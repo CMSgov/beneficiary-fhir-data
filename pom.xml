@@ -1,0 +1,304 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+	<artifactId>bbonfhir-server-parent</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<description>
+		The CMS Blue Button project provides Medicare beneficiaries with access
+        to their health care data, and supports an ecosystem of third-party 
+        applications that can leverage that data. This is the parent POM for 
+        the project.
+	</description>
+	<url>https://github.com/karlmdavis/bbonfhir-server</url>
+	<organization>
+		<name>Centers for Medicare &amp; Medicaid Services</name>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://spdx.org/licenses/Apache-2.0</url>
+		</license>
+	</licenses>
+
+	<issueManagement>
+		<!-- There doesn't seem to be any tooling support for this yet, but it 
+			doesn't hurt to include it. -->
+		<system>GitHub Issues</system>
+		<url>https://github.com/karlmdavis/bbonfhir-server/issues</url>
+	</issueManagement>
+
+	<ciManagement>
+		<!-- TODO per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
+			Sonar (at least) can use this information. -->
+		<system>jenkins</system>
+		<url><!-- TODO --></url>
+	</ciManagement>
+
+	<distributionManagement>
+		<repository>
+			<id>cms-nexus</id>
+			<url>TODO</url>
+		</repository>
+		<snapshotRepository>
+			<id>cms-nexus</id>
+			<url>TODO</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<scm>
+		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
+		<connection>scm:git:git@github.com:karlmdavis/bbonfhir-server.git</connection>
+		<developerConnection>scm:git:git@github.com:karlmdavis/bbonfhir-server.git</developerConnection>
+		<url>https://github.com/karlmdavis/bbonfhir-server</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<properties>
+		<!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding, 
+			this property is used by many different plugins to. -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
+
+		<!-- The version of Java that we'll use for everything. -->
+		<javaSourceVersion>1.8</javaSourceVersion>
+
+		<!-- Configure Sonar such that projects evaluated by it against it will 
+			use JaCoCo to compute the code coverage of any unit and integration tests. -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<resources>
+			<resource>
+				<!-- Enable Maven's resource filtering for text files in 'src/main/resources/'. 
+					This will replace properties in text files with their values, e.g. "${project.groupId}" 
+					will be replaced with "gov.hhs.cms.bluebutton.fhir". -->
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<!-- Enable Maven's resource filtering for text files in 'src/test/resources/'. 
+					This will replace properties in text files with their values, e.g. "${project.groupId}" 
+					will be replaced with "gov.hhs.cms.bluebutton.fhir". -->
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
+		<pluginManagement>
+			<plugins>
+				<!-- It adds a lot of noise to this file, but we specify the version 
+					of all plugins used in the module builds here to help ensure that the builds 
+					are always reproducible. This is actually enforced down below by the maven-enforcer-plugin 
+					execution. -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.4.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.3</version>
+					<configuration>
+						<!-- Set the Java source version used by the compiler. -->
+						<source>${javaSourceVersion}</source>
+						<target>${javaSourceVersion}</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.19.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.19.1</version>
+				</plugin>
+				<plugin>
+					<!-- A test code coverage plugin that can operate as a Java agent (and 
+						thus doesn't require class file instrumentation). -->
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.5.201505241946</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.6</version>
+					<configuration>
+						<!-- Add some extra information to the JAR manifests. Helpful for folks 
+							looking at a JAR, trying to figure out what it is. -->
+						<archive>
+							<manifest>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.5.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.3</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- Use the enforcer plugin to help ensure that builds are always 
+							reproducible. -->
+						<id>enforce-plugin-versions</id>
+						<inherited>true</inherited>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requirePluginVersions>
+									<message>Undefined plugin versions can lead to un-reproducible
+										builds.</message>
+									<banTimestamps>false</banTimestamps>
+								</requirePluginVersions>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<!-- This profile will only be active for builds inside of Eclipse (managed 
+				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
+			<id>m2e-manage-executions</id>
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<!--This plugin's configuration is used to store Eclipse m2e settings 
+								only. It has no influence on the Maven build itself. -->
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-enforcer-plugin</artifactId>
+												<versionRange>[1.0.0,)</versionRange>
+												<goals>
+													<goal>enforce</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<!-- Don't run this plugin inside m2e; necessary to disable a 
+													POM warning in Eclipse. -->
+												<ignore />
+											</action>
+										</pluginExecution>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.jacoco</groupId>
+												<artifactId>
+													jacoco-maven-plugin
+												</artifactId>
+												<versionRange>
+													[0.6.5.201403032054,)
+												</versionRange>
+												<goals>
+													<goal>prepare-agent</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<!-- Don't run this plugin inside m2e; necessary to disable a 
+													POM warning in Eclipse. -->
+												<ignore />
+											</action>
+										</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
+
+</project>
