@@ -191,7 +191,7 @@
 					<version>9.3.6.v20151106</version>
 					<configuration>
 						<webApp>
-							<contextPath>/hapi-fhir-jpaserver-example</contextPath>
+							<contextPath>/hapi-fhir</contextPath>
 							<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
 						</webApp>
 					</configuration>
