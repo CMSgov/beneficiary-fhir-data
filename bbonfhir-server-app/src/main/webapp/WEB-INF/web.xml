@@ -1,20 +1,16 @@
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<context-param>
 		<param-name>contextClass</param-name>
-		<param-value>
-			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
-		</param-value>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
 	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>
-			ca.uhn.fhir.jpa.demo.FhirServerConfig
-		</param-value>
+		<param-value>ca.uhn.fhir.jpa.demo.FhirServerConfig</param-value>
 	</context-param>
 
 	<!-- Servlets -->
@@ -57,9 +53,7 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
-
-
-	<!-- This filters provide support for Cross Origin Resource Sharing (CORS) -->
+	<!-- This filter provides support for Cross Origin Resource Sharing (CORS) -->
 	<filter>
 		<filter-name>CORS Filter</filter-name>
 		<filter-class>org.ebaysf.web.cors.CORSFilter</filter-class>
@@ -103,6 +97,5 @@
 		<filter-name>CORS Filter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-
 
 </web-app>
