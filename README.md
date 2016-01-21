@@ -1,4 +1,4 @@
-MyMedicare.gov BlueButton Java Parent
-=====================================
+MyMedicare.gov BlueButton Parent POM
+====================================
 
-This repo just contains some (rather boring) build resources that are shared by the CMS/MyMedicare.gov Java projects. For example, a Maven parent POM.
+This repo just contains a Maven parent POM and some other build/dev resources that are shared by the CMS/MyMedicare.gov Java projects.
