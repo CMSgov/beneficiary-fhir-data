@@ -22,11 +22,11 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import gov.hhs.cms.bluebutton.texttofhir.parsing.antlr.MyMedicare2BlueButtonTextLexer;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.antlr.MyMedicare2BlueButtonTextParser;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.antlr.MyMedicare2BlueButtonTextParser.BbTextFileContext;
-import gov.hhs.cms.bluebutton.texttofhir.parsing.antlr.MyMedicare2BlueButtonTextParser.EntryContext;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.antlr.MyMedicare2BlueButtonTextParser.SectionContext;
 
 /**
@@ -95,7 +95,8 @@ public final class TextFileProcessor {
 		 */
 		CharStream antlrInputStream = new ANTLRInputStream(textFileReader);
 		MyMedicare2BlueButtonTextLexer lexer = new MyMedicare2BlueButtonTextLexer(antlrInputStream);
-		for(Token token:lexer.getAllTokens()) System.out.println(token);
+//		for (Token token : lexer.getAllTokens())
+//			System.out.println(token);
 		TokenStream lexerTokenStream = new CommonTokenStream(lexer);
 
 		/*
@@ -156,40 +157,26 @@ public final class TextFileProcessor {
 	 *         {@link SectionContext}
 	 */
 	private static Section convertAntlrModel(SectionContext antlrSection, long sectionIndex) {
-		String name = null;
-		if (antlrSection.sectionHeader().headerEntry != null) {
-			Token headerEntry = antlrSection.sectionHeader().headerEntry;
-			name = headerEntry.getText().trim();
+		String headerName = null;
+		if (antlrSection.sectionHeader().entry != null) {
+			Token headerEntry = antlrSection.sectionHeader().entry;
+			headerName = headerEntry.getText().trim();
 		}
 
 		List<Entry> entries = new ArrayList<>();
 		long entryIndex = 0;
-		for (EntryContext antlrEntry : antlrSection.entry()) {
-			Entry entry = convertAntlrModel(antlrEntry, entryIndex);
+		for (TerminalNode antlrEntry : antlrSection.ENTRY()) {
+			String entryText = antlrEntry.getText().trim();
+			int separatorIndex = entryText.indexOf(':');
+			String entryName = entryText.substring(0, separatorIndex).trim();
+			String entryValue = entryText.substring(separatorIndex + 1).trim();
+			Entry entry = new Entry(entryIndex, entryName, entryValue);
 			entries.add(entry);
 			entryIndex++;
 		}
 
-		Section section = new Section(sectionIndex, name, entries);
+		Section section = new Section(sectionIndex, headerName, entries);
 		return section;
-	}
-
-	/**
-	 * @param antlrEntry
-	 *            the ANTLR-produced {@link EntryContext} model object to be
-	 *            converted
-	 * @param entryIndex
-	 *            the (zero-indexed) position of the specified
-	 *            {@link EntryContext} in the file (relative to the other
-	 *            {@link EntryContext}s in the parent {@link SectionContext})
-	 * @return a {@link TextFile} model object matching the specified
-	 *         {@link EntryContext}
-	 */
-	private static Entry convertAntlrModel(EntryContext antlrEntry, long entryIndex) {
-		String name = antlrEntry.key.getText().trim();
-		String value = antlrEntry.value != null ? antlrEntry.value.getText().trim() : null;
-		Entry entry = new Entry(entryIndex, name, value);
-		return entry;
 	}
 
 	/**

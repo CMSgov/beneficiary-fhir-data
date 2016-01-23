@@ -24,11 +24,10 @@ fileHeader    : SECTION_SEPARATOR
                 timestamp=TIMESTAMP
                 NL*;
 sectionHeader : SECTION_SEPARATOR
-                headerEntry=VALUE?
+                entry=ENTRY? NL*
                 SECTION_SEPARATOR
                 NL*;
-section       : sectionHeader (entry NL*)+;
-entry         : key=KEY KEY_VALUE_SEPARATOR value=VALUE?;
+section       : sectionHeader (entry=ENTRY NL*)+;
 
 SECTION_SEPARATOR
     : '--------------------------------' NL;
@@ -41,11 +40,7 @@ FORMAT_SPEC
 TIMESTAMP
     // Match format: '02/04/2015 9:18 AM'
     : ('0'..'9')+ '/' ('0'..'9')+ '/' ('0'..'9')+ ' ' ('0'..'9')+ ':' ('0'..'9')+ ' ' ('AM'|'PM') NL;
-KEY
-    : ~('\r'|'\n'|':')+;
-KEY_VALUE_SEPARATOR
-    : ':' ' '*;
-VALUE
-    : ~('\r'|'\n')+ NL;
+ENTRY
+    : ~('\r'|'\n')+;
 NL
     : '\r' '\r'? '\n';

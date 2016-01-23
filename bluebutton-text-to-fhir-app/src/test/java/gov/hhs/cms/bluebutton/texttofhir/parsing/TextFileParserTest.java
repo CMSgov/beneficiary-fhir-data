@@ -35,7 +35,7 @@ public final class TextFileParserTest {
 		Assert.assertEquals("Name", demographicSection.getEntries().get(1).getName());
 		Assert.assertEquals("JOHN DOE", demographicSection.getEntries().get(1).getValue());
 		Assert.assertEquals("Address Line 2", demographicSection.getEntries().get(4).getName());
-		Assert.assertEquals(null, demographicSection.getEntries().get(4).getValue());
+		Assert.assertEquals("", demographicSection.getEntries().get(4).getValue());
 	}
 
 	/**
