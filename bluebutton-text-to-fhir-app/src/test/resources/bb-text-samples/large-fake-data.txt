@@ -1,0 +1,1113 @@
+--------------------------------
+MYMEDICARE.GOV PERSONAL HEALTH INFORMATION
+--------------------------------
+**********CONFIDENTIAL***********
+Produced by the Blue Button (v2.0)
+02/04/2015 9:18 AM
+
+
+--------------------------------
+Demographic
+--------------------------------
+
+Source: MyMedicare.gov
+
+Name: JOHN DOE
+Date of Birth: 1/1/1910
+Address Line 1: 123 ANY ROAD
+Address Line 2: 
+City: ANYTOWN
+State: IN
+Zip: 46250
+Phone Number: 215-248-0684
+Email: 
+Part A Effective Date: 2/1/2014
+Part B Effective Date: 2/1/2014
+
+--------------------------------
+Emergency Contact
+--------------------------------
+
+Source: Self-Entered
+
+Contact Name: Billy Bigelow2
+Address Type:Home
+Address Line 1: 1234 Carnival Lane
+Address Line 2: Lobster Bay, ME 11112
+City: 
+State: 
+Zip: 11111
+Relationship: Friend
+Home Phone: 
+Work Phone: 
+Mobile Phone: 
+Email Address: 
+
+Contact Name: Enoch Snow
+Address Type:Home
+Address Line 1: 2345 Fish Head Cove
+Address Line 2: Lobster Bay, ME 11112
+City: 
+State: 
+Zip: 
+Relationship: Friend
+Home Phone: 
+Work Phone: 
+Mobile Phone: 
+Email Address: 
+
+--------------------------------
+Self Reported Medical Conditions
+--------------------------------
+
+Source: Self-Entered
+
+Condition Name: Allergies
+Medical Condition Start Date: 1/29/2013
+Medical Condition End Date: 
+
+Condition Name: Arthritis
+Medical Condition Start Date: 8/1/1960
+Medical Condition End Date: 12/31/1980
+
+Condition Name: Broken Wrist
+Medical Condition Start Date: 2/6/1910
+Medical Condition End Date: 2/6/2013
+
+Condition Name: Other
+Medical Condition Start Date: 2/1/2011
+Medical Condition End Date: 
+
+Condition Name: Other
+Medical Condition Start Date: 2/28/2012
+Medical Condition End Date: 
+
+--------------------------------
+Self Reported Allergies
+--------------------------------
+
+Source: Self-Entered
+
+Allergy Name: Antibotic
+Type: Drugs
+Reaction: 
+Severity: 
+Diagnosed: 
+Treatment: 
+First Episode Date: 
+Last Episode Date: 
+Last Treatment Date: 
+Comments: 
+
+Allergy Name: Corn
+Type: Food
+Reaction: Blisters
+Severity: Mild
+Diagnosed: Yes
+Treatment: Other
+First Episode Date: 
+Last Episode Date: 
+Last Treatment Date: 
+Comments: 
+
+Allergy Name: Milk
+Type: Food
+Reaction: Anaphylaxis
+Severity: Severe
+Diagnosed: Yes
+Treatment: Epinephrine (Epi-Pen)
+First Episode Date: 3/21/1985
+Last Episode Date: 3/31/2012
+Last Treatment Date: 3/31/2012
+Comments: 
+
+Allergy Name: Other - other
+Type: Other - other
+Reaction: 
+Severity: 
+Diagnosed: 
+Treatment: 
+First Episode Date: 
+Last Episode Date: 
+Last Treatment Date: 
+Comments: 
+
+--------------------------------
+Self Reported Implantable Device
+--------------------------------
+
+Source: Self-Entered
+
+Device Name: COronary stent
+Date Implanted: 11/27/2005
+
+Device Name: Knee replacement
+Date Implanted: 2/2/2014
+
+Device Name: Pace maker
+Date Implanted: 2/28/2012
+
+Device Name: foot
+Date Implanted: 9/9/1984
+
+Device Name: hearing aid
+Date Implanted: 1/1/2013
+
+Device Name: nov20
+Date Implanted: 12/15/2007
+
+--------------------------------
+Self Reported Immunizations
+--------------------------------
+
+Source: Self-Entered
+
+Immunization Name: shingles
+Date Administered:2/3/2010
+Method: Injection
+Were you vaccinated in the US: Yes
+Comments: 
+Booster 1 Date: 2/4/2011
+Booster 2 Date: 4/6/2012
+Booster 3 Date: 
+
+--------------------------------
+Self Reported Labs and Tests
+--------------------------------
+
+Source: Self-Entered
+
+Test/Lab Type: Test
+Date Taken: 1/2/2013
+Administered by: Inova
+Requesting Doctor: Dr. John Doe
+Reason Test/Lab Requested: 
+Results: 
+Comments: 
+
+--------------------------------
+Self Reported Vital Statistics
+--------------------------------
+
+Source: Self-Entered
+
+Vital Statistic Type: Glucose
+Date: 2/7/2008
+Time: 12:00 AM
+Reading/Value: 322
+Comments: 
+
+Vital Statistic Type: Glucose
+Date: 4/3/2009
+Time: 12:02 PM
+Reading/Value: 24
+Comments: fwrqwrgreg
+
+Vital Statistic Type: Glucose
+Date: 5/14/2009
+Time: 12:17 PM
+Reading/Value: 134
+Comments: rwrtrt
+
+Vital Statistic Type: Otro - other
+Date: 1/1/1939
+Time: 12:00 AM
+Reading/Value: other
+Comments: 
+
+Vital Statistic Type: Pulse
+Date: 4/6/2013
+Time: 12:00 AM
+Reading/Value: 333
+Comments: 
+
+Vital Statistic Type: Pulse
+Date: 3/2/2011
+Time: 12:09 AM
+Reading/Value: 80
+Comments: wwqrgtrt
+
+Vital Statistic Type: Temperature
+Date: 6/5/2009
+Time: 8:06 AM
+Reading/Value: 100
+Comments: fwqerqwr
+
+Vital Statistic Type: Temperature
+Date: 4/4/2008
+Time: 9:02 AM
+Reading/Value: 99
+Comments: 
+
+--------------------------------
+Family Medical History
+--------------------------------
+
+Source: Self-Entered
+
+Family Member: Daughter
+Type: Maternal
+DOB:1/1/1994
+DOD: 
+Age: 31
+Type: Allergy
+Description: Dyes
+Type: Condition
+Description: Diabetes, Type 2
+Description: Skin Cancer
+
+Family Member: Brother
+Type: 
+DOB:4/4/2012
+DOD: 
+Age: 
+Type: Allergy
+Description: Chemotherapy
+Type: Condition
+Description: Alzheimer's Disease
+
+--------------------------------
+Drugs
+--------------------------------
+
+Source: Self-Entered
+
+Drug Name: Abacavir TAB 300MG
+Supply: 60 Every 1 Month
+Orig Drug Entry: Abacavir
+
+Drug Name: Abilify Maintena INJ 300MG
+Supply: 1 X Vial Every 1 Month
+Orig Drug Entry: Abilify Maintena
+
+Drug Name: Amlodipine Besylate TAB 10MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate
+
+Drug Name: Amlodipine Besylate TAB 2.5MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate
+
+Drug Name: Amlodipine Besylate TAB 5MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate
+
+Drug Name: Amlodipine Besylate/Atorvastatin Calcium TAB 10-10MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate/Atorvastatin Calcium
+
+Drug Name: Amlodipine Besylate/Atorvastatin Calcium TAB 10-20MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate/Atorvastatin Calcium
+
+Drug Name: Amlodipine Besylate/Atorvastatin Calcium TAB 10-40MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate/Atorvastatin Calcium
+
+Drug Name: Amlodipine Besylate/Atorvastatin Calcium TAB 10-80MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate/Atorvastatin Calcium
+
+Drug Name: Amlodipine Besylate/Atorvastatin Calcium TAB 5-10MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Caduet
+
+Drug Name: Amlodipine Besylate/Atorvastatin Calcium TAB 5-80MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Amlodipine Besylate/Atorvastatin Calcium
+
+Drug Name: Androgel Pump GEL 1.62%
+Supply: 2 X 75GM Pump Bottle (sold in a package of 1 pump bottle) Every 1 Month
+Orig Drug Entry: Androgel Pump
+
+Drug Name: Drospirenone/Ethinyl Estradiol TAB 3-0.03MG
+Supply: 28 Every 1 Month
+Orig Drug Entry: Yasmin 28
+
+Drug Name: Gabapentin CAP 100MG
+Supply: 90 Every 1 Month
+Orig Drug Entry: Gabapentin
+
+Drug Name: Gabapentin SOL 250/5ML
+Supply: 1 X 470ML Bottle Every 1 Month
+Orig Drug Entry: Gabapentin
+
+Drug Name: Jakafi TAB 10MG
+Supply: 60 Every 1 Month
+Orig Drug Entry: Jakafi
+
+Drug Name: Losartan Potassium/Hydrochlorothiazide TAB 100-25
+Supply: 30 Every 1 Month
+Orig Drug Entry: Losartan Potassium/Hydrochlorothiazide
+
+Drug Name: Montelukast Sodium TAB 10MG
+Supply: 90 Every 3 Month
+Orig Drug Entry: Montelukast Sodium
+
+Drug Name: Omeprazole CAP 20MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Omeprazole
+
+Drug Name: Rabavert INJ
+Supply: 2 X Vial (sold in a package of 2) Every 12 Month
+Orig Drug Entry: Rabavert
+
+Drug Name: Tabloid TAB 40MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Tabloid
+
+Drug Name: Vagifem TAB 10MCG
+Supply: 8 Every 1 Month
+Orig Drug Entry: Vagifem
+
+Drug Name: Zafirlukast TAB 20MG
+Supply: 60 Every 1 Month
+Orig Drug Entry: Zafirlukast
+
+Drug Name: Zaleplon CAP 10MG
+Supply: 30 Every 1 Month
+Orig Drug Entry: Zaleplon
+
+Drug Name: Zaltrap INJ 100/4ML
+Supply: 1 X 4ML Vial Every 1 Month
+Orig Drug Entry: Zaltrap
+
+--------------------------------
+Preventive Services
+--------------------------------
+
+Source: MyMedicare.gov
+
+Description: ABDOMINAL AORTIC ANEURYSM
+Next Eligible Date: 2/1/2014
+Last Date of Service: 
+
+Description: CARDIOVASCULAR
+Next Eligible Date: 2/1/2014
+Last Date of Service: 
+
+Description: PPV
+Next Eligible Date: 2/1/2014
+Last Date of Service: 
+
+Description: PROSTATE
+Next Eligible Date: 2/1/2014
+Last Date of Service: 3/26/2012
+
+Description: PSA
+Next Eligible Date: 2/1/2014
+Last Date of Service: 3/26/2012
+
+Description: ANNUAL WELLNESS VISIT
+Next Eligible Date: 2/1/2015
+Last Date of Service: 
+
+Description: ALCOHOL MISUSE SCREENING
+Next Eligible Date: 
+Last Date of Service: 
+
+Description: CARDIOVASCULAR DISEASE (BEHAVIORAL THERAPY)
+Next Eligible Date: 
+Last Date of Service: 
+
+Description: COLORECTAL
+Next Eligible Date: 
+Last Date of Service: 4/21/2011
+
+Description: DEPRESSION SCREENING
+Next Eligible Date: 
+Last Date of Service: 
+
+Description: DIABETES
+Next Eligible Date: 
+Last Date of Service: 5/21/2012
+
+Description: HIGH INTENSITY BEHAVIORAL COUNSELING
+Next Eligible Date: 
+Last Date of Service: 
+
+Description: OBESITY COUNSELING
+Next Eligible Date: 
+Last Date of Service: 
+
+Description: PHYSICAL
+Next Eligible Date: 
+Last Date of Service: 
+
+Description: SMOKING CESSATION (counseling to stop smoking)
+Next Eligible Date: 
+Last Date of Service: 
+
+--------------------------------
+Providers
+--------------------------------
+
+Source: Self-Entered
+
+Provider Name: ANGELO SCOTTI
+Provider Address: 180 WHITE RD LITTLE SILVER, NJ 07739
+Type: Physician & Other Healthcare Professional
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: DOUGLAS KNOX
+Provider Address: 1104 E 23RD ST LAWRENCE, KS 66046
+Type: Physician & Other Healthcare Professional
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: SIAMAK RASSADI
+Provider Address: 1331 N 7TH ST PHOENIX, AZ 85006
+Type: Physician & Other Healthcare Professional
+Specialty: Cardiac Electrophysiology,Cardiovascular Disease (Cardiology)
+Medicare Provider: May Accept Medicare
+
+Provider Name: PETER LEAVITT
+Provider Address: 2965 NECONNERS AVE BEND, OR 97701
+Type: Physician & Other Healthcare Professional
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: JOHN KENNEDY
+Provider Address: 8888 KEYSTONE XING INDIANAPOLIS, IN 46240
+Type: Physician & Other Healthcare Professional
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: REBECCA KELLY
+Provider Address: 7250 CLEARVISTA DR INDIANAPOLIS, IN 46256
+Type: Physician & Other Healthcare Professional
+Specialty: Addiction Medicine
+Medicare Provider: Yes
+
+Provider Name: RILEY HOSPITAL - PEDS DIALYSIS
+Provider Address: 705 RILEY HOSPITAL DRIVE INDIANAPOLIS, IN 46202
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: FMC - SHADELAND STATION
+Provider Address: 7155 SHADELAND STATION STE 130 INDIANAPOLIS, IN 46256
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: IU HEALTH - HOME DIALYSIS
+Provider Address: 8803 N. MERIDIAN ST., STE 150 INDIANAPOLIS, IN 46260
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: MESA VISTA OF BOULDER
+Provider Address: 2121 MESA DRIVE BOULDER, CO 80304
+Type: Nursing Home
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: FAIRBANKS
+Provider Address: 8102 CLEARVISTA PARKWAY INDIANAPOLIS, IN 46256
+Type: Hospital
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: ALLIANCE HOME HEALTH SERVICES INC
+Provider Address: 9615 N COLLEGE AVE INDIANAPOLIS, IN 46280
+Type: Home Health
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: THE VIRGINIAN
+Provider Address: 9229 ARLINGTON BLVD FAIRFAX, VA 22031
+Type: Nursing Home
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: KINDRED TRANSITIONAL CARE & REHAB-ALLISON POINTE
+Provider Address: 5226 E 82ND ST INDIANAPOLIS, IN 46250
+Type: Nursing Home
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: INDIANA HEART HOSPITAL THE
+Provider Address: 8075 N SHADELAND AVE INDIANAPOLIS, IN 46250
+Type: Hospital
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: COMMUNITY HOSPITAL NORTH
+Provider Address: 7150 CLEARVISTA DR INDIANAPOLIS, IN 46256
+Type: Hospital
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: FORUM AT THE CROSSING
+Provider Address: 8505 WOODFIELD CROSSING BLVD INDIANAPOLIS, IN 46240
+Type: Nursing Home
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: BEAUMONT HOSPITAL, TROY
+Provider Address: 44201 DEQUINDRE ROAD TROY, MI 48085
+Type: Hospital
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: DAVITA - EAGLE HIGHLANDS
+Provider Address: 6925 SHORE TERRACE INDIANAPOLIS, IN 46254
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: FMC - CARMEL
+Provider Address: 12400 NORTH MERIDIAN ST., STE 200 CARMEL, IN 46032
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: DSI - NW INDIANAPOLIS RENAL CENTER
+Provider Address: 6488 CORPORATE DRIVE INDIANAPOLIS, IN 46268
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: GEORGE WASHINGTON UNIV HOSPITAL
+Provider Address: 900 23RD ST NW WASHINGTON, DC 20037
+Type: Hospital
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: DAVITA - CARMEL HEALTH AND LIVING
+Provider Address: 118 MEDICAL DRIVE, SUITE 114 CARMEL, IN 46032
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: FMC-INDIANAPOLIS MIDTOWN
+Provider Address: 3007 DR ANDREW J BROWN AVENUE INDIANAPOLIS, IN 46205
+Type: Dialysis Facility
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: MILLER'S SENIOR LIVING COMMUNITY
+Provider Address: 8400 CLEARVISTA PL INDIANAPOLIS, IN 46256
+Type: Nursing Home
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: TEST QT
+Provider Address:  COEBURN, VA 24230
+Type: Home Health
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: ADVANCED HOME CARE, INC
+Provider Address: 165 PLAZA ROAD, SUITE 20 WISE, VA 24293
+Type: Home Health
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: TEST NHC QT
+Provider Address:  0 24230
+Type: Nursing Home
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: HERITAGE HALL WISE
+Provider Address: 9434 COEBURN MOUNTAIN ROAD WISE, VA 24293
+Type: Nursing Home
+Specialty: 
+Medicare Provider: Yes
+
+Provider Name: QT JAN 15 TEST
+Provider Address: 121 HOME STREET COEBURN, VA 24230
+Type: Hospital
+Specialty: 
+Medicare Provider: Not Available
+
+Provider Name: NORTON COMMUNITY HOSPITAL
+Provider Address: 100  15TH ST NW NORTON, VA 24273
+Type: Hospital
+Specialty: 
+Medicare Provider: Not Available
+
+--------------------------------
+Pharmacies
+--------------------------------
+
+Source: Self-Entered
+
+Pharmacy Name: Castleton Integrative Health 8208 Allisonville Rd Indianapolis, IN 46250
+Pharmacy Phone: 317-849-1222
+
+Pharmacy Name: Costco Pharmacy Indianapolis, IN 462506110 East 86th Street Castleton, IN 46250
+Pharmacy Phone: 317-558-1452
+
+--------------------------------
+Plans
+--------------------------------
+
+Source: MyMedicare.gov
+
+Contract ID/Plan ID: S1111/801
+Plan Period: 12/01/2012 - current
+Plan Name: 
+Marketing Name: 
+Plan Address:     
+Plan Type: 11 - Medicare Prescription Drug Plan
+
+--------------------------------
+Employer Subsidy
+--------------------------------
+
+Source: MyMedicare.gov
+
+
+--------------------------------
+Primary Insurance
+--------------------------------
+
+Source: MyMedicare.gov
+
+
+--------------------------------
+Other Insurance
+--------------------------------
+
+Source: MyMedicare.gov
+
+MSP Type: 
+Policy Number: 30002
+Insurer Name: UNITEDHEALTH GROUP
+Insurer Address: 601 OFFICE CENTER DRIVE FORT WASHINGTON, PA 19034
+Effective Date: 10/01/1984
+Termination Date: 
+
+--------------------------------
+Claim Summary
+--------------------------------
+
+Source: MyMedicare.gov
+
+Claim Number: 11122233330000
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: $135.00
+Medicare Approved: $92.53
+Provider Paid: $74.02
+You May be Billed: $18.51
+Claim Type: DME
+Diagnosis Code 1: 32723
+Diagnosis Code 2: 78051
+
+--------------------------------
+Claim Lines for Claim Number: 11122233330000
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  E0601 - Continuous Positive Airway Pressure (Cpap) Device
+Modifier 1/Description:  MS - Six Month Maintenance And Servicing Fee For Reasonable And Necessary Parts And Labor Which Are
+Modifier 2/Description:  KX - Requirements Specified In The Medical Policy Have Been Met
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  $135.00
+Allowed Amount:  $92.53
+Non-Covered:  $42.47
+Place of Service/Description:  12 - Home
+Type of Service/Description:  R - Rental of DME
+Rendering Provider No:  DMEPROVIDR
+Rendering Provider NPI:  
+
+--------------------------------
+
+--------------------------------
+
+Claim Number: 11122233320000
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: $135.00
+Medicare Approved: $90.45
+Provider Paid: $72.36
+You May be Billed: $18.09
+Claim Type: DME
+Diagnosis Code 1: 32723
+Diagnosis Code 2: 78051
+
+--------------------------------
+Claim Lines for Claim Number: 11122233320000
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  E0601 - Continuous Positive Airway Pressure (Cpap) Device
+Modifier 1/Description:  MS - Six Month Maintenance And Servicing Fee For Reasonable And Necessary Parts And Labor Which Are
+Modifier 2/Description:  KX - Requirements Specified In The Medical Policy Have Been Met
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  $135.00
+Allowed Amount:  $90.45
+Non-Covered:  $44.55
+Place of Service/Description:  12 - Home
+Type of Service/Description:  R - Rental of DME
+Rendering Provider No:  DMEPROVIDR
+Rendering Provider NPI:  
+
+--------------------------------
+
+--------------------------------
+
+Claim Number: 2333444555100
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: * Not Available *
+Medicare Approved: * Not Available *
+Provider Paid: * Not Available *
+You May be Billed: * Not Available *
+Claim Type: PartB
+Diagnosis Code 1: 7392
+Diagnosis Code 2: 7241
+Diagnosis Code 3: 7393
+Diagnosis Code 4: 7391
+
+--------------------------------
+Claim Lines for Claim Number: 2333444555100
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  98941 - Chiropractic Manipulative Treatment, 3 To 4 Spinal Regions
+Modifier 1/Description:  GA - Waiver Of Liability Statement Issued As Required By Payer Policy, Individual Case
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  11 - Office
+Type of Service/Description:  1 - Medical Care
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Line number:  2
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  G0283 - Electrical Stimulation (Unattended), To One Or More Areas For Indication(S) Other Than Wound
+Modifier 1/Description:  GY - Item Or Service Statutorily Excluded, Does Not Meet The Definition Of Any Medicare Benefit Or,
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  11 - Office
+Type of Service/Description:  1 - Medical Care
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+--------------------------------
+
+--------------------------------
+
+Claim Number: 2333444555500
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: $1,022.50
+Medicare Approved: $782.33
+Provider Paid: $625.86
+You May be Billed: $156.47
+Claim Type: PartB
+Diagnosis Code 1: 70700
+
+--------------------------------
+Claim Lines for Claim Number: 2333444555500
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  A0428 - Ambulance Service, Basic Life Support, Non-Emergency Transport, (Bls)
+Modifier 1/Description:  RH
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  $275.00
+Allowed Amount:  $208.99
+Non-Covered:  $66.01
+Place of Service/Description:  41 - Ambulance - Land
+Type of Service/Description:  9 - Other Medical Services
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Line number:  2
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  A0428 - Ambulance Service, Basic Life Support, Non-Emergency Transport, (Bls)
+Modifier 1/Description:  HR - Family/Couple With Client Present
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  $275.00
+Allowed Amount:  $208.99
+Non-Covered:  $66.01
+Place of Service/Description:  41 - Ambulance - Land
+Type of Service/Description:  9 - Other Medical Services
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Line number:  3
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  A0425 - Ground Mileage, Per Statute Mile
+Modifier 1/Description:  RH
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  44
+Submitted Amount/Charges:  $472.50
+Allowed Amount:  $364.35
+Non-Covered:  $108.15
+Place of Service/Description:  41 - Ambulance - Land
+Type of Service/Description:  9 - Other Medical Services
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+--------------------------------
+
+--------------------------------
+
+Claim Number: 2333444555200
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: * Not Available *
+Medicare Approved: * Not Available *
+Provider Paid: * Not Available *
+You May be Billed: * Not Available *
+Claim Type: PartB
+Diagnosis Code 1: 2163
+
+--------------------------------
+Claim Lines for Claim Number: 2333444555200
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  99213 - Established Patient Office Or Other Outpatient Visit, Typically 15 Minutes
+Modifier 1/Description:  
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  22 - Outpatient Hospital
+Type of Service/Description:  1 - Medical Care
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+--------------------------------
+
+--------------------------------
+
+Claim Number: 2333444555300
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: * Not Available *
+Medicare Approved: * Not Available *
+Provider Paid: * Not Available *
+You May be Billed: * Not Available *
+Claim Type: PartB
+Diagnosis Code 1: 28521
+Diagnosis Code 2: 5854
+
+--------------------------------
+Claim Lines for Claim Number: 2333444555300
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  J2916 - Injection, Sodium Ferric Gluconate Complex In Sucrose Injection, 12.5 Mg
+Modifier 1/Description:  
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  10
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  11 - Office
+Type of Service/Description:  1 - Medical Care
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Line number:  2
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  36000 - Insertion Of Needle Or Catheter Into A Vein
+Modifier 1/Description:  
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  11 - Office
+Type of Service/Description:  2 - Surgery
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Line number:  3
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  90765 - Intravenous Infusion, For Therapy, Prophylaxis, Or Diagnosis (Specify Substance Or Drug); In
+Modifier 1/Description:  
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  11 - Office
+Type of Service/Description:  1 - Medical Care
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Line number:  4
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  90775 - Therapeutic, Prophylactic Or Diagnostic Injection (Specify Substance Or Drug); Each Addition
+Modifier 1/Description:  
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  11 - Office
+Type of Service/Description:  1 - Medical Care
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Line number:  5
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  99211 - Established Patient Office Or Other Outpatient Visit, Typically 5 Minutes
+Modifier 1/Description:  25 - Significant, Separately Identifiable Evaluation And Management Service By The Same Physician On
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  * Not Available *
+Allowed Amount:  * Not Available *
+Non-Covered:  * Not Available *
+Place of Service/Description:  11 - Office
+Type of Service/Description:  1 - Medical Care
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+--------------------------------
+
+--------------------------------
+
+Claim Number: 2333444555400
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: $38.00
+Medicare Approved: $9.38
+Provider Paid: $7.50
+You May be Billed: $1.88
+Claim Type: PartB
+Diagnosis Code 1: 9593
+Diagnosis Code 2: E8889
+
+--------------------------------
+Claim Lines for Claim Number: 2333444555400
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  73110 - X-Ray Of Wrist, Minimum Of 3 Views
+Modifier 1/Description:  26 - Professional Component: Certain Procedures Are A Combination Of A Physician Component And A Tec
+Modifier 2/Description:  
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  $38.00
+Allowed Amount:  $9.38
+Non-Covered:  $28.62
+Place of Service/Description:  22 - Outpatient Hospital
+Type of Service/Description:  4 - Diagnostic x-ray
+Rendering Provider No:  PARTBPROV
+Rendering Provider NPI:  
+
+Claim Number: 11122233310000
+Provider: No Information Available
+Provider Billing Address:    
+Service Start Date: 01/05/2014
+Service End Date: 01/05/2014
+Amount Charged: $135.00
+Medicare Approved: $90.45
+Provider Paid: $72.36
+You May be Billed: $18.09
+Claim Type: DME
+Diagnosis Code 1: 32723
+Diagnosis Code 2: 78051
+
+--------------------------------
+Claim Lines for Claim Number: 11122233310000
+--------------------------------
+
+
+Line number:  1
+Date of Service From:  01/05/2014
+Date of Service To:  01/05/2014
+Procedure Code/Description:  E0601 - Continuous Positive Airway Pressure (Cpap) Device
+Modifier 1/Description:  MS - Six Month Maintenance And Servicing Fee For Reasonable And Necessary Parts And Labor Which Are
+Modifier 2/Description:  KX - Requirements Specified In The Medical Policy Have Been Met
+Modifier 3/Description:  
+Modifier 4/Description:  
+Quantity Billed/Units:  1
+Submitted Amount/Charges:  $135.00
+Allowed Amount:  $90.45
+Non-Covered:  $44.55
+Place of Service/Description:  12 - Home
+Type of Service/Description:  R - Rental of DME
+Rendering Provider No:  DMEPROVIDR
+Rendering Provider NPI:  
+
