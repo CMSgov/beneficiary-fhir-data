@@ -5,12 +5,12 @@
 	<prerequisites>
 		<maven>3.3</maven>
 	</prerequisites>
-    
-    <parent>
-        <groupId>gov.hhs.cms.bluebutton</groupId>
-        <artifactId>bluebutton-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton</groupId>
+		<artifactId>bluebutton-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
 
 	<groupId>gov.hhs.cms.bluebutton.texttofhir</groupId>
 	<artifactId>bluebutton-text-to-fhir</artifactId>
@@ -52,16 +52,30 @@
 		<url>https://github.com/karlmdavis/bluebutton-text-to-fhir</url>
 		<tag>HEAD</tag>
 	</scm>
-	
+
 	<modules>
 		<module>bluebutton-text-to-fhir-app</module>
 	</modules>
 
 	<properties>
+		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<!-- Provides the FHIR client being used to create/push resources to 
+					the server. -->
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-base</artifactId>
+				<version>${hapi-fhir.version}</version>
+			</dependency>
+			<dependency>
+				<!-- At least one "structures" JAR must also be included -->
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+				<version>${hapi-fhir.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
