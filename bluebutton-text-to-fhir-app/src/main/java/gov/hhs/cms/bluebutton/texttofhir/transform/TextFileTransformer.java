@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.model.Address;
 import org.hl7.fhir.dstu21.model.Claim;
-import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.ContactPoint;
 import org.hl7.fhir.dstu21.model.ContactPoint.ContactPointSystem;
@@ -23,15 +23,12 @@ import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.HumanName;
 import org.hl7.fhir.dstu21.model.IdType;
-import org.hl7.fhir.dstu21.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
-import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.Entry;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.Section;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.TextFile;
@@ -65,6 +62,16 @@ public final class TextFileTransformer {
 	static final String CODING_SYSTEM_ICD9_DIAG = "http://hl7.org/fhir/sid/icd-9-cm/diagnosis";
 
 	static final String CODING_SYSTEM_ICD9_PROC = "http://hl7.org/fhir/sid/icd-9-cm/procedure";
+
+	static final String CODING_SYSTEM_MONEY = "urn:std:iso:4217";
+
+	static final String CODING_SYSTEM_MONEY_US = "USD";
+
+	static final String PART_B_PLAN_NAME = "Medicare Part B";
+
+	static final String ADJUDICATION_NON_COVERED = "non-covered";
+
+	static final String ADJUDICATION_ALLOWED = "allowed";
 
 	/**
 	 * @param inputData
@@ -181,7 +188,7 @@ public final class TextFileTransformer {
 		if (partBDateText != null) {
 			LocalDate parsedDate = LocalDate.parse(partBDateText, DATE_FORMATTER);
 			coverages.add(new Coverage().setSubscriber(results.createPatientReference())
-					.setIssuer(results.createCmsOrganizationReference()).setPlan("Medicare Part B")
+					.setIssuer(results.createCmsOrganizationReference()).setPlan(PART_B_PLAN_NAME)
 					.setPeriod(new Period().setStart(Date.valueOf(parsedDate))));
 		}
 
@@ -307,21 +314,26 @@ public final class TextFileTransformer {
 			eob.setId(IdType.newRandomUuid());
 			eob.setPatient(results.createPatientReference());
 
+			// TODO is billablePeriod equivalent to EOB/item/servicedPeriod?
+			String serviceStartText = getStringOrThrow(claimSummarySection, EntryName.CLAIM_SUMMARY_START);
+			LocalDate serviceStart = LocalDate.parse(serviceStartText, DATE_FORMATTER);
+			eob.getBillablePeriod().setStart(Date.valueOf(serviceStart));
+
+			String typeText = getStringOrNull(claimSummarySection, EntryName.CLAIM_SUMMARY_TYPE);
+			if (typeText != null) {
+				eob.getCoverage().setCoverage(results.createCoveragePartBReference());
+			}
+
+			String serviceEndText = getStringOrThrow(claimSummarySection, EntryName.CLAIM_SUMMARY_END);
+			LocalDate serviceEnd = LocalDate.parse(serviceEndText, DATE_FORMATTER);
+			eob.getBillablePeriod().setEnd(Date.valueOf(serviceEnd));
+
 			Claim claim = new Claim();
 			claim.setId(IdType.newRandomUuid());
 			resources.add(claim);
 			eob.setClaim(new Reference().setReference(claim.getId()));
 
 			claim.addIdentifier().setValue(claimNumber);
-
-			// TODO is billablePeriod equivalent to EOB/item/servicedPeriod?
-			String serviceStartText = getStringOrThrow(claimSummarySection, EntryName.CLAIM_SUMMARY_START);
-			LocalDate serviceStart = LocalDate.parse(serviceStartText, DATE_FORMATTER);
-			eob.getBillablePeriod().setStart(Date.valueOf(serviceStart));
-
-			String serviceEndText = getStringOrThrow(claimSummarySection, EntryName.CLAIM_SUMMARY_END);
-			LocalDate serviceEnd = LocalDate.parse(serviceEndText, DATE_FORMATTER);
-			eob.getBillablePeriod().setEnd(Date.valueOf(serviceEnd));
 
 			// TODO handle multiple diag codes
 			String diagCode1Text = getStringOrNull(claimSummarySection, EntryName.CLAIM_SUMMARY_DIAGNOSIS_CODE_1);
@@ -375,16 +387,25 @@ public final class TextFileTransformer {
 				String lineNumberText = entryLineNumber.getValue();
 				eobItem.setSequence(Integer.parseInt(lineNumberText));
 
+				eobItem.setServiced(new Period());
 				if (entryServiceFrom != null && !entryServiceFrom.getValue().isEmpty()) {
 					LocalDate itemServiceStart = LocalDate.parse(entryServiceFrom.getValue(), DATE_FORMATTER);
-					// FIXME throws FHIRException
-					// eobItem.getServicedPeriod().setStart(Date.valueOf(itemServiceStart));
+					try {
+						eobItem.getServicedPeriod().setStart(Date.valueOf(itemServiceStart));
+					} catch (FHIRException e) {
+						// Shouldn't happen.
+						throw new IllegalStateException(e);
+					}
 				}
 
 				if (entryServiceTo != null && !entryServiceTo.getValue().isEmpty()) {
 					LocalDate itemServiceEnd = LocalDate.parse(entryServiceTo.getValue(), DATE_FORMATTER);
-					// FIXME throws FHIRException
-					// eobItem.getServicedPeriod().setEnd(Date.valueOf(itemServiceEnd));
+					try {
+						eobItem.getServicedPeriod().setEnd(Date.valueOf(itemServiceEnd));
+					} catch (FHIRException e) {
+						// Shouldn't happen.
+						throw new IllegalStateException(e);
+					}
 				}
 
 				if (entryProcedure != null && !entryProcedure.getValue().isEmpty()) {
@@ -401,18 +422,22 @@ public final class TextFileTransformer {
 
 				if (entryModifier1 != null && !entryModifier1.getValue().isEmpty()) {
 					eobItem.addModifier().setCode(entryModifier1.getValue());
+					// TODO set system & code
 				}
 
 				if (entryModifier2 != null && !entryModifier2.getValue().isEmpty()) {
 					eobItem.addModifier().setCode(entryModifier2.getValue());
+					// TODO set system & code
 				}
 
 				if (entryModifier3 != null && !entryModifier3.getValue().isEmpty()) {
 					eobItem.addModifier().setCode(entryModifier3.getValue());
+					// TODO set system & code
 				}
 
 				if (entryModifier4 != null && !entryModifier4.getValue().isEmpty()) {
 					eobItem.addModifier().setCode(entryModifier4.getValue());
+					// TODO set system & code
 				}
 
 				if (entryQuantity != null && !entryQuantity.getValue().isEmpty()) {
@@ -426,8 +451,8 @@ public final class TextFileTransformer {
 								"Invalid value for entry '%s' in section '%s': %s", entrySubmitted.getName(),
 								claimLinesSection.getName(), entrySubmitted.getValue()));
 
-					eobItem.getNet().setValue(new BigDecimal(matcher.group(1)));
-					// TODO code and system for Money values?
+					eobItem.getNet().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+							.setValue(new BigDecimal(matcher.group(1)));
 				}
 
 				if (hasValue(entryAllowed)) {
@@ -437,9 +462,9 @@ public final class TextFileTransformer {
 								String.format("Invalid value for entry '%s' in section '%s': %s",
 										entryAllowed.getName(), claimLinesSection.getName(), entryAllowed.getValue()));
 
-					eobItem.addAdjudication().setCategory(new Coding().setCode("allowed"))
+					eobItem.addAdjudication().setCategory(new Coding().setCode(ADJUDICATION_ALLOWED)).getAmount()
+							.setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 							.setValue(new BigDecimal(matcher.group(1)));
-					// TODO code and system for Money values?
 				}
 
 				if (hasValue(entryUncovered)) {
@@ -449,35 +474,19 @@ public final class TextFileTransformer {
 								"Invalid value for entry '%s' in section '%s': %s", entryUncovered.getName(),
 								claimLinesSection.getName(), entryUncovered.getValue()));
 
-					eobItem.addAdjudication().setCategory(new Coding().setCode("non-covered"))
+					eobItem.addAdjudication().setCategory(new Coding().setCode(ADJUDICATION_NON_COVERED)).getAmount()
+							.setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 							.setValue(new BigDecimal(matcher.group(1)));
-					// TODO code and system for Money values?
 				}
 
 				if (entryPlace != null && !entryPlace.getValue().isEmpty()) {
-					eobItem.getPlace().setDisplay(entryType.getValue());
+					eobItem.getPlace().setDisplay(entryPlace.getValue());
 					// TODO what coding system is this?
 				}
 
 				if (entryType != null && !entryType.getValue().isEmpty()) {
 					eobItem.getType().setDisplay(entryType.getValue());
 					// TODO what coding system is this?
-				}
-
-				if (entryRendererNpi != null && !entryRendererNpi.getValue().isEmpty()) {
-					// TODO horrible, awful code, doesn't handle 'Renderer No'
-					Practitioner provider = new Practitioner();
-					provider.setId(IdDt.newRandomUuid());
-					eobItem.setProvider(new Reference().setReference(provider.getId()));
-					resources.add(new Practitioner());
-					Organization organization = new Organization();
-					organization.setId(IdDt.newRandomUuid());
-					provider.addPractitionerRole()
-							.setManagingOrganization(new Reference().setReference(organization.getId()));
-					// TODO fix ID.type
-					organization.addIdentifier().setType(new CodeableConcept().setText("NPI"))
-							.setUse(IdentifierUse.OFFICIAL).setValue(entryRendererNpi.getValue());
-					resources.add(organization);
 				}
 			}
 
@@ -655,6 +664,18 @@ public final class TextFileTransformer {
 			Reference patientRef = new Reference();
 			patientRef.setReference(patient.getId());
 			return patientRef;
+		}
+
+		/**
+		 * @return a new {@link Reference} to the "Part B" {@link Coverage} in
+		 *         this {@link TransformationResults}
+		 */
+		public Reference createCoveragePartBReference() {
+			Coverage partB = (Coverage) resources.stream().filter(r -> r.getClass().equals(Coverage.class))
+					.filter(r -> PART_B_PLAN_NAME.equals(((Coverage) r).getPlan())).findFirst().get();
+			Reference partBRef = new Reference();
+			partBRef.setReference(partB.getId());
+			return partBRef;
 		}
 	}
 }

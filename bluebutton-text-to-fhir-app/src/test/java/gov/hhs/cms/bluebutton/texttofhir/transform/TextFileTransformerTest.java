@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.model.Address;
 import org.hl7.fhir.dstu21.model.Claim;
-import org.hl7.fhir.dstu21.model.Claim.ItemsComponent;
 import org.hl7.fhir.dstu21.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu21.model.Coverage;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
+import org.hl7.fhir.dstu21.model.Money;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,9 +37,11 @@ public final class TextFileTransformerTest {
 	 * 
 	 * @throws TextFileParseException
 	 *             (indicates a test failure)
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@Test
-	public void allSupportedFields() throws TextFileParseException {
+	public void allSupportedFields() throws TextFileParseException, FHIRException {
 		// Create the "Demographics" section.
 		Entry demographicsSource = new Entry(0, EntryName.DEMOGRAPHICS_SOURCE.getName(), "MyMedicare.gov");
 		Entry demographicsName = new Entry(0, EntryName.DEMOGRAPHICS_NAME.getName(), "John Doe");
@@ -144,17 +148,17 @@ public final class TextFileTransformerTest {
 		Assert.assertEquals(3, resourcesMap.get(Coverage.class).size());
 		Coverage coveragePartA = (Coverage) resourcesMap.get(Coverage.class).get(0);
 		Assert.assertEquals(patient.getId(), coveragePartA.getSubscriber().getReference());
-		// TODO verify issuer
+		Assert.assertEquals(cmsOrg.getId(), coveragePartA.getIssuer().getReference());
 		Assert.assertEquals("Medicare Part A", coveragePartA.getPlan());
 		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 2, 1)), coveragePartA.getPeriod().getStart());
 		Coverage coveragePartB = (Coverage) resourcesMap.get(Coverage.class).get(1);
 		Assert.assertEquals(patient.getId(), coveragePartB.getSubscriber().getReference());
-		// TODO verify issuer
+		Assert.assertEquals(cmsOrg.getId(), coveragePartB.getIssuer().getReference());
 		Assert.assertEquals("Medicare Part B", coveragePartB.getPlan());
 		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 2, 1)), coveragePartB.getPeriod().getStart());
 		Coverage coveragePartD = (Coverage) resourcesMap.get(Coverage.class).get(2);
 		Assert.assertEquals(patient.getId(), coveragePartD.getSubscriber().getReference());
-		// TODO verify issuer
+		Assert.assertEquals(cmsOrg.getId(), coveragePartD.getIssuer().getReference());
 		Assert.assertEquals("S1111/801", coveragePartD.getPlan());
 		Assert.assertEquals(Date.valueOf(LocalDate.of(2012, 12, 1)), coveragePartD.getPeriod().getStart());
 		Assert.assertEquals(null, coveragePartD.getPeriod().getEnd());
@@ -167,50 +171,55 @@ public final class TextFileTransformerTest {
 		Assert.assertEquals(1, resourcesMap.get(Claim.class).size());
 		Claim eobAClaimA = (Claim) resourcesMap.get(Claim.class).get(0);
 		Assert.assertEquals(claimANumber.getValue(), eobAClaimA.getIdentifier().get(0).getValue());
-		// TODO where to map Provider name? As an ID? Goofy...
-		// TODO "provider billing address"
-		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)), eobAClaimA.getBillablePeriod().getStart());
-		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)), eobAClaimA.getBillablePeriod().getEnd());
+		/*
+		 * TODO Sample data 'Provider' and 'Provider Billing Address' don't have
+		 * useful data. Safe to always ignore?
+		 */
+		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)), eobA.getBillablePeriod().getStart());
+		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)), eobA.getBillablePeriod().getEnd());
 		// FIXME no mapping for 'Amount Charged'
 		// FIXME no mapping for 'Medicare Approved'
 		// FIXME no mapping for 'Provider Paid'
 		// FIXME no mapping for 'You May Be Billed'
-		// FIXME mapping for 'Claim Type' points to a 'Part B' org?
-		// Answer: map to 'EOB/coverage'.
+		Assert.assertEquals(coveragePartB.getId(), eobA.getCoverage().getCoverage().getReference());
 		Assert.assertEquals(1, eobAClaimA.getDiagnosis().size());
 		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_ICD9_DIAG,
 				eobAClaimA.getDiagnosis().get(0).getDiagnosis().getSystem());
 		Assert.assertEquals(claimACode1.getValue(), eobAClaimA.getDiagnosis().get(0).getDiagnosis().getCode());
 
-		Assert.assertEquals(1, eobAClaimA.getItem().size());
-		ItemsComponent eobAClaimAItem1 = eobAClaimA.getItem().get(0);
-		Assert.assertEquals(1, eobAClaimAItem1.getSequence());
-		// FIXME transformer code goes boom
-		// Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)),
-		// eobAClaimAItem1.getServicedPeriod().getStart());
-		// Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)),
-		// eobAClaimAItem1.getServicedPeriod().getEnd());
-		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_ICD9_PROC, eobAClaimAItem1.getService().getSystem());
-		Assert.assertEquals("A0428", eobAClaimAItem1.getService().getCode());
+		Assert.assertEquals(1, eobA.getItem().size());
+		ItemsComponent eobAItem1 = eobA.getItem().get(0);
+		Assert.assertEquals(1, eobAItem1.getSequence());
+		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)), eobAItem1.getServicedPeriod().getStart());
+		Assert.assertEquals(Date.valueOf(LocalDate.of(2014, 1, 5)), eobAItem1.getServicedPeriod().getEnd());
+		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_ICD9_PROC, eobAItem1.getService().getSystem());
+		Assert.assertEquals("A0428", eobAItem1.getService().getCode());
 		Assert.assertEquals("Ambulance Service, Basic Life Support, Non-Emergency Transport, (Bls)",
-				eobAClaimAItem1.getService().getDisplay());
-		Assert.assertEquals(1, eobAClaimAItem1.getModifier().size());
-		// TODO what system for modifier coding?
-		Assert.assertEquals(claimALine1Modifier1.getValue(), eobAClaimAItem1.getModifier().get(0).getCode());
-		Assert.assertEquals(new BigDecimal(claimALine1Quantity.getValue()), eobAClaimAItem1.getQuantity().getValue());
-		// TODO code and system for Money values?
-		// Answer: Look at ISO 4217.
-		Assert.assertEquals(new BigDecimal("275.00"), eobAClaimAItem1.getNet().getValue());
-		// FIXME Spec? EOB/item has adjudication, but EOB/Claim/item does not.
-		// TODO (per above) 'Submitted'
-		// TODO (per above) 'Allowed'
-		// FIXME Spec? EOB/Claim has facility, but EOB/Claim/item does not.
-		// Answer: Map to EOB/item/place
-		// TODO (per above) 'Place of Service'
-		Assert.assertEquals(claimALine1Type.getValue(), eobAClaimAItem1.getType().getDisplay());
-		// TODO 'Rendering Provider No' how to map? Item/provider only has
-		// 'HumanName'
-		// Answer: Create an 'EOB/item/provider' with no name, but a 'managingOrganization'.
-		// TODO 'Rendering Provider NPI' how to map?
+				eobAItem1.getService().getDisplay());
+		Assert.assertEquals(1, eobAItem1.getModifier().size());
+		Assert.assertEquals(claimALine1Modifier1.getValue(), eobAItem1.getModifier().get(0).getCode());
+		Assert.assertEquals(new BigDecimal(claimALine1Quantity.getValue()), eobAItem1.getQuantity().getValue());
+		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_MONEY, eobAItem1.getNet().getSystem());
+		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_MONEY_US, eobAItem1.getNet().getCode());
+		Assert.assertEquals(new BigDecimal("275.00"), eobAItem1.getNet().getValue());
+		Money eobAItem1Allowed = eobAItem1.getAdjudication().stream()
+				.filter(a -> TextFileTransformer.ADJUDICATION_ALLOWED.equals(a.getCategory().getCode())).findFirst()
+				.get().getAmount();
+		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_MONEY, eobAItem1Allowed.getSystem());
+		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_MONEY_US, eobAItem1Allowed.getCode());
+		Assert.assertEquals(new BigDecimal("208.99"), eobAItem1Allowed.getValue());
+		Money eobAItem1NonCovered = eobAItem1.getAdjudication().stream()
+				.filter(a -> TextFileTransformer.ADJUDICATION_NON_COVERED.equals(a.getCategory().getCode())).findFirst()
+				.get().getAmount();
+		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_MONEY, eobAItem1NonCovered.getSystem());
+		Assert.assertEquals(TextFileTransformer.CODING_SYSTEM_MONEY_US, eobAItem1NonCovered.getCode());
+		Assert.assertEquals(new BigDecimal("66.01"), eobAItem1NonCovered.getValue());
+		Assert.assertEquals(claimALine1Place.getValue(), eobAItem1.getPlace().getDisplay());
+		Assert.assertEquals(claimALine1Type.getValue(), eobAItem1.getType().getDisplay());
+
+		/*
+		 * TODO Sample data 'Rendering Provider *' fields don't have useful
+		 * info. Safe to ignore?
+		 */
 	}
 }
