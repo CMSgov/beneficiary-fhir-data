@@ -95,7 +95,7 @@ public final class TextFileTransformerTest {
 		Entry claimALine1Quantity = new Entry(0, EntryName.CLAIM_LINES_QUANTITY.getName(), "1");
 		Entry claimALine1Submitted = new Entry(0, EntryName.CLAIM_LINES_SUBMITTED.getName(), "$275.00");
 		Entry claimALine1Allowed = new Entry(0, EntryName.CLAIM_LINES_ALLOWED.getName(), "$208.99");
-		Entry claimALine1Uncovered = new Entry(0, EntryName.CLAIM_LINES_UNCOVERED.getName(), "66.01");
+		Entry claimALine1Uncovered = new Entry(0, EntryName.CLAIM_LINES_UNCOVERED.getName(), "$66.01");
 		Entry claimALine1Place = new Entry(0, EntryName.CLAIM_LINES_PLACE.getName(), "41 - Ambulance - Land");
 		Entry claimALine1Type = new Entry(0, EntryName.CLAIM_LINES_TYPE.getName(), "9 - Other Medical Services");
 		Entry claimALine1RendererNumber = new Entry(0, EntryName.CLAIM_LINES_RENDERER_NUMBER.getName(), "PARTBPROV");
@@ -210,7 +210,7 @@ public final class TextFileTransformerTest {
 		Assert.assertEquals(claimALine1Type.getValue(), eobAClaimAItem1.getType().getDisplay());
 		// TODO 'Rendering Provider No' how to map? Item/provider only has
 		// 'HumanName'
-		// Answer: Create an 'EOB/item/provider' with no name, but a 'magaingOrganization'.
+		// Answer: Create an 'EOB/item/provider' with no name, but a 'managingOrganization'.
 		// TODO 'Rendering Provider NPI' how to map?
 	}
 }

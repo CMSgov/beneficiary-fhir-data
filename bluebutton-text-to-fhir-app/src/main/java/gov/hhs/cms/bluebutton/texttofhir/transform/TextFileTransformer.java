@@ -14,20 +14,24 @@ import java.util.regex.Pattern;
 
 import org.hl7.fhir.dstu21.model.Address;
 import org.hl7.fhir.dstu21.model.Claim;
-import org.hl7.fhir.dstu21.model.Claim.ItemsComponent;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.ContactPoint;
 import org.hl7.fhir.dstu21.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu21.model.Coverage;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.HumanName;
 import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
+import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.Entry;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.Section;
 import gov.hhs.cms.bluebutton.texttofhir.parsing.TextFile;
@@ -286,6 +290,18 @@ public final class TextFileTransformer {
 			if (!claimLinesSection.getName().equals(claimLinesSectionName))
 				throw new TextFileParseException("Missing claim lines section: " + claimLinesSectionName);
 
+			/*
+			 * Our output format needs a bit of explanation: we are (mostly)
+			 * producing an 'ExplanationOfBenefits' ('EOB') resource. Most of
+			 * the data from the input 'Claim Summary' section will land in the
+			 * EOB itself and the input 'Claim Lines' data will land in the
+			 * output 'EOB/items' entries. However, to ensure that folks can
+			 * trace the data back properly for customer service purposes, we'll
+			 * set 'EOB/claim' to a stub 'Claim' resource with just the claim
+			 * number. (The 'Claim' resource doesn't have payment adjudication
+			 * and other fields that we need to use. 'EOB/items' entries do.)
+			 */
+
 			ExplanationOfBenefit eob = new ExplanationOfBenefit();
 			resources.add(eob);
 			eob.setId(IdType.newRandomUuid());
@@ -298,13 +314,14 @@ public final class TextFileTransformer {
 
 			claim.addIdentifier().setValue(claimNumber);
 
+			// TODO is billablePeriod equivalent to EOB/item/servicedPeriod?
 			String serviceStartText = getStringOrThrow(claimSummarySection, EntryName.CLAIM_SUMMARY_START);
 			LocalDate serviceStart = LocalDate.parse(serviceStartText, DATE_FORMATTER);
-			claim.getBillablePeriod().setStart(Date.valueOf(serviceStart));
+			eob.getBillablePeriod().setStart(Date.valueOf(serviceStart));
 
 			String serviceEndText = getStringOrThrow(claimSummarySection, EntryName.CLAIM_SUMMARY_END);
 			LocalDate serviceEnd = LocalDate.parse(serviceEndText, DATE_FORMATTER);
-			claim.getBillablePeriod().setEnd(Date.valueOf(serviceEnd));
+			eob.getBillablePeriod().setEnd(Date.valueOf(serviceEnd));
 
 			// TODO handle multiple diag codes
 			String diagCode1Text = getStringOrNull(claimSummarySection, EntryName.CLAIM_SUMMARY_DIAGNOSIS_CODE_1);
@@ -352,22 +369,22 @@ public final class TextFileTransformer {
 				Entry entryRendererNpi = getEntry(claimLinesSection, itemStartIndex + 15,
 						EntryName.CLAIM_LINES_RENDERER_NPI);
 
-				ItemsComponent claimItem = new ItemsComponent();
-				claim.addItem(claimItem);
+				ItemsComponent eobItem = new ItemsComponent();
+				eob.addItem(eobItem);
 
 				String lineNumberText = entryLineNumber.getValue();
-				claimItem.setSequence(Integer.parseInt(lineNumberText));
+				eobItem.setSequence(Integer.parseInt(lineNumberText));
 
 				if (entryServiceFrom != null && !entryServiceFrom.getValue().isEmpty()) {
 					LocalDate itemServiceStart = LocalDate.parse(entryServiceFrom.getValue(), DATE_FORMATTER);
 					// FIXME throws FHIRException
-					// claimItem.getServicedPeriod().setStart(Date.valueOf(itemServiceStart));
+					// eobItem.getServicedPeriod().setStart(Date.valueOf(itemServiceStart));
 				}
 
 				if (entryServiceTo != null && !entryServiceTo.getValue().isEmpty()) {
 					LocalDate itemServiceEnd = LocalDate.parse(entryServiceTo.getValue(), DATE_FORMATTER);
 					// FIXME throws FHIRException
-					// claimItem.getServicedPeriod().setEnd(Date.valueOf(itemServiceEnd));
+					// eobItem.getServicedPeriod().setEnd(Date.valueOf(itemServiceEnd));
 				}
 
 				if (entryProcedure != null && !entryProcedure.getValue().isEmpty()) {
@@ -377,29 +394,29 @@ public final class TextFileTransformer {
 								"Invalid value for entry '%s' in section '%s': %s", entryProcedure.getName(),
 								claimLinesSection.getName(), entryProcedure.getValue()));
 
-					claimItem.getService().setSystem(CODING_SYSTEM_ICD9_PROC);
-					claimItem.getService().setCode(matcher.group(1));
-					claimItem.getService().setDisplay(matcher.group(2));
+					eobItem.getService().setSystem(CODING_SYSTEM_ICD9_PROC);
+					eobItem.getService().setCode(matcher.group(1));
+					eobItem.getService().setDisplay(matcher.group(2));
 				}
 
 				if (entryModifier1 != null && !entryModifier1.getValue().isEmpty()) {
-					claimItem.addModifier().setCode(entryModifier1.getValue());
+					eobItem.addModifier().setCode(entryModifier1.getValue());
 				}
 
 				if (entryModifier2 != null && !entryModifier2.getValue().isEmpty()) {
-					claimItem.addModifier().setCode(entryModifier2.getValue());
+					eobItem.addModifier().setCode(entryModifier2.getValue());
 				}
 
 				if (entryModifier3 != null && !entryModifier3.getValue().isEmpty()) {
-					claimItem.addModifier().setCode(entryModifier3.getValue());
+					eobItem.addModifier().setCode(entryModifier3.getValue());
 				}
 
 				if (entryModifier4 != null && !entryModifier4.getValue().isEmpty()) {
-					claimItem.addModifier().setCode(entryModifier4.getValue());
+					eobItem.addModifier().setCode(entryModifier4.getValue());
 				}
 
 				if (entryQuantity != null && !entryQuantity.getValue().isEmpty()) {
-					claimItem.getQuantity().setValue(new BigDecimal(entryQuantity.getValue()));
+					eobItem.getQuantity().setValue(new BigDecimal(entryQuantity.getValue()));
 				}
 
 				if (hasValue(entrySubmitted)) {
@@ -409,12 +426,58 @@ public final class TextFileTransformer {
 								"Invalid value for entry '%s' in section '%s': %s", entrySubmitted.getName(),
 								claimLinesSection.getName(), entrySubmitted.getValue()));
 
-					claimItem.getNet().setValue(new BigDecimal(matcher.group(1)));
+					eobItem.getNet().setValue(new BigDecimal(matcher.group(1)));
 					// TODO code and system for Money values?
 				}
 
+				if (hasValue(entryAllowed)) {
+					Matcher matcher = MONEY.matcher(entryAllowed.getValue());
+					if (!matcher.matches())
+						throw new TextFileParseException(
+								String.format("Invalid value for entry '%s' in section '%s': %s",
+										entryAllowed.getName(), claimLinesSection.getName(), entryAllowed.getValue()));
+
+					eobItem.addAdjudication().setCategory(new Coding().setCode("allowed"))
+							.setValue(new BigDecimal(matcher.group(1)));
+					// TODO code and system for Money values?
+				}
+
+				if (hasValue(entryUncovered)) {
+					Matcher matcher = MONEY.matcher(entryUncovered.getValue());
+					if (!matcher.matches())
+						throw new TextFileParseException(String.format(
+								"Invalid value for entry '%s' in section '%s': %s", entryUncovered.getName(),
+								claimLinesSection.getName(), entryUncovered.getValue()));
+
+					eobItem.addAdjudication().setCategory(new Coding().setCode("non-covered"))
+							.setValue(new BigDecimal(matcher.group(1)));
+					// TODO code and system for Money values?
+				}
+
+				if (entryPlace != null && !entryPlace.getValue().isEmpty()) {
+					eobItem.getPlace().setDisplay(entryType.getValue());
+					// TODO what coding system is this?
+				}
+
 				if (entryType != null && !entryType.getValue().isEmpty()) {
-					claimItem.getType().setDisplay(entryType.getValue());
+					eobItem.getType().setDisplay(entryType.getValue());
+					// TODO what coding system is this?
+				}
+
+				if (entryRendererNpi != null && !entryRendererNpi.getValue().isEmpty()) {
+					// TODO horrible, awful code, doesn't handle 'Renderer No'
+					Practitioner provider = new Practitioner();
+					provider.setId(IdDt.newRandomUuid());
+					eobItem.setProvider(new Reference().setReference(provider.getId()));
+					resources.add(new Practitioner());
+					Organization organization = new Organization();
+					organization.setId(IdDt.newRandomUuid());
+					provider.addPractitionerRole()
+							.setManagingOrganization(new Reference().setReference(organization.getId()));
+					// TODO fix ID.type
+					organization.addIdentifier().setType(new CodeableConcept().setText("NPI"))
+							.setUse(IdentifierUse.OFFICIAL).setValue(entryRendererNpi.getValue());
+					resources.add(organization);
 				}
 			}
 
