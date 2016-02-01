@@ -59,6 +59,15 @@
 		</dependency>
 
 		<dependency>
+			<!-- Mocking framework used in unit tests. -->
+			<!-- Must be listed in classpath (and thus POM) before JUnit, as it activates 
+				a Java agent that alters JUnit a bit. -->
+			<groupId>org.jmockit</groupId>
+			<artifactId>jmockit</artifactId>
+			<version>1.21</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<!-- The test framework used for unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
