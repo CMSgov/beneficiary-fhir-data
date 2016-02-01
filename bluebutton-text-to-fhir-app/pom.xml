@@ -22,6 +22,12 @@
 
 	<properties>
 		<antlr.version>4.5.1-1</antlr.version>
+
+		<!-- The version of the capsule library for the capsule-maven-plugin to 
+			use. We need to override the default, to avoid https://github.com/puniverse/capsule/issues/90, 
+			as this is seen in whichever version of the library is used by default in 
+			the 1.0.1 version of the plugin. -->
+		<capsule.version>1.0.1</capsule.version>
 	</properties>
 
 	<dependencies>
@@ -88,6 +94,28 @@
 					<artifactId>build-helper-maven-plugin</artifactId>
 					<version>1.7</version>
 				</plugin>
+				<plugin>
+					<!-- Used to build executable JARs, with all dependencies included in 
+						them. -->
+					<groupId>com.github.chrischristo</groupId>
+					<artifactId>capsule-maven-plugin</artifactId>
+					<version>1.0.1</version>
+					<configuration>
+						<appClass>gov.hhs.cms.bluebutton.texttofhir.TextToFhirApp</appClass>
+						<chmod>true</chmod>
+						<types>fat</types>
+						<manifest>
+							<entry>
+								<key>JVM-Args</key>
+								<value>-Xmx1g</value>
+							</entry>
+							<entry>
+								<key>Min-Java-Version</key>
+								<value>1.8.0</value>
+							</entry>
+						</manifest>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -117,6 +145,19 @@
 								<source>target/generated-sources/antlr4</source>
 							</sources>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Used to build executable JARs, with all dependencies included in 
+					them. -->
+				<groupId>com.github.chrischristo</groupId>
+				<artifactId>capsule-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
