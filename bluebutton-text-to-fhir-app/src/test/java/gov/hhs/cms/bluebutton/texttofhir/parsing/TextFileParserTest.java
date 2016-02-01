@@ -48,7 +48,7 @@ public final class TextFileParserTest {
 	@Test
 	public void largeFakeDataFile() throws TextFileParseException {
 		InputStream textFileStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("bb-text-samples/large-fake-data.txt");
+				.getResourceAsStream("bb-text-samples/fake-data-large.txt");
 		TextFile parsedFile = TextFileProcessor.parse(textFileStream);
 
 		// For now, just ensure it didn't go boom.
