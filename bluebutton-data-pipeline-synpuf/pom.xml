@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+		<artifactId>bluebutton-data-pipeline</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>bluebutton-data-pipeline-synpuf</artifactId>
+	<packaging>jar</packaging>
+
+	<description>
+		Loads the DE-SynPUF data into SQL, and transforms it into the CCW schema.
+	</description>
+
+	<properties>
+    </properties>
+    
+    <dependencies>
+    </dependencies>
+
+	<build>
+		<pluginManagement>
+		</pluginManagement>
+		<plugins>
+		</plugins>
+	</build>
+
+</project>
