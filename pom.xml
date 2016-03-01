@@ -54,7 +54,7 @@
 	</scm>
 
 	<modules>
-		<module>bluebutton-data-pipeline-synpuf</module>
+		<module>bluebutton-data-pipeline-sampledata</module>
 	</modules>
 
 	<properties>
