@@ -261,6 +261,7 @@
 				<artifactId>maven-toolchains-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>toolchain-default</id>
 						<goals>
 							<goal>toolchain</goal>
 						</goals>
