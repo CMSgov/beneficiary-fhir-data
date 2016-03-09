@@ -140,8 +140,37 @@
 
 	<build>
 		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Can be used to select which JDK to use (amongst other things). 
+						Options must be specified in `~/.m2/toolchains.xml`. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<configuration>
+						<toolchains>
+							<jdk>
+								<!-- Use a Java 8 JDK. -->
+								<version>1.8</version>
+							</jdk>
+						</toolchains>
+					</configuration>
+				</plugin>
+			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- Activate the toolchain specified above. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-toolchains-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>toolchain-default</id>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
