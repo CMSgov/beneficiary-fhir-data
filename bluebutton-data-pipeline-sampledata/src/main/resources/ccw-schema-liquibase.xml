@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
+	objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+
+	<property name="type.binary" value="binary(255)" dbms="hsqldb" />
+	<property name="type.binary" value="bytea" dbms="postgresql" />
+	<property name="type.gameId" value="varchar(10)" />
+
+	<!-- This is required to work around https://hibernate.atlassian.net/browse/HHH-9427. -->
+	<property name="fkColumnName.Game.id" value="GAMEID" dbms="hsqldb" />
+	<property name="fkColumnName.Game.id" value="gameid" dbms="postgresql" />
+	<property name="fkColumnName.LoginIdentity.id" value="LOGINIDENTITYID" dbms="hsqldb" />
+	<property name="fkColumnName.LoginIdentity.id" value="loginidentityid" dbms="postgresql" />
+
+	<!-- This is required to work around https://hibernate.atlassian.net/browse/HHH-9430 
+		and https://hibernate.atlassian.net/browse/HHH-9431. -->
+	<property name="option.autoIncrement" value="true" dbms="hsqldb" />
+	<property name="option.autoIncrement" value="false" dbms="postgresql" />
+
+	<changeSet id="1" author="karlmdavis">
+
+		<createTable tableName="CCW_BENE_CRNT_VW">
+			<column name="BENE_ID" type="NUMERIC(28)">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="BENE_BIRTH_DT" type="TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+	</changeSet>
+
+</databaseChangeLog>
