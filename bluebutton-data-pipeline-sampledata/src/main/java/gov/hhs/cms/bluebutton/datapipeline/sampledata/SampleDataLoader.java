@@ -22,9 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForBeneficiarySummary;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForPartAOutpatient;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSample;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSampleLoader;
-import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSummaryColumn;
 
 /**
  * Loads sample data into the specified database.
@@ -68,34 +69,84 @@ public final class SampleDataLoader {
 				 * CCW, those IDs are an integer. This Map keeps track of the
 				 * problem.
 				 */
-				Map<String, Integer> synpufToCcwIds = new HashMap<>();
+				Map<String, CurrentBeneficiary> synpufIdsToBeneficiaries = new HashMap<>();
 
 				// Process the beneficiary summaries.
 				for (Path summaryCsv : synpufSample.getBeneficiarySummaries()) {
+					LOGGER.info("Processing DE-SynPUF file '{}'...", summaryCsv.getFileName());
 					try (Reader in = new FileReader(summaryCsv.toFile());) {
-						CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufSummaryColumn.getAllColumnNames())
+						CSVFormat csvFormat = CSVFormat.EXCEL
+								.withHeader(SynpufColumnForBeneficiarySummary.getAllColumnNames())
 								.withSkipHeaderRecord();
 						Iterable<CSVRecord> records = csvFormat.parse(in);
 						for (CSVRecord record : records) {
-							LOGGER.trace("Processing DE-SynPUF record #{}.", record.getRecordNumber());
+							LOGGER.trace("Processing DE-SynPUF Beneficiary Summary record #{}.",
+									record.getRecordNumber());
 
-							String synpufId = record.get(SynpufSummaryColumn.DESYNPUF_ID);
-							String birthDateText = record.get(SynpufSummaryColumn.BENE_BIRTH_DT);
+							String synpufId = record.get(SynpufColumnForBeneficiarySummary.DESYNPUF_ID);
+							String birthDateText = record.get(SynpufColumnForBeneficiarySummary.BENE_BIRTH_DT);
 							LocalDate birthDate = LocalDate.parse(birthDateText, SYNPUF_DATE_FORMATTER);
 
-							CurrentBeneficiary bene = new CurrentBeneficiary();
-							synpufToCcwIds.put(synpufId, synpufToCcwIds.size());
-							bene.setId(synpufToCcwIds.get(synpufId));
+							/*
+							 * Many beneficiaries appear in the summary file for
+							 * more than one year. To keep things simple, we'll
+							 * just always assume that the later years are
+							 * "more correct".
+							 */
+							CurrentBeneficiary bene;
+							if (synpufIdsToBeneficiaries.containsKey(synpufId)) {
+								bene = synpufIdsToBeneficiaries.get(synpufId);
+							} else {
+								bene = new CurrentBeneficiary();
+								bene.setId(synpufIdsToBeneficiaries.size());
+							}
+
 							bene.setBirthDate(birthDate);
 
 							pm.makePersistent(bene);
+							synpufIdsToBeneficiaries.put(synpufId, bene);
 						}
 					} catch (IOException e) {
 						throw new SampleDataException(e);
 					}
+					LOGGER.info("Processed DE-SynPUF file '{}'.", summaryCsv.getFileName());
 				}
 
-				// Process the Part A claims.
+				// Process the Part A Inpatient claims.
+
+				/*
+				 * Process the Part A Outpatient claims. Each claim will be
+				 * (potentially) repeated multiple times: one entry per
+				 * "claim line".
+				 */
+				LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getPartAClaimsOutpatient().getFileName());
+				try (Reader in = new FileReader(synpufSample.getPartAClaimsOutpatient().toFile());) {
+					Map<Long, PartAClaimFact> claimsMap = new HashMap<>();
+					CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartAOutpatient.getAllColumnNames())
+							.withSkipHeaderRecord();
+					Iterable<CSVRecord> records = csvFormat.parse(in);
+					for (CSVRecord record : records) {
+						LOGGER.trace("Processing DE-SynPUF Part A Outpatient record #{}.", record.getRecordNumber());
+
+						String claimIdText = record.get(SynpufColumnForPartAOutpatient.CLM_ID);
+						long claimId = Long.parseLong(claimIdText);
+						String synpufId = record.get(SynpufColumnForPartAOutpatient.DESYNPUF_ID);
+						String diagnosisCodeText = record.get(SynpufColumnForPartAOutpatient.ADMTNG_ICD9_DGNS_CD);
+
+						if (!claimsMap.containsKey(claimId)) {
+							PartAClaimFact claim = new PartAClaimFact();
+							claim.setId(claimId);
+							claim.setBeneficiary(synpufIdsToBeneficiaries.get(synpufId));
+							claim.setAdmittingDiagnosisCode(diagnosisCodeText);
+
+							pm.makePersistent(claim);
+							claimsMap.put(claimId, claim);
+						}
+					}
+				} catch (IOException e) {
+					throw new SampleDataException(e);
+				}
+				LOGGER.info("Processed DE-SynPUF file '{}'...", synpufSample.getPartAClaimsOutpatient().getFileName());
 
 				// Process the Part B claims.
 
@@ -103,6 +154,7 @@ public final class SampleDataLoader {
 
 				// Commit the transaction.
 				tx.commit();
+				LOGGER.info("Committed DE-SynPUF sample '{}'.", synpufSample.getArchive().name());
 			} finally {
 				if (tx.isActive())
 					tx.rollback();

@@ -31,6 +31,19 @@
 			</column>
 		</createTable>
 
+		<createTable tableName="CCW_PTA_FACT">
+			<column name="CLM_ID" type="NUMERIC(22)">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="BENE_ID" type="NUMERIC(28)">
+				<constraints nullable="false" foreignKeyName="PtaFactToBeneCrnt"
+					referencedTableName="CCW_BENE_CRNT_VW" />
+			</column>
+			<column name="DGNS_1_CD" type="varchar(7)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
 	</changeSet>
 
 </databaseChangeLog>

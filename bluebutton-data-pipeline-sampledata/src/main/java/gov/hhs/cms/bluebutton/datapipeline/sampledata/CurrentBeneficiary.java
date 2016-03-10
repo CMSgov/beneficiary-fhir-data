@@ -2,6 +2,7 @@ package gov.hhs.cms.bluebutton.datapipeline.sampledata;
 
 import java.time.LocalDate;
 
+import javax.jdo.annotations.Column;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
@@ -10,13 +11,15 @@ import javax.jdo.annotations.PrimaryKey;
  * Models rows in the CCW's <code>CCW_BENE_CRNT_VW</code> table, which represent
  * current Medicare beneficiaries.
  */
-@PersistenceCapable(table = "CCW_BENE_CRNT_VW")
+@PersistenceCapable(table = "CCW_BENE_CRNT_VW", detachable = "true")
 public class CurrentBeneficiary {
+	@Persistent
+	@Column(name = "BENE_ID")
 	@PrimaryKey
-	@Persistent(column = "BENE_ID")
 	private Integer id;
 
-	@Persistent(column = "BENE_BIRTH_DT")
+	@Persistent
+	@Column(name = "BENE_BIRTH_DT", allowsNull = "true")
 	private LocalDate birthDate;
 
 	/**
@@ -35,17 +38,11 @@ public class CurrentBeneficiary {
 	/**
 	 * @param id
 	 *            the new value for {@link #getId()}
+	 * @return this instance (for call-chaining purposes)
 	 */
-	public void setId(Integer id) {
+	public CurrentBeneficiary setId(Integer id) {
 		this.id = id;
-	}
-
-	/**
-	 * @param birthDate
-	 *            the new value for {@link #getBirthDate()}
-	 */
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
+		return this;
 	}
 
 	/**
@@ -53,5 +50,15 @@ public class CurrentBeneficiary {
 	 */
 	public LocalDate getBirthDate() {
 		return birthDate;
+	}
+
+	/**
+	 * @param birthDate
+	 *            the new value for {@link #getBirthDate()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public CurrentBeneficiary setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
+		return this;
 	}
 }

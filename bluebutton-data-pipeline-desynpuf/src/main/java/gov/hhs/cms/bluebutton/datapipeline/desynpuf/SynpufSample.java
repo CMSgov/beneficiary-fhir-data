@@ -7,8 +7,8 @@ import java.nio.file.Path;
  * Represents an extracted DE-SynPUF sample bundle.
  */
 public final class SynpufSample {
-	private Path sampleDir;
-	private SynpufArchive archive;
+	private final Path sampleDir;
+	private final SynpufArchive archive;
 
 	/**
 	 * Constructs a new {@link SynpufSample}.
@@ -17,8 +17,7 @@ public final class SynpufSample {
 	 *            the directory that the files for this {@link SynpufSample} can
 	 *            be found in
 	 * @param archive
-	 *            the {@link SynpufArchive} that this {@link SynpufSample}
-	 *            represents
+	 *            the value to use for {@link #getArchive()}
 	 */
 	public SynpufSample(Path sampleDir, SynpufArchive archive) {
 		this.sampleDir = sampleDir;
@@ -26,10 +25,27 @@ public final class SynpufSample {
 	}
 
 	/**
+	 * @return the {@link SynpufArchive} that this {@link SynpufSample}
+	 *         represents
+	 */
+	public SynpufArchive getArchive() {
+		return archive;
+	}
+
+	/**
 	 * @return the {@link Path}s to the extracted Beneficiary Summary files
 	 */
 	public Path[] getBeneficiarySummaries() {
-		return new Path[] { sampleDir.resolve(SynpufFile.BENE_SUMMARY_2008.getFileName(archive)) };
+		return new Path[] { sampleDir.resolve(SynpufFile.BENE_SUMMARY_2008.getFileName(archive)),
+				sampleDir.resolve(SynpufFile.BENE_SUMMARY_2009.getFileName(archive)),
+				sampleDir.resolve(SynpufFile.BENE_SUMMARY_2010.getFileName(archive)) };
+	}
+
+	/**
+	 * @return the {@link Path} to the extracted Beneficiary Summary files
+	 */
+	public Path getPartAClaimsOutpatient() {
+		return sampleDir.resolve(SynpufFile.PART_A_CLAIMS_OUTPATIENT.getFileName(archive));
 	}
 
 	/**

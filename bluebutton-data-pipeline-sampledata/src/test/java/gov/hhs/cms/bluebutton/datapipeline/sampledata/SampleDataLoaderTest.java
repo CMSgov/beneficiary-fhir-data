@@ -19,6 +19,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
@@ -39,6 +41,8 @@ public final class SampleDataLoaderTest {
 	/*
 	 * FIXME This is a huge mess. Needs abstraction. Desperately.
 	 */
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SampleDataLoaderTest.class);
 
 	@ClassRule
 	public static final SpringClassRule springClassRule = new SpringClassRule();
@@ -79,6 +83,8 @@ public final class SampleDataLoaderTest {
 		Properties dnProps = new Properties();
 		dnProps.put("datanucleus.PersistenceUnitName", "CCW");
 		dnProps.put("datanucleus.identifier.case", "MixedCase");
+		dnProps.put("datanucleus.DetachAllOnCommit", "true");
+		dnProps.put("datanucleus.CopyOnAttach", "false");
 		// dnProps.put("datanucleus.schema.autoCreateAll", true);
 		dnProps.put("datanucleus.schema.validateTables", "true");
 		dnProps.put("datanucleus.schema.validateConstraints", "false");
@@ -99,12 +105,14 @@ public final class SampleDataLoaderTest {
 	@Test
 	public void normalUsage() {
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
+			// Run the loader and verify the results.
 			SampleDataLoader loader = new SampleDataLoader(pm);
 			loader.loadSampleData(Paths.get(".", "target"));
 
-			long beneficiaryCount = (long) pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
-					.result(false, QCurrentBeneficiary.candidate().count()).executeResultUnique();
-			Assert.assertEquals(116352, beneficiaryCount);
+			Assert.assertEquals(116352L, pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
+					.result(false, QCurrentBeneficiary.candidate().count()).executeResultUnique());
+			Assert.assertEquals(779815L, pm.newJDOQLTypedQuery(PartAClaimFact.class)
+					.result(false, QPartAClaimFact.candidate().count()).executeResultUnique());
 		}
 	}
 }

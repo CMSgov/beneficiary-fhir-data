@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Enumerates the columns in the CMS DE-SynPUF Beneficiary Summary files.
  */
-public enum SynpufSummaryColumn {
+public enum SynpufColumnForBeneficiarySummary {
 	/**
 	 * Beneficiary Code
 	 */
@@ -170,6 +170,6 @@ public enum SynpufSummaryColumn {
 	 * @return a <code>String[]</code> containing all of the column names
 	 */
 	public static String[] getAllColumnNames() {
-		return Arrays.stream(SynpufSummaryColumn.values()).map(v -> v.name()).toArray(size -> new String[size]);
+		return Arrays.stream(SynpufColumnForBeneficiarySummary.values()).map(v -> v.name()).toArray(size -> new String[size]);
 	}
 }
