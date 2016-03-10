@@ -34,7 +34,6 @@
 			<!-- Provides basic I/O utility code. -->
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<!-- Used to extract the DE-SynPUF `.tar.bz2` archive resources used in 
