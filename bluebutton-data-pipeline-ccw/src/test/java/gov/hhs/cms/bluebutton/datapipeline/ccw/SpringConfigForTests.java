@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.sampledata;
+package gov.hhs.cms.bluebutton.datapipeline.ccw;
 
 import java.net.URL;
 
@@ -15,7 +15,7 @@ import com.justdavis.karl.misc.datasources.provisioners.XmlProvisioningTargetsPr
  * Spring {@link Configuration} for this project's unit tests.
  */
 @Configuration
-@Import(value = { SpringConfigForBlueButtonPipelineSampleData.class })
+@Import(value = { SpringConfigForBlueButtonPipelineCcw.class })
 public class SpringConfigForTests {
 	/**
 	 * @param provisionersManager

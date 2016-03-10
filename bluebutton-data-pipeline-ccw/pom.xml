@@ -12,29 +12,17 @@
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-pipeline-sampledata</artifactId>
+	<artifactId>bluebutton-data-pipeline-ccw</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
-		Loads sample data, such as the DE-SynPUF data, into a SQL database, 
-		which must have the CCW schema.
+		Contains resources and code related to the CCW itself and its schema.
 	</description>
 
 	<properties>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-desynpuf</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-ccw</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>com.justdavis.karl.jessentials</groupId>
 			<artifactId>jessentials-misc</artifactId>
@@ -62,13 +50,6 @@
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-accessplatform-jdo-rdbms</artifactId>
 			<type>pom</type>
-		</dependency>
-
-		<dependency>
-			<!-- Used to parse and read the DE-SynPUF data files. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
 		</dependency>
 
 		<dependency>
@@ -104,6 +85,20 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- Run the DataNucleus/JDO bytecode enhancer on the project's compiled 
+					classes. -->
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

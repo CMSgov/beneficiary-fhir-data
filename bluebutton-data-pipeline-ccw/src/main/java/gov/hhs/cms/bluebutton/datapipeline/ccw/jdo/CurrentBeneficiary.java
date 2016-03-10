@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.sampledata;
+package gov.hhs.cms.bluebutton.datapipeline.ccw.jdo;
 
 import java.time.LocalDate;
 

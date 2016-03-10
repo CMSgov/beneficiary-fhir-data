@@ -21,6 +21,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForBeneficiarySummary;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForPartAOutpatient;

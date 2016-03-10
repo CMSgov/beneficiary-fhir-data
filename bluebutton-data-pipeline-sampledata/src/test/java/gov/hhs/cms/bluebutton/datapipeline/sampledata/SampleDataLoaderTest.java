@@ -32,6 +32,12 @@ import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningTargetsProvider;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.CcwSchemaInitializer;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartAClaimFact;
+
 /**
  * Unit tests for {@link SampleDataLoader}.
  */

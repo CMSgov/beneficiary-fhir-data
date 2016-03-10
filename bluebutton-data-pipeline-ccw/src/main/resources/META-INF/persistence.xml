@@ -6,7 +6,8 @@
 	version="2.1">
 
 	<persistence-unit name="CCW">
-		<class>gov.hhs.cms.bluebutton.datapipeline.sampledata.CurrentBeneficiary</class>
+		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary</class>
+		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact</class>
 		<exclude-unlisted-classes />
 	</persistence-unit>
 

@@ -68,6 +68,7 @@
 
 	<modules>
 		<module>bluebutton-data-pipeline-desynpuf</module>
+		<module>bluebutton-data-pipeline-ccw</module>
 		<module>bluebutton-data-pipeline-sampledata</module>
 	</modules>
 

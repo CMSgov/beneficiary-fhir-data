@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.sampledata;
+package gov.hhs.cms.bluebutton.datapipeline.ccw;
 
 import javax.inject.Inject;
 
@@ -10,8 +10,6 @@ import com.justdavis.karl.misc.datasources.schema.IDataSourceSchemaManager;
 /**
  * Can be used to create a dev/test schema in a database that is analogous to
  * the CCW (for the purposes of this system).
- * 
- * @see SampleDataLoader
  */
 @Component
 public final class CcwSchemaInitializer {
