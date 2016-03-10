@@ -155,6 +155,17 @@
 						</toolchains>
 					</configuration>
 				</plugin>
+				<plugin>
+					<!-- Can be used to run the DataNucleus/JDO bytecode enhancer on projects' 
+						compiled classes. -->
+					<groupId>org.datanucleus</groupId>
+					<artifactId>datanucleus-maven-plugin</artifactId>
+					<version>4.0.2</version>
+					<configuration>
+						<api>JDO</api>
+						<verbose>true</verbose>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>

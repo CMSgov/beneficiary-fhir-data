@@ -110,6 +110,20 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- Run the DataNucleus/JDO bytecode enhancer on the project's compiled 
+					classes. -->
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
