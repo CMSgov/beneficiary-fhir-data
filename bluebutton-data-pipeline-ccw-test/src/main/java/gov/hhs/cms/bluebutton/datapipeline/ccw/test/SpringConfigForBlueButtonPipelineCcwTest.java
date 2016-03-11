@@ -1,8 +1,9 @@
-package gov.hhs.cms.bluebutton.datapipeline.ccw;
+package gov.hhs.cms.bluebutton.datapipeline.ccw.test;
 
 import java.net.URL;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -11,12 +12,15 @@ import com.justdavis.karl.misc.datasources.provisioners.DataSourceProvisionersMa
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningTargetsProvider;
 import com.justdavis.karl.misc.datasources.provisioners.XmlProvisioningTargetsProvider;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.SpringConfigForBlueButtonPipelineCcw;
+
 /**
- * Spring {@link Configuration} for this project's unit tests.
+ * Spring {@link Configuration} for this project.
  */
 @Configuration
 @Import(value = { SpringConfigForBlueButtonPipelineCcw.class })
-public class SpringConfigForTests {
+@ComponentScan(basePackageClasses = { SpringConfigForBlueButtonPipelineCcwTest.class })
+public class SpringConfigForBlueButtonPipelineCcwTest {
 	/**
 	 * @param provisionersManager
 	 *            the injected {@link DataSourceConnectorsManager} for the

@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.ccw;
+package gov.hhs.cms.bluebutton.datapipeline.ccw.schema;
 
 import javax.inject.Inject;
 

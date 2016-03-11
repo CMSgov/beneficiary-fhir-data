@@ -13,6 +13,8 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import com.justdavis.karl.misc.datasources.hsql.HsqlCoordinates;
 import com.justdavis.karl.misc.datasources.schema.IDataSourceSchemaManager;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.schema.CcwSchemaInitializer;
+
 /**
  * Unit tests for {@link CcwSchemaInitializer}.
  */

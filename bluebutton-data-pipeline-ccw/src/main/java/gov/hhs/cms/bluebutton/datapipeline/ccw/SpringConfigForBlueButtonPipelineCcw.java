@@ -10,6 +10,8 @@ import com.justdavis.karl.misc.datasources.DataSourceConnectorsManager;
 import com.justdavis.karl.misc.datasources.schema.IDataSourceSchemaManager;
 import com.justdavis.karl.misc.datasources.schema.LiquibaseSchemaManager;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.schema.CcwSchemaInitializer;
+
 /**
  * Spring {@link Configuration} for this project.
  */
