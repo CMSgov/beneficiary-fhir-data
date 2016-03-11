@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.ccw.test;
+package gov.hhs.cms.bluebutton.datapipeline.ccw;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -27,6 +27,8 @@ import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningReq
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.test.SpringConfigForBlueButtonPipelineCcwTest;
 
 /**
  * Unit tests for {@link SampleDataLoader}.
