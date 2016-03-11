@@ -71,6 +71,7 @@
 		<module>bluebutton-data-pipeline-ccw</module>
 		<module>bluebutton-data-pipeline-ccw-test</module>
 		<module>bluebutton-data-pipeline-sampledata</module>
+		<module>bluebutton-data-pipeline-ccw-extract</module>
 	</modules>
 
 	<properties>
