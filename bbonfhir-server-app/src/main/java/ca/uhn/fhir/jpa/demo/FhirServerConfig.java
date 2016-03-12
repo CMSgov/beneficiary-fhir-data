@@ -7,7 +7,9 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +54,10 @@ public class FhirServerConfig extends BaseJavaConfigDstu21 {
 		retVal.setUrl("jdbc:derby:directory:target/jpaserver_derby_files;create=true");
 		retVal.setUsername("");
 		retVal.setPassword("");
+//		retVal.setDriver(new Driver());
+//		retVal.setUrl("jdbc:postgresql://bluebutton.cccekphclb8m.us-east-1.rds.amazonaws.com:5432/fhir");
+//		retVal.setUsername("postgres");
+//		retVal.setPassword("Axx2FkVBizgOB4ke1rLP");
 		return retVal;
 	}
 
@@ -70,6 +76,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu21 {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
+//		extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

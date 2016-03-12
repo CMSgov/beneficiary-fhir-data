@@ -48,8 +48,8 @@
 			<url>TODO</url>
 		</repository>
 		<snapshotRepository>
-			<id>cms-nexus</id>
-			<url>TODO</url>
+			<id>justdavis-nexus</id>
+			<url>https://justdavis.com/nexus/content/repositories/opensource-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
