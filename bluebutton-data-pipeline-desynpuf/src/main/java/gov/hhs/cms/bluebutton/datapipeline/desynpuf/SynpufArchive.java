@@ -45,7 +45,7 @@ public enum SynpufArchive {
 	 * @return the number of unique beneficiaries stored in this
 	 *         {@link SynpufArchive}
 	 */
-	public int getBeneficiaryCount() {
+	public long getBeneficiaryCount() {
 		return beneficiaryCount;
 	}
 }
