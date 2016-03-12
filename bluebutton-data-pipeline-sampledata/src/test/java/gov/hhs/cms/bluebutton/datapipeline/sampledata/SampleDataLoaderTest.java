@@ -27,6 +27,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 
 /**
@@ -42,6 +43,8 @@ public final class SampleDataLoaderTest {
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 	@Rule
+	public final TearDownAcceptor tearDown = new TearDownAcceptor();
+
 	@Inject
 	public CcwTestHelper ccwHelper;
 
@@ -59,7 +62,7 @@ public final class SampleDataLoaderTest {
 	 */
 	@Test
 	public void normalUsage() {
-		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest);
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Run the loader and verify the results.

@@ -29,6 +29,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.SpringConfigForBlueButtonPipelineCcwTest;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
 
 /**
  * Unit tests for {@link SampleDataLoader}.
@@ -43,6 +44,8 @@ public final class SourceDatabaseModelTest {
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 	@Rule
+	public final TearDownAcceptor tearDown = new TearDownAcceptor();
+
 	@Inject
 	public CcwTestHelper ccwHelper;
 
@@ -60,7 +63,7 @@ public final class SourceDatabaseModelTest {
 	 */
 	@Test
 	public void beneficiaryClaimsPartA() {
-		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest);
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Create some model objects and persist them.

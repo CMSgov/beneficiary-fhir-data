@@ -7,17 +7,15 @@ import javax.jdo.JDOHelper;
 
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.junit.Rule;
-import org.junit.rules.ExternalResource;
 import org.springframework.stereotype.Component;
 
 import com.justdavis.karl.misc.datasources.DataSourceConnectorsManager;
 import com.justdavis.karl.misc.datasources.provisioners.DataSourceProvisionersManager;
 import com.justdavis.karl.misc.datasources.provisioners.DataSourceProvisionersManager.ProvisioningResult;
-
-import gov.hhs.cms.bluebutton.datapipeline.ccw.schema.CcwSchemaInitializer;
-
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningTargetsProvider;
+
+import gov.hhs.cms.bluebutton.datapipeline.ccw.schema.CcwSchemaInitializer;
 
 /**
  * <p>
@@ -35,6 +33,9 @@ import com.justdavis.karl.misc.datasources.provisioners.IProvisioningTargetsProv
  * 
  * 	{@literal @}Rule
  * 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
+ * 	
+ * 	{@literal @}Rule
+ * 	public final TearDownAcceptor tearDown = new TearDownAcceptor();
  * 
  * 	{@literal @}Rule
  * 	{@literal @}Inject
@@ -43,14 +44,17 @@ import com.justdavis.karl.misc.datasources.provisioners.IProvisioningTargetsProv
  * 	{@literal @}Test
  * 	public void normalUsage() {
  * 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(
- * 			new HsqlProvisioningRequest("tests"));
+ * 			new HsqlProvisioningRequest("tests"), tearDown);
  * 		// Do stuff with the PMF...
+ * 		
+ * 		// The PMF and DB will be automatically cleaned up at the end of the 
+ * 		// test. 
  * 	}
  * }
  * </pre>
  */
 @Component
-public final class CcwTestHelper extends ExternalResource {
+public final class CcwTestHelper implements AutoCloseable {
 	private final DataSourceProvisionersManager provisioner;
 	private final IProvisioningTargetsProvider provisioningTargetsProvider;
 	private final CcwSchemaInitializer schemaInitializer;
@@ -79,17 +83,6 @@ public final class CcwTestHelper extends ExternalResource {
 		this.provisioningTargetsProvider = provisioningTargetsProvider;
 		this.schemaInitializer = schemaInitializer;
 		this.connector = connector;
-	}
-
-	/**
-	 * @see org.junit.rules.ExternalResource#before()
-	 */
-	@Override
-	protected void before() throws Throwable {
-		/*
-		 * Nothing happens automatically here. Instead, test classes must call
-		 * provisionMockCcwDatabase(...) to kick things off.
-		 */
 	}
 
 	/**
@@ -129,6 +122,26 @@ public final class CcwTestHelper extends ExternalResource {
 	}
 
 	/**
+	 * Convenience method. Works exactly as
+	 * {@link #provisionMockCcwDatabase(IProvisioningRequest)}, but also
+	 * registers this {@link CcwTestHelper} with the specified
+	 * {@link TearDownAcceptor}.
+	 * 
+	 * @param provisioningRequest
+	 *            (see {@link #provisionMockCcwDatabase(IProvisioningRequest)})
+	 * @param tearDownAcceptor
+	 *            the {@link TearDownAcceptor} to register this
+	 *            {@link CcwTestHelper} with
+	 * @return (see {@link #provisionMockCcwDatabase(IProvisioningRequest)})
+	 */
+	public JDOPersistenceManagerFactory provisionMockCcwDatabase(IProvisioningRequest provisioningRequest,
+			TearDownAcceptor tearDownAcceptor) {
+		JDOPersistenceManagerFactory pmf = provisionMockCcwDatabase(provisioningRequest);
+		tearDownAcceptor.register(this);
+		return pmf;
+	}
+
+	/**
 	 * @param provisionedDb
 	 *            the DB that the {@link JDOPersistenceManagerFactory} will
 	 *            connect to
@@ -153,13 +166,22 @@ public final class CcwTestHelper extends ExternalResource {
 	}
 
 	/**
-	 * @see org.junit.rules.ExternalResource#after()
+	 * Closes the {@link JDOPersistenceManagerFactory}, deletes the provisioned
+	 * database, and readies this {@link CcwTestHelper} for a new call to
+	 * {@link #createJdoPmf(ProvisioningResult)}
 	 */
-	@Override
-	protected void after() {
+	public void cleanupAndReset() {
 		if (pmf != null)
 			pmf.close();
 		if (provisionedDb != null)
 			provisioner.delete(provisionedDb);
+	}
+
+	/**
+	 * @see java.lang.AutoCloseable#close()
+	 */
+	@Override
+	public void close() throws Exception {
+		cleanupAndReset();
 	}
 }

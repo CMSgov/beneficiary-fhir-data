@@ -14,7 +14,6 @@ import javax.jdo.Transaction;
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.junit.Assert;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +32,7 @@ import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningReq
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.SampleDataLoader;
 
@@ -51,6 +51,8 @@ public final class CcwExtractorTest {
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 	@Rule
+	public final TearDownAcceptor tearDown = new TearDownAcceptor();
+
 	@Inject
 	public CcwTestHelper ccwHelper;
 
@@ -67,9 +69,8 @@ public final class CcwExtractorTest {
 	 * small amount of sample data.
 	 */
 	@Test
-	@Ignore("CcwTestHelper does not clean up DBs, so this goes boom")
 	public void extractSmallSample() {
-		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest);
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Create some model objects and persist them.
@@ -111,7 +112,7 @@ public final class CcwExtractorTest {
 	 */
 	@Test
 	public void extractSynpuf() {
-		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest);
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Load the DE-SynPUF sample data.
