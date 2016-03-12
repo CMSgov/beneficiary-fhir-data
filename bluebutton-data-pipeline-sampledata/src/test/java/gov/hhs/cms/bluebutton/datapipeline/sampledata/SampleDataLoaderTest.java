@@ -27,6 +27,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 
 /**
  * Unit tests for {@link SampleDataLoader}.
@@ -65,8 +66,9 @@ public final class SampleDataLoaderTest {
 			SampleDataLoader loader = new SampleDataLoader(pm);
 			loader.loadSampleData(Paths.get(".", "target"));
 
-			Assert.assertEquals(116352L, pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
-					.result(false, QCurrentBeneficiary.candidate().count()).executeResultUnique());
+			Assert.assertEquals(SynpufArchive.SAMPLE_1.getBeneficiaryCount(),
+					pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
+							.result(false, QCurrentBeneficiary.candidate().count()).executeResultUnique());
 			Assert.assertEquals(779815L, pm.newJDOQLTypedQuery(PartAClaimFact.class)
 					.result(false, QPartAClaimFact.candidate().count()).executeResultUnique());
 		}
