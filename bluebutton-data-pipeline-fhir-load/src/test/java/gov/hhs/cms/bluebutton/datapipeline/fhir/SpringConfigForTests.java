@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
+package gov.hhs.cms.bluebutton.datapipeline.fhir;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

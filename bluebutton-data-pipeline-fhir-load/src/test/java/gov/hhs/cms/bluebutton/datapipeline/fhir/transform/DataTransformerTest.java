@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 
 /**
  * Unit tests for {@link DataTransformer}.
