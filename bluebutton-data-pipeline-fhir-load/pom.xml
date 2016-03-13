@@ -44,6 +44,18 @@
 		</dependency>
 
 		<dependency>
+			<!-- Provides the FHIR client being used to create/push resources to the 
+				server. -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+		</dependency>
+		<dependency>
+			<!-- At least one "structures" JAR must also be included -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+		</dependency>
+
+		<dependency>
 			<!-- Allows for Spring DI and TX management inside tests. -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
