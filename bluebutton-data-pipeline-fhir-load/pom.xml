@@ -56,6 +56,14 @@
 		</dependency>
 
 		<dependency>
+			<!-- Provides utilities for working with Java 8 streams, including batching 
+				features that are used in this project. -->
+			<groupId>io.reactivex</groupId>
+			<artifactId>rxjava</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<dependency>
 			<!-- Allows for Spring DI and TX management inside tests. -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>

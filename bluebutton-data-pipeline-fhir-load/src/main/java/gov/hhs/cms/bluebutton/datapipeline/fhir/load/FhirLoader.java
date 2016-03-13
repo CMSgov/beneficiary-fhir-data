@@ -1,0 +1,83 @@
+package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import javax.inject.Inject;
+
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu21.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
+import rx.Observable;
+
+/**
+ * Pushes already-transformed CCW data ({@link ExplanationOfBenefit} records)
+ * into a FHIR server.
+ */
+public final class FhirLoader {
+	private final LoadAppOptions options;
+
+	/**
+	 * Constructs a new {@link FhirLoader} instance.
+	 * 
+	 * @param options
+	 *            the (injected) {@link LoadAppOptions} to use
+	 */
+	@Inject
+	public FhirLoader(LoadAppOptions options) {
+		this.options = options;
+	}
+
+	/**
+	 * @param dataToLoad
+	 *            the already-transformed {@link ExplanationOfBenefit}s to be
+	 *            pushed to a FHIR server
+	 * @return the {@link FhirResult}s that record the results of each batch
+	 *         FHIR operation
+	 */
+	public List<FhirResult> insertFhirRecords(Stream<ExplanationOfBenefit> dataToLoad) {
+		/*
+		 * Fun trivia: this one line of code literally took three hours to write
+		 * (took ages to decide that RxJava was the best choice, and then figure
+		 * out how to actually use it. For background: the only reason it's
+		 * needed at all is that there's no reasonably simple way to
+		 * batch/buffer items from plain Java 8 streams.
+		 */
+		List<FhirResult> batchResults = Observable.from(dataToLoad::iterator).buffer(100).map(batch -> process(batch))
+				.toList().toBlocking().single();
+
+		return batchResults;
+	}
+
+	/**
+	 * @param batch
+	 *            the batch of {@link ExplanationOfBenefit}s to push to the FHIR
+	 *            server
+	 * @return a {@link FhirResult} that summarizes the results of the operation
+	 *         without keeping all of the pushed objects in memory
+	 */
+	private FhirResult process(List<ExplanationOfBenefit> batch) {
+		FhirContext ctx = FhirContext.forDstu2_1();
+		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
+		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
+		fhirClientLogging.setLogRequestBody(true);
+		client.registerInterceptor(fhirClientLogging);
+
+		Bundle bundle = new Bundle();
+		for (IBaseResource resource : batch) {
+			Resource typedResource = (Resource) resource;
+			bundle.addEntry().setFullUrl(typedResource.getId()).setResource(typedResource).getRequest()
+					.setMethod(HTTPVerb.POST);
+		}
+
+		Bundle resultBundle = client.transaction().withBundle(bundle).execute();
+		return new FhirResult(resultBundle.getTotal());
+	}
+}
