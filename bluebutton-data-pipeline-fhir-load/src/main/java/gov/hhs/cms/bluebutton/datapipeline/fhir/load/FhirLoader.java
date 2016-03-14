@@ -15,6 +15,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
 import rx.Observable;
 
 /**
@@ -37,12 +38,12 @@ public final class FhirLoader {
 
 	/**
 	 * @param dataToLoad
-	 *            the already-transformed {@link ExplanationOfBenefit}s to be
-	 *            pushed to a FHIR server
+	 *            the FHIR {@link BeneficiaryBundle}s to be pushed to a FHIR
+	 *            server
 	 * @return the {@link FhirResult}s that record the results of each batch
 	 *         FHIR operation
 	 */
-	public List<FhirResult> insertFhirRecords(Stream<ExplanationOfBenefit> dataToLoad) {
+	public List<FhirResult> insertFhirRecords(Stream<BeneficiaryBundle> dataToLoad) {
 		/*
 		 * Fun trivia: this one line of code literally took three hours to write
 		 * (took ages to decide that RxJava was the best choice, and then figure
@@ -58,12 +59,12 @@ public final class FhirLoader {
 
 	/**
 	 * @param batch
-	 *            the batch of {@link ExplanationOfBenefit}s to push to the FHIR
+	 *            the batch of {@link BeneficiaryBundle}s to push to the FHIR
 	 *            server
 	 * @return a {@link FhirResult} that summarizes the results of the operation
 	 *         without keeping all of the pushed objects in memory
 	 */
-	private FhirResult process(List<ExplanationOfBenefit> batch) {
+	private FhirResult process(List<BeneficiaryBundle> batch) {
 		FhirContext ctx = FhirContext.forDstu2_1();
 		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
 		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
@@ -71,10 +72,12 @@ public final class FhirLoader {
 		client.registerInterceptor(fhirClientLogging);
 
 		Bundle bundle = new Bundle();
-		for (IBaseResource resource : batch) {
-			Resource typedResource = (Resource) resource;
-			bundle.addEntry().setFullUrl(typedResource.getId()).setResource(typedResource).getRequest()
-					.setMethod(HTTPVerb.POST);
+		for (BeneficiaryBundle beneficiaryBundle : batch) {
+			for (IBaseResource resource : beneficiaryBundle.getFhirResources()) {
+				Resource typedResource = (Resource) resource;
+				bundle.addEntry().setFullUrl(typedResource.getId()).setResource(typedResource).getRequest()
+						.setMethod(HTTPVerb.POST);
+			}
 		}
 
 		Bundle resultBundle = client.transaction().withBundle(bundle).execute();

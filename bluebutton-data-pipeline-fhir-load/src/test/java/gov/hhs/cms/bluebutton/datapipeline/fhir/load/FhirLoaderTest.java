@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -17,6 +16,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 
 /**
@@ -43,7 +43,7 @@ public final class FhirLoaderTest {
 		LoadAppOptions options = new LoadAppOptions(fhirServer);
 		FhirLoader loader = new FhirLoader(options);
 
-		Stream<ExplanationOfBenefit> fhirStream = new ArrayList<ExplanationOfBenefit>().stream();
+		Stream<BeneficiaryBundle> fhirStream = new ArrayList<BeneficiaryBundle>().stream();
 		List<FhirResult> results = loader.insertFhirRecords(fhirStream);
 		Assert.assertNotNull(results);
 		Assert.assertEquals(0, results.size());

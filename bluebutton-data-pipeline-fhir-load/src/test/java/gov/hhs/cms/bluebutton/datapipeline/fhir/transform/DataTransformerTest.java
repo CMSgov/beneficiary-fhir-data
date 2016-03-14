@@ -3,7 +3,6 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -35,7 +34,7 @@ public final class DataTransformerTest {
 		DataTransformer transformer = new DataTransformer();
 
 		Stream<CurrentBeneficiary> emptySourceStream = new ArrayList<CurrentBeneficiary>().stream();
-		Stream<ExplanationOfBenefit> transformedFhirStream = transformer.transformSourceData(emptySourceStream);
+		Stream<BeneficiaryBundle> transformedFhirStream = transformer.transformSourceData(emptySourceStream);
 		Assert.assertNotNull(transformedFhirStream);
 		Assert.assertEquals(0, transformedFhirStream.count());
 	}
