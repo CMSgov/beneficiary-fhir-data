@@ -35,8 +35,8 @@ public final class FhirLoaderTest {
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
 	/**
-	 * Verifies that {@link DataTransformer} works correctly when passed an
-	 * empty stream.
+	 * Verifies that {@link FhirLoader} works correctly when passed an empty
+	 * stream.
 	 * 
 	 * @throws URISyntaxException
 	 *             (won't happen: URI is hardcoded)
@@ -54,8 +54,8 @@ public final class FhirLoaderTest {
 	}
 
 	/**
-	 * Verifies that {@link DataTransformer} works correctly when passed a
-	 * small, hand-crafted data set.
+	 * Verifies that {@link FhirLoader} works correctly when passed a small,
+	 * hand-crafted data set.
 	 * 
 	 * @throws URISyntaxException
 	 *             (won't happen: URI is hardcoded)
