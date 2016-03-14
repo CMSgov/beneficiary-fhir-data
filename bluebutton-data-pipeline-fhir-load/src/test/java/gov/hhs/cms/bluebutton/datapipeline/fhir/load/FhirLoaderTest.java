@@ -24,7 +24,7 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 
 /**
- * Unit tests for {@link DataTransformer}.
+ * Unit tests for {@link FhirLoader}.
  */
 @ContextConfiguration(classes = { SpringConfigForTests.class })
 public final class FhirLoaderTest {
