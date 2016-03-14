@@ -1,7 +1,11 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
-import java.util.Objects;
+import java.sql.Date;
+import java.util.Arrays;
 import java.util.stream.Stream;
+
+import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Patient;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 
@@ -17,9 +21,7 @@ public final class DataTransformer {
 	 * @return a {@link Stream} of FHIR {@link BeneficiaryBundle}s
 	 */
 	public Stream<BeneficiaryBundle> transformSourceData(Stream<CurrentBeneficiary> sourceBeneficiaries) {
-		// FIXME remove filter once this is less fake
-		Stream<BeneficiaryBundle> transformedRecords = sourceBeneficiaries.map(b -> convertToFhir(b))
-				.filter(Objects::nonNull);
+		Stream<BeneficiaryBundle> transformedRecords = sourceBeneficiaries.map(b -> convertToFhir(b));
 		return transformedRecords;
 	}
 
@@ -31,7 +33,12 @@ public final class DataTransformer {
 	 *         beneficiary and its associated claims data
 	 */
 	static BeneficiaryBundle convertToFhir(CurrentBeneficiary sourceBeneficiary) {
-		// TODO
-		return null;
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+
+		patient.addIdentifier().setValue("" + sourceBeneficiary.getId());
+		patient.setBirthDate(Date.valueOf(sourceBeneficiary.getBirthDate()));
+
+		return new BeneficiaryBundle(Arrays.asList(patient));
 	}
 }
