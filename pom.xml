@@ -170,6 +170,14 @@
 						<verbose>true</verbose>
 					</configuration>
 				</plugin>
+				<plugin>
+					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<configuration>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>

@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.extract.SpringConfigForBlueButtonPipelineCcwExtract;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForBlueButtonPipelineFhirLoad;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.test.SpringConfigForBlueButtonPipelineCcwTest;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.SpringConfigForBlueButtonPipelineSampleData;
 
 /**
@@ -12,6 +12,6 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.SpringConfigForBlueButtonP
  */
 @Configuration
 @Import(value = { SpringConfigForBlueButtonPipelineFhirLoad.class, SpringConfigForBlueButtonPipelineCcwExtract.class,
-		SpringConfigForBlueButtonPipelineSampleData.class })
+		SpringConfigForBlueButtonPipelineCcwTest.class, SpringConfigForBlueButtonPipelineSampleData.class })
 public class SpringConfigForTests {
 }

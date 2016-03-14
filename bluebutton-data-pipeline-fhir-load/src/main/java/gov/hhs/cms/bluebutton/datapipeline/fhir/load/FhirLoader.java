@@ -66,9 +66,12 @@ public final class FhirLoader {
 	 */
 	private FhirResult process(List<BeneficiaryBundle> batch) {
 		FhirContext ctx = FhirContext.forDstu2_1();
+		// The default timeout is 10s, which was failing for batches of 100.
+		ctx.getRestfulClientFactory().setSocketTimeout(60 * 1000);
 		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
 		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
-		fhirClientLogging.setLogRequestBody(true);
+		fhirClientLogging.setLogRequestBody(false);
+		fhirClientLogging.setLogResponseBody(false);
 		client.registerInterceptor(fhirClientLogging);
 
 		Bundle bundle = new Bundle();
