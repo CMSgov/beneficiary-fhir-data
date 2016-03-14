@@ -1,19 +1,27 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
 import java.sql.Date;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
+import org.hl7.fhir.dstu21.model.Claim;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 
 /**
  * Handles the translation from source/CCW {@link CurrentBeneficiary} data into
  * FHIR {@link BeneficiaryBundle}s.
  */
 public final class DataTransformer {
+	static final String CODING_SYSTEM_ICD9_DIAG = "http://hl7.org/fhir/sid/icd-9-cm/diagnosis";
+
 	/**
 	 * @param sourceBeneficiaries
 	 *            the source/CCW {@link CurrentBeneficiary} records to be
@@ -33,12 +41,31 @@ public final class DataTransformer {
 	 *         beneficiary and its associated claims data
 	 */
 	static BeneficiaryBundle convertToFhir(CurrentBeneficiary sourceBeneficiary) {
-		Patient patient = new Patient();
-		patient.setId(IdType.newRandomUuid());
+		List<IBaseResource> resources = new ArrayList<>();
 
+		Patient patient = new Patient();
+		resources.add(patient);
+		patient.setId(IdType.newRandomUuid());
 		patient.addIdentifier().setValue("" + sourceBeneficiary.getId());
 		patient.setBirthDate(Date.valueOf(sourceBeneficiary.getBirthDate()));
 
-		return new BeneficiaryBundle(Arrays.asList(patient));
+		for (PartAClaimFact sourcePartAClaim : sourceBeneficiary.getPartAClaimFacts()) {
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			resources.add(eob);
+			eob.setId(IdType.newRandomUuid());
+			eob.setPatient(new Reference().setReference(patient.getId()));
+			eob.addIdentifier().setValue("" + sourcePartAClaim.getId());
+
+			Claim claim = new Claim();
+			resources.add(claim);
+			claim.setId(IdType.newRandomUuid());
+			eob.setClaim(new Reference().setReference(claim.getId()));
+			claim.addIdentifier().setValue("" + sourcePartAClaim.getId());
+			if (sourcePartAClaim.getAdmittingDiagnosisCode() != null)
+				claim.addDiagnosis().getDiagnosis().setSystem(CODING_SYSTEM_ICD9_DIAG)
+						.setCode(sourcePartAClaim.getAdmittingDiagnosisCode());
+		}
+
+		return new BeneficiaryBundle(resources);
 	}
 }

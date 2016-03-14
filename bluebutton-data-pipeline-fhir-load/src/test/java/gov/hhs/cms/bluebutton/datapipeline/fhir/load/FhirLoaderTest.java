@@ -81,7 +81,7 @@ public final class FhirLoaderTest {
 		// Verify the results.
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(2, results.get(0).getResourcesPushedCount());
+		Assert.assertEquals(6, results.get(0).getResourcesPushedCount());
 
 		// TODO verify results by actually querying the server.
 	}

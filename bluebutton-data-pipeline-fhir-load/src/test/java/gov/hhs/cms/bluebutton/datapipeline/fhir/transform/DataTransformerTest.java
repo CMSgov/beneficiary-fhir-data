@@ -71,5 +71,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals("" + beneA.getId(),
 				transformedBundles.get(0).getPatient().getIdentifier().get(0).getValue());
 		Assert.assertEquals(Date.valueOf(beneA.getBirthDate()), transformedBundles.get(0).getPatient().getBirthDate());
+		Assert.assertEquals(1, transformedBundles.get(0).getClaim().getDiagnosis().size());
+		Assert.assertEquals(factA.getAdmittingDiagnosisCode(),
+				transformedBundles.get(0).getClaim().getDiagnosis().get(0).getDiagnosis().getCode());
 	}
 }
