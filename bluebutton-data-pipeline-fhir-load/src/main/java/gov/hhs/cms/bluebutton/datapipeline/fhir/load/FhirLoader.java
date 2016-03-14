@@ -81,6 +81,10 @@ public final class FhirLoader {
 		}
 
 		Bundle resultBundle = client.transaction().withBundle(bundle).execute();
-		return new FhirResult(resultBundle.getTotal());
+		/*
+		 * FIXME this count is inaccurate: need to verify status of each
+		 * response entry
+		 */
+		return new FhirResult(resultBundle.getEntry().size());
 	}
 }
