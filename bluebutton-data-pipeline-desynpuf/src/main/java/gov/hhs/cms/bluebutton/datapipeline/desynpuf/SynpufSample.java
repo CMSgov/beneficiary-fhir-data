@@ -36,16 +36,25 @@ public final class SynpufSample {
 	 * @return the {@link Path}s to the extracted Beneficiary Summary files
 	 */
 	public Path[] getBeneficiarySummaries() {
-		return new Path[] { sampleDir.resolve(SynpufFile.BENE_SUMMARY_2008.getFileName(archive)),
-				sampleDir.resolve(SynpufFile.BENE_SUMMARY_2009.getFileName(archive)),
-				sampleDir.resolve(SynpufFile.BENE_SUMMARY_2010.getFileName(archive)) };
+		return new Path[] { resolve(SynpufFile.BENE_SUMMARY_2008), resolve(SynpufFile.BENE_SUMMARY_2009),
+				resolve(SynpufFile.BENE_SUMMARY_2010) };
 	}
 
 	/**
 	 * @return the {@link Path} to the extracted Beneficiary Summary files
 	 */
 	public Path getPartAClaimsOutpatient() {
-		return sampleDir.resolve(SynpufFile.PART_A_CLAIMS_OUTPATIENT.getFileName(archive));
+		return resolve(SynpufFile.PART_A_CLAIMS_OUTPATIENT);
+	}
+
+	/**
+	 * @param file
+	 *            the {@link SynpufFile} to resolve the path of
+	 * @return the {@link Path} for the specified {@link SynpufFile} in this
+	 *         {@link SynpufSample}
+	 */
+	public Path resolve(SynpufFile file) {
+		return sampleDir.resolve(file.getFileName(archive));
 	}
 
 	/**

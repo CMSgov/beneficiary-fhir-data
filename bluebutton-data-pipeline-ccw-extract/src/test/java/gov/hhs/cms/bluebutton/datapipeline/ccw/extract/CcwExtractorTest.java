@@ -117,7 +117,8 @@ public final class CcwExtractorTest {
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Load the DE-SynPUF sample data.
 			SampleDataLoader sampleLoader = new SampleDataLoader(pm);
-			sampleLoader.loadSampleData(Paths.get(".", "target"));
+			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
+			sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
 
 			/*
 			 * Run the extractor and verify the results. The first thing to
@@ -134,7 +135,7 @@ public final class CcwExtractorTest {
 			Assert.assertTrue((streamEnd - streamStart) <= 5L * 1000L);
 
 			Assert.assertNotNull(beneficiariesStream);
-			Assert.assertEquals(SynpufArchive.SAMPLE_1.getBeneficiaryCount(), beneficiariesStream.count());
+			Assert.assertEquals(archive.getBeneficiaryCount(), beneficiariesStream.count());
 		}
 	}
 }

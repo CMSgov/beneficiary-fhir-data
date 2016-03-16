@@ -67,13 +67,14 @@ public final class SampleDataLoaderTest {
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Run the loader and verify the results.
 			SampleDataLoader loader = new SampleDataLoader(pm);
-			loader.loadSampleData(Paths.get(".", "target"));
+			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
+			loader.loadSampleData(Paths.get(".", "target"), archive);
 
-			Assert.assertEquals(SynpufArchive.SAMPLE_1.getBeneficiaryCount(),
-					pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
-							.result(false, QCurrentBeneficiary.candidate().count()).executeResultUnique());
-			Assert.assertEquals(779815L, pm.newJDOQLTypedQuery(PartAClaimFact.class)
-					.result(false, QPartAClaimFact.candidate().count()).executeResultUnique());
+			Assert.assertEquals(archive.getBeneficiaryCount(), pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
+					.result(false, QCurrentBeneficiary.candidate().count()).executeResultUnique());
+			long partAFactCount = (long) pm.newJDOQLTypedQuery(PartAClaimFact.class)
+					.result(false, QPartAClaimFact.candidate().count()).executeResultUnique();
+			Assert.assertTrue(partAFactCount > 0L);
 		}
 	}
 }

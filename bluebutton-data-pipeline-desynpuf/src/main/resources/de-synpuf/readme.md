@@ -8,9 +8,11 @@ After downloading the sample ZIP files, they were extracted and then recompresse
     $ mkdir de-synpuf-sample-1
     $ unzip DE1_0_\*.zip -d de-synpuf-sample-1
     $ cd de-synpuf-sample-1
-    $ tar -cvjSf bluebutton-data-pipeline-sampledata/src/main/resources/de-synpuf/sample-1.tar.bz2 ./*
+    $ tar -cvjSf bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-1.tar.bz2 ./*
 
 The resulting combined archive was then hooked in to git-lfs, as follows:
 
-    $ git lfs track bluebutton-data-pipeline-sampledata/src/main/resources/de-synpuf/sample-1.tar.bz2
-    $ git add bluebutton-data-pipeline-sampledata/src/main/resources/de-synpuf/sample-1.tar.bz2
+    $ git lfs track bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-1.tar.bz2
+    $ git add bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-1.tar.bz2
+
+The various "test" samples were created using the above process against the output produced by running the `SynpufSubsetter` utility from this project.

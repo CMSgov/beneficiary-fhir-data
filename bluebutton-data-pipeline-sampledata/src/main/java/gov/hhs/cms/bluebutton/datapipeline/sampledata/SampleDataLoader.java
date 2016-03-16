@@ -49,12 +49,26 @@ public final class SampleDataLoader {
 		this.pm = pm;
 	}
 
-	public SampleDataSummary loadSampleData(Path workDir) throws SampleDataException {
+	/**
+	 * Loads the data from the specified {@link SynpufArchive}s into the (CCW)
+	 * database.
+	 * 
+	 * @param workDir
+	 *            a directory that can be used to write any temporary files
+	 *            needed
+	 * @return a {@link SampleDataSummary} instance that contains information
+	 *         about the data that was loaded
+	 * @throws SampleDataException
+	 *             A {@link SampleDataException} will be thrown if any errors
+	 *             occur reading in or processing the specified
+	 *             {@link SynpufArchive}s.
+	 */
+	public SampleDataSummary loadSampleData(Path workDir, SynpufArchive... synpufArchives) throws SampleDataException {
 		// Extract the DE-SynPUF CSV files.
 		Path synpufDir = workDir.resolve("blue-button-de-synpuf");
 		List<SynpufSample> synpufSamples = null;
-		synpufSamples = Arrays.stream(SynpufArchive.values())
-				.map(a -> SynpufSampleLoader.extractSynpufFile(synpufDir, a)).collect(Collectors.toList());
+		synpufSamples = Arrays.stream(synpufArchives).map(a -> SynpufSampleLoader.extractSynpufFile(synpufDir, a))
+				.collect(Collectors.toList());
 
 		// Load the other sample data sets.
 		// TODO

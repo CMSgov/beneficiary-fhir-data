@@ -4,7 +4,11 @@ package gov.hhs.cms.bluebutton.datapipeline.desynpuf;
  * Enumerates the DE-SynPUF archive resources used in this project.
  */
 public enum SynpufArchive {
-	SAMPLE_1("de-synpuf/sample-1.tar.bz2", "1", 116352);
+	SAMPLE_1("de-synpuf/sample-1.tar.bz2", "1", 116352), 
+	
+	SAMPLE_TEST_A("de-synpuf/sample-test-a.tar.bz2", "TestA", 10), 
+	
+	SAMPLE_TEST_B("de-synpuf/sample-test-b.tar.bz2", "TestB", 500);
 
 	private final String resourceName;
 	private final String id;

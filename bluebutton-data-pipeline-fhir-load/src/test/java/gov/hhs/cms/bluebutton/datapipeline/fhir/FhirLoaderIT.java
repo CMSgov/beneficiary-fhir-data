@@ -79,7 +79,8 @@ public final class FhirLoaderIT {
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Load the DE-SynPUF sample data and then extract it.
 			SampleDataLoader sampleLoader = new SampleDataLoader(pm);
-			sampleLoader.loadSampleData(Paths.get(".", "target"));
+			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_B;
+			sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
 			CcwExtractor extractor = new CcwExtractor(pm);
 			Stream<CurrentBeneficiary> beneficiariesStream = extractor.extractAllBeneficiaries();
 
@@ -87,6 +88,7 @@ public final class FhirLoaderIT {
 			Stream<BeneficiaryBundle> fhirStream = new DataTransformer().transformSourceData(beneficiariesStream);
 
 			// Push the data to FHIR.
+			//URI fhirServer = new URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
 			URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
 			LoadAppOptions options = new LoadAppOptions(fhirServer);
 			FhirLoader loader = new FhirLoader(options);
@@ -94,7 +96,7 @@ public final class FhirLoaderIT {
 
 			// Verify the results.
 			Assert.assertNotNull(results);
-			Assert.assertEquals(SynpufArchive.SAMPLE_1.getBeneficiaryCount() * 3,
+			Assert.assertEquals(archive.getBeneficiaryCount() * 3,
 					results.stream().mapToInt(r -> r.getResourcesPushedCount()).sum());
 
 			// TODO verify results by actually querying the server.
