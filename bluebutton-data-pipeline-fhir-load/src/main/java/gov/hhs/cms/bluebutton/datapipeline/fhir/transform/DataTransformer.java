@@ -48,6 +48,7 @@ public final class DataTransformer {
 		patient.setId(IdType.newRandomUuid());
 		patient.addIdentifier().setValue("" + sourceBeneficiary.getId());
 		patient.setBirthDate(Date.valueOf(sourceBeneficiary.getBirthDate()));
+		patient.addName().addFamily(sourceBeneficiary.getSurname()).addGiven(sourceBeneficiary.getGivenName());
 
 		for (PartAClaimFact sourcePartAClaim : sourceBeneficiary.getPartAClaimFacts()) {
 			ExplanationOfBenefit eob = new ExplanationOfBenefit();

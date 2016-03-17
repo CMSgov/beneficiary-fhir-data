@@ -26,6 +26,14 @@ public class CurrentBeneficiary {
 	@Column(name = "BENE_BIRTH_DT", allowsNull = "true")
 	private LocalDate birthDate;
 
+	@Persistent
+	@Column(name = "BENE_GVN_NAME", allowsNull = "true")
+	private String givenName;
+
+	@Persistent
+	@Column(name = "BENE_SRNM_NAME", allowsNull = "true")
+	private String surname;
+
 	@Persistent(mappedBy = "beneficiary")
 	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "beneficiary ASC"))
 	private List<PartAClaimFact> partAClaimFacts = new ArrayList<>();
@@ -71,10 +79,55 @@ public class CurrentBeneficiary {
 	}
 
 	/**
+	 * @return the beneficiary's first/given name
+	 */
+	public String getGivenName() {
+		return givenName;
+	}
+
+	/**
+	 * @param givenName
+	 *            the new value for {@link #getGivenName()}
+	 * @return
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public CurrentBeneficiary setGivenName(String givenName) {
+		this.givenName = givenName;
+		return this;
+	}
+
+	/**
+	 * @return the beneficiary's surname/last/family name
+	 */
+	public String getSurname() {
+		return surname;
+	}
+
+	/**
+	 * @param surname
+	 *            the new value for {@link #getSurname()}
+	 * @return
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public CurrentBeneficiary setSurname(String surname) {
+		this.surname = surname;
+		return this;
+	}
+
+	/**
 	 * @return the {@link PartAClaimFact}s associated with this
 	 *         {@link CurrentBeneficiary}
 	 */
 	public List<PartAClaimFact> getPartAClaimFacts() {
 		return partAClaimFacts;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "CurrentBeneficiary [id=" + id + ", birthDate=" + birthDate + ", givenName=" + givenName + ", surname="
+				+ surname + ", partAClaimFacts=" + partAClaimFacts + "]";
 	}
 }

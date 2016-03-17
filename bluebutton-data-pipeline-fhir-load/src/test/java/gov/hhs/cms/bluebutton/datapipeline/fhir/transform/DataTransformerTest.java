@@ -52,7 +52,8 @@ public final class DataTransformerTest {
 	@Test
 	public void transformSmallDataset() {
 		// Create some mock data.
-		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now());
+		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now()).setGivenName("John")
+				.setSurname("Doe");
 		PartAClaimFact factA = new PartAClaimFact().setId(0L).setBeneficiary(beneA).setAdmittingDiagnosisCode("foo");
 		beneA.getPartAClaimFacts().add(factA);
 		CurrentBeneficiary beneB = new CurrentBeneficiary().setId(1).setBirthDate(LocalDate.now());
@@ -70,6 +71,11 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, transformedBundles.get(0).getPatient().getIdentifier().size());
 		Assert.assertEquals("" + beneA.getId(),
 				transformedBundles.get(0).getPatient().getIdentifier().get(0).getValue());
+		Assert.assertEquals(1, transformedBundles.get(0).getPatient().getName().size());
+		Assert.assertEquals(beneA.getGivenName(),
+				transformedBundles.get(0).getPatient().getName().get(0).getGivenAsSingleString());
+		Assert.assertEquals(beneA.getSurname(),
+				transformedBundles.get(0).getPatient().getName().get(0).getFamilyAsSingleString());
 		Assert.assertEquals(Date.valueOf(beneA.getBirthDate()), transformedBundles.get(0).getPatient().getBirthDate());
 		Assert.assertEquals(1, transformedBundles.get(0).getClaim().getDiagnosis().size());
 		Assert.assertEquals(factA.getAdmittingDiagnosisCode(),

@@ -24,10 +24,20 @@
 
 		<createTable tableName="CCW_BENE_CRNT_VW">
 			<column name="BENE_ID" type="NUMERIC(28)">
+				<!-- This is column #1 in the actual CCW schema. -->
 				<constraints primaryKey="true" nullable="false" />
 			</column>
 			<column name="BENE_BIRTH_DT" type="TIMESTAMP">
+				<!-- This is column #7 in the actual CCW schema. -->
 				<constraints nullable="false" />
+			</column>
+			<column name="BENE_GVN_NAME" type="varchar(15)">
+				<!-- This is column #11 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="BENE_SRNM_NAME" type="varchar(26)">
+				<!-- This is column #13 in the actual CCW schema. -->
+				<constraints nullable="true" />
 			</column>
 		</createTable>
 

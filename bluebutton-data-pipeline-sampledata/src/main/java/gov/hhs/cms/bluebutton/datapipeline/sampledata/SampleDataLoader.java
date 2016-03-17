@@ -71,7 +71,7 @@ public final class SampleDataLoader {
 				.collect(Collectors.toList());
 
 		// Load the other sample data sets.
-		// TODO
+		SampleNameGenerator nameGenerator = new SampleNameGenerator();
 
 		// Process each DE-SynPUF sample.
 		for (SynpufSample synpufSample : synpufSamples) {
@@ -118,6 +118,9 @@ public final class SampleDataLoader {
 							}
 
 							bene.setBirthDate(birthDate);
+							SampleName name = nameGenerator.generateName();
+							bene.setGivenName(name.getFirstName());
+							bene.setSurname(name.getLastName());
 
 							pm.makePersistent(bene);
 							synpufIdsToBeneficiaries.put(synpufId, bene);

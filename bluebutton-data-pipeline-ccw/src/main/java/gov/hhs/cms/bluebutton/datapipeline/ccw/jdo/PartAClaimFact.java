@@ -80,4 +80,21 @@ public class PartAClaimFact {
 		this.admittingDiagnosisCode = admittingDiagnosisCode;
 		return this;
 	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("PartAClaimFact [id=");
+		builder.append(id);
+		builder.append(", beneficiary.id=");
+		builder.append(beneficiary != null ? beneficiary.getId() : "null");
+		builder.append(", admittingDiagnosisCode=");
+		builder.append(admittingDiagnosisCode);
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

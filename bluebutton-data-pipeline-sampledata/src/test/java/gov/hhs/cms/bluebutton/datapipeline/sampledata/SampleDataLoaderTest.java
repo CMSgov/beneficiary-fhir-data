@@ -57,11 +57,11 @@ public final class SampleDataLoaderTest {
 	public IProvisioningRequest provisioningRequest;
 
 	/**
-	 * Verifies that {@link SampleDataLoader} works correctly under normal
-	 * circumstances.
+	 * Verifies that {@link SampleDataLoader} loads the expected number of
+	 * records when run against {@link SynpufArchive#SAMPLE_TEST_A}.
 	 */
 	@Test
-	public void normalUsage() {
+	public void verifyCountsForSampleTestA() {
 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
@@ -75,6 +75,38 @@ public final class SampleDataLoaderTest {
 			long partAFactCount = (long) pm.newJDOQLTypedQuery(PartAClaimFact.class)
 					.result(false, QPartAClaimFact.candidate().count()).executeResultUnique();
 			Assert.assertTrue(partAFactCount > 0L);
+		}
+	}
+
+	/**
+	 * Spot-checks a single loaded beneficiary from
+	 * {@link SynpufArchive#SAMPLE_TEST_A} to verify that
+	 * {@link SampleDataLoader} is handling fields as expected.
+	 */
+	@Test
+	public void spotCheckBeneficiaryFromSampleTestA() {
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
+
+		try (PersistenceManager pm = pmf.getPersistenceManager();) {
+			// Run the loader and verify the results.
+			SampleDataLoader loader = new SampleDataLoader(pm);
+			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
+			loader.loadSampleData(Paths.get(".", "target"), archive);
+
+			// Grab the beneficiary to spot-check.
+			CurrentBeneficiary loadedBene = pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
+					.filter(QCurrentBeneficiary.candidate().id.eq(0)).executeUnique();
+
+			// Spot check the CurrentBeneificiary itself.
+			Assert.assertEquals(1923, loadedBene.getBirthDate().getYear());
+			Assert.assertTrue(loadedBene.getGivenName() != null && loadedBene.getGivenName().length() > 0);
+			Assert.assertTrue(loadedBene.getSurname() != null && loadedBene.getSurname().length() > 0);
+
+			// Spot check one of the beneficiary's PartAClaimFacts.
+			Assert.assertEquals(1, loadedBene.getPartAClaimFacts().size());
+			PartAClaimFact partAClaim = loadedBene.getPartAClaimFacts().get(0);
+			Assert.assertEquals(542192281063886L, (long) partAClaim.getId());
+			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
 		}
 	}
 }
