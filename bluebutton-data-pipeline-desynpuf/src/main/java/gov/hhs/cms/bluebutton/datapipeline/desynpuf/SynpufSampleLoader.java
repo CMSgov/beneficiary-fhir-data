@@ -61,7 +61,7 @@ public final class SynpufSampleLoader {
 					LOGGER.info("Extracting '{}'...", synpufTarEntry.getName());
 					try (FileOutputStream synpufFileOutStream = new FileOutputStream(synpufFileOutPath.toFile());) {
 						// Copy from the bounded input stream out to the file.
-						byte[] buffer = new byte[1024 * 16];
+						byte[] buffer = new byte[1024 * 1024 * 10];
 						int bufferedBytes;
 						while ((bufferedBytes = synpufTarStream.read(buffer, 0, buffer.length)) != -1) {
 							synpufFileOutStream.write(buffer, 0, bufferedBytes);
