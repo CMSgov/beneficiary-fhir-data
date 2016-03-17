@@ -2,9 +2,12 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hl7.fhir.dstu21.model.Address;
 import org.hl7.fhir.dstu21.model.Claim;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.IdType;
@@ -49,6 +52,16 @@ public final class DataTransformer {
 		patient.addIdentifier().setValue("" + sourceBeneficiary.getId());
 		patient.setBirthDate(Date.valueOf(sourceBeneficiary.getBirthDate()));
 		patient.addName().addFamily(sourceBeneficiary.getSurname()).addGiven(sourceBeneficiary.getGivenName());
+
+		List<String> addressComponents = Arrays.asList(sourceBeneficiary.getContactAddress(),
+				sourceBeneficiary.getContactAddressZip());
+		addressComponents = addressComponents.stream().filter(c -> (c != null && c.trim().length() > 0))
+				.collect(Collectors.toList());
+		if (!addressComponents.isEmpty()) {
+			Address address = patient.addAddress();
+			for (String addressComponent : addressComponents)
+				address.addLine(addressComponent);
+		}
 
 		for (PartAClaimFact sourcePartAClaim : sourceBeneficiary.getPartAClaimFacts()) {
 			ExplanationOfBenefit eob = new ExplanationOfBenefit();

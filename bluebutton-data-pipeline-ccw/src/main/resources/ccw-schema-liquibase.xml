@@ -39,6 +39,14 @@
 				<!-- This is column #13 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
+			<column name="BENE_MLG_CNTCT_ADR" type="varchar(132)">
+				<!-- This is column #16 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="BENE_MLG_CNTCT_ZIP_CD" type="varchar(9)">
+				<!-- This is column #17 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
 		</createTable>
 
 		<createTable tableName="CCW_PTA_FACT">

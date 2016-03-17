@@ -34,6 +34,14 @@ public class CurrentBeneficiary {
 	@Column(name = "BENE_SRNM_NAME", allowsNull = "true")
 	private String surname;
 
+	@Persistent
+	@Column(name = "BENE_MLG_CNTCT_ADR", allowsNull = "true")
+	private String contactAddress;
+
+	@Persistent
+	@Column(name = "BENE_MLG_CNTCT_ZIP_CD", allowsNull = "true")
+	private String contactAddressZip;
+
 	@Persistent(mappedBy = "beneficiary")
 	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "beneficiary ASC"))
 	private List<PartAClaimFact> partAClaimFacts = new ArrayList<>();
@@ -88,7 +96,6 @@ public class CurrentBeneficiary {
 	/**
 	 * @param givenName
 	 *            the new value for {@link #getGivenName()}
-	 * @return
 	 * @return this instance (for call-chaining purposes)
 	 */
 	public CurrentBeneficiary setGivenName(String givenName) {
@@ -106,11 +113,45 @@ public class CurrentBeneficiary {
 	/**
 	 * @param surname
 	 *            the new value for {@link #getSurname()}
-	 * @return
 	 * @return this instance (for call-chaining purposes)
 	 */
 	public CurrentBeneficiary setSurname(String surname) {
 		this.surname = surname;
+		return this;
+	}
+
+	/**
+	 * @return the beneficiary's contact/mailing address as a single-line
+	 *         {@link String}, including everything but their zip code
+	 */
+	public String getContactAddress() {
+		return contactAddress;
+	}
+
+	/**
+	 * @param contactAddress
+	 *            the new value for {@link #getContactAddress()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public CurrentBeneficiary setContactAddress(String contactAddress) {
+		this.contactAddress = contactAddress;
+		return this;
+	}
+
+	/**
+	 * @return the zip code of the beneficiary's contact/mailing address
+	 */
+	public String getContactAddressZip() {
+		return contactAddressZip;
+	}
+
+	/**
+	 * @param contactAddressZip
+	 *            the new value for {@link #getContactAddressZip()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public CurrentBeneficiary setContactAddressZip(String contactAddressZip) {
+		this.contactAddressZip = contactAddressZip;
 		return this;
 	}
 
@@ -127,7 +168,22 @@ public class CurrentBeneficiary {
 	 */
 	@Override
 	public String toString() {
-		return "CurrentBeneficiary [id=" + id + ", birthDate=" + birthDate + ", givenName=" + givenName + ", surname="
-				+ surname + ", partAClaimFacts=" + partAClaimFacts + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("CurrentBeneficiary [id=");
+		builder.append(id);
+		builder.append(", birthDate=");
+		builder.append(birthDate);
+		builder.append(", givenName=");
+		builder.append(givenName);
+		builder.append(", surname=");
+		builder.append(surname);
+		builder.append(", contactAddress=");
+		builder.append(contactAddress);
+		builder.append(", contactAddressZip=");
+		builder.append(contactAddressZip);
+		builder.append(", partAClaimFacts=");
+		builder.append(partAClaimFacts);
+		builder.append("]");
+		return builder.toString();
 	}
 }

@@ -28,6 +28,8 @@ import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForBeneficiarySu
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForPartAOutpatient;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSample;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSampleLoader;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddressGenerator;
 
 /**
  * Loads sample data into the specified database.
@@ -72,6 +74,7 @@ public final class SampleDataLoader {
 
 		// Load the other sample data sets.
 		SampleNameGenerator nameGenerator = new SampleNameGenerator();
+		SampleAddressGenerator addressGenerator = new SampleAddressGenerator();
 
 		// Process each DE-SynPUF sample.
 		for (SynpufSample synpufSample : synpufSamples) {
@@ -121,6 +124,9 @@ public final class SampleDataLoader {
 							SampleName name = nameGenerator.generateName();
 							bene.setGivenName(name.getFirstName());
 							bene.setSurname(name.getLastName());
+							SampleAddress address = addressGenerator.generateAddress();
+							bene.setContactAddress(address.getAddressExceptZip());
+							bene.setContactAddressZip(address.getZip());
 
 							pm.makePersistent(bene);
 							synpufIdsToBeneficiaries.put(synpufId, bene);

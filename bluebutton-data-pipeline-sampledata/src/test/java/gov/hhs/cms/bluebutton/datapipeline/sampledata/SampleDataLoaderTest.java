@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
@@ -36,6 +38,8 @@ import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 @ContextConfiguration(classes = { SpringConfigForTests.class })
 @RunWith(Parameterized.class)
 public final class SampleDataLoaderTest {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SampleDataLoaderTest.class);
+
 	@ClassRule
 	public static final SpringClassRule springClassRule = new SpringClassRule();
 
@@ -94,17 +98,21 @@ public final class SampleDataLoaderTest {
 			loader.loadSampleData(Paths.get(".", "target"), archive);
 
 			// Grab the beneficiary to spot-check.
-			CurrentBeneficiary loadedBene = pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
+			CurrentBeneficiary beneficiary = pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
 					.filter(QCurrentBeneficiary.candidate().id.eq(0)).executeUnique();
 
-			// Spot check the CurrentBeneificiary itself.
-			Assert.assertEquals(1923, loadedBene.getBirthDate().getYear());
-			Assert.assertTrue(loadedBene.getGivenName() != null && loadedBene.getGivenName().length() > 0);
-			Assert.assertTrue(loadedBene.getSurname() != null && loadedBene.getSurname().length() > 0);
+			// Spot check the CurrentBeneficiary itself.
+			LOGGER.info("Checking against beneficiary: {}", beneficiary);
+			Assert.assertEquals(1923, beneficiary.getBirthDate().getYear());
+			Assert.assertTrue(beneficiary.getGivenName() != null && beneficiary.getGivenName().length() > 0);
+			Assert.assertTrue(beneficiary.getSurname() != null && beneficiary.getSurname().length() > 0);
+			Assert.assertTrue(beneficiary.getContactAddress() != null && beneficiary.getContactAddress().length() > 0);
+			Assert.assertTrue(
+					beneficiary.getContactAddressZip() != null && beneficiary.getContactAddressZip().length() > 0);
 
 			// Spot check one of the beneficiary's PartAClaimFacts.
-			Assert.assertEquals(1, loadedBene.getPartAClaimFacts().size());
-			PartAClaimFact partAClaim = loadedBene.getPartAClaimFacts().get(0);
+			Assert.assertEquals(1, beneficiary.getPartAClaimFacts().size());
+			PartAClaimFact partAClaim = beneficiary.getPartAClaimFacts().get(0);
 			Assert.assertEquals(542192281063886L, (long) partAClaim.getId());
 			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
 		}

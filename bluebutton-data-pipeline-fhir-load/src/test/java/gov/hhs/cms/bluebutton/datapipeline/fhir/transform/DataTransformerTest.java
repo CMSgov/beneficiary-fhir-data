@@ -53,7 +53,7 @@ public final class DataTransformerTest {
 	public void transformSmallDataset() {
 		// Create some mock data.
 		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now()).setGivenName("John")
-				.setSurname("Doe");
+				.setSurname("Doe").setContactAddress("123 Main St, Anytown, MD").setContactAddressZip("123456789");
 		PartAClaimFact factA = new PartAClaimFact().setId(0L).setBeneficiary(beneA).setAdmittingDiagnosisCode("foo");
 		beneA.getPartAClaimFacts().add(factA);
 		CurrentBeneficiary beneB = new CurrentBeneficiary().setId(1).setBirthDate(LocalDate.now());
@@ -66,17 +66,30 @@ public final class DataTransformerTest {
 		Stream<BeneficiaryBundle> transformedFhirStream = transformer.transformSourceData(emptySourceStream);
 		List<BeneficiaryBundle> transformedBundles = transformedFhirStream.collect(Collectors.toList());
 
-		// Verify the transformation results.
+		/*
+		 * Verify the transformation results.
+		 */
 		Assert.assertEquals(2, transformedBundles.size());
+
 		Assert.assertEquals(1, transformedBundles.get(0).getPatient().getIdentifier().size());
 		Assert.assertEquals("" + beneA.getId(),
 				transformedBundles.get(0).getPatient().getIdentifier().get(0).getValue());
+
 		Assert.assertEquals(1, transformedBundles.get(0).getPatient().getName().size());
 		Assert.assertEquals(beneA.getGivenName(),
 				transformedBundles.get(0).getPatient().getName().get(0).getGivenAsSingleString());
 		Assert.assertEquals(beneA.getSurname(),
 				transformedBundles.get(0).getPatient().getName().get(0).getFamilyAsSingleString());
+
 		Assert.assertEquals(Date.valueOf(beneA.getBirthDate()), transformedBundles.get(0).getPatient().getBirthDate());
+
+		Assert.assertEquals(1, transformedBundles.get(0).getPatient().getAddress().size());
+		Assert.assertEquals(2, transformedBundles.get(0).getPatient().getAddress().get(0).getLine().size());
+		Assert.assertEquals(beneA.getContactAddress(),
+				transformedBundles.get(0).getPatient().getAddress().get(0).getLine().get(0).getValue());
+		Assert.assertEquals(beneA.getContactAddressZip(),
+				transformedBundles.get(0).getPatient().getAddress().get(0).getLine().get(1).getValue());
+
 		Assert.assertEquals(1, transformedBundles.get(0).getClaim().getDiagnosis().size());
 		Assert.assertEquals(factA.getAdmittingDiagnosisCode(),
 				transformedBundles.get(0).getClaim().getDiagnosis().get(0).getDiagnosis().getCode());
