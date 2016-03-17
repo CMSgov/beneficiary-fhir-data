@@ -96,8 +96,7 @@ public final class FhirLoaderIT {
 
 			// Verify the results.
 			Assert.assertNotNull(results);
-			Assert.assertEquals(archive.getBeneficiaryCount() * 3,
-					results.stream().mapToInt(r -> r.getResourcesPushedCount()).sum());
+			Assert.assertTrue(results.stream().mapToInt(r -> r.getResourcesPushedCount()).sum() > 100);
 
 			// TODO verify results by actually querying the server.
 		}
