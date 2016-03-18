@@ -24,10 +24,10 @@ import org.slf4j.LoggerFactory;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
-import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForBeneficiarySummary;
-import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufColumnForPartAOutpatient;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSample;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSampleLoader;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForBeneficiarySummary;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartAOutpatient;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddressGenerator;
 

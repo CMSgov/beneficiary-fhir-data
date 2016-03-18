@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.desynpuf;
+package gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns;
 
 import java.util.Arrays;
 
