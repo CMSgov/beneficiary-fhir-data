@@ -46,6 +46,10 @@ public class CurrentBeneficiary {
 	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "beneficiary ASC"))
 	private List<PartAClaimFact> partAClaimFacts = new ArrayList<>();
 
+	@Persistent(mappedBy = "beneficiary")
+	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "beneficiary ASC"))
+	private List<PartBClaimFact> partBClaimFacts = new ArrayList<>();
+
 	/**
 	 * Constructs a new {@link CurrentBeneficiary} instance.
 	 */
@@ -164,6 +168,14 @@ public class CurrentBeneficiary {
 	}
 
 	/**
+	 * @return the {@link PartBClaimFact}s associated with this
+	 *         {@link CurrentBeneficiary}
+	 */
+	public List<PartBClaimFact> getPartBClaimFacts() {
+		return partBClaimFacts;
+	}
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -183,6 +195,8 @@ public class CurrentBeneficiary {
 		builder.append(contactAddressZip);
 		builder.append(", partAClaimFacts=");
 		builder.append(partAClaimFacts);
+		builder.append(", partBClaimFacts=");
+		builder.append(partBClaimFacts);
 		builder.append("]");
 		return builder.toString();
 	}

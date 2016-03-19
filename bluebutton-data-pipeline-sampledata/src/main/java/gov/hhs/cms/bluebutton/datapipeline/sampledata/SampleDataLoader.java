@@ -23,11 +23,15 @@ import org.slf4j.LoggerFactory;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSample;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSampleLoader;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForBeneficiarySummary;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartAOutpatient;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartB;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddressGenerator;
 
@@ -85,10 +89,10 @@ public final class SampleDataLoader {
 
 				/*
 				 * In DE-SynPUF, beneficiaries' ID is arbitrary text. In the
-				 * CCW, those IDs are an integer. This Map keeps track of the
-				 * problem.
+				 * CCW, those IDs are an integer. The registry keeps track of
+				 * the problem (amongst other things).
 				 */
-				Map<String, CurrentBeneficiary> synpufIdsToBeneficiaries = new HashMap<>();
+				SharedDataRegistry registry = new SharedDataRegistry();
 
 				// Process the beneficiary summaries.
 				for (Path summaryCsv : synpufSample.getBeneficiarySummaries()) {
@@ -113,11 +117,11 @@ public final class SampleDataLoader {
 							 * "more correct".
 							 */
 							CurrentBeneficiary bene;
-							if (synpufIdsToBeneficiaries.containsKey(synpufId)) {
-								bene = synpufIdsToBeneficiaries.get(synpufId);
+							if (registry.getBeneficiary(synpufId) != null) {
+								bene = registry.getBeneficiary(synpufId);
 							} else {
 								bene = new CurrentBeneficiary();
-								bene.setId(synpufIdsToBeneficiaries.size());
+								bene.setId(registry.getBeneficiariesCount());
 							}
 
 							bene.setBirthDate(birthDate);
@@ -129,7 +133,7 @@ public final class SampleDataLoader {
 							bene.setContactAddressZip(address.getZip());
 
 							pm.makePersistent(bene);
-							synpufIdsToBeneficiaries.put(synpufId, bene);
+							registry.register(synpufId, bene);
 						}
 					} catch (IOException e) {
 						throw new SampleDataException(e);
@@ -161,7 +165,7 @@ public final class SampleDataLoader {
 						if (!claimsMap.containsKey(claimId)) {
 							PartAClaimFact claim = new PartAClaimFact();
 							claim.setId(claimId);
-							claim.setBeneficiary(synpufIdsToBeneficiaries.get(synpufId));
+							claim.setBeneficiary(registry.getBeneficiary(synpufId));
 							claim.setAdmittingDiagnosisCode(diagnosisCodeText);
 
 							pm.makePersistent(claim);
@@ -171,9 +175,10 @@ public final class SampleDataLoader {
 				} catch (IOException e) {
 					throw new SampleDataException(e);
 				}
-				LOGGER.info("Processed DE-SynPUF file '{}'...", synpufSample.getPartAClaimsOutpatient().getFileName());
+				LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
 
 				// Process the Part B claims.
+				processPartBClaims(synpufSample, registry);
 
 				// Process the Part D claims.
 
@@ -188,5 +193,243 @@ public final class SampleDataLoader {
 
 		// TODO
 		return null;
+	}
+
+	/**
+	 * Processes the Part B claims data in the specified {@link SynpufSample}.
+	 * 
+	 * @param synpufSample
+	 *            the {@link SynpufSample} to process
+	 * @param registry
+	 *            the {@link SharedDataRegistry} being used
+	 */
+	private void processPartBClaims(SynpufSample synpufSample, SharedDataRegistry registry) {
+		Map<Long, PartBClaimFact> claimsMap = new HashMap<>();
+		for (Path claimsCsv : synpufSample.getPartBClaims()) {
+			LOGGER.info("Processing DE-SynPUF file '{}'...", claimsCsv.getFileName());
+			try (Reader in = new FileReader(claimsCsv.toFile());) {
+				CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartB.getAllColumnNames())
+						.withSkipHeaderRecord();
+				Iterable<CSVRecord> records = csvFormat.parse(in);
+				for (CSVRecord record : records) {
+					LOGGER.trace("Processing DE-SynPUF Part B Outpatient record #{}.", record.getRecordNumber());
+
+					String synpufId = record.get(SynpufColumnForPartB.DESYNPUF_ID);
+					String claimIdText = record.get(SynpufColumnForPartB.CLM_ID);
+					long claimId = Long.parseLong(claimIdText);
+					String dateFromText = record.get(SynpufColumnForPartB.CLM_FROM_DT);
+					LocalDate dateFrom = LocalDate.parse(dateFromText, SYNPUF_DATE_FORMATTER);
+					String dateThroughText = record.get(SynpufColumnForPartB.CLM_THRU_DT);
+					LocalDate dateThrough = LocalDate.parse(dateThroughText, SYNPUF_DATE_FORMATTER);
+					String diagnosisCode1 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_1);
+					String diagnosisCode2 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_2);
+					String diagnosisCode3 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_3);
+					String diagnosisCode4 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_4);
+					String diagnosisCode5 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_5);
+					String diagnosisCode6 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_6);
+					String diagnosisCode7 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_7);
+					String diagnosisCode8 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_8);
+
+					// Sanity check:
+					if (claimsMap.containsKey(claimId)) {
+						throw new IllegalStateException("Dupe claim: " + claimId);
+					}
+
+					PartBClaimFact claim = new PartBClaimFact();
+					claimsMap.put(claimId, claim);
+					claim.setId(claimId);
+					claim.setBeneficiary(registry.getBeneficiary(synpufId));
+					claim.setCarrierControlNumber(claimId);
+					claim.setDiagnosisCode1(diagnosisCode1);
+					claim.setDiagnosisCode2(diagnosisCode2);
+					claim.setDiagnosisCode3(diagnosisCode3);
+					claim.setDiagnosisCode4(diagnosisCode4);
+					claim.setDiagnosisCode5(diagnosisCode5);
+					claim.setDiagnosisCode6(diagnosisCode6);
+					claim.setDiagnosisCode7(diagnosisCode7);
+					claim.setDiagnosisCode8(diagnosisCode8);
+
+					for (int lineNumber = 1; lineNumber <= 13; lineNumber++) {
+						PartBClaimLineFact claimLine = new PartBClaimLineFact();
+						claimLine.setClaim(claim);
+						claimLine.setBeneficiary(claim.getBeneficiary());
+
+						claimLine.setLineNumber((long) lineNumber);
+						claimLine.setDateFrom(dateFrom);
+						claimLine.setDateThrough(dateThrough);
+
+						String lineDiagnosisCode = record.get(SynpufColumnForPartB.getLineIcd9DgnsCd(lineNumber));
+						claimLine.setLineDiagnosisCode(lineDiagnosisCode);
+
+						String performingPhysicianNpi = record.get(SynpufColumnForPartB.getPrfPhysnNpi(lineNumber));
+						// TODO where to map PRF_PHYSN_NPI_#? Note: Gibberish
+						// data!
+
+						String taxNum = record.get(SynpufColumnForPartB.getTaxNum(lineNumber));
+						// TODO where to map TAX_NUM_#? Note: Gibberish data!
+
+						String hcpcsCd = record.get(SynpufColumnForPartB.getHcpcsCd(lineNumber));
+						if (!isBlank(hcpcsCd)) {
+							Procedure procedure;
+							if (registry.getProcedure(hcpcsCd) != null) {
+								procedure = registry.getProcedure(hcpcsCd);
+							} else {
+								procedure = new Procedure().setId((long) registry.getProceduresCount())
+										.setCode(hcpcsCd);
+								registry.register(procedure);
+							}
+							claimLine.setProcedure(procedure);
+						}
+
+						String nchPaymentAmountText = record.get(SynpufColumnForPartB.getLineNchPmtAmt(lineNumber));
+						Double nchPaymentAmount = Double.parseDouble(nchPaymentAmountText);
+						claimLine.setNchPaymentAmount(nchPaymentAmount);
+
+						String deductibleAmountText = record
+								.get(SynpufColumnForPartB.getLineBenePtbDdctblAmt(lineNumber));
+						Double deductibleAmount = Double.parseDouble(deductibleAmountText);
+						// TODO where to stick LINE_BENE_PTB_DDCTBL_AMT_#?
+
+						String primaryPayerPaidAmountText = record
+								.get(SynpufColumnForPartB.getLineBenePrmryPyrPdAmt(lineNumber));
+						Double primaryPayerPaidAmount = Double.parseDouble(primaryPayerPaidAmountText);
+						claimLine.setBeneficiaryPrimaryPayerPaidAmount(primaryPayerPaidAmount);
+
+						String coinsuranceAmountText = record.get(SynpufColumnForPartB.getLineCoinsrncAmt(lineNumber));
+						Double coinsuranceAmount = Double.parseDouble(coinsuranceAmountText);
+						claimLine.setCoinsuranceAmount(coinsuranceAmount);
+
+						String allowedAmountText = record.get(SynpufColumnForPartB.getLineAlowdChrgAmt(lineNumber));
+						Double allowedAmount = Double.parseDouble(allowedAmountText);
+						claimLine.setAllowedAmount(allowedAmount);
+
+						String processingIndicationCode = record
+								.get(SynpufColumnForPartB.getLinePrcsgIndCd(lineNumber));
+						claimLine.setProcessingIndicationCode(processingIndicationCode);
+
+						// TODO how to populate this?
+						// claimLine.setSubmittedAmount(submittedAmount);
+
+						// TODO how to populate this?
+						// claimLine.setMiscCode(miscCode);
+
+						if (!isMostlyBlank(claimLine))
+							claim.getClaimLines().add(claimLine);
+					}
+
+					pm.makePersistent(claim);
+				}
+			} catch (IOException e) {
+				throw new SampleDataException(e);
+			}
+			LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
+		}
+	}
+
+	/**
+	 * @param claimLine
+	 *            the {@link PartBClaimLineFact} to check
+	 * @return <code>true</code> if all of the following fields are blank,
+	 *         <code>false</code> if not:
+	 *         <ul>
+	 *         <li>{@link PartBClaimLineFact#getProcedure()}</li>
+	 *         <li>{@link PartBClaimLineFact#getAllowedAmount()}</li>
+	 *         <li>{@link PartBClaimLineFact#getSubmittedAmount()}</li>
+	 *         <li>{@link PartBClaimLineFact#getLineDiagnosisCode()}</li>
+	 *         <li>{@link PartBClaimLineFact#getMiscCode()}</li>
+	 *         <li>{@link PartBClaimLineFact#getNchPaymentAmount()}</li>
+	 *         <li>
+	 *         {@link PartBClaimLineFact#getBeneficiaryPrimaryPayerPaidAmount()}
+	 *         </li>
+	 *         <li>{@link PartBClaimLineFact#getCoinsuranceAmount()}</li>
+	 *         <li>{@link PartBClaimLineFact#getProcessingIndicationCode()}</li>
+	 *         </ul>
+	 */
+	private static boolean isMostlyBlank(PartBClaimLineFact claimLine) {
+		return claimLine.getProcedure() == null && isBlank(claimLine.getAllowedAmount())
+				&& isBlank(claimLine.getSubmittedAmount()) && isBlank(claimLine.getLineDiagnosisCode())
+				&& claimLine.getMiscCode() == null && isBlank(claimLine.getNchPaymentAmount())
+				&& isBlank(claimLine.getBeneficiaryPrimaryPayerPaidAmount())
+				&& isBlank(claimLine.getCoinsuranceAmount()) && isBlank(claimLine.getProcessingIndicationCode());
+	}
+
+	/**
+	 * @param value
+	 *            the value to check
+	 * @return <code>true</code> if the specified value is <code>null</code> or
+	 *         only contains whitespace
+	 */
+	private static boolean isBlank(String value) {
+		return value == null || value.trim().isEmpty();
+	}
+
+	/**
+	 * @param value
+	 *            the value to check
+	 * @return <code>true</code> if the specified value is <code>null</code> or
+	 *         <code>0</code>
+	 */
+	private static boolean isBlank(Number value) {
+		return value == null || value.equals(Double.valueOf(0.0));
+	}
+
+	/**
+	 * A simple registry for shared data records that are created during a
+	 * {@link SampleDataLoader#loadSampleData(Path, SynpufArchive...)}
+	 * operation.
+	 */
+	private static final class SharedDataRegistry {
+		private final Map<String, CurrentBeneficiary> beneficiariesBySynpufId = new HashMap<>();
+		private final Map<String, Procedure> proceduresByCode = new HashMap<>();
+
+		/**
+		 * @return the matching {@link CurrentBeneficiary} that was passed to
+		 *         {@link #register(CurrentBeneficiary)}, or <code>null</code>
+		 *         if no such match is found
+		 */
+		public CurrentBeneficiary getBeneficiary(String synpufId) {
+			return beneficiariesBySynpufId.get(synpufId);
+		}
+
+		/**
+		 * @return the number of {@link CurrentBeneficiary}s that have been
+		 *         passed to {@link #register(String, CurrentBeneficiary)}
+		 */
+		public int getBeneficiariesCount() {
+			return beneficiariesBySynpufId.size();
+		}
+
+		/**
+		 * @param beneficiary
+		 *            the {@link CurrentBeneficiary} to register
+		 */
+		public void register(String synpufId, CurrentBeneficiary beneficiary) {
+			beneficiariesBySynpufId.put(synpufId, beneficiary);
+		}
+
+		/**
+		 * @return the matching {@link Procedure} that was passed to
+		 *         {@link #register(Procedure)}, or <code>null</code> if no such
+		 *         match is found
+		 */
+		public Procedure getProcedure(String code) {
+			return proceduresByCode.get(code);
+		}
+
+		/**
+		 * @return the number of {@link Procedure}s that have been passed to
+		 *         {@link #register(Procedure)}
+		 */
+		public int getProceduresCount() {
+			return proceduresByCode.size();
+		}
+
+		/**
+		 * @param procedure
+		 *            the {@link Procedure} to register
+		 */
+		public void register(Procedure procedure) {
+			proceduresByCode.put(procedure.getCode(), procedure);
+		}
 	}
 }

@@ -48,6 +48,15 @@ public final class SynpufSample {
 	}
 
 	/**
+	 * @return the {@link Path}s to the extracted
+	 *         {@link SynpufFile#PART_B_CLAIMS_FIRST} and
+	 *         {@link SynpufFile#PART_B_CLAIMS_SECOND} files
+	 */
+	public Path[] getPartBClaims() {
+		return new Path[] { resolve(SynpufFile.PART_B_CLAIMS_FIRST), resolve(SynpufFile.PART_B_CLAIMS_SECOND) };
+	}
+
+	/**
 	 * @param file
 	 *            the {@link SynpufFile} to resolve the path of
 	 * @return the {@link Path} for the specified {@link SynpufFile} in this

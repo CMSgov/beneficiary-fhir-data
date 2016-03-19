@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu21.model.Claim;
+import org.hl7.fhir.dstu21.model.Coverage;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -58,5 +60,32 @@ public final class BeneficiaryBundle {
 		if (claims.size() != 1)
 			throw new IllegalStateException();
 		return (Claim) claims.get(0);
+	}
+
+	/**
+	 * @return the {@link Coverage} resource for Part B in
+	 *         {@link #getFhirResources()}
+	 * @throws IllegalStateException
+	 *             An {@link IllegalStateException} will be thrown if exactly
+	 *             one matching {@link Coverage} is not found.
+	 */
+	public Coverage getPartBCoverage() {
+		List<Coverage> coverages = fhirResources.stream().filter(r -> r instanceof Coverage).map(r -> (Coverage) r)
+				.filter(c -> c.getPlan().equals(DataTransformer.COVERAGE_PLAN_PART_B)).collect(Collectors.toList());
+		if (coverages.size() != 1)
+			throw new IllegalStateException();
+		return coverages.get(0);
+	}
+
+	/**
+	 * @return the {@link ExplanationOfBenefit}s resources for Part B claims in
+	 *         {@link #getFhirResources()}
+	 */
+	public List<ExplanationOfBenefit> getExplanationOfBenefitsForPartB() {
+		List<ExplanationOfBenefit> eobs = fhirResources.stream().filter(r -> r instanceof ExplanationOfBenefit)
+				.map(r -> (ExplanationOfBenefit) r)
+				.filter(eob -> eob.getCoverage().getCoverage().getReference().equals(getPartBCoverage().getId()))
+				.collect(Collectors.toList());
+		return eobs;
 	}
 }

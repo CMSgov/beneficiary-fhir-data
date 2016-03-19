@@ -26,8 +26,12 @@ import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningReq
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartBClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
@@ -76,9 +80,17 @@ public final class SampleDataLoaderTest {
 
 			Assert.assertEquals(archive.getBeneficiaryCount(), pm.newJDOQLTypedQuery(CurrentBeneficiary.class)
 					.result(false, QCurrentBeneficiary.candidate().count()).executeResultUnique());
+
 			long partAFactCount = (long) pm.newJDOQLTypedQuery(PartAClaimFact.class)
 					.result(false, QPartAClaimFact.candidate().count()).executeResultUnique();
 			Assert.assertTrue(partAFactCount > 0L);
+
+			long partBFactCount = (long) pm.newJDOQLTypedQuery(PartBClaimFact.class)
+					.result(false, QPartBClaimFact.candidate().count()).executeResultUnique();
+			Assert.assertTrue(partBFactCount > 0L);
+			long partBFactLineCount = (long) pm.newJDOQLTypedQuery(PartBClaimLineFact.class)
+					.result(false, QPartBClaimLineFact.candidate().count()).executeResultUnique();
+			Assert.assertTrue(partBFactLineCount > partBFactCount);
 		}
 	}
 
@@ -115,6 +127,45 @@ public final class SampleDataLoaderTest {
 			PartAClaimFact partAClaim = beneficiary.getPartAClaimFacts().get(0);
 			Assert.assertEquals(542192281063886L, (long) partAClaim.getId());
 			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
+
+			// Spot check one of the beneficiary's PartBClaimFacts.
+			Assert.assertEquals(5, beneficiary.getPartBClaimFacts().size());
+			PartBClaimFact partBClaim = beneficiary.getPartBClaimFacts().get(0);
+			Assert.assertEquals(887213386947664L, (long) partBClaim.getId());
+			Assert.assertSame(beneficiary, partBClaim.getBeneficiary());
+			Assert.assertEquals(partBClaim.getId(), partBClaim.getCarrierControlNumber());
+			Assert.assertEquals("3598", partBClaim.getDiagnosisCode1());
+			Assert.assertEquals("27541", partBClaim.getDiagnosisCode2());
+			Assert.assertEquals("", partBClaim.getDiagnosisCode3());
+			Assert.assertEquals("", partBClaim.getDiagnosisCode4());
+			Assert.assertEquals("", partBClaim.getDiagnosisCode5());
+			Assert.assertEquals("", partBClaim.getDiagnosisCode6());
+			Assert.assertEquals("", partBClaim.getDiagnosisCode7());
+			Assert.assertEquals("", partBClaim.getDiagnosisCode8());
+
+			// Spot check one of the beneficiary's PartBClaimLineFacts.
+			Assert.assertEquals(1, partBClaim.getClaimLines().size());
+			PartBClaimLineFact partBClaimLine = partBClaim.getClaimLines().get(0);
+			Assert.assertEquals(887213386947664L, (long) partBClaim.getId());
+			Assert.assertSame(partBClaim, partBClaimLine.getClaim());
+			Assert.assertEquals(1L, partBClaimLine.getLineNumber());
+			Assert.assertSame(beneficiary, partBClaimLine.getBeneficiary());
+			Assert.assertTrue(partBClaimLine.getProcedure().getId() >= 0);
+			Assert.assertEquals("01996", partBClaimLine.getProcedure().getCode());
+			Assert.assertEquals(2009, partBClaimLine.getDateFrom().getYear());
+			Assert.assertEquals(2009, partBClaimLine.getDateThrough().getYear());
+			Assert.assertEquals(Double.valueOf(60.0), partBClaimLine.getAllowedAmount());
+			// TODO
+			// Assert.assertEquals(null, partBClaimLine.getSubmittedAmount());
+			Assert.assertEquals("33818", partBClaimLine.getLineDiagnosisCode());
+			// TODO
+			// Assert.assertEquals("???", partBClaimLine.getMiscCode().getId());
+			// Assert.assertEquals("???",
+			// partBClaimLine.getMiscCode().getCode());
+			Assert.assertEquals(Double.valueOf(50.0), partBClaimLine.getNchPaymentAmount());
+			Assert.assertEquals(Double.valueOf(0.0), partBClaimLine.getBeneficiaryPrimaryPayerPaidAmount());
+			Assert.assertEquals(Double.valueOf(10.0), partBClaimLine.getCoinsuranceAmount());
+			Assert.assertEquals("A", partBClaimLine.getProcessingIndicationCode());
 		}
 	}
 }

@@ -12,8 +12,10 @@
 	<!-- This is required to work around https://hibernate.atlassian.net/browse/HHH-9427. -->
 	<property name="fkColumnName.Game.id" value="GAMEID" dbms="hsqldb" />
 	<property name="fkColumnName.Game.id" value="gameid" dbms="postgresql" />
-	<property name="fkColumnName.LoginIdentity.id" value="LOGINIDENTITYID" dbms="hsqldb" />
-	<property name="fkColumnName.LoginIdentity.id" value="loginidentityid" dbms="postgresql" />
+	<property name="fkColumnName.LoginIdentity.id" value="LOGINIDENTITYID"
+		dbms="hsqldb" />
+	<property name="fkColumnName.LoginIdentity.id" value="loginidentityid"
+		dbms="postgresql" />
 
 	<!-- This is required to work around https://hibernate.atlassian.net/browse/HHH-9430 
 		and https://hibernate.atlassian.net/browse/HHH-9431. -->
@@ -29,7 +31,7 @@
 			</column>
 			<column name="BENE_BIRTH_DT" type="TIMESTAMP">
 				<!-- This is column #7 in the actual CCW schema. -->
-				<constraints nullable="false" />
+				<constraints nullable="true" />
 			</column>
 			<column name="BENE_GVN_NAME" type="varchar(15)">
 				<!-- This is column #11 in the actual CCW schema. -->
@@ -49,6 +51,24 @@
 			</column>
 		</createTable>
 
+		<createTable tableName="CCW_HCPCS_CD">
+			<column name="HCPCS_ID" type="NUMERIC(22)">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="HCPCS_CD" type="VARCHAR(5)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<createTable tableName="CLM_LINE_MISC_CD">
+			<column name="CLM_LINE_MISC_CD_ID" type="VARCHAR(20)">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="LINE_TYPE_SRVC_CD" type="VARCHAR(2)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
 		<createTable tableName="CCW_PTA_FACT">
 			<column name="CLM_ID" type="NUMERIC(22)">
 				<constraints primaryKey="true" nullable="false" />
@@ -58,6 +78,129 @@
 					referencedTableName="CCW_BENE_CRNT_VW" />
 			</column>
 			<column name="DGNS_1_CD" type="varchar(7)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
+		<createTable tableName="CCW_PTB_FACT">
+			<column name="CLM_ID" type="NUMERIC(22)">
+				<!-- This is column #1 in the actual CCW schema. -->
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="BENE_ID" type="NUMERIC(22)">
+				<!-- This is column #2 in the actual CCW schema. -->
+				<constraints nullable="false" foreignKeyName="PtbFactToBeneCrnt"
+					referencedTableName="CCW_BENE_CRNT_VW" />
+			</column>
+			<column name="CARR_CLM_CNTL_NUM" type="varchar(23)">
+				<!-- This is column #27 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_1_CD" type="varchar(7)">
+				<!-- This is column #38 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_2_CD" type="varchar(7)">
+				<!-- This is column #40 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_3_CD" type="varchar(7)">
+				<!-- This is column #42 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_4_CD" type="varchar(7)">
+				<!-- This is column #44 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_5_CD" type="varchar(7)">
+				<!-- This is column #46 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_6_CD" type="varchar(7)">
+				<!-- This is column #48 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_7_CD" type="varchar(7)">
+				<!-- This is column #50 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DGNS_8_CD" type="varchar(7)">
+				<!-- This is column #52 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
+		<createTable tableName="CCW_PTB_LINE_FACT">
+			<column name="CLM_ID" type="NUMERIC(22)">
+				<!-- This is column #1 in the actual CCW schema. -->
+				<constraints primaryKey="true" nullable="false"
+					foreignKeyName="PtbLineFactToPtbFact" referencedTableName="CCW_PTB_FACT"
+					referencedColumnNames="CLM_ID" />
+			</column>
+			<column name="LINE_NUM" type="NUMERIC(22)">
+				<!-- This is column #2 in the actual CCW schema. -->
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="BENE_ID" type="NUMERIC(22)">
+				<!-- This is column #3 in the actual CCW schema. -->
+				<constraints nullable="true" foreignKeyName="PtbLineFactToBeneCrnt"
+					referencedTableName="CCW_BENE_CRNT_VW" referencedColumnNames="BENE_ID" />
+			</column>
+			<column name="HCPCS_ID" type="NUMERIC(22)">
+				<!-- This is column #6 in the actual CCW schema. -->
+				<constraints nullable="true" foreignKeyName="PtbLineFactToHcpcs"
+					referencedTableName="CCW_HCPCS_CD" referencedColumnNames="HCPCS_ID" />
+			</column>
+			<column name="CLM_FROM_DT" type="TIMESTAMP">
+				<!-- This is column #11 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="CLM_THRU_DT" type="TIMESTAMP">
+				<!-- This is column #12 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_ALOWD_CHRG_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #25 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_SBMTD_CHRG_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #34 in the actual CCW schema. -->
+				<!-- TODO: Which of the DE-SynPUF amount columns does this represent: 
+					LINE_NCH_PMT_AMT, LINE_BENE_PTB_DDCTBL_AMT, LINE_BENE_PRMRY_PYR_PD_AMT, LINE_COINSRNC_AMT? -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_DGNS_CD" type="varchar(7)">
+				<!-- This is column #49 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="CLM_LINE_MISC_CD_ID" type="VARCHAR(22)">
+				<!-- This is column #97 in the actual CCW schema. -->
+				<!-- FIXME: I had to adjust this column data type to match the FK target. -->
+				<constraints nullable="true" foreignKeyName="PtbLineFactToClmLineMiscCd"
+					referencedTableName="CLM_LINE_MISC_CD" referencedColumnNames="CLM_LINE_MISC_CD_ID" />
+			</column>
+			<column name="LINE_NCH_PMT_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #?? in the actual CCW schema. -->
+				<!-- TODO: This column has not yet been mapped correctly from the DE-SynPUF 
+					schema to the CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_BENE_PRMRY_PYR_PD_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #?? in the actual CCW schema. -->
+				<!-- TODO: This column has not yet been mapped correctly from the DE-SynPUF 
+					schema to the CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_COINSRNC_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #?? in the actual CCW schema. -->
+				<!-- TODO: This column has not yet been mapped correctly from the DE-SynPUF 
+					schema to the CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_PRCSG_IND_CD" type="VARCHAR(2)">
+				<!-- This is column #?? in the actual CCW schema. -->
+				<!-- TODO: This column has not yet been mapped correctly from the DE-SynPUF 
+					schema to the CCW schema. -->
 				<constraints nullable="true" />
 			</column>
 		</createTable>
