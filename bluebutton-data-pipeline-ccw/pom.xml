@@ -82,6 +82,15 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<!-- Run the DataNucleus/JDO bytecode enhancer on the project's compiled 
+						classes. -->
+					<groupId>org.datanucleus</groupId>
+					<artifactId>datanucleus-maven-plugin</artifactId>
+					<configuration>
+						<log4jConfiguration>${basedir}/src/build/datanucleus-maven-plugin-log4j.properties</log4jConfiguration>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
