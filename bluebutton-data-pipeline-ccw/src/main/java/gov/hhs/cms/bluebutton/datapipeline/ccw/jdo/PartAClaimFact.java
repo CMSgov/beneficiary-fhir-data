@@ -6,8 +6,8 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 /**
- * Models rows in the CCW's <code>CCW_BENE_CRNT_VW</code> table, which represent
- * current Medicare beneficiaries.
+ * Models rows in the CCW's <code>CCW_PTA_FACT</code> table, which represents
+ * Part A claims.
  */
 @PersistenceCapable(table = "CCW_PTA_FACT", detachable = "true")
 public class PartAClaimFact {
