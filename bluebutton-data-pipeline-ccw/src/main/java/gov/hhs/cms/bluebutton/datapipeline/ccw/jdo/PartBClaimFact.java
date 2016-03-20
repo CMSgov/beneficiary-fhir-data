@@ -61,6 +61,10 @@ public class PartBClaimFact {
 	@Column(name = "DGNS_8_CD")
 	private String diagnosisCode8;
 
+	@Persistent
+	@Column(name = "PRVDR_ID")
+	private Long providerNpi;
+
 	@Persistent(mappedBy = "claim")
 	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "lineNumber ASC"))
 	private List<PartBClaimLineFact> claimLines = new ArrayList<>();
@@ -259,6 +263,23 @@ public class PartBClaimFact {
 	}
 
 	/**
+	 * @return the NPI of the performing physician
+	 */
+	public Long getProviderNpi() {
+		return providerNpi;
+	}
+
+	/**
+	 * @param providerNpi
+	 *            the new value for {@link #getProviderNpi()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartBClaimFact setProviderNpi(Long providerNpi) {
+		this.providerNpi = providerNpi;
+		return this;
+	}
+
+	/**
 	 * @return the {@link PartBClaimLineFact}s associated with this
 	 *         {@link PartBClaimFact}
 	 */
@@ -294,6 +315,8 @@ public class PartBClaimFact {
 		builder.append(diagnosisCode7);
 		builder.append(", diagnosisCode8=");
 		builder.append(diagnosisCode8);
+		builder.append(", providerNpi=");
+		builder.append(providerNpi);
 		builder.append(", claimLines=");
 		builder.append(claimLines);
 		builder.append("]");

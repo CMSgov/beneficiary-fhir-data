@@ -34,6 +34,7 @@ import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartA
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartB;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddressGenerator;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.npi.SampleProviderGenerator;
 
 /**
  * Loads sample data into the specified database.
@@ -79,6 +80,7 @@ public final class SampleDataLoader {
 		// Load the other sample data sets.
 		SampleNameGenerator nameGenerator = new SampleNameGenerator();
 		SampleAddressGenerator addressGenerator = new SampleAddressGenerator();
+		SampleProviderGenerator providerGenerator = new SampleProviderGenerator();
 
 		// Process each DE-SynPUF sample.
 		for (SynpufSample synpufSample : synpufSamples) {
@@ -178,7 +180,7 @@ public final class SampleDataLoader {
 				LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
 
 				// Process the Part B claims.
-				processPartBClaims(synpufSample, registry);
+				processPartBClaims(synpufSample, registry, providerGenerator);
 
 				// Process the Part D claims.
 
@@ -202,8 +204,11 @@ public final class SampleDataLoader {
 	 *            the {@link SynpufSample} to process
 	 * @param registry
 	 *            the {@link SharedDataRegistry} being used
+	 * @param providerGenerator
+	 *            the {@link SampleProviderGenerator} to use
 	 */
-	private void processPartBClaims(SynpufSample synpufSample, SharedDataRegistry registry) {
+	private void processPartBClaims(SynpufSample synpufSample, SharedDataRegistry registry,
+			SampleProviderGenerator providerGenerator) {
 		Map<Long, PartBClaimFact> claimsMap = new HashMap<>();
 		for (Path claimsCsv : synpufSample.getPartBClaims()) {
 			LOGGER.info("Processing DE-SynPUF file '{}'...", claimsCsv.getFileName());
@@ -248,6 +253,8 @@ public final class SampleDataLoader {
 					claim.setDiagnosisCode6(diagnosisCode6);
 					claim.setDiagnosisCode7(diagnosisCode7);
 					claim.setDiagnosisCode8(diagnosisCode8);
+					int claimPerformingPhysicianNpi = providerGenerator.generateProvider().getNpi();
+					claim.setProviderNpi((long) claimPerformingPhysicianNpi);
 
 					for (int lineNumber = 1; lineNumber <= 13; lineNumber++) {
 						PartBClaimLineFact claimLine = new PartBClaimLineFact();
@@ -261,9 +268,9 @@ public final class SampleDataLoader {
 						String lineDiagnosisCode = record.get(SynpufColumnForPartB.getLineIcd9DgnsCd(lineNumber));
 						claimLine.setLineDiagnosisCode(lineDiagnosisCode);
 
-						String performingPhysicianNpi = record.get(SynpufColumnForPartB.getPrfPhysnNpi(lineNumber));
+						int claimLinePerformingPhysicianNpi = providerGenerator.generateProvider().getNpi();
 						// TODO where to map PRF_PHYSN_NPI_#? Note: Gibberish
-						// data!
+						// data! (Already mapped at claim level.)
 
 						String taxNum = record.get(SynpufColumnForPartB.getTaxNum(lineNumber));
 						// TODO where to map TAX_NUM_#? Note: Gibberish data!

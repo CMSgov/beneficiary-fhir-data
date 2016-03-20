@@ -128,6 +128,10 @@
 				<!-- This is column #52 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
+			<column name="PRVDR_ID" type="NUMERIC(22)">
+				<!-- This is column #67 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
 		</createTable>
 
 		<createTable tableName="CCW_PTB_LINE_FACT">

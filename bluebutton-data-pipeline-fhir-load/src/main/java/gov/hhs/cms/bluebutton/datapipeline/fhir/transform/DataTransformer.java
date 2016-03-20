@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
+import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -51,6 +52,13 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_ICD9_DIAG = "http://hl7.org/fhir/sid/icd-9-cm/diagnosis";
 
 	static final String CODING_SYSTEM_ICD9_PROC = "http://hl7.org/fhir/sid/icd-9-cm/procedure";
+
+	/**
+	 * The United States National Provider Identifier, as available at
+	 * <a href="http://download.cms.gov/nppes/NPI_Files.html">NPI/NPPES File</a>
+	 * .
+	 */
+	static final String CODING_SYSTEM_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
 	static final String CODING_SYSTEM_FHIR_ADJUDICATION = "http://hl7.org/fhir/adjudication";
 
@@ -163,6 +171,15 @@ public final class DataTransformer {
 			if (!isBlank(sourceClaim.getDiagnosisCode8()))
 				eob.addDiagnosis().getDiagnosis().setSystem(CODING_SYSTEM_ICD9_DIAG)
 						.setCode(sourceClaim.getDiagnosisCode8());
+
+			if (sourceClaim.getProviderNpi() != null) {
+				Practitioner providingPhysician = new Practitioner();
+				resources.add(providingPhysician);
+				providingPhysician.setId(IdType.newRandomUuid());
+				providingPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(sourceClaim.getProviderNpi().toString());
+				eob.setProvider(new Reference().setReference(providingPhysician.getId()));
+			}
 
 			for (PartBClaimLineFact sourceClaimLine : sourceClaim.getClaimLines()) {
 				ItemsComponent item = eob.addItem();

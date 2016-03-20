@@ -125,12 +125,14 @@ public final class SampleDataLoaderTest {
 			// Spot check one of the beneficiary's PartAClaimFacts.
 			Assert.assertEquals(1, beneficiary.getPartAClaimFacts().size());
 			PartAClaimFact partAClaim = beneficiary.getPartAClaimFacts().get(0);
+			LOGGER.info("Checking against Part A claim: {}", partAClaim);
 			Assert.assertEquals(542192281063886L, (long) partAClaim.getId());
 			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
 
 			// Spot check one of the beneficiary's PartBClaimFacts.
 			Assert.assertEquals(5, beneficiary.getPartBClaimFacts().size());
 			PartBClaimFact partBClaim = beneficiary.getPartBClaimFacts().get(0);
+			LOGGER.info("Checking against Part B claim: {}", partBClaim);
 			Assert.assertEquals(887213386947664L, (long) partBClaim.getId());
 			Assert.assertSame(beneficiary, partBClaim.getBeneficiary());
 			Assert.assertEquals(partBClaim.getId(), partBClaim.getCarrierControlNumber());
@@ -142,10 +144,13 @@ public final class SampleDataLoaderTest {
 			Assert.assertEquals("", partBClaim.getDiagnosisCode6());
 			Assert.assertEquals("", partBClaim.getDiagnosisCode7());
 			Assert.assertEquals("", partBClaim.getDiagnosisCode8());
+			Assert.assertEquals("", partBClaim.getDiagnosisCode8());
+			Assert.assertEquals(1689746125L, (long) partBClaim.getProviderNpi());
 
 			// Spot check one of the beneficiary's PartBClaimLineFacts.
 			Assert.assertEquals(1, partBClaim.getClaimLines().size());
 			PartBClaimLineFact partBClaimLine = partBClaim.getClaimLines().get(0);
+			LOGGER.info("Checking against Part B claim line: {}", partBClaimLine);
 			Assert.assertEquals(887213386947664L, (long) partBClaim.getId());
 			Assert.assertSame(partBClaim, partBClaimLine.getClaim());
 			Assert.assertEquals(1L, partBClaimLine.getLineNumber());

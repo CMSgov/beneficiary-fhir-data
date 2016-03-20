@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu21.model.Practitioner;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -68,7 +69,7 @@ public final class DataTransformerTest {
 				.setAdmittingDiagnosisCode("foo");
 		beneA.getPartAClaimFacts().add(partAClaimForBeneA);
 		PartBClaimFact partBClaimForBeneA = new PartBClaimFact().setId(0L).setBeneficiary(beneA)
-				.setCarrierControlNumber(0L).setDiagnosisCode1("foo").setDiagnosisCode2("bar");
+				.setCarrierControlNumber(0L).setDiagnosisCode1("foo").setDiagnosisCode2("bar").setProviderNpi(12345L);
 		beneA.getPartBClaimFacts().add(partBClaimForBeneA);
 		PartBClaimLineFact partBClaimLineForBeneA = new PartBClaimLineFact().setClaim(partBClaimForBeneA)
 				.setLineNumber(1).setBeneficiary(beneA).setProcedure(new Procedure().setId(0L).setCode("foo"))
@@ -122,6 +123,18 @@ public final class DataTransformerTest {
 				partBEob.getDiagnosis().get(0).getDiagnosis().getCode());
 		Assert.assertEquals(partBClaimForBeneA.getDiagnosisCode2(),
 				partBEob.getDiagnosis().get(1).getDiagnosis().getCode());
+		Assert.assertNotNull(partBEob.getProvider().getReference());
+		Assert.assertEquals(
+				partBEob.getProvider()
+						.getReference(),
+				bundle.getFhirResources().stream()
+						.filter(r -> r instanceof Practitioner).map(
+								r -> (Practitioner) r)
+						.filter(p -> p.getIdentifier().stream()
+								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
+								.filter(i -> partBClaimForBeneA.getProviderNpi().toString().equals(i.getValue()))
+								.findAny().isPresent())
+						.findAny().get().getId());
 		Assert.assertEquals(1, partBEob.getItem().size());
 
 		ItemsComponent partBEobItem = partBEob.getItem().get(0);
