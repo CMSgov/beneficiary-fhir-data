@@ -10,6 +10,8 @@ import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -23,6 +25,8 @@ import rx.Observable;
  * into a FHIR server.
  */
 public final class FhirLoader {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoader.class);
+
 	private final LoadAppOptions options;
 
 	/**
@@ -51,7 +55,7 @@ public final class FhirLoader {
 		 * needed at all is that there's no reasonably simple way to
 		 * batch/buffer items from plain Java 8 streams.
 		 */
-		List<FhirResult> batchResults = Observable.from(dataToLoad::iterator).buffer(100).map(batch -> process(batch))
+		List<FhirResult> batchResults = Observable.from(dataToLoad::iterator).buffer(10).map(batch -> process(batch))
 				.toList().toBlocking().single();
 
 		return batchResults;
@@ -67,7 +71,10 @@ public final class FhirLoader {
 	private FhirResult process(List<BeneficiaryBundle> batch) {
 		FhirContext ctx = FhirContext.forDstu2_1();
 		// The default timeout is 10s, which was failing for batches of 100.
-		ctx.getRestfulClientFactory().setSocketTimeout(60 * 1000);
+		// A 300s timeout was failing for batches of 100 once Part B claims were
+		// mostly mapped, so batches were cut to 10, which ran at 12s or so,
+		// each.
+		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
 		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
 		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
 		fhirClientLogging.setLogRequestBody(false);
@@ -83,6 +90,7 @@ public final class FhirLoader {
 			}
 		}
 
+		LOGGER.info("Loading bundle with {} beneficiaries and {} resources.", batch.size(), bundle.getEntry().size());
 		Bundle resultBundle = client.transaction().withBundle(bundle).execute();
 		/*
 		 * FIXME this count is inaccurate: need to verify status of each

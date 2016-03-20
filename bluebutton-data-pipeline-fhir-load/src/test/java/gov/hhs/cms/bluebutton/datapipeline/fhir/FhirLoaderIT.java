@@ -19,6 +19,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
@@ -43,6 +45,8 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.SampleDataLoader;
 @ContextConfiguration(classes = { SpringConfigForTests.class })
 @RunWith(Parameterized.class)
 public final class FhirLoaderIT {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoaderIT.class);
+
 	@ClassRule
 	public static final SpringClassRule springClassRule = new SpringClassRule();
 
@@ -88,11 +92,16 @@ public final class FhirLoaderIT {
 			Stream<BeneficiaryBundle> fhirStream = new DataTransformer().transformSourceData(beneficiariesStream);
 
 			// Push the data to FHIR.
-			//URI fhirServer = new URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
+			// URI fhirServer = new
+			// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
 			URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
 			LoadAppOptions options = new LoadAppOptions(fhirServer);
 			FhirLoader loader = new FhirLoader(options);
+			long loadStart = System.currentTimeMillis();
 			List<FhirResult> results = loader.insertFhirRecords(fhirStream);
+			long loadEnd = System.currentTimeMillis();
+			LOGGER.info("Loaded {} resources in {}ms.",
+					results.stream().mapToInt(r -> r.getResourcesPushedCount()).sum(), (loadEnd - loadStart));
 
 			// Verify the results.
 			Assert.assertNotNull(results);
