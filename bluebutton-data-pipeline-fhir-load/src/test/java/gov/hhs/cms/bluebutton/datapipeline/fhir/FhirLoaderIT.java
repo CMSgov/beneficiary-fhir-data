@@ -100,8 +100,10 @@ public final class FhirLoaderIT {
 			long loadStart = System.currentTimeMillis();
 			List<FhirResult> results = loader.insertFhirRecords(fhirStream);
 			long loadEnd = System.currentTimeMillis();
-			LOGGER.info("Loaded {} resources in {}ms.",
-					results.stream().mapToInt(r -> r.getResourcesPushedCount()).sum(), (loadEnd - loadStart));
+			int resourcesCount = results.stream().mapToInt(r -> r.getResourcesPushedCount()).sum();
+			long loadMs = loadEnd - loadStart;
+			long loadMsPerResource = loadMs / resourcesCount;
+			LOGGER.info("Loaded {} resources in {} ms ({} ms/resource).", resourcesCount, loadMs, loadMsPerResource);
 
 			// Verify the results.
 			Assert.assertNotNull(results);
