@@ -20,10 +20,10 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.SampleDataException;
  */
 public final class SampleAddressGenerator {
 	/**
-	 * Used to select a random {@link SampleAddress} entry from XXX. Note that
-	 * the seed is fixed so that the sequence produced is stable. This should
-	 * make the sample data more predictable, which is a good thing for our use
-	 * cases.
+	 * Used to select a random {@link SampleAddress} entry from
+	 * {@link #addresses}. Note that the seed is fixed so that the sequence
+	 * produced is stable. This should make the sample data more predictable,
+	 * which is a good thing for our use cases.
 	 */
 	private final Random rng = new Random(42L);
 	private final List<SampleAddress> addresses;
