@@ -122,7 +122,7 @@ public final class DataTransformer {
 		Patient patient = new Patient();
 		resources.add(patient);
 		patient.setId(IdType.newRandomUuid());
-		patient.addIdentifier().setValue("" + sourceBeneficiary.getId());
+		patient.addIdentifier().setSystem("CCW_BENE_CRNT_VW.BENE_ID").setValue("" + sourceBeneficiary.getId());
 		patient.setBirthDate(Date.valueOf(sourceBeneficiary.getBirthDate()));
 		patient.addName().addFamily(sourceBeneficiary.getSurname()).addGiven(sourceBeneficiary.getGivenName());
 
@@ -289,7 +289,7 @@ public final class DataTransformer {
 			eob.setId(IdType.newRandomUuid());
 			eob.getCoverage().setCoverage(new Reference(partDCoverage.getId()));
 			eob.setPatient(new Reference().setReference(patient.getId()));
-			eob.addIdentifier().setValue("" + sourceEvent.getId());
+			eob.addIdentifier().setSystem("CCW_PDE_FACT.PDE_ID").setValue("" + sourceEvent.getId());
 
 			MedicationOrder prescription = new MedicationOrder();
 			resources.add(prescription);
