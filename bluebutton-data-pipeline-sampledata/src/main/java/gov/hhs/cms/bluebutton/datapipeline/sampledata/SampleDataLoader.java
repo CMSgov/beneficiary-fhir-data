@@ -38,6 +38,7 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddressGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.npi.SampleProviderGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.pharmacies.SamplePharmacyGenerator;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.prescribers.SamplePrescriberGenerator;
 
 /**
  * Loads sample data into the specified database.
@@ -371,7 +372,9 @@ public final class SampleDataLoader {
 	 * @param registry
 	 */
 	private void processPartDClaims(SynpufSample synpufSample, SharedDataRegistry registry) {
+		SamplePrescriberGenerator prescriberGenerator = new SamplePrescriberGenerator();
 		SamplePharmacyGenerator pharmacyGenerator = new SamplePharmacyGenerator();
+
 		Path claimsCsv = synpufSample.getPartDClaims();
 		LOGGER.info("Processing DE-SynPUF file '{}'...", claimsCsv.getFileName());
 		try (Reader in = new FileReader(claimsCsv.toFile());) {
@@ -400,7 +403,7 @@ public final class SampleDataLoader {
 
 				PartDEventFact event = new PartDEventFact();
 				event.setId(eventId);
-				// TODO setPrescriberNpi
+				event.setPrescriberNpi((long) prescriberGenerator.generatePrescriber().getNpi());
 				event.setServiceProviderNpi((long) pharmacyGenerator.generatePharmacy().getNpi());
 				event.setProductNdc(productId);
 				event.setBeneficiary(registry.getBeneficiary(synpufId));
