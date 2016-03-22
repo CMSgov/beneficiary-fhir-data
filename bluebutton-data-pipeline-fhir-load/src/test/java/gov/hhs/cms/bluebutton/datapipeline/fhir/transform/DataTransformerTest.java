@@ -9,8 +9,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu21.exceptions.FHIRException;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
+import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
+import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Practitioner;
 import org.junit.Assert;
@@ -25,6 +28,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 
@@ -78,6 +82,11 @@ public final class DataTransformerTest {
 				.setBeneficiaryPrimaryPayerPaidAmount(45.0).setCoinsuranceAmount(46.0)
 				.setProcessingIndicationCode("foo");
 		partBClaimForBeneA.getClaimLines().add(partBClaimLineForBeneA);
+		PartDEventFact partDEventForBeneA = new PartDEventFact().setId(0L).setBeneficiary(beneA).setPrescriberNpi(1234L)
+				.setServiceProviderNpi(2345L).setProductNdc(3456L).setServiceDate(LocalDate.now())
+				.setQuantityDispensed(12L).setNumberDaysSupply(43L).setPatientPayAmount(42.0)
+				.setTotalPrescriptionCost(142.0);
+		beneA.getPartDEventFacts().add(partDEventForBeneA);
 		CurrentBeneficiary beneB = new CurrentBeneficiary().setId(1).setBirthDate(LocalDate.now());
 		PartAClaimFact partAClaimForBeneB = new PartAClaimFact().setId(1L).setBeneficiary(beneB)
 				.setAdmittingDiagnosisCode("foo");
@@ -147,5 +156,59 @@ public final class DataTransformerTest {
 				partBEobItem.getServicedPeriod().getEnd());
 		// TODO test amounts
 		Assert.assertEquals(0, (int) partBEobItem.getDiagnosisLinkId().get(0).getValue());
+
+		Assert.assertEquals(1, bundle.getExplanationOfBenefitsForPartD().size());
+		ExplanationOfBenefit partDEob = bundle.getExplanationOfBenefitsForPartD().get(0);
+		Assert.assertEquals(patientA.getId(), partDEob.getPatient().getReference());
+		Assert.assertEquals("" + partDEventForBeneA.getId(), partDEob.getIdentifier().get(0).getValue());
+		Assert.assertEquals(
+				partDEob.getProvider()
+						.getReference(),
+				bundle.getFhirResources().stream()
+						.filter(r -> r instanceof Practitioner).map(
+								r -> (Practitioner) r)
+						.filter(p -> p.getIdentifier().stream()
+								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
+								.filter(i -> partDEventForBeneA.getServiceProviderNpi().toString().equals(i.getValue()))
+								.findAny().isPresent())
+						.findAny().get().getId());
+		Assert.assertEquals(Date.valueOf(partDEventForBeneA.getServiceDate()),
+				partDEob.getItem().get(0).getServicedDateType().getValue());
+		Assert.assertEquals(
+				partDEventForBeneA
+						.getPatientPayAmount(),
+				partDEob.getItem().get(0).getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_PATIENT_PAY.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue().doubleValue(),
+				0.0);
+		Assert.assertEquals(
+				partDEventForBeneA
+						.getTotalPrescriptionCost(),
+				partDEob.getItem().get(0).getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_TOTAL_COST.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue().doubleValue(),
+				0.0);
+
+		Assert.assertEquals(1, bundle.getFhirResources().stream().filter(r -> r instanceof MedicationOrder).count());
+		MedicationOrder partDOrder = bundle.getFhirResources().stream().filter(r -> r instanceof MedicationOrder)
+				.map(r -> (MedicationOrder) r).findAny().get();
+		Assert.assertEquals(partDOrder.getId(), partDEob.getPrescription().getReference());
+		Assert.assertEquals(
+				partDOrder.getPrescriber()
+						.getReference(),
+				bundle.getFhirResources().stream()
+						.filter(r -> r instanceof Practitioner).map(
+								r -> (Practitioner) r)
+						.filter(p -> p.getIdentifier().stream()
+								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
+								.filter(i -> partDEventForBeneA.getPrescriberNpi().toString().equals(i.getValue()))
+								.findAny().isPresent())
+						.findAny().get().getId());
+		Assert.assertEquals("" + partDEventForBeneA.getProductNdc(),
+				((CodeableConcept) partDOrder.getMedication()).getCoding().get(0).getCode());
+		Assert.assertEquals(partDEventForBeneA.getQuantityDispensed().longValue(),
+				partDOrder.getDispenseRequest().getQuantity().getValue().longValue());
+		Assert.assertEquals(partDEventForBeneA.getNumberDaysSupply().longValue(),
+				partDOrder.getDispenseRequest().getExpectedSupplyDuration().getValue().longValue());
 	}
 }

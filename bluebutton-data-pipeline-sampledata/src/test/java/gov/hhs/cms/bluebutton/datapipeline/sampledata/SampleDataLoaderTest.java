@@ -28,10 +28,12 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartBClaimLineFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
@@ -91,6 +93,10 @@ public final class SampleDataLoaderTest {
 			long partBFactLineCount = (long) pm.newJDOQLTypedQuery(PartBClaimLineFact.class)
 					.result(false, QPartBClaimLineFact.candidate().count()).executeResultUnique();
 			Assert.assertTrue(partBFactLineCount > partBFactCount);
+
+			long partDFactCount = (long) pm.newJDOQLTypedQuery(PartDEventFact.class)
+					.result(false, QPartDEventFact.candidate().count()).executeResultUnique();
+			Assert.assertTrue(partDFactCount > 0L);
 		}
 	}
 
@@ -171,6 +177,20 @@ public final class SampleDataLoaderTest {
 			Assert.assertEquals(Double.valueOf(0.0), partBClaimLine.getBeneficiaryPrimaryPayerPaidAmount());
 			Assert.assertEquals(Double.valueOf(10.0), partBClaimLine.getCoinsuranceAmount());
 			Assert.assertEquals("A", partBClaimLine.getProcessingIndicationCode());
+
+			// Spot check one of the beneficiary's PartDEventFacts.
+			Assert.assertEquals(188, beneficiary.getPartDEventFacts().size());
+			PartDEventFact partDEvent = beneficiary.getPartDEventFacts().get(0);
+			LOGGER.info("Checking against Part D event: {}", partDEvent);
+			Assert.assertEquals(233024488623927L, (long) partDEvent.getId());
+			Assert.assertEquals(null, partDEvent.getPrescriberNpi());
+			Assert.assertEquals(null, partDEvent.getServiceProviderNpi());
+			Assert.assertEquals(54868407904L, (long) partDEvent.getProductNdc());
+			Assert.assertEquals(2010, partDEvent.getServiceDate().getYear());
+			Assert.assertEquals(30L, (long) partDEvent.getQuantityDispensed());
+			Assert.assertEquals(30L, (long) partDEvent.getNumberDaysSupply());
+			Assert.assertEquals(0.0, (double) partDEvent.getPatientPayAmount(), 0.0);
+			Assert.assertEquals(180.0, (double) partDEvent.getTotalPrescriptionCost(), 0.0);
 		}
 	}
 }

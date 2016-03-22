@@ -57,6 +57,14 @@ public final class SynpufSample {
 	}
 
 	/**
+	 * @return the {@link Path}s to the extracted
+	 *         {@link SynpufFile#PART_D_CLAIMS} file
+	 */
+	public Path getPartDClaims() {
+		return resolve(SynpufFile.PART_D_CLAIMS);
+	}
+
+	/**
 	 * @param file
 	 *            the {@link SynpufFile} to resolve the path of
 	 * @return the {@link Path} for the specified {@link SynpufFile} in this

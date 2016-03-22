@@ -25,6 +25,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSample;
@@ -32,6 +33,7 @@ import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSampleLoader;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForBeneficiarySummary;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartAOutpatient;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartB;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartD;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddressGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.npi.SampleProviderGenerator;
@@ -183,6 +185,7 @@ public final class SampleDataLoader {
 				processPartBClaims(synpufSample, registry, providerGenerator);
 
 				// Process the Part D claims.
+				processPartDClaims(synpufSample, registry);
 
 				// Commit the transaction.
 				tx.commit();
@@ -358,6 +361,58 @@ public final class SampleDataLoader {
 				&& claimLine.getMiscCode() == null && isBlank(claimLine.getNchPaymentAmount())
 				&& isBlank(claimLine.getBeneficiaryPrimaryPayerPaidAmount())
 				&& isBlank(claimLine.getCoinsuranceAmount()) && isBlank(claimLine.getProcessingIndicationCode());
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param synpufSample
+	 * @param registry
+	 */
+	private void processPartDClaims(SynpufSample synpufSample, SharedDataRegistry registry) {
+		Path claimsCsv = synpufSample.getPartDClaims();
+		LOGGER.info("Processing DE-SynPUF file '{}'...", claimsCsv.getFileName());
+		try (Reader in = new FileReader(claimsCsv.toFile());) {
+			CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartD.getAllColumnNames())
+					.withSkipHeaderRecord();
+			Iterable<CSVRecord> records = csvFormat.parse(in);
+			for (CSVRecord record : records) {
+				LOGGER.trace("Processing DE-SynPUF Part D Outpatient record #{}.", record.getRecordNumber());
+
+				String synpufId = record.get(SynpufColumnForPartD.DESYNPUF_ID);
+				String eventIdText = record.get(SynpufColumnForPartD.PDE_ID);
+				long eventId = Long.parseLong(eventIdText);
+				String serviceDateText = record.get(SynpufColumnForPartD.SRVC_DT);
+				LocalDate serviceDate = LocalDate.parse(serviceDateText, SYNPUF_DATE_FORMATTER);
+				String productIdText = record.get(SynpufColumnForPartD.PROD_SRVC_ID);
+				long productId = Long.parseLong(productIdText);
+				String quantityText = record.get(SynpufColumnForPartD.QTY_DSPNSD_NUM);
+				// FIXME some/all values have fractions, e.g. "30.000"
+				long quantity = (long) Double.parseDouble(quantityText);
+				String daysSupplyText = record.get(SynpufColumnForPartD.DAYS_SUPLY_NUM);
+				long daysSupply = Long.parseLong(daysSupplyText);
+				String patientPaymentText = record.get(SynpufColumnForPartD.PTNT_PAY_AMT);
+				double patientPayment = Double.parseDouble(patientPaymentText);
+				String prescriptionCostText = record.get(SynpufColumnForPartD.TOT_RX_CST_AMT);
+				double prescriptionCost = Double.parseDouble(prescriptionCostText);
+
+				PartDEventFact event = new PartDEventFact();
+				event.setId(eventId);
+				// TODO setPrescriberNpi, setServiceProviderNpi
+				event.setProductNdc(productId);
+				event.setBeneficiary(registry.getBeneficiary(synpufId));
+				event.setServiceDate(serviceDate);
+				event.setQuantityDispensed(quantity);
+				event.setNumberDaysSupply(daysSupply);
+				event.setPatientPayAmount(patientPayment);
+				event.setTotalPrescriptionCost(prescriptionCost);
+
+				pm.makePersistent(event);
+			}
+		} catch (IOException e) {
+			throw new SampleDataException(e);
+		}
+		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
 	}
 
 	/**

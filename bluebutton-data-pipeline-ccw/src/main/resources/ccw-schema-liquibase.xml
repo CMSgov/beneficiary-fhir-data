@@ -209,6 +209,53 @@
 			</column>
 		</createTable>
 
+		<createTable tableName="CCW_PDE_FACT">
+			<column name="PDE_ID" type="NUMERIC(22)">
+				<!-- This is column #1 in the actual CCW schema. -->
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="PDE_PRSCRBR_PRFL_ID" type="NUMERIC(22)">
+				<!-- This is column #3 in the actual CCW schema. -->
+				<!-- FIXME: In the actual CCW, this is probably a FK to a 'PRSCRBR_PRFL' table. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="PDE_SRVC_PRVDR_PRFL_ID" type="NUMERIC(22)">
+				<!-- This is column #4 in the actual CCW schema. -->
+				<!-- FIXME: In the actual CCW, this is probably a FK to a 'SRVC_PRVDR_PRFL' table. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="PDE_PROD_PRFL_ID" type="NUMERIC(22)">
+				<!-- This is column #6 in the actual CCW schema. -->
+				<!-- FIXME: In the actual CCW, this is probably a FK to a 'PROD_PRFL' table. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="BENE_ID" type="NUMERIC(22)">
+				<!-- This is column #7 in the actual CCW schema. -->
+				<constraints nullable="true" foreignKeyName="PdeFactToBeneCrnt"
+					referencedTableName="CCW_BENE_CRNT_VW" referencedColumnNames="BENE_ID" />
+			</column>
+			<column name="SRVC_DT" type="TIMESTAMP">
+				<!-- This is column #13 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="QTY_DSPNSD_NUM" type="NUMERIC(22)">
+				<!-- This is column #24 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="DAYS_SUPLY_NUM" type="NUMERIC(22)">
+				<!-- This is column #25 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="PTNT_PAY_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #31 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="TOT_RX_CST_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #37 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+
 	</changeSet>
 
 </databaseChangeLog>

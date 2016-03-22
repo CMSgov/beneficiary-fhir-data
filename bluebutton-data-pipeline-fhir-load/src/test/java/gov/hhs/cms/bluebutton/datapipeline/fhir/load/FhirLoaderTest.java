@@ -71,6 +71,7 @@ public final class FhirLoaderTest {
 		beneB.getPartAClaimFacts().add(factB);
 		Stream<BeneficiaryBundle> fhirStream = new DataTransformer()
 				.transformSourceData(Arrays.asList(beneA, beneB).stream());
+		// TODO need to expand the test data here
 
 		// Push the data to FHIR.
 		URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
@@ -81,7 +82,7 @@ public final class FhirLoaderTest {
 		// Verify the results.
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(12, results.get(0).getResourcesPushedCount());
+		Assert.assertEquals(14, results.get(0).getResourcesPushedCount());
 
 		// TODO verify results by actually querying the server.
 	}

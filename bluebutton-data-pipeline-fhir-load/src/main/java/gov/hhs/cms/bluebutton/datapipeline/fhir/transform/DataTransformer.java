@@ -9,23 +9,34 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu21.model.Address;
 import org.hl7.fhir.dstu21.model.Claim;
+import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.Coverage;
+import org.hl7.fhir.dstu21.model.DateType;
+import org.hl7.fhir.dstu21.model.Duration;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.MedicationOrder;
+import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
+import org.hl7.fhir.dstu21.model.Money;
 import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
 import org.hl7.fhir.dstu21.model.Practitioner;
+import org.hl7.fhir.dstu21.model.Quantity;
 import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.SimpleQuantity;
+import org.hl7.fhir.dstu21.model.Type;
+import org.hl7.fhir.dstu21.model.valuesets.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 
 /**
  * Handles the translation from source/CCW {@link CurrentBeneficiary} data into
@@ -41,6 +52,11 @@ public final class DataTransformer {
 	 * The {@link Coverage#getPlan()} value for Part B.
 	 */
 	static final String COVERAGE_PLAN_PART_B = "Part B";
+
+	/**
+	 * The {@link Coverage#getPlan()} value for Part D.
+	 */
+	static final String COVERAGE_PLAN_PART_D = "Part D";
 
 	/**
 	 * A CMS-controlled standard. More info here: <a href=
@@ -60,7 +76,23 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
-	static final String CODING_SYSTEM_FHIR_ADJUDICATION = "http://hl7.org/fhir/adjudication";
+	static final String CODING_SYSTEM_ADJUDICATION_FHIR = "http://hl7.org/fhir/adjudication";
+
+	/**
+	 * The CMS-custom {@link Coding#getSystem()} value for Medicare
+	 * {@link Adjudication}s.
+	 */
+	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
+
+	/**
+	 * One of the {@link #CODING_SYSTEM_ADJUDICATION_CMS} codes.
+	 */
+	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
+
+	/**
+	 * One of the {@link #CODING_SYSTEM_ADJUDICATION_CMS} codes.
+	 */
+	static final String CODED_ADJUDICATION_TOTAL_COST = "Total Prescription Cost";
 
 	static final String CODING_SYSTEM_MONEY = "urn:std:iso:4217";
 
@@ -197,7 +229,7 @@ public final class DataTransformer {
 				if (sourceClaimLine.getAllowedAmount() != null)
 					// TODO: is this the correct code?
 					item.addAdjudication()
-							.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_ADJUDICATION).setCode("eligible"))
+							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_FHIR).setCode("eligible"))
 							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 							.setValue(sourceClaimLine.getAllowedAmount());
 				if (sourceClaimLine.getSubmittedAmount() != null)
@@ -220,7 +252,7 @@ public final class DataTransformer {
 				 */
 				if (sourceClaimLine.getNchPaymentAmount() != null)
 					item.addAdjudication()
-							.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_ADJUDICATION).setCode("benefit"))
+							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_FHIR).setCode("benefit"))
 							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 							.setValue(sourceClaimLine.getNchPaymentAmount());
 
@@ -243,6 +275,78 @@ public final class DataTransformer {
 				 * "The code on a noninstitutional claim indicating to whom payment was made or if the claim was denied."
 				 */
 			}
+		}
+
+		Coverage partDCoverage = new Coverage();
+		resources.add(partDCoverage);
+		partDCoverage.setId(IdType.newRandomUuid());
+		partDCoverage.setIssuer(new Reference(cms.getId()));
+		partDCoverage.setPlan(COVERAGE_PLAN_PART_D);
+
+		for (PartDEventFact sourceEvent : sourceBeneficiary.getPartDEventFacts()) {
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			resources.add(eob);
+			eob.setId(IdType.newRandomUuid());
+			eob.getCoverage().setCoverage(new Reference(partDCoverage.getId()));
+			eob.setPatient(new Reference().setReference(patient.getId()));
+			eob.addIdentifier().setValue("" + sourceEvent.getId());
+
+			MedicationOrder prescription = new MedicationOrder();
+			resources.add(prescription);
+			prescription.setId(IdType.newRandomUuid());
+			eob.setPrescription(new Reference().setReference(prescription.getId()));
+
+			if (sourceEvent.getPrescriberNpi() != null) {
+				Practitioner prescriber = new Practitioner();
+				resources.add(prescriber);
+				prescriber.setId(IdType.newRandomUuid());
+				prescriber.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(sourceEvent.getPrescriberNpi().toString());
+
+				prescription.setPrescriber(new Reference().setReference(prescriber.getId()));
+			}
+
+			if (sourceEvent.getServiceProviderNpi() != null) {
+				Practitioner servicingProvider = new Practitioner();
+				resources.add(servicingProvider);
+				servicingProvider.setId(IdType.newRandomUuid());
+				servicingProvider.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(sourceEvent.getServiceProviderNpi().toString());
+				eob.setProvider(new Reference().setReference(servicingProvider.getId()));
+			}
+
+			if (sourceEvent.getProductNdc() != null) {
+				// TODO I think the system here is incorrect
+				CodeableConcept medicationCoding = new CodeableConcept();
+				medicationCoding.addCoding().setSystem("https://www.accessdata.fda.gov/scripts/cder/ndc/")
+						.setCode("" + sourceEvent.getProductNdc());
+				prescription.setMedication(medicationCoding);
+			}
+
+			ItemsComponent eventItem = eob.addItem();
+			eventItem.setSequence(1);
+			eventItem.setType(new Coding().setSystem("http://hl7.org/fhir/v3/ActCode").setCode("RXDINV"));
+			eventItem.setServiced(new DateType().setValue(Date.valueOf(sourceEvent.getServiceDate())));
+
+			SimpleQuantity quantity = new SimpleQuantity();
+			quantity.setValue(sourceEvent.getQuantityDispensed());
+			Duration numberDaysSupply = new Duration();
+			numberDaysSupply.setUnit("days");
+			numberDaysSupply.setValue(sourceEvent.getNumberDaysSupply());
+			prescription.setDispenseRequest(new MedicationOrderDispenseRequestComponent().setQuantity(quantity)
+					.setExpectedSupplyDuration(numberDaysSupply));
+
+			Money patientPayment = (Money) new Money().setSystem(CODING_SYSTEM_MONEY_US)
+					.setValue(sourceEvent.getPatientPayAmount());
+			eventItem.addAdjudication().setCategory(
+					new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PATIENT_PAY))
+					.setAmount(patientPayment);
+
+			Money totalPrescriptionCost = (Money) new Money().setSystem(CODING_SYSTEM_MONEY_US)
+					.setValue(sourceEvent.getTotalPrescriptionCost());
+			eventItem.addAdjudication().setCategory(
+					new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_TOTAL_COST))
+					.setAmount(totalPrescriptionCost);
 		}
 
 		return new BeneficiaryBundle(resources);
