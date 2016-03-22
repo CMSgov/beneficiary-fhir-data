@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu21.exceptions.FHIRException;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
-import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
