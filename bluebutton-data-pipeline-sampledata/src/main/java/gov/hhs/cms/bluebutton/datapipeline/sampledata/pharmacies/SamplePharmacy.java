@@ -1,7 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.sampledata.pharmacies;
 
 /**
- * Models a sample/generated address.
+ * Models a sample/generated pharmacy.
  */
 public final class SamplePharmacy {
 	private final int npi;
