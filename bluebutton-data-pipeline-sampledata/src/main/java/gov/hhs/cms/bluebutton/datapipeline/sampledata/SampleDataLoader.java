@@ -401,7 +401,7 @@ public final class SampleDataLoader {
 				PartDEventFact event = new PartDEventFact();
 				event.setId(eventId);
 				// TODO setPrescriberNpi
-				event.setServiceProviderNpi((long) pharmacyGenerator.generateProvider().getNpi());
+				event.setServiceProviderNpi((long) pharmacyGenerator.generatePharmacy().getNpi());
 				event.setProductNdc(productId);
 				event.setBeneficiary(registry.getBeneficiary(synpufId));
 				event.setServiceDate(serviceDate);

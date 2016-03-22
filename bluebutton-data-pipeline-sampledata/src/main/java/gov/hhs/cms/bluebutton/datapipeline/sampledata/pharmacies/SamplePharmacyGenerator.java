@@ -71,7 +71,7 @@ public final class SamplePharmacyGenerator {
 	/**
 	 * @return a generated {@link SamplePharmacy} instance
 	 */
-	public SamplePharmacy generateProvider() {
+	public SamplePharmacy generatePharmacy() {
 		return pharmacies.get(rng.nextInt(pharmacies.size()));
 	}
 }
