@@ -184,7 +184,7 @@ public final class SampleDataLoaderTest {
 			LOGGER.info("Checking against Part D event: {}", partDEvent);
 			Assert.assertEquals(233024488623927L, (long) partDEvent.getId());
 			Assert.assertEquals(null, partDEvent.getPrescriberNpi());
-			Assert.assertEquals(null, partDEvent.getServiceProviderNpi());
+			Assert.assertEquals(1700826658L, (long) partDEvent.getServiceProviderNpi());
 			Assert.assertEquals(54868407904L, (long) partDEvent.getProductNdc());
 			Assert.assertEquals(2010, partDEvent.getServiceDate().getYear());
 			Assert.assertEquals(30L, (long) partDEvent.getQuantityDispensed());
