@@ -133,7 +133,7 @@ public final class SampleDataLoader {
 							bene.setBirthDate(birthDate);
 							SampleName name = nameGenerator.generateName();
 							bene.setGivenName(name.getFirstName());
-							bene.setSurname(name.getLastName());
+							bene.setSurname(synpufId);
 							SampleAddress address = addressGenerator.generateAddress();
 							bene.setContactAddress(address.getAddressExceptZip());
 							bene.setContactAddressZip(address.getZip());

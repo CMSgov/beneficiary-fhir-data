@@ -123,7 +123,7 @@ public final class SampleDataLoaderTest {
 			LOGGER.info("Checking against beneficiary: {}", beneficiary);
 			Assert.assertEquals(1923, beneficiary.getBirthDate().getYear());
 			Assert.assertTrue(beneficiary.getGivenName() != null && beneficiary.getGivenName().length() > 0);
-			Assert.assertTrue(beneficiary.getSurname() != null && beneficiary.getSurname().length() > 0);
+			Assert.assertEquals("00013D2EFD8E45D1", beneficiary.getSurname());
 			Assert.assertTrue(beneficiary.getContactAddress() != null && beneficiary.getContactAddress().length() > 0);
 			Assert.assertTrue(
 					beneficiary.getContactAddressZip() != null && beneficiary.getContactAddressZip().length() > 0);
