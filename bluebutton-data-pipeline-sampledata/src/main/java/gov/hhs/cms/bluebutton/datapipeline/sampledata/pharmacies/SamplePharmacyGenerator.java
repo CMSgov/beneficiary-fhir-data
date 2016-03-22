@@ -39,7 +39,7 @@ public final class SamplePharmacyGenerator {
 	 * 
 	 */
 	public SamplePharmacyGenerator() throws SampleDataException {
-		List<SamplePharmacy> pharmacies = new ArrayList<>(10000);
+		List<SamplePharmacy> pharmacies = new ArrayList<>(120000);
 		InputStream csvStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream("pharmacy-names.csv");
 		CSVFormat csvFormat = CSVFormat.EXCEL.withSkipHeaderRecord();
