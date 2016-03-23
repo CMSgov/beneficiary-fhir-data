@@ -179,7 +179,8 @@ public final class DataTransformer {
 			eob.setId(IdType.newRandomUuid());
 			eob.getCoverage().setCoverage(new Reference(partBCoverage.getId()));
 			eob.setPatient(new Reference().setReference(patient.getId()));
-			eob.addIdentifier().setValue("" + sourceClaim.getCarrierControlNumber());
+			eob.addIdentifier().setSystem("CCW_PTB_FACT.CARR_CLM_CNTL_NUM")
+					.setValue("" + sourceClaim.getCarrierControlNumber());
 
 			if (!isBlank(sourceClaim.getDiagnosisCode1()))
 				eob.addDiagnosis().getDiagnosis().setSystem(CODING_SYSTEM_ICD9_DIAG)
