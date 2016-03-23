@@ -167,10 +167,20 @@
 				<!-- This is column #25 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
-			<column name="LINE_SBMTD_CHRG_AMT" type="NUMERIC(22,2)">
-				<!-- This is column #34 in the actual CCW schema. -->
-				<!-- TODO: Which of the DE-SynPUF amount columns does this represent: 
-					LINE_NCH_PMT_AMT, LINE_BENE_PTB_DDCTBL_AMT, LINE_BENE_PRMRY_PYR_PD_AMT, LINE_COINSRNC_AMT? -->
+			<column name="LINE_BENE_PTB_DDCTBL_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #27 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_BENE_PRMRY_PYR_PD_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #28 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_COINSRNC_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #29 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="LINE_NCH_PMT_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #31 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
 			<column name="LINE_DGNS_CD" type="varchar(7)">
@@ -182,24 +192,6 @@
 				<!-- FIXME: I had to adjust this column data type to match the FK target. -->
 				<constraints nullable="true" foreignKeyName="PtbLineFactToClmLineMiscCd"
 					referencedTableName="CLM_LINE_MISC_CD" referencedColumnNames="CLM_LINE_MISC_CD_ID" />
-			</column>
-			<column name="LINE_NCH_PMT_AMT" type="NUMERIC(22,2)">
-				<!-- This is column #?? in the actual CCW schema. -->
-				<!-- TODO: This column has not yet been mapped correctly from the DE-SynPUF 
-					schema to the CCW schema. -->
-				<constraints nullable="true" />
-			</column>
-			<column name="LINE_BENE_PRMRY_PYR_PD_AMT" type="NUMERIC(22,2)">
-				<!-- This is column #?? in the actual CCW schema. -->
-				<!-- TODO: This column has not yet been mapped correctly from the DE-SynPUF 
-					schema to the CCW schema. -->
-				<constraints nullable="true" />
-			</column>
-			<column name="LINE_COINSRNC_AMT" type="NUMERIC(22,2)">
-				<!-- This is column #?? in the actual CCW schema. -->
-				<!-- TODO: This column has not yet been mapped correctly from the DE-SynPUF 
-					schema to the CCW schema. -->
-				<constraints nullable="true" />
 			</column>
 			<column name="LINE_PRCSG_IND_CD" type="VARCHAR(2)">
 				<!-- This is column #?? in the actual CCW schema. -->

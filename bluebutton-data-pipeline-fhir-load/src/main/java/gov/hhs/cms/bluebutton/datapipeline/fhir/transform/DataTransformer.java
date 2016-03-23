@@ -25,10 +25,8 @@ import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
 import org.hl7.fhir.dstu21.model.Practitioner;
-import org.hl7.fhir.dstu21.model.Quantity;
 import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.dstu21.model.SimpleQuantity;
-import org.hl7.fhir.dstu21.model.Type;
 import org.hl7.fhir.dstu21.model.valuesets.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -84,14 +82,18 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
 
-	/**
-	 * One of the {@link #CODING_SYSTEM_ADJUDICATION_CMS} codes.
-	 */
+	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Line Allowed Charge Amount";
+
+	static final String CODED_ADJUDICATION_DEDUCTIBLE = "Line Beneficiary Part B Deductible Amount";
+
+	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Line Beneficiary Primary Payer Paid Amount";
+
+	static final String CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT = "Line Coinsurance Amount";
+
+	static final String CODED_ADJUDICATION_PAYMENT = "Line NCH Payment Amount";
+
 	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
 
-	/**
-	 * One of the {@link #CODING_SYSTEM_ADJUDICATION_CMS} codes.
-	 */
 	static final String CODED_ADJUDICATION_TOTAL_COST = "Total Prescription Cost";
 
 	static final String CODING_SYSTEM_MONEY = "urn:std:iso:4217";
@@ -227,15 +229,35 @@ public final class DataTransformer {
 				}
 
 				if (sourceClaimLine.getAllowedAmount() != null)
-					// TODO: is this the correct code?
 					item.addAdjudication()
-							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_FHIR).setCode("eligible"))
+							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+									.setCode(CODED_ADJUDICATION_ALLOWED_CHARGE))
 							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 							.setValue(sourceClaimLine.getAllowedAmount());
-				if (sourceClaimLine.getSubmittedAmount() != null)
-					// TODO: is this the correct field?
-					item.getNet().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-							.setValue(sourceClaimLine.getSubmittedAmount());
+				if (sourceClaimLine.getDeductibleAmount() != null)
+					item.addAdjudication()
+							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+									.setCode(CODED_ADJUDICATION_DEDUCTIBLE))
+							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+							.setValue(sourceClaimLine.getDeductibleAmount());
+				if (sourceClaimLine.getBeneficiaryPrimaryPayerPaidAmount() != null)
+					item.addAdjudication()
+							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+									.setCode(CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID))
+							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+							.setValue(sourceClaimLine.getBeneficiaryPrimaryPayerPaidAmount());
+				if (sourceClaimLine.getCoinsuranceAmount() != null)
+					item.addAdjudication()
+							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+									.setCode(CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
+							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+							.setValue(sourceClaimLine.getCoinsuranceAmount());
+				if (sourceClaimLine.getNchPaymentAmount() != null)
+					item.addAdjudication()
+							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+									.setCode(CODED_ADJUDICATION_PAYMENT))
+							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+							.setValue(sourceClaimLine.getNchPaymentAmount());
 
 				if (!isBlank(sourceClaimLine.getLineDiagnosisCode())) {
 					addDiagnosisCode(eob.getDiagnosis(), sourceClaimLine.getLineDiagnosisCode());
@@ -245,30 +267,6 @@ public final class DataTransformer {
 				}
 
 				// TODO map source MiscCd
-
-				/*
-				 * TODO: is this where to stick LINE_NCH_PMT_AMT?
-				 * "Amount of payment made from the trust funds (after deductible and coinsurance amounts have been paid) for the line item service on the non- institutional claim."
-				 */
-				if (sourceClaimLine.getNchPaymentAmount() != null)
-					item.addAdjudication()
-							.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_FHIR).setCode("benefit"))
-							.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-							.setValue(sourceClaimLine.getNchPaymentAmount());
-
-				/*
-				 * TODO: where to stick LINE_BENE_PRMRY_PYR_PD_AMT? "The amount
-				 * of a payment made on behalf of a Medicare beneficiary by a
-				 * primary payer other than Medicare, that the provider is
-				 * applying to covered Medicare charges for to the line ITEM
-				 * SERVICE ON THE NONINSTITUTIONAL."
-				 */
-
-				/*
-				 * TODO: where to stick LINE_COINSRNC_AMT? "... the beneficiary
-				 * coinsurance liability amount for this line item service on
-				 * the noninstitutional claim."
-				 */
 
 				/*
 				 * TODO: where to stick LINE_PRCSG_IND_CD?

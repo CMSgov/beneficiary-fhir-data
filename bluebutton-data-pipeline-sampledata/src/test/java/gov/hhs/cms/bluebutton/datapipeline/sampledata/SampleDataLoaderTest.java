@@ -165,17 +165,16 @@ public final class SampleDataLoaderTest {
 			Assert.assertEquals("01996", partBClaimLine.getProcedure().getCode());
 			Assert.assertEquals(2009, partBClaimLine.getDateFrom().getYear());
 			Assert.assertEquals(2009, partBClaimLine.getDateThrough().getYear());
+			Assert.assertEquals(Double.valueOf(50.0), partBClaimLine.getNchPaymentAmount());
+			Assert.assertEquals(Double.valueOf(0.0), partBClaimLine.getDeductibleAmount());
+			Assert.assertEquals(Double.valueOf(0.0), partBClaimLine.getBeneficiaryPrimaryPayerPaidAmount());
+			Assert.assertEquals(Double.valueOf(10.0), partBClaimLine.getCoinsuranceAmount());
 			Assert.assertEquals(Double.valueOf(60.0), partBClaimLine.getAllowedAmount());
-			// TODO
-			// Assert.assertEquals(null, partBClaimLine.getSubmittedAmount());
 			Assert.assertEquals("33818", partBClaimLine.getLineDiagnosisCode());
 			// TODO
 			// Assert.assertEquals("???", partBClaimLine.getMiscCode().getId());
 			// Assert.assertEquals("???",
 			// partBClaimLine.getMiscCode().getCode());
-			Assert.assertEquals(Double.valueOf(50.0), partBClaimLine.getNchPaymentAmount());
-			Assert.assertEquals(Double.valueOf(0.0), partBClaimLine.getBeneficiaryPrimaryPayerPaidAmount());
-			Assert.assertEquals(Double.valueOf(10.0), partBClaimLine.getCoinsuranceAmount());
 			Assert.assertEquals("A", partBClaimLine.getProcessingIndicationCode());
 
 			// Spot check one of the beneficiary's PartDEventFacts.

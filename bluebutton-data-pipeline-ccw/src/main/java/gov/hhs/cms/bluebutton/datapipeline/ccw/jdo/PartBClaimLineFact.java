@@ -46,20 +46,8 @@ public class PartBClaimLineFact {
 	private Double allowedAmount;
 
 	@Persistent
-	@Column(name = "LINE_SBMTD_CHRG_AMT")
-	private Double submittedAmount;
-
-	@Persistent
-	@Column(name = "LINE_DGNS_CD")
-	private String lineDiagnosisCode;
-
-	@Persistent
-	@Column(name = "CLM_LINE_MISC_CD_ID")
-	private ClaimLineMiscCode miscCode;
-
-	@Persistent
-	@Column(name = "LINE_NCH_PMT_AMT")
-	private Double nchPaymentAmount;
+	@Column(name = "LINE_BENE_PTB_DDCTBL_AMT")
+	private Double deductibleAmount;
 
 	@Persistent
 	@Column(name = "LINE_BENE_PRMRY_PYR_PD_AMT")
@@ -68,6 +56,18 @@ public class PartBClaimLineFact {
 	@Persistent
 	@Column(name = "LINE_COINSRNC_AMT")
 	private Double coinsuranceAmount;
+
+	@Persistent
+	@Column(name = "LINE_NCH_PMT_AMT")
+	private Double nchPaymentAmount;
+
+	@Persistent
+	@Column(name = "LINE_DGNS_CD")
+	private String lineDiagnosisCode;
+
+	@Persistent
+	@Column(name = "CLM_LINE_MISC_CD_ID")
+	private ClaimLineMiscCode miscCode;
 
 	@Persistent
 	@Column(name = "LINE_PRCSG_IND_CD")
@@ -203,68 +203,17 @@ public class PartBClaimLineFact {
 	/**
 	 * @return TODO
 	 */
-	public Double getSubmittedAmount() {
-		return submittedAmount;
+	public Double getDeductibleAmount() {
+		return deductibleAmount;
 	}
 
 	/**
-	 * @param submittedAmount
-	 *            the new value for {@link #getSubmittedAmount()}
+	 * @param deductibleAmount
+	 *            the new value for {@link #getDeductibleAmount()}
 	 * @return this instance (for call-chaining purposes)
 	 */
-	public PartBClaimLineFact setSubmittedAmount(Double submittedAmount) {
-		this.submittedAmount = submittedAmount;
-		return this;
-	}
-
-	/**
-	 * @return TODO
-	 */
-	public String getLineDiagnosisCode() {
-		return lineDiagnosisCode;
-	}
-
-	/**
-	 * @param lineDiagnosisCode
-	 *            the new value for {@link #getLineDiagnosisCode()}
-	 * @return this instance (for call-chaining purposes)
-	 */
-	public PartBClaimLineFact setLineDiagnosisCode(String lineDiagnosisCode) {
-		this.lineDiagnosisCode = lineDiagnosisCode;
-		return this;
-	}
-
-	/**
-	 * @return TODO
-	 */
-	public ClaimLineMiscCode getMiscCode() {
-		return miscCode;
-	}
-
-	/**
-	 * @param miscCode
-	 *            the new value for {@link #getMiscCode()}
-	 * @return this instance (for call-chaining purposes)
-	 */
-	public PartBClaimLineFact setMiscCode(ClaimLineMiscCode miscCode) {
-		this.miscCode = miscCode;
-		return this;
-	}
-
-	/**
-	 * @return TODO
-	 */
-	public Double getNchPaymentAmount() {
-		return nchPaymentAmount;
-	}
-
-	/**
-	 * @param nchPaymentAmount
-	 *            the new value for {@link #getNchPaymentAmount()}
-	 * @return this instance (for call-chaining purposes)
-	 */
-	public PartBClaimLineFact setNchPaymentAmount(Double nchPaymentAmount) {
-		this.nchPaymentAmount = nchPaymentAmount;
+	public PartBClaimLineFact setDeductibleAmount(Double deductibleAmount) {
+		this.deductibleAmount = deductibleAmount;
 		return this;
 	}
 
@@ -306,6 +255,57 @@ public class PartBClaimLineFact {
 	/**
 	 * @return TODO
 	 */
+	public Double getNchPaymentAmount() {
+		return nchPaymentAmount;
+	}
+
+	/**
+	 * @param nchPaymentAmount
+	 *            the new value for {@link #getNchPaymentAmount()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartBClaimLineFact setNchPaymentAmount(Double nchPaymentAmount) {
+		this.nchPaymentAmount = nchPaymentAmount;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
+	public String getLineDiagnosisCode() {
+		return lineDiagnosisCode;
+	}
+
+	/**
+	 * @param lineDiagnosisCode
+	 *            the new value for {@link #getLineDiagnosisCode()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartBClaimLineFact setLineDiagnosisCode(String lineDiagnosisCode) {
+		this.lineDiagnosisCode = lineDiagnosisCode;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
+	public ClaimLineMiscCode getMiscCode() {
+		return miscCode;
+	}
+
+	/**
+	 * @param miscCode
+	 *            the new value for {@link #getMiscCode()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartBClaimLineFact setMiscCode(ClaimLineMiscCode miscCode) {
+		this.miscCode = miscCode;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
 	public String getProcessingIndicationCode() {
 		return processingIndicationCode;
 	}
@@ -340,18 +340,18 @@ public class PartBClaimLineFact {
 		builder.append(dateThrough);
 		builder.append(", allowedAmount=");
 		builder.append(allowedAmount);
-		builder.append(", submittedAmount=");
-		builder.append(submittedAmount);
-		builder.append(", lineDiagnosisCode=");
-		builder.append(lineDiagnosisCode);
-		builder.append(", miscCode=");
-		builder.append(miscCode);
-		builder.append(", nchPaymentAmount=");
-		builder.append(nchPaymentAmount);
+		builder.append(", deductibleAmount=");
+		builder.append(deductibleAmount);
 		builder.append(", beneficiaryPrimaryPayerPaidAmount=");
 		builder.append(beneficiaryPrimaryPayerPaidAmount);
 		builder.append(", coinsuranceAmount=");
 		builder.append(coinsuranceAmount);
+		builder.append(", nchPaymentAmount=");
+		builder.append(nchPaymentAmount);
+		builder.append(", lineDiagnosisCode=");
+		builder.append(lineDiagnosisCode);
+		builder.append(", miscCode=");
+		builder.append(miscCode);
 		builder.append(", processingIndicationCode=");
 		builder.append(processingIndicationCode);
 		builder.append("]");

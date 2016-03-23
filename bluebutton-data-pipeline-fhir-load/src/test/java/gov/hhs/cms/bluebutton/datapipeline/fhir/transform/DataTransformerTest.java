@@ -77,9 +77,8 @@ public final class DataTransformerTest {
 		PartBClaimLineFact partBClaimLineForBeneA = new PartBClaimLineFact().setClaim(partBClaimForBeneA)
 				.setLineNumber(1).setBeneficiary(beneA).setProcedure(new Procedure().setId(0L).setCode("foo"))
 				.setDateFrom(LocalDate.now()).setDateThrough(LocalDate.now()).setAllowedAmount(42.0)
-				.setSubmittedAmount(43.0).setLineDiagnosisCode("bar").setNchPaymentAmount(44.0)
-				.setBeneficiaryPrimaryPayerPaidAmount(45.0).setCoinsuranceAmount(46.0)
-				.setProcessingIndicationCode("foo");
+				.setDeductibleAmount(43.0).setBeneficiaryPrimaryPayerPaidAmount(44.0).setCoinsuranceAmount(45.0)
+				.setNchPaymentAmount(46.0).setLineDiagnosisCode("bar").setProcessingIndicationCode("foo");
 		partBClaimForBeneA.getClaimLines().add(partBClaimLineForBeneA);
 		PartDEventFact partDEventForBeneA = new PartDEventFact().setId(0L).setBeneficiary(beneA).setPrescriberNpi(1234L)
 				.setServiceProviderNpi(2345L).setProductNdc(3456L).setServiceDate(LocalDate.now())
@@ -153,7 +152,38 @@ public final class DataTransformerTest {
 				partBEobItem.getServicedPeriod().getStart());
 		Assert.assertEquals(Date.valueOf(partBClaimLineForBeneA.getDateThrough()),
 				partBEobItem.getServicedPeriod().getEnd());
-		// TODO test amounts
+		Assert.assertEquals(partBClaimLineForBeneA.getAllowedAmount(),
+				partBEobItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE
+								.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue().doubleValue(),
+				0.0);
+		Assert.assertEquals(
+				partBClaimLineForBeneA
+						.getDeductibleAmount(),
+				partBEobItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_DEDUCTIBLE.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue().doubleValue(),
+				0.0);
+		Assert.assertEquals(partBClaimLineForBeneA.getBeneficiaryPrimaryPayerPaidAmount(),
+				partBEobItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID
+								.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue().doubleValue(),
+				0.0);
+		Assert.assertEquals(partBClaimLineForBeneA.getCoinsuranceAmount(),
+				partBEobItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT
+								.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue().doubleValue(),
+				0.0);
+		Assert.assertEquals(
+				partBClaimLineForBeneA
+						.getNchPaymentAmount(),
+				partBEobItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_PAYMENT.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue().doubleValue(),
+				0.0);
 		Assert.assertEquals(0, (int) partBEobItem.getDiagnosisLinkId().get(0).getValue());
 
 		Assert.assertEquals(1, bundle.getExplanationOfBenefitsForPartD().size());

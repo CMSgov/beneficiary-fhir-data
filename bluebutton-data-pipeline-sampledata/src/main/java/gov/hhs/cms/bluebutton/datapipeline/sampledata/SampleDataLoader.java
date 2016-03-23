@@ -300,7 +300,7 @@ public final class SampleDataLoader {
 						String deductibleAmountText = record
 								.get(SynpufColumnForPartB.getLineBenePtbDdctblAmt(lineNumber));
 						Double deductibleAmount = Double.parseDouble(deductibleAmountText);
-						// TODO where to stick LINE_BENE_PTB_DDCTBL_AMT_#?
+						claimLine.setDeductibleAmount(deductibleAmount);
 
 						String primaryPayerPaidAmountText = record
 								.get(SynpufColumnForPartB.getLineBenePrmryPyrPdAmt(lineNumber));
@@ -359,7 +359,7 @@ public final class SampleDataLoader {
 	 */
 	private static boolean isMostlyBlank(PartBClaimLineFact claimLine) {
 		return claimLine.getProcedure() == null && isBlank(claimLine.getAllowedAmount())
-				&& isBlank(claimLine.getSubmittedAmount()) && isBlank(claimLine.getLineDiagnosisCode())
+				&& isBlank(claimLine.getLineDiagnosisCode())
 				&& claimLine.getMiscCode() == null && isBlank(claimLine.getNchPaymentAmount())
 				&& isBlank(claimLine.getBeneficiaryPrimaryPayerPaidAmount())
 				&& isBlank(claimLine.getCoinsuranceAmount()) && isBlank(claimLine.getProcessingIndicationCode());
