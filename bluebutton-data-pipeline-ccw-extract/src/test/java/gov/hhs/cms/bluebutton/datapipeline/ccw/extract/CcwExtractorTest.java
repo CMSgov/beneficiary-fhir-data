@@ -29,6 +29,8 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
@@ -79,12 +81,13 @@ public final class CcwExtractorTest {
 				tx.begin();
 				CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now());
 				PartAClaimFact factA = new PartAClaimFact().setId(0L).setBeneficiary(beneA)
+						.setClaimProfile(new AllClaimsProfile().setId(1L).setClaimType(ClaimType.OUTPATIENT_CLAIM))
 						.setAdmittingDiagnosisCode("foo");
 				beneA.getPartAClaimFacts().add(factA);
 				pm.makePersistent(beneA);
 				CurrentBeneficiary beneB = new CurrentBeneficiary().setId(1).setBirthDate(LocalDate.now());
 				PartAClaimFact factB = new PartAClaimFact().setId(1L).setBeneficiary(beneB)
-						.setAdmittingDiagnosisCode("foo");
+						.setClaimProfile(factA.getClaimProfile()).setAdmittingDiagnosisCode("foo");
 				beneB.getPartAClaimFacts().add(factB);
 				pm.makePersistent(beneB);
 				tx.commit();

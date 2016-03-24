@@ -9,6 +9,8 @@ import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
+
 /**
  * Groups together the related FHIR {@link IBaseResource}s that comprise a
  * beneficiary and their claims data.
@@ -87,8 +89,7 @@ public final class BeneficiaryBundle {
 				.map(r -> (ExplanationOfBenefit) r)
 				.filter(e -> e.getExtension().stream()
 						.filter(x -> DataTransformer.EXTENSION_CMS_CLAIM_TYPE.equals(x.getUrl())
-								&& DataTransformer.CODED_CMS_CLAIM_TYPE_OUTPATIENT
-										.equals(((Coding) x.getValue()).getCode()))
+								&& ClaimType.OUTPATIENT_CLAIM.getCode().equals(((Coding) x.getValue()).getCode()))
 						.findAny().isPresent())
 				.collect(Collectors.toList());
 		return eobs;
@@ -103,8 +104,7 @@ public final class BeneficiaryBundle {
 				.map(r -> (ExplanationOfBenefit) r)
 				.filter(e -> e.getExtension().stream()
 						.filter(x -> DataTransformer.EXTENSION_CMS_CLAIM_TYPE.equals(x.getUrl())
-								&& DataTransformer.CODED_CMS_CLAIM_TYPE_CARRIER
-										.equals(((Coding) x.getValue()).getCode()))
+								&& ClaimType.CARRIER_NON_DME_CLAIM.getCode().equals(((Coding) x.getValue()).getCode()))
 						.findAny().isPresent())
 				.collect(Collectors.toList());
 		return eobs;

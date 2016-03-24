@@ -28,6 +28,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
@@ -75,6 +77,7 @@ public final class DataTransformerTest {
 		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now()).setGivenName("John")
 				.setSurname("Doe").setContactAddress("123 Main St, Anytown, MD").setContactAddressZip("123456789");
 		PartAClaimFact outpatientClaimForBeneA = new PartAClaimFact().setId(0L).setBeneficiary(beneA)
+				.setClaimProfile(new AllClaimsProfile().setId(1L).setClaimType(ClaimType.OUTPATIENT_CLAIM))
 				.setDateFrom(LocalDate.now()).setDateThrough(LocalDate.now()).setProviderAtTimeOfClaimNpi(42L)
 				.setPayment(new BigDecimal("1.00")).setNchBeneficiaryBloodDeductibleLiability(new BigDecimal("2.00"))
 				.setNchBeneficiaryPartBDeductible(new BigDecimal("3.00"))
@@ -87,6 +90,7 @@ public final class DataTransformerTest {
 				.setDiagnosisCode1("bar").setProcedureCode1("fizz");
 		outpatientClaimForBeneA.getClaimLines().add(outpatientClaimLineForBeneA);
 		PartBClaimFact carrierClaimForBeneA = new PartBClaimFact().setId(0L).setBeneficiary(beneA)
+				.setClaimProfile(new AllClaimsProfile().setId(1L).setClaimType(ClaimType.CARRIER_NON_DME_CLAIM))
 				.setCarrierControlNumber(0L).setDiagnosisCode1("foo").setDiagnosisCode2("bar").setProviderNpi(12345L);
 		beneA.getPartBClaimFacts().add(carrierClaimForBeneA);
 		PartBClaimLineFact carrierClaimLineForBeneA = new PartBClaimLineFact().setClaim(carrierClaimForBeneA)
@@ -101,9 +105,9 @@ public final class DataTransformerTest {
 				.setTotalPrescriptionCost(142.0);
 		beneA.getPartDEventFacts().add(partDEventForBeneA);
 		CurrentBeneficiary beneB = new CurrentBeneficiary().setId(1).setBirthDate(LocalDate.now());
-		PartAClaimFact partAClaimForBeneB = new PartAClaimFact().setId(1L).setBeneficiary(beneB)
-				.setAdmittingDiagnosisCode("foo");
-		beneB.getPartAClaimFacts().add(partAClaimForBeneB);
+		PartAClaimFact outpatientClaimForBeneB = new PartAClaimFact().setId(1L).setBeneficiary(beneB)
+				.setClaimProfile(outpatientClaimForBeneA.getClaimProfile()).setAdmittingDiagnosisCode("foo");
+		beneB.getPartAClaimFacts().add(outpatientClaimForBeneB);
 
 		// Run the transformer against the mock data.
 		DataTransformer transformer = new DataTransformer();

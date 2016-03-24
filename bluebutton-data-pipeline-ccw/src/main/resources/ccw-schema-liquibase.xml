@@ -51,6 +51,17 @@
 			</column>
 		</createTable>
 
+		<createTable tableName="CCW_ALL_CLM_PRFL">
+			<column name="CLM_TYPE_ID" type="NUMERIC(22)">
+				<!-- This is column #1 in the actual CCW schema. -->
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="NCH_CLM_TYPE_CD" type="VARCHAR(4)">
+				<!-- This is column #6 in the actual CCW schema. -->
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
 		<createTable tableName="CCW_HCPCS_CD">
 			<column name="HCPCS_ID" type="NUMERIC(22)">
 				<constraints primaryKey="true" nullable="false" />
@@ -78,6 +89,11 @@
 				<!-- This is column #2 in the actual CCW schema. -->
 				<constraints nullable="false" foreignKeyName="PtaFactToBeneCrnt"
 					referencedTableName="CCW_BENE_CRNT_VW" referencedColumnNames="BENE_ID" />
+			</column>
+			<column name="CLM_TYPE_ID" type="NUMERIC(22)">
+				<!-- This is column #3 in the actual CCW schema. -->
+				<constraints nullable="false" foreignKeyName="PtaFactToAllClmPrfl"
+					referencedTableName="CCW_ALL_CLM_PRFL" referencedColumnNames="CLM_TYPE_ID" />
 			</column>
 			<column name="CLM_FROM_DT" type="TIMESTAMP">
 				<!-- This is column #10 in the actual CCW schema. -->
@@ -220,6 +236,11 @@
 				<!-- This is column #2 in the actual CCW schema. -->
 				<constraints nullable="false" foreignKeyName="PtbFactToBeneCrnt"
 					referencedTableName="CCW_BENE_CRNT_VW" />
+			</column>
+			<column name="CLM_TYPE_ID" type="NUMERIC(22)">
+				<!-- This is column #3 in the actual CCW schema. -->
+				<constraints nullable="false" foreignKeyName="PtbFactToAllClmPrfl"
+					referencedTableName="CCW_ALL_CLM_PRFL" referencedColumnNames="CLM_TYPE_ID" />
 			</column>
 			<column name="CARR_CLM_CNTL_NUM" type="varchar(23)">
 				<!-- This is column #27 in the actual CCW schema. -->

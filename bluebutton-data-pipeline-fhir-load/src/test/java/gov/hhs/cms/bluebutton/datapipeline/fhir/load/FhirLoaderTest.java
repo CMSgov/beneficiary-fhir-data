@@ -16,6 +16,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
@@ -67,6 +69,7 @@ public final class FhirLoaderTest {
 		// Use the DataTransformer to create some sample FHIR resources.
 		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now());
 		PartAClaimFact outpatientClaimForBeneA = new PartAClaimFact().setId(0L).setBeneficiary(beneA)
+				.setClaimProfile(new AllClaimsProfile().setId(1L).setClaimType(ClaimType.OUTPATIENT_CLAIM))
 				.setAdmittingDiagnosisCode("foo");
 		beneA.getPartAClaimFacts().add(outpatientClaimForBeneA);
 		PartAClaimRevLineFact outpatientRevLineForBeneA = new PartAClaimRevLineFact().setClaim(outpatientClaimForBeneA)
@@ -74,7 +77,7 @@ public final class FhirLoaderTest {
 		outpatientClaimForBeneA.getClaimLines().add(outpatientRevLineForBeneA);
 		CurrentBeneficiary beneB = new CurrentBeneficiary().setId(1).setBirthDate(LocalDate.now());
 		PartAClaimFact outpatientClaimForBeneB = new PartAClaimFact().setId(1L).setBeneficiary(beneB)
-				.setAdmittingDiagnosisCode("foo");
+				.setClaimProfile(outpatientClaimForBeneA.getClaimProfile()).setAdmittingDiagnosisCode("foo");
 		beneB.getPartAClaimFacts().add(outpatientClaimForBeneB);
 		PartAClaimRevLineFact outpatientRevLineForBeneB = new PartAClaimRevLineFact().setClaim(outpatientClaimForBeneB)
 				.setLineNumber(1).setRevenueCenter(new Procedure().setCode("foo"));

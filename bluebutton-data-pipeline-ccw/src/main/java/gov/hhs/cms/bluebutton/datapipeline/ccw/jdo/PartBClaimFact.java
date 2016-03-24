@@ -26,6 +26,10 @@ public class PartBClaimFact {
 	private CurrentBeneficiary beneficiary;
 
 	@Persistent
+	@Column(name = "CLM_TYPE_ID")
+	private AllClaimsProfile claimProfile;
+
+	@Persistent
 	@Column(name = "CARR_CLM_CNTL_NUM")
 	private Long carrierControlNumber;
 
@@ -106,6 +110,24 @@ public class PartBClaimFact {
 	 */
 	public PartBClaimFact setBeneficiary(CurrentBeneficiary beneficiary) {
 		this.beneficiary = beneficiary;
+		return this;
+	}
+
+	/**
+	 * @return the {@link AllClaimsProfile} that specifies this
+	 *         {@link PartBClaimFact}'s {@link ClaimType} (and other metadata)
+	 */
+	public AllClaimsProfile getClaimProfile() {
+		return claimProfile;
+	}
+
+	/**
+	 * @param claimProfile
+	 *            the new value for {@link #getClaimProfile()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartBClaimFact setClaimProfile(AllClaimsProfile claimProfile) {
+		this.claimProfile = claimProfile;
 		return this;
 	}
 
@@ -297,6 +319,8 @@ public class PartBClaimFact {
 		builder.append(id);
 		builder.append(", beneficiary=");
 		builder.append(beneficiary != null ? beneficiary.getId() : "null");
+		builder.append(", claimProfile=");
+		builder.append(claimProfile);
 		builder.append(", carrierControlNumber=");
 		builder.append(carrierControlNumber);
 		builder.append(", diagnosisCode1=");

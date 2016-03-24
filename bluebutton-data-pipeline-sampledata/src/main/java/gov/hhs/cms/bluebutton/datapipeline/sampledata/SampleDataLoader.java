@@ -23,6 +23,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
@@ -264,6 +266,17 @@ public final class SampleDataLoader {
 				} else {
 					claim = new PartAClaimFact();
 					claim.setId(claimId);
+
+					AllClaimsProfile claimProfile;
+					if (registry.getClaimProfile(ClaimType.OUTPATIENT_CLAIM) != null) {
+						claimProfile = registry.getClaimProfile(ClaimType.OUTPATIENT_CLAIM);
+					} else {
+						claimProfile = new AllClaimsProfile().setId((long) registry.getClaimProfilesCount())
+								.setClaimType(ClaimType.OUTPATIENT_CLAIM);
+						registry.register(claimProfile);
+					}
+
+					claim.setClaimProfile(claimProfile);
 				}
 
 				claim.setBeneficiary(registry.getBeneficiary(synpufId));
@@ -389,6 +402,17 @@ public final class SampleDataLoader {
 					claimsMap.put(claimId, claim);
 					claim.setId(claimId);
 					claim.setBeneficiary(registry.getBeneficiary(synpufId));
+
+					AllClaimsProfile claimProfile;
+					if (registry.getClaimProfile(ClaimType.CARRIER_NON_DME_CLAIM) != null) {
+						claimProfile = registry.getClaimProfile(ClaimType.CARRIER_NON_DME_CLAIM);
+					} else {
+						claimProfile = new AllClaimsProfile().setId((long) registry.getClaimProfilesCount())
+								.setClaimType(ClaimType.CARRIER_NON_DME_CLAIM);
+						registry.register(claimProfile);
+					}
+					claim.setClaimProfile(claimProfile);
+
 					claim.setCarrierControlNumber(claimId);
 					claim.setDiagnosisCode1(diagnosisCode1);
 					claim.setDiagnosisCode2(diagnosisCode2);
@@ -608,6 +632,7 @@ public final class SampleDataLoader {
 	private static final class SharedDataRegistry {
 		private final Map<String, CurrentBeneficiary> beneficiariesBySynpufId = new HashMap<>();
 		private final Map<String, Procedure> proceduresByCode = new HashMap<>();
+		private final Map<ClaimType, AllClaimsProfile> claimProfilesByType = new HashMap<>();
 
 		/**
 		 * @return the matching {@link CurrentBeneficiary} that was passed to
@@ -657,6 +682,31 @@ public final class SampleDataLoader {
 		 */
 		public void register(Procedure procedure) {
 			proceduresByCode.put(procedure.getCode(), procedure);
+		}
+
+		/**
+		 * @return the matching {@link AllClaimsProfile} that was passed to
+		 *         {@link #register(AllClaimsProfile)}, or <code>null</code> if
+		 *         no such match is found
+		 */
+		public AllClaimsProfile getClaimProfile(ClaimType claimType) {
+			return claimProfilesByType.get(claimType);
+		}
+
+		/**
+		 * @return the number of {@link AllClaimsProfile}s that have been passed
+		 *         to {@link #register(AllClaimsProfile)}
+		 */
+		public int getClaimProfilesCount() {
+			return claimProfilesByType.size();
+		}
+
+		/**
+		 * @param claimProfile
+		 *            the {@link AllClaimsProfile} to register
+		 */
+		public void register(AllClaimsProfile claimProfile) {
+			claimProfilesByType.put(claimProfile.getClaimType(), claimProfile);
 		}
 	}
 }

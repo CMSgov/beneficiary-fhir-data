@@ -33,6 +33,7 @@ import org.hl7.fhir.dstu21.model.SimpleQuantity;
 import org.hl7.fhir.dstu21.model.valuesets.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
@@ -99,10 +100,6 @@ public final class DataTransformer {
 	 * {@link Adjudication}s.
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
-
-	static final String CODED_CMS_CLAIM_TYPE_OUTPATIENT = "FIXME1"; // FIXME
-
-	static final String CODED_CMS_CLAIM_TYPE_CARRIER = "FIXME2"; // FIXME
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
@@ -199,13 +196,20 @@ public final class DataTransformer {
 		 * determine which is actually which.
 		 */
 		for (PartAClaimFact sourceClaim : sourceBeneficiary.getPartAClaimFacts()) {
+			// Filter to only outpatient claims.
+			if (sourceClaim.getClaimProfile() == null
+					|| sourceClaim.getClaimProfile().getClaimType() != ClaimType.OUTPATIENT_CLAIM)
+				continue;
+
 			ExplanationOfBenefit eob = new ExplanationOfBenefit();
 			resources.add(eob);
 			eob.setId(IdType.newRandomUuid());
 			eob.getCoverage().setCoverage(new Reference(partBCoverage.getId()));
+			// FIXME claim type code should come from DB
 			eob.addExtension().setUrl(EXTENSION_CMS_CLAIM_TYPE)
 					.setValue(new Coding().setSystem(CODING_SYSTEM_CMS_CLAIM_TYPES)
-							.setCode(CODED_CMS_CLAIM_TYPE_OUTPATIENT).setDisplay("Part B Outpatient"));
+							.setCode(sourceClaim.getClaimProfile().getClaimType().getCode())
+							.setDisplay(sourceClaim.getClaimProfile().getClaimType().getDescription()));
 			eob.setPatient(new Reference().setReference(patient.getId()));
 			eob.addIdentifier().setSystem("CCW_PTA_FACT.CLM_ID").setValue("" + sourceClaim.getId());
 
@@ -341,14 +345,21 @@ public final class DataTransformer {
 			}
 		}
 
+		// Transform all Part B Carrier claims.
 		for (PartBClaimFact sourceClaim : sourceBeneficiary.getPartBClaimFacts()) {
+			// Filter to only carrier claims.
+			if (sourceClaim.getClaimProfile() == null
+					|| sourceClaim.getClaimProfile().getClaimType() != ClaimType.CARRIER_NON_DME_CLAIM)
+				continue;
+
 			ExplanationOfBenefit eob = new ExplanationOfBenefit();
 			resources.add(eob);
 			eob.setId(IdType.newRandomUuid());
 			eob.getCoverage().setCoverage(new Reference(partBCoverage.getId()));
 			eob.addExtension().setUrl(EXTENSION_CMS_CLAIM_TYPE)
 					.setValue(new Coding().setSystem(CODING_SYSTEM_CMS_CLAIM_TYPES)
-							.setCode(CODED_CMS_CLAIM_TYPE_CARRIER).setDisplay("Part B Carrier"));
+							.setCode(sourceClaim.getClaimProfile().getClaimType().getCode())
+							.setDisplay(sourceClaim.getClaimProfile().getClaimType().getDescription()));
 			eob.setPatient(new Reference().setReference(patient.getId()));
 			eob.addIdentifier().setSystem("CCW_PTB_FACT.CARR_CLM_CNTL_NUM")
 					.setValue("" + sourceClaim.getCarrierControlNumber());

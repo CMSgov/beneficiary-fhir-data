@@ -28,6 +28,10 @@ public class PartAClaimFact {
 	private CurrentBeneficiary beneficiary;
 
 	@Persistent
+	@Column(name = "CLM_TYPE_ID")
+	private AllClaimsProfile claimProfile;
+
+	@Persistent
 	@Column(name = "CLM_FROM_DT")
 	private LocalDate dateFrom;
 
@@ -116,6 +120,24 @@ public class PartAClaimFact {
 	 */
 	public PartAClaimFact setBeneficiary(CurrentBeneficiary beneficiary) {
 		this.beneficiary = beneficiary;
+		return this;
+	}
+
+	/**
+	 * @return the {@link AllClaimsProfile} that specifies this
+	 *         {@link PartAClaimFact}'s {@link ClaimType} (and other metadata)
+	 */
+	public AllClaimsProfile getClaimProfile() {
+		return claimProfile;
+	}
+
+	/**
+	 * @param claimProfile
+	 *            the new value for {@link #getClaimProfile()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setClaimProfile(AllClaimsProfile claimProfile) {
+		this.claimProfile = claimProfile;
 		return this;
 	}
 
@@ -342,6 +364,8 @@ public class PartAClaimFact {
 		builder.append(id);
 		builder.append(", beneficiary.id=");
 		builder.append(beneficiary != null ? beneficiary.getId() : "null");
+		builder.append(", claimProfile=");
+		builder.append(claimProfile);
 		builder.append(", dateFrom=");
 		builder.append(dateFrom);
 		builder.append(", dateThrough=");
