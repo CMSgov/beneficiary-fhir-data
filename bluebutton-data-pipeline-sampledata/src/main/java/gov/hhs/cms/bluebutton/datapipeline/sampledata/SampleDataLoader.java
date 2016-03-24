@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.datapipeline.sampledata;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
@@ -80,6 +83,13 @@ public final class SampleDataLoader {
 		List<SynpufSample> synpufSamples = null;
 		synpufSamples = Arrays.stream(synpufArchives).map(a -> SynpufSampleLoader.extractSynpufFile(synpufDir, a))
 				.collect(Collectors.toList());
+
+		/*
+		 * FIXME Need to come up with a more consistent and
+		 * representative-of-the-CCW way to handle missing fields. For example,
+		 * the parseDate method is a good thing. Also: many CCW fields use '~'
+		 * and '^' to indicate missing values.
+		 */
 
 		// Load the other sample data sets.
 		SampleNameGenerator nameGenerator = new SampleNameGenerator();
@@ -149,39 +159,8 @@ public final class SampleDataLoader {
 
 				// Process the Part A Inpatient claims.
 
-				/*
-				 * Process the Part A Outpatient claims. Each claim will be
-				 * (potentially) repeated multiple times: one entry per
-				 * "claim line".
-				 */
-				LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getPartAClaimsOutpatient().getFileName());
-				try (Reader in = new FileReader(synpufSample.getPartAClaimsOutpatient().toFile());) {
-					Map<Long, PartAClaimFact> claimsMap = new HashMap<>();
-					CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartAOutpatient.getAllColumnNames())
-							.withSkipHeaderRecord();
-					Iterable<CSVRecord> records = csvFormat.parse(in);
-					for (CSVRecord record : records) {
-						LOGGER.trace("Processing DE-SynPUF Part A Outpatient record #{}.", record.getRecordNumber());
-
-						String claimIdText = record.get(SynpufColumnForPartAOutpatient.CLM_ID);
-						long claimId = Long.parseLong(claimIdText);
-						String synpufId = record.get(SynpufColumnForPartAOutpatient.DESYNPUF_ID);
-						String diagnosisCodeText = record.get(SynpufColumnForPartAOutpatient.ADMTNG_ICD9_DGNS_CD);
-
-						if (!claimsMap.containsKey(claimId)) {
-							PartAClaimFact claim = new PartAClaimFact();
-							claim.setId(claimId);
-							claim.setBeneficiary(registry.getBeneficiary(synpufId));
-							claim.setAdmittingDiagnosisCode(diagnosisCodeText);
-
-							pm.makePersistent(claim);
-							claimsMap.put(claimId, claim);
-						}
-					}
-				} catch (IOException e) {
-					throw new SampleDataException(e);
-				}
-				LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
+				// Process the Part A Outpatient claims.
+				processOutpatientClaims(synpufSample, registry, providerGenerator);
 
 				// Process the Part B claims.
 				processPartBClaims(synpufSample, registry, providerGenerator);
@@ -200,6 +179,164 @@ public final class SampleDataLoader {
 
 		// TODO
 		return null;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param synpufSample
+	 * @param registry
+	 * @param providerGenerator
+	 */
+	private void processOutpatientClaims(SynpufSample synpufSample, SharedDataRegistry registry,
+			SampleProviderGenerator providerGenerator) {
+		LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getPartAClaimsOutpatient().getFileName());
+		try (Reader in = new FileReader(synpufSample.getPartAClaimsOutpatient().toFile());) {
+			Map<Long, PartAClaimFact> claimsMap = new HashMap<>();
+			CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartAOutpatient.getAllColumnNames())
+					.withSkipHeaderRecord();
+			Iterable<CSVRecord> records = csvFormat.parse(in);
+			for (CSVRecord record : records) {
+				LOGGER.trace("Processing DE-SynPUF Outpatient record #{}.", record.getRecordNumber());
+
+				/*
+				 * Based on conversations with Tony Dean at CMS, it seems pretty
+				 * clear that the DE-SynPUF outpatient data records are rather
+				 * borked: each segment/line/trailer can have up to 45 different
+				 * HCPCS in the DE-SynPUF data. This does not reflect the real
+				 * world data's structure (or the CCW's), where each HCPCS is a
+				 * separate trailer, with associated payment/financial amounts.
+				 * It seems that the DE-SynPUF data has arbitrarily grouped
+				 * HCPCS into blocks of (up to) 45. To cope with this, we'll
+				 * pretend that each segment only has one HCPCS (selected
+				 * arbitrarily from the possible 45).
+				 */
+
+				String synpufId = record.get(SynpufColumnForPartAOutpatient.DESYNPUF_ID);
+				long claimId = Long.parseLong(record.get(SynpufColumnForPartAOutpatient.CLM_ID));
+				int segment = Integer.parseInt(record.get(SynpufColumnForPartAOutpatient.SEGMENT));
+				LocalDate dateClaimFrom = parseDate(record, SynpufColumnForPartAOutpatient.CLM_FROM_DT);
+				LocalDate dateClaimThrough = parseDate(record, SynpufColumnForPartAOutpatient.CLM_THRU_DT);
+				BigDecimal claimPayment = new BigDecimal(record.get(SynpufColumnForPartAOutpatient.CLM_PMT_AMT));
+				BigDecimal nchPrimaryPayerClaimPaid = new BigDecimal(
+						record.get(SynpufColumnForPartAOutpatient.NCH_PRMRY_PYR_CLM_PD_AMT));
+				BigDecimal nchBeneficiaryBloodDeductible = new BigDecimal(
+						record.get(SynpufColumnForPartAOutpatient.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+				String diagnosisCode1 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_1);
+				String diagnosisCode2 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_2);
+				String diagnosisCode3 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_3);
+				String diagnosisCode4 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_4);
+				String diagnosisCode5 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_5);
+				String diagnosisCode6 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_6);
+				String diagnosisCode7 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_7);
+				String diagnosisCode8 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_8);
+				String diagnosisCode9 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_9);
+				String diagnosisCode10 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_10);
+				String procedureCode1 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_1);
+				String procedureCode2 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_2);
+				String procedureCode3 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_3);
+				String procedureCode4 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_4);
+				String procedureCode5 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_5);
+				String procedureCode6 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_6);
+				BigDecimal nchBeneficiaryPartBDeductible = new BigDecimal(
+						record.get(SynpufColumnForPartAOutpatient.NCH_BENE_PTB_DDCTBL_AMT));
+				BigDecimal nchBeneficiaryPartBCoinsurance = new BigDecimal(
+						record.get(SynpufColumnForPartAOutpatient.NCH_BENE_PTB_COINSRNC_AMT));
+				String admittingDiagnosisCode = record.get(SynpufColumnForPartAOutpatient.ADMTNG_ICD9_DGNS_CD);
+				String hcpcsCode = selectArbitraryOutpatientHcpcsCode(record);
+
+				/*
+				 * Note: The DE-SynPUF records do not present the different
+				 * segments/lines for each claim in the correct order. Each CSV
+				 * record represents a combined parent-claim and child-line. If,
+				 * for some reason, the parent-claims differ between the
+				 * child-lines (and they do, because the DE-SynPUF data is
+				 * kinda' bad), whichever parent-claim is encountered last
+				 * "wins".
+				 */
+				PartAClaimFact claim;
+				if (claimsMap.containsKey(claimId)) {
+					claim = claimsMap.get(claimId);
+				} else {
+					claim = new PartAClaimFact();
+					claim.setId(claimId);
+				}
+
+				claim.setBeneficiary(registry.getBeneficiary(synpufId));
+				claim.setDateFrom(dateClaimFrom);
+				claim.setDateThrough(dateClaimThrough);
+				claim.setAdmittingDiagnosisCode(admittingDiagnosisCode);
+				claim.setPayment(claimPayment);
+				claim.setNchBeneficiaryBloodDeductibleLiability(nchBeneficiaryBloodDeductible);
+				claim.setNchBeneficiaryPartBDeductible(nchBeneficiaryPartBDeductible);
+				claim.setNchBeneficiaryPartBCoinsurance(nchBeneficiaryPartBCoinsurance);
+				claim.setNchPrimaryPayerPaid(nchPrimaryPayerClaimPaid);
+
+				// Skipping SynPUF data for these fields, since it's gibberish.
+				claim.setAttendingPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
+				claim.setOperatingPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
+				claim.setOtherPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
+
+				// Skipping SynPUF data for provider, since it's gibberish.
+				claim.setProviderAtTimeOfClaimNpi((long) providerGenerator.generateProvider().getNpi());
+
+				PartAClaimRevLineFact revLine = new PartAClaimRevLineFact();
+				claim.getClaimLines().add(revLine);
+				revLine.setClaim(claim);
+				revLine.setLineNumber(segment);
+				if (!isBlank(hcpcsCode)) {
+					Procedure procedure;
+					if (registry.getProcedure(hcpcsCode) != null) {
+						procedure = registry.getProcedure(hcpcsCode);
+					} else {
+						procedure = new Procedure().setId((long) registry.getProceduresCount()).setCode(hcpcsCode);
+						registry.register(procedure);
+					}
+					revLine.setRevenueCenter(procedure);
+				}
+				revLine.setDiagnosisCode1(diagnosisCode1);
+				revLine.setDiagnosisCode2(diagnosisCode2);
+				revLine.setDiagnosisCode3(diagnosisCode3);
+				revLine.setDiagnosisCode4(diagnosisCode4);
+				revLine.setDiagnosisCode5(diagnosisCode5);
+				revLine.setDiagnosisCode6(diagnosisCode6);
+				revLine.setDiagnosisCode7(diagnosisCode7);
+				revLine.setDiagnosisCode8(diagnosisCode8);
+				revLine.setDiagnosisCode9(diagnosisCode9);
+				revLine.setDiagnosisCode10(diagnosisCode10);
+				revLine.setProcedureCode1(procedureCode1);
+				revLine.setProcedureCode2(procedureCode2);
+				revLine.setProcedureCode3(procedureCode3);
+				revLine.setProcedureCode4(procedureCode4);
+				revLine.setProcedureCode5(procedureCode5);
+				revLine.setProcedureCode6(procedureCode6);
+
+				pm.makePersistent(claim);
+				claimsMap.put(claimId, claim);
+			}
+		} catch (IOException e) {
+			throw new SampleDataException(e);
+		}
+		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
+	}
+
+	/**
+	 * @param outpatientRecord
+	 *            the outpatient claim record to select a HCPCS code from
+	 * @return an arbitrary value from the
+	 *         {@link SynpufColumnForPartAOutpatient#HCPCS_CD_1},
+	 *         {@link SynpufColumnForPartAOutpatient#HCPCS_CD_2}, etc. columns
+	 *         in the specified record, or null if none of the columns have a
+	 *         value
+	 */
+	private static String selectArbitraryOutpatientHcpcsCode(CSVRecord outpatientRecord) {
+		List<String> hcpcsColumnNames = Arrays.stream(SynpufColumnForPartAOutpatient.values())
+				.filter(c -> c.name().startsWith("HCPCS_CD_")).map(c -> c.name()).collect(Collectors.toList());
+		List<String> hcpcsColumnValues = hcpcsColumnNames.stream().map(c -> outpatientRecord.get(c))
+				.collect(Collectors.toList());
+		Optional<String> arbitraryHcpcsValue = hcpcsColumnValues.stream().filter(v -> v != null && !v.trim().isEmpty())
+				.findAny();
+		return arbitraryHcpcsValue.orElse(null);
 	}
 
 	/**
@@ -359,9 +496,8 @@ public final class SampleDataLoader {
 	 */
 	private static boolean isMostlyBlank(PartBClaimLineFact claimLine) {
 		return claimLine.getProcedure() == null && isBlank(claimLine.getAllowedAmount())
-				&& isBlank(claimLine.getLineDiagnosisCode())
-				&& claimLine.getMiscCode() == null && isBlank(claimLine.getNchPaymentAmount())
-				&& isBlank(claimLine.getBeneficiaryPrimaryPayerPaidAmount())
+				&& isBlank(claimLine.getLineDiagnosisCode()) && claimLine.getMiscCode() == null
+				&& isBlank(claimLine.getNchPaymentAmount()) && isBlank(claimLine.getBeneficiaryPrimaryPayerPaidAmount())
 				&& isBlank(claimLine.getCoinsuranceAmount()) && isBlank(claimLine.getProcessingIndicationCode());
 	}
 
@@ -439,6 +575,22 @@ public final class SampleDataLoader {
 	 */
 	private static boolean isBlank(Number value) {
 		return value == null || value.equals(Double.valueOf(0.0));
+	}
+
+	/**
+	 * @param record
+	 *            the {@link CSVRecord} to parse a value from
+	 * @param column
+	 *            the column to parse a value from
+	 * @return the {@link LocalDate} that was parsed from the specified record
+	 *         and column, or <code>null</code> if the column was empty
+	 */
+	private static LocalDate parseDate(CSVRecord record, Enum<?> column) {
+		String columnValue = record.get(column);
+		if (isBlank(columnValue))
+			return null;
+		else
+			return LocalDate.parse(columnValue, SYNPUF_DATE_FORMATTER);
 	}
 
 	/**

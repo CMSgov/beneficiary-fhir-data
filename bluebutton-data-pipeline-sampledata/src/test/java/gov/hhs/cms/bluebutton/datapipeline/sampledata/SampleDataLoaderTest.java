@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.sampledata;
 
+import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
@@ -26,11 +27,13 @@ import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningReq
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QCurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartAClaimRevLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.QPartDEventFact;
@@ -86,6 +89,9 @@ public final class SampleDataLoaderTest {
 			long partAFactCount = (long) pm.newJDOQLTypedQuery(PartAClaimFact.class)
 					.result(false, QPartAClaimFact.candidate().count()).executeResultUnique();
 			Assert.assertTrue(partAFactCount > 0L);
+			long partARevLineFactCount = (long) pm.newJDOQLTypedQuery(PartAClaimRevLineFact.class)
+					.result(false, QPartAClaimRevLineFact.candidate().count()).executeResultUnique();
+			Assert.assertTrue(partARevLineFactCount > 0L);
 
 			long partBFactCount = (long) pm.newJDOQLTypedQuery(PartBClaimFact.class)
 					.result(false, QPartBClaimFact.candidate().count()).executeResultUnique();
@@ -134,6 +140,27 @@ public final class SampleDataLoaderTest {
 			LOGGER.info("Checking against Part A claim: {}", partAClaim);
 			Assert.assertEquals(542192281063886L, (long) partAClaim.getId());
 			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
+			Assert.assertEquals(2008, partAClaim.getDateFrom().getYear());
+			Assert.assertEquals(2008, partAClaim.getDateThrough().getYear());
+			Assert.assertNotNull(partAClaim.getProviderAtTimeOfClaimNpi());
+			Assert.assertEquals(new BigDecimal("50.00"), partAClaim.getPayment());
+			Assert.assertEquals(new BigDecimal("0.00"), partAClaim.getNchBeneficiaryBloodDeductibleLiability());
+			Assert.assertEquals(new BigDecimal("0.00"), partAClaim.getNchBeneficiaryPartBDeductible());
+			Assert.assertEquals(new BigDecimal("10.00"), partAClaim.getNchBeneficiaryPartBCoinsurance());
+			Assert.assertEquals(new BigDecimal("0.00"), partAClaim.getNchPrimaryPayerPaid());
+			Assert.assertNotNull(partAClaim.getAttendingPhysicianNpi());
+			Assert.assertNotNull(partAClaim.getOperatingPhysicianNpi());
+			Assert.assertNotNull(partAClaim.getOtherPhysicianNpi());
+			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
+
+			// Spot check one of the beneficiary's PartAClaimFacts.
+			Assert.assertEquals(1, partAClaim.getClaimLines().size());
+			PartAClaimRevLineFact partAClaimRevLine = partAClaim.getClaimLines().get(0);
+			LOGGER.info("Checking against Part A claim rev line: {}", partAClaimRevLine);
+			Assert.assertSame(partAClaim, partAClaimRevLine.getClaim());
+			Assert.assertEquals(1, partAClaimRevLine.getLineNumber());
+			Assert.assertEquals("85610", partAClaimRevLine.getRevenueCenter().getCode());
+			Assert.assertEquals("V5841", partAClaimRevLine.getDiagnosisCode1());
 
 			// Spot check one of the beneficiary's PartBClaimFacts.
 			Assert.assertEquals(5, beneficiary.getPartBClaimFacts().size());
@@ -151,7 +178,7 @@ public final class SampleDataLoaderTest {
 			Assert.assertEquals("", partBClaim.getDiagnosisCode7());
 			Assert.assertEquals("", partBClaim.getDiagnosisCode8());
 			Assert.assertEquals("", partBClaim.getDiagnosisCode8());
-			Assert.assertEquals(1689746125L, (long) partBClaim.getProviderNpi());
+			Assert.assertNotNull(partBClaim.getProviderNpi());
 
 			// Spot check one of the beneficiary's PartBClaimLineFacts.
 			Assert.assertEquals(1, partBClaim.getClaimLines().size());

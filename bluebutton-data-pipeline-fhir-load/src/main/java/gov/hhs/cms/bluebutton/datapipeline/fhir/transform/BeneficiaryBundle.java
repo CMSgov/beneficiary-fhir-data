@@ -3,7 +3,7 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.dstu21.model.Claim;
+import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.Coverage;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Patient;
@@ -49,20 +49,6 @@ public final class BeneficiaryBundle {
 	}
 
 	/**
-	 * @return the {@link Claim} resource in {@link #getFhirResources()}
-	 * @throws IllegalStateException
-	 *             An {@link IllegalStateException} will be thrown if exactly
-	 *             one {@link Claim} is not found.
-	 */
-	public Claim getClaim() {
-		List<IBaseResource> claims = fhirResources.stream().filter(r -> r instanceof Claim)
-				.collect(Collectors.toList());
-		if (claims.size() != 1)
-			throw new IllegalStateException();
-		return (Claim) claims.get(0);
-	}
-
-	/**
 	 * @return the {@link Coverage} resource for Part B in
 	 *         {@link #getFhirResources()}
 	 * @throws IllegalStateException
@@ -93,13 +79,33 @@ public final class BeneficiaryBundle {
 	}
 
 	/**
+	 * @return the {@link ExplanationOfBenefit}s resources for Part A outpatient
+	 *         claims in {@link #getFhirResources()}
+	 */
+	public List<ExplanationOfBenefit> getExplanationOfBenefitsForOutpatient() {
+		List<ExplanationOfBenefit> eobs = fhirResources.stream().filter(r -> r instanceof ExplanationOfBenefit)
+				.map(r -> (ExplanationOfBenefit) r)
+				.filter(e -> e.getExtension().stream()
+						.filter(x -> DataTransformer.EXTENSION_CMS_CLAIM_TYPE.equals(x.getUrl())
+								&& DataTransformer.CODED_CMS_CLAIM_TYPE_OUTPATIENT
+										.equals(((Coding) x.getValue()).getCode()))
+						.findAny().isPresent())
+				.collect(Collectors.toList());
+		return eobs;
+	}
+
+	/**
 	 * @return the {@link ExplanationOfBenefit}s resources for Part B claims in
 	 *         {@link #getFhirResources()}
 	 */
-	public List<ExplanationOfBenefit> getExplanationOfBenefitsForPartB() {
+	public List<ExplanationOfBenefit> getExplanationOfBenefitsForCarrier() {
 		List<ExplanationOfBenefit> eobs = fhirResources.stream().filter(r -> r instanceof ExplanationOfBenefit)
 				.map(r -> (ExplanationOfBenefit) r)
-				.filter(eob -> eob.getCoverage().getCoverage().getReference().equals(getPartBCoverage().getId()))
+				.filter(e -> e.getExtension().stream()
+						.filter(x -> DataTransformer.EXTENSION_CMS_CLAIM_TYPE.equals(x.getUrl())
+								&& DataTransformer.CODED_CMS_CLAIM_TYPE_CARRIER
+										.equals(((Coding) x.getValue()).getCode()))
+						.findAny().isPresent())
 				.collect(Collectors.toList());
 		return eobs;
 	}

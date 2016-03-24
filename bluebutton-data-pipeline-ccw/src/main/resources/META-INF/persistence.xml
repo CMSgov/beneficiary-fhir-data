@@ -8,6 +8,7 @@
 	<persistence-unit name="CCW">
 		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary</class>
 		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact</class>
+		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact</class>
 		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimLineMiscCode</class>
 		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact</class>
 		<class>gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact</class>

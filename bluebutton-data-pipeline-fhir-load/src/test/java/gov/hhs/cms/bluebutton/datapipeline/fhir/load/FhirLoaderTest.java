@@ -18,6 +18,8 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
@@ -64,11 +66,19 @@ public final class FhirLoaderTest {
 	public void loadSmallSample() throws URISyntaxException {
 		// Use the DataTransformer to create some sample FHIR resources.
 		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now());
-		PartAClaimFact factA = new PartAClaimFact().setId(0L).setBeneficiary(beneA).setAdmittingDiagnosisCode("foo");
-		beneA.getPartAClaimFacts().add(factA);
+		PartAClaimFact outpatientClaimForBeneA = new PartAClaimFact().setId(0L).setBeneficiary(beneA)
+				.setAdmittingDiagnosisCode("foo");
+		beneA.getPartAClaimFacts().add(outpatientClaimForBeneA);
+		PartAClaimRevLineFact outpatientRevLineForBeneA = new PartAClaimRevLineFact().setClaim(outpatientClaimForBeneA)
+				.setLineNumber(1).setRevenueCenter(new Procedure().setCode("foo"));
+		outpatientClaimForBeneA.getClaimLines().add(outpatientRevLineForBeneA);
 		CurrentBeneficiary beneB = new CurrentBeneficiary().setId(1).setBirthDate(LocalDate.now());
-		PartAClaimFact factB = new PartAClaimFact().setId(1L).setBeneficiary(beneB).setAdmittingDiagnosisCode("foo");
-		beneB.getPartAClaimFacts().add(factB);
+		PartAClaimFact outpatientClaimForBeneB = new PartAClaimFact().setId(1L).setBeneficiary(beneB)
+				.setAdmittingDiagnosisCode("foo");
+		beneB.getPartAClaimFacts().add(outpatientClaimForBeneB);
+		PartAClaimRevLineFact outpatientRevLineForBeneB = new PartAClaimRevLineFact().setClaim(outpatientClaimForBeneB)
+				.setLineNumber(1).setRevenueCenter(new Procedure().setCode("foo"));
+		outpatientClaimForBeneB.getClaimLines().add(outpatientRevLineForBeneB);
 		Stream<BeneficiaryBundle> fhirStream = new DataTransformer()
 				.transformSourceData(Arrays.asList(beneA, beneB).stream());
 		// TODO need to expand the test data here
@@ -82,7 +92,7 @@ public final class FhirLoaderTest {
 		// Verify the results.
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(14, results.get(0).getResourcesPushedCount());
+		Assert.assertEquals(12, results.get(0).getResourcesPushedCount());
 
 		// TODO verify results by actually querying the server.
 	}
