@@ -136,73 +136,73 @@ public final class SampleDataLoaderTest {
 
 			// Spot check one of the beneficiary's PartAClaimFacts.
 			Assert.assertEquals(1, beneficiary.getPartAClaimFacts().size());
-			PartAClaimFact partAClaim = beneficiary.getPartAClaimFacts().get(0);
-			LOGGER.info("Checking against Part A claim: {}", partAClaim);
-			Assert.assertEquals(542192281063886L, (long) partAClaim.getId());
-			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
-			Assert.assertEquals(2008, partAClaim.getDateFrom().getYear());
-			Assert.assertEquals(2008, partAClaim.getDateThrough().getYear());
-			Assert.assertNotNull(partAClaim.getProviderAtTimeOfClaimNpi());
-			Assert.assertEquals(new BigDecimal("50.00"), partAClaim.getPayment());
-			Assert.assertEquals(new BigDecimal("0.00"), partAClaim.getNchBeneficiaryBloodDeductibleLiability());
-			Assert.assertEquals(new BigDecimal("0.00"), partAClaim.getNchBeneficiaryPartBDeductible());
-			Assert.assertEquals(new BigDecimal("10.00"), partAClaim.getNchBeneficiaryPartBCoinsurance());
-			Assert.assertEquals(new BigDecimal("0.00"), partAClaim.getNchPrimaryPayerPaid());
-			Assert.assertNotNull(partAClaim.getAttendingPhysicianNpi());
-			Assert.assertNotNull(partAClaim.getOperatingPhysicianNpi());
-			Assert.assertNotNull(partAClaim.getOtherPhysicianNpi());
-			Assert.assertEquals("V5883", partAClaim.getAdmittingDiagnosisCode());
+			PartAClaimFact outpatientClaim = beneficiary.getPartAClaimFacts().get(0);
+			LOGGER.info("Checking against outpatient claim: {}", outpatientClaim);
+			Assert.assertEquals(542192281063886L, (long) outpatientClaim.getId());
+			Assert.assertEquals("V5883", outpatientClaim.getAdmittingDiagnosisCode());
+			Assert.assertEquals(2008, outpatientClaim.getDateFrom().getYear());
+			Assert.assertEquals(2008, outpatientClaim.getDateThrough().getYear());
+			Assert.assertNotNull(outpatientClaim.getProviderAtTimeOfClaimNpi());
+			Assert.assertEquals(new BigDecimal("50.00"), outpatientClaim.getPayment());
+			Assert.assertEquals(new BigDecimal("0.00"), outpatientClaim.getNchBeneficiaryBloodDeductibleLiability());
+			Assert.assertEquals(new BigDecimal("0.00"), outpatientClaim.getNchBeneficiaryPartBDeductible());
+			Assert.assertEquals(new BigDecimal("10.00"), outpatientClaim.getNchBeneficiaryPartBCoinsurance());
+			Assert.assertEquals(new BigDecimal("0.00"), outpatientClaim.getNchPrimaryPayerPaid());
+			Assert.assertNotNull(outpatientClaim.getAttendingPhysicianNpi());
+			Assert.assertNotNull(outpatientClaim.getOperatingPhysicianNpi());
+			Assert.assertNotNull(outpatientClaim.getOtherPhysicianNpi());
+			Assert.assertEquals("V5883", outpatientClaim.getAdmittingDiagnosisCode());
 
 			// Spot check one of the beneficiary's PartAClaimFacts.
-			Assert.assertEquals(1, partAClaim.getClaimLines().size());
-			PartAClaimRevLineFact partAClaimRevLine = partAClaim.getClaimLines().get(0);
-			LOGGER.info("Checking against Part A claim rev line: {}", partAClaimRevLine);
-			Assert.assertSame(partAClaim, partAClaimRevLine.getClaim());
-			Assert.assertEquals(1, partAClaimRevLine.getLineNumber());
-			Assert.assertEquals("85610", partAClaimRevLine.getRevenueCenter().getCode());
-			Assert.assertEquals("V5841", partAClaimRevLine.getDiagnosisCode1());
+			Assert.assertEquals(1, outpatientClaim.getClaimLines().size());
+			PartAClaimRevLineFact outpatientClaimRevLine = outpatientClaim.getClaimLines().get(0);
+			LOGGER.info("Checking against outpatient claim rev line: {}", outpatientClaimRevLine);
+			Assert.assertSame(outpatientClaim, outpatientClaimRevLine.getClaim());
+			Assert.assertEquals(1, outpatientClaimRevLine.getLineNumber());
+			Assert.assertEquals("85610", outpatientClaimRevLine.getRevenueCenter().getCode());
+			Assert.assertEquals("V5841", outpatientClaimRevLine.getDiagnosisCode1());
 
 			// Spot check one of the beneficiary's PartBClaimFacts.
 			Assert.assertEquals(5, beneficiary.getPartBClaimFacts().size());
-			PartBClaimFact partBClaim = beneficiary.getPartBClaimFacts().get(0);
-			LOGGER.info("Checking against Part B claim: {}", partBClaim);
-			Assert.assertEquals(887213386947664L, (long) partBClaim.getId());
-			Assert.assertSame(beneficiary, partBClaim.getBeneficiary());
-			Assert.assertEquals(partBClaim.getId(), partBClaim.getCarrierControlNumber());
-			Assert.assertEquals("3598", partBClaim.getDiagnosisCode1());
-			Assert.assertEquals("27541", partBClaim.getDiagnosisCode2());
-			Assert.assertEquals("", partBClaim.getDiagnosisCode3());
-			Assert.assertEquals("", partBClaim.getDiagnosisCode4());
-			Assert.assertEquals("", partBClaim.getDiagnosisCode5());
-			Assert.assertEquals("", partBClaim.getDiagnosisCode6());
-			Assert.assertEquals("", partBClaim.getDiagnosisCode7());
-			Assert.assertEquals("", partBClaim.getDiagnosisCode8());
-			Assert.assertEquals("", partBClaim.getDiagnosisCode8());
-			Assert.assertNotNull(partBClaim.getProviderNpi());
+			PartBClaimFact carrierClaim = beneficiary.getPartBClaimFacts().get(0);
+			LOGGER.info("Checking against carrier claim: {}", carrierClaim);
+			Assert.assertEquals(887213386947664L, (long) carrierClaim.getId());
+			Assert.assertSame(beneficiary, carrierClaim.getBeneficiary());
+			Assert.assertEquals(carrierClaim.getId(), carrierClaim.getCarrierControlNumber());
+			Assert.assertEquals("3598", carrierClaim.getDiagnosisCode1());
+			Assert.assertEquals("27541", carrierClaim.getDiagnosisCode2());
+			Assert.assertEquals("", carrierClaim.getDiagnosisCode3());
+			Assert.assertEquals("", carrierClaim.getDiagnosisCode4());
+			Assert.assertEquals("", carrierClaim.getDiagnosisCode5());
+			Assert.assertEquals("", carrierClaim.getDiagnosisCode6());
+			Assert.assertEquals("", carrierClaim.getDiagnosisCode7());
+			Assert.assertEquals("", carrierClaim.getDiagnosisCode8());
+			Assert.assertEquals("", carrierClaim.getDiagnosisCode8());
+			Assert.assertNotNull(carrierClaim.getProviderNpi());
 
 			// Spot check one of the beneficiary's PartBClaimLineFacts.
-			Assert.assertEquals(1, partBClaim.getClaimLines().size());
-			PartBClaimLineFact partBClaimLine = partBClaim.getClaimLines().get(0);
-			LOGGER.info("Checking against Part B claim line: {}", partBClaimLine);
-			Assert.assertEquals(887213386947664L, (long) partBClaim.getId());
-			Assert.assertSame(partBClaim, partBClaimLine.getClaim());
-			Assert.assertEquals(1L, partBClaimLine.getLineNumber());
-			Assert.assertSame(beneficiary, partBClaimLine.getBeneficiary());
-			Assert.assertTrue(partBClaimLine.getProcedure().getId() >= 0);
-			Assert.assertEquals("01996", partBClaimLine.getProcedure().getCode());
-			Assert.assertEquals(2009, partBClaimLine.getDateFrom().getYear());
-			Assert.assertEquals(2009, partBClaimLine.getDateThrough().getYear());
-			Assert.assertEquals(Double.valueOf(50.0), partBClaimLine.getNchPaymentAmount());
-			Assert.assertEquals(Double.valueOf(0.0), partBClaimLine.getDeductibleAmount());
-			Assert.assertEquals(Double.valueOf(0.0), partBClaimLine.getBeneficiaryPrimaryPayerPaidAmount());
-			Assert.assertEquals(Double.valueOf(10.0), partBClaimLine.getCoinsuranceAmount());
-			Assert.assertEquals(Double.valueOf(60.0), partBClaimLine.getAllowedAmount());
-			Assert.assertEquals("33818", partBClaimLine.getLineDiagnosisCode());
+			Assert.assertEquals(1, carrierClaim.getClaimLines().size());
+			PartBClaimLineFact carrierClaimLine = carrierClaim.getClaimLines().get(0);
+			LOGGER.info("Checking against carrier claim line: {}", carrierClaimLine);
+			Assert.assertEquals(887213386947664L, (long) carrierClaim.getId());
+			Assert.assertSame(carrierClaim, carrierClaimLine.getClaim());
+			Assert.assertEquals(1L, carrierClaimLine.getLineNumber());
+			Assert.assertSame(beneficiary, carrierClaimLine.getBeneficiary());
+			Assert.assertTrue(carrierClaimLine.getProcedure().getId() >= 0);
+			Assert.assertEquals("01996", carrierClaimLine.getProcedure().getCode());
+			Assert.assertEquals(2009, carrierClaimLine.getDateFrom().getYear());
+			Assert.assertEquals(2009, carrierClaimLine.getDateThrough().getYear());
+			Assert.assertEquals(Double.valueOf(50.0), carrierClaimLine.getNchPaymentAmount());
+			Assert.assertEquals(Double.valueOf(0.0), carrierClaimLine.getDeductibleAmount());
+			Assert.assertEquals(Double.valueOf(0.0), carrierClaimLine.getBeneficiaryPrimaryPayerPaidAmount());
+			Assert.assertEquals(Double.valueOf(10.0), carrierClaimLine.getCoinsuranceAmount());
+			Assert.assertEquals(Double.valueOf(60.0), carrierClaimLine.getAllowedAmount());
+			Assert.assertEquals("33818", carrierClaimLine.getLineDiagnosisCode());
 			// TODO
 			// Assert.assertEquals("???", partBClaimLine.getMiscCode().getId());
 			// Assert.assertEquals("???",
 			// partBClaimLine.getMiscCode().getCode());
-			Assert.assertEquals("A", partBClaimLine.getProcessingIndicationCode());
+			Assert.assertEquals("A", carrierClaimLine.getProcessingIndicationCode());
 
 			// Spot check one of the beneficiary's PartDEventFacts.
 			Assert.assertEquals(188, beneficiary.getPartDEventFacts().size());

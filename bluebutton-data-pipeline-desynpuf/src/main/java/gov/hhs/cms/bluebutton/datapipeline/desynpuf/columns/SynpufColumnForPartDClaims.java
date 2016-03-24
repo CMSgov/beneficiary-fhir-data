@@ -5,9 +5,9 @@ import java.util.Arrays;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufFile;
 
 /**
- * Enumerates the columns in the {@link SynpufFile#PART_D_CLAIMS} file.
+ * Enumerates the columns in the {@link SynpufFile#CLAIMS_PART_D} file.
  */
-public enum SynpufColumnForPartD {
+public enum SynpufColumnForPartDClaims {
 	/**
 	 * Beneficiary Code
 	 */
@@ -52,6 +52,6 @@ public enum SynpufColumnForPartD {
 	 * @return a <code>String[]</code> containing all of the column names
 	 */
 	public static String[] getAllColumnNames() {
-		return Arrays.stream(SynpufColumnForPartD.values()).map(v -> v.name()).toArray(size -> new String[size]);
+		return Arrays.stream(SynpufColumnForPartDClaims.values()).map(v -> v.name()).toArray(size -> new String[size]);
 	}
 }

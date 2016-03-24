@@ -86,15 +86,15 @@ public final class DataTransformerTest {
 				.setClaim(outpatientClaimForBeneA).setLineNumber(1).setRevenueCenter(new Procedure().setCode("foo"))
 				.setDiagnosisCode1("bar").setProcedureCode1("fizz");
 		outpatientClaimForBeneA.getClaimLines().add(outpatientClaimLineForBeneA);
-		PartBClaimFact partBClaimForBeneA = new PartBClaimFact().setId(0L).setBeneficiary(beneA)
+		PartBClaimFact carrierClaimForBeneA = new PartBClaimFact().setId(0L).setBeneficiary(beneA)
 				.setCarrierControlNumber(0L).setDiagnosisCode1("foo").setDiagnosisCode2("bar").setProviderNpi(12345L);
-		beneA.getPartBClaimFacts().add(partBClaimForBeneA);
-		PartBClaimLineFact partBClaimLineForBeneA = new PartBClaimLineFact().setClaim(partBClaimForBeneA)
+		beneA.getPartBClaimFacts().add(carrierClaimForBeneA);
+		PartBClaimLineFact carrierClaimLineForBeneA = new PartBClaimLineFact().setClaim(carrierClaimForBeneA)
 				.setLineNumber(1).setBeneficiary(beneA).setProcedure(new Procedure().setId(0L).setCode("foo"))
 				.setDateFrom(LocalDate.now()).setDateThrough(LocalDate.now()).setAllowedAmount(42.0)
 				.setDeductibleAmount(43.0).setBeneficiaryPrimaryPayerPaidAmount(44.0).setCoinsuranceAmount(45.0)
 				.setNchPaymentAmount(46.0).setLineDiagnosisCode("bar").setProcessingIndicationCode("foo");
-		partBClaimForBeneA.getClaimLines().add(partBClaimLineForBeneA);
+		carrierClaimForBeneA.getClaimLines().add(carrierClaimLineForBeneA);
 		PartDEventFact partDEventForBeneA = new PartDEventFact().setId(0L).setBeneficiary(beneA).setPrescriberNpi(1234L)
 				.setServiceProviderNpi(2345L).setProductNdc(3456L).setServiceDate(LocalDate.now())
 				.setQuantityDispensed(12L).setNumberDaysSupply(43L).setPatientPayAmount(42.0)
@@ -244,11 +244,11 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, bundle.getExplanationOfBenefitsForCarrier().size());
 		ExplanationOfBenefit carrierEob = bundle.getExplanationOfBenefitsForCarrier().get(0);
 		Assert.assertEquals(patientA.getId(), carrierEob.getPatient().getReference());
-		Assert.assertEquals("" + partBClaimForBeneA.getCarrierControlNumber(),
+		Assert.assertEquals("" + carrierClaimForBeneA.getCarrierControlNumber(),
 				carrierEob.getIdentifier().get(0).getValue());
-		Assert.assertEquals(partBClaimForBeneA.getDiagnosisCode1(),
+		Assert.assertEquals(carrierClaimForBeneA.getDiagnosisCode1(),
 				carrierEob.getDiagnosis().get(0).getDiagnosis().getCode());
-		Assert.assertEquals(partBClaimForBeneA.getDiagnosisCode2(),
+		Assert.assertEquals(carrierClaimForBeneA.getDiagnosisCode2(),
 				carrierEob.getDiagnosis().get(1).getDiagnosis().getCode());
 		Assert.assertNotNull(carrierEob.getProvider().getReference());
 		Assert.assertEquals(
@@ -259,7 +259,7 @@ public final class DataTransformerTest {
 								r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
-								.filter(i -> partBClaimForBeneA.getProviderNpi().toString().equals(i.getValue()))
+								.filter(i -> carrierClaimForBeneA.getProviderNpi().toString().equals(i.getValue()))
 								.findAny().isPresent())
 						.findAny().get().getId());
 		Assert.assertEquals(1, carrierEob.getItem().size());
@@ -267,38 +267,38 @@ public final class DataTransformerTest {
 		ItemsComponent carrierEobItem = carrierEob.getItem().get(0);
 		Assert.assertEquals(1, carrierEobItem.getSequence());
 		Assert.assertEquals(patientA.getId(), carrierEob.getPatient().getReference());
-		Assert.assertEquals(partBClaimLineForBeneA.getProcedure().getCode(), carrierEobItem.getService().getCode());
-		Assert.assertEquals(Date.valueOf(partBClaimLineForBeneA.getDateFrom()),
+		Assert.assertEquals(carrierClaimLineForBeneA.getProcedure().getCode(), carrierEobItem.getService().getCode());
+		Assert.assertEquals(Date.valueOf(carrierClaimLineForBeneA.getDateFrom()),
 				carrierEobItem.getServicedPeriod().getStart());
-		Assert.assertEquals(Date.valueOf(partBClaimLineForBeneA.getDateThrough()),
+		Assert.assertEquals(Date.valueOf(carrierClaimLineForBeneA.getDateThrough()),
 				carrierEobItem.getServicedPeriod().getEnd());
-		Assert.assertEquals(partBClaimLineForBeneA.getAllowedAmount(),
+		Assert.assertEquals(carrierClaimLineForBeneA.getAllowedAmount(),
 				carrierEobItem.getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE
 								.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
 				0.0);
 		Assert.assertEquals(
-				partBClaimLineForBeneA
+				carrierClaimLineForBeneA
 						.getDeductibleAmount(),
 				carrierEobItem.getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_DEDUCTIBLE.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
 				0.0);
-		Assert.assertEquals(partBClaimLineForBeneA.getBeneficiaryPrimaryPayerPaidAmount(),
+		Assert.assertEquals(carrierClaimLineForBeneA.getBeneficiaryPrimaryPayerPaidAmount(),
 				carrierEobItem.getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID
 								.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
 				0.0);
-		Assert.assertEquals(partBClaimLineForBeneA.getCoinsuranceAmount(),
+		Assert.assertEquals(carrierClaimLineForBeneA.getCoinsuranceAmount(),
 				carrierEobItem.getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT
 								.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
 				0.0);
 		Assert.assertEquals(
-				partBClaimLineForBeneA
+				carrierClaimLineForBeneA
 						.getNchPaymentAmount(),
 				carrierEobItem.getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_PAYMENT.equals(a.getCategory().getCode()))

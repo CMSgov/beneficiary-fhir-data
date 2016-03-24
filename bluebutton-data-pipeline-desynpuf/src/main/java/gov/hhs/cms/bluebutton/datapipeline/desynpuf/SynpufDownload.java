@@ -1,5 +1,8 @@
 package gov.hhs.cms.bluebutton.datapipeline.desynpuf;
 
+/**
+ * FIXME Don't think this is being used
+ */
 public enum SynpufDownload {
 	SAMPLE_1(
 			"https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SynPUFs/Downloads/DE1_0_2008_Beneficiary_Summary_File_Sample_1.zip",

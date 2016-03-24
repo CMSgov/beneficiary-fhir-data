@@ -5,10 +5,10 @@ import java.util.Arrays;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufFile;
 
 /**
- * Enumerates the columns in the {@link SynpufFile#PART_B_CLAIMS_FIRST} and
- * {@link SynpufFile#PART_B_CLAIMS_SECOND} files.
+ * Enumerates the columns in the {@link SynpufFile#CLAIMS_CARRIER_FIRST} and
+ * {@link SynpufFile#CLAIMS_CARRIER_SECOND} files.
  */
-public enum SynpufColumnForPartB {
+public enum SynpufColumnForCarrierClaims {
 	/**
 	 * Beneficiary Code
 	 */
@@ -723,7 +723,7 @@ public enum SynpufColumnForPartB {
 	 * @return a <code>String[]</code> containing all of the column names
 	 */
 	public static String[] getAllColumnNames() {
-		return Arrays.stream(SynpufColumnForPartB.values()).map(v -> v.name()).toArray(size -> new String[size]);
+		return Arrays.stream(SynpufColumnForCarrierClaims.values()).map(v -> v.name()).toArray(size -> new String[size]);
 	}
 
 	/**
@@ -731,11 +731,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>PRF_PHYSN_NPI_#</code> column to
 	 *            return, must be <code>1</code> through <code>13</code>,
 	 *            inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>PRF_PHYSN_NPI_#</code> column
 	 */
-	public static SynpufColumnForPartB getPrfPhysnNpi(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getPrfPhysnNpi(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("PRF_PHYSN_NPI") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -746,11 +746,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>TAX_NUM_#</code> column to
 	 *            return, must be <code>1</code> through <code>13</code>,
 	 *            inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>TAX_NUM_#</code> column
 	 */
-	public static SynpufColumnForPartB getTaxNum(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getTaxNum(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("TAX_NUM") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -761,11 +761,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>HCPCS_CD_#</code> column to
 	 *            return, must be <code>1</code> through <code>13</code>,
 	 *            inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>HCPCS_CD_#</code> column
 	 */
-	public static SynpufColumnForPartB getHcpcsCd(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getHcpcsCd(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("HCPCS_CD") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -776,11 +776,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>LINE_NCH_PMT_AMT_#</code> column
 	 *            to return, must be <code>1</code> through <code>13</code>,
 	 *            inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>LINE_NCH_PMT_AMT_#</code> column
 	 */
-	public static SynpufColumnForPartB getLineNchPmtAmt(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getLineNchPmtAmt(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("LINE_NCH_PMT_AMT") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -791,11 +791,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>LINE_BENE_PTB_DDCTBL_AMT_#</code>
 	 *            column to return, must be <code>1</code> through
 	 *            <code>13</code>, inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>LINE_BENE_PTB_DDCTBL_AMT_#</code> column
 	 */
-	public static SynpufColumnForPartB getLineBenePtbDdctblAmt(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getLineBenePtbDdctblAmt(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("LINE_BENE_PTB_DDCTBL_AMT") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -806,11 +806,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the
 	 *            <code>LINE_BENE_PRMRY_PYR_PD_AMT_#</code> column to return,
 	 *            must be <code>1</code> through <code>13</code>, inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>LINE_BENE_PRMRY_PYR_PD_AMT_#</code> column
 	 */
-	public static SynpufColumnForPartB getLineBenePrmryPyrPdAmt(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getLineBenePrmryPyrPdAmt(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("LINE_BENE_PRMRY_PYR_PD_AMT") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -821,11 +821,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>LINE_COINSRNC_AMT_#</code> column
 	 *            to return, must be <code>1</code> through <code>13</code>,
 	 *            inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>LINE_COINSRNC_AMT_#</code> column
 	 */
-	public static SynpufColumnForPartB getLineCoinsrncAmt(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getLineCoinsrncAmt(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("LINE_COINSRNC_AMT") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -836,11 +836,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>LINE_ALOWD_CHRG_AMT_#</code>
 	 *            column to return, must be <code>1</code> through
 	 *            <code>13</code>, inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>LINE_ALOWD_CHRG_AMT_#</code> column
 	 */
-	public static SynpufColumnForPartB getLineAlowdChrgAmt(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getLineAlowdChrgAmt(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("LINE_ALOWD_CHRG_AMT") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -851,11 +851,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>LINE_PRCSG_IND_CD_#</code> column
 	 *            to return, must be <code>1</code> through <code>13</code>,
 	 *            inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>LINE_PRCSG_IND_CD_#</code> column
 	 */
-	public static SynpufColumnForPartB getLinePrcsgIndCd(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getLinePrcsgIndCd(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("LINE_PRCSG_IND_CD") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);
@@ -866,11 +866,11 @@ public enum SynpufColumnForPartB {
 	 *            the line number of the <code>LINE_ICD9_DGNS_CD_#</code> column
 	 *            to return, must be <code>1</code> through <code>13</code>,
 	 *            inclusive
-	 * @return the {@link SynpufColumnForPartB} constant for the specified
+	 * @return the {@link SynpufColumnForCarrierClaims} constant for the specified
 	 *         <code>LINE_ICD9_DGNS_CD_#</code> column
 	 */
-	public static SynpufColumnForPartB getLineIcd9DgnsCd(int lineNumber) {
-		for (SynpufColumnForPartB column : SynpufColumnForPartB.values())
+	public static SynpufColumnForCarrierClaims getLineIcd9DgnsCd(int lineNumber) {
+		for (SynpufColumnForCarrierClaims column : SynpufColumnForCarrierClaims.values())
 			if (column.name().startsWith("LINE_ICD9_DGNS_CD") && column.name().endsWith("_" + lineNumber))
 				return column;
 		throw new IllegalArgumentException("Undefined column for line: " + lineNumber);

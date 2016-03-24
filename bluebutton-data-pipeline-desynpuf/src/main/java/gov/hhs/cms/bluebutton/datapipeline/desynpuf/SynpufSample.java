@@ -43,25 +43,25 @@ public final class SynpufSample {
 	/**
 	 * @return the {@link Path} to the extracted Beneficiary Summary files
 	 */
-	public Path getPartAClaimsOutpatient() {
-		return resolve(SynpufFile.PART_A_CLAIMS_OUTPATIENT);
+	public Path getOutpatientClaimsFile() {
+		return resolve(SynpufFile.CLAIMS_OUTPATIENT);
 	}
 
 	/**
 	 * @return the {@link Path}s to the extracted
-	 *         {@link SynpufFile#PART_B_CLAIMS_FIRST} and
-	 *         {@link SynpufFile#PART_B_CLAIMS_SECOND} files
+	 *         {@link SynpufFile#CLAIMS_CARRIER_FIRST} and
+	 *         {@link SynpufFile#CLAIMS_CARRIER_SECOND} files
 	 */
-	public Path[] getPartBClaims() {
-		return new Path[] { resolve(SynpufFile.PART_B_CLAIMS_FIRST), resolve(SynpufFile.PART_B_CLAIMS_SECOND) };
+	public Path[] getCarrierClaimsFiles() {
+		return new Path[] { resolve(SynpufFile.CLAIMS_CARRIER_FIRST), resolve(SynpufFile.CLAIMS_CARRIER_SECOND) };
 	}
 
 	/**
 	 * @return the {@link Path}s to the extracted
-	 *         {@link SynpufFile#PART_D_CLAIMS} file
+	 *         {@link SynpufFile#CLAIMS_PART_D} file
 	 */
-	public Path getPartDClaims() {
-		return resolve(SynpufFile.PART_D_CLAIMS);
+	public Path getPartDClaimsFile() {
+		return resolve(SynpufFile.CLAIMS_PART_D);
 	}
 
 	/**

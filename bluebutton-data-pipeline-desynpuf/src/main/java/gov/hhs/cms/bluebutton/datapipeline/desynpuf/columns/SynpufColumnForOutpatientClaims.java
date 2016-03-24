@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Enumerates the columns in the CMS DE-SynPUF Beneficiary Summary files.
  */
-public enum SynpufColumnForPartAOutpatient {
+public enum SynpufColumnForOutpatientClaims {
 	/**
 	 * Beneficiary Code
 	 */
@@ -390,7 +390,7 @@ public enum SynpufColumnForPartAOutpatient {
 	 * @return a <code>String[]</code> containing all of the column names
 	 */
 	public static String[] getAllColumnNames() {
-		return Arrays.stream(SynpufColumnForPartAOutpatient.values()).map(v -> v.name())
+		return Arrays.stream(SynpufColumnForOutpatientClaims.values()).map(v -> v.name())
 				.toArray(size -> new String[size]);
 	}
 }

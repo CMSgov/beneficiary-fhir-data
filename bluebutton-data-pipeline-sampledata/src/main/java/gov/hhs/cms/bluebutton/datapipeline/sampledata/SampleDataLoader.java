@@ -34,9 +34,9 @@ import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSample;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSampleLoader;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForBeneficiarySummary;
-import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartAOutpatient;
-import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartB;
-import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartD;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForCarrierClaims;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForOutpatientClaims;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartDClaims;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddressGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.npi.SampleProviderGenerator;
@@ -86,9 +86,9 @@ public final class SampleDataLoader {
 
 		/*
 		 * FIXME Need to come up with a more consistent and
-		 * representative-of-the-CCW way to handle missing fields. For example,
-		 * the parseDate method is a good thing. Also: many CCW fields use '~'
-		 * and '^' to indicate missing values.
+		 * representative-of-the-CCW way to handle missing fields, throughout
+		 * this class. For example, the parseDate method is a good thing. Also:
+		 * many CCW fields use '~' and '^' to indicate missing values.
 		 */
 
 		// Load the other sample data sets.
@@ -157,13 +157,13 @@ public final class SampleDataLoader {
 					LOGGER.info("Processed DE-SynPUF file '{}'.", summaryCsv.getFileName());
 				}
 
-				// Process the Part A Inpatient claims.
+				// Process the Part A inpatient claims.
 
-				// Process the Part A Outpatient claims.
+				// Process the Part B outpatient claims.
 				processOutpatientClaims(synpufSample, registry, providerGenerator);
 
-				// Process the Part B claims.
-				processPartBClaims(synpufSample, registry, providerGenerator);
+				// Process the Part B carrier claims.
+				processCarrierClaims(synpufSample, registry, providerGenerator);
 
 				// Process the Part D claims.
 				processPartDClaims(synpufSample, registry);
@@ -182,18 +182,22 @@ public final class SampleDataLoader {
 	}
 
 	/**
-	 * TODO
+	 * Process the Part B outpatient claims data in the specified
+	 * {@link SynpufSample}.
 	 * 
 	 * @param synpufSample
+	 *            the {@link SynpufSample} to process
 	 * @param registry
+	 *            the {@link SharedDataRegistry} to use
 	 * @param providerGenerator
+	 *            the {@link SampleProviderGenerator} to use
 	 */
 	private void processOutpatientClaims(SynpufSample synpufSample, SharedDataRegistry registry,
 			SampleProviderGenerator providerGenerator) {
-		LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getPartAClaimsOutpatient().getFileName());
-		try (Reader in = new FileReader(synpufSample.getPartAClaimsOutpatient().toFile());) {
+		LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getOutpatientClaimsFile().getFileName());
+		try (Reader in = new FileReader(synpufSample.getOutpatientClaimsFile().toFile());) {
 			Map<Long, PartAClaimFact> claimsMap = new HashMap<>();
-			CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartAOutpatient.getAllColumnNames())
+			CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForOutpatientClaims.getAllColumnNames())
 					.withSkipHeaderRecord();
 			Iterable<CSVRecord> records = csvFormat.parse(in);
 			for (CSVRecord record : records) {
@@ -212,37 +216,37 @@ public final class SampleDataLoader {
 				 * arbitrarily from the possible 45).
 				 */
 
-				String synpufId = record.get(SynpufColumnForPartAOutpatient.DESYNPUF_ID);
-				long claimId = Long.parseLong(record.get(SynpufColumnForPartAOutpatient.CLM_ID));
-				int segment = Integer.parseInt(record.get(SynpufColumnForPartAOutpatient.SEGMENT));
-				LocalDate dateClaimFrom = parseDate(record, SynpufColumnForPartAOutpatient.CLM_FROM_DT);
-				LocalDate dateClaimThrough = parseDate(record, SynpufColumnForPartAOutpatient.CLM_THRU_DT);
-				BigDecimal claimPayment = new BigDecimal(record.get(SynpufColumnForPartAOutpatient.CLM_PMT_AMT));
+				String synpufId = record.get(SynpufColumnForOutpatientClaims.DESYNPUF_ID);
+				long claimId = Long.parseLong(record.get(SynpufColumnForOutpatientClaims.CLM_ID));
+				int segment = Integer.parseInt(record.get(SynpufColumnForOutpatientClaims.SEGMENT));
+				LocalDate dateClaimFrom = parseDate(record, SynpufColumnForOutpatientClaims.CLM_FROM_DT);
+				LocalDate dateClaimThrough = parseDate(record, SynpufColumnForOutpatientClaims.CLM_THRU_DT);
+				BigDecimal claimPayment = new BigDecimal(record.get(SynpufColumnForOutpatientClaims.CLM_PMT_AMT));
 				BigDecimal nchPrimaryPayerClaimPaid = new BigDecimal(
-						record.get(SynpufColumnForPartAOutpatient.NCH_PRMRY_PYR_CLM_PD_AMT));
+						record.get(SynpufColumnForOutpatientClaims.NCH_PRMRY_PYR_CLM_PD_AMT));
 				BigDecimal nchBeneficiaryBloodDeductible = new BigDecimal(
-						record.get(SynpufColumnForPartAOutpatient.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
-				String diagnosisCode1 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_1);
-				String diagnosisCode2 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_2);
-				String diagnosisCode3 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_3);
-				String diagnosisCode4 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_4);
-				String diagnosisCode5 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_5);
-				String diagnosisCode6 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_6);
-				String diagnosisCode7 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_7);
-				String diagnosisCode8 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_8);
-				String diagnosisCode9 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_9);
-				String diagnosisCode10 = record.get(SynpufColumnForPartAOutpatient.ICD9_DGNS_CD_10);
-				String procedureCode1 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_1);
-				String procedureCode2 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_2);
-				String procedureCode3 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_3);
-				String procedureCode4 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_4);
-				String procedureCode5 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_5);
-				String procedureCode6 = record.get(SynpufColumnForPartAOutpatient.ICD9_PRCDR_CD_6);
+						record.get(SynpufColumnForOutpatientClaims.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+				String diagnosisCode1 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_1);
+				String diagnosisCode2 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_2);
+				String diagnosisCode3 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_3);
+				String diagnosisCode4 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_4);
+				String diagnosisCode5 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_5);
+				String diagnosisCode6 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_6);
+				String diagnosisCode7 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_7);
+				String diagnosisCode8 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_8);
+				String diagnosisCode9 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_9);
+				String diagnosisCode10 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_10);
+				String procedureCode1 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_1);
+				String procedureCode2 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_2);
+				String procedureCode3 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_3);
+				String procedureCode4 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_4);
+				String procedureCode5 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_5);
+				String procedureCode6 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_6);
 				BigDecimal nchBeneficiaryPartBDeductible = new BigDecimal(
-						record.get(SynpufColumnForPartAOutpatient.NCH_BENE_PTB_DDCTBL_AMT));
+						record.get(SynpufColumnForOutpatientClaims.NCH_BENE_PTB_DDCTBL_AMT));
 				BigDecimal nchBeneficiaryPartBCoinsurance = new BigDecimal(
-						record.get(SynpufColumnForPartAOutpatient.NCH_BENE_PTB_COINSRNC_AMT));
-				String admittingDiagnosisCode = record.get(SynpufColumnForPartAOutpatient.ADMTNG_ICD9_DGNS_CD);
+						record.get(SynpufColumnForOutpatientClaims.NCH_BENE_PTB_COINSRNC_AMT));
+				String admittingDiagnosisCode = record.get(SynpufColumnForOutpatientClaims.ADMTNG_ICD9_DGNS_CD);
 				String hcpcsCode = selectArbitraryOutpatientHcpcsCode(record);
 
 				/*
@@ -276,8 +280,6 @@ public final class SampleDataLoader {
 				claim.setAttendingPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
 				claim.setOperatingPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
 				claim.setOtherPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
-
-				// Skipping SynPUF data for provider, since it's gibberish.
 				claim.setProviderAtTimeOfClaimNpi((long) providerGenerator.generateProvider().getNpi());
 
 				PartAClaimRevLineFact revLine = new PartAClaimRevLineFact();
@@ -317,20 +319,20 @@ public final class SampleDataLoader {
 		} catch (IOException e) {
 			throw new SampleDataException(e);
 		}
-		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
+		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
 	}
 
 	/**
 	 * @param outpatientRecord
 	 *            the outpatient claim record to select a HCPCS code from
 	 * @return an arbitrary value from the
-	 *         {@link SynpufColumnForPartAOutpatient#HCPCS_CD_1},
-	 *         {@link SynpufColumnForPartAOutpatient#HCPCS_CD_2}, etc. columns
+	 *         {@link SynpufColumnForOutpatientClaims#HCPCS_CD_1},
+	 *         {@link SynpufColumnForOutpatientClaims#HCPCS_CD_2}, etc. columns
 	 *         in the specified record, or null if none of the columns have a
 	 *         value
 	 */
 	private static String selectArbitraryOutpatientHcpcsCode(CSVRecord outpatientRecord) {
-		List<String> hcpcsColumnNames = Arrays.stream(SynpufColumnForPartAOutpatient.values())
+		List<String> hcpcsColumnNames = Arrays.stream(SynpufColumnForOutpatientClaims.values())
 				.filter(c -> c.name().startsWith("HCPCS_CD_")).map(c -> c.name()).collect(Collectors.toList());
 		List<String> hcpcsColumnValues = hcpcsColumnNames.stream().map(c -> outpatientRecord.get(c))
 				.collect(Collectors.toList());
@@ -340,7 +342,8 @@ public final class SampleDataLoader {
 	}
 
 	/**
-	 * Processes the Part B claims data in the specified {@link SynpufSample}.
+	 * Processes the Part B carrier claims data in the specified
+	 * {@link SynpufSample}.
 	 * 
 	 * @param synpufSample
 	 *            the {@link SynpufSample} to process
@@ -349,33 +352,33 @@ public final class SampleDataLoader {
 	 * @param providerGenerator
 	 *            the {@link SampleProviderGenerator} to use
 	 */
-	private void processPartBClaims(SynpufSample synpufSample, SharedDataRegistry registry,
+	private void processCarrierClaims(SynpufSample synpufSample, SharedDataRegistry registry,
 			SampleProviderGenerator providerGenerator) {
 		Map<Long, PartBClaimFact> claimsMap = new HashMap<>();
-		for (Path claimsCsv : synpufSample.getPartBClaims()) {
+		for (Path claimsCsv : synpufSample.getCarrierClaimsFiles()) {
 			LOGGER.info("Processing DE-SynPUF file '{}'...", claimsCsv.getFileName());
 			try (Reader in = new FileReader(claimsCsv.toFile());) {
-				CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartB.getAllColumnNames())
+				CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForCarrierClaims.getAllColumnNames())
 						.withSkipHeaderRecord();
 				Iterable<CSVRecord> records = csvFormat.parse(in);
 				for (CSVRecord record : records) {
-					LOGGER.trace("Processing DE-SynPUF Part B Outpatient record #{}.", record.getRecordNumber());
+					LOGGER.trace("Processing DE-SynPUF Carrier record #{}.", record.getRecordNumber());
 
-					String synpufId = record.get(SynpufColumnForPartB.DESYNPUF_ID);
-					String claimIdText = record.get(SynpufColumnForPartB.CLM_ID);
+					String synpufId = record.get(SynpufColumnForCarrierClaims.DESYNPUF_ID);
+					String claimIdText = record.get(SynpufColumnForCarrierClaims.CLM_ID);
 					long claimId = Long.parseLong(claimIdText);
-					String dateFromText = record.get(SynpufColumnForPartB.CLM_FROM_DT);
+					String dateFromText = record.get(SynpufColumnForCarrierClaims.CLM_FROM_DT);
 					LocalDate dateFrom = LocalDate.parse(dateFromText, SYNPUF_DATE_FORMATTER);
-					String dateThroughText = record.get(SynpufColumnForPartB.CLM_THRU_DT);
+					String dateThroughText = record.get(SynpufColumnForCarrierClaims.CLM_THRU_DT);
 					LocalDate dateThrough = LocalDate.parse(dateThroughText, SYNPUF_DATE_FORMATTER);
-					String diagnosisCode1 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_1);
-					String diagnosisCode2 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_2);
-					String diagnosisCode3 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_3);
-					String diagnosisCode4 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_4);
-					String diagnosisCode5 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_5);
-					String diagnosisCode6 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_6);
-					String diagnosisCode7 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_7);
-					String diagnosisCode8 = record.get(SynpufColumnForPartB.ICD9_DGNS_CD_8);
+					String diagnosisCode1 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_1);
+					String diagnosisCode2 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_2);
+					String diagnosisCode3 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_3);
+					String diagnosisCode4 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_4);
+					String diagnosisCode5 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_5);
+					String diagnosisCode6 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_6);
+					String diagnosisCode7 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_7);
+					String diagnosisCode8 = record.get(SynpufColumnForCarrierClaims.ICD9_DGNS_CD_8);
 
 					// Sanity check:
 					if (claimsMap.containsKey(claimId)) {
@@ -407,17 +410,18 @@ public final class SampleDataLoader {
 						claimLine.setDateFrom(dateFrom);
 						claimLine.setDateThrough(dateThrough);
 
-						String lineDiagnosisCode = record.get(SynpufColumnForPartB.getLineIcd9DgnsCd(lineNumber));
+						String lineDiagnosisCode = record
+								.get(SynpufColumnForCarrierClaims.getLineIcd9DgnsCd(lineNumber));
 						claimLine.setLineDiagnosisCode(lineDiagnosisCode);
 
 						int claimLinePerformingPhysicianNpi = providerGenerator.generateProvider().getNpi();
 						// TODO where to map PRF_PHYSN_NPI_#? Note: Gibberish
 						// data! (Already mapped at claim level.)
 
-						String taxNum = record.get(SynpufColumnForPartB.getTaxNum(lineNumber));
+						String taxNum = record.get(SynpufColumnForCarrierClaims.getTaxNum(lineNumber));
 						// TODO where to map TAX_NUM_#? Note: Gibberish data!
 
-						String hcpcsCd = record.get(SynpufColumnForPartB.getHcpcsCd(lineNumber));
+						String hcpcsCd = record.get(SynpufColumnForCarrierClaims.getHcpcsCd(lineNumber));
 						if (!isBlank(hcpcsCd)) {
 							Procedure procedure;
 							if (registry.getProcedure(hcpcsCd) != null) {
@@ -430,30 +434,33 @@ public final class SampleDataLoader {
 							claimLine.setProcedure(procedure);
 						}
 
-						String nchPaymentAmountText = record.get(SynpufColumnForPartB.getLineNchPmtAmt(lineNumber));
+						String nchPaymentAmountText = record
+								.get(SynpufColumnForCarrierClaims.getLineNchPmtAmt(lineNumber));
 						Double nchPaymentAmount = Double.parseDouble(nchPaymentAmountText);
 						claimLine.setNchPaymentAmount(nchPaymentAmount);
 
 						String deductibleAmountText = record
-								.get(SynpufColumnForPartB.getLineBenePtbDdctblAmt(lineNumber));
+								.get(SynpufColumnForCarrierClaims.getLineBenePtbDdctblAmt(lineNumber));
 						Double deductibleAmount = Double.parseDouble(deductibleAmountText);
 						claimLine.setDeductibleAmount(deductibleAmount);
 
 						String primaryPayerPaidAmountText = record
-								.get(SynpufColumnForPartB.getLineBenePrmryPyrPdAmt(lineNumber));
+								.get(SynpufColumnForCarrierClaims.getLineBenePrmryPyrPdAmt(lineNumber));
 						Double primaryPayerPaidAmount = Double.parseDouble(primaryPayerPaidAmountText);
 						claimLine.setBeneficiaryPrimaryPayerPaidAmount(primaryPayerPaidAmount);
 
-						String coinsuranceAmountText = record.get(SynpufColumnForPartB.getLineCoinsrncAmt(lineNumber));
+						String coinsuranceAmountText = record
+								.get(SynpufColumnForCarrierClaims.getLineCoinsrncAmt(lineNumber));
 						Double coinsuranceAmount = Double.parseDouble(coinsuranceAmountText);
 						claimLine.setCoinsuranceAmount(coinsuranceAmount);
 
-						String allowedAmountText = record.get(SynpufColumnForPartB.getLineAlowdChrgAmt(lineNumber));
+						String allowedAmountText = record
+								.get(SynpufColumnForCarrierClaims.getLineAlowdChrgAmt(lineNumber));
 						Double allowedAmount = Double.parseDouble(allowedAmountText);
 						claimLine.setAllowedAmount(allowedAmount);
 
 						String processingIndicationCode = record
-								.get(SynpufColumnForPartB.getLinePrcsgIndCd(lineNumber));
+								.get(SynpufColumnForCarrierClaims.getLinePrcsgIndCd(lineNumber));
 						claimLine.setProcessingIndicationCode(processingIndicationCode);
 
 						// TODO how to populate this?
@@ -471,7 +478,7 @@ public final class SampleDataLoader {
 			} catch (IOException e) {
 				throw new SampleDataException(e);
 			}
-			LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
+			LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
 		}
 	}
 
@@ -511,30 +518,30 @@ public final class SampleDataLoader {
 		SamplePrescriberGenerator prescriberGenerator = new SamplePrescriberGenerator();
 		SamplePharmacyGenerator pharmacyGenerator = new SamplePharmacyGenerator();
 
-		Path claimsCsv = synpufSample.getPartDClaims();
+		Path claimsCsv = synpufSample.getPartDClaimsFile();
 		LOGGER.info("Processing DE-SynPUF file '{}'...", claimsCsv.getFileName());
 		try (Reader in = new FileReader(claimsCsv.toFile());) {
-			CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartD.getAllColumnNames())
+			CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForPartDClaims.getAllColumnNames())
 					.withSkipHeaderRecord();
 			Iterable<CSVRecord> records = csvFormat.parse(in);
 			for (CSVRecord record : records) {
 				LOGGER.trace("Processing DE-SynPUF Part D Outpatient record #{}.", record.getRecordNumber());
 
-				String synpufId = record.get(SynpufColumnForPartD.DESYNPUF_ID);
-				String eventIdText = record.get(SynpufColumnForPartD.PDE_ID);
+				String synpufId = record.get(SynpufColumnForPartDClaims.DESYNPUF_ID);
+				String eventIdText = record.get(SynpufColumnForPartDClaims.PDE_ID);
 				long eventId = Long.parseLong(eventIdText);
-				String serviceDateText = record.get(SynpufColumnForPartD.SRVC_DT);
+				String serviceDateText = record.get(SynpufColumnForPartDClaims.SRVC_DT);
 				LocalDate serviceDate = LocalDate.parse(serviceDateText, SYNPUF_DATE_FORMATTER);
-				String productIdText = record.get(SynpufColumnForPartD.PROD_SRVC_ID);
+				String productIdText = record.get(SynpufColumnForPartDClaims.PROD_SRVC_ID);
 				long productId = Long.parseLong(productIdText);
-				String quantityText = record.get(SynpufColumnForPartD.QTY_DSPNSD_NUM);
+				String quantityText = record.get(SynpufColumnForPartDClaims.QTY_DSPNSD_NUM);
 				// FIXME some/all values have fractions, e.g. "30.000"
 				long quantity = (long) Double.parseDouble(quantityText);
-				String daysSupplyText = record.get(SynpufColumnForPartD.DAYS_SUPLY_NUM);
+				String daysSupplyText = record.get(SynpufColumnForPartDClaims.DAYS_SUPLY_NUM);
 				long daysSupply = Long.parseLong(daysSupplyText);
-				String patientPaymentText = record.get(SynpufColumnForPartD.PTNT_PAY_AMT);
+				String patientPaymentText = record.get(SynpufColumnForPartDClaims.PTNT_PAY_AMT);
 				double patientPayment = Double.parseDouble(patientPaymentText);
-				String prescriptionCostText = record.get(SynpufColumnForPartD.TOT_RX_CST_AMT);
+				String prescriptionCostText = record.get(SynpufColumnForPartDClaims.TOT_RX_CST_AMT);
 				double prescriptionCost = Double.parseDouble(prescriptionCostText);
 
 				PartDEventFact event = new PartDEventFact();
@@ -554,7 +561,7 @@ public final class SampleDataLoader {
 		} catch (IOException e) {
 			throw new SampleDataException(e);
 		}
-		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartAClaimsOutpatient().getFileName());
+		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
 	}
 
 	/**
