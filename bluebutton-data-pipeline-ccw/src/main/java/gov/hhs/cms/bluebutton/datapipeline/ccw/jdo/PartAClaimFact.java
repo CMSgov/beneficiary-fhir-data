@@ -32,6 +32,14 @@ public class PartAClaimFact {
 	private AllClaimsProfile claimProfile;
 
 	@Persistent
+	@Column(name = "DRG_ID")
+	private DiagnosisRelatedGroup diagnosisGroup;
+
+	@Persistent
+	@Column(name = "CLM_ADMSN_DT")
+	private LocalDate dateAdmission;
+
+	@Persistent
 	@Column(name = "CLM_FROM_DT")
 	private LocalDate dateFrom;
 
@@ -40,16 +48,36 @@ public class PartAClaimFact {
 	private LocalDate dateThrough;
 
 	@Persistent
+	@Column(name = "NCH_BENE_DSCHRG_DT")
+	private LocalDate dateDischarge;
+
+	@Persistent
 	@Column(name = "PRVDR_AT_TIME_OF_CLM_ID")
 	private Long providerAtTimeOfClaimNpi;
+
+	@Persistent
+	@Column(name = "CLM_UTLZTN_DAY_CNT")
+	private Long utilizationDayCount;
 
 	@Persistent
 	@Column(name = "CLM_PMT_AMT")
 	private BigDecimal payment;
 
 	@Persistent
+	@Column(name = "CLM_PASS_THRU_PER_DIEM_AMT")
+	private BigDecimal passThroughPerDiemAmount;
+
+	@Persistent
 	@Column(name = "NCH_BENE_BLOOD_DDCTBL_LBLTY_AM")
 	private BigDecimal nchBeneficiaryBloodDeductibleLiability;
+
+	@Persistent
+	@Column(name = "NCH_BENE_IP_DDCTBL_AMT")
+	private BigDecimal nchBeneficiaryInpatientDeductible;
+
+	@Persistent
+	@Column(name = "NCH_BENE_PTA_COINSRNC_LBLTY_AM")
+	private BigDecimal nchBeneficiaryPartACoinsuranceLiability;
 
 	@Persistent
 	@Column(name = "NCH_BENE_PTB_DDCTBL_AMT")
@@ -142,6 +170,40 @@ public class PartAClaimFact {
 	}
 
 	/**
+	 * @return the {@link DiagnosisRelatedGroup} for this {@link PartAClaimFact}
+	 */
+	public DiagnosisRelatedGroup getDiagnosisGroup() {
+		return diagnosisGroup;
+	}
+
+	/**
+	 * @param diagnosisGroup
+	 *            the new value for {@link #getDiagnosisGroup()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setDiagnosisGroup(DiagnosisRelatedGroup diagnosisGroup) {
+		this.diagnosisGroup = diagnosisGroup;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
+	public LocalDate getDateAdmission() {
+		return dateAdmission;
+	}
+
+	/**
+	 * @param dateAdmission
+	 *            the new value for {@link #getDateAdmission()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setDateAdmission(LocalDate dateAdmission) {
+		this.dateAdmission = dateAdmission;
+		return this;
+	}
+
+	/**
 	 * @return TODO
 	 */
 	public LocalDate getDateFrom() {
@@ -163,6 +225,23 @@ public class PartAClaimFact {
 	 */
 	public LocalDate getDateThrough() {
 		return dateThrough;
+	}
+
+	/**
+	 * @return TODO
+	 */
+	public LocalDate getDateDischarge() {
+		return dateDischarge;
+	}
+
+	/**
+	 * @param dateDischarge
+	 *            the new value for {@link #getDateDischarge()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setDateDischarge(LocalDate dateDischarge) {
+		this.dateDischarge = dateDischarge;
+		return this;
 	}
 
 	/**
@@ -195,6 +274,23 @@ public class PartAClaimFact {
 	/**
 	 * @return TODO
 	 */
+	public Long getUtilizationDayCount() {
+		return utilizationDayCount;
+	}
+
+	/**
+	 * @param utilizationDayCount
+	 *            the new value for {@link #getUtilizationDayCount()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setUtilizationDayCount(Long utilizationDayCount) {
+		this.utilizationDayCount = utilizationDayCount;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
 	public BigDecimal getPayment() {
 		return payment;
 	}
@@ -206,6 +302,23 @@ public class PartAClaimFact {
 	 */
 	public PartAClaimFact setPayment(BigDecimal payment) {
 		this.payment = payment;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
+	public BigDecimal getPassThroughPerDiemAmount() {
+		return passThroughPerDiemAmount;
+	}
+
+	/**
+	 * @param passThroughPerDiemAmount
+	 *            the new value for {@link #getPassThroughPerDiemAmount()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setPassThroughPerDiemAmount(BigDecimal passThroughPerDiemAmount) {
+		this.passThroughPerDiemAmount = passThroughPerDiemAmount;
 		return this;
 	}
 
@@ -224,6 +337,43 @@ public class PartAClaimFact {
 	 */
 	public PartAClaimFact setNchBeneficiaryBloodDeductibleLiability(BigDecimal nchBeneficiaryBloodDeductibleLiability) {
 		this.nchBeneficiaryBloodDeductibleLiability = nchBeneficiaryBloodDeductibleLiability;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
+	public BigDecimal getNchBeneficiaryInpatientDeductible() {
+		return nchBeneficiaryInpatientDeductible;
+	}
+
+	/**
+	 * @param nchBeneficiaryInpatientDeductible
+	 *            the new value for
+	 *            {@link #getNchBeneficiaryInpatientDeductible()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setNchBeneficiaryInpatientDeductible(BigDecimal nchBeneficiaryInpatientDeductible) {
+		this.nchBeneficiaryInpatientDeductible = nchBeneficiaryInpatientDeductible;
+		return this;
+	}
+
+	/**
+	 * @return TODO
+	 */
+	public BigDecimal getNchBeneficiaryPartACoinsuranceLiability() {
+		return nchBeneficiaryPartACoinsuranceLiability;
+	}
+
+	/**
+	 * @param nchBeneficiaryPartACoinsuranceLiability
+	 *            the new value for
+	 *            {@link #getNchBeneficiaryPartACoinsuranceLiability()}
+	 * @return this instance (for call-chaining purposes)
+	 */
+	public PartAClaimFact setNchBeneficiaryPartACoinsuranceLiability(
+			BigDecimal nchBeneficiaryPartACoinsuranceLiability) {
+		this.nchBeneficiaryPartACoinsuranceLiability = nchBeneficiaryPartACoinsuranceLiability;
 		return this;
 	}
 
@@ -366,16 +516,30 @@ public class PartAClaimFact {
 		builder.append(beneficiary != null ? beneficiary.getId() : "null");
 		builder.append(", claimProfile=");
 		builder.append(claimProfile);
+		builder.append(", diagnosisGroup=");
+		builder.append(diagnosisGroup);
+		builder.append(", dateAdmission=");
+		builder.append(dateAdmission);
 		builder.append(", dateFrom=");
 		builder.append(dateFrom);
 		builder.append(", dateThrough=");
 		builder.append(dateThrough);
+		builder.append(", dateDischarge=");
+		builder.append(dateDischarge);
 		builder.append(", providerAtTimeOfClaimNpi=");
 		builder.append(providerAtTimeOfClaimNpi);
+		builder.append(", utilizationDayCount=");
+		builder.append(utilizationDayCount);
 		builder.append(", payment=");
 		builder.append(payment);
+		builder.append(", passThroughPerDiemAmount=");
+		builder.append(passThroughPerDiemAmount);
 		builder.append(", nchBeneficiaryBloodDeductibleLiability=");
 		builder.append(nchBeneficiaryBloodDeductibleLiability);
+		builder.append(", nchBeneficiaryInpatientDeductible=");
+		builder.append(nchBeneficiaryInpatientDeductible);
+		builder.append(", nchBeneficiaryPartACoinsuranceLiability=");
+		builder.append(nchBeneficiaryPartACoinsuranceLiability);
 		builder.append(", nchBeneficiaryPartBDeductible=");
 		builder.append(nchBeneficiaryPartBDeductible);
 		builder.append(", nchBeneficiaryPartBCoinsurance=");

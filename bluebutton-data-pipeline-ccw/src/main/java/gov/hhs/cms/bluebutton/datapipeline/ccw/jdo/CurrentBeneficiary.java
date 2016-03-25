@@ -43,13 +43,11 @@ public class CurrentBeneficiary {
 	private String contactAddressZip;
 
 	@Persistent(mappedBy = "beneficiary")
-	// FIXME wrong sort field: how is SampleDataLoaderTest passing?!
-	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "beneficiary ASC"))
+	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "id ASC"))
 	private List<PartAClaimFact> partAClaimFacts = new ArrayList<>();
 
 	@Persistent(mappedBy = "beneficiary")
-	// FIXME wrong sort field: how is SampleDataLoaderTest passing?!
-	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "beneficiary ASC"))
+	@Order(extensions = @Extension(vendorName = "datanucleus", key = "list-ordering", value = "id ASC"))
 	private List<PartBClaimFact> partBClaimFacts = new ArrayList<>();
 
 	@Persistent(mappedBy = "beneficiary")

@@ -80,6 +80,17 @@
 			</column>
 		</createTable>
 
+		<createTable tableName="CCW_DRG">
+			<column name="DRG_ID" type="NUMERIC(22)">
+				<!-- This is column #1 in the actual CCW schema. -->
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="CLM_DRG_CD" type="VARCHAR(3)">
+				<!-- This is column #2 in the actual CCW schema. -->
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
 		<createTable tableName="CCW_PTA_FACT">
 			<column name="CLM_ID" type="NUMERIC(22)">
 				<!-- This is column #1 in the actual CCW schema. -->
@@ -95,12 +106,25 @@
 				<constraints nullable="false" foreignKeyName="PtaFactToAllClmPrfl"
 					referencedTableName="CCW_ALL_CLM_PRFL" referencedColumnNames="CLM_TYPE_ID" />
 			</column>
+			<column name="DRG_ID" type="NUMERIC(22)">
+				<!-- This is column #4 in the actual CCW schema. -->
+				<constraints nullable="true" foreignKeyName="PtaFactToDrg"
+					referencedTableName="CCW_DRG" referencedColumnNames="DRG_ID" />
+			</column>
+			<column name="CLM_ADMSN_DT" type="TIMESTAMP">
+				<!-- This is column #7 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
 			<column name="CLM_FROM_DT" type="TIMESTAMP">
 				<!-- This is column #10 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
 			<column name="CLM_THRU_DT" type="TIMESTAMP">
 				<!-- This is column #11 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="NCH_BENE_DSCHRG_DT" type="TIMESTAMP">
+				<!-- This is column #14 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
 			<column name="PRVDR_AT_TIME_OF_CLM_ID" type="NUMERIC(22)">
@@ -119,12 +143,28 @@
 				<!-- This is column #24 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
+			<column name="CLM_UTLZTN_DAY_CNT" type="NUMERIC(22)">
+				<!-- This is column #31 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
 			<column name="CLM_PMT_AMT" type="NUMERIC(22,2)">
 				<!-- This is column #35 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
+			<column name="CLM_PASS_THRU_PER_DIEM_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #36 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
 			<column name="NCH_BENE_BLOOD_DDCTBL_LBLTY_AM" type="NUMERIC(22,2)">
 				<!-- This is column #45 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="NCH_BENE_IP_DDCTBL_AMT" type="NUMERIC(22,2)">
+				<!-- This is column #46 in the actual CCW schema. -->
+				<constraints nullable="true" />
+			</column>
+			<column name="NCH_BENE_PTA_COINSRNC_LBLTY_AM" type="NUMERIC(22,2)">
+				<!-- This is column #47 in the actual CCW schema. -->
 				<constraints nullable="true" />
 			</column>
 			<column name="NCH_BENE_PTB_DDCTBL_AMT" type="NUMERIC(22,2)">

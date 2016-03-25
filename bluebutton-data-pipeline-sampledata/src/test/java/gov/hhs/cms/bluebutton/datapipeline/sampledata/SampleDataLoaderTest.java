@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
@@ -133,13 +134,62 @@ public final class SampleDataLoaderTest {
 			Assert.assertTrue(beneficiary.getContactAddress() != null && beneficiary.getContactAddress().length() > 0);
 			Assert.assertTrue(
 					beneficiary.getContactAddressZip() != null && beneficiary.getContactAddressZip().length() > 0);
+			Assert.assertEquals(2, beneficiary.getPartAClaimFacts().size());
 
-			// Spot check one of the beneficiary's PartAClaimFacts.
-			Assert.assertEquals(1, beneficiary.getPartAClaimFacts().size());
-			PartAClaimFact outpatientClaim = beneficiary.getPartAClaimFacts().get(0);
+			// Spot check one of the beneficiary's inpatient claims.
+			PartAClaimFact inpatientClaim = beneficiary.getPartAClaimFacts().get(0);
+			LOGGER.info("Checking against inpatient claim: {}", inpatientClaim);
+			Assert.assertEquals(196661176988405L, (long) inpatientClaim.getId());
+			Assert.assertEquals(ClaimType.INPATIENT_CLAIM, inpatientClaim.getClaimProfile().getClaimType());
+			Assert.assertEquals("217", inpatientClaim.getDiagnosisGroup().getCode());
+			Assert.assertEquals(2010, inpatientClaim.getDateAdmission().getYear());
+			Assert.assertEquals(2010, inpatientClaim.getDateFrom().getYear());
+			Assert.assertEquals(2010, inpatientClaim.getDateThrough().getYear());
+			Assert.assertEquals(2010, inpatientClaim.getDateDischarge().getYear());
+			Assert.assertNotNull(inpatientClaim.getProviderAtTimeOfClaimNpi());
+			Assert.assertEquals(1L, (long) inpatientClaim.getUtilizationDayCount());
+			Assert.assertEquals(new BigDecimal("4000.00"), inpatientClaim.getPayment());
+			Assert.assertEquals(new BigDecimal("0.00"), inpatientClaim.getPassThroughPerDiemAmount());
+			Assert.assertEquals(new BigDecimal("0.00"), inpatientClaim.getNchBeneficiaryBloodDeductibleLiability());
+			Assert.assertEquals(new BigDecimal("1100.00"), inpatientClaim.getNchBeneficiaryInpatientDeductible());
+			Assert.assertEquals(new BigDecimal("0.00"), inpatientClaim.getNchBeneficiaryPartACoinsuranceLiability());
+			Assert.assertNull(inpatientClaim.getNchBeneficiaryPartBDeductible());
+			Assert.assertNull(inpatientClaim.getNchBeneficiaryPartBCoinsurance());
+			Assert.assertEquals(new BigDecimal("0.00"), inpatientClaim.getNchPrimaryPayerPaid());
+			Assert.assertNotNull(inpatientClaim.getAttendingPhysicianNpi());
+			Assert.assertNotNull(inpatientClaim.getOperatingPhysicianNpi());
+			Assert.assertNotNull(inpatientClaim.getOtherPhysicianNpi());
+			Assert.assertEquals("4580", inpatientClaim.getAdmittingDiagnosisCode());
+
+			// Spot check one of the beneficiary's inpatient claim lines.
+			Assert.assertEquals(1, inpatientClaim.getClaimLines().size());
+			PartAClaimRevLineFact inpatientClaimRevLine = inpatientClaim.getClaimLines().get(0);
+			LOGGER.info("Checking against inpatient claim rev line: {}", inpatientClaimRevLine);
+			Assert.assertSame(inpatientClaim, inpatientClaimRevLine.getClaim());
+			Assert.assertEquals(1, inpatientClaimRevLine.getLineNumber());
+			Assert.assertNull(inpatientClaimRevLine.getRevenueCenter());
+			Assert.assertEquals("7802", inpatientClaimRevLine.getDiagnosisCode1());
+			Assert.assertEquals("78820", inpatientClaimRevLine.getDiagnosisCode2());
+			Assert.assertEquals("V4501", inpatientClaimRevLine.getDiagnosisCode3());
+			Assert.assertEquals("4280", inpatientClaimRevLine.getDiagnosisCode4());
+			Assert.assertEquals("2720", inpatientClaimRevLine.getDiagnosisCode5());
+			Assert.assertEquals("4019", inpatientClaimRevLine.getDiagnosisCode6());
+			Assert.assertEquals("V4502", inpatientClaimRevLine.getDiagnosisCode7());
+			Assert.assertEquals("73300", inpatientClaimRevLine.getDiagnosisCode8());
+			Assert.assertEquals("E9330", inpatientClaimRevLine.getDiagnosisCode9());
+			Assert.assertEquals("", inpatientClaimRevLine.getDiagnosisCode10());
+			Assert.assertEquals("", inpatientClaimRevLine.getProcedureCode1());
+			Assert.assertEquals("", inpatientClaimRevLine.getProcedureCode2());
+			Assert.assertEquals("", inpatientClaimRevLine.getProcedureCode3());
+			Assert.assertEquals("", inpatientClaimRevLine.getProcedureCode4());
+			Assert.assertEquals("", inpatientClaimRevLine.getProcedureCode5());
+			Assert.assertEquals("", inpatientClaimRevLine.getProcedureCode6());
+
+			// Spot check one of the beneficiary's outpatient claims.
+			PartAClaimFact outpatientClaim = beneficiary.getPartAClaimFacts().get(1);
 			LOGGER.info("Checking against outpatient claim: {}", outpatientClaim);
 			Assert.assertEquals(542192281063886L, (long) outpatientClaim.getId());
-			Assert.assertEquals("V5883", outpatientClaim.getAdmittingDiagnosisCode());
+			Assert.assertEquals(ClaimType.OUTPATIENT_CLAIM, outpatientClaim.getClaimProfile().getClaimType());
 			Assert.assertEquals(2008, outpatientClaim.getDateFrom().getYear());
 			Assert.assertEquals(2008, outpatientClaim.getDateThrough().getYear());
 			Assert.assertNotNull(outpatientClaim.getProviderAtTimeOfClaimNpi());
@@ -153,7 +203,7 @@ public final class SampleDataLoaderTest {
 			Assert.assertNotNull(outpatientClaim.getOtherPhysicianNpi());
 			Assert.assertEquals("V5883", outpatientClaim.getAdmittingDiagnosisCode());
 
-			// Spot check one of the beneficiary's PartAClaimFacts.
+			// Spot check one of the beneficiary's outpatient claim lines.
 			Assert.assertEquals(1, outpatientClaim.getClaimLines().size());
 			PartAClaimRevLineFact outpatientClaimRevLine = outpatientClaim.getClaimLines().get(0);
 			LOGGER.info("Checking against outpatient claim rev line: {}", outpatientClaimRevLine);
@@ -168,6 +218,7 @@ public final class SampleDataLoaderTest {
 			LOGGER.info("Checking against carrier claim: {}", carrierClaim);
 			Assert.assertEquals(887213386947664L, (long) carrierClaim.getId());
 			Assert.assertSame(beneficiary, carrierClaim.getBeneficiary());
+			Assert.assertEquals(ClaimType.CARRIER_NON_DME_CLAIM, carrierClaim.getClaimProfile().getClaimType());
 			Assert.assertEquals(carrierClaim.getId(), carrierClaim.getCarrierControlNumber());
 			Assert.assertEquals("3598", carrierClaim.getDiagnosisCode1());
 			Assert.assertEquals("27541", carrierClaim.getDiagnosisCode2());

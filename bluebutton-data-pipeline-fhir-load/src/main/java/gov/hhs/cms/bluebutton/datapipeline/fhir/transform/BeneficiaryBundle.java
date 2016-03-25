@@ -81,6 +81,21 @@ public final class BeneficiaryBundle {
 	}
 
 	/**
+	 * @return the {@link ExplanationOfBenefit}s resources for Part A inpatient
+	 *         claims in {@link #getFhirResources()}
+	 */
+	public List<ExplanationOfBenefit> getExplanationOfBenefitsForInpatient() {
+		List<ExplanationOfBenefit> eobs = fhirResources.stream().filter(r -> r instanceof ExplanationOfBenefit)
+				.map(r -> (ExplanationOfBenefit) r)
+				.filter(e -> e.getExtension().stream()
+						.filter(x -> DataTransformer.EXTENSION_CMS_CLAIM_TYPE.equals(x.getUrl())
+								&& ClaimType.INPATIENT_CLAIM.getCode().equals(((Coding) x.getValue()).getCode()))
+						.findAny().isPresent())
+				.collect(Collectors.toList());
+		return eobs;
+	}
+
+	/**
 	 * @return the {@link ExplanationOfBenefit}s resources for Part A outpatient
 	 *         claims in {@link #getFhirResources()}
 	 */

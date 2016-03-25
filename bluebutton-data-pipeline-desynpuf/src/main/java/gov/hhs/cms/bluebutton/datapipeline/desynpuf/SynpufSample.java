@@ -33,7 +33,10 @@ public final class SynpufSample {
 	}
 
 	/**
-	 * @return the {@link Path}s to the extracted Beneficiary Summary files
+	 * @return the {@link Path}s to the extracted
+	 *         {@link SynpufFile#BENE_SUMMARY_2008},
+	 *         {@link SynpufFile#BENE_SUMMARY_2009}, and
+	 *         {@link SynpufFile#BENE_SUMMARY_2010} files
 	 */
 	public Path[] getBeneficiarySummaries() {
 		return new Path[] { resolve(SynpufFile.BENE_SUMMARY_2008), resolve(SynpufFile.BENE_SUMMARY_2009),
@@ -41,7 +44,16 @@ public final class SynpufSample {
 	}
 
 	/**
-	 * @return the {@link Path} to the extracted Beneficiary Summary files
+	 * @return the {@link Path} to the extracted
+	 *         {@link SynpufFile#CLAIMS_INPATIENT}
+	 */
+	public Path getInpatientClaimsFile() {
+		return resolve(SynpufFile.CLAIMS_INPATIENT);
+	}
+
+	/**
+	 * @return the {@link Path} to the extracted
+	 *         {@link SynpufFile#CLAIMS_OUTPATIENT}
 	 */
 	public Path getOutpatientClaimsFile() {
 		return resolve(SynpufFile.CLAIMS_OUTPATIENT);

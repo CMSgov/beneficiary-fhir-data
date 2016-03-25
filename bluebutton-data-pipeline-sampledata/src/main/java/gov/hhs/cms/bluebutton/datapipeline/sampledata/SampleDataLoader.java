@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.DiagnosisRelatedGroup;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
@@ -37,6 +38,7 @@ import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSample;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufSampleLoader;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForBeneficiarySummary;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForCarrierClaims;
+import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForInpatientClaims;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForOutpatientClaims;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.columns.SynpufColumnForPartDClaims;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.addresses.SampleAddress;
@@ -160,6 +162,7 @@ public final class SampleDataLoader {
 				}
 
 				// Process the Part A inpatient claims.
+				processInpatientClaims(synpufSample, registry, providerGenerator);
 
 				// Process the Part B outpatient claims.
 				processOutpatientClaims(synpufSample, registry, providerGenerator);
@@ -181,6 +184,153 @@ public final class SampleDataLoader {
 
 		// TODO
 		return null;
+	}
+
+	/**
+	 * Process the Part A inpatient claims data in the specified
+	 * {@link SynpufSample}.
+	 * 
+	 * @param synpufSample
+	 *            the {@link SynpufSample} to process
+	 * @param registry
+	 *            the {@link SharedDataRegistry} to use
+	 * @param providerGenerator
+	 *            the {@link SampleProviderGenerator} to use
+	 */
+	private void processInpatientClaims(SynpufSample synpufSample, SharedDataRegistry registry,
+			SampleProviderGenerator providerGenerator) {
+		LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getInpatientClaimsFile().getFileName());
+		try (Reader in = new FileReader(synpufSample.getInpatientClaimsFile().toFile());) {
+			Map<Long, PartAClaimFact> claimsMap = new HashMap<>();
+			CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForInpatientClaims.getAllColumnNames())
+					.withSkipHeaderRecord();
+			Iterable<CSVRecord> records = csvFormat.parse(in);
+			for (CSVRecord record : records) {
+				LOGGER.trace("Processing DE-SynPUF Inpatient record #{}.", record.getRecordNumber());
+
+				/*
+				 * Based on conversations with Tony Dean at CMS, it seems pretty
+				 * clear that the DE-SynPUF inpatient data records are rather
+				 * borked: in the CCW, there is one line/trailer per
+				 * "revenue center code" associated with the claim. Each of
+				 * those lines/trailers has associated payment/financial
+				 * amounts. It seems that the DE-SynPUF data has arbitrarily
+				 * grouped the lines/trailers into "SEGMENT"s, which do not have
+				 * a revenue center code at all. More confusingly, only 0.1% of
+				 * the DE-SynPUF records have more than segment, and a spot
+				 * check indicates that the few second segments present contain
+				 * very little information. To cope with this, we're going to
+				 * ignore the HCPCSs and anything other than the first segments;
+				 * we just won't have trailers for our sample inpatient claims.
+				 */
+
+				String synpufId = record.get(SynpufColumnForInpatientClaims.DESYNPUF_ID);
+				long claimId = Long.parseLong(record.get(SynpufColumnForInpatientClaims.CLM_ID));
+				int segment = Integer.parseInt(record.get(SynpufColumnForInpatientClaims.SEGMENT));
+				LocalDate dateClaimFrom = parseDate(record, SynpufColumnForInpatientClaims.CLM_FROM_DT);
+				LocalDate dateClaimThrough = parseDate(record, SynpufColumnForInpatientClaims.CLM_THRU_DT);
+				// Skip PRVDR_NUM: it contains gibberish
+				BigDecimal claimPayment = new BigDecimal(record.get(SynpufColumnForInpatientClaims.CLM_PMT_AMT));
+				BigDecimal nchPrimaryPayerClaimPaid = new BigDecimal(
+						record.get(SynpufColumnForInpatientClaims.NCH_PRMRY_PYR_CLM_PD_AMT));
+				// Skip AT_PHYSN_NPI: it contains gibberish
+				// Skip OP_PHYSN_NPI: it contains gibberish
+				// Skip OT_PHYSN_NPI: it contains gibberish
+				LocalDate dateClaimAdmission = parseDate(record, SynpufColumnForInpatientClaims.CLM_ADMSN_DT);
+				String admittingDiagnosisCode = record.get(SynpufColumnForInpatientClaims.ADMTNG_ICD9_DGNS_CD);
+				BigDecimal passThroughPerDiemAmount = new BigDecimal(
+						record.get(SynpufColumnForInpatientClaims.CLM_PASS_THRU_PER_DIEM_AMT));
+				BigDecimal nchBeneficiaryInpatientDeductible = new BigDecimal(
+						record.get(SynpufColumnForInpatientClaims.NCH_BENE_IP_DDCTBL_AMT));
+				BigDecimal nchBeneficiaryPartACoinsuranceLiability = new BigDecimal(
+						record.get(SynpufColumnForInpatientClaims.NCH_BENE_PTA_COINSRNC_LBLTY_AM));
+				BigDecimal nchBeneficiaryBloodDeductible = new BigDecimal(
+						record.get(SynpufColumnForInpatientClaims.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+				Long utilizationDayCount = Long
+						.parseLong(record.get(SynpufColumnForInpatientClaims.CLM_UTLZTN_DAY_CNT));
+				LocalDate dateClaimDischarge = parseDate(record, SynpufColumnForInpatientClaims.NCH_BENE_DSCHRG_DT);
+				String diagnosisRelatedGroupCode = record.get(SynpufColumnForInpatientClaims.CLM_DRG_CD);
+				String diagnosisCode1 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_1);
+				String diagnosisCode2 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_2);
+				String diagnosisCode3 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_3);
+				String diagnosisCode4 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_4);
+				String diagnosisCode5 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_5);
+				String diagnosisCode6 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_6);
+				String diagnosisCode7 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_7);
+				String diagnosisCode8 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_8);
+				String diagnosisCode9 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_9);
+				String diagnosisCode10 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_10);
+				String procedureCode1 = record.get(SynpufColumnForInpatientClaims.ICD9_PRCDR_CD_1);
+				String procedureCode2 = record.get(SynpufColumnForInpatientClaims.ICD9_PRCDR_CD_2);
+				String procedureCode3 = record.get(SynpufColumnForInpatientClaims.ICD9_PRCDR_CD_3);
+				String procedureCode4 = record.get(SynpufColumnForInpatientClaims.ICD9_PRCDR_CD_4);
+				String procedureCode5 = record.get(SynpufColumnForInpatientClaims.ICD9_PRCDR_CD_5);
+				String procedureCode6 = record.get(SynpufColumnForInpatientClaims.ICD9_PRCDR_CD_6);
+
+				// As explained above, we're skipping extra segments.
+				if (segment > 1)
+					continue;
+
+				PartAClaimFact claim = new PartAClaimFact();
+				claim.setId(claimId);
+				claim.setBeneficiary(registry.getBeneficiary(synpufId));
+
+				AllClaimsProfile claimProfile;
+				if (registry.getClaimProfile(ClaimType.INPATIENT_CLAIM) != null) {
+					claimProfile = registry.getClaimProfile(ClaimType.INPATIENT_CLAIM);
+				} else {
+					claimProfile = new AllClaimsProfile().setId((long) registry.getClaimProfilesCount())
+							.setClaimType(ClaimType.INPATIENT_CLAIM);
+					registry.register(claimProfile);
+				}
+				claim.setClaimProfile(claimProfile);
+
+				claim.setDiagnosisGroup(registry.findOrCreate(diagnosisRelatedGroupCode));
+				claim.setDateAdmission(dateClaimAdmission);
+				claim.setDateFrom(dateClaimFrom);
+				claim.setDateThrough(dateClaimThrough);
+				claim.setDateDischarge(dateClaimDischarge);
+				claim.setProviderAtTimeOfClaimNpi((long) providerGenerator.generateProvider().getNpi());
+				claim.setUtilizationDayCount(utilizationDayCount);
+				claim.setPayment(claimPayment);
+				claim.setPassThroughPerDiemAmount(passThroughPerDiemAmount);
+				claim.setNchBeneficiaryBloodDeductibleLiability(nchBeneficiaryBloodDeductible);
+				claim.setNchBeneficiaryInpatientDeductible(nchBeneficiaryInpatientDeductible);
+				claim.setNchBeneficiaryPartACoinsuranceLiability(nchBeneficiaryPartACoinsuranceLiability);
+				claim.setNchPrimaryPayerPaid(nchPrimaryPayerClaimPaid);
+				claim.setAttendingPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
+				claim.setOperatingPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
+				claim.setOtherPhysicianNpi((long) providerGenerator.generateProvider().getNpi());
+				claim.setAdmittingDiagnosisCode(admittingDiagnosisCode);
+
+				PartAClaimRevLineFact revLine = new PartAClaimRevLineFact();
+				claim.getClaimLines().add(revLine);
+				revLine.setClaim(claim);
+				revLine.setLineNumber(1);
+				revLine.setDiagnosisCode1(diagnosisCode1);
+				revLine.setDiagnosisCode2(diagnosisCode2);
+				revLine.setDiagnosisCode3(diagnosisCode3);
+				revLine.setDiagnosisCode4(diagnosisCode4);
+				revLine.setDiagnosisCode5(diagnosisCode5);
+				revLine.setDiagnosisCode6(diagnosisCode6);
+				revLine.setDiagnosisCode7(diagnosisCode7);
+				revLine.setDiagnosisCode8(diagnosisCode8);
+				revLine.setDiagnosisCode9(diagnosisCode9);
+				revLine.setDiagnosisCode10(diagnosisCode10);
+				revLine.setProcedureCode1(procedureCode1);
+				revLine.setProcedureCode2(procedureCode2);
+				revLine.setProcedureCode3(procedureCode3);
+				revLine.setProcedureCode4(procedureCode4);
+				revLine.setProcedureCode5(procedureCode5);
+				revLine.setProcedureCode6(procedureCode6);
+
+				pm.makePersistent(claim);
+				claimsMap.put(claimId, claim);
+			}
+		} catch (IOException e) {
+			throw new SampleDataException(e);
+		}
+		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
 	}
 
 	/**
@@ -633,6 +783,7 @@ public final class SampleDataLoader {
 		private final Map<String, CurrentBeneficiary> beneficiariesBySynpufId = new HashMap<>();
 		private final Map<String, Procedure> proceduresByCode = new HashMap<>();
 		private final Map<ClaimType, AllClaimsProfile> claimProfilesByType = new HashMap<>();
+		private final Map<String, DiagnosisRelatedGroup> diagnosisGroupsByCode = new HashMap<>();
 
 		/**
 		 * @return the matching {@link CurrentBeneficiary} that was passed to
@@ -707,6 +858,25 @@ public final class SampleDataLoader {
 		 */
 		public void register(AllClaimsProfile claimProfile) {
 			claimProfilesByType.put(claimProfile.getClaimType(), claimProfile);
+		}
+
+		/**
+		 * @param diagnosisRelatedGroupCode
+		 *            the {@link DiagnosisRelatedGroup#getCode()} value to
+		 *            search for
+		 * @return either an already-existing {@link DiagnosisRelatedGroup} that
+		 *         matches the specified {@link DiagnosisRelatedGroup#getCode()}
+		 *         , or a new {@link DiagnosisRelatedGroup} with the specified
+		 *         value
+		 */
+		public DiagnosisRelatedGroup findOrCreate(String diagnosisRelatedGroupCode) {
+			DiagnosisRelatedGroup diagnosisGroup = diagnosisGroupsByCode.containsKey(diagnosisRelatedGroupCode)
+					? diagnosisGroupsByCode.get(diagnosisRelatedGroupCode)
+					: new DiagnosisRelatedGroup().setId((long) diagnosisGroupsByCode.size())
+							.setCode(diagnosisRelatedGroupCode);
+			if (!diagnosisGroupsByCode.containsKey(diagnosisRelatedGroupCode))
+				diagnosisGroupsByCode.put(diagnosisRelatedGroupCode, diagnosisGroup);
+			return diagnosisGroup;
 		}
 	}
 }

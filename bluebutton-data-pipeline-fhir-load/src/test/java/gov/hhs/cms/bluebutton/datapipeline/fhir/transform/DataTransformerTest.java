@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -31,6 +32,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
+import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.DiagnosisRelatedGroup;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
@@ -62,6 +64,159 @@ public final class DataTransformerTest {
 		Stream<BeneficiaryBundle> transformedFhirStream = transformer.transformSourceData(emptySourceStream);
 		Assert.assertNotNull(transformedFhirStream);
 		Assert.assertEquals(0, transformedFhirStream.count());
+	}
+
+	/**
+	 * Verifies that {@link DataTransformer} works correctly when when passed a
+	 * small hand-crafted data set with an inpatient claim.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void transformInpatientClaim() throws FHIRException {
+		// Create some mock data.
+		CurrentBeneficiary bene = new CurrentBeneficiary().setId(0);
+		PartAClaimFact sourceClaim = new PartAClaimFact().setId(0L).setBeneficiary(bene)
+				.setClaimProfile(new AllClaimsProfile().setId(1L).setClaimType(ClaimType.INPATIENT_CLAIM))
+				.setDiagnosisGroup(new DiagnosisRelatedGroup().setId(1L).setCode("foo"))
+				.setDateAdmission(LocalDate.now()).setDateFrom(LocalDate.now()).setDateThrough(LocalDate.now())
+				.setDateDischarge(LocalDate.now()).setProviderAtTimeOfClaimNpi(42L).setUtilizationDayCount(3L)
+				.setPayment(new BigDecimal("1.00")).setPassThroughPerDiemAmount(new BigDecimal("1.50"))
+				.setNchBeneficiaryBloodDeductibleLiability(new BigDecimal("2.00"))
+				.setNchBeneficiaryInpatientDeductible(new BigDecimal("3.00"))
+				.setNchBeneficiaryPartACoinsuranceLiability(new BigDecimal("4.00"))
+				.setNchPrimaryPayerPaid(new BigDecimal("5.00")).setAttendingPhysicianNpi(43L)
+				.setOperatingPhysicianNpi(44L).setOtherPhysicianNpi(45L).setAdmittingDiagnosisCode("foo");
+		bene.getPartAClaimFacts().add(sourceClaim);
+		PartAClaimRevLineFact sourceClaimLine = new PartAClaimRevLineFact().setClaim(sourceClaim).setLineNumber(1)
+				.setDiagnosisCode1("bar").setProcedureCode1("fizz");
+		sourceClaim.getClaimLines().add(sourceClaimLine);
+
+		// Run the transformer against the mock data.
+		DataTransformer transformer = new DataTransformer();
+		Stream<CurrentBeneficiary> emptySourceStream = Arrays.asList(bene).stream();
+		Stream<BeneficiaryBundle> transformedFhirStream = transformer.transformSourceData(emptySourceStream);
+		List<BeneficiaryBundle> transformedBundles = transformedFhirStream.collect(Collectors.toList());
+
+		/*
+		 * Verify the transformation results.
+		 */
+		Assert.assertEquals(1, transformedBundles.size());
+		BeneficiaryBundle bundle = transformedBundles.get(0);
+		Patient patient = bundle.getPatient();
+
+		// Verify the transformed inpatient EOB and its sole item
+		Assert.assertEquals(1, bundle.getExplanationOfBenefitsForInpatient().size());
+		ExplanationOfBenefit eob = bundle.getExplanationOfBenefitsForInpatient().get(0);
+		Assert.assertEquals("" + sourceClaim.getId(), eob.getIdentifier().get(0).getValue());
+		Assert.assertEquals(patient.getId(), eob.getPatient().getReference());
+		Assert.assertEquals(sourceClaim.getDiagnosisGroup().getCode(),
+				((StringType) eob.getExtensionsByUrl(DataTransformer.EXTENSION_CMS_DIAGNOSIS_GROUP).get(0).getValue())
+						.getValue());
+		Assert.assertEquals(Date.valueOf(sourceClaim.getDateFrom()), eob.getBillablePeriod().getStart());
+		Assert.assertEquals(Date.valueOf(sourceClaim.getDateThrough()), eob.getBillablePeriod().getEnd());
+		Assert.assertEquals(1, eob.getItem().size());
+		ItemsComponent eobSoleItem = eob.getItem().get(0);
+		Assert.assertEquals(Date.valueOf(sourceClaim.getDateAdmission()), eobSoleItem.getServicedPeriod().getStart());
+		Assert.assertEquals(Date.valueOf(sourceClaim.getDateDischarge()), eobSoleItem.getServicedPeriod().getEnd());
+		Assert.assertEquals(
+				eob.getProvider()
+						.getReference(),
+				bundle.getFhirResources().stream()
+						.filter(r -> r instanceof Practitioner).map(
+								r -> (Practitioner) r)
+						.filter(p -> p.getIdentifier().stream()
+								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
+								.filter(i -> sourceClaim.getProviderAtTimeOfClaimNpi().toString().equals(i.getValue()))
+								.findAny().isPresent())
+						.findAny().get().getId());
+		Assert.assertEquals((long) sourceClaim.getUtilizationDayCount(),
+				eobSoleItem.getQuantity().getValue().longValue());
+		Assert.assertEquals(sourceClaim.getPayment(),
+				eobSoleItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_PAYMENT.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue());
+		Assert.assertEquals(sourceClaim.getPassThroughPerDiemAmount(), eobSoleItem.getAdjudication().stream().filter(
+				a -> DataTransformer.CODED_ADJUDICATION_PASS_THROUGH_PER_DIEM_AMOUNT.equals(a.getCategory().getCode()))
+				.findAny().get().getAmount().getValue());
+		Assert.assertEquals(sourceClaim.getNchBeneficiaryBloodDeductibleLiability(),
+				eobSoleItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_NCH_BENEFICIARY_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT
+								.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue());
+		Assert.assertEquals(sourceClaim.getNchBeneficiaryInpatientDeductible(),
+				eobSoleItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_NCH_BENEFICIARY_INPATIENT_DEDUCTIBLE
+								.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue());
+		Assert.assertEquals(sourceClaim.getNchBeneficiaryPartACoinsuranceLiability(),
+				eobSoleItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_A_COINSURANCE_LIABILITY
+								.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue());
+		Assert.assertEquals(sourceClaim.getNchPrimaryPayerPaid(),
+				eobSoleItem.getAdjudication().stream()
+						.filter(a -> DataTransformer.CODED_ADJUDICATION_NCH_PRIMARY_PAYER_CLAIM_PAID_AMOUNT
+								.equals(a.getCategory().getCode()))
+						.findAny().get().getAmount().getValue());
+		Assert.assertEquals(
+				eob.getExtension().stream()
+						.filter(x -> DataTransformer.EXTENSION_CMS_ATTENDING_PHYSICIAN.equals(x.getUrl()))
+						.map(x -> ((Reference) x.getValue())
+								.getReference())
+						.findAny().get(),
+				bundle.getFhirResources().stream()
+						.filter(r -> r instanceof Practitioner).map(
+								r -> (Practitioner) r)
+						.filter(p -> p.getIdentifier().stream()
+								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
+								.filter(i -> sourceClaim.getAttendingPhysicianNpi().toString().equals(i.getValue()))
+								.findAny().isPresent())
+						.findAny().get().getId());
+		Assert.assertEquals(
+				eob.getExtension().stream()
+						.filter(x -> DataTransformer.EXTENSION_CMS_OPERATING_PHYSICIAN.equals(x.getUrl()))
+						.map(x -> ((Reference) x.getValue())
+								.getReference())
+						.findAny().get(),
+				bundle.getFhirResources().stream()
+						.filter(r -> r instanceof Practitioner).map(
+								r -> (Practitioner) r)
+						.filter(p -> p.getIdentifier().stream()
+								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
+								.filter(i -> sourceClaim.getOperatingPhysicianNpi().toString().equals(i.getValue()))
+								.findAny().isPresent())
+						.findAny().get().getId());
+		Assert.assertEquals(
+				eob.getExtension().stream()
+						.filter(x -> DataTransformer.EXTENSION_CMS_OTHER_PHYSICIAN.equals(x.getUrl()))
+						.map(x -> ((Reference) x.getValue())
+								.getReference())
+						.findAny().get(),
+				bundle.getFhirResources().stream()
+						.filter(r -> r instanceof Practitioner).map(
+								r -> (Practitioner) r)
+						.filter(p -> p.getIdentifier().stream()
+								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
+								.filter(i -> sourceClaim.getOtherPhysicianNpi().toString().equals(i.getValue()))
+								.findAny().isPresent())
+						.findAny().get().getId());
+		Assert.assertEquals(sourceClaim.getAdmittingDiagnosisCode(),
+				((Coding) eob.getExtensionsByUrl(DataTransformer.EXTENSION_CMS_ADMITTING_DIAGNOSIS).get(0).getValue())
+						.getCode());
+
+		// Verify EOB's sole item's detail and subdetail components.
+		Assert.assertEquals(sourceClaim.getClaimLines().size(), eobSoleItem.getDetail().size());
+		DetailComponent outpatientEobDetail = eobSoleItem.getDetail().get(0);
+		Assert.assertEquals(sourceClaimLine.getLineNumber(), outpatientEobDetail.getSequence());
+		Assert.assertEquals(1, eob.getDiagnosis().size());
+		Assert.assertEquals(0,
+				((IntegerType) outpatientEobDetail.getExtensionsByUrl(DataTransformer.EXTENSION_CMS_DIAGNOSIS_LINK_ID)
+						.get(0).getValue()).getValue().intValue());
+		Assert.assertEquals(1, outpatientEobDetail.getSubDetail().size());
+		Assert.assertEquals(sourceClaimLine.getProcedureCode1(),
+				outpatientEobDetail.getSubDetail().get(0).getService().getCode());
 	}
 
 	/**
@@ -141,12 +296,12 @@ public final class DataTransformerTest {
 		ExplanationOfBenefit outpatientEob = bundle.getExplanationOfBenefitsForOutpatient().get(0);
 		Assert.assertEquals("" + outpatientClaimForBeneA.getId(), outpatientEob.getIdentifier().get(0).getValue());
 		Assert.assertEquals(patientA.getId(), outpatientEob.getPatient().getReference());
+		Assert.assertEquals(Date.valueOf(outpatientClaimForBeneA.getDateFrom()),
+				outpatientEob.getBillablePeriod().getStart());
+		Assert.assertEquals(Date.valueOf(outpatientClaimForBeneA.getDateThrough()),
+				outpatientEob.getBillablePeriod().getEnd());
 		Assert.assertEquals(1, outpatientEob.getItem().size());
 		ItemsComponent outpatientEobSoleItem = outpatientEob.getItem().get(0);
-		Assert.assertEquals(Date.valueOf(outpatientClaimForBeneA.getDateFrom()),
-				outpatientEobSoleItem.getServicedPeriod().getStart());
-		Assert.assertEquals(Date.valueOf(outpatientClaimForBeneA.getDateThrough()),
-				outpatientEobSoleItem.getServicedPeriod().getEnd());
 		Assert.assertEquals(
 				outpatientEob.getProvider()
 						.getReference(),

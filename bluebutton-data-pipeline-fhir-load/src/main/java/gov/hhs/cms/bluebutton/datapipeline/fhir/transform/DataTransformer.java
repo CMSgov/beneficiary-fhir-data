@@ -30,6 +30,7 @@ import org.hl7.fhir.dstu21.model.Period;
 import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.dstu21.model.SimpleQuantity;
+import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.dstu21.model.valuesets.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -47,6 +48,8 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
  */
 public final class DataTransformer {
 	static final String EXTENSION_CMS_CLAIM_TYPE = "http://bluebutton.cms.hhs.gov/extensions#claimType";
+
+	static final String EXTENSION_CMS_DIAGNOSIS_GROUP = "http://bluebutton.cms.hhs.gov/extensions#diagnosisRelatedGroupCode";
 
 	static final String EXTENSION_CMS_ADMITTING_DIAGNOSIS = "http://bluebutton.cms.hhs.gov/extensions#admittingDiagnosis";
 
@@ -113,6 +116,12 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_PAYMENT = "Line NCH Payment Amount";
 
+	static final String CODED_ADJUDICATION_PASS_THROUGH_PER_DIEM_AMOUNT = "Claim Pass Thru Per Diem Amount";
+
+	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_INPATIENT_DEDUCTIBLE = "NCH Beneficiary Inpatient Deductible Amount";
+
+	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_A_COINSURANCE_LIABILITY = "NCH Beneficiary Part A Coinsurance Liability Amount";
+
 	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
 
 	static final String CODED_ADJUDICATION_TOTAL_COST = "Total Prescription Cost";
@@ -158,7 +167,8 @@ public final class DataTransformer {
 		resources.add(patient);
 		patient.setId(IdType.newRandomUuid());
 		patient.addIdentifier().setSystem("CCW_BENE_CRNT_VW.BENE_ID").setValue("" + sourceBeneficiary.getId());
-		patient.setBirthDate(Date.valueOf(sourceBeneficiary.getBirthDate()));
+		if (sourceBeneficiary.getBirthDate() != null)
+			patient.setBirthDate(Date.valueOf(sourceBeneficiary.getBirthDate()));
 		patient.addName().addFamily(sourceBeneficiary.getSurname()).addGiven(sourceBeneficiary.getGivenName());
 
 		List<String> addressComponents = Arrays.asList(sourceBeneficiary.getContactAddress(),
@@ -182,36 +192,33 @@ public final class DataTransformer {
 		partACoverage.setIssuer(new Reference(cms.getId()));
 		partACoverage.setPlan(COVERAGE_PLAN_PART_A);
 
-		Coverage partBCoverage = new Coverage();
-		resources.add(partBCoverage);
-		partBCoverage.setId(IdType.newRandomUuid());
-		partBCoverage.setIssuer(new Reference(cms.getId()));
-		partBCoverage.setPlan(COVERAGE_PLAN_PART_B);
-
-		/*
-		 * Transform all Part B Outpatient claims. Confusingly, these are stored
-		 * in the CCW's Part A tables because Part B hospital outpatient claims
-		 * happen to be structured very similarly to Part A hospital inpatient
-		 * claims. The claim type (TODO) for each record can be used to
-		 * determine which is actually which.
-		 */
+		// Transform all Part A Inpatient claims.
 		for (PartAClaimFact sourceClaim : sourceBeneficiary.getPartAClaimFacts()) {
-			// Filter to only outpatient claims.
+			// Filter to only inpatient claims.
 			if (sourceClaim.getClaimProfile() == null
-					|| sourceClaim.getClaimProfile().getClaimType() != ClaimType.OUTPATIENT_CLAIM)
+					|| sourceClaim.getClaimProfile().getClaimType() != ClaimType.INPATIENT_CLAIM)
 				continue;
 
 			ExplanationOfBenefit eob = new ExplanationOfBenefit();
 			resources.add(eob);
 			eob.setId(IdType.newRandomUuid());
-			eob.getCoverage().setCoverage(new Reference(partBCoverage.getId()));
-			// FIXME claim type code should come from DB
+			eob.getCoverage().setCoverage(new Reference(partACoverage.getId()));
 			eob.addExtension().setUrl(EXTENSION_CMS_CLAIM_TYPE)
 					.setValue(new Coding().setSystem(CODING_SYSTEM_CMS_CLAIM_TYPES)
 							.setCode(sourceClaim.getClaimProfile().getClaimType().getCode())
 							.setDisplay(sourceClaim.getClaimProfile().getClaimType().getDescription()));
 			eob.setPatient(new Reference().setReference(patient.getId()));
 			eob.addIdentifier().setSystem("CCW_PTA_FACT.CLM_ID").setValue("" + sourceClaim.getId());
+
+			if (sourceClaim.getDiagnosisGroup() != null) {
+				eob.addExtension().setUrl(EXTENSION_CMS_DIAGNOSIS_GROUP)
+						.setValue(new StringType(sourceClaim.getDiagnosisGroup().getCode()));
+			}
+
+			if (sourceClaim.getDateFrom() != null || sourceClaim.getDateThrough() != null) {
+				eob.setBillablePeriod(new Period().setStart(Date.valueOf(sourceClaim.getDateFrom()))
+						.setEnd(Date.valueOf(sourceClaim.getDateThrough())));
+			}
 
 			if (sourceClaim.getProviderAtTimeOfClaimNpi() != null) {
 				Practitioner provider = new Practitioner();
@@ -269,10 +276,181 @@ public final class DataTransformer {
 			eobSoleItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
 					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
+			if (sourceClaim.getDateAdmission() != null || sourceClaim.getDateDischarge() != null) {
+				eobSoleItem.setServiced(new Period().setStart(Date.valueOf(sourceClaim.getDateAdmission()))
+						.setEnd(Date.valueOf(sourceClaim.getDateDischarge())));
+			}
+
+			if (sourceClaim.getUtilizationDayCount() != null) {
+				SimpleQuantity utilizationDayCount = (SimpleQuantity) new SimpleQuantity().setUnit("days")
+						.setValue(sourceClaim.getUtilizationDayCount());
+				eobSoleItem.setQuantity(utilizationDayCount);
+			}
+
+			if (sourceClaim.getPayment() != null)
+				eobSoleItem.addAdjudication()
+						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+								.setCode(CODED_ADJUDICATION_PAYMENT))
+						.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+						.setValue(sourceClaim.getPayment());
+
+			if (sourceClaim.getPassThroughPerDiemAmount() != null)
+				eobSoleItem.addAdjudication()
+						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+								.setCode(CODED_ADJUDICATION_PASS_THROUGH_PER_DIEM_AMOUNT))
+						.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+						.setValue(sourceClaim.getPassThroughPerDiemAmount());
+
+			if (sourceClaim.getNchBeneficiaryBloodDeductibleLiability() != null)
+				eobSoleItem.addAdjudication()
+						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+								.setCode(CODED_ADJUDICATION_NCH_BENEFICIARY_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT))
+						.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+						.setValue(sourceClaim.getNchBeneficiaryBloodDeductibleLiability());
+
+			if (sourceClaim.getNchBeneficiaryInpatientDeductible() != null)
+				eobSoleItem.addAdjudication()
+						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+								.setCode(CODED_ADJUDICATION_NCH_BENEFICIARY_INPATIENT_DEDUCTIBLE))
+						.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+						.setValue(sourceClaim.getNchBeneficiaryInpatientDeductible());
+
+			if (sourceClaim.getNchBeneficiaryPartACoinsuranceLiability() != null)
+				eobSoleItem.addAdjudication()
+						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+								.setCode(CODED_ADJUDICATION_NCH_BENEFICIARY_PART_A_COINSURANCE_LIABILITY))
+						.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+						.setValue(sourceClaim.getNchBeneficiaryPartACoinsuranceLiability());
+
+			if (sourceClaim.getNchPrimaryPayerPaid() != null)
+				eobSoleItem.addAdjudication()
+						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+								.setCode(CODED_ADJUDICATION_NCH_PRIMARY_PAYER_CLAIM_PAID_AMOUNT))
+						.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+						.setValue(sourceClaim.getNchPrimaryPayerPaid());
+
+			for (PartAClaimRevLineFact sourceLine : sourceClaim.getClaimLines()) {
+				DetailComponent eobDetail = eobSoleItem.addDetail();
+				eobDetail.setSequence((int) sourceLine.getLineNumber());
+				eobDetail.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+						.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode1());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode2());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode3());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode4());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode5());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode6());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode7());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode8());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode9());
+				addDiagnosisCodeAndLink(eob, eobDetail, sourceLine.getDiagnosisCode10());
+
+				List<String> procedureCodes = Arrays
+						.stream(new String[] { sourceLine.getProcedureCode1(), sourceLine.getProcedureCode2(),
+								sourceLine.getProcedureCode3(), sourceLine.getProcedureCode4(),
+								sourceLine.getProcedureCode5(), sourceLine.getProcedureCode6() })
+						.filter(c -> c != null && !c.trim().isEmpty()).collect(Collectors.toList());
+				for (String procedureCode : procedureCodes) {
+					SubDetailComponent eobSubDetail = new SubDetailComponent();
+					eobDetail.addSubDetail(eobSubDetail);
+					eobSubDetail.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+							.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+					eobSubDetail.setService(new Coding().setSystem(CODING_SYSTEM_ICD9_PROC).setCode(procedureCode));
+				}
+			}
+		}
+
+		Coverage partBCoverage = new Coverage();
+		resources.add(partBCoverage);
+		partBCoverage.setId(IdType.newRandomUuid());
+		partBCoverage.setIssuer(new Reference(cms.getId()));
+		partBCoverage.setPlan(COVERAGE_PLAN_PART_B);
+
+		/*
+		 * Transform all Part B Outpatient claims. Confusingly, these are stored
+		 * in the CCW's Part A tables because Part B hospital outpatient claims
+		 * happen to be structured very similarly to Part A hospital inpatient
+		 * claims. The claim type for each record can be used to determine which
+		 * is actually which.
+		 */
+		for (PartAClaimFact sourceClaim : sourceBeneficiary.getPartAClaimFacts()) {
+			// Filter to only outpatient claims.
+			if (sourceClaim.getClaimProfile() == null
+					|| sourceClaim.getClaimProfile().getClaimType() != ClaimType.OUTPATIENT_CLAIM)
+				continue;
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			resources.add(eob);
+			eob.setId(IdType.newRandomUuid());
+			eob.getCoverage().setCoverage(new Reference(partBCoverage.getId()));
+			eob.addExtension().setUrl(EXTENSION_CMS_CLAIM_TYPE)
+					.setValue(new Coding().setSystem(CODING_SYSTEM_CMS_CLAIM_TYPES)
+							.setCode(sourceClaim.getClaimProfile().getClaimType().getCode())
+							.setDisplay(sourceClaim.getClaimProfile().getClaimType().getDescription()));
+			eob.setPatient(new Reference().setReference(patient.getId()));
+			eob.addIdentifier().setSystem("CCW_PTA_FACT.CLM_ID").setValue("" + sourceClaim.getId());
+
 			if (sourceClaim.getDateFrom() != null || sourceClaim.getDateThrough() != null) {
-				eobSoleItem.setServiced(new Period().setStart(Date.valueOf(sourceClaim.getDateFrom()))
+				eob.setBillablePeriod(new Period().setStart(Date.valueOf(sourceClaim.getDateFrom()))
 						.setEnd(Date.valueOf(sourceClaim.getDateThrough())));
 			}
+
+			if (sourceClaim.getProviderAtTimeOfClaimNpi() != null) {
+				Practitioner provider = new Practitioner();
+				resources.add(provider);
+				provider.setId(IdType.newRandomUuid());
+				provider.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(sourceClaim.getProviderAtTimeOfClaimNpi().toString());
+				eob.setProvider(new Reference().setReference(provider.getId()));
+			}
+
+			if (sourceClaim.getAttendingPhysicianNpi() != null) {
+				Practitioner attendingPhysician = new Practitioner();
+				resources.add(attendingPhysician);
+				attendingPhysician.setId(IdType.newRandomUuid());
+				attendingPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(sourceClaim.getAttendingPhysicianNpi().toString());
+
+				Extension attendingPhysicianExtension = eob.addExtension();
+				attendingPhysicianExtension.setUrl(EXTENSION_CMS_ATTENDING_PHYSICIAN);
+				attendingPhysicianExtension.setValue(new Reference().setReference(attendingPhysician.getId()));
+			}
+
+			if (sourceClaim.getOperatingPhysicianNpi() != null) {
+				Practitioner operatingPhysician = new Practitioner();
+				resources.add(operatingPhysician);
+				operatingPhysician.setId(IdType.newRandomUuid());
+				operatingPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(sourceClaim.getOperatingPhysicianNpi().toString());
+
+				Extension operatingPhysicianExtension = eob.addExtension();
+				operatingPhysicianExtension.setUrl(EXTENSION_CMS_OPERATING_PHYSICIAN);
+				operatingPhysicianExtension.setValue(new Reference().setReference(operatingPhysician.getId()));
+			}
+
+			if (sourceClaim.getOtherPhysicianNpi() != null) {
+				Practitioner otherPhysician = new Practitioner();
+				resources.add(otherPhysician);
+				otherPhysician.setId(IdType.newRandomUuid());
+				otherPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(sourceClaim.getOtherPhysicianNpi().toString());
+
+				Extension otherPhysicianExtension = eob.addExtension();
+				otherPhysicianExtension.setUrl(EXTENSION_CMS_OTHER_PHYSICIAN);
+				otherPhysicianExtension.setValue(new Reference().setReference(otherPhysician.getId()));
+			}
+
+			if (sourceClaim.getAdmittingDiagnosisCode() != null) {
+				Extension operatingPhysicianExtension = eob.addExtension();
+				operatingPhysicianExtension.setUrl(EXTENSION_CMS_ADMITTING_DIAGNOSIS);
+				operatingPhysicianExtension.setValue(new Coding().setSystem(CODING_SYSTEM_ICD9_DIAG)
+						.setCode(sourceClaim.getAdmittingDiagnosisCode()));
+			}
+
+			ItemsComponent eobSoleItem = eob.addItem();
+			eobSoleItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			if (sourceClaim.getPayment() != null)
 				eobSoleItem.addAdjudication()
