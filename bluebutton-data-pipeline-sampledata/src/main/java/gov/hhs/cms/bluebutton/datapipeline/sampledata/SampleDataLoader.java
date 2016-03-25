@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 
@@ -158,7 +159,11 @@ public final class SampleDataLoader {
 							bene.setContactAddress(address.getAddressExceptZip());
 							bene.setContactAddressZip(address.getZip());
 
-							pm.makePersistent(bene);
+							try {
+								pm.makePersistent(bene);
+							} catch (JDODataStoreException e) {
+								throw new SampleDataException(String.format("Bad data in here: %s", bene), e);
+							}
 							registry.register(synpufId, bene);
 						}
 					} catch (IOException e) {
@@ -252,8 +257,7 @@ public final class SampleDataLoader {
 						SynpufColumnForInpatientClaims.NCH_BENE_PTA_COINSRNC_LBLTY_AM);
 				BigDecimal nchBeneficiaryBloodDeductible = parseBigDecimal(record,
 						SynpufColumnForInpatientClaims.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM);
-				Long utilizationDayCount = Long
-						.parseLong(record.get(SynpufColumnForInpatientClaims.CLM_UTLZTN_DAY_CNT));
+				Long utilizationDayCount = parseLong(record, SynpufColumnForInpatientClaims.CLM_UTLZTN_DAY_CNT);
 				LocalDate dateClaimDischarge = parseDate(record, SynpufColumnForInpatientClaims.NCH_BENE_DSCHRG_DT);
 				String diagnosisRelatedGroupCode = record.get(SynpufColumnForInpatientClaims.CLM_DRG_CD);
 				String diagnosisCode1 = record.get(SynpufColumnForInpatientClaims.ICD9_DGNS_CD_1);
@@ -708,17 +712,14 @@ public final class SampleDataLoader {
 				LOGGER.trace("Processing DE-SynPUF Part D Outpatient record #{}.", record.getRecordNumber());
 
 				String synpufId = record.get(SynpufColumnForPartDClaims.DESYNPUF_ID);
-				String eventIdText = record.get(SynpufColumnForPartDClaims.PDE_ID);
-				long eventId = Long.parseLong(eventIdText);
+				long eventId = Long.parseLong(record.get(SynpufColumnForPartDClaims.PDE_ID));
 				String serviceDateText = record.get(SynpufColumnForPartDClaims.SRVC_DT);
 				LocalDate serviceDate = LocalDate.parse(serviceDateText, SYNPUF_DATE_FORMATTER);
-				String productIdText = record.get(SynpufColumnForPartDClaims.PROD_SRVC_ID);
-				long productId = Long.parseLong(productIdText);
+				Long productId = parseLong(record, SynpufColumnForPartDClaims.PROD_SRVC_ID);
 				String quantityText = record.get(SynpufColumnForPartDClaims.QTY_DSPNSD_NUM);
 				// FIXME some/all values have fractions, e.g. "30.000"
 				long quantity = (long) Double.parseDouble(quantityText);
-				String daysSupplyText = record.get(SynpufColumnForPartDClaims.DAYS_SUPLY_NUM);
-				long daysSupply = Long.parseLong(daysSupplyText);
+				Long daysSupply = parseLong(record, SynpufColumnForPartDClaims.DAYS_SUPLY_NUM);
 				String patientPaymentText = record.get(SynpufColumnForPartDClaims.PTNT_PAY_AMT);
 				double patientPayment = Double.parseDouble(patientPaymentText);
 				String prescriptionCostText = record.get(SynpufColumnForPartDClaims.TOT_RX_CST_AMT);
@@ -803,6 +804,22 @@ public final class SampleDataLoader {
 			return null;
 		else
 			return new BigDecimal(columnValue);
+	}
+
+	/**
+	 * @param record
+	 *            the {@link CSVRecord} to parse a value from
+	 * @param column
+	 *            the column to parse a value from
+	 * @return the {@link Long} that was parsed from the specified record and
+	 *         column, or <code>null</code> if the column was empty
+	 */
+	private static Long parseLong(CSVRecord record, Enum<?> column) {
+		String columnValue = record.get(column);
+		if (isBlank(columnValue))
+			return null;
+		else
+			return Long.parseLong(columnValue);
 	}
 
 	/**

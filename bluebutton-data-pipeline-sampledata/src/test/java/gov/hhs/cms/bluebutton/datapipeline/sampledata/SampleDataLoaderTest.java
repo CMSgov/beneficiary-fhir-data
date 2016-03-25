@@ -279,7 +279,7 @@ public final class SampleDataLoaderTest {
 	 * to verify that no errors are thrown.
 	 */
 	@Test
-	@Ignore("slow, so skipped by default")
+	@Ignore("slow (takes 190sec+), so skipped by default")
 	public void noErrorsFromSampleTestB() {
 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
@@ -287,6 +287,27 @@ public final class SampleDataLoaderTest {
 			MetricRegistry metrics = new MetricRegistry();
 			SampleDataLoader loader = new SampleDataLoader(metrics, pm);
 			loader.loadSampleData(Paths.get(".", "target"), SynpufArchive.SAMPLE_TEST_B);
+
+			// Collect and print out the metrics from the run, just cause.
+			Slf4jReporter metricsReporter = Slf4jReporter.forRegistry(metrics)
+					.outputTo(LoggerFactory.getLogger(SampleDataLoaderTest.class)).build();
+			metricsReporter.report();
+		}
+	}
+
+	/**
+	 * Runs {@link SampleDataLoader} against {@link SynpufArchive#SAMPLE_1} to
+	 * verify that no errors are thrown.
+	 */
+	@Test
+	@Ignore("slow (takes TODO), so skipped by default")
+	public void noErrorsFromSample1() {
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
+
+		try (PersistenceManager pm = pmf.getPersistenceManager();) {
+			MetricRegistry metrics = new MetricRegistry();
+			SampleDataLoader loader = new SampleDataLoader(metrics, pm);
+			loader.loadSampleData(Paths.get(".", "target"), SynpufArchive.SAMPLE_1);
 
 			// Collect and print out the metrics from the run, just cause.
 			Slf4jReporter metricsReporter = Slf4jReporter.forRegistry(metrics)

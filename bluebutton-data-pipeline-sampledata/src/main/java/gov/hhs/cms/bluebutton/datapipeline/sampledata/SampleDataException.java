@@ -10,6 +10,18 @@ public final class SampleDataException extends RuntimeException {
 	/**
 	 * Constructs a new {@link SampleDataException} instance.
 	 * 
+	 * @param message
+	 *            the value to use for {@link #getMessage()}
+	 * @param cause
+	 *            the value to use for {@link #getCause()}
+	 */
+	public SampleDataException(String message, Exception cause) {
+		super(message, cause);
+	}
+
+	/**
+	 * Constructs a new {@link SampleDataException} instance.
+	 * 
 	 * @param cause
 	 *            the value to use for {@link #getCause()}
 	 */

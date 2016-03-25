@@ -17,7 +17,45 @@ public final class SampleAddress {
 	 */
 	public SampleAddress(String addressExceptZip, String zip) {
 		this.addressExceptZip = addressExceptZip;
+
+		/*
+		 * Workaround for CBBD-43: Some of the sample zips have a space between
+		 * their zip-5 and zip-4.
+		 */
+		zip = stripWhiteSpace(zip);
+
+		/*
+		 * Workaround for CBBD-43: Some of the sample zips have a dash between
+		 * their zip-5 and zip-4.
+		 */
+		zip = stripDashes(zip);
+
+		/*
+		 * Workaround for CBBD-43: Some of the sample zips have more than nine
+		 * characters (look like international addresses).
+		 */
+		zip = zip.substring(0, Math.min(9, zip.length()));
+
 		this.zip = zip;
+	}
+
+	/**
+	 * @param text
+	 *            the {@link String} to process
+	 * @return the specified {@link String}, but with all whitespace removed
+	 */
+	private static String stripWhiteSpace(String text) {
+		return text.replaceAll("\\s", "");
+	}
+
+	/**
+	 * @param text
+	 *            the {@link String} to process
+	 * @return the specified {@link String}, but with all '<code>-</code>'
+	 *         characters removed
+	 */
+	private static String stripDashes(String text) {
+		return text.replaceAll("-", "");
 	}
 
 	/**
