@@ -23,6 +23,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
@@ -54,16 +56,20 @@ public final class SampleDataLoader {
 	private final static Logger LOGGER = LoggerFactory.getLogger(SampleDataLoader.class);
 	private final static DateTimeFormatter SYNPUF_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
+	private final MetricRegistry metrics;
 	private final PersistenceManager pm;
 
 	/**
 	 * Constructs a new {@link SampleDataLoader} instance.
 	 * 
+	 * @param metrics
+	 *            the (injected) {@link MetricRegistry} to use
 	 * @param pm
 	 *            the (injected) {@link PersistenceManager} to use
 	 */
 	@Inject
-	public SampleDataLoader(PersistenceManager pm) {
+	public SampleDataLoader(MetricRegistry metrics, PersistenceManager pm) {
+		this.metrics = metrics;
 		this.pm = pm;
 	}
 
@@ -230,22 +236,22 @@ public final class SampleDataLoader {
 				LocalDate dateClaimFrom = parseDate(record, SynpufColumnForInpatientClaims.CLM_FROM_DT);
 				LocalDate dateClaimThrough = parseDate(record, SynpufColumnForInpatientClaims.CLM_THRU_DT);
 				// Skip PRVDR_NUM: it contains gibberish
-				BigDecimal claimPayment = new BigDecimal(record.get(SynpufColumnForInpatientClaims.CLM_PMT_AMT));
-				BigDecimal nchPrimaryPayerClaimPaid = new BigDecimal(
-						record.get(SynpufColumnForInpatientClaims.NCH_PRMRY_PYR_CLM_PD_AMT));
+				BigDecimal claimPayment = parseBigDecimal(record, SynpufColumnForInpatientClaims.CLM_PMT_AMT);
+				BigDecimal nchPrimaryPayerClaimPaid = parseBigDecimal(record,
+						SynpufColumnForInpatientClaims.NCH_PRMRY_PYR_CLM_PD_AMT);
 				// Skip AT_PHYSN_NPI: it contains gibberish
 				// Skip OP_PHYSN_NPI: it contains gibberish
 				// Skip OT_PHYSN_NPI: it contains gibberish
 				LocalDate dateClaimAdmission = parseDate(record, SynpufColumnForInpatientClaims.CLM_ADMSN_DT);
 				String admittingDiagnosisCode = record.get(SynpufColumnForInpatientClaims.ADMTNG_ICD9_DGNS_CD);
-				BigDecimal passThroughPerDiemAmount = new BigDecimal(
-						record.get(SynpufColumnForInpatientClaims.CLM_PASS_THRU_PER_DIEM_AMT));
-				BigDecimal nchBeneficiaryInpatientDeductible = new BigDecimal(
-						record.get(SynpufColumnForInpatientClaims.NCH_BENE_IP_DDCTBL_AMT));
-				BigDecimal nchBeneficiaryPartACoinsuranceLiability = new BigDecimal(
-						record.get(SynpufColumnForInpatientClaims.NCH_BENE_PTA_COINSRNC_LBLTY_AM));
-				BigDecimal nchBeneficiaryBloodDeductible = new BigDecimal(
-						record.get(SynpufColumnForInpatientClaims.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+				BigDecimal passThroughPerDiemAmount = parseBigDecimal(record,
+						SynpufColumnForInpatientClaims.CLM_PASS_THRU_PER_DIEM_AMT);
+				BigDecimal nchBeneficiaryInpatientDeductible = parseBigDecimal(record,
+						SynpufColumnForInpatientClaims.NCH_BENE_IP_DDCTBL_AMT);
+				BigDecimal nchBeneficiaryPartACoinsuranceLiability = parseBigDecimal(record,
+						SynpufColumnForInpatientClaims.NCH_BENE_PTA_COINSRNC_LBLTY_AM);
+				BigDecimal nchBeneficiaryBloodDeductible = parseBigDecimal(record,
+						SynpufColumnForInpatientClaims.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM);
 				Long utilizationDayCount = Long
 						.parseLong(record.get(SynpufColumnForInpatientClaims.CLM_UTLZTN_DAY_CNT));
 				LocalDate dateClaimDischarge = parseDate(record, SynpufColumnForInpatientClaims.NCH_BENE_DSCHRG_DT);
@@ -373,11 +379,11 @@ public final class SampleDataLoader {
 				int segment = Integer.parseInt(record.get(SynpufColumnForOutpatientClaims.SEGMENT));
 				LocalDate dateClaimFrom = parseDate(record, SynpufColumnForOutpatientClaims.CLM_FROM_DT);
 				LocalDate dateClaimThrough = parseDate(record, SynpufColumnForOutpatientClaims.CLM_THRU_DT);
-				BigDecimal claimPayment = new BigDecimal(record.get(SynpufColumnForOutpatientClaims.CLM_PMT_AMT));
-				BigDecimal nchPrimaryPayerClaimPaid = new BigDecimal(
-						record.get(SynpufColumnForOutpatientClaims.NCH_PRMRY_PYR_CLM_PD_AMT));
-				BigDecimal nchBeneficiaryBloodDeductible = new BigDecimal(
-						record.get(SynpufColumnForOutpatientClaims.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+				BigDecimal claimPayment = parseBigDecimal(record, SynpufColumnForOutpatientClaims.CLM_PMT_AMT);
+				BigDecimal nchPrimaryPayerClaimPaid = parseBigDecimal(record,
+						SynpufColumnForOutpatientClaims.NCH_PRMRY_PYR_CLM_PD_AMT);
+				BigDecimal nchBeneficiaryBloodDeductible = parseBigDecimal(record,
+						SynpufColumnForOutpatientClaims.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM);
 				String diagnosisCode1 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_1);
 				String diagnosisCode2 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_2);
 				String diagnosisCode3 = record.get(SynpufColumnForOutpatientClaims.ICD9_DGNS_CD_3);
@@ -394,10 +400,10 @@ public final class SampleDataLoader {
 				String procedureCode4 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_4);
 				String procedureCode5 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_5);
 				String procedureCode6 = record.get(SynpufColumnForOutpatientClaims.ICD9_PRCDR_CD_6);
-				BigDecimal nchBeneficiaryPartBDeductible = new BigDecimal(
-						record.get(SynpufColumnForOutpatientClaims.NCH_BENE_PTB_DDCTBL_AMT));
-				BigDecimal nchBeneficiaryPartBCoinsurance = new BigDecimal(
-						record.get(SynpufColumnForOutpatientClaims.NCH_BENE_PTB_COINSRNC_AMT));
+				BigDecimal nchBeneficiaryPartBDeductible = parseBigDecimal(record,
+						SynpufColumnForOutpatientClaims.NCH_BENE_PTB_DDCTBL_AMT);
+				BigDecimal nchBeneficiaryPartBCoinsurance = parseBigDecimal(record,
+						SynpufColumnForOutpatientClaims.NCH_BENE_PTB_COINSRNC_AMT);
 				String admittingDiagnosisCode = record.get(SynpufColumnForOutpatientClaims.ADMTNG_ICD9_DGNS_CD);
 				String hcpcsCode = selectArbitraryOutpatientHcpcsCode(record);
 
@@ -718,6 +724,15 @@ public final class SampleDataLoader {
 				String prescriptionCostText = record.get(SynpufColumnForPartDClaims.TOT_RX_CST_AMT);
 				double prescriptionCost = Double.parseDouble(prescriptionCostText);
 
+				/*
+				 * Workarounds for part of CBBD-41: cope with some cases of bad
+				 * data. These occur in about 5-7% of the records, each.
+				 */
+				if (patientPayment > prescriptionCost)
+					prescriptionCost = patientPayment;
+				if (patientPayment <= 0 && prescriptionCost <= 0)
+					continue;
+
 				PartDEventFact event = new PartDEventFact();
 				event.setId(eventId);
 				event.setPrescriberNpi((long) prescriberGenerator.generatePrescriber().getNpi());
@@ -772,6 +787,22 @@ public final class SampleDataLoader {
 			return null;
 		else
 			return LocalDate.parse(columnValue, SYNPUF_DATE_FORMATTER);
+	}
+
+	/**
+	 * @param record
+	 *            the {@link CSVRecord} to parse a value from
+	 * @param column
+	 *            the column to parse a value from
+	 * @return the {@link BigDecimal} that was parsed from the specified record
+	 *         and column, or <code>null</code> if the column was empty
+	 */
+	private static BigDecimal parseBigDecimal(CSVRecord record, Enum<?> column) {
+		String columnValue = record.get(column);
+		if (isBlank(columnValue))
+			return null;
+		else
+			return new BigDecimal(columnValue);
 	}
 
 	/**

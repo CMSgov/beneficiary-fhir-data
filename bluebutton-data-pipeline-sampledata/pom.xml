@@ -72,6 +72,12 @@
 		</dependency>
 
 		<dependency>
+			<!-- Used to collect statistics about the sample data being generated. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-core</artifactId>
+		</dependency>
+
+		<dependency>
 			<!-- Allows for Spring DI and TX management inside tests. -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>

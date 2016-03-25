@@ -25,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
+import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
@@ -82,7 +83,7 @@ public final class FhirLoaderIT {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Load the DE-SynPUF sample data and then extract it.
-			SampleDataLoader sampleLoader = new SampleDataLoader(pm);
+			SampleDataLoader sampleLoader = new SampleDataLoader(new MetricRegistry(), pm);
 			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_B;
 			sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
 			CcwExtractor extractor = new CcwExtractor(pm);

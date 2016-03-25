@@ -10,6 +10,7 @@ import javax.jdo.PersistenceManager;
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +23,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Slf4jReporter;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
@@ -80,7 +83,7 @@ public final class SampleDataLoaderTest {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Run the loader and verify the results.
-			SampleDataLoader loader = new SampleDataLoader(pm);
+			SampleDataLoader loader = new SampleDataLoader(new MetricRegistry(), pm);
 			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
 			loader.loadSampleData(Paths.get(".", "target"), archive);
 
@@ -118,7 +121,7 @@ public final class SampleDataLoaderTest {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Run the loader and verify the results.
-			SampleDataLoader loader = new SampleDataLoader(pm);
+			SampleDataLoader loader = new SampleDataLoader(new MetricRegistry(), pm);
 			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
 			loader.loadSampleData(Paths.get(".", "target"), archive);
 
@@ -256,18 +259,39 @@ public final class SampleDataLoaderTest {
 			Assert.assertEquals("A", carrierClaimLine.getProcessingIndicationCode());
 
 			// Spot check one of the beneficiary's PartDEventFacts.
-			Assert.assertEquals(188, beneficiary.getPartDEventFacts().size());
+			Assert.assertEquals(174, beneficiary.getPartDEventFacts().size());
 			PartDEventFact partDEvent = beneficiary.getPartDEventFacts().get(0);
 			LOGGER.info("Checking against Part D event: {}", partDEvent);
 			Assert.assertEquals(233024488623927L, (long) partDEvent.getId());
-			Assert.assertEquals(1487603916L, (long) partDEvent.getPrescriberNpi());
-			Assert.assertEquals(1700826658L, (long) partDEvent.getServiceProviderNpi());
+			Assert.assertNotNull(partDEvent.getPrescriberNpi());
+			Assert.assertNotNull(partDEvent.getServiceProviderNpi());
 			Assert.assertEquals(54868407904L, (long) partDEvent.getProductNdc());
 			Assert.assertEquals(2010, partDEvent.getServiceDate().getYear());
 			Assert.assertEquals(30L, (long) partDEvent.getQuantityDispensed());
 			Assert.assertEquals(30L, (long) partDEvent.getNumberDaysSupply());
 			Assert.assertEquals(0.0, (double) partDEvent.getPatientPayAmount(), 0.0);
 			Assert.assertEquals(180.0, (double) partDEvent.getTotalPrescriptionCost(), 0.0);
+		}
+	}
+
+	/**
+	 * Runs {@link SampleDataLoader} against {@link SynpufArchive#SAMPLE_TEST_B}
+	 * to verify that no errors are thrown.
+	 */
+	@Test
+	@Ignore("slow, so skipped by default")
+	public void noErrorsFromSampleTestB() {
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
+
+		try (PersistenceManager pm = pmf.getPersistenceManager();) {
+			MetricRegistry metrics = new MetricRegistry();
+			SampleDataLoader loader = new SampleDataLoader(metrics, pm);
+			loader.loadSampleData(Paths.get(".", "target"), SynpufArchive.SAMPLE_TEST_B);
+
+			// Collect and print out the metrics from the run, just cause.
+			Slf4jReporter metricsReporter = Slf4jReporter.forRegistry(metrics)
+					.outputTo(LoggerFactory.getLogger(SampleDataLoaderTest.class)).build();
+			metricsReporter.report();
 		}
 	}
 }
