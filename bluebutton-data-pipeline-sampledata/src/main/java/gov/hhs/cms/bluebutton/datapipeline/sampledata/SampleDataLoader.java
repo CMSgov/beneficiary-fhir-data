@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
@@ -108,7 +109,9 @@ public final class SampleDataLoader {
 		SampleProviderGenerator providerGenerator = new SampleProviderGenerator();
 
 		// Process each DE-SynPUF sample.
+		final Timer timerSamples = metrics.timer(MetricRegistry.name(SampleDataLoader.class, "samples"));
 		for (SynpufSample synpufSample : synpufSamples) {
+			Timer.Context timerSamplesContext = timerSamples.time();
 			Transaction tx = pm.currentTransaction();
 			try {
 				// Start the transaction: each sample gets its own TX.
@@ -121,56 +124,8 @@ public final class SampleDataLoader {
 				 */
 				SharedDataRegistry registry = new SharedDataRegistry();
 
-				// Process the beneficiary summaries.
-				for (Path summaryCsv : synpufSample.getBeneficiarySummaries()) {
-					LOGGER.info("Processing DE-SynPUF file '{}'...", summaryCsv.getFileName());
-					try (Reader in = new FileReader(summaryCsv.toFile());) {
-						CSVFormat csvFormat = CSVFormat.EXCEL
-								.withHeader(SynpufColumnForBeneficiarySummary.getAllColumnNames())
-								.withSkipHeaderRecord();
-						Iterable<CSVRecord> records = csvFormat.parse(in);
-						for (CSVRecord record : records) {
-							LOGGER.trace("Processing DE-SynPUF Beneficiary Summary record #{}.",
-									record.getRecordNumber());
-
-							String synpufId = record.get(SynpufColumnForBeneficiarySummary.DESYNPUF_ID);
-							String birthDateText = record.get(SynpufColumnForBeneficiarySummary.BENE_BIRTH_DT);
-							LocalDate birthDate = LocalDate.parse(birthDateText, SYNPUF_DATE_FORMATTER);
-
-							/*
-							 * Many beneficiaries appear in the summary file for
-							 * more than one year. To keep things simple, we'll
-							 * just always assume that the later years are
-							 * "more correct".
-							 */
-							CurrentBeneficiary bene;
-							if (registry.getBeneficiary(synpufId) != null) {
-								bene = registry.getBeneficiary(synpufId);
-							} else {
-								bene = new CurrentBeneficiary();
-								bene.setId(registry.getBeneficiariesCount());
-							}
-
-							bene.setBirthDate(birthDate);
-							SampleName name = nameGenerator.generateName();
-							bene.setGivenName(name.getFirstName());
-							bene.setSurname(synpufId);
-							SampleAddress address = addressGenerator.generateAddress();
-							bene.setContactAddress(address.getAddressExceptZip());
-							bene.setContactAddressZip(address.getZip());
-
-							try {
-								pm.makePersistent(bene);
-							} catch (JDODataStoreException e) {
-								throw new SampleDataException(String.format("Bad data in here: %s", bene), e);
-							}
-							registry.register(synpufId, bene);
-						}
-					} catch (IOException e) {
-						throw new SampleDataException(e);
-					}
-					LOGGER.info("Processed DE-SynPUF file '{}'.", summaryCsv.getFileName());
-				}
+				// Process the beneficiaries
+				processBeneficiaries(synpufSample, registry, nameGenerator, addressGenerator);
 
 				// Process the Part A inpatient claims.
 				processInpatientClaims(synpufSample, registry, providerGenerator);
@@ -185,16 +140,90 @@ public final class SampleDataLoader {
 				processPartDClaims(synpufSample, registry);
 
 				// Commit the transaction.
+				Timer.Context timerTxContext = metrics
+						.timer(MetricRegistry.name(SampleDataLoader.class, "samples", "tx")).time();
 				tx.commit();
+				timerTxContext.stop();
 				LOGGER.info("Committed DE-SynPUF sample '{}'.", synpufSample.getArchive().name());
 			} finally {
 				if (tx.isActive())
 					tx.rollback();
 			}
+			timerSamplesContext.stop();
 		}
 
 		// TODO
 		return null;
+	}
+
+	/**
+	 * Process the beneficiary data in the specified {@link SynpufSample}.
+	 * 
+	 * @param synpufSample
+	 *            the {@link SynpufSample} to process
+	 * @param registry
+	 *            the {@link SharedDataRegistry} to use
+	 * @param nameGenerator
+	 *            the {@link SampleNameGenerator} to use
+	 * @param addressGenerator
+	 *            the {@link SampleAddressGenerator} to use
+	 */
+	private void processBeneficiaries(SynpufSample synpufSample, SharedDataRegistry registry,
+			SampleNameGenerator nameGenerator, SampleAddressGenerator addressGenerator) {
+		// Process the beneficiary summaries.
+		for (Path summaryCsv : synpufSample.getBeneficiarySummaries()) {
+			Timer.Context timerBeneficiaryFilesContext = metrics
+					.timer(MetricRegistry.name(SampleDataLoader.class, "beneficiaries", "files")).time();
+			Timer timerBeneficiaryRecords = metrics
+					.timer(MetricRegistry.name(SampleDataLoader.class, "beneficiaries", "records"));
+			LOGGER.info("Processing DE-SynPUF file '{}'...", summaryCsv.getFileName());
+			try (Reader in = new FileReader(summaryCsv.toFile());) {
+				CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForBeneficiarySummary.getAllColumnNames())
+						.withSkipHeaderRecord();
+				Iterable<CSVRecord> records = csvFormat.parse(in);
+				for (CSVRecord record : records) {
+					Timer.Context timerBeneficiaryRecordContext = timerBeneficiaryRecords.time();
+					LOGGER.trace("Processing DE-SynPUF Beneficiary Summary record #{}.", record.getRecordNumber());
+
+					String synpufId = record.get(SynpufColumnForBeneficiarySummary.DESYNPUF_ID);
+					String birthDateText = record.get(SynpufColumnForBeneficiarySummary.BENE_BIRTH_DT);
+					LocalDate birthDate = LocalDate.parse(birthDateText, SYNPUF_DATE_FORMATTER);
+
+					/*
+					 * Many beneficiaries appear in the summary file for more
+					 * than one year. To keep things simple, we'll just always
+					 * assume that the later years are "more correct".
+					 */
+					CurrentBeneficiary bene;
+					if (registry.getBeneficiary(synpufId) != null) {
+						bene = registry.getBeneficiary(synpufId);
+					} else {
+						bene = new CurrentBeneficiary();
+						bene.setId(registry.getBeneficiariesCount());
+					}
+
+					bene.setBirthDate(birthDate);
+					SampleName name = nameGenerator.generateName();
+					bene.setGivenName(name.getFirstName());
+					bene.setSurname(synpufId);
+					SampleAddress address = addressGenerator.generateAddress();
+					bene.setContactAddress(address.getAddressExceptZip());
+					bene.setContactAddressZip(address.getZip());
+
+					try {
+						pm.makePersistent(bene);
+					} catch (JDODataStoreException e) {
+						throw new SampleDataException(String.format("Bad data in here: %s", bene), e);
+					}
+					registry.register(synpufId, bene);
+					timerBeneficiaryRecordContext.stop();
+				}
+			} catch (IOException e) {
+				throw new SampleDataException(e);
+			}
+			LOGGER.info("Processed DE-SynPUF file '{}'.", summaryCsv.getFileName());
+			timerBeneficiaryFilesContext.stop();
+		}
 	}
 
 	/**
@@ -210,6 +239,10 @@ public final class SampleDataLoader {
 	 */
 	private void processInpatientClaims(SynpufSample synpufSample, SharedDataRegistry registry,
 			SampleProviderGenerator providerGenerator) {
+		Timer.Context timerInpatientFilesContext = metrics
+				.timer(MetricRegistry.name(SampleDataLoader.class, "inpatient", "files")).time();
+		Timer timerInpatientRecords = metrics
+				.timer(MetricRegistry.name(SampleDataLoader.class, "inpatient", "records"));
 		LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getInpatientClaimsFile().getFileName());
 		try (Reader in = new FileReader(synpufSample.getInpatientClaimsFile().toFile());) {
 			Map<Long, PartAClaimFact> claimsMap = new HashMap<>();
@@ -217,6 +250,7 @@ public final class SampleDataLoader {
 					.withSkipHeaderRecord();
 			Iterable<CSVRecord> records = csvFormat.parse(in);
 			for (CSVRecord record : records) {
+				Timer.Context timerInpatientRecordContext = timerInpatientRecords.time();
 				LOGGER.trace("Processing DE-SynPUF Inpatient record #{}.", record.getRecordNumber());
 
 				/*
@@ -336,11 +370,13 @@ public final class SampleDataLoader {
 
 				pm.makePersistent(claim);
 				claimsMap.put(claimId, claim);
+				timerInpatientRecordContext.stop();
 			}
 		} catch (IOException e) {
 			throw new SampleDataException(e);
 		}
-		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
+		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getInpatientClaimsFile().getFileName());
+		timerInpatientFilesContext.stop();
 	}
 
 	/**
@@ -356,6 +392,10 @@ public final class SampleDataLoader {
 	 */
 	private void processOutpatientClaims(SynpufSample synpufSample, SharedDataRegistry registry,
 			SampleProviderGenerator providerGenerator) {
+		Timer.Context timerOutpatientFilesContext = metrics
+				.timer(MetricRegistry.name(SampleDataLoader.class, "outpatient", "files")).time();
+		Timer timerOutpatientRecords = metrics
+				.timer(MetricRegistry.name(SampleDataLoader.class, "outpatient", "records"));
 		LOGGER.info("Processing DE-SynPUF file '{}'...", synpufSample.getOutpatientClaimsFile().getFileName());
 		try (Reader in = new FileReader(synpufSample.getOutpatientClaimsFile().toFile());) {
 			Map<Long, PartAClaimFact> claimsMap = new HashMap<>();
@@ -363,6 +403,7 @@ public final class SampleDataLoader {
 					.withSkipHeaderRecord();
 			Iterable<CSVRecord> records = csvFormat.parse(in);
 			for (CSVRecord record : records) {
+				Timer.Context timerOutpatientRecordContext = timerOutpatientRecords.time();
 				LOGGER.trace("Processing DE-SynPUF Outpatient record #{}.", record.getRecordNumber());
 
 				/*
@@ -488,11 +529,13 @@ public final class SampleDataLoader {
 
 				pm.makePersistent(claim);
 				claimsMap.put(claimId, claim);
+				timerOutpatientRecordContext.stop();
 			}
 		} catch (IOException e) {
 			throw new SampleDataException(e);
 		}
 		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
+		timerOutpatientFilesContext.stop();
 	}
 
 	/**
@@ -529,12 +572,17 @@ public final class SampleDataLoader {
 			SampleProviderGenerator providerGenerator) {
 		Map<Long, PartBClaimFact> claimsMap = new HashMap<>();
 		for (Path claimsCsv : synpufSample.getCarrierClaimsFiles()) {
+			Timer.Context timerCarrierFilesContext = metrics
+					.timer(MetricRegistry.name(SampleDataLoader.class, "carrier", "files")).time();
+			Timer timerCarrierRecords = metrics
+					.timer(MetricRegistry.name(SampleDataLoader.class, "carrier", "records"));
 			LOGGER.info("Processing DE-SynPUF file '{}'...", claimsCsv.getFileName());
 			try (Reader in = new FileReader(claimsCsv.toFile());) {
 				CSVFormat csvFormat = CSVFormat.EXCEL.withHeader(SynpufColumnForCarrierClaims.getAllColumnNames())
 						.withSkipHeaderRecord();
 				Iterable<CSVRecord> records = csvFormat.parse(in);
 				for (CSVRecord record : records) {
+					Timer.Context timerCarrierRecordContext = timerCarrierRecords.time();
 					LOGGER.trace("Processing DE-SynPUF Carrier record #{}.", record.getRecordNumber());
 
 					String synpufId = record.get(SynpufColumnForCarrierClaims.DESYNPUF_ID);
@@ -658,11 +706,13 @@ public final class SampleDataLoader {
 					}
 
 					pm.makePersistent(claim);
+					timerCarrierRecordContext.stop();
 				}
 			} catch (IOException e) {
 				throw new SampleDataException(e);
 			}
 			LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
+			timerCarrierFilesContext.stop();
 		}
 	}
 
@@ -699,6 +749,10 @@ public final class SampleDataLoader {
 	 * @param registry
 	 */
 	private void processPartDClaims(SynpufSample synpufSample, SharedDataRegistry registry) {
+		Timer.Context timerDrugFilesContext = metrics
+				.timer(MetricRegistry.name(SampleDataLoader.class, "drug", "files")).time();
+		Timer timerDrugRecords = metrics.timer(MetricRegistry.name(SampleDataLoader.class, "drug", "records"));
+
 		SamplePrescriberGenerator prescriberGenerator = new SamplePrescriberGenerator();
 		SamplePharmacyGenerator pharmacyGenerator = new SamplePharmacyGenerator();
 
@@ -709,6 +763,7 @@ public final class SampleDataLoader {
 					.withSkipHeaderRecord();
 			Iterable<CSVRecord> records = csvFormat.parse(in);
 			for (CSVRecord record : records) {
+				Timer.Context timerDrugRecordContext = timerDrugRecords.time();
 				LOGGER.trace("Processing DE-SynPUF Part D Outpatient record #{}.", record.getRecordNumber());
 
 				String synpufId = record.get(SynpufColumnForPartDClaims.DESYNPUF_ID);
@@ -747,11 +802,13 @@ public final class SampleDataLoader {
 				event.setTotalPrescriptionCost(prescriptionCost);
 
 				pm.makePersistent(event);
+				timerDrugRecordContext.stop();
 			}
 		} catch (IOException e) {
 			throw new SampleDataException(e);
 		}
 		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
+		timerDrugFilesContext.stop();
 	}
 
 	/**
