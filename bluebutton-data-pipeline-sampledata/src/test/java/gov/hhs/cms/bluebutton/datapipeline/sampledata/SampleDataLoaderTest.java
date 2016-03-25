@@ -281,6 +281,11 @@ public final class SampleDataLoaderTest {
 	@Test
 	@Ignore("slow (takes 190sec+), so skipped by default")
 	public void noErrorsFromSampleTestB() {
+		/*
+		 * If I run this test by itself using Eclipse Mar's new feature that
+		 * allows that, this seems to complete in 20-30 seconds. WTF?! Why so
+		 * much faster?
+		 */
 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
