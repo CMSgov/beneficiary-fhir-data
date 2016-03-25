@@ -348,9 +348,9 @@ public final class SampleDataLoader {
 				claim.setAdmittingDiagnosisCode(admittingDiagnosisCode);
 
 				PartAClaimRevLineFact revLine = new PartAClaimRevLineFact();
-				claim.getClaimLines().add(revLine);
 				revLine.setClaim(claim);
 				revLine.setLineNumber(1);
+				claim.getClaimLines().add(revLine);
 				revLine.setDiagnosisCode1(diagnosisCode1);
 				revLine.setDiagnosisCode2(diagnosisCode2);
 				revLine.setDiagnosisCode3(diagnosisCode3);
@@ -497,9 +497,9 @@ public final class SampleDataLoader {
 				claim.setProviderAtTimeOfClaimNpi((long) providerGenerator.generateProvider().getNpi());
 
 				PartAClaimRevLineFact revLine = new PartAClaimRevLineFact();
-				claim.getClaimLines().add(revLine);
 				revLine.setClaim(claim);
 				revLine.setLineNumber(segment);
+				claim.getClaimLines().add(revLine);
 				if (!isBlank(hcpcsCode)) {
 					Procedure procedure;
 					if (registry.getProcedure(hcpcsCode) != null) {
