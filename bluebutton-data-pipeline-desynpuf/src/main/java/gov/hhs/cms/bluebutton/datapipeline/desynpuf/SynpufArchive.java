@@ -8,7 +8,11 @@ public enum SynpufArchive {
 	
 	SAMPLE_TEST_A("de-synpuf/sample-test-a.tar.bz2", "TestA", 10), 
 	
-	SAMPLE_TEST_B("de-synpuf/sample-test-b.tar.bz2", "TestB", 500);
+	SAMPLE_TEST_B("de-synpuf/sample-test-b.tar.bz2", "TestB", 500), 
+	
+	SAMPLE_TEST_C("de-synpuf/sample-test-c.tar.bz2", "TestC", 200), 
+	
+	SAMPLE_TEST_D("de-synpuf/sample-test-d.tar.bz2", "TestD", 10000);
 
 	private final String resourceName;
 	private final String id;
