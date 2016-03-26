@@ -112,17 +112,18 @@ public final class SampleDataLoader {
 		final Timer timerSamples = metrics.timer(MetricRegistry.name(SampleDataLoader.class, "samples"));
 		for (SynpufSample synpufSample : synpufSamples) {
 			Timer.Context timerSamplesContext = timerSamples.time();
+
+			/*
+			 * In DE-SynPUF, beneficiaries' ID is arbitrary text. In the CCW,
+			 * those IDs are an integer. The registry keeps track of the problem
+			 * (amongst other things).
+			 */
+			SharedDataRegistry registry = new SharedDataRegistry();
+
 			Transaction tx = pm.currentTransaction();
 			try {
 				// Start the transaction: each sample gets its own TX.
 				tx.begin();
-
-				/*
-				 * In DE-SynPUF, beneficiaries' ID is arbitrary text. In the
-				 * CCW, those IDs are an integer. The registry keeps track of
-				 * the problem (amongst other things).
-				 */
-				SharedDataRegistry registry = new SharedDataRegistry();
 
 				// Process the beneficiaries
 				processBeneficiaries(synpufSample, registry, nameGenerator, addressGenerator);
@@ -874,6 +875,8 @@ public final class SampleDataLoader {
 	private static Long parseLong(CSVRecord record, Enum<?> column) {
 		String columnValue = record.get(column);
 		if (isBlank(columnValue))
+			return null;
+		else if ("OTHER".equals(columnValue))
 			return null;
 		else
 			return Long.parseLong(columnValue);
