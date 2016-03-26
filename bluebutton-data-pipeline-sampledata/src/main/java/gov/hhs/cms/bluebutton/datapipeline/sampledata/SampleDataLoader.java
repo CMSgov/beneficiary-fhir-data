@@ -711,7 +711,7 @@ public final class SampleDataLoader {
 			} catch (IOException e) {
 				throw new SampleDataException(e);
 			}
-			LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
+			LOGGER.info("Processed DE-SynPUF file '{}'.", claimsCsv.getFileName());
 			timerCarrierFilesContext.stop();
 		}
 	}
@@ -807,7 +807,7 @@ public final class SampleDataLoader {
 		} catch (IOException e) {
 			throw new SampleDataException(e);
 		}
-		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getOutpatientClaimsFile().getFileName());
+		LOGGER.info("Processed DE-SynPUF file '{}'.", synpufSample.getPartDClaimsFile().getFileName());
 		timerDrugFilesContext.stop();
 	}
 
