@@ -133,6 +133,12 @@
 				<artifactId>metrics-core</artifactId>
 				<version>${metrics.version}</version>
 			</dependency>
+			<dependency>
+				<!-- Used to monitor the JVM's memory usage, garbage collection, etc. at runtime. -->
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-jvm</artifactId>
+				<version>${metrics.version}</version>
+			</dependency>
 
 			<dependency>
 				<!-- Used to run our unit and integration tests. -->

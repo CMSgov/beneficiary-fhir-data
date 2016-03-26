@@ -25,6 +25,8 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
@@ -290,6 +292,9 @@ public final class SampleDataLoaderTest {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			MetricRegistry metrics = new MetricRegistry();
+			metrics.registerAll(new MemoryUsageGaugeSet());
+			metrics.registerAll(new GarbageCollectorMetricSet());
+
 			SampleDataLoader loader = new SampleDataLoader(metrics, pm);
 			loader.loadSampleData(Paths.get(".", "target"), SynpufArchive.SAMPLE_TEST_B);
 
@@ -311,6 +316,9 @@ public final class SampleDataLoaderTest {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			MetricRegistry metrics = new MetricRegistry();
+			metrics.registerAll(new MemoryUsageGaugeSet());
+			metrics.registerAll(new GarbageCollectorMetricSet());
+
 			SampleDataLoader loader = new SampleDataLoader(metrics, pm);
 			loader.loadSampleData(Paths.get(".", "target"), SynpufArchive.SAMPLE_TEST_D);
 
@@ -333,7 +341,7 @@ public final class SampleDataLoaderTest {
 		 * FIXME can't I move these into categories or ITs, instead of disabling
 		 * the slow test cases?
 		 */
-		
+
 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
