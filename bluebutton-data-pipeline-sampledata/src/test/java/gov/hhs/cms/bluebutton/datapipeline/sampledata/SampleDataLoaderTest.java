@@ -301,12 +301,39 @@ public final class SampleDataLoaderTest {
 	}
 
 	/**
+	 * Runs {@link SampleDataLoader} against {@link SynpufArchive#SAMPLE_TEST_B}
+	 * to verify that no errors are thrown.
+	 */
+	@Test
+	@Ignore("slow (takes 600sec), so skipped by default")
+	public void noErrorsFromSampleTestD() {
+		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
+
+		try (PersistenceManager pm = pmf.getPersistenceManager();) {
+			MetricRegistry metrics = new MetricRegistry();
+			SampleDataLoader loader = new SampleDataLoader(metrics, pm);
+			loader.loadSampleData(Paths.get(".", "target"), SynpufArchive.SAMPLE_TEST_D);
+
+			// Collect and print out the metrics from the run, just cause.
+			Slf4jReporter metricsReporter = Slf4jReporter.forRegistry(metrics)
+					.outputTo(LoggerFactory.getLogger(SampleDataLoaderTest.class)).build();
+			metricsReporter.report();
+		}
+	}
+
+	/**
 	 * Runs {@link SampleDataLoader} against {@link SynpufArchive#SAMPLE_1} to
 	 * verify that no errors are thrown.
 	 */
 	@Test
 	@Ignore("slow (takes TODO), so skipped by default")
 	public void noErrorsFromSample1() {
+		// TODO fill in the time, above
+		/*
+		 * FIXME can't I move these into categories or ITs, instead of disabling
+		 * the slow test cases?
+		 */
+		
 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
