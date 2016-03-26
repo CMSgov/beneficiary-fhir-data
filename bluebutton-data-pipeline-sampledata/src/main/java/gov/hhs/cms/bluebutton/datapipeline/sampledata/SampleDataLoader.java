@@ -103,6 +103,12 @@ public final class SampleDataLoader {
 		 * many CCW fields use '~' and '^' to indicate missing values.
 		 */
 
+		/*
+		 * TODO After a good bit of reflection, I think the data architecture
+		 * here is all wrong: the CCW is a claims-focused system, but what I've
+		 * built here is beneficiary-focused. Need to pivot that. Eventually.
+		 */
+
 		// Load the other sample data sets.
 		SampleNameGenerator nameGenerator = new SampleNameGenerator();
 		SampleAddressGenerator addressGenerator = new SampleAddressGenerator();
