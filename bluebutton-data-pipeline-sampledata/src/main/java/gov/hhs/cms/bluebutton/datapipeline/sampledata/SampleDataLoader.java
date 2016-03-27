@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +17,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.jdo.JDODataStoreException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Transaction;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -59,20 +58,16 @@ public final class SampleDataLoader {
 	private final static DateTimeFormatter SYNPUF_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
 	private final MetricRegistry metrics;
-	private final PersistenceManager pm;
 
 	/**
 	 * Constructs a new {@link SampleDataLoader} instance.
 	 * 
 	 * @param metrics
 	 *            the (injected) {@link MetricRegistry} to use
-	 * @param pm
-	 *            the (injected) {@link PersistenceManager} to use
 	 */
 	@Inject
-	public SampleDataLoader(MetricRegistry metrics, PersistenceManager pm) {
+	public SampleDataLoader(MetricRegistry metrics) {
 		this.metrics = metrics;
-		this.pm = pm;
 	}
 
 	/**
@@ -82,19 +77,26 @@ public final class SampleDataLoader {
 	 * @param workDir
 	 *            a directory that can be used to write any temporary files
 	 *            needed
-	 * @return a {@link SampleDataSummary} instance that contains information
-	 *         about the data that was loaded
+	 * @return the {@link CurrentBeneficiary}s that were generated
 	 * @throws SampleDataException
 	 *             A {@link SampleDataException} will be thrown if any errors
 	 *             occur reading in or processing the specified
 	 *             {@link SynpufArchive}s.
 	 */
-	public SampleDataSummary loadSampleData(Path workDir, SynpufArchive... synpufArchives) throws SampleDataException {
+	public List<CurrentBeneficiary> loadSampleData(Path workDir, SynpufArchive... synpufArchives)
+			throws SampleDataException {
 		// Extract the DE-SynPUF CSV files.
 		Path synpufDir = workDir.resolve("blue-button-de-synpuf");
-		List<SynpufSample> synpufSamples = null;
-		synpufSamples = Arrays.stream(synpufArchives).map(a -> SynpufSampleLoader.extractSynpufFile(synpufDir, a))
-				.collect(Collectors.toList());
+		List<SynpufSample> synpufSamples = Arrays.stream(synpufArchives)
+				.map(a -> SynpufSampleLoader.extractSynpufFile(synpufDir, a)).collect(Collectors.toList());
+
+		/*
+		 * FIXME This design is broken: takes about 8GB of heap to process each
+		 * full DE-SynPUF sample. Perhaps the comment just below about data
+		 * architecture holds the correct solution: pivot the data model and
+		 * asynchronously push out beneficiaries and claims as they are
+		 * produced.
+		 */
 
 		/*
 		 * FIXME Need to come up with a more consistent and
@@ -115,52 +117,39 @@ public final class SampleDataLoader {
 		SampleProviderGenerator providerGenerator = new SampleProviderGenerator();
 
 		// Process each DE-SynPUF sample.
+		List<CurrentBeneficiary> sampleBeneficiaries = new ArrayList<>();
 		final Timer timerSamples = metrics.timer(MetricRegistry.name(SampleDataLoader.class, "samples"));
 		for (SynpufSample synpufSample : synpufSamples) {
 			Timer.Context timerSamplesContext = timerSamples.time();
 
 			/*
-			 * In DE-SynPUF, beneficiaries' ID is arbitrary text. In the CCW,
-			 * those IDs are an integer. The registry keeps track of the problem
-			 * (amongst other things).
+			 * In the DE-SynPUF, beneficiaries' ID is arbitrary text. In the
+			 * CCW, those IDs are an integer. The registry keeps track of the
+			 * problem (amongst other things).
 			 */
 			SharedDataRegistry registry = new SharedDataRegistry();
 
-			Transaction tx = pm.currentTransaction();
-			try {
-				// Start the transaction: each sample gets its own TX.
-				tx.begin();
+			// Process the beneficiaries
+			processBeneficiaries(synpufSample, registry, nameGenerator, addressGenerator);
 
-				// Process the beneficiaries
-				processBeneficiaries(synpufSample, registry, nameGenerator, addressGenerator);
+			// Process the Part A inpatient claims.
+			processInpatientClaims(synpufSample, registry, providerGenerator);
 
-				// Process the Part A inpatient claims.
-				processInpatientClaims(synpufSample, registry, providerGenerator);
+			// Process the Part B outpatient claims.
+			processOutpatientClaims(synpufSample, registry, providerGenerator);
 
-				// Process the Part B outpatient claims.
-				processOutpatientClaims(synpufSample, registry, providerGenerator);
+			// Process the Part B carrier claims.
+			processCarrierClaims(synpufSample, registry, providerGenerator);
 
-				// Process the Part B carrier claims.
-				processCarrierClaims(synpufSample, registry, providerGenerator);
+			// Process the Part D claims.
+			processPartDClaims(synpufSample, registry);
 
-				// Process the Part D claims.
-				processPartDClaims(synpufSample, registry);
-
-				// Commit the transaction.
-				Timer.Context timerTxContext = metrics
-						.timer(MetricRegistry.name(SampleDataLoader.class, "samples", "tx")).time();
-				tx.commit();
-				timerTxContext.stop();
-				LOGGER.info("Committed DE-SynPUF sample '{}'.", synpufSample.getArchive().name());
-			} finally {
-				if (tx.isActive())
-					tx.rollback();
-			}
+			sampleBeneficiaries.addAll(registry.getBeneficiaries());
+			LOGGER.info("Processed DE-SynPUF sample '{}'.", synpufSample.getArchive().name());
 			timerSamplesContext.stop();
 		}
 
-		// TODO
-		return null;
+		return sampleBeneficiaries;
 	}
 
 	/**
@@ -217,11 +206,6 @@ public final class SampleDataLoader {
 					bene.setContactAddress(address.getAddressExceptZip());
 					bene.setContactAddressZip(address.getZip());
 
-					try {
-						pm.makePersistent(bene);
-					} catch (JDODataStoreException e) {
-						throw new SampleDataException(String.format("Bad data in here: %s", bene), e);
-					}
 					registry.register(synpufId, bene);
 					timerBeneficiaryRecordContext.stop();
 				}
@@ -325,6 +309,7 @@ public final class SampleDataLoader {
 				PartAClaimFact claim = new PartAClaimFact();
 				claim.setId(claimId);
 				claim.setBeneficiary(registry.getBeneficiary(synpufId));
+				claim.getBeneficiary().getPartAClaimFacts().add(claim);
 
 				AllClaimsProfile claimProfile;
 				if (registry.getClaimProfile(ClaimType.INPATIENT_CLAIM) != null) {
@@ -375,7 +360,6 @@ public final class SampleDataLoader {
 				revLine.setProcedureCode5(procedureCode5);
 				revLine.setProcedureCode6(procedureCode6);
 
-				pm.makePersistent(claim);
 				claimsMap.put(claimId, claim);
 				timerInpatientRecordContext.stop();
 			}
@@ -488,6 +472,7 @@ public final class SampleDataLoader {
 				}
 
 				claim.setBeneficiary(registry.getBeneficiary(synpufId));
+				claim.getBeneficiary().getPartAClaimFacts().add(claim);
 				claim.setDateFrom(dateClaimFrom);
 				claim.setDateThrough(dateClaimThrough);
 				claim.setAdmittingDiagnosisCode(admittingDiagnosisCode);
@@ -534,7 +519,6 @@ public final class SampleDataLoader {
 				revLine.setProcedureCode5(procedureCode5);
 				revLine.setProcedureCode6(procedureCode6);
 
-				pm.makePersistent(claim);
 				claimsMap.put(claimId, claim);
 				timerOutpatientRecordContext.stop();
 			}
@@ -617,6 +601,7 @@ public final class SampleDataLoader {
 					claimsMap.put(claimId, claim);
 					claim.setId(claimId);
 					claim.setBeneficiary(registry.getBeneficiary(synpufId));
+					claim.getBeneficiary().getPartBClaimFacts().add(claim);
 
 					AllClaimsProfile claimProfile;
 					if (registry.getClaimProfile(ClaimType.CARRIER_NON_DME_CLAIM) != null) {
@@ -712,7 +697,6 @@ public final class SampleDataLoader {
 							claim.getClaimLines().add(claimLine);
 					}
 
-					pm.makePersistent(claim);
 					timerCarrierRecordContext.stop();
 				}
 			} catch (IOException e) {
@@ -802,13 +786,13 @@ public final class SampleDataLoader {
 				event.setServiceProviderNpi((long) pharmacyGenerator.generatePharmacy().getNpi());
 				event.setProductNdc(productId);
 				event.setBeneficiary(registry.getBeneficiary(synpufId));
+				event.getBeneficiary().getPartDEventFacts().add(event);
 				event.setServiceDate(serviceDate);
 				event.setQuantityDispensed(quantity);
 				event.setNumberDaysSupply(daysSupply);
 				event.setPatientPayAmount(patientPayment);
 				event.setTotalPrescriptionCost(prescriptionCost);
 
-				pm.makePersistent(event);
 				timerDrugRecordContext.stop();
 			}
 		} catch (IOException e) {
@@ -906,6 +890,15 @@ public final class SampleDataLoader {
 		 */
 		public CurrentBeneficiary getBeneficiary(String synpufId) {
 			return beneficiariesBySynpufId.get(synpufId);
+		}
+
+		/**
+		 * @return all of the {@link CurrentBeneficiary}s (with their associated
+		 *         data and claims) that have been passed to
+		 *         {@link #register(String, CurrentBeneficiary)}
+		 */
+		public Collection<CurrentBeneficiary> getBeneficiaries() {
+			return beneficiariesBySynpufId.values();
 		}
 
 		/**

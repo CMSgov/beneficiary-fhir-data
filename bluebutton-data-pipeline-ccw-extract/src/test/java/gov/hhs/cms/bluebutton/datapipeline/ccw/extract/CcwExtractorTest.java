@@ -38,6 +38,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.SampleDataLoader;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.persist.SampleDataPersister;
 
 /**
  * Unit tests for {@link CcwExtractor}.
@@ -120,9 +121,12 @@ public final class CcwExtractorTest {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Load the DE-SynPUF sample data.
-			SampleDataLoader sampleLoader = new SampleDataLoader(new MetricRegistry(), pm);
+			MetricRegistry metrics = new MetricRegistry();
+			SampleDataLoader sampleLoader = new SampleDataLoader(metrics);
 			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
-			sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
+			List<CurrentBeneficiary> beneficiaries = sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
+			SampleDataPersister persister = new SampleDataPersister(metrics, pm);
+			persister.persist(beneficiaries.stream());
 
 			/*
 			 * Run the extractor and verify the results. The first thing to

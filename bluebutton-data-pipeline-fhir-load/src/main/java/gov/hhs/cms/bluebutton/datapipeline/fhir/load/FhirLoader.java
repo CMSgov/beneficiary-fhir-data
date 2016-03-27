@@ -27,7 +27,7 @@ import rx.Observable;
 public final class FhirLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoader.class);
 
-	private final LoadAppOptions options;
+	private final IGenericClient client;
 
 	/**
 	 * Constructs a new {@link FhirLoader} instance.
@@ -37,7 +37,19 @@ public final class FhirLoader {
 	 */
 	@Inject
 	public FhirLoader(LoadAppOptions options) {
-		this.options = options;
+		FhirContext ctx = FhirContext.forDstu2_1();
+		// The default timeout is 10s, which was failing for batches of 100.
+		// A 300s timeout was failing for batches of 100 once Part B claims were
+		// mostly mapped, so batches were cut to 10, which ran at 12s or so,
+		// each.
+		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
+		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
+		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
+		fhirClientLogging.setLogRequestBody(false);
+		fhirClientLogging.setLogResponseBody(false);
+		client.registerInterceptor(fhirClientLogging);
+
+		this.client = client;
 	}
 
 	/**
@@ -69,18 +81,6 @@ public final class FhirLoader {
 	 *         without keeping all of the pushed objects in memory
 	 */
 	private FhirResult process(List<BeneficiaryBundle> batch) {
-		FhirContext ctx = FhirContext.forDstu2_1();
-		// The default timeout is 10s, which was failing for batches of 100.
-		// A 300s timeout was failing for batches of 100 once Part B claims were
-		// mostly mapped, so batches were cut to 10, which ran at 12s or so,
-		// each.
-		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
-		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
-		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
-		fhirClientLogging.setLogRequestBody(false);
-		fhirClientLogging.setLogResponseBody(false);
-		client.registerInterceptor(fhirClientLogging);
-
 		Bundle bundle = new Bundle();
 		for (BeneficiaryBundle beneficiaryBundle : batch) {
 			for (IBaseResource resource : beneficiaryBundle.getFhirResources()) {

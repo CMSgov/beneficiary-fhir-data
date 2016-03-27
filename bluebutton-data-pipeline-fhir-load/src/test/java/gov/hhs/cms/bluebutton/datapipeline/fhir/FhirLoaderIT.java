@@ -29,7 +29,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
-import gov.hhs.cms.bluebutton.datapipeline.ccw.extract.CcwExtractor;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
@@ -41,7 +40,7 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.SampleDataLoader;
 
 /**
- * Integration tests for {@link DataTransformer}.
+ * Integration tests for {@link FhirLoader}.
  */
 @ContextConfiguration(classes = { SpringConfigForTests.class })
 @RunWith(Parameterized.class)
@@ -83,11 +82,11 @@ public final class FhirLoaderIT {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Load the DE-SynPUF sample data and then extract it.
-			SampleDataLoader sampleLoader = new SampleDataLoader(new MetricRegistry(), pm);
-			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_B;
-			sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
-			CcwExtractor extractor = new CcwExtractor(pm);
-			Stream<CurrentBeneficiary> beneficiariesStream = extractor.extractAllBeneficiaries();
+			SampleDataLoader sampleLoader = new SampleDataLoader(new MetricRegistry());
+			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
+			List<CurrentBeneficiary> beneficiaries = sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
+			// TODO get the CcwExtractor in this pipeline
+			Stream<CurrentBeneficiary> beneficiariesStream = beneficiaries.stream();
 
 			// Transform the data.
 			Stream<BeneficiaryBundle> fhirStream = new DataTransformer().transformSourceData(beneficiariesStream);
