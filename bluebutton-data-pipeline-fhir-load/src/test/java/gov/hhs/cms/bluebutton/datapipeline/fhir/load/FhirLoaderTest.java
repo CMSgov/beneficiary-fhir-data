@@ -16,6 +16,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
@@ -49,7 +51,7 @@ public final class FhirLoaderTest {
 	public void loadEmptyStream() throws URISyntaxException {
 		URI fhirServer = new URI("https://example.com/foo");
 		LoadAppOptions options = new LoadAppOptions(fhirServer);
-		FhirLoader loader = new FhirLoader(options);
+		FhirLoader loader = new FhirLoader(new MetricRegistry(), options);
 
 		Stream<BeneficiaryBundle> fhirStream = new ArrayList<BeneficiaryBundle>().stream();
 		List<FhirResult> results = loader.insertFhirRecords(fhirStream);
@@ -89,7 +91,7 @@ public final class FhirLoaderTest {
 		// Push the data to FHIR.
 		URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
 		LoadAppOptions options = new LoadAppOptions(fhirServer);
-		FhirLoader loader = new FhirLoader(options);
+		FhirLoader loader = new FhirLoader(new MetricRegistry(), options);
 		List<FhirResult> results = loader.insertFhirRecords(fhirStream);
 
 		// Verify the results.

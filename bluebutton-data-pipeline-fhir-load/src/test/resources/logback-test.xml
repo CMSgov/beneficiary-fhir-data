@@ -9,6 +9,11 @@
 		</encoder>
 	</appender>
 
+	<!-- Disable the FHIR client logging by default, as it's super annoying 
+		(unless I'm actually debugging with it, of course). -->
+	<logger name="ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor"
+		level="off" />
+
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
 	<root level="info">

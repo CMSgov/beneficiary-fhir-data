@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -26,6 +27,9 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Slf4jReporter;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
@@ -82,7 +86,8 @@ public final class FhirLoaderIT {
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
 			// Load the DE-SynPUF sample data and then extract it.
-			SampleDataLoader sampleLoader = new SampleDataLoader(new MetricRegistry());
+			MetricRegistry sampleDataMetrics = new MetricRegistry();
+			SampleDataLoader sampleLoader = new SampleDataLoader(sampleDataMetrics);
 			SynpufArchive archive = SynpufArchive.SAMPLE_TEST_A;
 			List<CurrentBeneficiary> beneficiaries = sampleLoader.loadSampleData(Paths.get(".", "target"), archive);
 			// TODO get the CcwExtractor in this pipeline
@@ -91,19 +96,23 @@ public final class FhirLoaderIT {
 			// Transform the data.
 			Stream<BeneficiaryBundle> fhirStream = new DataTransformer().transformSourceData(beneficiariesStream);
 
+			// Setup the metrics for FhirLoader to use.
+			MetricRegistry fhirMetrics = new MetricRegistry();
+			fhirMetrics.registerAll(new MemoryUsageGaugeSet());
+			fhirMetrics.registerAll(new GarbageCollectorMetricSet());
+			Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
+			fhirMetricsReporter.start(300, TimeUnit.SECONDS);
+
 			// Push the data to FHIR.
 			// URI fhirServer = new
 			// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
 			URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
 			LoadAppOptions options = new LoadAppOptions(fhirServer);
-			FhirLoader loader = new FhirLoader(options);
-			long loadStart = System.currentTimeMillis();
+			FhirLoader loader = new FhirLoader(fhirMetrics, options);
 			List<FhirResult> results = loader.insertFhirRecords(fhirStream);
-			long loadEnd = System.currentTimeMillis();
-			int resourcesCount = results.stream().mapToInt(r -> r.getResourcesPushedCount()).sum();
-			long loadMs = loadEnd - loadStart;
-			long loadMsPerResource = loadMs / resourcesCount;
-			LOGGER.info("Loaded {} resources in {} ms ({} ms/resource).", resourcesCount, loadMs, loadMsPerResource);
+			LOGGER.info("FHIR resources loaded.");
+			fhirMetricsReporter.stop();
+			fhirMetricsReporter.report();
 
 			// Verify the results.
 			Assert.assertNotNull(results);
