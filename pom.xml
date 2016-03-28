@@ -73,6 +73,7 @@
 		<module>bluebutton-data-pipeline-sampledata</module>
 		<module>bluebutton-data-pipeline-ccw-extract</module>
 		<module>bluebutton-data-pipeline-fhir-load</module>
+		<module>bluebutton-data-pipeline-fhir-sampledata</module>
 	</modules>
 
 	<properties>
