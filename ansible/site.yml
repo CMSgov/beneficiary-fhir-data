@@ -1,0 +1,150 @@
+---
+# This playbook stands up client test systems in AWS and then uses them to 
+# stress test a FHIR server.
+#
+# Usage:
+#  
+#     $ ansible-playbook site.yml --extra-vars "ec2_key_name=foo num_slaves=10 fhir_server=http://example.com/baseDstu2"
+
+- hosts: localhost
+  name: AWS - Provision Resources and Instances
+  connection: local
+  gather_facts: false
+  
+  vars:
+    # "Compute Optimized" with 4 vCPUs, 7.5 GB RAM, $0.209/hour
+    ec2_instance_type: "c4.xlarge"
+  
+  tasks:
+    
+    - name: Local - whoami
+      local_action: command whoami
+      register: whoami
+    
+    - name: EC2 - Provision Security Group 'ssh-all'
+      ec2_group:
+        name: ssh-all
+        description: Allows incoming traffic on port 22 (from all IPs).
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+    
+    - name: EC2 - Provision 'bluebutton-stress' master
+      ec2:
+        key_name: "{{ ec2_key_name }}"
+        group:
+          - default
+          - ssh-all
+        instance_type: "{{ ec2_instance_type }}"
+        image: "{{ ami_id_ubuntu }}"
+        region: "{{ region }}"
+        wait: true
+        exact_count: 1
+        count_tag:
+          Name: bluebutton-stress-master
+          Application: "BlueButton"
+        instance_tags:
+          Name: bluebutton-stress-master
+          Application: "BlueButton"
+          CreatedBy: "{{ whoami.stdout }}"
+      register: ec2_master
+    
+    - name: EC2 - Provision 'bluebutton-stress' slaves
+      ec2:
+        key_name: "{{ ec2_key_name }}"
+        group:
+          - default
+          - ssh-all
+        instance_type: "{{ ec2_instance_type }}"
+        image: "{{ ami_id_ubuntu }}"
+        region: "{{ region }}"
+        wait: true
+        # The default of 300s here wasn't cutting it for 8 slaves.
+        wait_timeout: 600
+        exact_count: "{{ num_slaves }}"
+        count_tag:
+          Name: bluebutton-stress-slave
+          Application: "BlueButton"
+        instance_tags:
+          Name: bluebutton-stress-slave
+          Application: "BlueButton"
+          CreatedBy: "{{ whoami.stdout }}"
+      register: ec2_slaves
+    
+    - name: Create inventory group 'master'
+      add_host: hostname={{ item.public_ip }} groupname=master
+      with_items: ec2_master.instances
+    
+    - name: Create inventory group 'slaves'
+      add_host: hostname={{ item.public_ip }} groupname=slaves
+      with_items: ec2_slaves.instances
+    
+    - name: Wait for SSH to come up
+      wait_for: host={{ item.public_dns_name }} port=22 timeout=320 state=started
+      with_flattened:
+        - ec2_master.instances
+        - ec2_slaves.instances
+      
+- name: Configure instance(s)
+  hosts: master:slaves
+  become: True
+  user: ubuntu
+  gather_facts: True
+  roles:
+    - stress_configure
+
+- name: Launch JMeter slaves
+  hosts: slaves
+  become: True
+  user: ubuntu
+  gather_facts: True
+  
+  tasks:
+    
+    - name: Launch JMeter Server in Background
+      # The "JMeter Server" is what the distributed testing nodes run.
+      shell: "( ( nohup /opt/fhir-stress/apache-jmeter-2.13/bin/jmeter-server 1>/dev/null 2>&1 ) & )"
+
+- name: Launch JMeter master and start tests
+  hosts: master
+  become: True
+  user: ubuntu
+  gather_facts: True
+  
+  vars:
+    slavesyses: "{{ hostvars | get_members(groups, 'slaves') | to_json }}"
+  
+  tasks:
+    
+    - debug: var=slavesyses
+    
+    - name: Run Stress
+      # Command Line Docs: http://jmeter.apache.org/usermanual/get-started.html
+      command: "/opt/fhir-stress/apache-jmeter-2.13/bin/jmeter --nongui --testfile /opt/fhir-stress/jmeter-fhir-test.jmx --logfile /opt/fhir-stress/log.jtl --jmeterlogfile /opt/fhir-stress/log-jmeter.txt --remotestart {{ hostvars | get_members(groups, 'slaves') | map(attribute='ansible_fqdn') | list | join(',') }} --jmeterproperty fhir_server={{ fhir_server }}"
+    
+    - name: Collect Results
+      fetch: src=/opt/fhir-stress/log.jtl dest=results/ fail_on_missing=yes
+    
+    - name: Collect Logs
+      fetch: src=/opt/fhir-stress/log-jmeter.txt dest=results/ fail_on_missing=yes
+
+- name: Terminate instances
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Terminate master instance
+      ec2:
+        state: 'absent'
+        instance_ids: "{{ ec2_master.instance_ids }}"
+        region: "{{ region }}"
+    - name: Terminate slave instances
+      ec2:
+        state: 'absent'
+        instance_ids: "{{ ec2_slaves.instance_ids }}"
+        region: "{{ region }}"

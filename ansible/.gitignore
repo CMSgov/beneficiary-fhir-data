@@ -1,0 +1,5 @@
+# Ignore the Python virtual environment.
+venv/
+
+# Ignore the collected stress tests results.
+results/
