@@ -23,10 +23,10 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 
 /**
  * This JMeter sampler will run a search for a random FHIR {@link Patient} and
- * then retrieve that {@link Patient} and all of their
+ * then retrieve that {@link Patient} and a single "page" of their
  * {@link ExplanationOfBenefit}s.
  */
-public final class RetrievePatientAndEobs extends AbstractJavaSamplerClient {
+public final class RetrievePatientAndFirstEobs extends AbstractJavaSamplerClient {
 	private static final String PARAM_SERVER = "fhir_server";
 	private static final String HOSTNAME_UNKNOWN = "unknown-host";
 
@@ -158,16 +158,7 @@ public final class RetrievePatientAndEobs extends AbstractJavaSamplerClient {
 	 */
 	private void runTest() {
 		String patientId = patientIds.get(rng.nextInt(patientIds.size()));
-		Bundle currentResultsPage = client.search().forResource(Patient.class)
-				.where(DomainResource.RES_ID.matchesExactly().value(patientId))
+		client.search().forResource(Patient.class).where(DomainResource.RES_ID.matchesExactly().value(patientId))
 				.revInclude(ExplanationOfBenefit.INCLUDE_PATIENT).returnBundle(Bundle.class).execute();
-		while (currentResultsPage != null) {
-			// Keep grabbing the next page, until there isn't one.
-			if (currentResultsPage.getLink(Bundle.LINK_NEXT) != null) {
-				currentResultsPage = client.loadPage().next(currentResultsPage).execute();
-			} else {
-				currentResultsPage = null;
-			}
-		}
 	}
 }
