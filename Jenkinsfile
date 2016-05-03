@@ -13,7 +13,7 @@ node {
 	
 	
 	//stage 'Archive'
-	step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
+	//step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
 	step([$class: 'ArtifactArchiver', artifacts: '**/target/*.war', fingerprint: true])
 	//step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
 	//step([$class: 'JUnitResultArchiver', testResults: '**/target/failsafe-reports/TEST-*.xml'])
