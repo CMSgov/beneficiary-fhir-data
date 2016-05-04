@@ -23,6 +23,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -35,6 +36,15 @@ public class JpaServerDemo extends RestfulServer {
 	private static final long serialVersionUID = 1L;
 
 	private WebApplicationContext myAppCtx;
+	
+	/**
+	 * Constructs a new {@link JpaServerDemo} instance.
+	 */
+	public JpaServerDemo() {
+		super();
+
+		setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -147,9 +157,9 @@ public class JpaServerDemo extends RestfulServer {
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		/*
-		 * This is a simple paging strategy that keeps the last 10 searches in memory
+		 * This is a simple paging strategy that keeps the last 1K searches in memory
 		 */
-		setPagingProvider(new FifoMemoryPagingProvider(10));
+		setPagingProvider(new FifoMemoryPagingProvider(1000));
 
 		/*
 		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
