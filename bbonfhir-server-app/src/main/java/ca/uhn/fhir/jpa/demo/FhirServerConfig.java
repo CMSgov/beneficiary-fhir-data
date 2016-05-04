@@ -7,10 +7,9 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -27,6 +26,9 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 @Configuration
 @EnableTransactionManagement()
 public class FhirServerConfig extends BaseJavaConfigDstu21 {
+	public static final String PROP_DB_URL = "bbfhir.db.url";
+	public static final String PROP_DB_USERNAME = "bbfhir.db.username";
+	public static final String PROP_DB_PASSWORD = "bbfhir.db.password";
 
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
@@ -48,24 +50,21 @@ public class FhirServerConfig extends BaseJavaConfigDstu21 {
 	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
 	 */
 	@Bean(destroyMethod = "close")
-	public DataSource dataSource() {
+	public DataSource dataSource(@Value("${" + PROP_DB_URL + "}") String url,
+			@Value("${" + PROP_DB_USERNAME + "}") String username,
+			@Value("${" + PROP_DB_PASSWORD + "}") String password) {
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:directory:target/jpaserver_derby_files;create=true");
-		retVal.setUsername("");
-		retVal.setPassword("");
-//		retVal.setDriver(new Driver());
-//		retVal.setUrl("jdbc:postgresql://bluebutton.cccekphclb8m.us-east-1.rds.amazonaws.com:5432/fhir");
-//		retVal.setUsername("postgres");
-//		retVal.setPassword("Axx2FkVBizgOB4ke1rLP");
+		retVal.setUrl(url);
+		retVal.setUsername(username);
+		retVal.setPassword(password);
 		return retVal;
 	}
 
 	@Bean()
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
 		retVal.setPersistenceUnitName("HAPI_PU");
-		retVal.setDataSource(dataSource());
+		retVal.setDataSource(dataSource);
 		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
 		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
 		retVal.setJpaProperties(jpaProperties());
@@ -75,8 +74,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu21 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
-//		extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

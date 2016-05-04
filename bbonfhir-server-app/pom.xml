@@ -141,6 +141,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.2.4</version>
+		</dependency>
+
+		<dependency>
 			<!-- The test framework used for unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

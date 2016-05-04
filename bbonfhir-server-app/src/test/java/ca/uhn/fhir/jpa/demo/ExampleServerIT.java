@@ -48,6 +48,10 @@ public class ExampleServerIT {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
+		System.setProperty(FhirServerConfig.PROP_DB_URL, "jdbc:hsqldb:mem:test");
+		System.setProperty(FhirServerConfig.PROP_DB_USERNAME, "");
+		System.setProperty(FhirServerConfig.PROP_DB_PASSWORD, "");
+		
 		/*
 		 * This runs under maven, and I'm not sure how else to figure out the target directory from code..
 		 */
