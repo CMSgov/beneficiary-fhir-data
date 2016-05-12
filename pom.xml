@@ -53,19 +53,6 @@
 		<tag>HEAD</tag>
 	</scm>
 
-	<repositories>
-		<repository>
-			<id>justdavis-nexus</id>
-			<url>https://justdavis.com/nexus/content/repositories/opensource-releases/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<modules>
 		<module>bluebutton-data-pipeline-desynpuf</module>
 		<module>bluebutton-data-pipeline-ccw</module>
