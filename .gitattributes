@@ -3,5 +3,3 @@ bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-a.tar
 bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-b.tar.bz2 filter=lfs diff=lfs merge=lfs -text
 bluebutton-data-pipeline-sampledata/src/main/resources/pharmacy-names.csv filter=lfs diff=lfs merge=lfs -text
 bluebutton-data-pipeline-sampledata/src/main/resources/prescriber-names.csv filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-c.tar.bz2 filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-d.tar.bz2 filter=lfs diff=lfs merge=lfs -text
