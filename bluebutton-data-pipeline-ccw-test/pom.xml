@@ -30,9 +30,9 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<!-- Provides various utilities, particularly for managing DB connections. -->
 			<groupId>com.justdavis.karl.jessentials</groupId>
 			<artifactId>jessentials-misc</artifactId>
-			<version>3.1.0</version>
 		</dependency>
 
 		<dependency>

@@ -85,6 +85,13 @@
 			</dependency>
 
 			<dependency>
+				<!-- Provides various utilities, particularly for managing DB connections. -->
+				<groupId>com.justdavis.karl.jessentials</groupId>
+				<artifactId>jessentials-misc</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+
+			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
 				<groupId>org.slf4j</groupId>
