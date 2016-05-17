@@ -271,6 +271,7 @@
 						<!-- Require manual pushes after releases. Makes it easier to clean 
 							things up if releases fail. -->
 						<pushChanges>false</pushChanges>
+						<localCheckout>true</localCheckout>
 					</configuration>
 				</plugin>
 			</plugins>
