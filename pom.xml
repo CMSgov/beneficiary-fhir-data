@@ -37,10 +37,10 @@
 	</issueManagement>
 
 	<ciManagement>
-		<!-- TODO per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
+		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
 			Sonar (at least) can use this information. -->
 		<system>jenkins</system>
-		<url><!-- TODO --></url>
+		<url>http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bbonfhir-server/</url>
 	</ciManagement>
 
 	<scm>
@@ -80,7 +80,7 @@
 				<artifactId>logback-classic</artifactId>
 				<version>1.1.3</version>
 			</dependency>
-			
+
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
 				<groupId>junit</groupId>
