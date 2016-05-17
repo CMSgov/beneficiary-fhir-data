@@ -43,17 +43,6 @@
 		<url><!-- TODO --></url>
 	</ciManagement>
 
-	<distributionManagement>
-		<repository>
-			<id>cms-nexus</id>
-			<url>TODO</url>
-		</repository>
-		<snapshotRepository>
-			<id>justdavis-nexus</id>
-			<url>https://justdavis.com/nexus/content/repositories/opensource-snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<scm>
 		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
 		<connection>scm:git:git@github.com:karlmdavis/bbonfhir-server.git</connection>
