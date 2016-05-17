@@ -22,15 +22,6 @@
 		A parent POM for the CMS/MyMedicare.gov ETL: migrates data from the CCW data warehouse to the Blue Button FHIR server.
 	</description>
 	<url>https://github.com/HHSIDEAlab/bluebutton-data-pipeline</url>
-	<organization>
-		<name>Centers for Medicare &amp; Medicaid Services</name>
-	</organization>
-	<licenses>
-		<license>
-			<name>Apache License 2.0</name>
-			<url>http://spdx.org/licenses/Apache-2.0</url>
-		</license>
-	</licenses>
 
 	<issueManagement>
 		<!-- There doesn't seem to be any tooling support for this yet, but it 
