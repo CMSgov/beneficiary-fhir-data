@@ -11,6 +11,7 @@
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
+	<name>bbonfhir-server-parent</name>
 	<description>
 		The CMS Blue Button project provides Medicare beneficiaries with access
         to their health care data, and supports an ecosystem of third-party 
