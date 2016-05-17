@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>gov.hhs.cms.bluebutton</groupId>
 		<artifactId>bluebutton-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
 	<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
