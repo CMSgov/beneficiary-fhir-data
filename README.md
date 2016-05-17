@@ -3,6 +3,15 @@ MyMedicare.gov BlueButton Parent POM
 
 This repo just contains a Maven parent POM and some other build/dev resources that are shared by the CMS/MyMedicare.gov Java projects.
 
+## Releases
+
+This project uses Maven's [maven-release-plugin](http://maven.apache.org/maven-release/maven-release-plugin/) for releases, and must be manually released by a developer with permissions to [its GitHub repo](https://github.com/HHSIDEAlab/bluebutton-parent-pom) and to [OSSRH](http://central.sonatype.org/pages/ossrh-guide.html) (which is used to ensure its releases land in Maven Central).
+
+Run the following commands to perform a release:
+
+    $ mvn release:prepare release:perform
+    $ git push --all && git push --tags
+
 ## License
 
 This project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):
