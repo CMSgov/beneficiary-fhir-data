@@ -156,20 +156,6 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<!-- Can be used to select which JDK to use (amongst other things). 
-						Options must be specified in `~/.m2/toolchains.xml`. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-toolchains-plugin</artifactId>
-					<configuration>
-						<toolchains>
-							<jdk>
-								<!-- Use a Java 8 JDK. -->
-								<version>1.8</version>
-							</jdk>
-						</toolchains>
-					</configuration>
-				</plugin>
-				<plugin>
 					<!-- Can be used to run the DataNucleus/JDO bytecode enhancer on projects' 
 						compiled classes. -->
 					<groupId>org.datanucleus</groupId>
