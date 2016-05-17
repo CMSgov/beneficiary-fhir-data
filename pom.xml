@@ -25,6 +25,15 @@
 		</license>
 	</licenses>
 
+	<developers>
+		<developer>
+			<id>karlmdavis</id>
+			<name>Karl M. Davis</name>
+			<email>karl@justdavis.com</email>
+			<url>https://justdavis.com/karl</url>
+		</developer>
+	</developers>
+
 	<issueManagement>
 		<!-- There doesn't seem to be any tooling support for this yet, but it 
 			doesn't hurt to include it. -->
@@ -40,14 +49,17 @@
 	</ciManagement>
 
 	<distributionManagement>
-		<repository>
-			<id>cms-nexus</id>
-			<url>TODO</url>
-		</repository>
+		<!-- Deploy these open source projects to the public OSSRH repositories, 
+			per http://central.sonatype.org/pages/apache-maven.html. This helps ensure 
+			that the releases land in the Maven Central repos. -->
 		<snapshotRepository>
-			<id>cms-nexus</id>
-			<url>TODO</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
 	</distributionManagement>
 
 	<scm>
@@ -57,6 +69,19 @@
 		<url>https://github.com/karlmdavis/bluebutton-parent-pom</url>
 		<tag>HEAD</tag>
 	</scm>
+
+	<repositories>
+		<repository>
+			<id>ossrh-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<properties>
 		<!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding, 
@@ -215,8 +240,23 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>2.8.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>1.6.7</version>
+					<configuration>
+						<serverId>ossrh</serverId>
+						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+						<autoReleaseAfterClose>true</autoReleaseAfterClose>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -267,6 +307,31 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- Ensure that all artifacts get signed prior to being deployed. 
+							This is required for all artifacts heading to the Maven Central repo, but 
+							is a good idea in general. -->
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Specifying this plugin here replaces the default deploy plugin in 
+					the lifecycle: this plugin will be used to deploy artifacts. This is great 
+					for interacting with OSSRH and deploying to Maven Central. However, it can 
+					be disabled in descendant projects by setting 'extensions' to false. -->
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<extensions>true</extensions>
 			</plugin>
 		</plugins>
 	</build>
