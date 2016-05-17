@@ -17,6 +17,7 @@
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
+	<name>bluebutton-data-pipeline</name>
 	<description>
 		A parent POM for the CMS/MyMedicare.gov ETL: migrates data from the CCW data warehouse to the Blue Button FHIR server.
 	</description>
