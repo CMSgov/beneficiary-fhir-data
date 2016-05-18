@@ -31,10 +31,10 @@ node {
 	stage 'Build'
 	
 	// Run the build, using Maven.
-	sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore clean install"
+	sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore clean deploy scm:tag"
 	
 	
-	//stage 'Archive'
+	stage 'Archive'
 	//step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
 	step([$class: 'ArtifactArchiver', artifacts: '**/target/*.war', fingerprint: true])
 	//step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
