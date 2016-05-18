@@ -14,7 +14,7 @@
 
 	<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
 	<artifactId>bbonfhir-server-parent</artifactId>
-	<version>0.1.0-${buildId}</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>bbonfhir-server-parent</name>
@@ -51,12 +51,6 @@
 	<modules>
 		<module>bbonfhir-server-app</module>
 	</modules>
-
-	<properties>
-		<!-- A sane default for dev-local builds. Should be overridden and set 
-			to the branch name and build number in CI builds, though. -->
-		<buildId>SNAPSHOT</buildId>
-	</properties>
 
 	<dependencyManagement>
 		<dependencies>
