@@ -23,7 +23,7 @@ node {
 	
 	// Update the POM version to include the build ID.
 	// Reference: https://maven.apache.org/maven-release/maven-release-plugin/examples/update-versions.html
-	def pomProjectVersionWithBuildId = pomProjectVersion.replaceAll("-SNAPSHOT", buildId)
+	def pomProjectVersionWithBuildId = pomProjectVersion.replaceAll("SNAPSHOT", buildId)
 	echo "Updated POM version: ${pomProjectVersionWithBuildId}"
 	sh "${mvnHome}/bin/mvn --batch-mode release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=${pomProjectVersionWithBuildId}"
 	
