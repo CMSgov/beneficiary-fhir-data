@@ -7,7 +7,7 @@ node {
 	
 	// Calculate the current POM version.
 	// Reference: http://stackoverflow.com/a/26514030/1851299
-	sh "${mvnHome}/bin/mvn --quiet --non-recursive -Dexec.executable='echo' -Dexec.args='${project.version}' org.codehaus.mojo:exec-maven-plugin:1.3.1:exec > pom.project.version.txt"
+	sh "${mvnHome}/bin/mvn --quiet --non-recursive -Dexec.executable='echo' -Dexec.args='\${project.version}' org.codehaus.mojo:exec-maven-plugin:1.3.1:exec > pom.project.version.txt"
 	pomProjectVersion = readFile('pom.project.version.txt').trim()
 	echo "Current POM version: ${pomProjectVersion}"
 	
