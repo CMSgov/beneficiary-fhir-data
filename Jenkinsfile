@@ -12,7 +12,8 @@ node {
 	echo "Current POM version: ${pomProjectVersion}"
 	
 	// Calculate the build ID.
-	gitBranchName = "${env.BRANCH_NAME}"
+	gitBranchName = "${env.BRANCH_NAME}".toString()
+	echo "Branch name: ${gitBranchName}"
 	def buildId = ""
 	if("master".equals(gitBranchName)) {
 		buildId = "${env.BUILD_NUMBER}"
