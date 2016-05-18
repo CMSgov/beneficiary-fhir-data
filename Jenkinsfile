@@ -2,6 +2,14 @@ node {
 	stage 'Checkout'
 	checkout scm
 	
+	// Calculate the build ID.
+	sh "git branch | sed -n -e 's/^\* \(.*\)/\1/p' | tee git-branch-name.txt"
+	gitBranchName = readFile('commandResult').trim()
+	if("master".equals(gitBranchName)) {
+		def buildId = "${env.BUILD_NUMBER}"
+	} else {
+		def buildId = "${gitBranchName}-${env.BUILD_NUMBER}"
+	}
 	
 	stage 'Build'
 	
@@ -9,7 +17,7 @@ node {
 	def mvnHome = tool 'maven-3'
 	
 	// Run the build, using Maven.
-	sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore clean install"
+	sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore clean install -DbuildId=${buildId}"
 	
 	
 	//stage 'Archive'
