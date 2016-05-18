@@ -11,6 +11,8 @@ node {
 	} else {
 		buildId = "${gitBranchName}-${env.BUILD_NUMBER}"
 	}
+	echo "Build ID: "
+	echo buildId
 	
 	stage 'Build'
 	
@@ -18,7 +20,7 @@ node {
 	def mvnHome = tool 'maven-3'
 	
 	// Run the build, using Maven.
-	sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore clean install -DbuildId=${buildId}"
+	sh "${mvnHome}/bin/mvn -DbuildId=${buildId} -Dmaven.test.failure.ignore clean install"
 	
 	
 	//stage 'Archive'
