@@ -4,7 +4,7 @@ node {
 	
 	// Calculate the build ID.
 	sh "git branch | sed -n -e 's/^\\* \\(.*\\)/\\1/p' | tee git-branch-name.txt"
-	gitBranchName = readFile('commandResult').trim()
+	gitBranchName = readFile('git-branch-name.txt').trim()
 	if("master".equals(gitBranchName)) {
 		def buildId = "${env.BUILD_NUMBER}"
 	} else {
