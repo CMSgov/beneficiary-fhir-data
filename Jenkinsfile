@@ -3,8 +3,7 @@ node {
 	checkout scm
 	
 	// Calculate the build ID.
-	sh "env"
-	gitBranchName = "${BRANCH_NAME}"
+	gitBranchName = "${env.BRANCH_NAME}"
 	def buildId = ""
 	if("master".equals(gitBranchName)) {
 		buildId = "${env.BUILD_NUMBER}"
