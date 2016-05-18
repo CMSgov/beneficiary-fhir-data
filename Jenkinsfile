@@ -26,7 +26,7 @@ node {
 	// Reference: https://maven.apache.org/maven-release/maven-release-plugin/examples/update-versions.html
 	def pomProjectVersionWithBuildId = pomProjectVersion.replaceAll("SNAPSHOT", buildId)
 	echo "Updated POM version: ${pomProjectVersionWithBuildId}"
-	sh "${mvnHome}/bin/mvn --batch-mode release:update-versions -DautoVersionSubmodules=true -DdevelopmentVersion=${pomProjectVersionWithBuildId}"
+	sh "${mvnHome}/bin/mvn --batch-mode --quiet org.codehaus.mojo:versions-maven-plugin:2.2:set -DnewVersion='${pomProjectVersionWithBuildId}' -DgenerateBackupPoms=false"
 	
 	stage 'Build'
 	
