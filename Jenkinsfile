@@ -30,18 +30,13 @@ node {
 	
 	stage 'Build'
 	
-	try {
-		// Create the settings file for Maven (contains deploy credentials).
-		step([$class: 'ConfigFileBuildStep', 
-			managedFiles: [[fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:cms-bluebutton-settings-xml', 
-			targetLocation: 'settings.xml']]
-		])
-	
+	// Create the settings file for Maven (contains deploy credentials).
+	wrap([$class: 'ConfigFileBuildWrapper', 
+		managedFiles: [[fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:cms-bluebutton-settings-xml', 
+		targetLocation: 'settings.xml']]
+	]) {
 		// Run the build, using Maven.
 		sh "${mvnHome}/bin/mvn --settings settings.xml -Dmaven.test.failure.ignore clean deploy scm:tag"
-	} finally {
-		// Clean up the credentials, to minimize exposure.
-		sh "rm -f settings.xml"
 	}
 	
 	
