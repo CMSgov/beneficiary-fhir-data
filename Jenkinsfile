@@ -1,4 +1,4 @@
-/*
+/**
  * <p>
  * This is the script that will be run by Jenkins to build and test this 
  * project. This drives the project's continuous integration, delivery, and
