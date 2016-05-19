@@ -1,7 +1,7 @@
 node {
 	stage 'Checkout'
 		checkout scm
-		setPomVersionUsingBuildId(mvnHome)
+		setPomVersionUsingBuildId()
 	
 	stage 'Build'
 		/* Create the settings file for Maven (contains deploy credentials). 
@@ -80,7 +80,7 @@ def calculateBuildId() {
  * unique version number.
  * </p>
  */
-def setPomVersionUsingBuildId(mvnHome) {
+def setPomVersionUsingBuildId() {
 	// Update the POM version to include the build ID.
 	// Reference: https://maven.apache.org/maven-release/maven-release-plugin/examples/update-versions.html
 	pomProjectVersionWithBuildId = readPomVersion().replaceAll("SNAPSHOT", calculateBuildId())
