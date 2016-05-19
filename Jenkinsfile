@@ -30,7 +30,8 @@ node {
 	
 	stage 'Build'
 	
-	// Create the settings file for Maven (contains deploy credentials).
+	// Create the settings file for Maven (contains deploy credentials). Will
+	// be automatically cleaned up at end of block.
 	wrap([$class: 'ConfigFileBuildWrapper', 
 		managedFiles: [[fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:cms-bluebutton-settings-xml', 
 		variable: 'SETTINGS_PATH']]
