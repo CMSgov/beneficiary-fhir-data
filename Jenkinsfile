@@ -33,10 +33,10 @@ node {
 	// Create the settings file for Maven (contains deploy credentials).
 	wrap([$class: 'ConfigFileBuildWrapper', 
 		managedFiles: [[fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:cms-bluebutton-settings-xml', 
-		variable: 'settingsPath']]
+		variable: 'SETTINGS_PATH']]
 	]) {
 		// Run the build, using Maven.
-		sh "${mvnHome}/bin/mvn --settings ${settingsPath} -Dmaven.test.failure.ignore clean deploy scm:tag"
+		sh "${mvnHome}/bin/mvn --settings ${env.SETTINGS_PATH} -Dmaven.test.failure.ignore clean deploy scm:tag"
 	}
 	
 	
