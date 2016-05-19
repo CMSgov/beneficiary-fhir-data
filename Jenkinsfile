@@ -5,6 +5,12 @@
  * deployment.
  * </p>
  * <p>
+ * This script is run by Jenkins' 
+ * <a href="https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Plugin">Pipeline Plugin</a>. 
+ * A good intro tutorial for working with this plugin can be found here: 
+ * <a href="https://github.com/jenkinsci/pipeline-plugin/blob/master/TUTORIAL.md">jenkinsci/pipeline-plugin/TUTORIAL.md</a>.
+ * </p>
+ * <p>
  * The canonical Jenkins server job for this project is located here: 
  * <a href="http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bbonfhir-server/">bbonfhir-server</a>.
  * </p>
