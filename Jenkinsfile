@@ -1,3 +1,15 @@
+/*
+ * <p>
+ * This is the script that will be run by Jenkins to build and test this 
+ * project. This drives the project's continuous integration, delivery, and
+ * deployment.
+ * </p>
+ * <p>
+ * The canonical Jenkins server job for this project is located here: 
+ * <a href="http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bbonfhir-server/">bbonfhir-server</a>.
+ * </p>
+ */
+
 node {
 	stage 'Checkout'
 		checkout scm
