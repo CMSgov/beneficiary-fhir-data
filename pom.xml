@@ -71,16 +71,18 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<build><pluginManagement>
-		<plugins>
-			<plugin>
-				<artifactId>maven-scm-plugin</artifactId>
-				<configuration>
-					<!-- This default config is used in the Jenkinsfile CI build. -->
-					<tag>${project.artifactId}-${project.version}</tag>
-				</configuration>
-			</plugin>
-		</plugins></pluginManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-scm-plugin</artifactId>
+					<configuration>
+						<!-- This default config is used in the Jenkinsfile CI build. -->
+						<tag>${project.artifactId}-${project.version}</tag>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 </project>
