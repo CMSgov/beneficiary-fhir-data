@@ -175,7 +175,7 @@ public class PartBClaimLineFact {
 
 	/**
 	 * @param dateThrough
-	 *            the new value for {@link #getDateThrough()
+	 *            the new value for {@link #getDateThrough()}
 	 * @return this instance (for call-chaining purposes)
 	 */
 	public PartBClaimLineFact setDateThrough(LocalDate dateThrough) {

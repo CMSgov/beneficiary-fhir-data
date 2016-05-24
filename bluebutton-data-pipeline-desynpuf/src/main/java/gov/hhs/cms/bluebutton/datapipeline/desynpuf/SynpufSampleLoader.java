@@ -22,7 +22,7 @@ public final class SynpufSampleLoader {
 	/**
 	 * @param extractionDir
 	 *            the {@link Path} to the directory to extract the files to
-	 * @param archiveIds
+	 * @param archiveId
 	 *            the {@link SynpufArchive} to extract
 	 * @return a {@link SynpufSample}s representing the results of extracting
 	 *         the specified {@link SynpufArchive}

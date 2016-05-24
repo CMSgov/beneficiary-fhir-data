@@ -24,8 +24,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.schema.CcwSchemaInitializer;
  * that database. This is intended for use as a JUnit {@link Rule}, as follows:
  * </p>
  * 
- * <pre>
- * {@code
+ * <pre><code>
  * {@literal @}ContextConfiguration(classes = { MySpringConfig.class })
  * public final class MyTest {
  * 	{@literal @}ClassRule
@@ -51,7 +50,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.schema.CcwSchemaInitializer;
  * 		// test. 
  * 	}
  * }
- * </pre>
+ * </code></pre>
  */
 @Component
 public final class CcwTestHelper implements AutoCloseable {

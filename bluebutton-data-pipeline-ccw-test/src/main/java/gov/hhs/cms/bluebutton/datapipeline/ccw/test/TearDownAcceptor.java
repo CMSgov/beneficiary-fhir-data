@@ -13,8 +13,7 @@ import org.junit.rules.ExternalResource;
  * case. This is intended for use as a JUnit {@link Rule}, as follows:
  * </p>
  * 
- * <pre>
- * {@code
+ * <pre><code>
  * public final class MyTest {
  * 	{@literal @}Rule
  * 	public final TearDownAcceptor tearDownAcceptor = new TearDownAcceptor();
@@ -29,7 +28,7 @@ import org.junit.rules.ExternalResource;
  * 		// foo will be .close()'d automatically after the test case
  * 	}
  * }
- * </pre>
+ * </code></pre>
  */
 public final class TearDownAcceptor extends ExternalResource {
 	private final List<AutoCloseable> tearDowns = new LinkedList<>();

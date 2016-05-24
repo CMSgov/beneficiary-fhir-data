@@ -246,7 +246,7 @@ public class PartAClaimFact {
 
 	/**
 	 * @param dateThrough
-	 *            the new value for {@link #getDateThrough()
+	 *            the new value for {@link #getDateThrough()}
 	 * @return this instance (for call-chaining purposes)
 	 */
 	public PartAClaimFact setDateThrough(LocalDate dateThrough) {
