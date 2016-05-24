@@ -174,6 +174,13 @@
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					</configuration>
 				</plugin>
+				<plugin>
+					<artifactId>maven-scm-plugin</artifactId>
+					<configuration>
+						<!-- This default config is used in the Jenkinsfile CI build. -->
+						<tag>${project.artifactId}-${project.version}</tag>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
