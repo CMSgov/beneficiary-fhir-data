@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu21.model.Address;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.Coverage;
@@ -29,10 +32,13 @@ import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
 import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.Resource;
 import org.hl7.fhir.dstu21.model.SimpleQuantity;
 import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.dstu21.model.valuesets.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
@@ -41,6 +47,10 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
+import rx.Observable;
 
 /**
  * Handles the translation from source/CCW {@link CurrentBeneficiary} data into
@@ -60,6 +70,10 @@ public final class DataTransformer {
 	static final String EXTENSION_CMS_ATTENDING_PHYSICIAN = "http://bluebutton.cms.hhs.gov/extensions#attendingPhysician";
 
 	static final String EXTENSION_CMS_DIAGNOSIS_LINK_ID = "http://bluebutton.cms.hhs.gov/extensions#diagnosisLinkId";
+
+	static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
+
+	static final String COVERAGE_PLAN = "Medicare";
 
 	/**
 	 * The {@link Coverage#getPlan()} value for Part A.
@@ -103,6 +117,8 @@ public final class DataTransformer {
 	 * {@link Adjudication}s.
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
+
+	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
@@ -775,5 +791,143 @@ public final class DataTransformer {
 	 */
 	private static boolean isBlank(String value) {
 		return value == null || value.trim().isEmpty();
+	}
+
+	/**
+	 * @param rifStream
+	 *            the stream of source {@link RifRecordEvent}s to be transformed
+	 * @return the stream of FHIR resource {@link Bundle}s that is the result of
+	 *         transforming the specified {@link RifRecordEvent}s
+	 */
+	@SuppressWarnings("unchecked")
+	public Observable<TransformedBundle> transform(Observable<RifRecordEvent<?>> rifStream) {
+		return rifStream.map(rifRecordEvent -> {
+			if (rifRecordEvent.getRecord() instanceof BeneficiaryRow)
+				return transformBeneficiary((RifRecordEvent<BeneficiaryRow>) rifRecordEvent);
+
+			throw new BadCodeMonkeyException("Unhandled record type: " + rifRecordEvent.getRecord());
+		});
+	}
+
+	/**
+	 * @param rifRecordEvent
+	 *            the source {@link RifRecordEvent} to be transformed
+	 * @return the {@link TransformedBundle} that is the result of transforming
+	 *         the specified {@link RifRecordEvent}
+	 */
+	private TransformedBundle transformBeneficiary(RifRecordEvent<BeneficiaryRow> rifRecordEvent) {
+		if (rifRecordEvent == null)
+			throw new IllegalArgumentException();
+		BeneficiaryRow record = rifRecordEvent.getRecord();
+		if (1 != record.version)
+			throw new IllegalArgumentException("Unsupported record version: " + record.version);
+		if (record.recordAction != RecordAction.INSERT)
+			// Will need refactoring to support other ops.
+			throw new BadCodeMonkeyException();
+
+		Bundle bundle = new Bundle();
+
+		Patient beneficiary = new Patient();
+		beneficiary.setId("Patient/" + record.beneficiaryId);
+		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID).setValue(record.beneficiaryId);
+		beneficiary.addAddress().setState(record.stateCode).setDistrict(record.countyCode)
+				.setPostalCode(record.postalCode);
+		// TODO rest of mapping
+		insert(bundle, beneficiary);
+
+		/*
+		 * To prevent an extra round-trip to the FHIR server (which would
+		 * greatly complicate this class' code, since it doesn't even know about
+		 * the FHIR server), we always just upsert this org, whenever it's used.
+		 */
+		Organization cms = new Organization();
+		cms.setName(COVERAGE_ISSUER);
+		upsert(bundle, cms, "Organization/?name=" + COVERAGE_ISSUER);
+
+		/*
+		 * We don't have detailed enough data on this right now, so we'll just
+		 * assume that everyone has Part A, B, and D.
+		 */
+
+		Coverage partA = new Coverage();
+		partA.setPlan(COVERAGE_PLAN);
+		partA.setSubPlan(COVERAGE_PLAN_PART_A);
+		partA.setIssuer(new Reference(cms.getId()));
+		partA.setSubscriber(new Reference(beneficiary.getId()));
+		insert(bundle, partA);
+
+		Coverage partB = new Coverage();
+		partB.setPlan(COVERAGE_PLAN);
+		partB.setSubPlan(COVERAGE_PLAN_PART_B);
+		partB.setIssuer(new Reference(cms.getId()));
+		partB.setSubscriber(new Reference(beneficiary.getId()));
+		insert(bundle, partA);
+
+		Coverage partD = new Coverage();
+		partD.setPlan(COVERAGE_PLAN);
+		partD.setSubPlan(COVERAGE_PLAN_PART_D);
+		partD.setIssuer(new Reference(cms.getId()));
+		partD.setSubscriber(new Reference(beneficiary.getId()));
+		insert(bundle, partA);
+
+		return new TransformedBundle(rifRecordEvent, bundle);
+	}
+
+	/**
+	 * Adds the specified {@link Resource}s to the specified {@link Bundle},
+	 * setting it as a <a href="http://hl7-fhir.github.io/http.html#insert">FHIR
+	 * "insert" operation</a> if {@link Resource#getId()} is <code>null</code>,
+	 * or a <a href="http://hl7-fhir.github.io/http.html#update">FHIR "update"
+	 * operation</a> if it is not.
+	 * 
+	 * @param bundle
+	 *            the {@link Bundle} to include the resource in
+	 * @param resources
+	 *            the FHIR {@link Resource} to upsert into the specified
+	 *            {@link Bundle}
+	 */
+	private static void insert(Bundle bundle, Resource resource) {
+		if (bundle == null)
+			throw new IllegalArgumentException();
+		if (resource == null)
+			throw new IllegalArgumentException();
+
+		if (resource.getId() == null)
+			bundle.addEntry().setResource(resource).getRequest().setMethod(HTTPVerb.POST);
+		else
+			bundle.addEntry().setFullUrl(resource.getId()).setResource(resource).getRequest().setMethod(HTTPVerb.PUT)
+					.setUrl(resource.getId());
+	}
+
+	/**
+	 * Adds the specified {@link Resource}s to the specified {@link Bundle},
+	 * setting it as a
+	 * <a href="http://hl7-fhir.github.io/http.html#2.1.0.10.2">FHIR
+	 * "conditional update" operation</a>.
+	 * 
+	 * @param bundle
+	 *            the {@link Bundle} to include the resource in
+	 * @param resources
+	 *            the FHIR {@link Resource} to upsert into the specified
+	 *            {@link Bundle}
+	 * @param resourceUrl
+	 *            the value to use for
+	 *            {@link BundleEntryRequestComponent#setUrl(String)}, which will
+	 *            typically be a search query of the form
+	 *            "<code>Patient/?field=value</code>" (there are good examples
+	 *            of this here: <a href=
+	 *            "http://hl7-fhir.github.io/bundle-transaction.xml.html">
+	 *            Bundle- transaction.xml</a>)
+	 */
+	private static void upsert(Bundle bundle, Resource resource, String resourceUrl) {
+		if (bundle == null)
+			throw new IllegalArgumentException();
+		if (resource == null)
+			throw new IllegalArgumentException();
+
+		if (resource.getId() != null)
+			throw new IllegalArgumentException("FHIR conditional updates don't allow IDs to be specified client-side");
+
+		bundle.addEntry().setResource(resource).getRequest().setMethod(HTTPVerb.PUT).setUrl(resourceUrl);
 	}
 }
