@@ -22,7 +22,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
-import rx.Observable;
 
 /**
  * Contains services responsible for handling new RIF files.
@@ -66,30 +65,30 @@ public final class RifFilesProcessor {
 	 * @param event
 	 *            the {@link RifFilesEvent} to be processed
 	 */
-	public Observable<RifRecordEvent<?>> process(RifFilesEvent event) {
+	public Stream<RifRecordEvent<?>> process(RifFilesEvent event) {
 		/*
-		 * Here Be Dragons. YMMV, but I'm new to reactive streams so this took
-		 * me a long while to wrap my head around and write. If this were being
-		 * done imperatively, we'd basically want something like 1) sort files
-		 * correctly (to obey rules described in JavaDoc above), 2) process the
-		 * files one-by-one (single threaded), chopping them up into the groups
-		 * of rows that represent benes/claims/etc., 3) hand those rows off to a
-		 * thread pool to be Transformed and Loaded. The key thing I was missing
-		 * here for a while is that the files HAVE to be processed one-by-one;
-		 * you can only run one file at a time. Otherwise, you're going to end
-		 * up violating the order rules. I mean, sure, you could process all of
-		 * the non-bene files from the same update-set in parallel, but why? It
-		 * would make the logic much more complex, and besides, the files are
-		 * each more than large enough to keep the Transform and Load threads
-		 * saturated. Thinking about it like this makes the Reactive version
-		 * quite a bit simpler, I think.
+		 * Given that the bottleneck in our ETL processing is the Load phase
+		 * (and likely always will be, due to network overhead and the FHIR
+		 * server's performance), the Extract and Transform phases are
+		 * single-threaded and likely to remain so. This allows the system to
+		 * prevent resource over-consumption by blocking in the Load phase: the
+		 * Load phase should block the Extract and Load phases' thread if too
+		 * many records are in-flight at once. This is effectively backpressure,
+		 * which will keep the Extract phase from over-producing and blowing the
+		 * heap.
 		 */
+		// TODO test the above assertions, to ensure I'm not a liar
 
 		List<RifFile> filesOrderedSafely = new ArrayList<>(event.getFiles());
-		Comparator<RifFile> someComparator = null;
+		Comparator<RifFile> someComparator = null; // TODO
 		Collections.sort(filesOrderedSafely, someComparator);
 
-		Observable<RifRecordEvent<?>> recordProducer = Observable.from(filesOrderedSafely)
+		/*
+		 * The flatMap(...) call is used here instead map(...), to merge the
+		 * Streams produced by produceRecords(...) into a single, flat/combined
+		 * Stream.
+		 */
+		Stream<RifRecordEvent<?>> recordProducer = filesOrderedSafely.stream()
 				.flatMap(file -> produceRecords(event, file));
 		return recordProducer;
 	}
@@ -99,10 +98,10 @@ public final class RifFilesProcessor {
 	 *            the {@link RifFilesEvent} that is being processed
 	 * @param file
 	 *            the {@link RifFile} to produce {@link RifRecordEvent}s from
-	 * @return an {@link Observable} that produces the {@link RifRecordEvent}s
+	 * @return a {@link Stream} that produces the {@link RifRecordEvent}s
 	 *         represented in the specified {@link RifFile}
 	 */
-	private Observable<RifRecordEvent<?>> produceRecords(RifFilesEvent rifFilesEvent, RifFile file) {
+	private Stream<RifRecordEvent<?>> produceRecords(RifFilesEvent rifFilesEvent, RifFile file) {
 		/*
 		 * Approach used here to parse CSV as a Java 8 Stream is courtesy of
 		 * https://rumianom.pl/rumianom/entry/apache-commons-csv-with-java
@@ -118,7 +117,7 @@ public final class RifFilesProcessor {
 			else
 				throw new BadCodeMonkeyException();
 
-			return Observable.from(rifRecordStream::iterator);
+			return rifRecordStream;
 		} catch (IOException e) {
 			// TODO first attempt retries, with exponential backoff
 			// If an input file really can't be read, stop the ETL for triage.

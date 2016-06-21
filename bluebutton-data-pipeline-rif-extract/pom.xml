@@ -44,13 +44,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides utilities for working with Java 8 streams, including batching 
-				features that are used in this project. -->
-			<groupId>io.reactivex</groupId>
-			<artifactId>rxjava</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

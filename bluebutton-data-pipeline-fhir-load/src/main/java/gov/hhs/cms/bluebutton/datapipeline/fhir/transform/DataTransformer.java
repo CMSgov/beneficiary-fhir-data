@@ -50,7 +50,6 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
-import rx.Observable;
 
 /**
  * Handles the translation from source/CCW {@link CurrentBeneficiary} data into
@@ -800,7 +799,7 @@ public final class DataTransformer {
 	 *         transforming the specified {@link RifRecordEvent}s
 	 */
 	@SuppressWarnings("unchecked")
-	public Observable<TransformedBundle> transform(Observable<RifRecordEvent<?>> rifStream) {
+	public Stream<TransformedBundle> transform(Stream<RifRecordEvent<?>> rifStream) {
 		return rifStream.map(rifRecordEvent -> {
 			if (rifRecordEvent.getRecord() instanceof BeneficiaryRow)
 				return transformBeneficiary((RifRecordEvent<BeneficiaryRow>) rifRecordEvent);
