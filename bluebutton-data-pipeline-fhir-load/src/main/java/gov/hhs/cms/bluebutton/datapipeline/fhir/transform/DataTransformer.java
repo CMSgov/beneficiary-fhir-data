@@ -882,7 +882,7 @@ public final class DataTransformer {
 	 * 
 	 * @param bundle
 	 *            the {@link Bundle} to include the resource in
-	 * @param resources
+	 * @param resource
 	 *            the FHIR {@link Resource} to upsert into the specified
 	 *            {@link Bundle}
 	 */
