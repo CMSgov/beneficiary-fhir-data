@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
  * Enumerates the various types of RIF files.
  */
 public enum RifFileType {
-	// TODO
-	BENEFICIARY(Pattern.compile("TODO")),
+	BENEFICIARY(Pattern.compile(".*beneficiary.*")),
 
 	// TODO
 	CARRIER(Pattern.compile("TODO")),
@@ -55,16 +54,19 @@ public enum RifFileType {
 	private boolean filenameMatches(String filename) {
 		return filenameRegex.matcher(filename).matches();
 	}
-	
+
 	/**
-	 * @param filename the filename (or S3 object key) to find a matching {@link RifFileType} for
-	 * @return the {@link RifFileType} that the specified value matches the expected pattern for
+	 * @param filename
+	 *            the filename (or S3 object key) to find a matching
+	 *            {@link RifFileType} for
+	 * @return the {@link RifFileType} that the specified value matches the
+	 *         expected pattern for
 	 */
-	public static RifFileType selectTypeForFilename(String filename){
-		for(RifFileType rifFileType:RifFileType.values())
-			if(rifFileType.filenameMatches(filename))
+	public static RifFileType selectTypeForFilename(String filename) {
+		for (RifFileType rifFileType : RifFileType.values())
+			if (rifFileType.filenameMatches(filename))
 				return rifFileType;
-		
+
 		throw new IllegalArgumentException("Unable to match filename: " + filename);
 	}
 }

@@ -123,6 +123,54 @@ public final class BeneficiaryRow {
 	public char nameMiddleInitial;
 
 	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("BeneficiaryRow [version=");
+		builder.append(version);
+		builder.append(", recordAction=");
+		builder.append(recordAction);
+		builder.append(", beneficiaryId=");
+		builder.append(beneficiaryId);
+		builder.append(", stateCode=");
+		builder.append(stateCode);
+		builder.append(", countyCode=");
+		builder.append(countyCode);
+		builder.append(", postalCode=");
+		builder.append(postalCode);
+		builder.append(", birthDate=");
+		builder.append(birthDate);
+		builder.append(", sex=");
+		builder.append(sex);
+		builder.append(", race=");
+		builder.append(race);
+		builder.append(", entitlementCodeOriginal=");
+		builder.append(entitlementCodeOriginal);
+		builder.append(", entitlementCodeCurrent=");
+		builder.append(entitlementCodeCurrent);
+		builder.append(", endStageRenalDiseaseCode=");
+		builder.append(endStageRenalDiseaseCode);
+		builder.append(", medicareEnrollmentStatusCode=");
+		builder.append(medicareEnrollmentStatusCode);
+		builder.append(", partATerminationCode=");
+		builder.append(partATerminationCode);
+		builder.append(", partBTerminationCode=");
+		builder.append(partBTerminationCode);
+		builder.append(", hicn=");
+		builder.append(hicn);
+		builder.append(", nameSurname=");
+		builder.append(nameSurname);
+		builder.append(", nameGiven=");
+		builder.append(nameGiven);
+		builder.append(", nameMiddleInitial=");
+		builder.append(nameMiddleInitial);
+		builder.append("]");
+		return builder.toString();
+	}
+
+	/**
 	 * Enumerates the raw RIF columns represented in {@link BeneficiaryRow},
 	 * where {@link Column#ordinal()} values represent each column's position in
 	 * the actual data.

@@ -19,14 +19,25 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
  * files (which are not cleaned up by this class).
  */
 public final class StaticRifGenerator implements RifGenerator {
+	private final StaticRifResource[] resources;
+
+	/**
+	 * Constructs a new {@link StaticRifGenerator} instance.
+	 * 
+	 * @param resources
+	 *            the RIF files to "generate", which must all be available at
+	 *            the specified classpath locations
+	 */
+	public StaticRifGenerator(StaticRifResource... resources) {
+		this.resources = resources;
+	}
+
 	/**
 	 * @see gov.hhs.cms.bluebutton.datapipeline.sampledata.RifGenerator#generate()
 	 */
 	@Override
 	public Stream<RifFile> generate() {
-		String[] resources = new String[] { "rif-static-sample-1/beneficiary.txt" };
-
-		return Stream.of(resources).map(resource -> {
+		return Stream.of(resources).map(resource -> resource.getClasspathName()).map(resource -> {
 			try {
 				InputStream resourceStream = Thread.currentThread().getContextClassLoader()
 						.getResourceAsStream(resource);
