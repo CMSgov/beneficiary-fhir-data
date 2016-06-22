@@ -2,6 +2,7 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +11,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu21.exceptions.FHIRException;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
@@ -40,6 +44,11 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 
 /**
  * Unit tests for {@link DataTransformer}.
@@ -518,5 +527,67 @@ public final class DataTransformerTest {
 				partDOrder.getDispenseRequest().getQuantity().getValue().longValue());
 		Assert.assertEquals(partDEventForBeneA.getNumberDaysSupply().longValue(),
 				partDOrder.getDispenseRequest().getExpectedSupplyDuration().getValue().longValue());
+	}
+
+	/**
+	 * Verifies that {@link DataTransformer} works correctly when when passed an
+	 * empty {@link RifRecordEvent} stream.
+	 */
+	@Test
+	public void transformEmptyRifStream() {
+		DataTransformer transformer = new DataTransformer();
+
+		Stream<RifRecordEvent<?>> source = new ArrayList<RifRecordEvent<?>>().stream();
+		Stream<TransformedBundle> result = transformer.transform(source);
+		Assert.assertNotNull(result);
+		Assert.assertEquals(0, result.count());
+	}
+
+	/**
+	 * Verifies that {@link DataTransformer} works correctly when when passed a
+	 * single {@link BeneficiaryRow} {@link RecordAction#INSERT}
+	 * {@link RifRecordEvent}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void transformInsertBeneficiaryEvent() {
+		// Create the mock bene to test against.
+		BeneficiaryRow record = new BeneficiaryRow();
+		record.version = 1;
+		record.recordAction = RecordAction.INSERT;
+		record.beneficiaryId = "42";
+		record.stateCode = "HI";
+		record.countyCode = "Transylvania";
+		record.postalCode = "12345";
+
+		RifFile file = new MockRifFile();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
+		RifRecordEvent beneRecordEvent = new RifRecordEvent<BeneficiaryRow>(filesEvent, file, record);
+
+		Stream source = Arrays.asList(beneRecordEvent).stream();
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> resultStream = transformer.transform(source);
+		Assert.assertNotNull(resultStream);
+		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
+		Assert.assertEquals(1, resultList.size());
+
+		TransformedBundle beneBundleWrapper = resultList.get(0);
+		Assert.assertNotNull(beneBundleWrapper);
+		Assert.assertSame(beneRecordEvent, beneBundleWrapper.getSource());
+		Assert.assertNotNull(beneBundleWrapper.getResult());
+
+		Bundle beneBundle = beneBundleWrapper.getResult();
+		Assert.assertEquals(5, beneBundle.getEntry().size());
+		BundleEntryComponent beneEntry = beneBundle.getEntry().stream().filter(r -> r.getResource() instanceof Patient)
+				.findAny().get();
+		Assert.assertEquals(HTTPVerb.PUT, beneEntry.getRequest().getMethod());
+		Assert.assertEquals("Patient/" + record.beneficiaryId, beneEntry.getRequest().getUrl());
+		Patient bene = (Patient) beneEntry.getResource();
+		Assert.assertEquals(bene.getId(), "Patient/" + record.beneficiaryId);
+		Assert.assertEquals(1, bene.getAddress().size());
+		Assert.assertEquals(record.stateCode, bene.getAddress().get(0).getState());
+		Assert.assertEquals(record.countyCode, bene.getAddress().get(0).getDistrict());
+		Assert.assertEquals(record.postalCode, bene.getAddress().get(0).getPostalCode());
+		// TODO test the rest of the columns/resource once they're all ready
 	}
 }

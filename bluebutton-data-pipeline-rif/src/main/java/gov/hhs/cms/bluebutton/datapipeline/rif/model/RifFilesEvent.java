@@ -1,6 +1,8 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -32,6 +34,18 @@ public final class RifFilesEvent {
 
 		this.timestamp = timestamp;
 		this.files = files;
+	}
+
+	/**
+	 * Constructs a new {@link RifFilesEvent} instance.
+	 * 
+	 * @param timestamp
+	 *            the value to use for {@link #getTimestamp()}
+	 * @param files
+	 *            the value to use for {@link #getFiles()}
+	 */
+	public RifFilesEvent(Instant timestamp, RifFile... files) {
+		this(timestamp, new HashSet<>(Arrays.asList(files)));
 	}
 
 	/**
