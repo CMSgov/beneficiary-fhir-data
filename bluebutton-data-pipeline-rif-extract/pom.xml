@@ -37,6 +37,18 @@
 		</dependency>
 
 		<dependency>
+			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Used to parse and read the RIF data files. -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
