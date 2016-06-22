@@ -5,7 +5,7 @@ import org.hl7.fhir.dstu21.model.Bundle;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 
 /**
- * Models a completed {@link DataTransformer#transform(rx.Observable)}
+ * Models a completed {@link DataTransformer#transform(java.util.stream.Stream)}
  * operation, for a single element.
  */
 public final class TransformedBundle {

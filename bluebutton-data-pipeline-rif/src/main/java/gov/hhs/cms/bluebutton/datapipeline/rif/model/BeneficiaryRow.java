@@ -187,87 +187,87 @@ public final class BeneficiaryRow {
 		DML_IND,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 15.
+		 * Type: <code>CHAR</code>, max chars: 15.
 		 */
 		BENE_ID,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 2.
+		 * Type: <code>CHAR</code>, max chars: 2.
 		 */
 		STATE_CODE,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 3.
+		 * Type: <code>CHAR</code>, max chars: 3.
 		 */
 		BENE_COUNTY_CD,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 9.
+		 * Type: <code>CHAR</code>, max chars: 9.
 		 */
 		BENE_ZIP_CD,
 
 		/**
-		 * Type: <code>DATE<code>, max chars: 8.
+		 * Type: <code>DATE</code>, max chars: 8.
 		 */
 		BENE_BIRTH_DT,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_SEX_IDENT_CD,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_RACE_CD,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_ENTLMT_RSN_ORIG,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_ENTLMT_RSN_CURR,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_ESRD_IND,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 2.
+		 * Type: <code>CHAR</code>, max chars: 2.
 		 */
 		BENE_MDCR_STATUS_CD,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_PTA_TRMNTN_CD,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_PTB_TRMNTN_CD,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 12.
+		 * Type: <code>CHAR</code>, max chars: 12.
 		 */
 		BENE_CRNT_HIC_NUM,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 24.
+		 * Type: <code>CHAR</code>, max chars: 24.
 		 */
 		BENE_SRNM_NAME,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 5.
+		 * Type: <code>CHAR</code>, max chars: 5.
 		 */
 		BENE_GVN_NAME,
 
 		/**
-		 * Type: <code>CHAR<code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_MDL_NAME;
 	}

@@ -41,7 +41,7 @@ public final class RifFilesProcessor {
 	 * in it and converting that data into {@link RifRecordEvent}s that can be
 	 * handled downstream in the ETL pipeline.
 	 * </p>
-	 * <h4>Design Notes</h4>
+	 * <h3>Design Notes</h3>
 	 * <p>
 	 * This method must accept {@link RifFilesEvent} instances, rather than
 	 * individual {@link RifFile} instances. This is due to processing order
@@ -72,6 +72,8 @@ public final class RifFilesProcessor {
 	 * 
 	 * @param event
 	 *            the {@link RifFilesEvent} to be processed
+	 * @return the {@link RifRecordEvent}s that are produced from the specified
+	 *         {@link RifFilesEvent}
 	 */
 	public Stream<RifRecordEvent<?>> process(RifFilesEvent event) {
 		/*
