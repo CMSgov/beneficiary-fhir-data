@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
  * Enumerates the various types of RIF files.
  */
 public enum RifFileType {
-	BENEFICIARY(Pattern.compile(".*beneficiary.*")),
+	BENEFICIARY(Pattern.compile(".*beneficiar(y|ies).*")),
 
 	// TODO
 	CARRIER(Pattern.compile("TODO")),

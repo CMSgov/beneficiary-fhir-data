@@ -6,7 +6,9 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
  * Enumerates the sample RIF resources available on the classpath.
  */
 public enum StaticRifResource {
-	BENE_1("rif-static-sample-1/beneficiary.txt", RifFileType.BENEFICIARY, 1000);
+	BENES_1("rif-static-samples/beneficiaries-1.txt", RifFileType.BENEFICIARY, 1),
+	
+	BENES_1000("rif-static-samples/beneficiaries-1000.txt", RifFileType.BENEFICIARY, 1000);
 
 	private final String classpathName;
 	private final RifFileType rifFileType;
