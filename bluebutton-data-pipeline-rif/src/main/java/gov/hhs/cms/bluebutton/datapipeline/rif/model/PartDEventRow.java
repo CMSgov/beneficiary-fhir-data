@@ -6,6 +6,8 @@ import java.time.LocalDate;
  * Models rows from <code>PDE</code> RIF Files.
  */
 public class PartDEventRow {
+	public static int COMPOUND_CODE_NOT_COMPOUNDED = 1;
+	public static int COMPOUND_CODE_COMPOUNDED = 2;
 	/**
 	 * FIXME is this the schema version or the record version?
 	 */

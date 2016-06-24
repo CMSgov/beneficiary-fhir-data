@@ -45,6 +45,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
@@ -589,5 +590,91 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.countyCode, bene.getAddress().get(0).getDistrict());
 		Assert.assertEquals(record.postalCode, bene.getAddress().get(0).getPostalCode());
 		// TODO test the rest of the columns/resource once they're all ready
+	}
+
+	/**
+	 * Verifies that {@link DataTransformer} works correctly when when passed a
+	 * single {@link PartDEventRow} {@link RecordAction#INSERT}
+	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             indicates test failure
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void transformInsertPartDEvent() throws FHIRException {
+		PartDEventRow record = new PartDEventRow();
+		record.version = 1;
+		record.recordAction = RecordAction.INSERT;
+		record.partDEventId = "5";
+		record.beneficiaryId = "17";
+		record.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
+		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
+
+		RifFile file = new MockRifFile();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
+		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, record);
+
+		Stream source = Arrays.asList(pdeRecordEvent).stream();
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> resultStream = transformer.transform(source);
+		Assert.assertNotNull(resultStream);
+		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
+		Assert.assertEquals(1, resultList.size());
+
+		TransformedBundle pdeBundleWrapper = resultList.get(0);
+		Assert.assertNotNull(pdeBundleWrapper);
+		Assert.assertSame(pdeRecordEvent, pdeBundleWrapper.getSource());
+		Assert.assertNotNull(pdeBundleWrapper.getResult());
+
+		Bundle pdeBundle = pdeBundleWrapper.getResult();
+		Assert.assertEquals(1, pdeBundle.getEntry().size());
+		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
+		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+		Assert.assertEquals("Patient/" + record.beneficiaryId, eob.getPatient().getReference());
+
+		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		Assert.assertEquals("RXCINV", rxItem.getType().getCode());
+		Assert.assertEquals(Date.valueOf(record.prescriptionFillDate), rxItem.getServicedDateType().getValue());
+		// TODO rest of values
+	}
+
+	/**
+	 * Verifies that {@link DataTransformer} correctly sets the code system
+	 * value when the compound code equals not compounded.
+	 * 
+	 * @throws FHIRException
+	 *             indicates test failure
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void transformInsertPartDEventNotCompound() throws FHIRException {
+		PartDEventRow record = new PartDEventRow();
+		record.version = 1;
+		record.recordAction = RecordAction.INSERT;
+		record.partDEventId = "5";
+		record.beneficiaryId = "17";
+		record.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
+		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
+
+		RifFile file = new MockRifFile();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
+		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, record);
+
+		Stream source = Arrays.asList(pdeRecordEvent).stream();
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> resultStream = transformer.transform(source);
+		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
+
+		TransformedBundle pdeBundleWrapper = resultList.get(0);
+		Bundle pdeBundle = pdeBundleWrapper.getResult();
+		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
+		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		Assert.assertEquals("RXDINV", rxItem.getType().getCode());
 	}
 }

@@ -48,6 +48,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 
@@ -118,6 +119,10 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
 
 	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
+
+	static final String CODING_SYSTEM_CCW_PDE_ID = "CCW.PDE_ID";
+
+	static final String CODING_SYSTEM_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
@@ -803,6 +808,8 @@ public final class DataTransformer {
 		return rifStream.map(rifRecordEvent -> {
 			if (rifRecordEvent.getRecord() instanceof BeneficiaryRow)
 				return transformBeneficiary((RifRecordEvent<BeneficiaryRow>) rifRecordEvent);
+			else if (rifRecordEvent.getRecord() instanceof PartDEventRow)
+				return transformPartDEvent((RifRecordEvent<PartDEventRow>) rifRecordEvent);
 
 			throw new BadCodeMonkeyException("Unhandled record type: " + rifRecordEvent.getRecord());
 		});
@@ -869,6 +876,55 @@ public final class DataTransformer {
 		partD.setSubscriber(new Reference(beneficiary.getId()));
 		insert(bundle, partA);
 
+		return new TransformedBundle(rifRecordEvent, bundle);
+	}
+
+	/**
+	 * @param rifRecordEvent
+	 *            the source {@link RifRecordEvent} to be transformed
+	 * @return the {@link TransformedBundle} that is the result of transforming
+	 *         the specified {@link RifRecordEvent}
+	 */
+	private TransformedBundle transformPartDEvent(RifRecordEvent<PartDEventRow> rifRecordEvent) {
+		if (rifRecordEvent == null)
+			throw new IllegalArgumentException();
+		PartDEventRow record = rifRecordEvent.getRecord();
+		if (1 != record.version)
+			throw new IllegalArgumentException("Unsupported record version: " + record.version);
+		if (record.recordAction != RecordAction.INSERT)
+			// Will need refactoring to support other ops.
+			throw new BadCodeMonkeyException();
+
+		Bundle bundle = new Bundle();
+		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId(IdType.newRandomUuid());
+		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
+		eob.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
+
+		ItemsComponent rxItem = eob.addItem();
+		rxItem.setSequence(1);
+		if (record.compoundCode == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
+			/* Pharmacy dispense invoice for a compound */
+			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
+		} else {
+			/*
+			 * Pharmacy dispense invoice not involving a compound - set if not a
+			 * compound or if compound code is not provided.
+			 */
+			/*
+			 * TODO Does it make sense to make non compound the default type?
+			 * Otherwise what code system would it make sense to specify here?
+			 */
+			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+		}
+		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
+
+		MedicationOrder medicationOrder = new MedicationOrder();
+		medicationOrder.setId(IdType.newRandomUuid());
+		eob.setPrescription(new Reference().setReference(medicationOrder.getId()));
+		// rest of mapping
+
+		insert(bundle, eob);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
