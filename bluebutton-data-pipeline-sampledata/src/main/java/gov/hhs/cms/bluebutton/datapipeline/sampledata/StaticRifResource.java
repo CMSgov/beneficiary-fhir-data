@@ -7,8 +7,12 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
  */
 public enum StaticRifResource {
 	BENES_1("rif-static-samples/beneficiaries-1.txt", RifFileType.BENEFICIARY, 1),
-	
-	BENES_1000("rif-static-samples/beneficiaries-1000.txt", RifFileType.BENEFICIARY, 1000);
+
+	BENES_1000("rif-static-samples/beneficiaries-1000.txt", RifFileType.BENEFICIARY, 1000),
+
+	PDE_1("rif-static-samples/pde-1.txt", RifFileType.PDE, 1),
+
+	PDE_1195("rif-static-samples/pde-1195.txt", RifFileType.PDE, 1195);
 
 	private final String classpathName;
 	private final RifFileType rifFileType;
