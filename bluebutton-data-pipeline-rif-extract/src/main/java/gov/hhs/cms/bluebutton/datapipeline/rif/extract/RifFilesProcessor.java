@@ -291,7 +291,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (1 != pdeRow.version)
-			throw new IllegalArgumentException("Unsupported record version: " + pdeRow);
+			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
 
 		return pdeRow;
 	}
