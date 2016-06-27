@@ -116,7 +116,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#PDE_1195}.
 	 */
 	@Test
-	public void process1000PDERecords() {
+	public void process1195PDERecords() {
 		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.PDE_1195);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));

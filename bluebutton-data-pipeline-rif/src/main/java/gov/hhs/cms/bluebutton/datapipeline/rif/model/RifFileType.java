@@ -26,7 +26,6 @@ public enum RifFileType {
 	// TODO
 	OUTPATIENT(Pattern.compile("TODO")),
 
-	// TODO
 	PDE(Pattern.compile(".*pde.*")),
 
 	// TODO
