@@ -29,6 +29,11 @@
 			<artifactId>bluebutton-data-pipeline-ccw</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<!-- Provides various utilities, particularly for managing DB connections. -->
@@ -65,7 +70,6 @@
 				features that are used in this project. -->
 			<groupId>io.reactivex</groupId>
 			<artifactId>rxjava</artifactId>
-			<version>1.1.1</version>
 		</dependency>
 
 		<dependency>

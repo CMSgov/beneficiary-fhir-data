@@ -1,0 +1,88 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+		<artifactId>bluebutton-data-pipeline</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
+	<packaging>jar</packaging>
+
+	<description>
+		The 'extract' portion of the CCW-to-Blue-Button extract-transform-load 
+		pipeline. Designed to receive 'RIF' files from the CCW.
+	</description>
+
+	<properties>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<!-- Provides various generic utilities. -->
+			<groupId>com.justdavis.karl.jessentials</groupId>
+			<artifactId>jessentials-misc</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Used to parse and read the RIF data files. -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<!-- Provides a sane facade for the giant mess of incompatible logging 
+				frameworks in Java. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to run our unit and integration tests. -->
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Logback is used as the logging target/backend for SLF4J during tests: 
+				all logging events will be sent to it. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-sampledata</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+		</plugins>
+	</build>
+
+</project>

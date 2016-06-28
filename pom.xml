@@ -51,6 +51,8 @@
 		<module>bluebutton-data-pipeline-ccw-test</module>
 		<module>bluebutton-data-pipeline-sampledata</module>
 		<module>bluebutton-data-pipeline-ccw-extract</module>
+		<module>bluebutton-data-pipeline-rif</module>
+		<module>bluebutton-data-pipeline-rif-extract</module>
 		<module>bluebutton-data-pipeline-fhir-load</module>
 		<module>bluebutton-data-pipeline-fhir-sampledata</module>
 	</modules>
@@ -126,6 +128,14 @@
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-jvm</artifactId>
 				<version>${metrics.version}</version>
+			</dependency>
+
+			<dependency>
+				<!-- Provides utilities for working with Java 8 streams, including batching 
+					features that are used in this project. -->
+				<groupId>io.reactivex</groupId>
+				<artifactId>rxjava</artifactId>
+				<version>1.1.1</version>
 			</dependency>
 
 			<dependency>
