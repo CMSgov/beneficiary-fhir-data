@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -608,7 +609,7 @@ public final class DataTransformerTest {
 		record.recordAction = RecordAction.INSERT;
 		record.partDEventId = "5";
 		record.beneficiaryId = "17";
-		record.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
+		record.compoundCode = Optional.of(PartDEventRow.COMPOUND_CODE_COMPOUNDED);
 		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
 
 		RifFile file = new MockRifFile();
@@ -656,7 +657,7 @@ public final class DataTransformerTest {
 		record.recordAction = RecordAction.INSERT;
 		record.partDEventId = "5";
 		record.beneficiaryId = "17";
-		record.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
+		record.compoundCode = Optional.of(PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED);
 		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
 
 		RifFile file = new MockRifFile();

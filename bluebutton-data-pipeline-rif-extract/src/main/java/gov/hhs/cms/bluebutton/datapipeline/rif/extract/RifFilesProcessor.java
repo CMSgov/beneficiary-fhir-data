@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -22,6 +24,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -255,38 +258,26 @@ public final class RifFilesProcessor {
 		pdeRow.beneficiaryId = csvRecord.get(PartDEventRow.Column.BENE_ID.ordinal());
 		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT.ordinal()),
 				RIF_DATE_FORMATTER);
-		// pdeRow.paymentDate =
-		// LocalDate.parse(csvRecord.get(PartDEventRow.Column.PD_DT.ordinal()),
-		// RIF_DATE_FORMATTER);
-		// pdeRow.serviceProviderIdQualiferCode =
-		// csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD.ordinal());
-		// pdeRow.serviceProviderId =
-		// csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID.ordinal());
-		// pdeRow.prescriberIdQualifierCode =
-		// csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD.ordinal());
-		// pdeRow.prescriberId =
-		// csvRecord.get(PartDEventRow.Column.PRSCRBR_ID.ordinal());
-		// pdeRow.prescriptionReferenceNumber = Integer
-		// .parseInt(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM.ordinal()));
-		// pdeRow.nationalDrugCode =
-		// csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID.ordinal());
-		// pdeRow.planContractId =
-		// csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID.ordinal());
-		// pdeRow.planBenefitPackageId =
-		// csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM.ordinal());
-		// pdeRow.compoundCode =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal()));
-		// pdeRow.dispenseAsWrittenProductSelectionCode =
-		// csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal());
-		// pdeRow.quantityDispensed =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.QTY_DPSNSD_NUM.ordinal()));
-		// pdeRow.daysSupply =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
-		// pdeRow.fillNumber =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
-		// pdeRow.dispensingStatuscode =
-		// csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()).charAt(0);
-		// TODO handle null/empty?
+		pdeRow.paymentDate = getOptionalLocalDate(csvRecord.get(PartDEventRow.Column.PD_DT.ordinal()));
+		pdeRow.serviceProviderIdQualiferCode = Optional
+				.ofNullable(csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD.ordinal()));
+		pdeRow.serviceProviderId = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID.ordinal());
+		pdeRow.prescriberIdQualifierCode = Optional
+				.ofNullable(csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD.ordinal()));
+		pdeRow.prescriberId = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID.ordinal());
+		pdeRow.prescriptionReferenceNumber = Long
+				.parseLong(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM.ordinal()));
+		pdeRow.nationalDrugCode = csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID.ordinal());
+		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID.ordinal());
+		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM.ordinal());
+		pdeRow.compoundCode = getOptionalInteger(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal()));
+		pdeRow.dispenseAsWrittenProductSelectionCode = Optional
+				.ofNullable(csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal()));
+		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DPSNSD_NUM.ordinal()));
+		pdeRow.daysSupply = getOptionalInteger(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
+		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
+		pdeRow.dispensingStatuscode = getOptionalCharacter(
+				csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()));
 		// TODO finish mapping the rest of the columns
 
 		// Sanity check:
@@ -294,5 +285,56 @@ public final class RifFilesProcessor {
 			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
 
 		return pdeRow;
+	}
+
+	/**
+	 * Utility method to return either a populated {@link LocalDate} or an empty
+	 * Optional if a null or empty {@link String} was passed.
+	 * 
+	 * @param record
+	 *            the parsed String from the input file.
+	 * @return a populated {@link Optional} if the record has data, or an empty
+	 *         Optional if not
+	 */
+	private static Optional<LocalDate> getOptionalLocalDate(String record) {
+		if (StringUtils.isEmpty(record)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(LocalDate.parse(record, RIF_DATE_FORMATTER));
+		}
+	}
+
+	/**
+	 * Utility method to return either a populated {@link Integer} or an empty
+	 * Optional if a null or empty {@link String} was passed.
+	 * 
+	 * @param record
+	 *            the parsed String from the input file.
+	 * @return a populated {@link Optional} if the record has data, or an empty
+	 *         Optional if not
+	 */
+	private static Optional<Integer> getOptionalInteger(String record) {
+		if (StringUtils.isEmpty(record)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(Integer.parseInt(record));
+		}
+	}
+
+	/**
+	 * Utility method to return either a populated {@link Character} or an empty
+	 * Optional if a null or empty {@link String} was passed.
+	 * 
+	 * @param record
+	 *            the parsed String from the input file.
+	 * @return a populated {@link Optional} if the record has data, or an empty
+	 *         Optional if not
+	 */
+	private static Optional<Character> getOptionalCharacter(String record) {
+		if (StringUtils.isEmpty(record)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(record.charAt(0));
+		}
 	}
 }

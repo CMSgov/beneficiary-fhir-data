@@ -1,6 +1,8 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 /**
  * Models rows from <code>PDE</code> RIF Files.
@@ -10,49 +12,60 @@ public class PartDEventRow {
 	public static int COMPOUND_CODE_COMPOUNDED = 2;
 	/**
 	 * FIXME is this the schema version or the record version?
+	 * 
+	 * @see Column#VERSION
 	 */
 	public int version;
 
 	/**
 	 * Indicates whether the record for the row is an insert, update, or delete.
+	 * 
+	 * @see Column#DML_IND
 	 */
 	public RecordAction recordAction;
 
 	/**
 	 * The CCW's assigned ID for this Part D Event.
+	 * 
+	 * @see Column#PDE_ID
 	 */
 	public String partDEventId;
 
 	/**
 	 * The CCW's assigned ID for the beneficiary this Part D Event is linked to.
+	 * 
+	 * @see Column#BENE_ID
 	 */
 	public String beneficiaryId;
 
 	/**
 	 * The date that the prescription was filled.
+	 * 
+	 * @see Column#SRVC_DT
 	 */
 	public LocalDate prescriptionFillDate;
 
 	/**
 	 * The date that the plan paid the pharmacy for the prescription.
+	 * 
+	 * @see Column#PD_DT
 	 */
-	public LocalDate paymentDate;
+	public Optional<LocalDate> paymentDate;
 
 	/**
 	 * The two-letter code that represents the type of pharmacy provider
 	 * identifier that is used in the {@link #serviceProviderId} field.
 	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_prvdr_id_qlfyr_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      srvc_prvdr_id_qlfyr_cd.txt</a>
+	 * @see Column#SRVC_PRVDR_ID_QLFYR_CD
 	 */
-	public String serviceProviderIdQualiferCode;
+	public Optional<String> serviceProviderIdQualiferCode;
 
 	/**
 	 * The ID of the pharmacy or physicians' office that dispensed the drug, the
 	 * type of which is described by the {@link #serviceProviderIdQualiferCode}
 	 * field.
+	 * 
+	 * @see Column#SRVC_PRVDR_ID
 	 */
 	public String serviceProviderId;
 
@@ -60,28 +73,31 @@ public class PartDEventRow {
 	 * The two-letter code that represents the type of prescribe identifier that
 	 * is used in the {@link #prescriberId} field.
 	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id_qlfyr_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      prscrbr_id_qlfyr_cd.txt</a>
+	 * @see Column#PRSCRBR_ID_QLFYR_CD
 	 */
-	public String prescriberIdQualifierCode;
+	public Optional<String> prescriberIdQualifierCode;
 
 	/**
 	 * The ID of the practitioner that prescribed the drug, the type of which is
 	 * described by the {@link #prescriberIdQualifierCode} field.
+	 * 
+	 * @see Column#PRSCRBR_ID
 	 */
 	public String prescriberId;
 
 	/**
 	 * The prescription reference number assigned by the pharmacy at the time
 	 * the prescription is filled.
+	 * 
+	 * @see Column#RX_SRVC_RFRNC_NUM
 	 */
-	public Integer prescriptionReferenceNumber;
+	public Long prescriptionReferenceNumber;
 
 	/**
 	 * The 11-digit code representing the drug using the National Drug Code
-	 * (NDC) TODO Link to official NDC directory?
+	 * (NDC).
+	 * 
+	 * @see Column#PROD_SRVC_ID
 	 */
 	public String nationalDrugCode;
 
@@ -90,16 +106,15 @@ public class PartDEventRow {
 	 * the time of payment reconciliation. Note the first letter of the ID is a
 	 * letter representing the type of plan.
 	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      plan_cntrct_rec_id.txt</a>
+	 * @see Column#PLAN_CNTRCT_REC_ID
 	 */
 	public String planContractId;
 
 	/**
 	 * The ID representing the latest benefit package the beneficiary was
 	 * enrolled in for the year.
+	 * 
+	 * @see Column#PLAN_PBP_REC_NUM
 	 */
 	public String planBenefitPackageId;
 
@@ -107,42 +122,42 @@ public class PartDEventRow {
 	 * Two-digit code representing whether the dispensed drug was compounded or
 	 * mixed.
 	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cmpnd_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      cmpnd_cd.txt</a>
+	 * @see Column#CMPND_CD
 	 */
-	public Integer compoundCode;
+	public Optional<Integer> compoundCode;
 
 	/**
 	 * One-digit code representing the prescriber's instructions regarding
 	 * substitution of generic equivalents or the order to dispense the specific
 	 * prescribed medication.
 	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      daw_prod_slctn_cd.txt</a>
+	 * @see Column#DAW_PROD_SLCTN_CD
 	 */
-	public String dispenseAsWrittenProductSelectionCode;
+	public Optional<String> dispenseAsWrittenProductSelectionCode;
 
 	/**
 	 * The number of units, grams, milligrams, or other dispensed in the current
 	 * drug event. For compounded items, the quantity dispensed is the total of
 	 * all ingredients. (Note: After some research, it does not appear there is
 	 * another field that specifies what unit this is.)
+	 * 
+	 * @see Column#QTY_DPSNSD_NUM
 	 */
-	public Integer quantityDispensed;
+	public BigDecimal quantityDispensed;
 
 	/**
 	 * The number of days' supply of medication dispensed, entered by the
 	 * pharmacy.
+	 * 
+	 * @see Column#DAYS_SUPLY_NUM
 	 */
-	public Integer daysSupply;
+	public Optional<Integer> daysSupply;
 
 	/**
 	 * The number fill of the currently dispensed supply, with 0 being the
 	 * original fill and 1-99 representing each refill.
+	 * 
+	 * @see Column#FILL_NUM
 	 */
 	public Integer fillNumber;
 
@@ -150,12 +165,9 @@ public class PartDEventRow {
 	 * One-digit code representing how the pharmacy dispensed the complete
 	 * quantity of the prescription.
 	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      dspnsng_stus_cd.txt</a>
+	 * @see Column#DSPNSNG_STUS_CD
 	 */
-	public Character dispensingStatuscode;
+	public Optional<Character> dispensingStatuscode;
 
 	// TODO FIll in rest of fields
 
@@ -242,12 +254,16 @@ public class PartDEventRow {
 		SRVC_DT,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8
+		 * Type: <code>DATE</code>, max chars: 8, <code>NULLABLE</code>
 		 */
 		PD_DT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2
+		 * Type: <code>CHAR</code>, max chars: 2, <code>NULLABLE</code>
+		 * 
+		 * @see <a href=
+		 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_prvdr_id_qlfyr_cd.txt">
+		 *      Data Dictionary</a>
 		 */
 		SRVC_PRVDR_ID_QLFYR_CD,
 
@@ -257,7 +273,11 @@ public class PartDEventRow {
 		SRVC_PRVDR_ID,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2
+		 * Type: <code>CHAR</code>, max chars: 2, <code>NULLABLE</code>
+		 * 
+		 * @see <a href=
+		 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id_qlfyr_cd.txt">
+		 *      Data Dictionary</a>
 		 */
 		PRSCRBR_ID_QLFYR_CD,
 
@@ -273,11 +293,17 @@ public class PartDEventRow {
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 19
+		 * 
+		 * TODO Link to official NDC directory?
 		 */
 		PROD_SRVC_ID,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 5
+		 * 
+		 * @see <a href=
+		 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt">
+		 *      Data Dictionary</a>
 		 */
 		PLAN_CNTRCT_REC_ID,
 
@@ -287,12 +313,20 @@ public class PartDEventRow {
 		PLAN_PBP_REC_NUM,
 
 		/**
-		 * Type: <code>NUM</code>, max chars: 2
+		 * Type: <code>NUM</code>, max chars: 2, <code>NULLABLE</code>
+		 * 
+		 * @see <a href=
+		 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cmpnd_cd.txt">
+		 *      Data Dictionary</a>
 		 */
 		CMPND_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1
+		 * Type: <code>CHAR</code>, max chars: 1, <code>NULLABLE</code>
+		 * 
+		 * @see <a href=
+		 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt">
+		 *      Data Dictionary</a>
 		 */
 		DAW_PROD_SLCTN_CD,
 
@@ -302,7 +336,7 @@ public class PartDEventRow {
 		QTY_DPSNSD_NUM,
 
 		/**
-		 * Type: <code>NUM</code>, max chars: 3
+		 * Type: <code>NUM</code>, max chars: 3, <code>NULLABLE</code>
 		 */
 		DAYS_SUPLY_NUM,
 
@@ -312,7 +346,11 @@ public class PartDEventRow {
 		FILL_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1
+		 * Type: <code>CHAR</code>, max chars: 1, <code>NULLABLE</code>
+		 * 
+		 * @see <a href=
+		 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt">
+		 *      Data Dictionary</a>
 		 */
 		DSPNSNG_STUS_CD
 		// TODO FIll in rest of fields

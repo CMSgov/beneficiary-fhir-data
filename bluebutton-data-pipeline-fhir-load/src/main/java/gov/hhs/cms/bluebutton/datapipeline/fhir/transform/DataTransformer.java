@@ -903,20 +903,19 @@ public final class DataTransformer {
 
 		ItemsComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
-		if (record.compoundCode == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
-			/* Pharmacy dispense invoice for a compound */
-			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
-		} else {
-			/*
-			 * Pharmacy dispense invoice not involving a compound - set if not a
-			 * compound or if compound code is not provided.
-			 */
-			/*
-			 * TODO Does it make sense to make non compound the default type?
-			 * Otherwise what code system would it make sense to specify here?
-			 */
-			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+		if (record.compoundCode.isPresent()) {
+			if (record.compoundCode.get() == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
+				/* Pharmacy dispense invoice for a compound */
+				rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
+			} else if (record.compoundCode.get() == PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED) {
+				/*
+				 * Pharmacy dispense invoice not involving a compound
+				 */
+				rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+			}
+			// TODO code for unknown compound type?
 		}
+
 		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
 
 		MedicationOrder medicationOrder = new MedicationOrder();

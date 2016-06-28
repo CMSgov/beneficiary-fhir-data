@@ -108,7 +108,8 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("96", pdeRow.partDEventId);
 		Assert.assertEquals("63", pdeRow.beneficiaryId);
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 6), pdeRow.prescriptionFillDate);
-		// TODO complete rows
+		Assert.assertFalse(pdeRow.paymentDate.isPresent());
+
 	}
 
 	/**
