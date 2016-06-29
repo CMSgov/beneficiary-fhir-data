@@ -34,6 +34,27 @@ What does it do for you? Great question! It will create a `~/workspaces/tools/` 
 
 If you're not using one of those supported platforms, or would prefer to setup things manually, you'll want to download and install the items listed above yourself.
 
+### Maven `toolchains.xml`
+
+Right now, the script does not create the Maven `toolchains.xml` file (though it can and should). As a workaround, create it manually yourself, as `~/.m2/toolchains.xml`, with content similar to the following (adjust the paths to match your system):
+
+```
+<?xml version="1.0" encoding="UTF8"?>
+<toolchains>
+	<toolchain>
+		<type>jdk</type>
+		<provides>
+			<version>1.8</version>
+			<vendor>oracle</vendor>
+			<id>jdk-8u31-linux-x64</id>
+		</provides>
+		<configuration>
+			<jdkHome>/home/karl/workspaces/tools/jdk-8u31-linux-x64</jdkHome>
+		</configuration>
+	</toolchain>
+</toolchains>
+```
+
 ## Git Large File Storage
 
 You'll also need to manually (boo!) download and install [Git Large File Storage](https://git-lfs.github.com/), which is used by some of the projects to store the large amounts of sample data needed in tests. Once installed, you need to run the following command once on your system:
@@ -90,4 +111,18 @@ GPG signing can also be disabled by adding `-Dgpg.skip=true` to your Maven build
 
     $ mvn clean verify -Dgpg.skip=true
 
-But please note that the `deploy` goal/phase will still fail if builds are not signed, as that's a requirement imposed by the repository itself.
+But please note that the `deploy` goal/phase will still fail if builds are not signed by an authorized user, as that's a requirement imposed by the repository itself.
+
+## OSSRH Hosting
+
+Even with a GPG key, you will be unable to deploy to OSSRH/Maven Central, unless your account has been given permissions to do so. This will result in errors like the following:
+
+```
+[ERROR] Failed to execute goal org.sonatype.plugins:nexus-staging-maven-plugin:1.6.7:deploy (injected-nexus-deploy) on project bluebutton-parent: Failed to deploy artifacts: Could not transfer artifact gov.hhs.cms.bluebutton:bluebutton-parent:pom.asc:1.1.1-20160614.223219-1 from/to ossrh (https://oss.sonatype.org/content/repositories/snapshots): Access denied to https://oss.sonatype.org/content/repositories/snapshots/gov/hhs/cms/bluebutton/bluebutton-parent/1.1.1-SNAPSHOT/bluebutton-parent-1.1.1-20160614.223219-1.pom.asc. Error code 401, Unauthorized -> [Help 1]
+```
+
+Follow the following procedure to obtain those permissions and resolve this problem:
+
+1. [Create a Sonatype JIRA account](https://issues.sonatype.org/secure/Signup!default.jspa).
+1. Ensure you've published your GPG key to a public key server, per [OSSRH: Working With PGP Signatures](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key).
+1. [File a new OSSRH issue](https://issues.sonatype.org/secure/CreateIssue.jspa) requesting authorization for the `gov.hhs.cms.bluebutton` repo in OSSRH. See [OSSRH-23379: Authorize Shaun Brockhoff to deploy to gov.hhs.cms.bluebutton repo](https://issues.sonatype.org/browse/OSSRH-23379) for an example.
