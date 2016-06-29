@@ -2,6 +2,7 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ import java.util.List;
  * need to be).
  * </p>
  */
-public final class CarrierClaimRows {
+public final class CarrierClaimGroup {
 	/**
 	 * @see Column#VERSION
 	 */
@@ -82,7 +83,14 @@ public final class CarrierClaimRows {
 	 * {@link Column#ICD_DGNS_VRSN_CD1} through
 	 * {@link Column#ICD_DGNS_VRSN_CD12}.
 	 */
-	public List<IcdCode> diagnosesAdditional;
+	public List<IcdCode> diagnosesAdditional = new LinkedList<>();
+
+	/**
+	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
+	 * columns: one entry for every "claim line" in the claim represented by
+	 * this {@link CarrierClaimGroup} instance.
+	 */
+	public List<CarrierClaimLine> lines = new LinkedList<>();
 
 	/**
 	 * @see java.lang.Object#toString()
@@ -90,7 +98,7 @@ public final class CarrierClaimRows {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("CarrierClaimRows [version=");
+		builder.append("CarrierClaimGroup [version=");
 		builder.append(version);
 		builder.append(", recordAction=");
 		builder.append(recordAction);
@@ -112,12 +120,15 @@ public final class CarrierClaimRows {
 		builder.append(diagnosisPrincipal);
 		builder.append(", diagnosesAdditional=");
 		builder.append(diagnosesAdditional);
+		builder.append(", lines=");
+		builder.append(lines);
 		builder.append("]");
 		return builder.toString();
 	}
 
 	/**
-	 * Models individual claim lines within a {@link CarrierClaimRows} instance.
+	 * Models individual claim lines within a {@link CarrierClaimGroup}
+	 * instance.
 	 */
 	public static final class CarrierClaimLine {
 		/**
@@ -175,7 +186,7 @@ public final class CarrierClaimRows {
 	}
 
 	/**
-	 * Enumerates the raw RIF columns represented in {@link CarrierClaimRows},
+	 * Enumerates the raw RIF columns represented in {@link CarrierClaimGroup},
 	 * where {@link Column#ordinal()} values represent each column's position in
 	 * the actual data.
 	 */
