@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +27,7 @@ import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
 import org.hl7.fhir.dstu21.model.StringType;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -61,6 +63,34 @@ public final class DataTransformerTest {
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
+	PartDEventRow partDEventRecord;
+
+	@Before
+	public void setup() {
+		// Initialize a default version of the PDE record
+		partDEventRecord = new PartDEventRow();
+		partDEventRecord.version = 1;
+		partDEventRecord.recordAction = RecordAction.INSERT;
+		partDEventRecord.partDEventId = "5";
+		partDEventRecord.beneficiaryId = "17";
+		partDEventRecord.prescriptionFillDate = LocalDate.of(2015, 6, 14);
+		partDEventRecord.paymentDate = Optional.of(LocalDate.of(2015, 6, 27));
+		partDEventRecord.serviceProviderIdQualiferCode = "01";
+		partDEventRecord.serviceProviderId = "1124137542";
+		partDEventRecord.prescriberIdQualifierCode = "01";
+		partDEventRecord.prescriberId = "1225061591";
+		partDEventRecord.prescriptionReferenceNumber = new Long(791569);
+		partDEventRecord.nationalDrugCode = "49884009902";
+		partDEventRecord.planContractId = "H8552";
+		partDEventRecord.planBenefitPackageId = "020";
+		partDEventRecord.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
+		partDEventRecord.dispenseAsWrittenProductSelectionCode = "0";
+		partDEventRecord.quantityDispensed = new BigDecimal(60);
+		partDEventRecord.daysSupply = new Integer(30);
+		partDEventRecord.fillNumber = new Integer(3);
+		partDEventRecord.dispensingStatuscode = Optional.of(new Character('C'));
+	}
 
 	/**
 	 * Verifies that {@link DataTransformer} works correctly when when passed an
@@ -603,17 +633,9 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEvent() throws FHIRException {
-		PartDEventRow record = new PartDEventRow();
-		record.version = 1;
-		record.recordAction = RecordAction.INSERT;
-		record.partDEventId = "5";
-		record.beneficiaryId = "17";
-		record.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
-		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
-
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, record);
+		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, partDEventRecord);
 
 		Stream source = Arrays.asList(pdeRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
@@ -633,11 +655,19 @@ public final class DataTransformerTest {
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
-		Assert.assertEquals("Patient/" + record.beneficiaryId, eob.getPatient().getReference());
-
+		Assert.assertEquals(partDEventRecord.partDEventId,
+				eob.getIdentifier().stream().filter(i -> DataTransformer.CODING_SYSTEM_CCW_PDE_ID.equals(i.getSystem()))
+						.findAny().get().getValue());
+		Assert.assertEquals("Patient/" + partDEventRecord.beneficiaryId, eob.getPatient().getReference());
 		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		Assert.assertEquals(Date.valueOf(partDEventRecord.prescriptionFillDate),
+				rxItem.getServicedDateType().getValue());
+		Assert.assertEquals(Date.valueOf(partDEventRecord.paymentDate.get()), eob.getPaymentDate());
+
+		// TODO values inside referenced resources
+
 		Assert.assertEquals("RXCINV", rxItem.getType().getCode());
-		Assert.assertEquals(Date.valueOf(record.prescriptionFillDate), rxItem.getServicedDateType().getValue());
+
 		// TODO rest of values
 	}
 
@@ -651,17 +681,11 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEventNotCompound() throws FHIRException {
-		PartDEventRow record = new PartDEventRow();
-		record.version = 1;
-		record.recordAction = RecordAction.INSERT;
-		record.partDEventId = "5";
-		record.beneficiaryId = "17";
-		record.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
-		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
+		partDEventRecord.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, record);
+		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, partDEventRecord);
 
 		Stream source = Arrays.asList(pdeRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();

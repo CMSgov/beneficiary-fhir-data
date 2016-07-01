@@ -912,7 +912,6 @@ public final class DataTransformer {
 
 		ItemsComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
-
 		if (record.compoundCode == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
 			/* Pharmacy dispense invoice for a compound */
 			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
@@ -923,23 +922,32 @@ public final class DataTransformer {
 			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
 		}
 		// TODO code for unknown compound type?
-
 		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
 
-		MedicationOrder medicationOrder = new MedicationOrder();
-		medicationOrder.setId(IdType.newRandomUuid());
-		medicationOrder.addIdentifier().setId(String.valueOf(record.prescriptionReferenceNumber));
-		medicationOrder.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(IdType.newRandomUuid());
+		/*
+		 * Set the coding system for the practitioner if the qualifier code is
+		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
+		 * no other code types should be found here.
+		 */
+		String prescriberIdSystem = (record.prescriberId == PartDEventRow.PRSCRBR_ID_QLFYR_CD_NPI)
+				? CODING_SYSTEM_NPI_US : null;
+		practitioner.addIdentifier().setSystem(prescriberIdSystem).setValue(record.prescriberId);
+		// TODO insert practitioner
 
 		Medication medication = new Medication();
 		medication.setId(IdType.newRandomUuid());
 		CodeableConcept ndcConcept = new CodeableConcept();
 		ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode);
 		medication.setCode(ndcConcept);
-		medicationOrder.setMedication(new Reference().setReference("Medication/" + medication.getId()));
-		// medicationOrder.getSubstitution() TODO update structure to use
-		// allowed/reason
 
+		MedicationOrder medicationOrder = new MedicationOrder();
+		medicationOrder.setId(IdType.newRandomUuid());
+		medicationOrder.addIdentifier().setId(String.valueOf(record.prescriptionReferenceNumber));
+		medicationOrder.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
+		medicationOrder.setPrescriber(new Reference().setReference("Practitioner/" + practitioner.getId()));
+		medicationOrder.setMedication(new Reference().setReference("Medication/" + medication.getId()));
 		SimpleQuantity quantity = new SimpleQuantity();
 		quantity.setValue(record.quantityDispensed);
 		Duration daysSupply = new Duration();
@@ -947,6 +955,10 @@ public final class DataTransformer {
 		daysSupply.setValue(record.daysSupply);
 		medicationOrder.setDispenseRequest(new MedicationOrderDispenseRequestComponent().setQuantity(quantity)
 				.setExpectedSupplyDuration(daysSupply));
+		/*
+		 * TODO Update structures to be able to use substitution allowed/reason
+		 * fields.
+		 */
 
 		eob.setPrescription(new Reference().setReference("MedicationOrder/" + medicationOrder.getId()));
 
@@ -980,19 +992,7 @@ public final class DataTransformer {
 		org.addIdentifier().setSystem(serviceProviderIdSystem).setValue(record.serviceProviderId);
 		// TODO real URLs for coding systems?
 		// TODO insert org
-
-		Practitioner practitioner = new Practitioner();
-		practitioner.setId(IdType.newRandomUuid());
-
-		/*
-		 * Set the coding system for the practitioner if the qualifier code is
-		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
-		 * no other code types should be found here.
-		 */
-		String prescriberIdSystem = (record.prescriberId == PartDEventRow.PRSCRBR_ID_QLFYR_CD_NPI)
-				? CODING_SYSTEM_NPI_US : null;
-		practitioner.addIdentifier().setSystem(prescriberIdSystem).setValue(record.prescriberId);
-		// TODO insert practitioner
+		eob.setOrganization(new Reference().setReference("Organization/" + org.getId()));
 
 		Coverage coverage = new Coverage();
 		coverage.setId(IdType.newRandomUuid());
