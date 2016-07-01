@@ -332,7 +332,152 @@ public class PartDEventRow {
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt">
 		 * CCW Data Dictionary: DSPNSNG_STUS_CD</a>.
 		 */
-		DSPNSNG_STUS_CD
-		// TODO FIll in rest of fields
+		DSPNSNG_STUS_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+		 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+		 */
+		DRUG_CVRG_STUS_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt">
+		 * CCW Data Dictionary: ADJSTMT_DLTN_CD</a>.
+		 */
+		ADJSTMT_DLTN_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nstd_frmt_cd.txt">
+		 * CCW Data Dictionary: NSTD_FRMT_CD</a>.
+		 */
+		NSTD_FRMT_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_excptn_cd.txt">
+		 * CCW Data Dictionary: PRCNG_EXCPTN_CD</a>.
+		 */
+		PRCNG_EXCPTN_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt">
+		 * CCW Data Dictionary: CTSTRPHC_CVRG_CD</a>.
+		 */
+		CTSTRPHC_CVRG_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_blw_oopt_amt.txt">
+		 * CCW Data Dictionary: GDC_BLW_OOPT_AMT</a>.
+		 */
+		GDC_BLW_OOPT_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_abv_oopt_amt.txt">
+		 * CCW Data Dictionary: GDC_ABV_OOPT_AMT</a>.
+		 */
+		GDC_ABV_OOPT_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt">
+		 * CCW Data Dictionary: PTNT_PAY_AMT</a>.
+		 */
+		PTNT_PAY_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/othr_troop_amt.txt">
+		 * CCW Data Dictionary: OTHR_TROOP_AMT</a>.
+		 */
+		OTHR_TROOP_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lics_amt.txt">
+		 * CCW Data Dictionary: LICS_AMT</a>.
+		 */
+		LICS_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plro_amt.txt">
+		 * CCW Data Dictionary: PLRO_AMT</a>.
+		 */
+		PLRO_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cvrd_d_plan_pd_amt.txt">
+		 * CCW Data Dictionary: CVRD_D_PLAN_PD_AMT</a>.
+		 */
+		CVRD_D_PLAN_PD_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncvrd_plan_pd_amt.txt">
+		 * CCW Data Dictionary: NCVRD_PLAN_PD_AMT</a>.
+		 */
+		NCVRD_PLAN_PD_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_rx_cst_amt.txt">
+		 * CCW Data Dictionary: TOT_RX_CST_AMT</a>.
+		 */
+		TOT_RX_CST_AMT,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt">
+		 * CCW Data Dictionary: RX_ORGN_CD</a>.
+		 */
+		RX_ORGN_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt">
+		 * CCW Data Dictionary: RPTD_GAP_DSCNT_NUM</a>.
+		 */
+		RPTD_GAP_DSCNT_NUM,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt">
+		 * CCW Data Dictionary: BRND_GNRC_CD</a>.
+		 */
+		BRND_GNRC_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt">
+		 * CCW Data Dictionary: PHRMCY_SRVC_TYPE_CD</a>.
+		 */
+		PHRMCY_SRVC_TYPE_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_rsdnc_cd.txt">
+		 * CCW Data Dictionary: PTNT_RSDNC_CD</a>.
+		 */
+		PTNT_RSDNC_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt">
+		 * CCW Data Dictionary: SUBMSN_CLR_CD</a>.
+		 */
+		SUBMSN_CLR_CD
 	}
 }
