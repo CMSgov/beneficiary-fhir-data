@@ -162,6 +162,12 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_MONEY_US = "USD";
 
+	static final String CODING_SYSTEM_NCPDP = "NCPDP";
+
+	static final String CODING_SYSTEM_ST_LICENSE = "STATE_LICENSE_NUM";
+
+	static final String CODING_SYSTEM_FED_TAX_NUM = "FEDERAL_TAX_NUM";
+
 	/**
 	 * @param sourceBeneficiaries
 	 *            the source/CCW {@link CurrentBeneficiary} records to be
@@ -903,24 +909,52 @@ public final class DataTransformer {
 
 		ItemsComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
-		if (record.compoundCode.isPresent()) {
-			if (record.compoundCode.get() == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
-				/* Pharmacy dispense invoice for a compound */
-				rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
-			} else if (record.compoundCode.get() == PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED) {
-				/*
-				 * Pharmacy dispense invoice not involving a compound
-				 */
-				rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
-			}
-			// TODO code for unknown compound type?
+
+		if (record.compoundCode == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
+			/* Pharmacy dispense invoice for a compound */
+			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
+		} else if (record.compoundCode == PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED) {
+			/*
+			 * Pharmacy dispense invoice not involving a compound
+			 */
+			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
 		}
+		// TODO code for unknown compound type?
 
 		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
 
 		MedicationOrder medicationOrder = new MedicationOrder();
 		medicationOrder.setId(IdType.newRandomUuid());
+		medicationOrder.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
+
 		eob.setPrescription(new Reference().setReference(medicationOrder.getId()));
+
+		if (record.paymentDate.isPresent()) {
+			eob.setPaymentDate(Date.valueOf(record.paymentDate.get()));
+		}
+
+		Organization org = new Organization();
+		org.setId(IdType.newRandomUuid());
+
+		// TODO real URLs for coding systems?
+		String serviceProviderIdSystem = "";
+		switch (record.serviceProviderIdQualiferCode) {
+		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_NPI:
+			serviceProviderIdSystem = CODING_SYSTEM_NPI_US;
+			break;
+		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_NCPDP:
+			serviceProviderIdSystem = CODING_SYSTEM_NCPDP;
+			break;
+		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_STLICENSE:
+			serviceProviderIdSystem = CODING_SYSTEM_ST_LICENSE;
+			break;
+		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_FEDTAX:
+			serviceProviderIdSystem = CODING_SYSTEM_FED_TAX_NUM;
+			break;
+		}
+		org.addIdentifier().setSystem(serviceProviderIdSystem).setValue(record.serviceProviderId);
+		// TODO insert org
+
 		// TODO rest of mapping
 
 		insert(bundle, eob);

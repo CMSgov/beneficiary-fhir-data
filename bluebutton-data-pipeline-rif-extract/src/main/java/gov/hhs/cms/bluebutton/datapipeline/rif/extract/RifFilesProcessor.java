@@ -259,22 +259,19 @@ public final class RifFilesProcessor {
 		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT.ordinal()),
 				RIF_DATE_FORMATTER);
 		pdeRow.paymentDate = getOptionalLocalDate(csvRecord.get(PartDEventRow.Column.PD_DT.ordinal()));
-		pdeRow.serviceProviderIdQualiferCode = Optional
-				.ofNullable(csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD.ordinal()));
+		pdeRow.serviceProviderIdQualiferCode = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD.ordinal());
 		pdeRow.serviceProviderId = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID.ordinal());
-		pdeRow.prescriberIdQualifierCode = Optional
-				.ofNullable(csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD.ordinal()));
+		pdeRow.prescriberIdQualifierCode = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD.ordinal());
 		pdeRow.prescriberId = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID.ordinal());
 		pdeRow.prescriptionReferenceNumber = Long
 				.parseLong(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM.ordinal()));
 		pdeRow.nationalDrugCode = csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID.ordinal());
 		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID.ordinal());
 		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM.ordinal());
-		pdeRow.compoundCode = getOptionalInteger(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal()));
-		pdeRow.dispenseAsWrittenProductSelectionCode = Optional
-				.ofNullable(csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal()));
+		pdeRow.compoundCode = Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal()));
+		pdeRow.dispenseAsWrittenProductSelectionCode = csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal());
 		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DPSNSD_NUM.ordinal()));
-		pdeRow.daysSupply = getOptionalInteger(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
+		pdeRow.daysSupply = Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
 		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
 		pdeRow.dispensingStatuscode = getOptionalCharacter(
 				csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()));

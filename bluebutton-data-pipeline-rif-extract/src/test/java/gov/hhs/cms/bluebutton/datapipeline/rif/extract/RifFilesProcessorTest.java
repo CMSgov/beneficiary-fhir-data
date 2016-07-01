@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -105,11 +106,24 @@ public final class RifFilesProcessorTest {
 		PartDEventRow pdeRow = (PartDEventRow) rifRecordEvent.getRecord();
 		Assert.assertEquals(1, pdeRow.version);
 		Assert.assertEquals(RecordAction.INSERT, pdeRow.recordAction);
-		Assert.assertEquals("96", pdeRow.partDEventId);
-		Assert.assertEquals("63", pdeRow.beneficiaryId);
-		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 6), pdeRow.prescriptionFillDate);
-		Assert.assertFalse(pdeRow.paymentDate.isPresent());
-
+		Assert.assertEquals("89", pdeRow.partDEventId);
+		Assert.assertEquals("103", pdeRow.beneficiaryId);
+		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.prescriptionFillDate);
+		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 27), pdeRow.paymentDate.get());
+		Assert.assertEquals("01", pdeRow.serviceProviderIdQualiferCode);
+		Assert.assertEquals("1124137542", pdeRow.serviceProviderId);
+		Assert.assertEquals("01", pdeRow.prescriberIdQualifierCode);
+		Assert.assertEquals("1225061591", pdeRow.prescriberId);
+		Assert.assertEquals(new Long(791569), pdeRow.prescriptionReferenceNumber);
+		Assert.assertEquals("49884009902", pdeRow.nationalDrugCode);
+		Assert.assertEquals("H8552", pdeRow.planContractId);
+		Assert.assertEquals("020", pdeRow.planBenefitPackageId);
+		Assert.assertEquals(new Integer(1), pdeRow.compoundCode);
+		Assert.assertEquals("0", pdeRow.dispenseAsWrittenProductSelectionCode);
+		Assert.assertEquals(new BigDecimal(60), pdeRow.quantityDispensed);
+		Assert.assertEquals(new Integer(30), pdeRow.daysSupply);
+		Assert.assertEquals(new Integer(3), pdeRow.fillNumber);
+		Assert.assertFalse(pdeRow.dispensingStatuscode.isPresent());
 	}
 
 	/**

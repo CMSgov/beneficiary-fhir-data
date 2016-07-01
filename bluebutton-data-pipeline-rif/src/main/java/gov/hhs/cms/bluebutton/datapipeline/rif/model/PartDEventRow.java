@@ -8,8 +8,15 @@ import java.util.Optional;
  * Models rows from <code>PDE</code> RIF Files.
  */
 public class PartDEventRow {
-	public static int COMPOUND_CODE_NOT_COMPOUNDED = 1;
-	public static int COMPOUND_CODE_COMPOUNDED = 2;
+	public static final int COMPOUND_CODE_NOT_COMPOUNDED = 1;
+	public static final int COMPOUND_CODE_COMPOUNDED = 2;
+
+	public static final String SVC_PRVDR_ID_QLFYR_CD_NPI = "01";
+	// Discontinued as of 2007
+	public static final String SVC_PRVDR_ID_QLFYR_CD_UPIN = "06";
+	public static final String SVC_PRVDR_ID_QLFYR_CD_NCPDP = "07";
+	public static final String SVC_PRVDR_ID_QLFYR_CD_STLICENSE = "08";
+	public static final String SVC_PRVDR_ID_QLFYR_CD_FEDTAX = "11";
 	/**
 	 * FIXME is this the schema version or the record version?
 	 * 
@@ -58,7 +65,7 @@ public class PartDEventRow {
 	 * 
 	 * @see Column#SRVC_PRVDR_ID_QLFYR_CD
 	 */
-	public Optional<String> serviceProviderIdQualiferCode;
+	public String serviceProviderIdQualiferCode;
 
 	/**
 	 * The ID of the pharmacy or physicians' office that dispensed the drug, the
@@ -75,7 +82,7 @@ public class PartDEventRow {
 	 * 
 	 * @see Column#PRSCRBR_ID_QLFYR_CD
 	 */
-	public Optional<String> prescriberIdQualifierCode;
+	public String prescriberIdQualifierCode;
 
 	/**
 	 * The ID of the practitioner that prescribed the drug, the type of which is
@@ -124,7 +131,7 @@ public class PartDEventRow {
 	 * 
 	 * @see Column#CMPND_CD
 	 */
-	public Optional<Integer> compoundCode;
+	public Integer compoundCode;
 
 	/**
 	 * One-digit code representing the prescriber's instructions regarding
@@ -133,7 +140,7 @@ public class PartDEventRow {
 	 * 
 	 * @see Column#DAW_PROD_SLCTN_CD
 	 */
-	public Optional<String> dispenseAsWrittenProductSelectionCode;
+	public String dispenseAsWrittenProductSelectionCode;
 
 	/**
 	 * The number of units, grams, milligrams, or other dispensed in the current
@@ -151,7 +158,7 @@ public class PartDEventRow {
 	 * 
 	 * @see Column#DAYS_SUPLY_NUM
 	 */
-	public Optional<Integer> daysSupply;
+	public Integer daysSupply;
 
 	/**
 	 * The number fill of the currently dispensed supply, with 0 being the
