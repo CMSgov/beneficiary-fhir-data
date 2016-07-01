@@ -12,11 +12,12 @@ public class PartDEventRow {
 	public static final int COMPOUND_CODE_COMPOUNDED = 2;
 
 	public static final String SVC_PRVDR_ID_QLFYR_CD_NPI = "01";
-	// Discontinued as of 2007
-	public static final String SVC_PRVDR_ID_QLFYR_CD_UPIN = "06";
 	public static final String SVC_PRVDR_ID_QLFYR_CD_NCPDP = "07";
 	public static final String SVC_PRVDR_ID_QLFYR_CD_STLICENSE = "08";
 	public static final String SVC_PRVDR_ID_QLFYR_CD_FEDTAX = "11";
+
+	public static final String PRSCRBR_ID_QLFYR_CD_NPI = "01";
+
 	/**
 	 * FIXME is this the schema version or the record version?
 	 * 

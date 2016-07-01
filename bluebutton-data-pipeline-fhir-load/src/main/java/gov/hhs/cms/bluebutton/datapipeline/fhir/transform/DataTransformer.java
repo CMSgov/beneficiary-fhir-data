@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.SubDetailComponent;
 import org.hl7.fhir.dstu21.model.Extension;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.IntegerType;
+import org.hl7.fhir.dstu21.model.Medication;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
 import org.hl7.fhir.dstu21.model.Money;
@@ -167,6 +168,8 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_ST_LICENSE = "STATE_LICENSE_NUM";
 
 	static final String CODING_SYSTEM_FED_TAX_NUM = "FEDERAL_TAX_NUM";
+
+	static final String CODING_SYSTEM_NDC = "https://www.accessdata.fda.gov/scripts/cder/ndc";
 
 	/**
 	 * @param sourceBeneficiaries
@@ -925,9 +928,27 @@ public final class DataTransformer {
 
 		MedicationOrder medicationOrder = new MedicationOrder();
 		medicationOrder.setId(IdType.newRandomUuid());
+		medicationOrder.addIdentifier().setId(String.valueOf(record.prescriptionReferenceNumber));
 		medicationOrder.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
 
-		eob.setPrescription(new Reference().setReference(medicationOrder.getId()));
+		Medication medication = new Medication();
+		medication.setId(IdType.newRandomUuid());
+		CodeableConcept ndcConcept = new CodeableConcept();
+		ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode);
+		medication.setCode(ndcConcept);
+		medicationOrder.setMedication(new Reference().setReference("Medication/" + medication.getId()));
+		// medicationOrder.getSubstitution() TODO update structure to use
+		// allowed/reason
+
+		SimpleQuantity quantity = new SimpleQuantity();
+		quantity.setValue(record.quantityDispensed);
+		Duration daysSupply = new Duration();
+		daysSupply.setUnit("days");
+		daysSupply.setValue(record.daysSupply);
+		medicationOrder.setDispenseRequest(new MedicationOrderDispenseRequestComponent().setQuantity(quantity)
+				.setExpectedSupplyDuration(daysSupply));
+
+		eob.setPrescription(new Reference().setReference("MedicationOrder/" + medicationOrder.getId()));
 
 		if (record.paymentDate.isPresent()) {
 			eob.setPaymentDate(Date.valueOf(record.paymentDate.get()));
@@ -936,8 +957,12 @@ public final class DataTransformer {
 		Organization org = new Organization();
 		org.setId(IdType.newRandomUuid());
 
-		// TODO real URLs for coding systems?
-		String serviceProviderIdSystem = "";
+		/*
+		 * Set the coding system for the organization based on the service
+		 * provider ID qualifier code, or null if the code does not match a
+		 * known system.
+		 */
+		String serviceProviderIdSystem = null;
 		switch (record.serviceProviderIdQualiferCode) {
 		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_NPI:
 			serviceProviderIdSystem = CODING_SYSTEM_NPI_US;
@@ -953,7 +978,28 @@ public final class DataTransformer {
 			break;
 		}
 		org.addIdentifier().setSystem(serviceProviderIdSystem).setValue(record.serviceProviderId);
+		// TODO real URLs for coding systems?
 		// TODO insert org
+
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(IdType.newRandomUuid());
+
+		/*
+		 * Set the coding system for the practitioner if the qualifier code is
+		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
+		 * no other code types should be found here.
+		 */
+		String prescriberIdSystem = (record.prescriberId == PartDEventRow.PRSCRBR_ID_QLFYR_CD_NPI)
+				? CODING_SYSTEM_NPI_US : null;
+		practitioner.addIdentifier().setSystem(prescriberIdSystem).setValue(record.prescriberId);
+		// TODO insert practitioner
+
+		Coverage coverage = new Coverage();
+		coverage.setId(IdType.newRandomUuid());
+		// TODO coverage issuer reference to CMS Organization?
+		coverage.setPlan(record.planContractId);
+		coverage.setSubPlan(record.planBenefitPackageId);
+		eob.getCoverage().setCoverage(new Reference("Coverage/" + coverage.getId()));
 
 		// TODO rest of mapping
 
