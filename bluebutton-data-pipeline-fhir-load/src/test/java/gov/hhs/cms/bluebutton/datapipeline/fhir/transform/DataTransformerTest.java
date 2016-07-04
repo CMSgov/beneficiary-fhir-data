@@ -72,9 +72,9 @@ public final class DataTransformerTest {
 		partDEventRecord = new PartDEventRow();
 		partDEventRecord.version = 1;
 		partDEventRecord.recordAction = RecordAction.INSERT;
-		partDEventRecord.partDEventId = "5";
-		partDEventRecord.beneficiaryId = "17";
-		partDEventRecord.prescriptionFillDate = LocalDate.of(2015, 6, 14);
+		partDEventRecord.partDEventId = "89";
+		partDEventRecord.beneficiaryId = "103";
+		partDEventRecord.prescriptionFillDate = LocalDate.of(2015, 6, 12);
 		partDEventRecord.paymentDate = Optional.of(LocalDate.of(2015, 6, 27));
 		partDEventRecord.serviceProviderIdQualiferCode = "01";
 		partDEventRecord.serviceProviderId = "1124137542";
@@ -84,12 +84,35 @@ public final class DataTransformerTest {
 		partDEventRecord.nationalDrugCode = "49884009902";
 		partDEventRecord.planContractId = "H8552";
 		partDEventRecord.planBenefitPackageId = "020";
-		partDEventRecord.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
+		partDEventRecord.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
 		partDEventRecord.dispenseAsWrittenProductSelectionCode = "0";
 		partDEventRecord.quantityDispensed = new BigDecimal(60);
 		partDEventRecord.daysSupply = new Integer(30);
 		partDEventRecord.fillNumber = new Integer(3);
-		partDEventRecord.dispensingStatuscode = Optional.of(new Character('C'));
+		partDEventRecord.dispensingStatuscode = Optional.of(new Character('P'));
+		partDEventRecord.drugCoverageStatusCode = new Character('C');
+		partDEventRecord.adjustmentDeletionCode = Optional.of(new Character('A'));
+		partDEventRecord.nonstandardFormatCode = Optional.of(new Character('X'));
+		partDEventRecord.pricingExceptionCode = Optional.of(new Character('M'));
+		partDEventRecord.catastrophicCoverageCode = Optional.of(new Character('C'));
+		partDEventRecord.grossCostBelowOutOfPocketThreshold = new BigDecimal("362.84");
+		partDEventRecord.grossCostAboveOutOfPocketThreshold = new BigDecimal("15.25");
+		partDEventRecord.patientPaidAmount = new BigDecimal("235.85");
+		partDEventRecord.otherTrueOutOfPocketPaidAmount = new BigDecimal("17.30");
+		partDEventRecord.lowIncomeSubsidyPaidAmount = new BigDecimal("122.23");
+		partDEventRecord.patientLiabilityReductionOtherPaidAmount = new BigDecimal("42.42");
+		partDEventRecord.partDPlanCoveredPaidAmount = new BigDecimal("126.99");
+		partDEventRecord.partDPlanNonCoveredPaidAmount = new BigDecimal("17.98");
+		partDEventRecord.totalPrescriptionCost = new BigDecimal("362.84");
+		partDEventRecord.prescriptionOriginationCode = Optional.of(new Character('3'));
+		partDEventRecord.gapDiscountAmount = new BigDecimal("317.22");
+		/*
+		 * TODO re-enable once determined if optional or not.
+		 */
+		// partDEventRecord.brandGenericCode = new Character('G');
+		partDEventRecord.pharamcyTypeCode = "01";
+		partDEventRecord.patientResidenceCode = "02";
+		partDEventRecord.submissionClarificationCode = Optional.of("08");
 	}
 
 	/**
@@ -666,22 +689,22 @@ public final class DataTransformerTest {
 
 		// TODO values inside referenced resources
 
-		Assert.assertEquals("RXCINV", rxItem.getType().getCode());
+		Assert.assertEquals("RXDINV", rxItem.getType().getCode());
 
 		// TODO rest of values
 	}
 
 	/**
 	 * Verifies that {@link DataTransformer} correctly sets the code system
-	 * value when the compound code equals not compounded.
+	 * value when the compound code equals compounded.
 	 * 
 	 * @throws FHIRException
 	 *             indicates test failure
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertPartDEventNotCompound() throws FHIRException {
-		partDEventRecord.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
+	public void transformInsertPartDEventCompound() throws FHIRException {
+		partDEventRecord.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -699,6 +722,6 @@ public final class DataTransformerTest {
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-		Assert.assertEquals("RXDINV", rxItem.getType().getCode());
+		Assert.assertEquals("RXCINV", rxItem.getType().getCode());
 	}
 }

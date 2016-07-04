@@ -123,6 +123,8 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_CCW_PDE_ID = "CCW.PDE_ID";
 
+	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "CCW.PHRMCY_SRVC_TYPE_CD";
+
 	static final String CODING_SYSTEM_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
@@ -154,6 +156,20 @@ public final class DataTransformer {
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE = "NCH Beneficiary Part B Deductible Amount";
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_COINSURANCE = "NCH Beneficiary Part B Coinsurance Amount";
+
+	static final String CODED_ADJUDICATION_PART_D_COVERED = "Part D Covered";
+
+	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT = "Part D Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)";
+
+	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_OTC = "Part D Over-the-counter drugs";
+
+	static final String CODED_ADJUDICATION_OTHER_TROOP_AMOUNT = "Other True Out-of-Pocket (TrOOP) Amount";
+
+	static final String CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT = "Part D Low Income Subsidy (LICS) Amount";
+
+	static final String CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT = "Reduction in patient liability due to payments by other payers (PLRO) Amount";
+
+	static final String CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT = "Medicare Coverage Gap Discount Amount";
 
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
 
@@ -908,6 +924,7 @@ public final class DataTransformer {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.setId(IdType.newRandomUuid());
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
+		// TODO eob.type when structures updated
 		eob.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
 
 		ItemsComponent rxItem = eob.addItem();
@@ -923,6 +940,68 @@ public final class DataTransformer {
 		}
 		// TODO code for unknown compound type?
 		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
+
+		/* If covered by Part D, use value from partDPlanCoveredPaidAmount */
+		if (PartDEventRow.DRUG_CVRD_STUS_CD_COVERED.equals(record.drugCoverageStatusCode)) {
+			rxItem.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PART_D_COVERED))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(record.partDPlanCoveredPaidAmount);
+		}
+		/*
+		 * If not covered by Part D, use value from
+		 * partDPlanNonCoveredPaidAmount
+		 */
+		else if (PartDEventRow.DRUG_CVRD_STUS_CD_SUPPLEMENT.equals(record.drugCoverageStatusCode)) {
+			rxItem.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(record.partDPlanNonCoveredPaidAmount);
+		} else if (PartDEventRow.DRUG_CVRD_STUS_CD_OTC.equals(record.drugCoverageStatusCode)) {
+			rxItem.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_OTC))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(record.partDPlanNonCoveredPaidAmount);
+		}
+
+		rxItem.addAdjudication()
+				.setCategory(
+						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PATIENT_PAY))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.patientPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_OTHER_TROOP_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.otherTrueOutOfPocketPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.lowIncomeSubsidyPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.patientLiabilityReductionOtherPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(
+						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_TOTAL_COST))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.totalPrescriptionCost);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.gapDiscountAmount);
 
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(IdType.newRandomUuid());
@@ -969,6 +1048,11 @@ public final class DataTransformer {
 		Organization org = new Organization();
 		org.setId(IdType.newRandomUuid());
 
+		// TODO Is this correct? Link to DD page with code values? Or actually
+		// put the definition of each code value here?
+		org.setType(new CodeableConcept().addCoding(
+				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharamcyTypeCode)));
+
 		/*
 		 * Set the coding system for the organization based on the service
 		 * provider ID qualifier code, or null if the code does not match a
@@ -1000,6 +1084,11 @@ public final class DataTransformer {
 		coverage.setPlan(record.planContractId);
 		coverage.setSubPlan(record.planBenefitPackageId);
 		eob.getCoverage().setCoverage(new Reference("Coverage/" + coverage.getId()));
+
+		/*
+		 * TODO eob.information when structures updated to store
+		 * PRCNG_EXCPTN_CD, CTSTRPHC_CVRG_CD value
+		 */
 
 		// TODO rest of mapping
 
