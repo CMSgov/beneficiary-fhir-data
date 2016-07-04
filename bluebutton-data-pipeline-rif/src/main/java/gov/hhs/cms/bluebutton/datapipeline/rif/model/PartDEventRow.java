@@ -35,6 +35,10 @@ public class PartDEventRow {
 
 	public static final String PRSCRBR_ID_QLFYR_CD_NPI = "01";
 
+	public static final Character DRUG_CVRD_STUS_CD_COVERED = new Character('C');
+	public static final Character DRUG_CVRD_STUS_CD_SUPPLEMENT = new Character('E');
+	public static final Character DRUG_CVRD_STUS_CD_OTC = new Character('O');
+
 	/**
 	 * @see Column#VERSION
 	 */
@@ -135,7 +139,107 @@ public class PartDEventRow {
 	 */
 	public Optional<Character> dispensingStatuscode;
 
-	// TODO FIll in rest of fields
+	/**
+	 * @see Column#DRUG_CVRG_STUS_CD
+	 */
+	public Character drugCoverageStatusCode;
+
+	/**
+	 * @see Column#ADJSTMT_DLTN_CD
+	 */
+	public Optional<Character> adjustmentDeletionCode;
+
+	/**
+	 * @see Column#NSTD_FRMT_CD
+	 */
+	public Optional<Character> nonstandardFormatCode;
+
+	/**
+	 * @see Column#PRCNG_EXCPTN_CD
+	 */
+	public Optional<Character> pricingExceptionCode;
+
+	/**
+	 * @see Column#CTSTRPHC_CVRG_CD
+	 */
+	public Optional<Character> catastrophicCoverageCode;
+
+	/**
+	 * @see Column#GDC_BLW_OOPT_AMT
+	 */
+	public BigDecimal grossCostBelowOutOfPocketThreshold;
+
+	/**
+	 * @see Column#GDC_ABV_OOPT_AMT
+	 */
+	public BigDecimal grossCostAboveOutOfPocketThreshold;
+
+	/**
+	 * @see Column#PTNT_PAY_AMT
+	 */
+	public BigDecimal patientPaidAmount;
+
+	/**
+	 * @see Column#OTHR_TROOP_AMT
+	 */
+	public BigDecimal otherTrueOutOfPocketPaidAmount;
+
+	/**
+	 * @see Column#LICS_AMT
+	 */
+	public BigDecimal lowIncomeSubsidyPaidAmount;
+
+	/**
+	 * @see Column#PLRO_AMT
+	 */
+	public BigDecimal patientLiabilityReductionOtherPaidAmount;
+
+	/**
+	 * @see Column#CVRD_D_PLAN_PD_AMT
+	 */
+	public BigDecimal partDPlanCoveredPaidAmount;
+
+	/**
+	 * @see Column#NCVRD_PLAN_PD_AMT
+	 */
+	public BigDecimal partDPlanNonCoveredPaidAmount;
+
+	/**
+	 * @see Column#TOT_RX_CST_AMT
+	 */
+	public BigDecimal totalPrescriptionCost;
+
+	/**
+	 * @see Column#RX_ORGN_CD
+	 */
+	public Optional<Character> prescriptionOriginationCode;
+
+	/**
+	 * @see Column#RPTD_GAP_DSCNT_NUM
+	 */
+	public BigDecimal gapDiscountAmount;
+
+	/**
+	 * @see Column#BRND_GNRC_CD
+	 */
+	// TODO should this be Optional? At least a couple rows in sample data that
+	// are blank.
+	public Character brandGenericCode;
+
+	/**
+	 * @see Column#PHRMCY_SRVC_TYPE_CD
+	 */
+	public String pharamcyTypeCode;
+
+	/**
+	 * @see Column#PTNT_RSDNC_CD
+	 */
+	public String patientResidenceCode;
+
+	/**
+	 * @see Column#SUBMSN_CLR_CD
+	 */
+	public Optional<String> submissionClarificationCode;
 
 	/**
 	 * @see java.lang.Object#toString()
@@ -183,9 +287,48 @@ public class PartDEventRow {
 		builder.append(fillNumber);
 		builder.append(", dispensingStatuscode=");
 		builder.append(dispensingStatuscode);
+		builder.append(", drugCoverageStatusCode=");
+		builder.append(drugCoverageStatusCode);
+		builder.append(", adjustmentDeletionCode=");
+		builder.append(adjustmentDeletionCode);
+		builder.append(", nonstandardFormatCode=");
+		builder.append(nonstandardFormatCode);
+		builder.append(", pricingExceptionCode=");
+		builder.append(pricingExceptionCode);
+		builder.append(", catastrophicCoverageCode=");
+		builder.append(catastrophicCoverageCode);
+		builder.append(", grossCostBelowOutOfPocketThreshold=");
+		builder.append(grossCostBelowOutOfPocketThreshold);
+		builder.append(", grossCostAboveOutOfPocketThreshold=");
+		builder.append(grossCostAboveOutOfPocketThreshold);
+		builder.append(", patientPaidAmount=");
+		builder.append(patientPaidAmount);
+		builder.append(", otherTrueOutOfPocketPaidAmount=");
+		builder.append(otherTrueOutOfPocketPaidAmount);
+		builder.append(", lowIncomeSubsidyPaidAmount=");
+		builder.append(lowIncomeSubsidyPaidAmount);
+		builder.append(", patientLiabilityReductionOtherPaidAmount=");
+		builder.append(patientLiabilityReductionOtherPaidAmount);
+		builder.append(", partDPlanCoveredPaidAmount=");
+		builder.append(partDPlanCoveredPaidAmount);
+		builder.append(", partDPlanNonCoveredPaidAmount=");
+		builder.append(partDPlanNonCoveredPaidAmount);
+		builder.append(", totalPrescriptionCost=");
+		builder.append(totalPrescriptionCost);
+		builder.append(", prescriptionOriginationCode=");
+		builder.append(prescriptionOriginationCode);
+		builder.append(", gapDiscountAmount=");
+		builder.append(gapDiscountAmount);
+		builder.append(", brandGenericCode=");
+		builder.append(brandGenericCode);
+		builder.append(", pharamcyTypeCode=");
+		builder.append(pharamcyTypeCode);
+		builder.append(", patientResidenceCode=");
+		builder.append(patientResidenceCode);
+		builder.append(", submissionClarificationCode=");
+		builder.append(submissionClarificationCode);
 		builder.append("]");
 		return builder.toString();
-		// TODO FIll in rest of fields
 	}
 
 	/**

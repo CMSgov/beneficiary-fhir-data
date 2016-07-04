@@ -253,6 +253,10 @@ public final class RifFilesProcessor {
 
 		PartDEventRow pdeRow = new PartDEventRow();
 		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION.ordinal()));
+		// Sanity check:
+		if (1 != pdeRow.version)
+			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
+
 		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND.ordinal()));
 		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID.ordinal());
 		pdeRow.beneficiaryId = csvRecord.get(PartDEventRow.Column.BENE_ID.ordinal());
@@ -275,11 +279,42 @@ public final class RifFilesProcessor {
 		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
 		pdeRow.dispensingStatuscode = getOptionalCharacter(
 				csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()));
-		// TODO finish mapping the rest of the columns
-
-		// Sanity check:
-		if (1 != pdeRow.version)
-			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
+		pdeRow.drugCoverageStatusCode = csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD.ordinal()).charAt(0);
+		pdeRow.adjustmentDeletionCode = getOptionalCharacter(
+				csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD.ordinal()));
+		pdeRow.nonstandardFormatCode = getOptionalCharacter(csvRecord.get(PartDEventRow.Column.NSTD_FRMT_CD.ordinal()));
+		pdeRow.pricingExceptionCode = getOptionalCharacter(
+				csvRecord.get(PartDEventRow.Column.PRCNG_EXCPTN_CD.ordinal()));
+		pdeRow.catastrophicCoverageCode = getOptionalCharacter(
+				csvRecord.get(PartDEventRow.Column.CTSTRPHC_CVRG_CD.ordinal()));
+		pdeRow.grossCostBelowOutOfPocketThreshold = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.GDC_BLW_OOPT_AMT.ordinal()));
+		pdeRow.grossCostAboveOutOfPocketThreshold = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.GDC_ABV_OOPT_AMT.ordinal()));
+		pdeRow.patientPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.PTNT_PAY_AMT.ordinal()));
+		pdeRow.otherTrueOutOfPocketPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.OTHR_TROOP_AMT.ordinal()));
+		pdeRow.lowIncomeSubsidyPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.LICS_AMT.ordinal()));
+		pdeRow.patientLiabilityReductionOtherPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.PLRO_AMT.ordinal()));
+		pdeRow.partDPlanCoveredPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.CVRD_D_PLAN_PD_AMT.ordinal()));
+		pdeRow.partDPlanNonCoveredPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.NCVRD_PLAN_PD_AMT.ordinal()));
+		pdeRow.totalPrescriptionCost = new BigDecimal(csvRecord.get(PartDEventRow.Column.TOT_RX_CST_AMT.ordinal()));
+		pdeRow.prescriptionOriginationCode = getOptionalCharacter(
+				csvRecord.get(PartDEventRow.Column.RX_ORGN_CD.ordinal()));
+		pdeRow.gapDiscountAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.RPTD_GAP_DSCNT_NUM.ordinal()));
+		/*
+		 * TODO Re-enable this mapping once it is determined for sure if this is
+		 * optional or not.
+		 */
+		// pdeRow.brandGenericCode =
+		// csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD.ordinal()).charAt(0);
+		pdeRow.pharamcyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD.ordinal());
+		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD.ordinal());
+		pdeRow.submissionClarificationCode = getOptionalString(
+				csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD.ordinal()));
 
 		return pdeRow;
 	}
@@ -332,6 +367,23 @@ public final class RifFilesProcessor {
 			return Optional.empty();
 		} else {
 			return Optional.of(record.charAt(0));
+		}
+	}
+
+	/**
+	 * Utility method to return either a populated {@link String} or an empty
+	 * Optional if a null or empty {@link String} was passed.
+	 * 
+	 * @param record
+	 *            the parsed String from the input file.
+	 * @return a populated {@link Optional} if the record has data, or an empty
+	 *         Optional if not
+	 */
+	private static Optional<String> getOptionalString(String record) {
+		if (StringUtils.isEmpty(record)) {
+			return Optional.empty();
+		} else {
+			return Optional.of(record);
 		}
 	}
 }

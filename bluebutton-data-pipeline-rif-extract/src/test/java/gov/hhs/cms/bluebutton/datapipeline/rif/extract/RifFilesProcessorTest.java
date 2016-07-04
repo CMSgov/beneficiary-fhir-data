@@ -120,10 +120,34 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("020", pdeRow.planBenefitPackageId);
 		Assert.assertEquals(new Integer(1), pdeRow.compoundCode);
 		Assert.assertEquals("0", pdeRow.dispenseAsWrittenProductSelectionCode);
-		Assert.assertEquals(new BigDecimal(60), pdeRow.quantityDispensed);
+		Assert.assertEquals(new BigDecimal("60"), pdeRow.quantityDispensed);
 		Assert.assertEquals(new Integer(30), pdeRow.daysSupply);
 		Assert.assertEquals(new Integer(3), pdeRow.fillNumber);
-		Assert.assertFalse(pdeRow.dispensingStatuscode.isPresent());
+		Assert.assertEquals(new Character('P'), pdeRow.dispensingStatuscode.get());
+		Assert.assertEquals(new Character('C'), pdeRow.drugCoverageStatusCode);
+		Assert.assertEquals(new Character('A'), pdeRow.adjustmentDeletionCode.get());
+		Assert.assertEquals(new Character('X'), pdeRow.nonstandardFormatCode.get());
+		Assert.assertEquals(new Character('M'), pdeRow.pricingExceptionCode.get());
+		Assert.assertEquals(new Character('C'), pdeRow.catastrophicCoverageCode.get());
+		Assert.assertEquals(new BigDecimal("362.84"), pdeRow.grossCostBelowOutOfPocketThreshold);
+		Assert.assertEquals(new BigDecimal("15.25"), pdeRow.grossCostAboveOutOfPocketThreshold);
+		Assert.assertEquals(new BigDecimal("235.85"), pdeRow.patientPaidAmount);
+		Assert.assertEquals(new BigDecimal("17.30"), pdeRow.otherTrueOutOfPocketPaidAmount);
+		Assert.assertEquals(new BigDecimal("122.23"), pdeRow.lowIncomeSubsidyPaidAmount);
+		Assert.assertEquals(new BigDecimal("42.42"), pdeRow.patientLiabilityReductionOtherPaidAmount);
+		Assert.assertEquals(new BigDecimal("126.99"), pdeRow.partDPlanCoveredPaidAmount);
+		Assert.assertEquals(new BigDecimal("17.98"), pdeRow.partDPlanNonCoveredPaidAmount);
+		Assert.assertEquals(new BigDecimal("362.84"), pdeRow.totalPrescriptionCost);
+		Assert.assertEquals(new Character('3'), pdeRow.prescriptionOriginationCode.get());
+		Assert.assertEquals(new BigDecimal("317.22"), pdeRow.gapDiscountAmount);
+		/*
+		 * TODO Re-enable this test case once it is determined if this field is
+		 * optional or not.
+		 */
+		// Assert.assertEquals(new Character('G'), pdeRow.brandGenericCode);
+		Assert.assertEquals("01", pdeRow.pharamcyTypeCode);
+		Assert.assertEquals("02", pdeRow.patientResidenceCode);
+		Assert.assertEquals("08", pdeRow.submissionClarificationCode.get());
 	}
 
 	/**
