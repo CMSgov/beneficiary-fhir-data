@@ -8,8 +8,7 @@ import java.util.regex.Pattern;
 public enum RifFileType {
 	BENEFICIARY(Pattern.compile(".*beneficiar(y|ies).*")),
 
-	// TODO
-	CARRIER(Pattern.compile("TODO")),
+	CARRIER(Pattern.compile(".*bcarrier.*")),
 
 	// TODO
 	DME(Pattern.compile("TODO")),

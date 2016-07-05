@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <p>
@@ -139,7 +140,7 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#ORG_NPI_NUM
 		 */
-		public String organizationNpi;
+		public Optional<String> organizationNpi;
 
 		/**
 		 * @see Column#LINE_CMS_TYPE_SRVC_CD
@@ -560,13 +561,6 @@ public final class CarrierClaimGroup {
 		LINE_NUM,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/thru_dt.txt">
-		 * CCW Data Dictionary: THRU_DT</a>.
-		 */
-		CLM_THRU_DT_2,
-
-		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prf_prfl.txt">
 		 * CCW Data Dictionary: PRF_PRFL</a>.
@@ -873,5 +867,18 @@ public final class CarrierClaimGroup {
 		 * CCW Data Dictionary: CARR_LINE_ANSTHSA_UNIT_CNT</a>.
 		 */
 		CARR_LINE_ANSTHSA_UNIT_CNT;
+	}
+
+	/**
+	 * A simple helper app that will print out the {@link Column} entries as if
+	 * they were a RIF header line, which can be used to help verify that the
+	 * {@link Column} enum is correct.
+	 * 
+	 * @param args
+	 *            (not used)
+	 */
+	public static void main(String[] args) {
+		for (Column col : Column.values())
+			System.out.print("|" + col);
 	}
 }

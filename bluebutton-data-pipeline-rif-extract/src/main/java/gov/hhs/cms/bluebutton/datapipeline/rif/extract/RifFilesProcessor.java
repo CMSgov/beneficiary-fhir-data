@@ -3,11 +3,17 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -22,7 +28,12 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
@@ -34,6 +45,12 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
  */
 public final class RifFilesProcessor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
+
+	/**
+	 * FIXME The data uses a two-digit year format, which is awful. Just awful.
+	 */
+	private final static DateTimeFormatter RIF_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
+			.appendPattern("dd-MMM-yy").toFormatter();
 
 	/**
 	 * <p>
@@ -130,20 +147,48 @@ public final class RifFilesProcessor {
 		 */
 
 		CSVParser parser = createCsvParser(file);
-		Iterator<CSVRecord> csvIterator = parser.iterator();
-		Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
-		Stream<CSVRecord> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 		Stream<RifRecordEvent<?>> rifRecordStream;
-		if (file.getFileType() == RifFileType.BENEFICIARY)
+		if (file.getFileType() == RifFileType.BENEFICIARY) {
+			Iterator<CSVRecord> csvIterator = parser.iterator();
+			Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Stream<CSVRecord> csvRecordStream = StreamSupport.stream(spliterator, false);
+
 			rifRecordStream = csvRecordStream.map(csvRecord -> {
 				RifRecordEvent<BeneficiaryRow> recordEvent = new RifRecordEvent<BeneficiaryRow>(rifFilesEvent, file,
 						buildBeneficiaryEvent(csvRecord));
 				closeParserIfDone(parser, csvIterator);
 				return recordEvent;
 			});
-		else
+		} else if (file.getFileType() == RifFileType.CARRIER) {
+			CsvRecordGrouper grouper = new CsvRecordGrouper() {
+				@Override
+				public boolean areSameGroup(CSVRecord record1, CSVRecord record2) {
+					if (record1 == null)
+						throw new IllegalArgumentException();
+					if (record2 == null)
+						throw new IllegalArgumentException();
+
+					String claimId1 = record1.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
+					String claimId2 = record2.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
+
+					return claimId1.equals(claimId2);
+				}
+			};
+
+			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
+
+			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
+				RifRecordEvent<CarrierClaimGroup> recordEvent = new RifRecordEvent<CarrierClaimGroup>(rifFilesEvent,
+						file, buildCarrierClaimEvent(csvRecordGroup));
+				closeParserIfDone(parser, csvIterator);
+				return recordEvent;
+			});
+		} else {
 			throw new BadCodeMonkeyException();
+		}
 
 		return rifRecordStream;
 	}
@@ -183,7 +228,7 @@ public final class RifFilesProcessor {
 	 *            the {@link Iterator} that is being used, from the specified
 	 *            {@link CSVParser}
 	 */
-	private static void closeParserIfDone(CSVParser parser, Iterator<CSVRecord> csvIterator) {
+	private static void closeParserIfDone(CSVParser parser, Iterator<?> csvIterator) {
 		if (!csvIterator.hasNext()) {
 			try {
 				/*
@@ -222,5 +267,178 @@ public final class RifFilesProcessor {
 			throw new IllegalArgumentException("Unsupported record version: " + beneficiaryRow);
 
 		return beneficiaryRow;
+	}
+
+	/**
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
+	 *            {@link RifFileType#CARRIER} {@link RifFile}, and must
+	 *            represent all of the claim lines from a single claim
+	 * @return a {@link BeneficiaryRow} built from the specified
+	 *         {@link CSVRecord}
+	 */
+	private static CarrierClaimGroup buildCarrierClaimEvent(List<CSVRecord> csvRecords) {
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecords.toString());
+
+		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		CarrierClaimGroup claimGroup = new CarrierClaimGroup();
+
+		/*
+		 * Parse the claim header fields.
+		 */
+		claimGroup.version = parseInt(firstClaimLine.get(CarrierClaimGroup.Column.VERSION.ordinal()));
+		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(CarrierClaimGroup.Column.DML_IND.ordinal()));
+		claimGroup.beneficiaryId = firstClaimLine.get(CarrierClaimGroup.Column.BENE_ID.ordinal());
+		claimGroup.claimId = firstClaimLine.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
+		claimGroup.dateFrom = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_FROM_DT.ordinal()));
+		claimGroup.dateThrough = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_THRU_DT.ordinal()));
+		claimGroup.carrierNpi = firstClaimLine.get(CarrierClaimGroup.Column.CARR_NUM.ordinal());
+		claimGroup.referringPhysicianNpi = firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_NPI.ordinal());
+		claimGroup.providerPaymentAmount = parseDecimal(
+				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CLM_PRVDR_PMT_AMT.ordinal()));
+		claimGroup.diagnosisPrincipal = parseIcdCode(
+				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD.ordinal()),
+				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD.ordinal()));
+		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, CarrierClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
+				CarrierClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
+		// TODO finish mapping the rest of the columns
+
+		/*
+		 * Parse the claim lines.
+		 */
+		for (CSVRecord claimLineRecord : csvRecords) {
+			CarrierClaimLine claimLine = new CarrierClaimLine();
+
+			claimLine.number = parseInt(claimLineRecord.get(CarrierClaimGroup.Column.LINE_NUM.ordinal()));
+			claimLine.organizationNpi = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.ORG_NPI_NUM.ordinal()));
+			claimLine.cmsServiceTypeCode = claimLineRecord
+					.get(CarrierClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD.ordinal());
+			claimLine.hcpcsCode = claimLineRecord.get(CarrierClaimGroup.Column.HCPCS_CD.ordinal());
+			claimLine.providerPaymentAmount = parseDecimal(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_PRVDR_PMT_AMT.ordinal()));
+			claimLine.diagnosis = parseIcdCode(claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_CD.ordinal()),
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD.ordinal()));
+			// TODO finish mapping the rest of the columns
+
+			claimGroup.lines.add(claimLine);
+		}
+
+		// Sanity check:
+		if (1 != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+
+		return claimGroup;
+	}
+
+	/**
+	 * @param string
+	 *            the value to parse
+	 * @return an {@link Optional} {@link String}, where
+	 *         {@link Optional#isPresent()} will be <code>false</code> if the
+	 *         specified value was empty, and will otherwise contain the
+	 *         specified value
+	 */
+	private static Optional<String> parseOptString(String string) {
+		return string.isEmpty() ? Optional.empty() : Optional.of(string);
+	}
+
+	/**
+	 * @param intText
+	 *            the number string to parse
+	 * @return the specified text parsed into an {@link Integer}
+	 */
+	private static Integer parseInt(String intText) {
+		/*
+		 * Might seem silly to pull this out, but it makes the code a bit easier
+		 * to read, and ensures that this parsing is standardized.
+		 */
+
+		return Integer.parseInt(intText);
+	}
+
+	/**
+	 * @param decimalText
+	 *            the decimal string to parse
+	 * @return the specified text parsed into a {@link BigDecimal}
+	 */
+	private static BigDecimal parseDecimal(String decimalText) {
+		/*
+		 * Might seem silly to pull this out, but it makes the code a bit easier
+		 * to read, and ensures that this parsing is standardized.
+		 */
+
+		return new BigDecimal(decimalText);
+	}
+
+	/**
+	 * @param dateText
+	 *            the date string to parse
+	 * @return the specified text as a {@link LocalDate}, parsed using
+	 *         {@link #RIF_DATE_FORMATTER}
+	 */
+	private static LocalDate parseDate(String dateText) {
+		/*
+		 * Might seem silly to pull this out, but it makes the code a bit easier
+		 * to read, and ensures that this parsing is standardized.
+		 */
+
+		LocalDate dateFrom = LocalDate.parse(dateText, RIF_DATE_FORMATTER);
+		return dateFrom;
+	}
+
+	/**
+	 * @param icdCode
+	 *            the value to use for {@link IcdCode#getCode()}
+	 * @param icdVersion
+	 *            the value to parse and use for {@link IcdCode#getVersion()}
+	 * @return an {@link IcdCode} instance built from the specified values
+	 */
+	private static IcdCode parseIcdCode(String icdCode, String icdVersion) {
+		return new IcdCode(IcdVersion.parse(icdVersion), icdCode);
+	}
+
+	/**
+	 * Parses {@link IcdCode}s out of the specified columns of the specified
+	 * {@link CSVRecord}. The columns must be arranged in code and version
+	 * pairs; the first column specified must represent an ICD code, the next
+	 * column must represent an ICD version (as can be parsed by
+	 * {@link IcdVersion#parse(String)}), and this sequence must repeat for all
+	 * of the specified columns.
+	 * 
+	 * @param csvRecord
+	 *            the {@link CSVRecord} to parse the {@link IcdCode}s from
+	 * @param icdColumnFirst
+	 *            the first column ordinal to parse from, which must contain an
+	 *            {@link IcdCode#getCode()} value
+	 * @param icdColumnLast
+	 *            the last column ordinal to parse from, which must contain a
+	 *            value that could be parsed by {@link IcdVersion#parse(String)}
+	 * @return the {@link IcdCode}s contained in the specified columns of the
+	 *         specified {@link CSVRecord}
+	 */
+	private static List<IcdCode> parseIcdCodes(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
+		if ((icdColumnLast - icdColumnFirst) < 1)
+			throw new BadCodeMonkeyException();
+		if ((icdColumnLast - icdColumnFirst + 1) % 2 != 0)
+			throw new BadCodeMonkeyException();
+
+		List<IcdCode> icdCodes = new LinkedList<>();
+		for (int i = icdColumnFirst; i < icdColumnLast; i += 2) {
+			String icdCodeText = csvRecord.get(i);
+			String icdVersionText = csvRecord.get(i + 1);
+
+			if (icdCodeText.isEmpty() && icdVersionText.isEmpty())
+				continue;
+			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty())
+				icdCodes.add(parseIcdCode(icdCodeText, icdVersionText));
+			else
+				throw new IllegalArgumentException(
+						String.format("Unexpected ICD code pair: '%s' and '%s'.", icdCodeText, icdVersionText));
+		}
+
+		return icdCodes;
 	}
 }

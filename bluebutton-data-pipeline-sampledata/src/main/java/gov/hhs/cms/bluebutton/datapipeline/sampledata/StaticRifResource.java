@@ -7,8 +7,17 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
  */
 public enum StaticRifResource {
 	BENES_1("rif-static-samples/beneficiaries-1.txt", RifFileType.BENEFICIARY, 1),
-	
-	BENES_1000("rif-static-samples/beneficiaries-1000.txt", RifFileType.BENEFICIARY, 1000);
+
+	BENES_1000("rif-static-samples/beneficiaries-1000.txt", RifFileType.BENEFICIARY, 1000),
+
+	CARRIER_1("rif-static-samples/sample-a-bcarrier-1.txt", RifFileType.CARRIER, 1),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ awk -F '|' '{print $4}' bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-b-bcarrier-1440.txt | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	CARRIER_1091("rif-static-samples/sample-b-bcarrier-1091.txt", RifFileType.CARRIER, 1091);
 
 	private final String classpathName;
 	private final RifFileType rifFileType;
