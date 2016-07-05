@@ -85,11 +85,6 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 			}
 		});
 
-		// FIXME remove debug
-		for (CSVRecord record : records)
-			if (record.get(CarrierClaimGroup.Column.CLM_ID.ordinal()).equals("1831831620"))
-				System.out.println("groupingBugWorkaround:  " + record);
-
 		return records.iterator();
 	}
 
