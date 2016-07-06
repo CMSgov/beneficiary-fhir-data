@@ -29,7 +29,7 @@ public class CsvRecordGroupingIteratorTest {
 	public void singleRowGroups() throws IOException {
 		// Create some mock data and the iterator to test against it.
 		CSVParser parser = CSVFormat.EXCEL.parse(new StringReader("a,b\na,b\na,b\n"));
-		CsvRecordGroupingIterator groupingIter = new CsvRecordGroupingIterator(parser, (record1, record2) -> false);
+		CsvRecordGroupingIterator groupingIter = new CsvRecordGroupingIterator(parser, (record1, record2) -> 1);
 
 		// Run the iterator, collecting its results into a List for analysis.
 		Stream<List<CSVRecord>> groupedRecordsStream = StreamSupport
@@ -55,7 +55,7 @@ public class CsvRecordGroupingIteratorTest {
 		// Create some mock data and the iterator to test against it.
 		CSVParser parser = CSVFormat.EXCEL.parse(new StringReader("a,b\na,b\nc,d\nc,d"));
 		CsvRecordGroupingIterator groupingIter = new CsvRecordGroupingIterator(parser,
-				(record1, record2) -> record1.get(0).equals(record2.get(0)));
+				(record1, record2) -> record1.get(0).compareTo(record2.get(0)));
 
 		// Run the iterator, collecting its results into a List for analysis.
 		Stream<List<CSVRecord>> groupedRecordsStream = StreamSupport

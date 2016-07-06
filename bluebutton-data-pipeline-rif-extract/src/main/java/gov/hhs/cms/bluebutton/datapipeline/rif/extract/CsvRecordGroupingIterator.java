@@ -13,8 +13,6 @@ import java.util.stream.Stream;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
-
 /**
  * <p>
  * This {@link Iterator} can group together related {@link CSVRecord}s from a
@@ -54,7 +52,7 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 	 *            the {@link CsvRecordGrouper} to use
 	 */
 	public CsvRecordGroupingIterator(CSVParser parser, CsvRecordGrouper grouper) {
-		this.singleRecordIter = groupingBugWorkaround(parser.iterator());
+		this.singleRecordIter = groupingBugWorkaround(parser.iterator(), grouper);
 		this.grouper = grouper;
 	}
 
@@ -62,10 +60,12 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 	 * @param iterator
 	 *            the {@link CSVRecord} {@link Iterator} to fix claim grouping
 	 *            issues in
+	 * @param grouper
+	 *            the {@link CsvRecordGrouper} being used for these records
 	 * @return a new {@link CSVRecord} {@link Iterator}, with records properly
 	 *         grouped
 	 */
-	private static Iterator<CSVRecord> groupingBugWorkaround(Iterator<CSVRecord> iterator) {
+	private static Iterator<CSVRecord> groupingBugWorkaround(Iterator<CSVRecord> iterator, CsvRecordGrouper grouper) {
 		/*
 		 * FIXME This is a workaround for
 		 * http://issues.hhsdevcloud.us/browse/CBBD-92. This workaround adds
@@ -75,15 +75,7 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 		List<CSVRecord> records = new ArrayList<>();
 		while (iterator.hasNext())
 			records.add(iterator.next());
-
-		records.sort(new Comparator<CSVRecord>() {
-			@Override
-			public int compare(CSVRecord o1, CSVRecord o2) {
-				String claimId1 = o1.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
-				String claimId2 = o2.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
-				return claimId1.compareTo(claimId2);
-			}
-		});
+		records.sort(grouper);
 
 		return records.iterator();
 	}
@@ -136,7 +128,7 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 	 * sequential fashion: {@link CSVRecord}s that should be grouped together
 	 * must be adjacent to each other.
 	 */
-	public interface CsvRecordGrouper {
+	public interface CsvRecordGrouper extends Comparator<CSVRecord> {
 		/**
 		 * @param record1
 		 *            the first {@link CSVRecord} to compare
@@ -146,6 +138,8 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 		 *         be part of the same group, <code>false</code> if they should
 		 *         not
 		 */
-		boolean areSameGroup(CSVRecord record1, CSVRecord record2);
+		default boolean areSameGroup(CSVRecord record1, CSVRecord record2) {
+			return compare(record1, record2) == 0;
+		}
 	}
 }

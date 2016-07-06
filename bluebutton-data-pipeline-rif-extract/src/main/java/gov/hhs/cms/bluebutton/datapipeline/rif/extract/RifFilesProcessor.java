@@ -163,16 +163,16 @@ public final class RifFilesProcessor {
 		} else if (file.getFileType() == RifFileType.CARRIER) {
 			CsvRecordGrouper grouper = new CsvRecordGrouper() {
 				@Override
-				public boolean areSameGroup(CSVRecord record1, CSVRecord record2) {
-					if (record1 == null)
+				public int compare(CSVRecord o1, CSVRecord o2) {
+					if (o1 == null)
 						throw new IllegalArgumentException();
-					if (record2 == null)
+					if (o2 == null)
 						throw new IllegalArgumentException();
 
-					String claimId1 = record1.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
-					String claimId2 = record2.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
+					String claimId1 = o1.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
+					String claimId2 = o2.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
 
-					return claimId1.equals(claimId2);
+					return claimId1.compareTo(claimId2);
 				}
 			};
 
