@@ -10,6 +10,10 @@ public enum StaticRifResource {
 
 	BENES_1000("rif-static-samples/beneficiaries-1000.txt", RifFileType.BENEFICIARY, 1000),
 
+	PDE_1("rif-static-samples/pde-1.txt", RifFileType.PDE, 1),
+
+	PDE_1195("rif-static-samples/pde-1195.txt", RifFileType.PDE, 1195),
+
 	CARRIER_1("rif-static-samples/sample-a-bcarrier-1.txt", RifFileType.CARRIER, 1),
 
 	/**

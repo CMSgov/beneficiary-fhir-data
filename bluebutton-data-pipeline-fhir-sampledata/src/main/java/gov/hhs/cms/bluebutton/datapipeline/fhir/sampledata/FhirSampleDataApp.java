@@ -67,6 +67,7 @@ public final class FhirSampleDataApp {
 		SampleDataLoader sampleDataLoader = new SampleDataLoader(metricsSampleData);
 		SynpufArchive synpufArchive = SynpufArchive.SAMPLE_1;
 		LOGGER.info("Loading sample data from {}...", synpufArchive);
+		// FIXME Should cleanup after itself and use a temp directory
 		List<CurrentBeneficiary> sampleBeneficiaries = sampleDataLoader.loadSampleData(Paths.get("."), synpufArchive);
 		LOGGER.info("Loaded sample data from {}.", synpufArchive);
 		Slf4jReporter.forRegistry(metricsSampleData).outputTo(LOGGER).build().report();
