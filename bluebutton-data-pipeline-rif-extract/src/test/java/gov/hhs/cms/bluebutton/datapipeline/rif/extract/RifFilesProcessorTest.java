@@ -114,7 +114,6 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("1831831620", claimGroup.claimId);
 		Assert.assertEquals(LocalDate.of(2015, 10, 27), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2015, 10, 27), claimGroup.dateThrough);
-		Assert.assertEquals("06102", claimGroup.carrierNpi);
 		Assert.assertEquals("1902880057", claimGroup.referringPhysicianNpi);
 		Assert.assertEquals(new BigDecimal("130.32"), claimGroup.providerPaymentAmount);
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "H40013"), claimGroup.diagnosisPrincipal);

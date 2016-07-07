@@ -294,7 +294,6 @@ public final class RifFilesProcessor {
 		claimGroup.claimId = firstClaimLine.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
 		claimGroup.dateFrom = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_FROM_DT.ordinal()));
 		claimGroup.dateThrough = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_THRU_DT.ordinal()));
-		claimGroup.carrierNpi = firstClaimLine.get(CarrierClaimGroup.Column.CARR_NUM.ordinal());
 		claimGroup.referringPhysicianNpi = firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_NPI.ordinal());
 		claimGroup.providerPaymentAmount = parseDecimal(
 				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CLM_PRVDR_PMT_AMT.ordinal()));

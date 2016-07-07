@@ -59,11 +59,6 @@ public final class CarrierClaimGroup {
 	public LocalDate dateThrough;
 
 	/**
-	 * @see Column#CARR_NUM
-	 */
-	public String carrierNpi;
-
-	/**
 	 * @see Column#RFR_PHYSN_NPI
 	 */
 	public String referringPhysicianNpi;
@@ -111,8 +106,6 @@ public final class CarrierClaimGroup {
 		builder.append(dateFrom);
 		builder.append(", dateThrough=");
 		builder.append(dateThrough);
-		builder.append(", carrierNpi=");
-		builder.append(carrierNpi);
 		builder.append(", referringPhysicianNpi=");
 		builder.append(referringPhysicianNpi);
 		builder.append(", providerPaymentAmount=");
@@ -268,7 +261,7 @@ public final class CarrierClaimGroup {
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
-		 * "www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt">
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt">
 		 * CCW Data Dictionary: CARR_NUM</a>.
 		 */
 		CARR_NUM,
