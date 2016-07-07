@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,15 +18,20 @@ import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.DateTimeType;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DetailComponent;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DiagnosisComponent;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemAdjudicationComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.IntegerType;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.ReferralRequest;
 import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.dstu21.model.TemporalPrecisionEnum;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -45,6 +52,10 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
@@ -589,5 +600,158 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.countyCode, bene.getAddress().get(0).getDistrict());
 		Assert.assertEquals(record.postalCode, bene.getAddress().get(0).getPostalCode());
 		// TODO test the rest of the columns/resource once they're all ready
+	}
+
+	/**
+	 * Verifies that {@link DataTransformer} works correctly when when passed a
+	 * single {@link CarrierClaimGroup} {@link RecordAction#INSERT}
+	 * {@link RifRecordEvent}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void transformInsertCarrierClaimEvent() {
+		// Create the mock bene to test against.
+		CarrierClaimGroup record = new CarrierClaimGroup();
+		record.version = 1;
+		record.recordAction = RecordAction.INSERT;
+		record.beneficiaryId = "42";
+		record.claimId = "SuttersMill";
+		record.dateFrom = LocalDate.of(1848, 01, 24);
+		record.dateThrough = LocalDate.of(1850, 01, 01);
+		record.referringPhysicianNpi = "1265415426";
+		record.providerPaymentAmount = new BigDecimal("123.45");
+		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "F63.2");
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R44.3"));
+		CarrierClaimLine recordLine1 = new CarrierClaimLine();
+		record.lines.add(recordLine1);
+		recordLine1.number = 1;
+		recordLine1.organizationNpi = Optional.of("1487872263");
+		recordLine1.cmsServiceTypeCode = "90853-HE";
+		recordLine1.providerPaymentAmount = new BigDecimal("123.45");
+		recordLine1.diagnosis = new IcdCode(IcdVersion.ICD_10, "F63.2");
+
+		RifFile file = new MockRifFile();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
+		RifRecordEvent beneRecordEvent = new RifRecordEvent<CarrierClaimGroup>(filesEvent, file, record);
+
+		Stream source = Arrays.asList(beneRecordEvent).stream();
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> resultStream = transformer.transform(source);
+		Assert.assertNotNull(resultStream);
+		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
+		Assert.assertEquals(1, resultList.size());
+
+		TransformedBundle beneBundleWrapper = resultList.get(0);
+		Assert.assertNotNull(beneBundleWrapper);
+		Assert.assertSame(beneRecordEvent, beneBundleWrapper.getSource());
+		Assert.assertNotNull(beneBundleWrapper.getResult());
+
+		Bundle claimBundle = beneBundleWrapper.getResult();
+		/*
+		 * Bundle should have: 1) EOB, 2) Practitioner (referrer).
+		 */
+		Assert.assertEquals(2, claimBundle.getEntry().size());
+		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
+		Assert.assertEquals("ExplanationOfBenefit/" + record.claimId, eobEntry.getRequest().getUrl());
+		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+		Assert.assertEquals(eob.getId(), "ExplanationOfBenefit/" + record.claimId);
+		Assert.assertEquals("Patient/42", eob.getPatient().getReference());
+		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
+		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
+		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+		Assert.assertEquals("Patient/" + record.beneficiaryId, referral.getPatient().getReference());
+		Assert.assertEquals(1, referral.getRecipient().size());
+		Assert.assertEquals(DataTransformer.referencePractitioner(record.referringPhysicianNpi).getReference(),
+				referral.getRecipient().get(0).getReference());
+		BundleEntryComponent referrerEntry = claimBundle.getEntry().stream().filter(r -> {
+			if (!(r.getResource() instanceof Practitioner))
+				return false;
+			Practitioner referrer = (Practitioner) r.getResource();
+			return referrer.getIdentifier().stream()
+					.filter(i -> DataTransformer.CODING_SYSTEM_NPI_US.equals(i.getSystem()))
+					.filter(i -> record.referringPhysicianNpi.equals(i.getValue())).findAny().isPresent();
+		}).findAny().get();
+		Assert.assertEquals(HTTPVerb.PUT, referrerEntry.getRequest().getMethod());
+		Assert.assertEquals(DataTransformer.referencePractitioner(record.referringPhysicianNpi).getReference(),
+				referrerEntry.getRequest().getUrl());
+		/*
+		 * TODO once STU3 is available, verify amounts in eob.information
+		 * entries
+		 */
+		Assert.assertEquals(2, eob.getDiagnosis().size());
+		Assert.assertEquals(1, eob.getItem().size());
+		ItemsComponent eobItem0 = eob.getItem().get(0);
+		Assert.assertEquals(recordLine1.number, eobItem0.getSequence());
+		// TODO Once STU3 is available, verify eob.item.careTeam entries.
+		// TODO Once STU3 is available, verify eob.item.category.
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode, eobItem0.getService());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT_B, recordLine1.providerPaymentAmount,
+				eobItem0.getAdjudication());
+		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
+		// TODO test the rest of the columns/resource once they're all ready
+	}
+
+	/**
+	 * @param expected
+	 *            the expected {@link LocalDate}
+	 * @param actual
+	 *            the actual {@link DateTimeType} to verify
+	 */
+	private static void assertDateEquals(LocalDate expected, DateTimeType actual) {
+		Assert.assertEquals(Date.from(expected.atStartOfDay(ZoneId.systemDefault()).toInstant()), actual.getValue());
+		Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
+	}
+
+	/**
+	 * @param expectedSystem
+	 *            the expected {@link Coding#getSystem()} value
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()} value
+	 * @param actual
+	 *            the actual {@link Coding} to verify
+	 */
+	private static void assertCodingEquals(String expectedSystem, String expectedCode, Coding actual) {
+		Assert.assertEquals(expectedSystem, actual.getSystem());
+		Assert.assertEquals(expectedCode, actual.getCode());
+	}
+
+	/**
+	 * @param expectedCategoryCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link ItemAdjudicationComponent#getCategory()} to find and
+	 *            verify
+	 * @param expectedAmount
+	 *            the expected {@link ItemAdjudicationComponent#getAmount()}
+	 * @param actuals
+	 *            the actual {@link ItemAdjudicationComponent}s to verify
+	 */
+	private static void assertAdjudicationEquals(String expectedCategoryCode, BigDecimal expectedAmount,
+			List<ItemAdjudicationComponent> actuals) {
+		Optional<ItemAdjudicationComponent> adjudication = actuals.stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
+		Assert.assertTrue(adjudication.isPresent());
+		Assert.assertEquals(expectedAmount, adjudication.get().getAmount().getValue());
+	}
+
+	/**
+	 * @param expectedDiagnosis
+	 *            the expected {@link IcdCode} to verify the presence of in the
+	 *            {@link ItemsComponent}
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to verify
+	 * @param eobItem
+	 *            the {@link ItemsComponent} to verify
+	 */
+	private static void assertDiagnosisLinkPresent(IcdCode expectedDiagnosis, ExplanationOfBenefit eob,
+			ItemsComponent eobItem) {
+		Optional<DiagnosisComponent> eobDiagnosis = eob.getDiagnosis().stream()
+				.filter(d -> expectedDiagnosis.getVersion().getFhirSystem().equals(d.getDiagnosis().getSystem()))
+				.filter(d -> expectedDiagnosis.getCode().equals(d.getDiagnosis().getCode())).findAny();
+		Assert.assertTrue(eobDiagnosis.isPresent());
+		Assert.assertTrue(eobItem.getDiagnosisLinkId().stream()
+				.filter(l -> eobDiagnosis.get().getSequence() == l.getValue()).findAny().isPresent());
 	}
 }

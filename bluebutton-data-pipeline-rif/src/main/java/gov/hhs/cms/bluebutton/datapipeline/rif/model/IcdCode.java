@@ -86,11 +86,13 @@ public final class IcdCode {
 	 * Enumerates the ICD versions that are used by {@link IcdCode}.
 	 */
 	public static enum IcdVersion {
-		ICD_9("9"),
+		ICD_9("9", "http://hl7.org/fhir/sid/icd-9-cm"),
 
-		ICD_10("0");
+		// TODO confirm that we're using intl ICD-10 codes
+		ICD_10("0", "http://hl7.org/fhir/sid/icd-10");
 
 		private final String ccwCoding;
+		private final String fhirCodingSystem;
 
 		/**
 		 * Enum constant constructor.
@@ -101,9 +103,19 @@ public final class IcdCode {
 		 *            "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
 		 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other
 		 *            similar fields
+		 * @param fhirCodingSystem the value to use for {@link #getFhirSystem()}
 		 */
-		private IcdVersion(String ccwCoding) {
-			this.ccwCoding = ccwCoding;
+		private IcdVersion(String ccwCoding, String fhirCodingSystem) {
+			this.ccwCoding = ccwCoding;this.fhirCodingSystem = fhirCodingSystem;
+		}
+
+		/**
+		 * @return the <a href=
+		 *         "https://www.hl7.org/fhir/terminologies-systems.html">FHIR
+		 *         Coding system</a> value for this ICD version
+		 */
+		public String getFhirSystem() {
+			return fhirCodingSystem;
 		}
 
 		/**

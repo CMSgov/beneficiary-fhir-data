@@ -1,9 +1,12 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +26,7 @@ import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.SubDetailComponent;
 import org.hl7.fhir.dstu21.model.Extension;
 import org.hl7.fhir.dstu21.model.IdType;
+import org.hl7.fhir.dstu21.model.Identifier;
 import org.hl7.fhir.dstu21.model.IntegerType;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
@@ -32,9 +36,12 @@ import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Period;
 import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu21.model.ReferralRequest;
+import org.hl7.fhir.dstu21.model.ReferralRequest.ReferralStatus;
 import org.hl7.fhir.dstu21.model.Resource;
 import org.hl7.fhir.dstu21.model.SimpleQuantity;
 import org.hl7.fhir.dstu21.model.StringType;
+import org.hl7.fhir.dstu21.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu21.model.valuesets.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -48,6 +55,9 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 
@@ -94,7 +104,7 @@ public final class DataTransformer {
 	 * "https://en.wikipedia.org/wiki/Healthcare_Common_Procedure_Coding_System">
 	 * Healthcare Common Procedure Coding System</a>.
 	 */
-	static final String CODING_SYSTEM_HCPCS = "HCPCS";
+	static final String CODING_SYSTEM_HCPCS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typsrvcb.txt";
 
 	static final String CODING_SYSTEM_ICD9_DIAG = "http://hl7.org/fhir/sid/icd-9-cm/diagnosis";
 
@@ -130,6 +140,13 @@ public final class DataTransformer {
 	static final String CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT = "Line Coinsurance Amount";
 
 	static final String CODED_ADJUDICATION_PAYMENT = "Line NCH Payment Amount";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprvpmt.txt">
+	 * CCW Data Dictionary: LPRVPMT</a>.
+	 */
+	static final String CODED_ADJUDICATION_PAYMENT_B = "Line Provider Payment Amount";
 
 	static final String CODED_ADJUDICATION_PASS_THROUGH_PER_DIEM_AMOUNT = "Claim Pass Thru Per Diem Amount";
 
@@ -803,6 +820,8 @@ public final class DataTransformer {
 		return rifStream.map(rifRecordEvent -> {
 			if (rifRecordEvent.getRecord() instanceof BeneficiaryRow)
 				return transformBeneficiary((RifRecordEvent<BeneficiaryRow>) rifRecordEvent);
+			else if (rifRecordEvent.getRecord() instanceof CarrierClaimGroup)
+				return transformCarrierClaim((RifRecordEvent<CarrierClaimGroup>) rifRecordEvent);
 
 			throw new BadCodeMonkeyException("Unhandled record type: " + rifRecordEvent.getRecord());
 		});
@@ -873,6 +892,85 @@ public final class DataTransformer {
 	}
 
 	/**
+	 * @param rifRecordEvent
+	 *            the source {@link RifRecordEvent} to be transformed
+	 * @return the {@link TransformedBundle} that is the result of transforming
+	 *         the specified {@link RifRecordEvent}
+	 */
+	private TransformedBundle transformCarrierClaim(RifRecordEvent<CarrierClaimGroup> rifRecordEvent) {
+		if (rifRecordEvent == null)
+			throw new IllegalArgumentException();
+		CarrierClaimGroup claimGroup = rifRecordEvent.getRecord();
+		if (1 != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+		if (claimGroup.recordAction != RecordAction.INSERT)
+			// Will need refactoring to support other ops.
+			throw new BadCodeMonkeyException();
+
+		Bundle bundle = new Bundle();
+
+		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/" + claimGroup.claimId);
+		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
+
+		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
+		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
+
+		/*
+		 * Referrals are represented as contained resources, because otherwise
+		 * updating them would require an extra roundtrip to the server (can't
+		 * think of an intelligent client-specified ID for them).
+		 */
+		Practitioner referrer = new Practitioner();
+		referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.referringPhysicianNpi);
+		Reference referrerRef = referencePractitioner(claimGroup.referringPhysicianNpi);
+		upsert(bundle, referrer, referrerRef.getReference());
+		ReferralRequest referral = new ReferralRequest();
+		referral.setStatus(ReferralStatus.COMPLETED);
+		referral.setPatient(referencePatient(claimGroup.beneficiaryId));
+		referral.addRecipient(referrerRef);
+		eob.setReferral(new Reference(referral));
+
+		/*
+		 * TODO once STU3 is available, transform financial/payment amounts into
+		 * eob.information entries
+		 */
+
+		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
+		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
+			addDiagnosisCode(eob, diagnosis);
+
+		for (CarrierClaimLine claimLine : claimGroup.lines) {
+			ItemsComponent item = eob.addItem();
+			item.setSequence(claimLine.number);
+
+			/*
+			 * TODO once STU3 is available, transform these fields into
+			 * eob.item.careTeam entries: organizationNpi.
+			 */
+
+			/*
+			 * TODO once STU3 available, transform cmsServiceTypeCode into
+			 * eob.item.category.
+			 */
+
+			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode));
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PAYMENT_B))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.providerPaymentAmount);
+
+			addDiagnosisLink(eob, item, claimLine.diagnosis);
+		}
+
+		insert(bundle, eob);
+		return new TransformedBundle(rifRecordEvent, bundle);
+	}
+
+	/**
 	 * Adds the specified {@link Resource}s to the specified {@link Bundle},
 	 * setting it as a <a href="http://hl7-fhir.github.io/http.html#insert">FHIR
 	 * "insert" operation</a> if {@link Resource#getId()} is <code>null</code>,
@@ -928,5 +1026,101 @@ public final class DataTransformer {
 			throw new IllegalArgumentException("FHIR conditional updates don't allow IDs to be specified client-side");
 
 		bundle.addEntry().setResource(resource).getRequest().setMethod(HTTPVerb.PUT).setUrl(resourceUrl);
+	}
+
+	/**
+	 * @param subPlan
+	 *            the {@link Coverage#getSubPlan()} value to match
+	 * @param subscriberPatientId
+	 *            the {@link Patient#getId()} for the
+	 *            {@link Coverage#getSubscriber()} value to match
+	 * @return a {@link Reference} to the {@link Coverage} resource where
+	 *         {@link Coverage#getPlan()} matches {@link #COVERAGE_PLAN} and the
+	 *         other parameters specified also match
+	 */
+	private static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
+		return new Reference(String.format("Coverage?subscriber=%s&plan=%s&subplan=%s", subscriberPatientId,
+				COVERAGE_PLAN, subPlan));
+	}
+
+	/**
+	 * @param patientId
+	 *            the {@link Patient#getId()} value to match
+	 * @return a {@link Reference} to the {@link Patient} resource that matches
+	 *         the specified parameters
+	 */
+	private static Reference referencePatient(String patientId) {
+		return new Reference(String.format("Patient/%s", patientId));
+	}
+
+	/**
+	 * @param practitionerNpi
+	 *            the {@link Practitioner#getIdentifier()} value to match (where
+	 *            {@link Identifier#getSystem()} is
+	 *            {@value #CODING_SYSTEM_NPI_US})
+	 * @return a {@link Reference} to the {@link Practitioner} resource that
+	 *         matches the specified parameters
+	 */
+	static Reference referencePractitioner(String practitionerNpi) {
+		return new Reference(String.format("Practitioner/%s|%s", CODING_SYSTEM_NPI_US, practitionerNpi));
+	}
+
+	/**
+	 * @param period
+	 *            the {@link Period} to adjust
+	 * @param date
+	 *            the {@link LocalDate} to set the {@link Period#getStart()}
+	 *            value with/to
+	 */
+	private static void setPeriodStart(Period period, LocalDate date) {
+		period.setStart(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY);
+	}
+
+	/**
+	 * @param period
+	 *            the {@link Period} to adjust
+	 * @param date
+	 *            the {@link LocalDate} to set the {@link Period#getEnd()} value
+	 *            with/to
+	 */
+	private static void setPeriodEnd(Period period, LocalDate date) {
+		period.setEnd(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY);
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to (possibly) modify
+	 * @param diagnosis
+	 *            the {@link IcdCode} to add, if it's not already present
+	 * @return the {@link DiagnosisComponent#getSequence()} of the existing or
+	 *         newly-added entry
+	 */
+	private static int addDiagnosisCode(ExplanationOfBenefit eob, IcdCode diagnosis) {
+		Optional<DiagnosisComponent> existingDiagnosis = eob.getDiagnosis().stream()
+				.filter(d -> d.getDiagnosis().getSystem().equals(diagnosis.getVersion().getFhirSystem()))
+				.filter(d -> d.getDiagnosis().getCode().equals(diagnosis.getCode())).findAny();
+		if (existingDiagnosis.isPresent())
+			return existingDiagnosis.get().getSequence();
+
+		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size());
+		diagnosisComponent.getDiagnosis().setSystem(diagnosis.getVersion().getFhirSystem())
+				.setCode(diagnosis.getCode());
+		eob.getDiagnosis().add(diagnosisComponent);
+		return diagnosisComponent.getSequence();
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that the specified
+	 *            {@link ItemsComponent} is a child of
+	 * @param item
+	 *            the {@link ItemsComponent} to add an
+	 *            {@link ItemsComponent#getDiagnosisLinkId()} entry to
+	 * @param diagnosis
+	 *            the diagnosis code to add a link for
+	 */
+	private static void addDiagnosisLink(ExplanationOfBenefit eob, ItemsComponent item, IcdCode diagnosis) {
+		int diagnosisSequence = addDiagnosisCode(eob, diagnosis);
+		item.addDiagnosisLinkId(diagnosisSequence);
 	}
 }
