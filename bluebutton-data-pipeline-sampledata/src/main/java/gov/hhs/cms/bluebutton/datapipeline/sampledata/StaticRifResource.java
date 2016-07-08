@@ -12,7 +12,16 @@ public enum StaticRifResource {
 
 	PDE_1("rif-static-samples/pde-1.txt", RifFileType.PDE, 1),
 
-	PDE_1195("rif-static-samples/pde-1195.txt", RifFileType.PDE, 1195);
+	PDE_1195("rif-static-samples/pde-1195.txt", RifFileType.PDE, 1195),
+
+	CARRIER_1("rif-static-samples/sample-a-bcarrier-1.txt", RifFileType.CARRIER, 1),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ awk -F '|' '{print $4}' bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-b-bcarrier-1440.txt | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	CARRIER_1091("rif-static-samples/sample-b-bcarrier-1091.txt", RifFileType.CARRIER, 1091);
 
 	private final String classpathName;
 	private final RifFileType rifFileType;
