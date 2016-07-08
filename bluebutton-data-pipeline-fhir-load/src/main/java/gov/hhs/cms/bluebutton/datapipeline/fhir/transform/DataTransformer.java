@@ -986,6 +986,7 @@ public final class DataTransformer {
 		referral.setStatus(ReferralStatus.COMPLETED);
 		referral.setPatient(referencePatient(claimGroup.beneficiaryId));
 		referral.addRecipient(referrerRef);
+		// Set the ReferralRequest as a contained resource in the EOB:
 		eob.setReferral(new Reference(referral));
 
 		/*
