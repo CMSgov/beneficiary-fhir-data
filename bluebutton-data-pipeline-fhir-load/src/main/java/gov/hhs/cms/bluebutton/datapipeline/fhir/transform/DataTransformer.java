@@ -119,10 +119,32 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
+	 * CCW Data Dictionary: BENE_ID</a>.
+	 */
 	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
+	 * CCW Data Dictionary: PDE_ID</a>.
+	 */
 	static final String CODING_SYSTEM_CCW_PDE_ID = "CCW.PDE_ID";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_srvc_rfrnc_num.txt">
+	 * CCW Data Dictionary: RX_SRVC_RFRNC_NUM</a>.
+	 */
+	static final String CODING_SYSTEM_RX_SRVC_RFRNC_NUM = "CCW.RX_SRVC_RFRNC_NUM";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt">
+	 * CCW Data Dictionary: PHRMCY_SRVC_TYPE_CD</a>.
+	 */
 	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "CCW.PHRMCY_SRVC_TYPE_CD";
 
 	static final String CODING_SYSTEM_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
@@ -145,8 +167,18 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_A_COINSURANCE_LIABILITY = "NCH Beneficiary Part A Coinsurance Liability Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt">
+	 * CCW Data Dictionary: PTNT_PAY_AMT</a>.
+	 */
 	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_rx_cst_amt.txt">
+	 * CCW Data Dictionary: TOT_RX_CST_AMT</a>.
+	 */
 	static final String CODED_ADJUDICATION_TOTAL_COST = "Total Prescription Cost";
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT = "NCH Beneficiary Blood Deductible Liability Amount";
@@ -157,18 +189,53 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_COINSURANCE = "NCH Beneficiary Part B Coinsurance Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+	 */
 	static final String CODED_ADJUDICATION_PART_D_COVERED = "Part D Covered";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+	 */
 	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT = "Part D Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+	 */
 	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_OTC = "Part D Over-the-counter drugs";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/othr_troop_amt.txt">
+	 * CCW Data Dictionary: OTHR_TROOP_AMT</a>.
+	 */
 	static final String CODED_ADJUDICATION_OTHER_TROOP_AMOUNT = "Other True Out-of-Pocket (TrOOP) Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lics_amt.txt">
+	 * CCW Data Dictionary: LICS_AMT</a>.
+	 */
 	static final String CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT = "Part D Low Income Subsidy (LICS) Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plro_amt.txt">
+	 * CCW Data Dictionary: PLRO_AMT</a>.
+	 */
 	static final String CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT = "Reduction in patient liability due to payments by other payers (PLRO) Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt">
+	 * CCW Data Dictionary: RPTD_GAP_DSCNT_NUM</a>.
+	 */
 	static final String CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT = "Medicare Coverage Gap Discount Amount";
 
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
@@ -922,10 +989,10 @@ public final class DataTransformer {
 
 		Bundle bundle = new Bundle();
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId(IdType.newRandomUuid());
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
-		// TODO eob.type when structures updated
-		eob.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
+		eob.setId("ExplanationOfBenefit/" + record.partDEventId);
+		// TODO Specify eob.type once STU3 is available (pharmacy)
+		Reference patientRef = new Reference().setReference("Patient/" + record.beneficiaryId);
+		eob.setPatient(patientRef);
 
 		ItemsComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
@@ -1003,8 +1070,7 @@ public final class DataTransformer {
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.gapDiscountAmount);
 
-		Practitioner practitioner = new Practitioner();
-		practitioner.setId(IdType.newRandomUuid());
+		Practitioner prescriber = new Practitioner();
 		/*
 		 * Set the coding system for the practitioner if the qualifier code is
 		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
@@ -1012,21 +1078,24 @@ public final class DataTransformer {
 		 */
 		String prescriberIdSystem = (record.prescriberId == PartDEventRow.PRSCRBR_ID_QLFYR_CD_NPI)
 				? CODING_SYSTEM_NPI_US : null;
-		practitioner.addIdentifier().setSystem(prescriberIdSystem).setValue(record.prescriberId);
-		// TODO insert practitioner
+		prescriber.addIdentifier().setSystem(prescriberIdSystem).setValue(record.prescriberId);
+		Reference prescriberRef = new Reference("Practitioner/" + record.prescriberId);
+		upsert(bundle, prescriber, prescriberRef.getReference());
 
 		Medication medication = new Medication();
-		medication.setId(IdType.newRandomUuid());
+		Reference medicationRef = new Reference("Medication/" + record.nationalDrugCode);
 		CodeableConcept ndcConcept = new CodeableConcept();
 		ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode);
 		medication.setCode(ndcConcept);
+		upsert(bundle, medication, medicationRef.getReference());
 
 		MedicationOrder medicationOrder = new MedicationOrder();
-		medicationOrder.setId(IdType.newRandomUuid());
-		medicationOrder.addIdentifier().setId(String.valueOf(record.prescriptionReferenceNumber));
-		medicationOrder.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
-		medicationOrder.setPrescriber(new Reference().setReference("Practitioner/" + practitioner.getId()));
-		medicationOrder.setMedication(new Reference().setReference("Medication/" + medication.getId()));
+		Reference medOrderReference = new Reference(medicationOrder);
+		medicationOrder.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
+				.setId(String.valueOf(record.prescriptionReferenceNumber));
+		medicationOrder.setPatient(patientRef);
+		medicationOrder.setPrescriber(prescriberRef);
+		medicationOrder.setMedication(medicationRef);
 		SimpleQuantity quantity = new SimpleQuantity();
 		quantity.setValue(record.quantityDispensed);
 		Duration daysSupply = new Duration();
@@ -1034,9 +1103,11 @@ public final class DataTransformer {
 		daysSupply.setValue(record.daysSupply);
 		medicationOrder.setDispenseRequest(new MedicationOrderDispenseRequestComponent().setQuantity(quantity)
 				.setExpectedSupplyDuration(daysSupply));
+		// TODO::verify this works if no id set explicitly for MedicationOrder
+		upsert(bundle, medicationOrder, medOrderReference.getReference());
 		/*
-		 * TODO Update structures to be able to use substitution allowed/reason
-		 * fields.
+		 * TODO Populate substitution.allowed and substitution.reason once STU3
+		 * structures are available.
 		 */
 
 		eob.setPrescription(new Reference().setReference("MedicationOrder/" + medicationOrder.getId()));
