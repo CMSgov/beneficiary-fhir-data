@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 /**
  * <p>
- * Models rows from <code>BENEFICIARY</code> RIF files.
+ * Models rows from {@link RifFileType#BENEFICIARY} RIF files.
  * </p>
  * <p>
  * Design Note: This class is too painful to maintain as a bean, so I've
