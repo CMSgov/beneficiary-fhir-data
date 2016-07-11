@@ -25,9 +25,6 @@ import java.util.Optional;
  * </p>
  */
 public class PartDEventRow {
-	public static final int COMPOUND_CODE_NOT_COMPOUNDED = 1;
-	public static final int COMPOUND_CODE_COMPOUNDED = 2;
-
 	public static final Character DRUG_CVRD_STUS_CD_COVERED = new Character('C');
 	public static final Character DRUG_CVRD_STUS_CD_SUPPLEMENT = new Character('E');
 	public static final Character DRUG_CVRD_STUS_CD_OTC = new Character('O');
@@ -105,7 +102,7 @@ public class PartDEventRow {
 	/**
 	 * @see Column#CMPND_CD
 	 */
-	public Integer compoundCode;
+	public CompoundCode compoundCode;
 
 	/**
 	 * @see Column#DAW_PROD_SLCTN_CD
@@ -135,7 +132,7 @@ public class PartDEventRow {
 	/**
 	 * @see Column#DRUG_CVRG_STUS_CD
 	 */
-	public Character drugCoverageStatusCode;
+	public DrugCoverageStatus drugCoverageStatusCode;
 
 	/**
 	 * @see Column#ADJSTMT_DLTN_CD

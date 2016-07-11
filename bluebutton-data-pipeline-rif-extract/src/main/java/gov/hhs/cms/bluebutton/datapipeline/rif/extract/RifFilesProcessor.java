@@ -32,6 +32,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
@@ -313,13 +315,15 @@ public final class RifFilesProcessor {
 		pdeRow.nationalDrugCode = csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID.ordinal());
 		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID.ordinal());
 		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM.ordinal());
-		pdeRow.compoundCode = Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal()));
+		pdeRow.compoundCode = CompoundCode
+				.parseRifValue(Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal())));
 		pdeRow.dispenseAsWrittenProductSelectionCode = csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal());
 		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DPSNSD_NUM.ordinal()));
 		pdeRow.daysSupply = Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
 		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
 		pdeRow.dispensingStatuscode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()));
-		pdeRow.drugCoverageStatusCode = csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD.ordinal()).charAt(0);
+		pdeRow.drugCoverageStatusCode = DrugCoverageStatus
+				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD.ordinal()).charAt(0));
 		pdeRow.adjustmentDeletionCode = parseOptCharacter(
 				csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD.ordinal()));
 		pdeRow.nonstandardFormatCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.NSTD_FRMT_CD.ordinal()));

@@ -60,6 +60,8 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
@@ -79,7 +81,7 @@ public final class DataTransformerTest {
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-	PartDEventRow pdeRecord;
+	private PartDEventRow pdeRecord;
 
 	@Before
 	public void setup() {
@@ -99,13 +101,13 @@ public final class DataTransformerTest {
 		pdeRecord.nationalDrugCode = "49884009902";
 		pdeRecord.planContractId = "H8552";
 		pdeRecord.planBenefitPackageId = "020";
-		pdeRecord.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
+		pdeRecord.compoundCode = CompoundCode.NOT_COMPOUNDED;
 		pdeRecord.dispenseAsWrittenProductSelectionCode = "0";
 		pdeRecord.quantityDispensed = new BigDecimal(60);
 		pdeRecord.daysSupply = new Integer(30);
 		pdeRecord.fillNumber = new Integer(3);
 		pdeRecord.dispensingStatuscode = Optional.of(new Character('P'));
-		pdeRecord.drugCoverageStatusCode = new Character('C');
+		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.COVERED;
 		pdeRecord.adjustmentDeletionCode = Optional.of(new Character('A'));
 		pdeRecord.nonstandardFormatCode = Optional.of(new Character('X'));
 		pdeRecord.pricingExceptionCode = Optional.of(new Character('M'));
@@ -671,29 +673,18 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEvent() throws FHIRException {
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, pdeRecord);
-
-		Stream source = Arrays.asList(pdeRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> resultStream = transformer.transform(source);
-		Assert.assertNotNull(resultStream);
-		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
-		Assert.assertEquals(1, resultList.size());
-
-		TransformedBundle pdeBundleWrapper = resultList.get(0);
-		Assert.assertNotNull(pdeBundleWrapper);
-		Assert.assertSame(pdeRecordEvent, pdeBundleWrapper.getSource());
-		Assert.assertNotNull(pdeBundleWrapper.getResult());
-
-		Bundle pdeBundle = pdeBundleWrapper.getResult();
+		Bundle pdeBundle = getBundle(pdeRecord);
+		/*
+		 * Bundle should have: 1) EOB, 2) Practitioner (prescriber), 3)
+		 * Medication, 4) Organization (serviceProviderOrg), 5) Coverage.
+		 */
 		Assert.assertEquals(5, pdeBundle.getEntry().size());
+
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
+		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 
-		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 		Assert.assertEquals("ExplanationOfBenefit/" + pdeRecord.partDEventId, eob.getId());
 		// TODO verify eob.type once STU3 available
 		Assert.assertEquals("Patient/" + pdeRecord.beneficiaryId, eob.getPatient().getReference());
@@ -796,19 +787,9 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEventCompound() throws FHIRException {
-		pdeRecord.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
+		pdeRecord.compoundCode = CompoundCode.COMPOUNDED;
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, pdeRecord);
-
-		Stream source = Arrays.asList(pdeRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> resultStream = transformer.transform(source);
-		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
-
-		TransformedBundle pdeBundleWrapper = resultList.get(0);
-		Bundle pdeBundle = pdeBundleWrapper.getResult();
+		Bundle pdeBundle = getBundle(pdeRecord);
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
@@ -828,19 +809,9 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEventNonCoveredSupplement() throws FHIRException {
-		pdeRecord.drugCoverageStatusCode = PartDEventRow.DRUG_CVRD_STUS_CD_SUPPLEMENT;
+		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.SUPPLEMENTAL;
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, pdeRecord);
-
-		Stream source = Arrays.asList(pdeRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> resultStream = transformer.transform(source);
-		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
-
-		TransformedBundle pdeBundleWrapper = resultList.get(0);
-		Bundle pdeBundle = pdeBundleWrapper.getResult();
+		Bundle pdeBundle = getBundle(pdeRecord);
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
@@ -870,19 +841,9 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEventNonCoveredOTC() throws FHIRException {
-		pdeRecord.drugCoverageStatusCode = PartDEventRow.DRUG_CVRD_STUS_CD_OTC;
+		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.OVER_THE_COUNTER;
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, pdeRecord);
-
-		Stream source = Arrays.asList(pdeRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> resultStream = transformer.transform(source);
-		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
-
-		TransformedBundle pdeBundleWrapper = resultList.get(0);
-		Bundle pdeBundle = pdeBundleWrapper.getResult();
+		Bundle pdeBundle = getBundle(pdeRecord);
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
@@ -1081,5 +1042,24 @@ public final class DataTransformerTest {
 	private static void assertIdentifierExists(String expectedSystem, String expectedId, List<Identifier> actuals) {
 		Assert.assertTrue(actuals.stream().filter(i -> expectedSystem.equals(i.getSystem()))
 				.anyMatch(i -> expectedId.equals(i.getValue())));
+	}
+
+	/**
+	 * @return a bundle for the Rif record passed in
+	 */
+	private Bundle getBundle(Object record) {
+		RifFile file = new MockRifFile();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
+		RifRecordEvent rifRecordEvent = new RifRecordEvent(filesEvent, file, record);
+
+		Stream source = Arrays.asList(rifRecordEvent).stream();
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> resultStream = transformer.transform(source);
+		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
+
+		TransformedBundle bundleWrapper = resultList.get(0);
+		Bundle bundle = bundleWrapper.getResult();
+
+		return bundle;
 	}
 }

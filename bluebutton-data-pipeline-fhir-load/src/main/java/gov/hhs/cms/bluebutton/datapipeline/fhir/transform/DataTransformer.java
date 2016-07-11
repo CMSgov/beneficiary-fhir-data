@@ -1011,44 +1011,65 @@ public final class DataTransformer {
 
 		ItemsComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
-		if (record.compoundCode == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
+		switch (record.compoundCode) {
+		case COMPOUNDED:
 			/* Pharmacy dispense invoice for a compound */
 			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
-		} else if (record.compoundCode == PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED) {
+			break;
+		case NOT_COMPOUNDED:
 			/*
 			 * Pharmacy dispense invoice not involving a compound
 			 */
 			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+			break;
+		default:
+			/*
+			 * Unexpected value encountered - compound code should be either
+			 * compounded or not compounded.
+			 */
+			throw new BadCodeMonkeyException();
 		}
+
 		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
 
-		/* If covered by Part D, use value from partDPlanCoveredPaidAmount */
-		if (PartDEventRow.DRUG_CVRD_STUS_CD_COVERED.equals(record.drugCoverageStatusCode)) {
+		switch (record.drugCoverageStatusCode) {
+		/*
+		 * If covered by Part D, use value from partDPlanCoveredPaidAmount
+		 */
+		case COVERED:
 			rxItem.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
 							.setCode(CODED_ADJUDICATION_PART_D_COVERED))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(record.partDPlanCoveredPaidAmount);
-		}
+			break;
 		/*
 		 * If not covered by Part D, use value from
 		 * partDPlanNonCoveredPaidAmount. There are 2 categories of non-covered
-		 * payment amounts, supplemental drugs covered by enhanced plans, and
+		 * payment amounts: supplemental drugs covered by enhanced plans, and
 		 * over the counter drugs that are covered only under specific
 		 * circumstances.
 		 */
-		else if (PartDEventRow.DRUG_CVRD_STUS_CD_SUPPLEMENT.equals(record.drugCoverageStatusCode)) {
+		case SUPPLEMENTAL:
 			rxItem.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
 							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(record.partDPlanNonCoveredPaidAmount);
-		} else if (PartDEventRow.DRUG_CVRD_STUS_CD_OTC.equals(record.drugCoverageStatusCode)) {
+			break;
+		case OVER_THE_COUNTER:
 			rxItem.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
 							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_OTC))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(record.partDPlanNonCoveredPaidAmount);
+			break;
+		default:
+			/*
+			 * Unexpected value encountered - drug coverage status code should
+			 * be one of the three above.
+			 */
+			throw new BadCodeMonkeyException();
 		}
 
 		rxItem.addAdjudication()
