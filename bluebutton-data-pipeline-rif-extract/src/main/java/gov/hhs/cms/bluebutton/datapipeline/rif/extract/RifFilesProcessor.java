@@ -32,6 +32,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
@@ -294,48 +296,68 @@ public final class RifFilesProcessor {
 
 		PartDEventRow pdeRow = new PartDEventRow();
 		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION.ordinal()));
+		// Sanity check:
+		if (1 != pdeRow.version)
+			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
+
 		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND.ordinal()));
 		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID.ordinal());
 		pdeRow.beneficiaryId = csvRecord.get(PartDEventRow.Column.BENE_ID.ordinal());
 		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT.ordinal()),
 				RIF_DATE_FORMATTER);
-		// pdeRow.paymentDate =
-		// LocalDate.parse(csvRecord.get(PartDEventRow.Column.PD_DT.ordinal()),
-		// RIF_DATE_FORMATTER);
-		// pdeRow.serviceProviderIdQualiferCode =
-		// csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD.ordinal());
-		// pdeRow.serviceProviderId =
-		// csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID.ordinal());
-		// pdeRow.prescriberIdQualifierCode =
-		// csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD.ordinal());
-		// pdeRow.prescriberId =
-		// csvRecord.get(PartDEventRow.Column.PRSCRBR_ID.ordinal());
-		// pdeRow.prescriptionReferenceNumber = Integer
-		// .parseInt(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM.ordinal()));
-		// pdeRow.nationalDrugCode =
-		// csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID.ordinal());
-		// pdeRow.planContractId =
-		// csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID.ordinal());
-		// pdeRow.planBenefitPackageId =
-		// csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM.ordinal());
-		// pdeRow.compoundCode =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal()));
-		// pdeRow.dispenseAsWrittenProductSelectionCode =
-		// csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal());
-		// pdeRow.quantityDispensed =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.QTY_DPSNSD_NUM.ordinal()));
-		// pdeRow.daysSupply =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
-		// pdeRow.fillNumber =
-		// Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
-		// pdeRow.dispensingStatuscode =
-		// csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()).charAt(0);
-		// TODO handle null/empty?
-		// TODO finish mapping the rest of the columns
-
-		// Sanity check:
-		if (1 != pdeRow.version)
-			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
+		pdeRow.paymentDate = parseOptDate(csvRecord.get(PartDEventRow.Column.PD_DT.ordinal()));
+		pdeRow.serviceProviderIdQualiferCode = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD.ordinal());
+		pdeRow.serviceProviderId = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID.ordinal());
+		pdeRow.prescriberIdQualifierCode = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD.ordinal());
+		pdeRow.prescriberId = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID.ordinal());
+		pdeRow.prescriptionReferenceNumber = Long
+				.parseLong(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM.ordinal()));
+		pdeRow.nationalDrugCode = csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID.ordinal());
+		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID.ordinal());
+		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM.ordinal());
+		pdeRow.compoundCode = CompoundCode
+				.parseRifValue(Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal())));
+		pdeRow.dispenseAsWrittenProductSelectionCode = csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal());
+		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DPSNSD_NUM.ordinal()));
+		pdeRow.daysSupply = Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
+		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
+		pdeRow.dispensingStatuscode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()));
+		pdeRow.drugCoverageStatusCode = DrugCoverageStatus
+				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD.ordinal()));
+		pdeRow.adjustmentDeletionCode = parseOptCharacter(
+				csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD.ordinal()));
+		pdeRow.nonstandardFormatCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.NSTD_FRMT_CD.ordinal()));
+		pdeRow.pricingExceptionCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.PRCNG_EXCPTN_CD.ordinal()));
+		pdeRow.catastrophicCoverageCode = parseOptCharacter(
+				csvRecord.get(PartDEventRow.Column.CTSTRPHC_CVRG_CD.ordinal()));
+		pdeRow.grossCostBelowOutOfPocketThreshold = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.GDC_BLW_OOPT_AMT.ordinal()));
+		pdeRow.grossCostAboveOutOfPocketThreshold = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.GDC_ABV_OOPT_AMT.ordinal()));
+		pdeRow.patientPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.PTNT_PAY_AMT.ordinal()));
+		pdeRow.otherTrueOutOfPocketPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.OTHR_TROOP_AMT.ordinal()));
+		pdeRow.lowIncomeSubsidyPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.LICS_AMT.ordinal()));
+		pdeRow.patientLiabilityReductionOtherPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.PLRO_AMT.ordinal()));
+		pdeRow.partDPlanCoveredPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.CVRD_D_PLAN_PD_AMT.ordinal()));
+		pdeRow.partDPlanNonCoveredPaidAmount = new BigDecimal(
+				csvRecord.get(PartDEventRow.Column.NCVRD_PLAN_PD_AMT.ordinal()));
+		pdeRow.totalPrescriptionCost = new BigDecimal(csvRecord.get(PartDEventRow.Column.TOT_RX_CST_AMT.ordinal()));
+		pdeRow.prescriptionOriginationCode = parseOptCharacter(
+				csvRecord.get(PartDEventRow.Column.RX_ORGN_CD.ordinal()));
+		pdeRow.gapDiscountAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.RPTD_GAP_DSCNT_NUM.ordinal()));
+		/*
+		 * TODO Re-enable this mapping once it is determined for sure if this is
+		 * optional or not.
+		 */
+		// pdeRow.brandGenericCode =
+		// csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD.ordinal()).charAt(0);
+		pdeRow.pharmacyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD.ordinal());
+		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD.ordinal());
+		pdeRow.submissionClarificationCode = parseOptString(
+				csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD.ordinal()));
 
 		return pdeRow;
 	}
@@ -457,6 +479,49 @@ public final class RifFilesProcessor {
 
 		LocalDate dateFrom = LocalDate.parse(dateText, RIF_DATE_FORMATTER);
 		return dateFrom;
+	}
+
+	/**
+	 * @param dateText
+	 *            the date string to parse
+	 * @return an {@link Optional} populated with a {@link LocalDate} if the
+	 *         input has data, or an empty Optional if not
+	 */
+	private static Optional<LocalDate> parseOptDate(String dateText) {
+		if (dateText.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return Optional.of(parseDate(dateText));
+		}
+	}
+
+	/**
+	 * @param charText
+	 *            the char string to parse
+	 * @return the specified text as a {@link Character} (first character only),
+	 *         parsed using {@link #RIF_DATE_FORMATTER}
+	 */
+	private static Character parseCharacter(String charText) {
+		/*
+		 * Might seem silly to pull this out, but it makes the code a bit easier
+		 * to read, and ensures that this parsing is standardized.
+		 */
+
+		return charText.charAt(0);
+	}
+
+	/**
+	 * @param dateText
+	 *            the date string to parse
+	 * @return an {@link Optional} populated with a {@link Character} if the
+	 *         input has data, or an empty Optional if not
+	 */
+	private static Optional<Character> parseOptCharacter(String charText) {
+		if (charText.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return Optional.of(parseCharacter(charText));
+		}
 	}
 
 	/**

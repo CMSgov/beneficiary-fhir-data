@@ -16,6 +16,8 @@ import org.junit.rules.ExpectedException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
@@ -110,10 +112,48 @@ public final class RifFilesProcessorTest {
 		PartDEventRow pdeRow = (PartDEventRow) rifRecordEvent.getRecord();
 		Assert.assertEquals(1, pdeRow.version);
 		Assert.assertEquals(RecordAction.INSERT, pdeRow.recordAction);
-		Assert.assertEquals("96", pdeRow.partDEventId);
-		Assert.assertEquals("63", pdeRow.beneficiaryId);
-		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 6), pdeRow.prescriptionFillDate);
-		// TODO complete rows
+		Assert.assertEquals("89", pdeRow.partDEventId);
+		Assert.assertEquals("103", pdeRow.beneficiaryId);
+		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.prescriptionFillDate);
+		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 27), pdeRow.paymentDate.get());
+		Assert.assertEquals("01", pdeRow.serviceProviderIdQualiferCode);
+		Assert.assertEquals("1124137542", pdeRow.serviceProviderId);
+		Assert.assertEquals("01", pdeRow.prescriberIdQualifierCode);
+		Assert.assertEquals("1225061591", pdeRow.prescriberId);
+		Assert.assertEquals(new Long(791569), pdeRow.prescriptionReferenceNumber);
+		Assert.assertEquals("49884009902", pdeRow.nationalDrugCode);
+		Assert.assertEquals("H8552", pdeRow.planContractId);
+		Assert.assertEquals("020", pdeRow.planBenefitPackageId);
+		Assert.assertEquals(CompoundCode.NOT_COMPOUNDED, pdeRow.compoundCode);
+		Assert.assertEquals("0", pdeRow.dispenseAsWrittenProductSelectionCode);
+		Assert.assertEquals(new BigDecimal("60"), pdeRow.quantityDispensed);
+		Assert.assertEquals(new Integer(30), pdeRow.daysSupply);
+		Assert.assertEquals(new Integer(3), pdeRow.fillNumber);
+		Assert.assertEquals(new Character('P'), pdeRow.dispensingStatuscode.get());
+		Assert.assertEquals(DrugCoverageStatus.COVERED, pdeRow.drugCoverageStatusCode);
+		Assert.assertEquals(new Character('A'), pdeRow.adjustmentDeletionCode.get());
+		Assert.assertEquals(new Character('X'), pdeRow.nonstandardFormatCode.get());
+		Assert.assertEquals(new Character('M'), pdeRow.pricingExceptionCode.get());
+		Assert.assertEquals(new Character('C'), pdeRow.catastrophicCoverageCode.get());
+		Assert.assertEquals(new BigDecimal("362.84"), pdeRow.grossCostBelowOutOfPocketThreshold);
+		Assert.assertEquals(new BigDecimal("15.25"), pdeRow.grossCostAboveOutOfPocketThreshold);
+		Assert.assertEquals(new BigDecimal("235.85"), pdeRow.patientPaidAmount);
+		Assert.assertEquals(new BigDecimal("17.30"), pdeRow.otherTrueOutOfPocketPaidAmount);
+		Assert.assertEquals(new BigDecimal("122.23"), pdeRow.lowIncomeSubsidyPaidAmount);
+		Assert.assertEquals(new BigDecimal("42.42"), pdeRow.patientLiabilityReductionOtherPaidAmount);
+		Assert.assertEquals(new BigDecimal("126.99"), pdeRow.partDPlanCoveredPaidAmount);
+		Assert.assertEquals(new BigDecimal("17.98"), pdeRow.partDPlanNonCoveredPaidAmount);
+		Assert.assertEquals(new BigDecimal("362.84"), pdeRow.totalPrescriptionCost);
+		Assert.assertEquals(new Character('3'), pdeRow.prescriptionOriginationCode.get());
+		Assert.assertEquals(new BigDecimal("317.22"), pdeRow.gapDiscountAmount);
+		/*
+		 * TODO Re-enable this test case once it is determined if this field is
+		 * optional or not.
+		 */
+		// Assert.assertEquals(new Character('G'), pdeRow.brandGenericCode);
+		Assert.assertEquals("01", pdeRow.pharmacyTypeCode);
+		Assert.assertEquals("02", pdeRow.patientResidenceCode);
+		Assert.assertEquals("08", pdeRow.submissionClarificationCode.get());
 	}
 
 	/**

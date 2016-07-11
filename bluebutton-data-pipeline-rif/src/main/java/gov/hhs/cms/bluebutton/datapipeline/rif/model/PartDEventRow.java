@@ -1,163 +1,231 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 /**
- * Models rows from <code>PDE</code> RIF Files.
+ * <p>
+ * Models rows from {@link RifFileType#PDE} RIF Files.
+ * </p>
+ * <p>
+ * The RIF file layout used here is specific to the Blue Button API's ETL
+ * process. The layouts of these files is detailed in the
+ * <code>bluebutton-data-pipeline-rif/dev/rif-record-layout.xlsx</code> file.
+ * The columns contained in the files are largely similar to those detailed in
+ * <a href="https://www.ccwdata.org/web/guest/data-dictionaries">CCW: Data
+ * Dictionaries</a>.
+ * </p>
+ * 
+ * <p>
+ * Design Note: This class is too painful to maintain as a bean, so I've
+ * stripped it down to just a struct. To be clear, this is <strong>not</strong>
+ * immutable and thus <strong>not</strong> thread-safe (and it really shouldn't
+ * need to be).
+ * </p>
  */
 public class PartDEventRow {
-	public static int COMPOUND_CODE_NOT_COMPOUNDED = 1;
-	public static int COMPOUND_CODE_COMPOUNDED = 2;
 	/**
-	 * FIXME is this the schema version or the record version?
+	 * @see Column#VERSION
 	 */
 	public int version;
 
 	/**
-	 * Indicates whether the record for the row is an insert, update, or delete.
+	 * @see Column#DML_IND
 	 */
 	public RecordAction recordAction;
 
 	/**
-	 * The CCW's assigned ID for this Part D Event.
+	 * @see Column#PDE_ID
 	 */
 	public String partDEventId;
 
 	/**
-	 * The CCW's assigned ID for the beneficiary this Part D Event is linked to.
+	 * @see Column#BENE_ID
 	 */
 	public String beneficiaryId;
 
 	/**
-	 * The date that the prescription was filled.
+	 * @see Column#SRVC_DT
 	 */
 	public LocalDate prescriptionFillDate;
 
 	/**
-	 * The date that the plan paid the pharmacy for the prescription.
+	 * @see Column#PD_DT
 	 */
-	public LocalDate paymentDate;
+	public Optional<LocalDate> paymentDate;
 
 	/**
-	 * The two-letter code that represents the type of pharmacy provider
-	 * identifier that is used in the {@link #serviceProviderId} field.
-	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_prvdr_id_qlfyr_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      srvc_prvdr_id_qlfyr_cd.txt</a>
+	 * @see Column#SRVC_PRVDR_ID_QLFYR_CD
 	 */
 	public String serviceProviderIdQualiferCode;
 
 	/**
-	 * The ID of the pharmacy or physicians' office that dispensed the drug, the
-	 * type of which is described by the {@link #serviceProviderIdQualiferCode}
-	 * field.
+	 * @see Column#SRVC_PRVDR_ID
 	 */
 	public String serviceProviderId;
 
 	/**
-	 * The two-letter code that represents the type of prescribe identifier that
-	 * is used in the {@link #prescriberId} field.
-	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id_qlfyr_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      prscrbr_id_qlfyr_cd.txt</a>
+	 * @see Column#PRSCRBR_ID_QLFYR_CD
 	 */
 	public String prescriberIdQualifierCode;
 
 	/**
-	 * The ID of the practitioner that prescribed the drug, the type of which is
-	 * described by the {@link #prescriberIdQualifierCode} field.
+	 * @see Column#PRSCRBR_ID
 	 */
 	public String prescriberId;
 
 	/**
-	 * The prescription reference number assigned by the pharmacy at the time
-	 * the prescription is filled.
+	 * @see Column#RX_SRVC_RFRNC_NUM
 	 */
-	public Integer prescriptionReferenceNumber;
+	public Long prescriptionReferenceNumber;
 
 	/**
-	 * The 11-digit code representing the drug using the National Drug Code
-	 * (NDC) TODO Link to official NDC directory?
+	 * @see Column#PROD_SRVC_ID
 	 */
 	public String nationalDrugCode;
 
 	/**
-	 * The ID representing the latest contract assigned to the beneficiary at
-	 * the time of payment reconciliation. Note the first letter of the ID is a
-	 * letter representing the type of plan.
-	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      plan_cntrct_rec_id.txt</a>
+	 * @see Column#PLAN_CNTRCT_REC_ID
 	 */
 	public String planContractId;
 
 	/**
-	 * The ID representing the latest benefit package the beneficiary was
-	 * enrolled in for the year.
+	 * @see Column#PLAN_PBP_REC_NUM
 	 */
 	public String planBenefitPackageId;
 
 	/**
-	 * Two-digit code representing whether the dispensed drug was compounded or
-	 * mixed.
-	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cmpnd_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      cmpnd_cd.txt</a>
+	 * @see Column#CMPND_CD
 	 */
-	public Integer compoundCode;
+	public CompoundCode compoundCode;
 
 	/**
-	 * One-digit code representing the prescriber's instructions regarding
-	 * substitution of generic equivalents or the order to dispense the specific
-	 * prescribed medication.
-	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      daw_prod_slctn_cd.txt</a>
+	 * @see Column#DAW_PROD_SLCTN_CD
 	 */
 	public String dispenseAsWrittenProductSelectionCode;
 
 	/**
-	 * The number of units, grams, milligrams, or other dispensed in the current
-	 * drug event. For compounded items, the quantity dispensed is the total of
-	 * all ingredients. (Note: After some research, it does not appear there is
-	 * another field that specifies what unit this is.)
+	 * @see Column#QTY_DPSNSD_NUM
 	 */
-	public Integer quantityDispensed;
+	public BigDecimal quantityDispensed;
 
 	/**
-	 * The number of days' supply of medication dispensed, entered by the
-	 * pharmacy.
+	 * @see Column#DAYS_SUPLY_NUM
 	 */
 	public Integer daysSupply;
 
 	/**
-	 * The number fill of the currently dispensed supply, with 0 being the
-	 * original fill and 1-99 representing each refill.
+	 * @see Column#FILL_NUM
 	 */
 	public Integer fillNumber;
 
 	/**
-	 * One-digit code representing how the pharmacy dispensed the complete
-	 * quantity of the prescription.
-	 * 
-	 * @see <a href=
-	 *      "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt">
-	 *      https://www.ccwdata.org/cs/groups/public/documents/datadictionary/
-	 *      dspnsng_stus_cd.txt</a>
+	 * @see Column#DSPNSNG_STUS_CD
 	 */
-	public Character dispensingStatuscode;
+	public Optional<Character> dispensingStatuscode;
 
-	// TODO FIll in rest of fields
+	/**
+	 * @see Column#DRUG_CVRG_STUS_CD
+	 */
+	public DrugCoverageStatus drugCoverageStatusCode;
+
+	/**
+	 * @see Column#ADJSTMT_DLTN_CD
+	 */
+	public Optional<Character> adjustmentDeletionCode;
+
+	/**
+	 * @see Column#NSTD_FRMT_CD
+	 */
+	public Optional<Character> nonstandardFormatCode;
+
+	/**
+	 * @see Column#PRCNG_EXCPTN_CD
+	 */
+	public Optional<Character> pricingExceptionCode;
+
+	/**
+	 * @see Column#CTSTRPHC_CVRG_CD
+	 */
+	public Optional<Character> catastrophicCoverageCode;
+
+	/**
+	 * @see Column#GDC_BLW_OOPT_AMT
+	 */
+	public BigDecimal grossCostBelowOutOfPocketThreshold;
+
+	/**
+	 * @see Column#GDC_ABV_OOPT_AMT
+	 */
+	public BigDecimal grossCostAboveOutOfPocketThreshold;
+
+	/**
+	 * @see Column#PTNT_PAY_AMT
+	 */
+	public BigDecimal patientPaidAmount;
+
+	/**
+	 * @see Column#OTHR_TROOP_AMT
+	 */
+	public BigDecimal otherTrueOutOfPocketPaidAmount;
+
+	/**
+	 * @see Column#LICS_AMT
+	 */
+	public BigDecimal lowIncomeSubsidyPaidAmount;
+
+	/**
+	 * @see Column#PLRO_AMT
+	 */
+	public BigDecimal patientLiabilityReductionOtherPaidAmount;
+
+	/**
+	 * @see Column#CVRD_D_PLAN_PD_AMT
+	 */
+	public BigDecimal partDPlanCoveredPaidAmount;
+
+	/**
+	 * @see Column#NCVRD_PLAN_PD_AMT
+	 */
+	public BigDecimal partDPlanNonCoveredPaidAmount;
+
+	/**
+	 * @see Column#TOT_RX_CST_AMT
+	 */
+	public BigDecimal totalPrescriptionCost;
+
+	/**
+	 * @see Column#RX_ORGN_CD
+	 */
+	public Optional<Character> prescriptionOriginationCode;
+
+	/**
+	 * @see Column#RPTD_GAP_DSCNT_NUM
+	 */
+	public BigDecimal gapDiscountAmount;
+
+	/**
+	 * @see Column#BRND_GNRC_CD
+	 */
+	// TODO should this be Optional? At least a couple rows in sample data that
+	// are blank.
+	public Character brandGenericCode;
+
+	/**
+	 * @see Column#PHRMCY_SRVC_TYPE_CD
+	 */
+	public String pharmacyTypeCode;
+
+	/**
+	 * @see Column#PTNT_RSDNC_CD
+	 */
+	public String patientResidenceCode;
+
+	/**
+	 * @see Column#SUBMSN_CLR_CD
+	 */
+	public Optional<String> submissionClarificationCode;
 
 	/**
 	 * @see java.lang.Object#toString()
@@ -205,9 +273,48 @@ public class PartDEventRow {
 		builder.append(fillNumber);
 		builder.append(", dispensingStatuscode=");
 		builder.append(dispensingStatuscode);
+		builder.append(", drugCoverageStatusCode=");
+		builder.append(drugCoverageStatusCode);
+		builder.append(", adjustmentDeletionCode=");
+		builder.append(adjustmentDeletionCode);
+		builder.append(", nonstandardFormatCode=");
+		builder.append(nonstandardFormatCode);
+		builder.append(", pricingExceptionCode=");
+		builder.append(pricingExceptionCode);
+		builder.append(", catastrophicCoverageCode=");
+		builder.append(catastrophicCoverageCode);
+		builder.append(", grossCostBelowOutOfPocketThreshold=");
+		builder.append(grossCostBelowOutOfPocketThreshold);
+		builder.append(", grossCostAboveOutOfPocketThreshold=");
+		builder.append(grossCostAboveOutOfPocketThreshold);
+		builder.append(", patientPaidAmount=");
+		builder.append(patientPaidAmount);
+		builder.append(", otherTrueOutOfPocketPaidAmount=");
+		builder.append(otherTrueOutOfPocketPaidAmount);
+		builder.append(", lowIncomeSubsidyPaidAmount=");
+		builder.append(lowIncomeSubsidyPaidAmount);
+		builder.append(", patientLiabilityReductionOtherPaidAmount=");
+		builder.append(patientLiabilityReductionOtherPaidAmount);
+		builder.append(", partDPlanCoveredPaidAmount=");
+		builder.append(partDPlanCoveredPaidAmount);
+		builder.append(", partDPlanNonCoveredPaidAmount=");
+		builder.append(partDPlanNonCoveredPaidAmount);
+		builder.append(", totalPrescriptionCost=");
+		builder.append(totalPrescriptionCost);
+		builder.append(", prescriptionOriginationCode=");
+		builder.append(prescriptionOriginationCode);
+		builder.append(", gapDiscountAmount=");
+		builder.append(gapDiscountAmount);
+		builder.append(", brandGenericCode=");
+		builder.append(brandGenericCode);
+		builder.append(", pharmacyTypeCode=");
+		builder.append(pharmacyTypeCode);
+		builder.append(", patientResidenceCode=");
+		builder.append(patientResidenceCode);
+		builder.append(", submissionClarificationCode=");
+		builder.append(submissionClarificationCode);
 		builder.append("]");
 		return builder.toString();
-		// TODO FIll in rest of fields
 	}
 
 	/**
@@ -227,94 +334,279 @@ public class PartDEventRow {
 		DML_IND,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 15
+		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
+		 * CCW Data Dictionary: PDE_ID</a>, though note that this instance of +
+		 * * the field is unencrypted.
 		 */
 		PDE_ID,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 15
+		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
+		 * CCW Data Dictionary: BENE_ID</a>, though note that this instance of +
+		 * * the field is unencrypted.
 		 */
 		BENE_ID,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_dt.txt">
+		 * CCW Data Dictionary: SRVC_DT</a>.
 		 */
 		SRVC_DT,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8
+		 * Type: <code>DATE</code>, max chars: 8, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pd_dt.txt">
+		 * CCW Data Dictionary: PD_DT</a>.
 		 */
 		PD_DT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_prvdr_id_qlfyr_cd.txt">
+		 * CCW Data Dictionary: SRVC_PRVDR_ID_QLFYR_CD</a>.
 		 */
 		SRVC_PRVDR_ID_QLFYR_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 15
+		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_prvdr_id.txt">
+		 * CCW Data Dictionary: SRVC_PRVDR_ID</a>.
 		 */
 		SRVC_PRVDR_ID,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id_qlfyr_cd.txt">
+		 * CCW Data Dictionary: PRSCRBR_ID_QLFYR_CD</a>.
 		 */
 		PRSCRBR_ID_QLFYR_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 15
+		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id.txt">
+		 * CCW Data Dictionary: PRSCRBR_ID</a>.
 		 */
 		PRSCRBR_ID,
 
 		/**
-		 * Type: <code>NUM</code>, max chars: 12
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_srvc_rfrnc_num.txt">
+		 * CCW Data Dictionary: RX_SRVC_RFRNC_NUM</a>.
 		 */
 		RX_SRVC_RFRNC_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 19
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prod_srvc_id.txt">
+		 * CCW Data Dictionary: PROD_SRVC_ID</a>.
 		 */
 		PROD_SRVC_ID,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5
+		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt">
+		 * CCW Data Dictionary: PLAN_CNTRCT_REC_ID</a>.
 		 */
 		PLAN_CNTRCT_REC_ID,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 3
+		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt">
+		 * CCW Data Dictionary: PLAN_PBP_REC_NUM</a>.
 		 */
 		PLAN_PBP_REC_NUM,
 
 		/**
-		 * Type: <code>NUM</code>, max chars: 2
+		 * Type: <code>NUM</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cmpnd_cd.txt">
+		 * CCW Data Dictionary: CMPND_CD</a>.
 		 */
 		CMPND_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt">
+		 * CCW Data Dictionary: DAW_PROD_SLCTN_CD</a>.
 		 */
 		DAW_PROD_SLCTN_CD,
 
 		/**
-		 * Type: <code>NUM</code>, max chars: 12
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qty_dspnsd_num.txt">
+		 * CCW Data Dictionary: QTY_DPSNSD_NUM</a>.
 		 */
 		QTY_DPSNSD_NUM,
 
 		/**
-		 * Type: <code>NUM</code>, max chars: 3
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/days_suply_num.txt">
+		 * CCW Data Dictionary: DAYS_SUPLY_NUM</a>.
 		 */
 		DAYS_SUPLY_NUM,
 
 		/**
-		 * Type: <code>NUM</code>, max chars: 3
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fill_num.txt">
+		 * CCW Data Dictionary: FILL_NUM</a>.
 		 */
 		FILL_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt">
+		 * CCW Data Dictionary: DSPNSNG_STUS_CD</a>.
 		 */
-		DSPNSNG_STUS_CD
-		// TODO FIll in rest of fields
+		DSPNSNG_STUS_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+		 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+		 */
+		DRUG_CVRG_STUS_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt">
+		 * CCW Data Dictionary: ADJSTMT_DLTN_CD</a>.
+		 */
+		ADJSTMT_DLTN_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nstd_frmt_cd.txt">
+		 * CCW Data Dictionary: NSTD_FRMT_CD</a>.
+		 */
+		NSTD_FRMT_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_excptn_cd.txt">
+		 * CCW Data Dictionary: PRCNG_EXCPTN_CD</a>.
+		 */
+		PRCNG_EXCPTN_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt">
+		 * CCW Data Dictionary: CTSTRPHC_CVRG_CD</a>.
+		 */
+		CTSTRPHC_CVRG_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_blw_oopt_amt.txt">
+		 * CCW Data Dictionary: GDC_BLW_OOPT_AMT</a>.
+		 */
+		GDC_BLW_OOPT_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/gdc_abv_oopt_amt.txt">
+		 * CCW Data Dictionary: GDC_ABV_OOPT_AMT</a>.
+		 */
+		GDC_ABV_OOPT_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt">
+		 * CCW Data Dictionary: PTNT_PAY_AMT</a>.
+		 */
+		PTNT_PAY_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/othr_troop_amt.txt">
+		 * CCW Data Dictionary: OTHR_TROOP_AMT</a>.
+		 */
+		OTHR_TROOP_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lics_amt.txt">
+		 * CCW Data Dictionary: LICS_AMT</a>.
+		 */
+		LICS_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plro_amt.txt">
+		 * CCW Data Dictionary: PLRO_AMT</a>.
+		 */
+		PLRO_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cvrd_d_plan_pd_amt.txt">
+		 * CCW Data Dictionary: CVRD_D_PLAN_PD_AMT</a>.
+		 */
+		CVRD_D_PLAN_PD_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncvrd_plan_pd_amt.txt">
+		 * CCW Data Dictionary: NCVRD_PLAN_PD_AMT</a>.
+		 */
+		NCVRD_PLAN_PD_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_rx_cst_amt.txt">
+		 * CCW Data Dictionary: TOT_RX_CST_AMT</a>.
+		 */
+		TOT_RX_CST_AMT,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt">
+		 * CCW Data Dictionary: RX_ORGN_CD</a>.
+		 */
+		RX_ORGN_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt">
+		 * CCW Data Dictionary: RPTD_GAP_DSCNT_NUM</a>.
+		 */
+		RPTD_GAP_DSCNT_NUM,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt">
+		 * CCW Data Dictionary: BRND_GNRC_CD</a>.
+		 */
+		BRND_GNRC_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt">
+		 * CCW Data Dictionary: PHRMCY_SRVC_TYPE_CD</a>.
+		 */
+		PHRMCY_SRVC_TYPE_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_rsdnc_cd.txt">
+		 * CCW Data Dictionary: PTNT_RSDNC_CD</a>.
+		 */
+		PTNT_RSDNC_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2, <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt">
+		 * CCW Data Dictionary: SUBMSN_CLR_CD</a>.
+		 */
+		SUBMSN_CLR_CD
 	}
 }

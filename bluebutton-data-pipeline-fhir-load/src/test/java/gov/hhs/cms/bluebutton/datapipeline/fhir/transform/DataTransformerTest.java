@@ -18,14 +18,19 @@ import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
+import org.hl7.fhir.dstu21.model.Coverage;
 import org.hl7.fhir.dstu21.model.DateTimeType;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DetailComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemAdjudicationComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
+import org.hl7.fhir.dstu21.model.Identifier;
 import org.hl7.fhir.dstu21.model.IntegerType;
+import org.hl7.fhir.dstu21.model.Medication;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
+import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
+import org.hl7.fhir.dstu21.model.Organization;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.dstu21.model.Practitioner;
 import org.hl7.fhir.dstu21.model.Reference;
@@ -33,6 +38,7 @@ import org.hl7.fhir.dstu21.model.ReferralRequest;
 import org.hl7.fhir.dstu21.model.StringType;
 import org.hl7.fhir.dstu21.model.TemporalPrecisionEnum;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,6 +60,8 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
@@ -72,6 +80,57 @@ public final class DataTransformerTest {
 
 	@Rule
 	public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
+	private PartDEventRow pdeRecord;
+
+	@Before
+	public void setup() {
+		// Initialize a default version of the PDE record
+		pdeRecord = new PartDEventRow();
+		pdeRecord.version = 1;
+		pdeRecord.recordAction = RecordAction.INSERT;
+		pdeRecord.partDEventId = "89";
+		pdeRecord.beneficiaryId = "103";
+		pdeRecord.prescriptionFillDate = LocalDate.of(2015, 6, 12);
+		pdeRecord.paymentDate = Optional.of(LocalDate.of(2015, 6, 27));
+		pdeRecord.serviceProviderIdQualiferCode = "01";
+		pdeRecord.serviceProviderId = "1124137542";
+		pdeRecord.prescriberIdQualifierCode = "01";
+		pdeRecord.prescriberId = "1225061591";
+		pdeRecord.prescriptionReferenceNumber = new Long(791569);
+		pdeRecord.nationalDrugCode = "49884009902";
+		pdeRecord.planContractId = "H8552";
+		pdeRecord.planBenefitPackageId = "020";
+		pdeRecord.compoundCode = CompoundCode.NOT_COMPOUNDED;
+		pdeRecord.dispenseAsWrittenProductSelectionCode = "0";
+		pdeRecord.quantityDispensed = new BigDecimal(60);
+		pdeRecord.daysSupply = new Integer(30);
+		pdeRecord.fillNumber = new Integer(3);
+		pdeRecord.dispensingStatuscode = Optional.of(new Character('P'));
+		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.COVERED;
+		pdeRecord.adjustmentDeletionCode = Optional.of(new Character('A'));
+		pdeRecord.nonstandardFormatCode = Optional.of(new Character('X'));
+		pdeRecord.pricingExceptionCode = Optional.of(new Character('M'));
+		pdeRecord.catastrophicCoverageCode = Optional.of(new Character('C'));
+		pdeRecord.grossCostBelowOutOfPocketThreshold = new BigDecimal("362.84");
+		pdeRecord.grossCostAboveOutOfPocketThreshold = new BigDecimal("15.25");
+		pdeRecord.patientPaidAmount = new BigDecimal("235.85");
+		pdeRecord.otherTrueOutOfPocketPaidAmount = new BigDecimal("17.30");
+		pdeRecord.lowIncomeSubsidyPaidAmount = new BigDecimal("122.23");
+		pdeRecord.patientLiabilityReductionOtherPaidAmount = new BigDecimal("42.42");
+		pdeRecord.partDPlanCoveredPaidAmount = new BigDecimal("126.99");
+		pdeRecord.partDPlanNonCoveredPaidAmount = new BigDecimal("17.98");
+		pdeRecord.totalPrescriptionCost = new BigDecimal("362.84");
+		pdeRecord.prescriptionOriginationCode = Optional.of(new Character('3'));
+		pdeRecord.gapDiscountAmount = new BigDecimal("317.22");
+		/*
+		 * TODO re-enable once determined if optional or not.
+		 */
+		// partDEventRecord.brandGenericCode = new Character('G');
+		pdeRecord.pharmacyTypeCode = "01";
+		pdeRecord.patientResidenceCode = "02";
+		pdeRecord.submissionClarificationCode = Optional.of("08");
+	}
 
 	/**
 	 * Verifies that {@link DataTransformer} works correctly when when passed an
@@ -614,79 +673,193 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEvent() throws FHIRException {
-		PartDEventRow record = new PartDEventRow();
-		record.version = 1;
-		record.recordAction = RecordAction.INSERT;
-		record.partDEventId = "5";
-		record.beneficiaryId = "17";
-		record.compoundCode = PartDEventRow.COMPOUND_CODE_COMPOUNDED;
-		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
+		Bundle pdeBundle = getBundle(pdeRecord);
+		/*
+		 * Bundle should have: 1) EOB, 2) Practitioner (prescriber), 3)
+		 * Medication, 4) Organization (serviceProviderOrg), 5) Coverage.
+		 */
+		Assert.assertEquals(5, pdeBundle.getEntry().size());
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, record);
-
-		Stream source = Arrays.asList(pdeRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> resultStream = transformer.transform(source);
-		Assert.assertNotNull(resultStream);
-		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
-		Assert.assertEquals(1, resultList.size());
-
-		TransformedBundle pdeBundleWrapper = resultList.get(0);
-		Assert.assertNotNull(pdeBundleWrapper);
-		Assert.assertSame(pdeRecordEvent, pdeBundleWrapper.getSource());
-		Assert.assertNotNull(pdeBundleWrapper.getResult());
-
-		Bundle pdeBundle = pdeBundleWrapper.getResult();
-		Assert.assertEquals(1, pdeBundle.getEntry().size());
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
-		Assert.assertEquals("Patient/" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
+
+		Assert.assertEquals("ExplanationOfBenefit/" + pdeRecord.partDEventId, eob.getId());
+		// TODO verify eob.type once STU3 available
+		Assert.assertEquals("Patient/" + pdeRecord.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(Date.valueOf(pdeRecord.paymentDate.get()), eob.getPaymentDate());
 
 		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-		Assert.assertEquals("RXCINV", rxItem.getType().getCode());
-		Assert.assertEquals(Date.valueOf(record.prescriptionFillDate), rxItem.getServicedDateType().getValue());
-		// TODO rest of values
+		// Default case has compound code = not a compound
+		Assert.assertEquals("RXDINV", rxItem.getType().getCode());
+		Assert.assertEquals(Date.valueOf(pdeRecord.prescriptionFillDate), rxItem.getServicedDateType().getValue());
+
+		// Default case has drug coverage status code as Covered
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PART_D_COVERED,
+				pdeRecord.partDPlanCoveredPaidAmount, rxItem.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT,
+				rxItem.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_PART_D_NONCOVERED_OTC,
+				rxItem.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PATIENT_PAY, pdeRecord.patientPaidAmount,
+				rxItem.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_OTHER_TROOP_AMOUNT,
+				pdeRecord.otherTrueOutOfPocketPaidAmount, rxItem.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT,
+				pdeRecord.lowIncomeSubsidyPaidAmount, rxItem.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT,
+				pdeRecord.patientLiabilityReductionOtherPaidAmount, rxItem.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_TOTAL_COST, pdeRecord.totalPrescriptionCost,
+				rxItem.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT, pdeRecord.gapDiscountAmount,
+				rxItem.getAdjudication());
+
+		BundleEntryComponent prescriberEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Practitioner).findAny().get();
+		Practitioner prescriber = (Practitioner) prescriberEntry.getResource();
+		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, pdeRecord.prescriberId,
+				prescriber.getIdentifier());
+		Assert.assertEquals(HTTPVerb.PUT, prescriberEntry.getRequest().getMethod());
+		Assert.assertEquals(DataTransformer.referencePractitioner(pdeRecord.prescriberId).getReference(),
+				prescriberEntry.getRequest().getUrl());
+
+		BundleEntryComponent medicationEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Medication).findAny().get();
+		Medication medication = (Medication) medicationEntry.getResource();
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC, pdeRecord.nationalDrugCode,
+				medication.getCode().getCoding().get(0));
+		Assert.assertEquals(HTTPVerb.PUT, medicationEntry.getRequest().getMethod());
+		Assert.assertEquals("Medication/" + pdeRecord.nationalDrugCode, medicationEntry.getRequest().getUrl());
+
+		MedicationOrder medicationOrder = (MedicationOrder) eob.getPrescription().getResource();
+		assertIdentifierExists(DataTransformer.CODING_SYSTEM_RX_SRVC_RFRNC_NUM,
+				String.valueOf(pdeRecord.prescriptionReferenceNumber), medicationOrder.getIdentifier());
+		Assert.assertEquals("Patient/" + pdeRecord.beneficiaryId, medicationOrder.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePractitioner(pdeRecord.prescriberId).getReference(),
+				medicationOrder.getPrescriber().getReference());
+		Assert.assertEquals("Medication/" + pdeRecord.nationalDrugCode,
+				medicationOrder.getMedicationReference().getReference());
+		MedicationOrderDispenseRequestComponent dispenseRequest = medicationOrder.getDispenseRequest();
+		Assert.assertEquals(pdeRecord.quantityDispensed, dispenseRequest.getQuantity().getValue());
+		Assert.assertEquals("days", dispenseRequest.getExpectedSupplyDuration().getUnit());
+		Assert.assertEquals(new BigDecimal(pdeRecord.daysSupply),
+				dispenseRequest.getExpectedSupplyDuration().getValue());
+		/*
+		 * TODO verify substitution.allowed and substitution.reason once STU3
+		 * structures are available
+		 */
+
+		BundleEntryComponent organizationEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Organization).findAny().get();
+		Organization organization = (Organization) organizationEntry.getResource();
+		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, pdeRecord.serviceProviderId,
+				organization.getIdentifier());
+		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
+		Assert.assertEquals(DataTransformer.referenceOrganization(pdeRecord.serviceProviderId).getReference(),
+				organizationEntry.getRequest().getUrl());
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, pdeRecord.pharmacyTypeCode,
+				organization.getType().getCoding().get(0));
+
+		BundleEntryComponent coverageEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Coverage).findAny().get();
+		Coverage coverage = (Coverage) coverageEntry.getResource();
+		assertIdentifierExists(DataTransformer.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, pdeRecord.planContractId,
+				coverage.getIdentifier());
+		assertIdentifierExists(DataTransformer.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
+				pdeRecord.planBenefitPackageId, coverage.getIdentifier());
+		Assert.assertEquals(HTTPVerb.PUT, coverageEntry.getRequest().getMethod());
+		Assert.assertEquals(
+				new Reference(String.format("Coverage?identifier=%s|%s",
+						DataTransformer.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, pdeRecord.planContractId)).getReference(),
+				coverageEntry.getRequest().getUrl());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, coverage.getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, coverage.getSubPlan());
 	}
 
 	/**
 	 * Verifies that {@link DataTransformer} correctly sets the code system
-	 * value when the compound code equals not compounded.
+	 * value when the compound code equals compounded.
 	 * 
 	 * @throws FHIRException
 	 *             indicates test failure
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertPartDEventNotCompound() throws FHIRException {
-		PartDEventRow record = new PartDEventRow();
-		record.version = 1;
-		record.recordAction = RecordAction.INSERT;
-		record.partDEventId = "5";
-		record.beneficiaryId = "17";
-		record.compoundCode = PartDEventRow.COMPOUND_CODE_NOT_COMPOUNDED;
-		record.prescriptionFillDate = LocalDate.of(2015, 6, 14);
+	public void transformInsertPartDEventCompound() throws FHIRException {
+		pdeRecord.compoundCode = CompoundCode.COMPOUNDED;
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent pdeRecordEvent = new RifRecordEvent<PartDEventRow>(filesEvent, file, record);
-
-		Stream source = Arrays.asList(pdeRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> resultStream = transformer.transform(source);
-		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
-
-		TransformedBundle pdeBundleWrapper = resultList.get(0);
-		Bundle pdeBundle = pdeBundleWrapper.getResult();
+		Bundle pdeBundle = getBundle(pdeRecord);
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-		Assert.assertEquals("RXDINV", rxItem.getType().getCode());
+		Assert.assertEquals("RXCINV", rxItem.getType().getCode());
+	}
+
+	/**
+	 * Verifies that the {@link DataTransformer} correctly uses the
+	 * {@link DataTransformer#CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT
+	 * code when the drug coverage status code =
+	 * {@link PartDEventRow#DRUG_CVRD_STUS_CD_SUPPLEMENT}
+	 * 
+	 * @throws FHIRException
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void transformInsertPartDEventNonCoveredSupplement() throws FHIRException {
+		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.SUPPLEMENTAL;
+
+		Bundle pdeBundle = getBundle(pdeRecord);
+		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
+		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+
+		/*
+		 * Assert that when the drug coverage status code equals non-covered
+		 * supplement, the adjudication uses the
+		 * PartDEventRow.partDPlanNonCoveredPaidAmount field.
+		 */
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT,
+				pdeRecord.partDPlanNonCoveredPaidAmount, rxItem.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_PART_D_COVERED, rxItem.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_PART_D_NONCOVERED_OTC,
+				rxItem.getAdjudication());
+	}
+
+	/**
+	 * Verifies that the {@link DataTransformer} correctly uses the
+	 * {@link DataTransformer#CODED_ADJUDICATION_PART_D_NONCOVERED_OTC code when
+	 * the drug coverage status code =
+	 * {@link PartDEventRow#DRUG_CVRD_STUS_CD_OTC}
+	 * 
+	 * @throws FHIRException
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void transformInsertPartDEventNonCoveredOTC() throws FHIRException {
+		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.OVER_THE_COUNTER;
+
+		Bundle pdeBundle = getBundle(pdeRecord);
+		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
+		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+
+		/*
+		 * Assert that when the drug coverage status code equals non-covered
+		 * OTC, the adjudication uses the
+		 * PartDEventRow.partDPlanNonCoveredPaidAmount field.
+		 */
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PART_D_NONCOVERED_OTC,
+				pdeRecord.partDPlanNonCoveredPaidAmount, rxItem.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_PART_D_COVERED, rxItem.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT,
+				rxItem.getAdjudication());
 	}
 
 	/**
@@ -824,6 +997,22 @@ public final class DataTransformerTest {
 	}
 
 	/**
+	 * @param expectedCategoryCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link ItemAdjudicationComponent#getCategory()} to verify is
+	 *            not present
+	 * @param actuals
+	 *            the actual {@link ItemAdjudicationComponent}s to verify
+	 */
+	private static void assertAdjudicationNotPresent(String expectedCategoryCode,
+			List<ItemAdjudicationComponent> actuals) {
+		Optional<ItemAdjudicationComponent> adjudication = actuals.stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
+		Assert.assertFalse(adjudication.isPresent());
+	}
+
+	/**
 	 * @param expectedDiagnosis
 	 *            the expected {@link IcdCode} to verify the presence of in the
 	 *            {@link ItemsComponent}
@@ -840,5 +1029,37 @@ public final class DataTransformerTest {
 		Assert.assertTrue(eobDiagnosis.isPresent());
 		Assert.assertTrue(eobItem.getDiagnosisLinkId().stream()
 				.filter(l -> eobDiagnosis.get().getSequence() == l.getValue()).findAny().isPresent());
+	}
+
+	/**
+	 * @param expectedSystem
+	 *            the expected {@link Identifier#getSystem()} value
+	 * @param expectedId
+	 *            the expected {@link Identifier#getValue()} value
+	 * @param actuals
+	 *            the actual {@link Identifier} to verify
+	 */
+	private static void assertIdentifierExists(String expectedSystem, String expectedId, List<Identifier> actuals) {
+		Assert.assertTrue(actuals.stream().filter(i -> expectedSystem.equals(i.getSystem()))
+				.anyMatch(i -> expectedId.equals(i.getValue())));
+	}
+
+	/**
+	 * @return a bundle for the Rif record passed in
+	 */
+	private Bundle getBundle(Object record) {
+		RifFile file = new MockRifFile();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
+		RifRecordEvent rifRecordEvent = new RifRecordEvent(filesEvent, file, record);
+
+		Stream source = Arrays.asList(rifRecordEvent).stream();
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> resultStream = transformer.transform(source);
+		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
+
+		TransformedBundle bundleWrapper = resultList.get(0);
+		Bundle bundle = bundleWrapper.getResult();
+
+		return bundle;
 	}
 }

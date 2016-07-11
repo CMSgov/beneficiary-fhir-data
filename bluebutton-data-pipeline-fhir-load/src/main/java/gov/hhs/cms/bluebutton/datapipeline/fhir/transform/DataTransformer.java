@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu21.model.Extension;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Identifier;
 import org.hl7.fhir.dstu21.model.IntegerType;
+import org.hl7.fhir.dstu21.model.Medication;
 import org.hl7.fhir.dstu21.model.MedicationOrder;
 import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
 import org.hl7.fhir.dstu21.model.Money;
@@ -128,9 +129,32 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
+	 * CCW Data Dictionary: BENE_ID</a>.
+	 */
 	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
+	 * CCW Data Dictionary: PDE_ID</a>.
+	 */
 	static final String CODING_SYSTEM_CCW_PDE_ID = "CCW.PDE_ID";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_srvc_rfrnc_num.txt">
+	 * CCW Data Dictionary: RX_SRVC_RFRNC_NUM</a>.
+	 */
+	static final String CODING_SYSTEM_RX_SRVC_RFRNC_NUM = "CCW.RX_SRVC_RFRNC_NUM";
+
+	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
+
+	static final String CODING_SYSTEM_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
+
+	static final String CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
 
 	static final String CODING_SYSTEM_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
 
@@ -159,8 +183,18 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_A_COINSURANCE_LIABILITY = "NCH Beneficiary Part A Coinsurance Liability Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt">
+	 * CCW Data Dictionary: PTNT_PAY_AMT</a>.
+	 */
 	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_rx_cst_amt.txt">
+	 * CCW Data Dictionary: TOT_RX_CST_AMT</a>.
+	 */
 	static final String CODED_ADJUDICATION_TOTAL_COST = "Total Prescription Cost";
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT = "NCH Beneficiary Blood Deductible Liability Amount";
@@ -171,6 +205,55 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_COINSURANCE = "NCH Beneficiary Part B Coinsurance Amount";
 
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+	 */
+	static final String CODED_ADJUDICATION_PART_D_COVERED = "Part D Covered";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+	 */
+	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT = "Part D Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
+	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
+	 */
+	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_OTC = "Part D Over-the-counter drugs";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/othr_troop_amt.txt">
+	 * CCW Data Dictionary: OTHR_TROOP_AMT</a>.
+	 */
+	static final String CODED_ADJUDICATION_OTHER_TROOP_AMOUNT = "Other True Out-of-Pocket (TrOOP) Amount";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lics_amt.txt">
+	 * CCW Data Dictionary: LICS_AMT</a>.
+	 */
+	static final String CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT = "Part D Low Income Subsidy (LICS) Amount";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plro_amt.txt">
+	 * CCW Data Dictionary: PLRO_AMT</a>.
+	 */
+	static final String CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT = "Reduction in patient liability due to payments by other payers (PLRO) Amount";
+
+	/**
+	 * See <a href=
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt">
+	 * CCW Data Dictionary: RPTD_GAP_DSCNT_NUM</a>.
+	 */
+	static final String CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT = "Medicare Coverage Gap Discount Amount";
+
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
 
 	static final String CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS = "CSPINV";
@@ -178,6 +261,8 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_MONEY = "urn:std:iso:4217";
 
 	static final String CODING_SYSTEM_MONEY_US = "USD";
+
+	static final String CODING_SYSTEM_NDC = "https://www.accessdata.fda.gov/scripts/cder/ndc";
 
 	/**
 	 * @param sourceBeneficiaries
@@ -916,32 +1001,184 @@ public final class DataTransformer {
 
 		Bundle bundle = new Bundle();
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId(IdType.newRandomUuid());
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
-		eob.setPatient(new Reference().setReference("Patient/" + record.beneficiaryId));
+		eob.setId("ExplanationOfBenefit/" + record.partDEventId);
+		// TODO Specify eob.type once STU3 is available (pharmacy)
+		Reference patientRef = referencePatient(record.beneficiaryId);
+		eob.setPatient(patientRef);
+		if (record.paymentDate.isPresent()) {
+			eob.setPaymentDate(Date.valueOf(record.paymentDate.get()));
+		}
 
 		ItemsComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
-		if (record.compoundCode == PartDEventRow.COMPOUND_CODE_COMPOUNDED) {
+		switch (record.compoundCode) {
+		case COMPOUNDED:
 			/* Pharmacy dispense invoice for a compound */
 			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
-		} else {
+			break;
+		case NOT_COMPOUNDED:
 			/*
-			 * Pharmacy dispense invoice not involving a compound - set if not a
-			 * compound or if compound code is not provided.
-			 */
-			/*
-			 * TODO Does it make sense to make non compound the default type?
-			 * Otherwise what code system would it make sense to specify here?
+			 * Pharmacy dispense invoice not involving a compound
 			 */
 			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+			break;
+		default:
+			/*
+			 * Unexpected value encountered - compound code should be either
+			 * compounded or not compounded.
+			 */
+			throw new BadCodeMonkeyException();
 		}
+
 		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
 
+		switch (record.drugCoverageStatusCode) {
+		/*
+		 * If covered by Part D, use value from partDPlanCoveredPaidAmount
+		 */
+		case COVERED:
+			rxItem.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PART_D_COVERED))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(record.partDPlanCoveredPaidAmount);
+			break;
+		/*
+		 * If not covered by Part D, use value from
+		 * partDPlanNonCoveredPaidAmount. There are 2 categories of non-covered
+		 * payment amounts: supplemental drugs covered by enhanced plans, and
+		 * over the counter drugs that are covered only under specific
+		 * circumstances.
+		 */
+		case SUPPLEMENTAL:
+			rxItem.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(record.partDPlanNonCoveredPaidAmount);
+			break;
+		case OVER_THE_COUNTER:
+			rxItem.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_OTC))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(record.partDPlanNonCoveredPaidAmount);
+			break;
+		default:
+			/*
+			 * Unexpected value encountered - drug coverage status code should
+			 * be one of the three above.
+			 */
+			throw new BadCodeMonkeyException();
+		}
+
+		rxItem.addAdjudication()
+				.setCategory(
+						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PATIENT_PAY))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.patientPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_OTHER_TROOP_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.otherTrueOutOfPocketPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.lowIncomeSubsidyPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.patientLiabilityReductionOtherPaidAmount);
+
+		rxItem.addAdjudication()
+				.setCategory(
+						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_TOTAL_COST))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.totalPrescriptionCost);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+						.setCode(CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.gapDiscountAmount);
+
+		Practitioner prescriber = new Practitioner();
+		/*
+		 * Set the coding system for the practitioner if the qualifier code is
+		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
+		 * no other code types should be found here.
+		 */
+		prescriber.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.prescriberId);
+		Reference prescriberRef = referencePractitioner(record.prescriberId);
+		upsert(bundle, prescriber, prescriberRef.getReference());
+
+		/*
+		 * Upsert Medication using NDC as the ID.
+		 */
+		Medication medication = new Medication();
+		Reference medicationRef = new Reference("Medication/" + record.nationalDrugCode);
+		CodeableConcept ndcConcept = new CodeableConcept();
+		ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode);
+		medication.setCode(ndcConcept);
+		upsert(bundle, medication, medicationRef.getReference());
+
+		/*
+		 * MedicationOrders are represented as contained resources inside the
+		 * EOB, as the lifetime of this resource should match with the EOB.
+		 */
 		MedicationOrder medicationOrder = new MedicationOrder();
-		medicationOrder.setId(IdType.newRandomUuid());
-		eob.setPrescription(new Reference().setReference(medicationOrder.getId()));
-		// TODO rest of mapping
+		medicationOrder.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
+				.setValue(String.valueOf(record.prescriptionReferenceNumber));
+		medicationOrder.setPatient(patientRef);
+		medicationOrder.setPrescriber(prescriberRef);
+		medicationOrder.setMedication(medicationRef);
+		SimpleQuantity quantity = new SimpleQuantity();
+		quantity.setValue(record.quantityDispensed);
+		Duration daysSupply = new Duration();
+		daysSupply.setUnit("days");
+		daysSupply.setValue(record.daysSupply);
+		medicationOrder.setDispenseRequest(new MedicationOrderDispenseRequestComponent().setQuantity(quantity)
+				.setExpectedSupplyDuration(daysSupply));
+		/*
+		 * TODO Populate substitution.allowed and substitution.reason once STU3
+		 * structures are available.
+		 */
+		eob.setPrescription(new Reference(medicationOrder));
+
+		Organization serviceProviderOrg = new Organization();
+		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.serviceProviderId);
+		Reference serviceProviderOrgReference = referenceOrganization(record.serviceProviderId);
+		serviceProviderOrg.setType(new CodeableConcept().addCoding(
+				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharmacyTypeCode)));
+		upsert(bundle, serviceProviderOrg, serviceProviderOrgReference.getReference());
+		eob.setOrganization(serviceProviderOrgReference);
+
+		/*
+		 * TODO PDE coverage includes unique identifiers where other coverage
+		 * objects do not yet. Coverage identifiers probably need to be
+		 * standardized across the board?
+		 */
+		Coverage coverage = new Coverage();
+		Reference coverageRef = new Reference(
+				String.format("Coverage?identifier=%s|%s", CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, record.planContractId));
+		coverage.addIdentifier().setSystem(CODING_SYSTEM_PDE_PLAN_CONTRACT_ID).setValue(record.planContractId);
+		coverage.addIdentifier().setSystem(CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID)
+				.setValue(record.planBenefitPackageId);
+		coverage.setPlan(COVERAGE_PLAN);
+		coverage.setSubPlan(COVERAGE_PLAN_PART_D);
+		upsert(bundle, coverage, coverageRef.getReference());
+		eob.getCoverage().setCoverage(coverageRef);
+
+		/*
+		 * TODO When updated to STU3, use eob.information to store values of
+		 * PRCNG_EXCPTN_CD, CTSTRPHC_CVRG_CD
+		 */
 
 		insert(bundle, eob);
 		return new TransformedBundle(rifRecordEvent, bundle);
@@ -1086,6 +1323,18 @@ public final class DataTransformer {
 	}
 
 	/**
+	 * @param organizationNpi
+	 *            the {@link Organization#getIdentifier()} value to match (where
+	 *            {@link Identifier#getSystem()} is
+	 *            {@value #CODING_SYSTEM_NPI_US})
+	 * @return a {@link Reference} to the {@link Organization} resource that
+	 *         matches the specified parameters
+	 */
+	static Reference referenceOrganization(String organizationNpi) {
+		return new Reference(String.format("Organization?identifier=%s|%s", CODING_SYSTEM_NPI_US, organizationNpi));
+	}
+
+	/**
 	 * @param subPlan
 	 *            the {@link Coverage#getSubPlan()} value to match
 	 * @param subscriberPatientId
@@ -1095,7 +1344,7 @@ public final class DataTransformer {
 	 *         {@link Coverage#getPlan()} matches {@link #COVERAGE_PLAN} and the
 	 *         other parameters specified also match
 	 */
-	private static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
+	static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
 		return new Reference(String.format("Coverage?subscriber=%s&plan=%s&subplan=%s", subscriberPatientId,
 				COVERAGE_PLAN, subPlan));
 	}
@@ -1106,7 +1355,7 @@ public final class DataTransformer {
 	 * @return a {@link Reference} to the {@link Patient} resource that matches
 	 *         the specified parameters
 	 */
-	private static Reference referencePatient(String patientId) {
+	static Reference referencePatient(String patientId) {
 		return new Reference(String.format("Patient/%s", patientId));
 	}
 
