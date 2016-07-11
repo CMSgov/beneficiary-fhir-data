@@ -262,12 +262,6 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_MONEY_US = "USD";
 
-	static final String CODING_SYSTEM_NCPDP = "NCPDP";
-
-	static final String CODING_SYSTEM_ST_LICENSE = "STATE_LICENSE_NUM";
-
-	static final String CODING_SYSTEM_FED_TAX_NUM = "FEDERAL_TAX_NUM";
-
 	static final String CODING_SYSTEM_NDC = "https://www.accessdata.fda.gov/scripts/cder/ndc";
 
 	/**
