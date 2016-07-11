@@ -25,10 +25,6 @@ import java.util.Optional;
  * </p>
  */
 public class PartDEventRow {
-	public static final Character DRUG_CVRD_STUS_CD_COVERED = new Character('C');
-	public static final Character DRUG_CVRD_STUS_CD_SUPPLEMENT = new Character('E');
-	public static final Character DRUG_CVRD_STUS_CD_OTC = new Character('O');
-
 	/**
 	 * @see Column#VERSION
 	 */
