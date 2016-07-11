@@ -4,22 +4,20 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.model;
  * Enumerate the possibly values for Compound Code for Part D
  */
 public enum CompoundCode {
-	NOT_COMPOUNDED(1, "Not Compounded"), COMPOUNDED(2, "Compounded");
+	NOT_COMPOUNDED(1),
+
+	COMPOUNDED(2);
 
 	private final Integer code;
-	private final String description;
 
 	/**
 	 * Enum constant constructor.
 	 * 
 	 * @param code
 	 *            the value to use for {@link #getValue()}
-	 * @param description
-	 *            the value to use for {@link #getDescription()}
 	 */
-	private CompoundCode(Integer code, String description) {
+	private CompoundCode(Integer code) {
 		this.code = code;
-		this.description = description;
 	}
 
 	/**
@@ -27,13 +25,6 @@ public enum CompoundCode {
 	 */
 	public Integer getCode() {
 		return code;
-	}
-
-	/**
-	 * @return a friendly description for the specified code
-	 */
-	public String getDescription() {
-		return description;
 	}
 
 	/**

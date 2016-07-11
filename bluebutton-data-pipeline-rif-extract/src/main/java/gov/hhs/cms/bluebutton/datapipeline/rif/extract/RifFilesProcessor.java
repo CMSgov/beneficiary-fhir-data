@@ -323,7 +323,7 @@ public final class RifFilesProcessor {
 		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
 		pdeRow.dispensingStatuscode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()));
 		pdeRow.drugCoverageStatusCode = DrugCoverageStatus
-				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD.ordinal()).charAt(0));
+				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD.ordinal()));
 		pdeRow.adjustmentDeletionCode = parseOptCharacter(
 				csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD.ordinal()));
 		pdeRow.nonstandardFormatCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.NSTD_FRMT_CD.ordinal()));
