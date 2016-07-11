@@ -25,7 +25,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -485,7 +484,7 @@ public final class RifFilesProcessor {
 	 *         input has data, or an empty Optional if not
 	 */
 	private static Optional<LocalDate> parseOptDate(String dateText) {
-		if (StringUtils.isEmpty(dateText)) {
+		if (dateText.isEmpty()) {
 			return Optional.empty();
 		} else {
 			return Optional.of(parseDate(dateText));
@@ -514,7 +513,7 @@ public final class RifFilesProcessor {
 	 *         input has data, or an empty Optional if not
 	 */
 	private static Optional<Character> parseOptCharacter(String charText) {
-		if (StringUtils.isEmpty(charText)) {
+		if (charText.isEmpty()) {
 			return Optional.empty();
 		} else {
 			return Optional.of(parseCharacter(charText));
