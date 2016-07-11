@@ -3,10 +3,12 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -43,11 +45,20 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.CcwTestHelper;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.test.TearDownAcceptor;
 import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirResult;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.SampleDataLoader;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifGenerator;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
 
 /**
  * Integration tests for {@link FhirLoader}.
@@ -169,5 +180,65 @@ public final class FhirLoaderIT {
 
 			// TODO verify results by actually querying the server.
 		}
+	}
+
+	/**
+	 * Verifies that the entire data pipeline works correctly: all the way from
+	 * generating sample data through extracting, transform, and finally loading
+	 * that data into a live FHIR server. Runs against XXX.
+	 * 
+	 * @throws URISyntaxException
+	 *             (won't happen: URI is hardcoded)
+	 */
+	@Test
+	public void loadRifDataSampleA() throws URISyntaxException {
+		// Generate the sample RIF data to feed through the pipeline.
+		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_A.getResources();
+		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
+		Stream<RifFile> rifFiles = rifGenerator.generate();
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+
+		// Initialize the Extract phase of the pipeline.
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifRecordEvents = processor.process(rifFilesEvent);
+
+		// Initialize the Transform phase of the pipeline.
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
+
+		// Setup the metrics for FhirLoader to use.
+		MetricRegistry fhirMetrics = new MetricRegistry();
+		fhirMetrics.registerAll(new MemoryUsageGaugeSet());
+		fhirMetrics.registerAll(new GarbageCollectorMetricSet());
+		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
+		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
+
+		// Initialize the Load phase of the pipeline.
+		// URI fhirServer = new
+		// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
+		URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
+		LoadAppOptions options = new LoadAppOptions(fhirServer);
+		FhirLoader loader = new FhirLoader(fhirMetrics, options);
+		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
+
+		/*
+		 * Collect all of the results, which will actually start data processing
+		 * through the pipeline (streams are lazy).
+		 */
+		List<FhirBundleResult> resultsList = resultsStream.collect(Collectors.toList());
+		LOGGER.info("FHIR resources loaded.");
+		fhirMetricsReporter.stop();
+		fhirMetricsReporter.report();
+
+		// Verify the results.
+		Assert.assertNotNull(resultsList);
+		/*
+		 * FIXME this test is hilariously broken right now, but we're leaving it
+		 * in as all of our ITs are currently disabled in the CI builds,
+		 * anyways.
+		 */
+		Assert.assertEquals(42, resultsList.size());
+
+		// TODO verify results by actually querying the server.
 	}
 }
