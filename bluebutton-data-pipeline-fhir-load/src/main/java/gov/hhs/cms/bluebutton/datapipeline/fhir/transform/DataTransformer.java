@@ -150,12 +150,11 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_RX_SRVC_RFRNC_NUM = "CCW.RX_SRVC_RFRNC_NUM";
 
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt">
-	 * CCW Data Dictionary: PHRMCY_SRVC_TYPE_CD</a>.
-	 */
-	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "CCW.PHRMCY_SRVC_TYPE_CD";
+	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
+
+	static final String CODING_SYSTEM_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
+
+	static final String CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
 
 	static final String CODING_SYSTEM_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
 
@@ -1010,8 +1009,11 @@ public final class DataTransformer {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.setId("ExplanationOfBenefit/" + record.partDEventId);
 		// TODO Specify eob.type once STU3 is available (pharmacy)
-		Reference patientRef = new Reference().setReference("Patient/" + record.beneficiaryId);
+		Reference patientRef = referencePatient(record.beneficiaryId);
 		eob.setPatient(patientRef);
+		if (record.paymentDate.isPresent()) {
+			eob.setPaymentDate(Date.valueOf(record.paymentDate.get()));
+		}
 
 		ItemsComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
@@ -1024,7 +1026,6 @@ public final class DataTransformer {
 			 */
 			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
 		}
-		// TODO code for unknown compound type?
 		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
 
 		/* If covered by Part D, use value from partDPlanCoveredPaidAmount */
@@ -1037,7 +1038,10 @@ public final class DataTransformer {
 		}
 		/*
 		 * If not covered by Part D, use value from
-		 * partDPlanNonCoveredPaidAmount
+		 * partDPlanNonCoveredPaidAmount. There are 2 categories of non-covered
+		 * payment amounts, supplemental drugs covered by enhanced plans, and
+		 * over the counter drugs that are covered only under specific
+		 * circumstances.
 		 */
 		else if (PartDEventRow.DRUG_CVRD_STUS_CD_SUPPLEMENT.equals(record.drugCoverageStatusCode)) {
 			rxItem.addAdjudication()
@@ -1095,12 +1099,13 @@ public final class DataTransformer {
 		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
 		 * no other code types should be found here.
 		 */
-		String prescriberIdSystem = (record.prescriberId == PartDEventRow.PRSCRBR_ID_QLFYR_CD_NPI)
-				? CODING_SYSTEM_NPI_US : null;
-		prescriber.addIdentifier().setSystem(prescriberIdSystem).setValue(record.prescriberId);
-		Reference prescriberRef = new Reference("Practitioner/" + record.prescriberId);
+		prescriber.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.prescriberId);
+		Reference prescriberRef = referencePractitioner(record.prescriberId);
 		upsert(bundle, prescriber, prescriberRef.getReference());
 
+		/*
+		 * Upsert Medication using NDC as the ID.
+		 */
 		Medication medication = new Medication();
 		Reference medicationRef = new Reference("Medication/" + record.nationalDrugCode);
 		CodeableConcept ndcConcept = new CodeableConcept();
@@ -1108,10 +1113,13 @@ public final class DataTransformer {
 		medication.setCode(ndcConcept);
 		upsert(bundle, medication, medicationRef.getReference());
 
+		/*
+		 * MedicationOrders are represented as contained resources inside the
+		 * EOB, as the lifetime of this resource should match with the EOB.
+		 */
 		MedicationOrder medicationOrder = new MedicationOrder();
-		Reference medOrderReference = new Reference(medicationOrder);
 		medicationOrder.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
-				.setId(String.valueOf(record.prescriptionReferenceNumber));
+				.setValue(String.valueOf(record.prescriptionReferenceNumber));
 		medicationOrder.setPatient(patientRef);
 		medicationOrder.setPrescriber(prescriberRef);
 		medicationOrder.setMedication(medicationRef);
@@ -1122,65 +1130,40 @@ public final class DataTransformer {
 		daysSupply.setValue(record.daysSupply);
 		medicationOrder.setDispenseRequest(new MedicationOrderDispenseRequestComponent().setQuantity(quantity)
 				.setExpectedSupplyDuration(daysSupply));
-		// TODO::verify this works if no id set explicitly for MedicationOrder
-		upsert(bundle, medicationOrder, medOrderReference.getReference());
 		/*
 		 * TODO Populate substitution.allowed and substitution.reason once STU3
 		 * structures are available.
 		 */
+		eob.setPrescription(new Reference(medicationOrder));
 
-		eob.setPrescription(new Reference().setReference("MedicationOrder/" + medicationOrder.getId()));
-
-		if (record.paymentDate.isPresent()) {
-			eob.setPaymentDate(Date.valueOf(record.paymentDate.get()));
-		}
-
-		Organization org = new Organization();
-		org.setId(IdType.newRandomUuid());
-
-		// TODO Is this correct? Link to DD page with code values? Or actually
-		// put the definition of each code value here?
-		org.setType(new CodeableConcept().addCoding(
-				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharamcyTypeCode)));
+		Organization serviceProviderOrg = new Organization();
+		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.serviceProviderId);
+		Reference serviceProviderOrgReference = referenceOrganization(record.serviceProviderId);
+		serviceProviderOrg.setType(new CodeableConcept().addCoding(
+				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharmacyTypeCode)));
+		upsert(bundle, serviceProviderOrg, serviceProviderOrgReference.getReference());
+		eob.setOrganization(serviceProviderOrgReference);
 
 		/*
-		 * Set the coding system for the organization based on the service
-		 * provider ID qualifier code, or null if the code does not match a
-		 * known system.
+		 * TODO PDE coverage includes unique identifiers where other coverage
+		 * objects do not yet. Coverage identifiers probably need to be
+		 * standardized across the board?
 		 */
-		String serviceProviderIdSystem = null;
-		switch (record.serviceProviderIdQualiferCode) {
-		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_NPI:
-			serviceProviderIdSystem = CODING_SYSTEM_NPI_US;
-			break;
-		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_NCPDP:
-			serviceProviderIdSystem = CODING_SYSTEM_NCPDP;
-			break;
-		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_STLICENSE:
-			serviceProviderIdSystem = CODING_SYSTEM_ST_LICENSE;
-			break;
-		case PartDEventRow.SVC_PRVDR_ID_QLFYR_CD_FEDTAX:
-			serviceProviderIdSystem = CODING_SYSTEM_FED_TAX_NUM;
-			break;
-		}
-		org.addIdentifier().setSystem(serviceProviderIdSystem).setValue(record.serviceProviderId);
-		// TODO real URLs for coding systems?
-		// TODO insert org
-		eob.setOrganization(new Reference().setReference("Organization/" + org.getId()));
-
 		Coverage coverage = new Coverage();
-		coverage.setId(IdType.newRandomUuid());
-		// TODO coverage issuer reference to CMS Organization?
-		coverage.setPlan(record.planContractId);
-		coverage.setSubPlan(record.planBenefitPackageId);
-		eob.getCoverage().setCoverage(new Reference("Coverage/" + coverage.getId()));
+		Reference coverageRef = new Reference(
+				String.format("Coverage?identifier=%s|%s", CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, record.planContractId));
+		coverage.addIdentifier().setSystem(CODING_SYSTEM_PDE_PLAN_CONTRACT_ID).setValue(record.planContractId);
+		coverage.addIdentifier().setSystem(CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID)
+				.setValue(record.planBenefitPackageId);
+		coverage.setPlan(COVERAGE_PLAN);
+		coverage.setSubPlan(COVERAGE_PLAN_PART_D);
+		upsert(bundle, coverage, coverageRef.getReference());
+		eob.getCoverage().setCoverage(coverageRef);
 
 		/*
-		 * TODO eob.information when structures updated to store
-		 * PRCNG_EXCPTN_CD, CTSTRPHC_CVRG_CD value
+		 * TODO When updated to STU3, use eob.information to store values of
+		 * PRCNG_EXCPTN_CD, CTSTRPHC_CVRG_CD
 		 */
-
-		// TODO rest of mapping
 
 		insert(bundle, eob);
 		return new TransformedBundle(rifRecordEvent, bundle);
@@ -1325,6 +1308,18 @@ public final class DataTransformer {
 	}
 
 	/**
+	 * @param organizationNpi
+	 *            the {@link Organization#getIdentifier()} value to match (where
+	 *            {@link Identifier#getSystem()} is
+	 *            {@value #CODING_SYSTEM_NPI_US})
+	 * @return a {@link Reference} to the {@link Organization} resource that
+	 *         matches the specified parameters
+	 */
+	static Reference referenceOrganization(String organizationNpi) {
+		return new Reference(String.format("Organization?identifier=%s|%s", CODING_SYSTEM_NPI_US, organizationNpi));
+	}
+
+	/**
 	 * @param subPlan
 	 *            the {@link Coverage#getSubPlan()} value to match
 	 * @param subscriberPatientId
@@ -1334,7 +1329,7 @@ public final class DataTransformer {
 	 *         {@link Coverage#getPlan()} matches {@link #COVERAGE_PLAN} and the
 	 *         other parameters specified also match
 	 */
-	private static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
+	static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
 		return new Reference(String.format("Coverage?subscriber=%s&plan=%s&subplan=%s", subscriberPatientId,
 				COVERAGE_PLAN, subPlan));
 	}
@@ -1345,7 +1340,7 @@ public final class DataTransformer {
 	 * @return a {@link Reference} to the {@link Patient} resource that matches
 	 *         the specified parameters
 	 */
-	private static Reference referencePatient(String patientId) {
+	static Reference referencePatient(String patientId) {
 		return new Reference(String.format("Patient/%s", patientId));
 	}
 

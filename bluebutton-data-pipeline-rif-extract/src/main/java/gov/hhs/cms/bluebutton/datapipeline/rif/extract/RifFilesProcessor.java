@@ -351,7 +351,7 @@ public final class RifFilesProcessor {
 		 */
 		// pdeRow.brandGenericCode =
 		// csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD.ordinal()).charAt(0);
-		pdeRow.pharamcyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD.ordinal());
+		pdeRow.pharmacyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD.ordinal());
 		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD.ordinal());
 		pdeRow.submissionClarificationCode = parseOptString(
 				csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD.ordinal()));

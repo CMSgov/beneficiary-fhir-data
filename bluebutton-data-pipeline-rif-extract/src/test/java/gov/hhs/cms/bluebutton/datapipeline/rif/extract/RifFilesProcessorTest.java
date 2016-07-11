@@ -149,7 +149,7 @@ public final class RifFilesProcessorTest {
 		 * optional or not.
 		 */
 		// Assert.assertEquals(new Character('G'), pdeRow.brandGenericCode);
-		Assert.assertEquals("01", pdeRow.pharamcyTypeCode);
+		Assert.assertEquals("01", pdeRow.pharmacyTypeCode);
 		Assert.assertEquals("02", pdeRow.patientResidenceCode);
 		Assert.assertEquals("08", pdeRow.submissionClarificationCode.get());
 	}

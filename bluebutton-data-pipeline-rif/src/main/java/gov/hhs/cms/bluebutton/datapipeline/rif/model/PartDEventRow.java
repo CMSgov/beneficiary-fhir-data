@@ -28,13 +28,6 @@ public class PartDEventRow {
 	public static final int COMPOUND_CODE_NOT_COMPOUNDED = 1;
 	public static final int COMPOUND_CODE_COMPOUNDED = 2;
 
-	public static final String SVC_PRVDR_ID_QLFYR_CD_NPI = "01";
-	public static final String SVC_PRVDR_ID_QLFYR_CD_NCPDP = "07";
-	public static final String SVC_PRVDR_ID_QLFYR_CD_STLICENSE = "08";
-	public static final String SVC_PRVDR_ID_QLFYR_CD_FEDTAX = "11";
-
-	public static final String PRSCRBR_ID_QLFYR_CD_NPI = "01";
-
 	public static final Character DRUG_CVRD_STUS_CD_COVERED = new Character('C');
 	public static final Character DRUG_CVRD_STUS_CD_SUPPLEMENT = new Character('E');
 	public static final Character DRUG_CVRD_STUS_CD_OTC = new Character('O');
@@ -229,7 +222,7 @@ public class PartDEventRow {
 	/**
 	 * @see Column#PHRMCY_SRVC_TYPE_CD
 	 */
-	public String pharamcyTypeCode;
+	public String pharmacyTypeCode;
 
 	/**
 	 * @see Column#PTNT_RSDNC_CD
@@ -321,8 +314,8 @@ public class PartDEventRow {
 		builder.append(gapDiscountAmount);
 		builder.append(", brandGenericCode=");
 		builder.append(brandGenericCode);
-		builder.append(", pharamcyTypeCode=");
-		builder.append(pharamcyTypeCode);
+		builder.append(", pharmacyTypeCode=");
+		builder.append(pharmacyTypeCode);
 		builder.append(", patientResidenceCode=");
 		builder.append(patientResidenceCode);
 		builder.append(", submissionClarificationCode=");
