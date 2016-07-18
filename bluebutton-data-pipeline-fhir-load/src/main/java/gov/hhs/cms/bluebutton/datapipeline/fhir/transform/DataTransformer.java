@@ -1,5 +1,8 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -12,7 +15,9 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu21.model.Address;
 import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.dstu21.model.Bundle.BundleType;
 import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.CodeableConcept;
 import org.hl7.fhir.dstu21.model.Coding;
@@ -135,6 +140,8 @@ public final class DataTransformer {
 	 * CCW Data Dictionary: BENE_ID</a>.
 	 */
 	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
+
+	static final String CODING_SYSTEM_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
 
 	/**
 	 * See <a href=
@@ -936,9 +943,10 @@ public final class DataTransformer {
 			throw new BadCodeMonkeyException();
 
 		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
 
 		Patient beneficiary = new Patient();
-		beneficiary.setId("Patient/" + record.beneficiaryId);
+		beneficiary.setId("Patient/bene-" + record.beneficiaryId);
 		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID).setValue(record.beneficiaryId);
 		beneficiary.addAddress().setState(record.stateCode).setDistrict(record.countyCode)
 				.setPostalCode(record.postalCode);
@@ -952,7 +960,7 @@ public final class DataTransformer {
 		 */
 		Organization cms = new Organization();
 		cms.setName(COVERAGE_ISSUER);
-		upsert(bundle, cms, "Organization/?name=" + COVERAGE_ISSUER);
+		Reference cmsOrgRef = upsert(bundle, cms, referenceOrganization(COVERAGE_ISSUER).getReference());
 
 		/*
 		 * We don't have detailed enough data on this right now, so we'll just
@@ -962,23 +970,23 @@ public final class DataTransformer {
 		Coverage partA = new Coverage();
 		partA.setPlan(COVERAGE_PLAN);
 		partA.setSubPlan(COVERAGE_PLAN_PART_A);
-		partA.setIssuer(new Reference(cms.getId()));
-		partA.setSubscriber(new Reference(beneficiary.getId()));
+		partA.setIssuer(cmsOrgRef);
+		partA.setSubscriber(referencePatient(record.beneficiaryId));
 		insert(bundle, partA);
 
 		Coverage partB = new Coverage();
 		partB.setPlan(COVERAGE_PLAN);
 		partB.setSubPlan(COVERAGE_PLAN_PART_B);
-		partB.setIssuer(new Reference(cms.getId()));
-		partB.setSubscriber(new Reference(beneficiary.getId()));
-		insert(bundle, partA);
+		partB.setIssuer(cmsOrgRef);
+		partB.setSubscriber(referencePatient(record.beneficiaryId));
+		insert(bundle, partB);
 
 		Coverage partD = new Coverage();
 		partD.setPlan(COVERAGE_PLAN);
 		partD.setSubPlan(COVERAGE_PLAN_PART_D);
-		partD.setIssuer(new Reference(cms.getId()));
-		partD.setSubscriber(new Reference(beneficiary.getId()));
-		insert(bundle, partA);
+		partD.setIssuer(cmsOrgRef);
+		partD.setSubscriber(referencePatient(record.beneficiaryId));
+		insert(bundle, partD);
 
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
@@ -1000,8 +1008,11 @@ public final class DataTransformer {
 			throw new BadCodeMonkeyException();
 
 		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.setId("ExplanationOfBenefit/" + record.partDEventId);
+		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
 		// TODO Specify eob.type once STU3 is available (pharmacy)
 		Reference patientRef = referencePatient(record.beneficiaryId);
 		eob.setPatient(patientRef);
@@ -1201,9 +1212,10 @@ public final class DataTransformer {
 			throw new BadCodeMonkeyException();
 
 		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/" + claimGroup.claimId);
+		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 
@@ -1217,12 +1229,12 @@ public final class DataTransformer {
 		 */
 		Practitioner referrer = new Practitioner();
 		referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.referringPhysicianNpi);
-		Reference referrerRef = referencePractitioner(claimGroup.referringPhysicianNpi);
-		upsert(bundle, referrer, referrerRef.getReference());
+		Reference referrerReference = upsert(bundle, referrer,
+				referencePractitioner(claimGroup.referringPhysicianNpi).getReference());
 		ReferralRequest referral = new ReferralRequest();
 		referral.setStatus(ReferralStatus.COMPLETED);
 		referral.setPatient(referencePatient(claimGroup.beneficiaryId));
-		referral.addRecipient(referrerRef);
+		referral.addRecipient(referrerReference);
 		// Set the ReferralRequest as a contained resource in the EOB:
 		eob.setReferral(new Reference(referral));
 
@@ -1265,6 +1277,19 @@ public final class DataTransformer {
 	}
 
 	/**
+	 * @param urlText
+	 *            the URL or URL portion to be encoded
+	 * @return a URL-encoded version of the specified text
+	 */
+	private static String urlEncode(String urlText) {
+		try {
+			return URLEncoder.encode(urlText, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+	}
+
+	/**
 	 * Adds the specified {@link Resource}s to the specified {@link Bundle},
 	 * setting it as a <a href="http://hl7-fhir.github.io/http.html#insert">FHIR
 	 * "insert" operation</a> if {@link Resource#getId()} is <code>null</code>,
@@ -1276,18 +1301,23 @@ public final class DataTransformer {
 	 * @param resource
 	 *            the FHIR {@link Resource} to upsert into the specified
 	 *            {@link Bundle}
+	 * @return a {@link Reference} instance, which must be used for any
+	 *         references to the {@link Resource} within the same {@link Bundle}
 	 */
-	private static void insert(Bundle bundle, Resource resource) {
+	private static Reference insert(Bundle bundle, Resource resource) {
 		if (bundle == null)
 			throw new IllegalArgumentException();
 		if (resource == null)
 			throw new IllegalArgumentException();
 
+		BundleEntryComponent bundleEntry = bundle.addEntry();
 		if (resource.getId() == null)
-			bundle.addEntry().setResource(resource).getRequest().setMethod(HTTPVerb.POST);
+			bundleEntry.setResource(resource).getRequest().setMethod(HTTPVerb.POST);
 		else
-			bundle.addEntry().setFullUrl(resource.getId()).setResource(resource).getRequest().setMethod(HTTPVerb.PUT)
-					.setUrl(resource.getId());
+			bundleEntry.setResource(resource).getRequest().setMethod(HTTPVerb.PUT).setUrl(resource.getId());
+
+		Reference bundleEntryReference = setFullUrl(bundleEntry);
+		return bundleEntryReference;
 	}
 
 	/**
@@ -1298,7 +1328,7 @@ public final class DataTransformer {
 	 * 
 	 * @param bundle
 	 *            the {@link Bundle} to include the resource in
-	 * @param resources
+	 * @param resource
 	 *            the FHIR {@link Resource} to upsert into the specified
 	 *            {@link Bundle}
 	 * @param resourceUrl
@@ -1309,8 +1339,10 @@ public final class DataTransformer {
 	 *            of this here: <a href=
 	 *            "http://hl7-fhir.github.io/bundle-transaction.xml.html">
 	 *            Bundle- transaction.xml</a>)
+	 * @return a {@link Reference} instance, which must be used for any
+	 *         references to the {@link Resource} within the same {@link Bundle}
 	 */
-	private static void upsert(Bundle bundle, Resource resource, String resourceUrl) {
+	private static Reference upsert(Bundle bundle, Resource resource, String resourceUrl) {
 		if (bundle == null)
 			throw new IllegalArgumentException();
 		if (resource == null)
@@ -1319,7 +1351,64 @@ public final class DataTransformer {
 		if (resource.getId() != null)
 			throw new IllegalArgumentException("FHIR conditional updates don't allow IDs to be specified client-side");
 
-		bundle.addEntry().setResource(resource).getRequest().setMethod(HTTPVerb.PUT).setUrl(resourceUrl);
+		BundleEntryComponent bundleEntry = bundle.addEntry();
+		bundleEntry.setResource(resource).getRequest().setMethod(HTTPVerb.PUT).setUrl(resourceUrl);
+
+		Reference bundleEntryReference = setFullUrl(bundleEntry);
+		return bundleEntryReference;
+	}
+
+	/**
+	 * <p>
+	 * Sets the {@link BundleEntryComponent#getFullUrl()} field of the specified
+	 * {@link BundleEntryComponent}. This is a required field, and a bit tricky:
+	 * </p>
+	 * <ol>
+	 * <li>Each entry may use a UUID (i.e. "<code>urn:uuid:...</code>") as its
+	 * URL. If so, other resources within the same {@link Bundle} may reference
+	 * that UUID when defining relationships with that resource.</li>
+	 * <li>Optionally: If the resource is known to <strong>already</strong>
+	 * exist on the server, the entry URL may be set to the absolute URL of that
+	 * resource. Again: this is optional; existing resources included in the
+	 * bundle may also be assigned and referred to via a bundle-specific UUID.
+	 * </li>
+	 * </ol>
+	 * 
+	 * 
+	 * @param bundleEntry
+	 *            the {@link BundleEntryComponent} to modify
+	 * @return a {@link Reference} to the {@link Resource} in the specified
+	 *         {@link BundleEntryComponent}'s that can be used by other
+	 *         resources in the same {@link Bundle}
+	 */
+	private static Reference setFullUrl(BundleEntryComponent bundleEntry) {
+		/*
+		 * For sanity, only this method should be used to set this field. And
+		 * only once per bundle entry.
+		 */
+		if (bundleEntry.getFullUrl() != null)
+			throw new BadCodeMonkeyException();
+
+		/*
+		 * The logic here is super simple. ... So why is this a method, you
+		 * might ask? Mostly just so there's a single place for the explanation
+		 * in this method's JavaDoc, which took quite a while to figure out.
+		 */
+
+		IdType entryId = IdType.newRandomUuid();
+		bundleEntry.setFullUrl(entryId.getValue());
+
+		return new Reference(entryId);
+	}
+
+	/**
+	 * @param orgName
+	 *            the {@link Organization#getName()} value to match
+	 * @return a {@link Reference} to the {@link Organization} resource that
+	 *         matches the specified parameters
+	 */
+	private Reference referenceOrganization(String orgName) {
+		return new Reference(String.format("Organization?name=" + urlEncode(orgName)));
 	}
 
 	/**
@@ -1345,8 +1434,8 @@ public final class DataTransformer {
 	 *         other parameters specified also match
 	 */
 	static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
-		return new Reference(String.format("Coverage?subscriber=%s&plan=%s&subplan=%s", subscriberPatientId,
-				COVERAGE_PLAN, subPlan));
+		return new Reference(String.format("Coverage?subscriber=Patient/bene-%s&plan=%s&subplan=%s",
+				urlEncode(subscriberPatientId), urlEncode(COVERAGE_PLAN), urlEncode(subPlan)));
 	}
 
 	/**
@@ -1356,7 +1445,7 @@ public final class DataTransformer {
 	 *         the specified parameters
 	 */
 	static Reference referencePatient(String patientId) {
-		return new Reference(String.format("Patient/%s", patientId));
+		return new Reference(String.format("Patient/bene-%s", urlEncode(patientId)));
 	}
 
 	/**
@@ -1368,7 +1457,8 @@ public final class DataTransformer {
 	 *         matches the specified parameters
 	 */
 	static Reference referencePractitioner(String practitionerNpi) {
-		return new Reference(String.format("Practitioner/%s|%s", CODING_SYSTEM_NPI_US, practitionerNpi));
+		return new Reference(String.format("Practitioner?identifier=%s|%s", urlEncode(CODING_SYSTEM_NPI_US),
+				urlEncode(practitionerNpi)));
 	}
 
 	/**

@@ -6,10 +6,8 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -149,18 +147,6 @@ public final class FhirLoader {
 	 */
 	private FhirBundleResult process(TransformedBundle inputBundle) {
 		Timer.Context timerContextBatch = metrics.timer(MetricRegistry.name(getClass(), "stream", "bundle")).time();
-
-		/*
-		 * Set the bundle entries' very very required `fullUrl` field. This has
-		 * to be set here, as the Transformer doesn't (and shouldn't) know the
-		 * FHIR server's base URL.
-		 */
-		for (BundleEntryComponent entry : inputBundle.getResult().getEntry()) {
-			if (entry.getResource().hasId() && !entry.getResource().getId().startsWith("urn:"))
-				entry.setFullUrl(String.format("%s/%s", client.getServerBase(), entry.getResource().getId()));
-			else
-				entry.setFullUrl(IdType.newRandomUuid().asStringValue());
-		}
 
 		// Push the input bundle.
 		int inputBundleCount = inputBundle.getResult().getEntry().size();
