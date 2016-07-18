@@ -2,7 +2,9 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -607,6 +609,15 @@ public class PartDEventRow {
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt">
 		 * CCW Data Dictionary: SUBMSN_CLR_CD</a>.
 		 */
-		SUBMSN_CLR_CD
+		SUBMSN_CLR_CD;
+
+		/**
+		 * @return a {@link String} array containing all of the RIF column
+		 *         names, in order
+		 */
+		public static String[] getColumnNames() {
+			return Arrays.stream(values()).map(c -> c.name()).collect(Collectors.toList())
+					.toArray(new String[values().length]);
+		}
 	}
 }

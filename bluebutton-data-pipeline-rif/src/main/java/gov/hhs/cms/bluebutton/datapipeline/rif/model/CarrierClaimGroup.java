@@ -2,9 +2,11 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -860,6 +862,15 @@ public final class CarrierClaimGroup {
 		 * CCW Data Dictionary: CARR_LINE_ANSTHSA_UNIT_CNT</a>.
 		 */
 		CARR_LINE_ANSTHSA_UNIT_CNT;
+
+		/**
+		 * @return a {@link String} array containing all of the RIF column
+		 *         names, in order
+		 */
+		public static String[] getColumnNames() {
+			return Arrays.stream(values()).map(c -> c.name()).collect(Collectors.toList())
+					.toArray(new String[values().length]);
+		}
 	}
 
 	/**

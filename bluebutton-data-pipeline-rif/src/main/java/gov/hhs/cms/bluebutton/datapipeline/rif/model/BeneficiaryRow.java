@@ -1,6 +1,8 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -270,5 +272,14 @@ public final class BeneficiaryRow {
 		 * Type: <code>CHAR</code>, max chars: 1.
 		 */
 		BENE_MDL_NAME;
+
+		/**
+		 * @return a {@link String} array containing all of the RIF column
+		 *         names, in order
+		 */
+		public static String[] getColumnNames() {
+			return Arrays.stream(values()).map(c -> c.name()).collect(Collectors.toList())
+					.toArray(new String[values().length]);
+		}
 	}
 }

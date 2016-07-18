@@ -37,11 +37,11 @@ public final class RifFilesProcessorTest {
 
 	/**
 	 * Ensures that {@link RifFilesProcessor} can correctly handle
-	 * {@link StaticRifResource#BENES_1}.
+	 * {@link StaticRifResource#SAMPLE_A_BENES}.
 	 */
 	@Test
 	public void process1BeneRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.BENES_1);
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_BENES);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
 
@@ -50,10 +50,10 @@ public final class RifFilesProcessorTest {
 
 		Assert.assertNotNull(rifEvents);
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.BENES_1.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
-		Assert.assertEquals(StaticRifResource.BENES_1.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRifFileType(), rifRecordEvent.getFile().getFileType());
 		Assert.assertNotNull(rifRecordEvent.getRecord());
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryRow);
 
@@ -69,11 +69,11 @@ public final class RifFilesProcessorTest {
 
 	/**
 	 * Ensures that {@link RifFilesProcessor} can correctly handle
-	 * {@link StaticRifResource#BENES_1000}.
+	 * {@link StaticRifResource#SAMPLE_B_BENES}.
 	 */
 	@Test
 	public void process1000BeneRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.BENES_1000);
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_BENES);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
 
@@ -82,18 +82,18 @@ public final class RifFilesProcessorTest {
 
 		Assert.assertNotNull(rifEvents);
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.BENES_1000.getRecordCount(), rifEventsList.size());
-		Assert.assertEquals(StaticRifResource.BENES_1000.getRifFileType(),
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
 	}
 
 	/**
 	 * Ensures that {@link RifFilesProcessor} can correctly handle
-	 * {@link StaticRifResource#PDE_1}.
+	 * {@link StaticRifResource#SAMPLE_A_PDE}.
 	 */
 	@Test
 	public void process1PDERecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.PDE_1);
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_PDE);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
 
@@ -102,10 +102,10 @@ public final class RifFilesProcessorTest {
 
 		Assert.assertNotNull(rifEvents);
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.PDE_1.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_PDE.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
-		Assert.assertEquals(StaticRifResource.PDE_1.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_PDE.getRifFileType(), rifRecordEvent.getFile().getFileType());
 		Assert.assertNotNull(rifRecordEvent.getRecord());
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof PartDEventRow);
 
@@ -113,7 +113,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(1, pdeRow.version);
 		Assert.assertEquals(RecordAction.INSERT, pdeRow.recordAction);
 		Assert.assertEquals("89", pdeRow.partDEventId);
-		Assert.assertEquals("103", pdeRow.beneficiaryId);
+		Assert.assertEquals("1", pdeRow.beneficiaryId);
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.prescriptionFillDate);
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 27), pdeRow.paymentDate.get());
 		Assert.assertEquals("01", pdeRow.serviceProviderIdQualiferCode);
@@ -158,11 +158,11 @@ public final class RifFilesProcessorTest {
 
 	/**
 	 * Ensures that {@link RifFilesProcessor} can correctly handle
-	 * {@link StaticRifResource#PDE_1195}.
+	 * {@link StaticRifResource#SAMPLE_B_PDE}.
 	 */
 	@Test
 	public void process1195PDERecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.PDE_1195);
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_PDE);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
 
@@ -171,17 +171,17 @@ public final class RifFilesProcessorTest {
 
 		Assert.assertNotNull(rifEvents);
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.PDE_1195.getRecordCount(), rifEventsList.size());
-		Assert.assertEquals(StaticRifResource.PDE_1195.getRifFileType(), rifEventsList.get(0).getFile().getFileType());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_PDE.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_PDE.getRifFileType(), rifEventsList.get(0).getFile().getFileType());
 	}
 
 	/**
 	 * Ensures that {@link RifFilesProcessor} can correctly handle
-	 * {@link StaticRifResource#CARRIER_1}.
+	 * {@link StaticRifResource#SAMPLE_A_CARRIER}.
 	 */
 	@Test
 	public void process1CarrierClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.CARRIER_1);
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_CARRIER);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
 
@@ -190,10 +190,10 @@ public final class RifFilesProcessorTest {
 
 		Assert.assertNotNull(rifEvents);
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.CARRIER_1.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
-		Assert.assertEquals(StaticRifResource.CARRIER_1.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRifFileType(), rifRecordEvent.getFile().getFileType());
 		Assert.assertNotNull(rifRecordEvent.getRecord());
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof CarrierClaimGroup);
 
@@ -201,7 +201,7 @@ public final class RifFilesProcessorTest {
 		CarrierClaimGroup claimGroup = (CarrierClaimGroup) rifRecordEvent.getRecord();
 		Assert.assertEquals(1, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
-		Assert.assertEquals("91", claimGroup.beneficiaryId);
+		Assert.assertEquals("1", claimGroup.beneficiaryId);
 		Assert.assertEquals("1831831620", claimGroup.claimId);
 		Assert.assertEquals("1831831620", claimGroup.claimId);
 		Assert.assertEquals(LocalDate.of(2015, 10, 27), claimGroup.dateFrom);
@@ -227,11 +227,11 @@ public final class RifFilesProcessorTest {
 
 	/**
 	 * Ensures that {@link RifFilesProcessor} can correctly handle
-	 * {@link StaticRifResource#CARRIER_1091}.
+	 * {@link StaticRifResource#SAMPLE_B_CARRIER}.
 	 */
 	@Test
 	public void process1091CarrierClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.CARRIER_1091);
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_CARRIER);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
 
@@ -240,8 +240,8 @@ public final class RifFilesProcessorTest {
 
 		Assert.assertNotNull(rifEvents);
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.CARRIER_1091.getRecordCount(), rifEventsList.size());
-		Assert.assertEquals(StaticRifResource.CARRIER_1091.getRifFileType(),
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_CARRIER.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_CARRIER.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
 	}
 }
