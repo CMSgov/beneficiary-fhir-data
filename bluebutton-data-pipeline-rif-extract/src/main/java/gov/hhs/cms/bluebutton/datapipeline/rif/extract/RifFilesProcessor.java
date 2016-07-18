@@ -53,7 +53,7 @@ public final class RifFilesProcessor {
 	 * FIXME The data uses a two-digit year format, which is awful. Just awful.
 	 */
 	private final static DateTimeFormatter RIF_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
-			.appendPattern("dd-MMM-yy").toFormatter();
+			.appendPattern("dd-MMM-yyyy").toFormatter();
 
 	/**
 	 * <p>
@@ -213,7 +213,7 @@ public final class RifFilesProcessor {
 	 * @return a {@link CSVParser} for the specified {@link RifFile}
 	 */
 	private static CSVParser createCsvParser(RifFile file) {
-		CSVFormat csvFormat = CSVFormat.EXCEL.withHeader((String[]) null).withDelimiter('|').withEscape('\\');
+		CSVFormat csvFormat = CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
 
 		InputStream fileStream = file.open();
 		BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
