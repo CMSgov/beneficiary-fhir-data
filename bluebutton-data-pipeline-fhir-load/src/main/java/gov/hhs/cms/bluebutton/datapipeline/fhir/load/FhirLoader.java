@@ -57,7 +57,7 @@ public final class FhirLoader {
 		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
 		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
 		fhirClientLogging.setLogRequestBody(LOGGER.isTraceEnabled());
-		fhirClientLogging.setLogResponseBody(false);
+		fhirClientLogging.setLogResponseBody(LOGGER.isTraceEnabled());
 		if (LOGGER.isInfoEnabled())
 			client.registerInterceptor(fhirClientLogging);
 
