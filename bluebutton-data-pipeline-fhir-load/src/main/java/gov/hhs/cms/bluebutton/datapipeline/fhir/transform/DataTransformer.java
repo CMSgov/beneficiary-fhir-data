@@ -1011,7 +1011,6 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/" + record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
 		// TODO Specify eob.type once STU3 is available (pharmacy)
 		Reference patientRef = referencePatient(record.beneficiaryId);
@@ -1133,7 +1132,7 @@ public final class DataTransformer {
 		 * Upsert Medication using NDC as the ID.
 		 */
 		Medication medication = new Medication();
-		Reference medicationRef = new Reference("Medication/" + record.nationalDrugCode);
+		Reference medicationRef = new Reference("Medication/ndc-" + record.nationalDrugCode);
 		CodeableConcept ndcConcept = new CodeableConcept();
 		ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode);
 		medication.setCode(ndcConcept);
@@ -1164,10 +1163,10 @@ public final class DataTransformer {
 
 		Organization serviceProviderOrg = new Organization();
 		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.serviceProviderId);
-		Reference serviceProviderOrgReference = referenceOrganizationByNpi(record.serviceProviderId);
 		serviceProviderOrg.setType(new CodeableConcept().addCoding(
 				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharmacyTypeCode)));
-		upsert(bundle, serviceProviderOrg, serviceProviderOrgReference.getReference());
+		Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
+				referenceOrganizationByNpi(record.serviceProviderId).getReference());
 		eob.setOrganization(serviceProviderOrgReference);
 
 		/*
