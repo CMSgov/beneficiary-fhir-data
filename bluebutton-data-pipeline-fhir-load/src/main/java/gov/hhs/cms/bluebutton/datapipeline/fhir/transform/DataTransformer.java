@@ -141,14 +141,14 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
 
-	static final String CODING_SYSTEM_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
+	public static final String CODING_SYSTEM_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
 
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
 	 * CCW Data Dictionary: PDE_ID</a>.
 	 */
-	static final String CODING_SYSTEM_CCW_PDE_ID = "CCW.PDE_ID";
+	public static final String CODING_SYSTEM_CCW_PDE_ID = "CCW.PDE_ID";
 
 	/**
 	 * See <a href=

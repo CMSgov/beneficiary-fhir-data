@@ -15,6 +15,10 @@ import javax.inject.Inject;
 import javax.jdo.PersistenceManager;
 
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
+import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -36,6 +40,9 @@ import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
@@ -52,6 +59,9 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
@@ -190,17 +200,26 @@ public final class FhirLoaderIT {
 	 * @throws URISyntaxException
 	 *             (won't happen: URI is hardcoded)
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void loadRifDataSampleA() throws URISyntaxException {
 		// Generate the sample RIF data to feed through the pipeline.
 		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_A.getResources();
 		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
-		Stream<RifFile> rifFiles = rifGenerator.generate();
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+		Stream<RifFile> rifFilesStream = rifGenerator.generate();
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
 
 		// Initialize the Extract phase of the pipeline.
 		RifFilesProcessor processor = new RifFilesProcessor();
 		Stream<RifRecordEvent<?>> rifRecordEvents = processor.process(rifFilesEvent);
+
+		// Grab a copy of that stream (for testing, below).
+		List<RifRecordEvent<?>> rifRecordEventsCopy = rifRecordEvents.collect(Collectors.toList());
+		RifRecordEvent<BeneficiaryRow> beneRecordEvent = (RifRecordEvent<BeneficiaryRow>) rifRecordEventsCopy.get(0);
+		RifRecordEvent<CarrierClaimGroup> carrierRecordEvent = (RifRecordEvent<CarrierClaimGroup>) rifRecordEventsCopy
+				.get(1);
+		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopy.get(2);
+		rifRecordEvents = rifRecordEventsCopy.stream();
 
 		// Initialize the Transform phase of the pipeline.
 		DataTransformer transformer = new DataTransformer();
@@ -232,13 +251,74 @@ public final class FhirLoaderIT {
 
 		// Verify the results.
 		Assert.assertNotNull(resultsList);
-		/*
-		 * FIXME this test is hilariously broken right now, but we're leaving it
-		 * in as all of our ITs are currently disabled in the CI builds,
-		 * anyways.
-		 */
-		Assert.assertEquals(42, resultsList.size());
+		Assert.assertEquals(rifResources.length, resultsList.size());
+		assertResultIsLegit(resultsList);
 
-		// TODO verify results by actually querying the server.
+		/*
+		 * Run some spot-checks against the server, to verify that things look
+		 * as expected.
+		 */
+		IGenericClient client = createFhirClient(fhirServer);
+		Assert.assertEquals(1,
+				client.search().forResource(Patient.class)
+						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
+						.returnBundle(Bundle.class).execute().getTotal());
+		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
+				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+						carrierRecordEvent.getRecord().claimId))
+				.returnBundle(Bundle.class).execute().getTotal());
+		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
+				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
+						pdeRecordEvent.getRecord().partDEventId))
+				.returnBundle(Bundle.class).execute().getTotal());
+	}
+
+	/**
+	 * Verifies that the specified {@link FhirBundleResult} has legit output,
+	 * given its input. Basically, just make sure that it contains the expected
+	 * number of responses and that those responses all have <code>2XX</code>
+	 * HTTP status codes.
+	 * 
+	 * @param resultsList
+	 *            the {@link FhirBundleResult}s to verify
+	 */
+	private static void assertResultIsLegit(List<FhirBundleResult> resultsList) {
+		/*
+		 * Verify each response (one per bundle that was sent, so one per
+		 * bene/claim/event).
+		 */
+		for (FhirBundleResult bundleResult : resultsList) {
+			Assert.assertEquals(bundleResult.getInputBundle().getResult().getEntry().size(),
+					bundleResult.getOutputBundle().getEntry().size());
+
+			// Verify each entry (one per resource that was in the bundle).
+			for (BundleEntryComponent resultEntry : bundleResult.getOutputBundle().getEntry()) {
+				Assert.assertNotNull(resultEntry.getResponse());
+				Assert.assertTrue("Invalid status: " + resultEntry.getResponse().getStatus(),
+						resultEntry.getResponse().getStatus().matches("^2\\d\\d .*$"));
+			}
+		}
+	}
+
+	/**
+	 * @param fhirServer
+	 *            the "base" FHIR API endpoint of the server to create a client
+	 *            for
+	 * @return a FHIR {@link IGenericClient} that can be used to query the
+	 *         specified FHIR server
+	 */
+	private static IGenericClient createFhirClient(URI fhirServer) {
+		FhirContext ctx = FhirContext.forDstu2_1();
+		IGenericClient client = ctx.newRestfulGenericClient(fhirServer.toString());
+		LoggingInterceptor clientLogger = new LoggingInterceptor();
+
+		// These can be enabled here, when needed.
+		clientLogger.setLogRequestBody(false);
+		clientLogger.setLogResponseBody(false);
+
+		client.registerInterceptor(clientLogger);
+		return client;
 	}
 }
