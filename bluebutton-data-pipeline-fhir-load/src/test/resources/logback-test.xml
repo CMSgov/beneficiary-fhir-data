@@ -12,7 +12,7 @@
 	<!-- At 'info', this will ensure that request and response headers are logged. 
 		At 'trace', this will ensure that request and response bodies are logged. -->
 	<logger name="gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader"
-		level="info" />
+		level="off" />
 
 	<!-- This logger should be controlled by modifying the 'gov.**.FhirLoader' 
 		levels, as specified above. -->
