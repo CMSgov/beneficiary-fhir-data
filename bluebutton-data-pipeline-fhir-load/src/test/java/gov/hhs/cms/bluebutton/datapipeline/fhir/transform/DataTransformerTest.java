@@ -756,7 +756,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, pdeRecord.serviceProviderId,
 				organization.getIdentifier());
 		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(DataTransformer.referenceOrganization(pdeRecord.serviceProviderId).getReference(),
+		Assert.assertEquals(DataTransformer.referenceOrganizationByNpi(pdeRecord.serviceProviderId).getReference(),
 				organizationEntry.getRequest().getUrl());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, pdeRecord.pharmacyTypeCode,
 				organization.getType().getCoding().get(0));

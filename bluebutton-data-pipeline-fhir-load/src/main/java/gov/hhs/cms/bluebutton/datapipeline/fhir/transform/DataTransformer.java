@@ -960,7 +960,7 @@ public final class DataTransformer {
 		 */
 		Organization cms = new Organization();
 		cms.setName(COVERAGE_ISSUER);
-		Reference cmsOrgRef = upsert(bundle, cms, referenceOrganization(COVERAGE_ISSUER).getReference());
+		Reference cmsOrgRef = upsert(bundle, cms, referenceOrganizationByName(COVERAGE_ISSUER).getReference());
 
 		/*
 		 * We don't have detailed enough data on this right now, so we'll just
@@ -1164,7 +1164,7 @@ public final class DataTransformer {
 
 		Organization serviceProviderOrg = new Organization();
 		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.serviceProviderId);
-		Reference serviceProviderOrgReference = referenceOrganization(record.serviceProviderId);
+		Reference serviceProviderOrgReference = referenceOrganizationByNpi(record.serviceProviderId);
 		serviceProviderOrg.setType(new CodeableConcept().addCoding(
 				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharmacyTypeCode)));
 		upsert(bundle, serviceProviderOrg, serviceProviderOrgReference.getReference());
@@ -1407,7 +1407,7 @@ public final class DataTransformer {
 	 * @return a {@link Reference} to the {@link Organization} resource that
 	 *         matches the specified parameters
 	 */
-	private Reference referenceOrganization(String orgName) {
+	private Reference referenceOrganizationByName(String orgName) {
 		return new Reference(String.format("Organization?name=" + urlEncode(orgName)));
 	}
 
@@ -1419,7 +1419,7 @@ public final class DataTransformer {
 	 * @return a {@link Reference} to the {@link Organization} resource that
 	 *         matches the specified parameters
 	 */
-	static Reference referenceOrganization(String organizationNpi) {
+	static Reference referenceOrganizationByNpi(String organizationNpi) {
 		return new Reference(String.format("Organization?identifier=%s|%s", CODING_SYSTEM_NPI_US, organizationNpi));
 	}
 

@@ -5,7 +5,7 @@ package gov.hhs.cms.bluebutton.datapipeline.sampledata;
  * together.
  */
 public enum StaticRifResourceGroup {
-	SAMPLE_A(StaticRifResource.BENES_1, StaticRifResource.CARRIER_1, StaticRifResource.PDE_1);
+	SAMPLE_A(StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_CARRIER, StaticRifResource.SAMPLE_A_PDE);
 
 	private final StaticRifResource[] resources;
 
