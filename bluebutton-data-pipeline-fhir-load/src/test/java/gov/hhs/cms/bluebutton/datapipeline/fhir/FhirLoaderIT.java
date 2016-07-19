@@ -195,7 +195,8 @@ public final class FhirLoaderIT {
 	/**
 	 * Verifies that the entire data pipeline works correctly: all the way from
 	 * generating sample data through extracting, transform, and finally loading
-	 * that data into a live FHIR server. Runs against XXX.
+	 * that data into a live FHIR server. Runs against
+	 * {@link StaticRifResourceGroup#SAMPLE_A}.
 	 * 
 	 * @throws URISyntaxException
 	 *             (won't happen: URI is hardcoded)
