@@ -16,8 +16,8 @@ import javax.jdo.PersistenceManager;
 
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -274,6 +274,76 @@ public final class FhirLoaderIT {
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
 						pdeRecordEvent.getRecord().partDEventId))
 				.returnBundle(Bundle.class).execute().getTotal());
+	}
+
+	/**
+	 * Verifies that the entire data pipeline works correctly: all the way from
+	 * generating sample data through extracting, transform, and finally loading
+	 * that data into a live FHIR server. Runs against
+	 * {@link StaticRifResourceGroup#SAMPLE_B}.
+	 * 
+	 * @throws URISyntaxException
+	 *             (won't happen: URI is hardcoded)
+	 */
+	@Test
+	public void loadRifDataSampleB() throws URISyntaxException {
+		// Generate the sample RIF data to feed through the pipeline.
+		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_B.getResources();
+		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
+		Stream<RifFile> rifFilesStream = rifGenerator.generate();
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
+
+		// Initialize the Extract phase of the pipeline.
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifRecordEvents = processor.process(rifFilesEvent);
+
+		// Initialize the Transform phase of the pipeline.
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
+
+		// Setup the metrics for FhirLoader to use.
+		MetricRegistry fhirMetrics = new MetricRegistry();
+		fhirMetrics.registerAll(new MemoryUsageGaugeSet());
+		fhirMetrics.registerAll(new GarbageCollectorMetricSet());
+		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
+		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
+
+		// Initialize the Load phase of the pipeline.
+		// URI fhirServer = new
+		// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
+		URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
+		LoadAppOptions options = new LoadAppOptions(fhirServer);
+		FhirLoader loader = new FhirLoader(fhirMetrics, options);
+		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
+
+		/*
+		 * Collect all of the results, which will actually start data processing
+		 * through the pipeline (streams are lazy).
+		 */
+		List<FhirBundleResult> resultsList = resultsStream.collect(Collectors.toList());
+		LOGGER.info("FHIR resources loaded.");
+		fhirMetricsReporter.stop();
+		fhirMetricsReporter.report();
+
+		// Verify the results.
+		Assert.assertNotNull(resultsList);
+		assertResultIsLegit(resultsList);
+
+		/*
+		 * Run some spot-checks against the server, to verify that things look
+		 * as expected.
+		 */
+		IGenericClient client = createFhirClient(fhirServer);
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(),
+				client.search().forResource(Patient.class).returnBundle(Bundle.class).execute().getTotal());
+
+		/*
+		 * Note that we're not really testing much for correctness here. That's
+		 * mostly covered in DataTransformerTest. Instead, the main goal here is
+		 * to ensure that all of the FHIR resources we're pushing are accepted
+		 * by the server as valid. Also: this particular test case benchmarks
+		 * performance a bit, given the number of resources it's pushing.
+		 */
 	}
 
 	/**
