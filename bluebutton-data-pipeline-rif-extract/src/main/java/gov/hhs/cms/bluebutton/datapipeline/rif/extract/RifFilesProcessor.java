@@ -47,6 +47,12 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
  * Contains services responsible for handling new RIF files.
  */
 public final class RifFilesProcessor {
+	/**
+	 * The {@link BeneficiaryRow#version}, {@link CarrierClaimGroup#version},
+	 * etc. value that is currently supported.
+	 */
+	public static final int RECORD_FORMAT_VERSION = 5;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
 	/**
@@ -277,7 +283,7 @@ public final class RifFilesProcessor {
 		// TODO finish mapping the rest of the columns
 
 		// Sanity check:
-		if (1 != beneficiaryRow.version)
+		if (RECORD_FORMAT_VERSION != beneficiaryRow.version)
 			throw new IllegalArgumentException("Unsupported record version: " + beneficiaryRow);
 
 		return beneficiaryRow;
@@ -297,7 +303,7 @@ public final class RifFilesProcessor {
 		PartDEventRow pdeRow = new PartDEventRow();
 		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION.ordinal()));
 		// Sanity check:
-		if (1 != pdeRow.version)
+		if (RECORD_FORMAT_VERSION != pdeRow.version)
 			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
 
 		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND.ordinal()));
@@ -419,7 +425,7 @@ public final class RifFilesProcessor {
 		}
 
 		// Sanity check:
-		if (1 != claimGroup.version)
+		if (RECORD_FORMAT_VERSION != claimGroup.version)
 			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
 
 		return claimGroup;

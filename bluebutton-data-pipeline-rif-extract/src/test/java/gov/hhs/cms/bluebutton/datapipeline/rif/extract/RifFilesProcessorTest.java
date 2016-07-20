@@ -58,7 +58,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryRow);
 
 		BeneficiaryRow beneRow = (BeneficiaryRow) rifRecordEvent.getRecord();
-		Assert.assertEquals(1, beneRow.version);
+		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, beneRow.version);
 		Assert.assertEquals(RecordAction.INSERT, beneRow.recordAction);
 		Assert.assertEquals("1", beneRow.beneficiaryId);
 		Assert.assertEquals("CT", beneRow.stateCode);
@@ -110,7 +110,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof PartDEventRow);
 
 		PartDEventRow pdeRow = (PartDEventRow) rifRecordEvent.getRecord();
-		Assert.assertEquals(1, pdeRow.version);
+		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, pdeRow.version);
 		Assert.assertEquals(RecordAction.INSERT, pdeRow.recordAction);
 		Assert.assertEquals("89", pdeRow.partDEventId);
 		Assert.assertEquals("1", pdeRow.beneficiaryId);
@@ -199,7 +199,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		CarrierClaimGroup claimGroup = (CarrierClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(1, claimGroup.version);
+		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
 		Assert.assertEquals("1", claimGroup.beneficiaryId);
 		Assert.assertEquals("1831831620", claimGroup.claimId);

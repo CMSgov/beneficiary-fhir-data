@@ -1,6 +1,5 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -52,32 +51,8 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 	 *            the {@link CsvRecordGrouper} to use
 	 */
 	public CsvRecordGroupingIterator(CSVParser parser, CsvRecordGrouper grouper) {
-		this.singleRecordIter = groupingBugWorkaround(parser.iterator(), grouper);
+		this.singleRecordIter = parser.iterator();
 		this.grouper = grouper;
-	}
-
-	/**
-	 * @param iterator
-	 *            the {@link CSVRecord} {@link Iterator} to fix claim grouping
-	 *            issues in
-	 * @param grouper
-	 *            the {@link CsvRecordGrouper} being used for these records
-	 * @return a new {@link CSVRecord} {@link Iterator}, with records properly
-	 *         grouped
-	 */
-	private static Iterator<CSVRecord> groupingBugWorkaround(Iterator<CSVRecord> iterator, CsvRecordGrouper grouper) {
-		/*
-		 * FIXME This is a workaround for
-		 * http://issues.hhsdevcloud.us/browse/CBBD-92. This workaround adds
-		 * unacceptable memory usage requirements to the system, and MUST be
-		 * removed before the system enters production.
-		 */
-		List<CSVRecord> records = new ArrayList<>();
-		while (iterator.hasNext())
-			records.add(iterator.next());
-		records.sort(grouper);
-
-		return records.iterator();
 	}
 
 	/**
