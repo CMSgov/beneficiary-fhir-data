@@ -51,7 +51,7 @@ public final class RifFilesProcessor {
 	 * The {@link BeneficiaryRow#version}, {@link CarrierClaimGroup#version},
 	 * etc. value that is currently supported.
 	 */
-	public static final int RECORD_FORMAT_VERSION = 4;
+	public static final int RECORD_FORMAT_VERSION = 5;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
