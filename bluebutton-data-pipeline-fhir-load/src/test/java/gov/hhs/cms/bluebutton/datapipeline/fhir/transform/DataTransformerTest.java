@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -652,9 +653,9 @@ public final class DataTransformerTest {
 		BundleEntryComponent beneEntry = beneBundle.getEntry().stream().filter(r -> r.getResource() instanceof Patient)
 				.findAny().get();
 		Assert.assertEquals(HTTPVerb.PUT, beneEntry.getRequest().getMethod());
-		Assert.assertEquals("Patient/" + record.beneficiaryId, beneEntry.getRequest().getUrl());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, beneEntry.getRequest().getUrl());
 		Patient bene = (Patient) beneEntry.getResource();
-		Assert.assertEquals(bene.getId(), "Patient/" + record.beneficiaryId);
+		Assert.assertEquals(bene.getId(), "Patient/bene-" + record.beneficiaryId);
 		Assert.assertEquals(1, bene.getAddress().size());
 		Assert.assertEquals(record.stateCode, bene.getAddress().get(0).getState());
 		Assert.assertEquals(record.countyCode, bene.getAddress().get(0).getDistrict());
@@ -683,11 +684,11 @@ public final class DataTransformerTest {
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 
-		Assert.assertEquals("ExplanationOfBenefit/" + pdeRecord.partDEventId, eob.getId());
+		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_PDE_ID, pdeRecord.partDEventId, eob.getIdentifier());
 		// TODO verify eob.type once STU3 available
-		Assert.assertEquals("Patient/" + pdeRecord.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, eob.getPatient().getReference());
 		Assert.assertEquals(Date.valueOf(pdeRecord.paymentDate.get()), eob.getPaymentDate());
 
 		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
@@ -730,15 +731,15 @@ public final class DataTransformerTest {
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC, pdeRecord.nationalDrugCode,
 				medication.getCode().getCoding().get(0));
 		Assert.assertEquals(HTTPVerb.PUT, medicationEntry.getRequest().getMethod());
-		Assert.assertEquals("Medication/" + pdeRecord.nationalDrugCode, medicationEntry.getRequest().getUrl());
+		Assert.assertEquals("Medication/ndc-" + pdeRecord.nationalDrugCode, medicationEntry.getRequest().getUrl());
 
 		MedicationOrder medicationOrder = (MedicationOrder) eob.getPrescription().getResource();
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_RX_SRVC_RFRNC_NUM,
 				String.valueOf(pdeRecord.prescriptionReferenceNumber), medicationOrder.getIdentifier());
-		Assert.assertEquals("Patient/" + pdeRecord.beneficiaryId, medicationOrder.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, medicationOrder.getPatient().getReference());
 		Assert.assertEquals(DataTransformer.referencePractitioner(pdeRecord.prescriberId).getReference(),
 				medicationOrder.getPrescriber().getReference());
-		Assert.assertEquals("Medication/" + pdeRecord.nationalDrugCode,
+		Assert.assertEquals("Medication/ndc-" + pdeRecord.nationalDrugCode,
 				medicationOrder.getMedicationReference().getReference());
 		MedicationOrderDispenseRequestComponent dispenseRequest = medicationOrder.getDispenseRequest();
 		Assert.assertEquals(pdeRecord.quantityDispensed, dispenseRequest.getQuantity().getValue());
@@ -756,7 +757,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, pdeRecord.serviceProviderId,
 				organization.getIdentifier());
 		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(DataTransformer.referenceOrganization(pdeRecord.serviceProviderId).getReference(),
+		Assert.assertEquals(DataTransformer.referenceOrganizationByNpi(pdeRecord.serviceProviderId).getReference(),
 				organizationEntry.getRequest().getUrl());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, pdeRecord.pharmacyTypeCode,
 				organization.getType().getCoding().get(0));
@@ -912,18 +913,18 @@ public final class DataTransformerTest {
 		 */
 		Assert.assertEquals(2, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
-				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
-		Assert.assertEquals("ExplanationOfBenefit/" + record.claimId, eobEntry.getRequest().getUrl());
+				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
+		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
-		Assert.assertEquals(eob.getId(), "ExplanationOfBenefit/" + record.claimId);
-		Assert.assertEquals("Patient/42", eob.getPatient().getReference());
+		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-		Assert.assertEquals("Patient/" + record.beneficiaryId, referral.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
 		Assert.assertEquals(1, referral.getRecipient().size());
-		Assert.assertEquals(DataTransformer.referencePractitioner(record.referringPhysicianNpi).getReference(),
+		Assert.assertEquals(claimBundle.getEntry().stream()
+				.filter(entryIsPractitionerWithNpi(record.referringPhysicianNpi)).findAny().get().getFullUrl(),
 				referral.getRecipient().get(0).getReference());
 		BundleEntryComponent referrerEntry = claimBundle.getEntry().stream().filter(r -> {
 			if (!(r.getResource() instanceof Practitioner))
@@ -951,6 +952,27 @@ public final class DataTransformerTest {
 				eobItem0.getAdjudication());
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
 		// TODO test the rest of the columns/resource once they're all ready
+	}
+
+	/**
+	 * @param npi
+	 *            the NPI to verify that the {@link Practitioner} resource in
+	 *            the specified {@link BundleEntryComponent} has
+	 * @return a {@link Predicate} that will match if the specified
+	 *         {@link BundleEntryComponent} has a {@link Practitioner} resource
+	 *         with the specified NPI
+	 */
+	private Predicate<? super BundleEntryComponent> entryIsPractitionerWithNpi(String npi) {
+		return e -> {
+			// First, check the resource type.
+			if (!(e.getResource() instanceof Practitioner))
+				return false;
+			Practitioner p = (Practitioner) e.getResource();
+
+			// Then, verify that the Practitioner has the expected NPI.
+			return p.getIdentifier().stream().filter(i -> DataTransformer.CODING_SYSTEM_NPI_US.equals(i.getSystem()))
+					.filter(i -> npi.equals(i.getValue())).findAny().isPresent();
+		};
 	}
 
 	/**

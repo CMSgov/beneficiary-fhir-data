@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 import rx.Observable;
 
 /**
@@ -55,9 +56,10 @@ public final class FhirLoader {
 		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
 		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
 		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
-		fhirClientLogging.setLogRequestBody(false);
-		fhirClientLogging.setLogResponseBody(false);
-		client.registerInterceptor(fhirClientLogging);
+		fhirClientLogging.setLogRequestBody(LOGGER.isTraceEnabled());
+		fhirClientLogging.setLogResponseBody(LOGGER.isTraceEnabled());
+		if (LOGGER.isInfoEnabled())
+			client.registerInterceptor(fhirClientLogging);
 
 		this.client = client;
 	}
@@ -120,5 +122,42 @@ public final class FhirLoader {
 		 * response entry
 		 */
 		return new FhirResult(resultBundle.getEntry().size());
+	}
+
+	/**
+	 * @param dataToLoad
+	 *            the FHIR {@link TransformedBundle}s to be loaded to a FHIR
+	 *            server
+	 * @return the {@link FhirResult}s that record the results of each batch
+	 *         FHIR operation
+	 */
+	public Stream<FhirBundleResult> process(Stream<TransformedBundle> dataToLoad) {
+		Timer.Context timerContextStream = metrics.timer(MetricRegistry.name(getClass(), "stream")).time();
+		Stream<FhirBundleResult> resultsStream = dataToLoad.map(bundle -> process(bundle));
+		timerContextStream.stop();
+
+		return resultsStream;
+	}
+
+	/**
+	 * @param inputBundle
+	 *            the input {@link TransformedBundle} to process
+	 * @return a {@link FhirBundleResult} that models the results of the
+	 *         operation
+	 */
+	private FhirBundleResult process(TransformedBundle inputBundle) {
+		Timer.Context timerContextBatch = metrics.timer(MetricRegistry.name(getClass(), "stream", "bundle")).time();
+
+		// Push the input bundle.
+		int inputBundleCount = inputBundle.getResult().getEntry().size();
+		LOGGER.trace("Loading bundle with {} resources", inputBundleCount);
+		Bundle resultBundle = client.transaction().withBundle(inputBundle.getResult()).execute();
+
+		// Update the metrics now that things have been pushed.
+		timerContextBatch.stop();
+		metrics.meter(MetricRegistry.name(getClass(), "stream", "processed-bundles")).mark(1);
+		metrics.meter(MetricRegistry.name(getClass(), "stream", "processed-resources")).mark(inputBundleCount);
+
+		return new FhirBundleResult(inputBundle, resultBundle);
 	}
 }

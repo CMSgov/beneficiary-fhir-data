@@ -116,7 +116,17 @@ public final class RifFilesProcessor {
 		// TODO test the above assertions, to ensure I'm not a liar
 
 		List<RifFile> filesOrderedSafely = new ArrayList<>(event.getFiles());
-		Comparator<RifFile> someComparator = null; // TODO
+		Comparator<RifFile> someComparator = new Comparator<RifFile>() {
+			@Override
+			public int compare(RifFile o1, RifFile o2) {
+				if (o1.getFileType() == RifFileType.BENEFICIARY && o2.getFileType() != RifFileType.BENEFICIARY)
+					return -1;
+				else if (o1.getFileType() != RifFileType.BENEFICIARY && o2.getFileType() == RifFileType.BENEFICIARY)
+					return 1;
+				else
+					return 0;
+			}
+		};
 		Collections.sort(filesOrderedSafely, someComparator);
 
 		/*
