@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,6 +107,7 @@ public final class FhirLoaderIT {
 	 *             (won't happen: URI is hardcoded)
 	 */
 	@Test
+	@Ignore
 	public void loadHandcraftedSample() throws URISyntaxException {
 		// Use the DataTransformer to create some sample FHIR resources.
 		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now());
@@ -151,6 +153,7 @@ public final class FhirLoaderIT {
 	 *             (won't happen: URI is hardcoded)
 	 */
 	@Test
+	@Ignore
 	public void loadSynpufDataSampleA() throws URISyntaxException {
 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
