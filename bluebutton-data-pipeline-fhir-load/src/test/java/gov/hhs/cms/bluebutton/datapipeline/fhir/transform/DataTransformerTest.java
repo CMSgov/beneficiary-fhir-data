@@ -58,6 +58,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
@@ -88,7 +89,7 @@ public final class DataTransformerTest {
 	public void setup() {
 		// Initialize a default version of the PDE record
 		pdeRecord = new PartDEventRow();
-		pdeRecord.version = 1;
+		pdeRecord.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
 		pdeRecord.recordAction = RecordAction.INSERT;
 		pdeRecord.partDEventId = "89";
 		pdeRecord.beneficiaryId = "103";
@@ -625,7 +626,7 @@ public final class DataTransformerTest {
 	public void transformInsertBeneficiaryEvent() {
 		// Create the mock bene to test against.
 		BeneficiaryRow record = new BeneficiaryRow();
-		record.version = 1;
+		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
 		record.recordAction = RecordAction.INSERT;
 		record.beneficiaryId = "42";
 		record.stateCode = "HI";
@@ -873,7 +874,7 @@ public final class DataTransformerTest {
 	public void transformInsertCarrierClaimEvent() {
 		// Create the mock bene to test against.
 		CarrierClaimGroup record = new CarrierClaimGroup();
-		record.version = 1;
+		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
 		record.recordAction = RecordAction.INSERT;
 		record.beneficiaryId = "42";
 		record.claimId = "SuttersMill";

@@ -60,6 +60,7 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartAClaimRevLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
@@ -936,7 +937,7 @@ public final class DataTransformer {
 		if (rifRecordEvent == null)
 			throw new IllegalArgumentException();
 		BeneficiaryRow record = rifRecordEvent.getRecord();
-		if (1 != record.version)
+		if (RifFilesProcessor.RECORD_FORMAT_VERSION != record.version)
 			throw new IllegalArgumentException("Unsupported record version: " + record.version);
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
@@ -1001,7 +1002,7 @@ public final class DataTransformer {
 		if (rifRecordEvent == null)
 			throw new IllegalArgumentException();
 		PartDEventRow record = rifRecordEvent.getRecord();
-		if (1 != record.version)
+		if (RifFilesProcessor.RECORD_FORMAT_VERSION != record.version)
 			throw new IllegalArgumentException("Unsupported record version: " + record.version);
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
@@ -1204,7 +1205,7 @@ public final class DataTransformer {
 		if (rifRecordEvent == null)
 			throw new IllegalArgumentException();
 		CarrierClaimGroup claimGroup = rifRecordEvent.getRecord();
-		if (1 != claimGroup.version)
+		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
 			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
