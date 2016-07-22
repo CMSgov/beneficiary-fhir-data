@@ -17,8 +17,12 @@ import javax.jdo.PersistenceManager;
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu21.model.Conformance;
+import org.hl7.fhir.dstu21.model.Conformance.ConditionalDeleteStatus;
+import org.hl7.fhir.dstu21.model.Conformance.RestfulConformanceMode;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Patient;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -40,10 +44,10 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.CurrentBeneficiary;
@@ -72,11 +76,37 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
 
 /**
- * Integration tests for {@link FhirLoader}.
+ * <p>
+ * Integration tests for {@link FhirLoader}. When run on the command line via
+ * Maven, these tests rely on a local FHIR server provided by the Cargo plugin.
+ * To run these tests in Eclipse, you can launch the server manually, as
+ * follows:
+ * </p>
+ * <ol>
+ * <li>Right-click the <code>bluebutton-data-pipeline-fhir-load</code> project,
+ * and select <strong>Run As > Maven build...</strong>.</li>
+ * <li>Set <strong>goal</strong> to <code>cargo:run</code>.</li>
+ * <li>Click <strong>Run</strong>.</li>
+ * </ol>
+ * <p>
+ * When done with the server, you can stop it by terminating the launch in
+ * Eclipse's <em>Console</em> view (with the red "Stop" button). Once it's been
+ * run the first time, the server can be re-launched from Eclipse's
+ * <strong>Run</strong> toolbar dropdown button, just like any other Java
+ * application, unit test, etc. Logs from the server can be found in the
+ * project's <code>target/failsafe-reports</code> and
+ * <code>target/cargo/configurations/jetty9x/logs</code> directories.
+ * </p>
  */
 @ContextConfiguration(classes = { SpringConfigForTests.class })
 @RunWith(Parameterized.class)
 public final class FhirLoaderIT {
+	/**
+	 * The address of the FHIR server to run against. See this project's
+	 * <code>pom.xml</code> for details on how it's stood up.
+	 */
+	private static final String FHIR_API = "http://localhost:9093/baseDstu2";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoaderIT.class);
 
 	@ClassRule
@@ -130,7 +160,7 @@ public final class FhirLoaderIT {
 		// TODO need to expand the test data here
 
 		// Push the data to FHIR.
-		URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
+		URI fhirServer = new URI(FHIR_API);
 		LoadAppOptions options = new LoadAppOptions(fhirServer);
 		FhirLoader loader = new FhirLoader(new MetricRegistry(), options);
 		List<FhirResult> results = loader.insertFhirRecords(fhirStream);
@@ -179,7 +209,7 @@ public final class FhirLoaderIT {
 			// Push the data to FHIR.
 			// URI fhirServer = new
 			// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
-			URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
+			URI fhirServer = new URI(FHIR_API);
 			LoadAppOptions options = new LoadAppOptions(fhirServer);
 			FhirLoader loader = new FhirLoader(fhirMetrics, options);
 			List<FhirResult> results = loader.insertFhirRecords(fhirStream);
@@ -219,10 +249,12 @@ public final class FhirLoaderIT {
 
 		// Grab a copy of that stream (for testing, below).
 		List<RifRecordEvent<?>> rifRecordEventsCopy = rifRecordEvents.collect(Collectors.toList());
-		RifRecordEvent<BeneficiaryRow> beneRecordEvent = (RifRecordEvent<BeneficiaryRow>) rifRecordEventsCopy.get(0);
+		RifRecordEvent<BeneficiaryRow> beneRecordEvent = (RifRecordEvent<BeneficiaryRow>) rifRecordEventsCopy.stream()
+				.filter(e -> e.getRecord() instanceof BeneficiaryRow).findAny().get();
 		RifRecordEvent<CarrierClaimGroup> carrierRecordEvent = (RifRecordEvent<CarrierClaimGroup>) rifRecordEventsCopy
-				.get(1);
-		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopy.get(2);
+				.stream().filter(e -> e.getRecord() instanceof CarrierClaimGroup).findAny().get();
+		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopy.stream()
+				.filter(e -> e.getRecord() instanceof PartDEventRow).findAny().get();
 		rifRecordEvents = rifRecordEventsCopy.stream();
 
 		// Initialize the Transform phase of the pipeline.
@@ -237,9 +269,7 @@ public final class FhirLoaderIT {
 		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Initialize the Load phase of the pipeline.
-		// URI fhirServer = new
-		// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
-		URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
+		URI fhirServer = new URI(FHIR_API);
 		LoadAppOptions options = new LoadAppOptions(fhirServer);
 		FhirLoader loader = new FhirLoader(fhirMetrics, options);
 		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
@@ -312,9 +342,7 @@ public final class FhirLoaderIT {
 		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Initialize the Load phase of the pipeline.
-		// URI fhirServer = new
-		// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
-		URI fhirServer = new URI("http://localhost:8080/hapi-fhir/baseDstu2");
+		URI fhirServer = new URI(FHIR_API);
 		LoadAppOptions options = new LoadAppOptions(fhirServer);
 		FhirLoader loader = new FhirLoader(fhirMetrics, options);
 		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
@@ -350,6 +378,89 @@ public final class FhirLoaderIT {
 	}
 
 	/**
+	 * Ensures that {@link #cleanFhirServer()} is called after each test case.
+	 * 
+	 * @throws URISyntaxException
+	 *             (won't happen: URI is hardcoded)
+	 */
+	@After
+	public void cleanFhirServerAfterEachTest() throws URISyntaxException {
+		cleanFhirServer();
+	}
+
+	/**
+	 * <strong>Serious Business:</strong> deletes all resources from the FHIR
+	 * server at {@link #FHIR_API}.
+	 * 
+	 * @throws URISyntaxException
+	 *             (won't happen: URI is hardcoded)
+	 */
+	private static void cleanFhirServer() throws URISyntaxException {
+		// Before disabling this check, please go and update your resume.
+		if (!FHIR_API.contains("localhost"))
+			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
+
+		IGenericClient fhirClient = createFhirClient(new URI(FHIR_API));
+		Conformance conformance = fhirClient.fetchConformance().ofType(Conformance.class).execute();
+
+		/*
+		 * This is ugly code, but not worth making more readable. Here's what it
+		 * does: grabs the server's conformance statement, looks at the
+		 * supported resources, and then grabs all of the resource type names
+		 * that support bulk conditional delete operations.
+		 */
+		List<String> resourcesToDelete = conformance.getRest().stream()
+				.filter(r -> r.getMode() == RestfulConformanceMode.SERVER).flatMap(r -> r.getResource().stream())
+				.filter(r -> r.getConditionalDelete() != null)
+				.filter(r -> r.getConditionalDelete() == ConditionalDeleteStatus.MULTIPLE).map(r -> r.getType())
+				.collect(Collectors.toList());
+
+		// Loop over each resource that can be deleted, and delete all of them.
+		/*
+		 * TODO This commented-out version should work, given HAPI 1.4's
+		 * conformance statement, but doesn't. Try again in a later version? The
+		 * not-commented-out version below does work, but is slower.
+		 */
+		// for (String resourceTypeName : resourcesToDelete)
+		// fhirClient.delete().resourceConditionalByUrl(resourceTypeName).execute();
+		for (String resourceTypeName : resourcesToDelete) {
+			Bundle results = fhirClient.search().forResource(resourceTypeName).returnBundle(Bundle.class).execute();
+			while (true) {
+				for (BundleEntryComponent resourceEntry : results.getEntry())
+					fhirClient.delete()
+							.resourceById(resourceTypeName, resourceEntry.getResource().getIdElement().getIdPart())
+							.execute();
+
+				// Get next page of results (if there is one), or exit loop.
+				if (results.getLink(Bundle.LINK_NEXT) != null)
+					results = fhirClient.loadPage().next(results).execute();
+				else
+					break;
+			}
+		}
+	}
+
+	/**
+	 * @param fhirServer
+	 *            the "base" FHIR API endpoint of the server to create a client
+	 *            for
+	 * @return a FHIR {@link IGenericClient} that can be used to query the
+	 *         specified FHIR server
+	 */
+	private static IGenericClient createFhirClient(URI fhirServer) {
+		FhirContext ctx = FhirContext.forDstu2_1();
+		IGenericClient client = ctx.newRestfulGenericClient(fhirServer.toString());
+
+		// Client logging can be enabled here, when needed.
+		// LoggingInterceptor clientLogger = new LoggingInterceptor();
+		// clientLogger.setLogRequestBody(false);
+		// clientLogger.setLogResponseBody(false);
+		// client.registerInterceptor(clientLogger);
+
+		return client;
+	}
+
+	/**
 	 * Verifies that the specified {@link FhirBundleResult} has legit output,
 	 * given its input. Basically, just make sure that it contains the expected
 	 * number of responses and that those responses all have <code>2XX</code>
@@ -374,25 +485,5 @@ public final class FhirLoaderIT {
 						resultEntry.getResponse().getStatus().matches("^2\\d\\d .*$"));
 			}
 		}
-	}
-
-	/**
-	 * @param fhirServer
-	 *            the "base" FHIR API endpoint of the server to create a client
-	 *            for
-	 * @return a FHIR {@link IGenericClient} that can be used to query the
-	 *         specified FHIR server
-	 */
-	private static IGenericClient createFhirClient(URI fhirServer) {
-		FhirContext ctx = FhirContext.forDstu2_1();
-		IGenericClient client = ctx.newRestfulGenericClient(fhirServer.toString());
-		LoggingInterceptor clientLogger = new LoggingInterceptor();
-
-		// These can be enabled here, when needed.
-		clientLogger.setLogRequestBody(false);
-		clientLogger.setLogResponseBody(false);
-
-		client.registerInterceptor(clientLogger);
-		return client;
 	}
 }
