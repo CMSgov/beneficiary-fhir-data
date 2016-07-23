@@ -169,7 +169,7 @@
 						<configuration>
 							<properties>
 								<cargo.servlet.port>9093</cargo.servlet.port>
-								<cargo.jvmargs>-Xmx4g</cargo.jvmargs>
+								<cargo.jvmargs>-Xmx2500m</cargo.jvmargs>
 							</properties>
 						</configuration>
 						<deployables>
