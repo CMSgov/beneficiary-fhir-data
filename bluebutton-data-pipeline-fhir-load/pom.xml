@@ -182,6 +182,11 @@
 									<!-- The webapp will be available at 'http://localhost:9093/'. -->
 									<context>/</context>
 								</properties>
+
+								<!-- Wait up to 120s for the webapp to become available at the specified 
+									URL. -->
+								<pingURL>http://localhost:9093/</pingURL>
+								<pingTimeout>120000</pingTimeout>
 							</deployable>
 						</deployables>
 					</configuration>
