@@ -21,6 +21,13 @@
 	</description>
 
 	<properties>
+		<!-- These settings are pulled out as POM properties so that they can be 
+			adjusted via profiles. This is required because the CI server doesn't have 
+			enough RAM to run with an in-mem DB, and so requires a different configuration. -->
+		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
+		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
+		<its.bbfhir.db.username></its.bbfhir.db.username>
+		<its.bbfhir.db.password></its.bbfhir.db.password>
 	</properties>
 
 	<dependencies>
@@ -116,14 +123,108 @@
 			<artifactId>metrics-jvm</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<!-- Used in ITs to launch embedded instances of the Blue Button FHIR 
+				server. -->
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- This must be listed as a dependency in order for the Cargo plugin 
+				to use it below (note: WARs are automatically excluded from any/all classpaths 
+				that Maven generates, so this shouldn't affect anything else). -->
+			<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+			<artifactId>bbonfhir-server-app</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<!-- Configure the Cargo plugin to start up an embedded Jetty server, 
+						running the Blue Button FHIR server. This plugin is executed during the project's 
+						ITs, or can be manually launched by running `mvn cargo:run` from this project. -->
+					<groupId>org.codehaus.cargo</groupId>
+					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>1.5.0</version>
+					<configuration>
+						<container>
+							<containerId>jetty9x</containerId>
+							<artifactInstaller>
+								<!-- Use a throwaway Jetty install (in the project's target/ directory) 
+									to run the ITs. Tried using an embedded Jetty instance via Cargo, but the 
+									web application fails to deploy that way for some reason: it throws "java.lang.IllegalStateException: 
+									zip file closed" errors. -->
+								<groupId>org.eclipse.jetty</groupId>
+								<artifactId>jetty-distribution</artifactId>
+								<version>9.3.10.v20160621</version>
+							</artifactInstaller>
+							<log>${project.build.directory}/failsafe-reports/cargo.log</log>
+							<output>${project.build.directory}/failsafe-reports/cargo-container.log</output>
+							<systemProperties>
+								<!-- Configure the FHIR server to use a temporary in-mem DB. -->
+								<bbfhir.db.url>${its.bbfhir.db.url}</bbfhir.db.url>
+								<bbfhir.db.username>${its.bbfhir.db.username}</bbfhir.db.username>
+								<bbfhir.db.password>${its.bbfhir.db.password}</bbfhir.db.password>
+							</systemProperties>
+						</container>
+						<configuration>
+							<properties>
+								<cargo.servlet.port>9093</cargo.servlet.port>
+								<cargo.jvmargs>${its.bbfhir.server.jvmargs}</cargo.jvmargs>
+							</properties>
+						</configuration>
+						<deployables>
+							<deployable>
+								<!-- The WAR for the Blue Button FHIR server. -->
+								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+								<artifactId>bbonfhir-server-app</artifactId>
+								<type>war</type>
+								<properties>
+									<!-- The webapp will be available at 'http://localhost:9093/'. -->
+									<context>/</context>
+								</properties>
+
+								<!-- Wait up to 120s for the webapp to become available at the specified 
+									URL. -->
+								<pingURL>http://localhost:9093/</pingURL>
+								<pingTimeout>120000</pingTimeout>
+							</deployable>
+						</deployables>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- Launch an embedded Jetty instance hosting the Blue Button FHIR server 
+					prior to running this project's integration tests, and stop it after the 
+					integration tests. Alternatively, for manual testing, manually run 'mvn cargo:run' 
+					to start the Jetty server. -->
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>start-container</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-container</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<!-- Will run the `*IT.java` integration tests in this project, as part 
 					of the build. -->
@@ -140,5 +241,27 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<!-- When activated via '-Prun-its-with-derby-db' this profile sets the 
+				ITs to run with an on-disk DB, instead of an in-memory one. This needs to 
+				be activated when running on systems without a lot of memory (such as the 
+				CI server). Note that, on Karl's personal laptop, this adds an extra 30 minutes 
+				or so to the project's build time. -->
+			<!-- Note: As of 2016-07-23, the CI server for this project only has 4 
+				GB of memory, and no swap space. Running FhirLoaderIT.loadRifDataSampleB() 
+				takes at least 2.5 GB of free memory, and Cargo was failing on the CI server 
+				due to its inability to reserve that much (when the DB was configured to 
+				be in-memory). -->
+			<id>run-its-with-derby-db</id>
+			<properties>
+				<its.bbfhir.server.jvmargs>-Xmx512m</its.bbfhir.server.jvmargs>
+				<its.bbfhir.db.url>jdbc:hsqldb:file:test</its.bbfhir.db.url>
+				<its.bbfhir.db.username></its.bbfhir.db.username>
+				<its.bbfhir.db.password></its.bbfhir.db.password>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
