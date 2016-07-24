@@ -21,6 +21,13 @@
 	</description>
 
 	<properties>
+		<!-- These settings are pulled out as POM properties so that they can be 
+			adjusted via profiles. This is required because the CI server doesn't have 
+			enough RAM to run with an in-mem DB, and so requires a different configuration. -->
+		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
+		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
+		<its.bbfhir.db.username></its.bbfhir.db.username>
+		<its.bbfhir.db.password></its.bbfhir.db.password>
 	</properties>
 
 	<dependencies>
@@ -161,15 +168,15 @@
 							<output>${project.build.directory}/failsafe-reports/cargo-container.log</output>
 							<systemProperties>
 								<!-- Configure the FHIR server to use a temporary in-mem DB. -->
-								<bbfhir.db.url>jdbc:hsqldb:mem:test</bbfhir.db.url>
-								<bbfhir.db.username></bbfhir.db.username>
-								<bbfhir.db.password></bbfhir.db.password>
+								<bbfhir.db.url>${its.bbfhir.db.url}</bbfhir.db.url>
+								<bbfhir.db.username>${its.bbfhir.db.username}</bbfhir.db.username>
+								<bbfhir.db.password>${its.bbfhir.db.password}</bbfhir.db.password>
 							</systemProperties>
 						</container>
 						<configuration>
 							<properties>
 								<cargo.servlet.port>9093</cargo.servlet.port>
-								<cargo.jvmargs>-Xmx2500m</cargo.jvmargs>
+								<cargo.jvmargs>${its.bbfhir.server.jvmargs}</cargo.jvmargs>
 							</properties>
 						</configuration>
 						<deployables>
@@ -234,5 +241,27 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<!-- When activated via '-Prun-its-with-derby-db' this profile sets the 
+				ITs to run with an on-disk DB, instead of an in-memory one. This needs to 
+				be activated when running on systems without a lot of memory (such as the 
+				CI server). Note that, on Karl's personal laptop, this adds an extra 30 minutes 
+				or so to the project's build time. -->
+			<!-- Note: As of 2016-07-23, the CI server for this project only has 4 
+				GB of memory, and no swap space. Running FhirLoaderIT.loadRifDataSampleB() 
+				takes at least 2.5 GB of free memory, and Cargo was failing on the CI server 
+				due to its inability to reserve that much (when the DB was configured to 
+				be in-memory). -->
+			<id>run-its-with-derby-db</id>
+			<properties>
+				<its.bbfhir.server.jvmargs>-Xmx512m</its.bbfhir.server.jvmargs>
+				<its.bbfhir.db.url>jdbc:hsqldb:file:test</its.bbfhir.db.url>
+				<its.bbfhir.db.username></its.bbfhir.db.username>
+				<its.bbfhir.db.password></its.bbfhir.db.password>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
