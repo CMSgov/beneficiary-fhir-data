@@ -64,7 +64,19 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("CT", beneRow.stateCode);
 		Assert.assertEquals("LITCHFIELD", beneRow.countyCode);
 		Assert.assertEquals("060981009", beneRow.postalCode);
-		// TODO test the rest of the columns once they're all ready
+		Assert.assertEquals(LocalDate.of(1959, Month.MARCH, 17), beneRow.birthDate);
+		Assert.assertEquals(('M'), beneRow.sex);
+		Assert.assertEquals(('1'), beneRow.race);
+		Assert.assertEquals(new Character('1'), beneRow.entitlementCodeOriginal.get());
+		Assert.assertEquals(new Character('1'), beneRow.entitlementCodeCurrent.get());
+		Assert.assertEquals(new Character('N'), beneRow.endStageRenalDiseaseCode.get());
+		Assert.assertEquals(new String("20"), beneRow.medicareEnrollmentStatusCode.get());
+		Assert.assertEquals(new Character('0'), beneRow.partBTerminationCode.get());
+		Assert.assertEquals(new Character('0'), beneRow.partBTerminationCode.get());
+		Assert.assertEquals("314747066U", beneRow.hicn);
+		Assert.assertEquals("Hyxswp", beneRow.nameSurname);
+		Assert.assertEquals("Axom", beneRow.nameGiven);
+		Assert.assertEquals(new Character('A'), beneRow.nameMiddleInitial.get());
 	}
 
 	/**
@@ -172,7 +184,8 @@ public final class RifFilesProcessorTest {
 		Assert.assertNotNull(rifEvents);
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_PDE.getRecordCount(), rifEventsList.size());
-		Assert.assertEquals(StaticRifResource.SAMPLE_B_PDE.getRifFileType(), rifEventsList.get(0).getFile().getFileType());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_PDE.getRifFileType(),
+				rifEventsList.get(0).getFile().getFileType());
 	}
 
 	/**
@@ -193,7 +206,8 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
-		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRifFileType(),
+				rifRecordEvent.getFile().getFileType());
 		Assert.assertNotNull(rifRecordEvent.getRecord());
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof CarrierClaimGroup);
 

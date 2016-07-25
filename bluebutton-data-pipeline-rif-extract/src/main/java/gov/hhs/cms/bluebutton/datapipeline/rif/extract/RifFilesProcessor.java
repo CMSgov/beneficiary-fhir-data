@@ -290,7 +290,27 @@ public final class RifFilesProcessor {
 		beneficiaryRow.stateCode = csvRecord.get(BeneficiaryRow.Column.STATE_CODE.ordinal());
 		beneficiaryRow.countyCode = csvRecord.get(BeneficiaryRow.Column.BENE_COUNTY_CD.ordinal());
 		beneficiaryRow.postalCode = csvRecord.get(BeneficiaryRow.Column.BENE_ZIP_CD.ordinal());
-		// TODO finish mapping the rest of the columns
+		beneficiaryRow.birthDate = LocalDate.parse(csvRecord.get(BeneficiaryRow.Column.BENE_BIRTH_DT.ordinal()),
+				RIF_DATE_FORMATTER);
+		beneficiaryRow.sex = csvRecord.get(BeneficiaryRow.Column.BENE_SEX_IDENT_CD.ordinal()).charAt(0);
+		beneficiaryRow.race = csvRecord.get(BeneficiaryRow.Column.BENE_RACE_CD.ordinal()).charAt(0);
+		beneficiaryRow.entitlementCodeOriginal = parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_ORIG.ordinal()));
+		beneficiaryRow.entitlementCodeCurrent = parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_CURR.ordinal()));
+		beneficiaryRow.endStageRenalDiseaseCode = parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_ESRD_IND.ordinal()));
+		beneficiaryRow.medicareEnrollmentStatusCode = parseOptString(
+				csvRecord.get(BeneficiaryRow.Column.BENE_MDCR_STATUS_CD.ordinal()));
+		beneficiaryRow.partATerminationCode = parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_PTA_TRMNTN_CD.ordinal()));
+		beneficiaryRow.partBTerminationCode = parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_PTB_TRMNTN_CD.ordinal()));
+		beneficiaryRow.hicn = csvRecord.get(BeneficiaryRow.Column.BENE_CRNT_HIC_NUM.ordinal());
+		beneficiaryRow.nameSurname = csvRecord.get(BeneficiaryRow.Column.BENE_SRNM_NAME.ordinal());
+		beneficiaryRow.nameGiven = csvRecord.get(BeneficiaryRow.Column.BENE_GVN_NAME.ordinal());
+		beneficiaryRow.nameMiddleInitial = parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_MDL_NAME.ordinal()));
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != beneficiaryRow.version)
