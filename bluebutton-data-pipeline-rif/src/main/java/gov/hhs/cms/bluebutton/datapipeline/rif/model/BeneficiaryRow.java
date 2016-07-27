@@ -183,8 +183,7 @@ public final class BeneficiaryRow {
 		/**
 		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
-		 * CCW Data Dictionary: BENE_ID</a>, though note that this instance of +
-		 * * the field is encrypted.
+		 * CCW Data Dictionary: BENE_ID</a>.
 		 */
 		BENE_ID,
 
@@ -279,29 +278,32 @@ public final class BeneficiaryRow {
 		BENE_PTB_TRMNTN_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * TODO - need data dictionary link for BENE_CRNT_HIC_NUM Type:
+		 * <code>CHAR</code>, max chars: 12. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/???.txt">
 		 * CCW Data Dictionary: BENE_CRNT_HIC_NUM</a>.
 		 */
 		BENE_CRNT_HIC_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 24. See <a href=
+		 * TODO - need data dictionary link for BENE_SRNM_NAME Type:
+		 * <code>CHAR</code>, max chars: 24. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/???.txt">
 		 * CCW Data Dictionary: BENE_SRNM_NAME</a>.
 		 */
 		BENE_SRNM_NAME,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * TODO - need data dictionary link for BENE_GVN_NAME Type:
+		 * <code>CHAR</code>, max chars: 5. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/???.txt">
 		 * CCW Data Dictionary: BENE_GVN_NAME</a>.
 		 */
 		BENE_GVN_NAME,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
-		 * <a href=
+		 * TODO - need data dictionary link for BENE_MDL_NAME Type:
+		 * <code>CHAR</code>, max chars: 1 <code>Optional</code>. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/???.txt">
 		 * CCW Data Dictionary: BENE_MDL_NAME</a>.
 		 */

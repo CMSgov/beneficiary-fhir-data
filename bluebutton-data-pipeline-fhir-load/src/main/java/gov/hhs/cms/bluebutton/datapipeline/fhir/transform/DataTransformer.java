@@ -160,15 +160,6 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_RX_SRVC_RFRNC_NUM = "CCW.RX_SRVC_RFRNC_NUM";
 
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/deh?.txt">
-	 * CCW Data Dictionary: BENE_CRNT_HIC_NUM</a>.
-	 */
-	static final String CODING_SYSTEM_CCW_BENE_CRNT_HIC_NUM = "CCW.BENE_CRNT_HIC_NUM";
-
-	static final String CODING_SYSTEM_CCW_BENE_RACE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
-
 	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_ORIG = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
 
 	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_CURR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
@@ -977,57 +968,29 @@ public final class DataTransformer {
 		if (record.birthDate != null) {
 			beneficiary.setBirthDate(Date.valueOf(record.birthDate));
 		}
-
 		switch (record.sex) {
 		case ('M'):
-			/* Male */
 			beneficiary.setGender((AdministrativeGender.MALE));
 			break;
 		case ('F'):
-			/* Female */
 			beneficiary.setGender((AdministrativeGender.FEMALE));
 			break;
 		default:
-			/* Unknown */
 			beneficiary.setGender((AdministrativeGender.UNKNOWN));
 			break;
-
 		}
-		// TODO Could not map the following fields. Initially created extension
-		// for these fields but decided this may not be the best approach.
-		// Have created a JIRA ticket called "Finalize fields for Beneficary" to
-		// revisit on where to best map the following fields.
 		/*
-		 * beneficiary.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_RACE_CD)
-		 * .setValue(new
-		 * Coding().setSystem(CODING_SYSTEM_CCW_BENE_RACE_CD).setCode(String.
-		 * valueOf(record.race)));
-		 * 
-		 * beneficiary.addExtension().setUrl(
-		 * CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_ORIG) .setValue(new
-		 * Coding().setSystem(CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_ORIG)
-		 * .setCode(String.valueOf(record.entitlementCodeOriginal)));
-		 * 
-		 * beneficiary.addExtension().setUrl(
-		 * CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_CURR) .setValue(new
-		 * Coding().setSystem(CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_CURR)
-		 * .setCode(String.valueOf(record.entitlementCodeCurrent)));
-		 * 
-		 * beneficiary.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_ESRD_IND)
-		 * .setValue(new Coding().setSystem(CODING_SYSTEM_CCW_BENE_ESRD_IND)
-		 * .setCode(String.valueOf(String.valueOf(record.
-		 * endStageRenalDiseaseCode))));
-		 * 
-		 * beneficiary.addExtension().setUrl(
-		 * CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD) .setValue(new
-		 * Coding().setSystem(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
-		 * .setCode(String.valueOf(record.medicareEnrollmentStatusCode)));
+		 * TODO Could not map the following fields. Have created a JIRA ticket
+		 * called "Finalize fields for Beneficiary" to revisit on where to best
+		 * map the following fields. BENE_ENTLMT_RSN_ORIG, BENE_ENTLMT_RSN_CURR,
+		 * BENE_ESRD_IND
 		 */
 
-		beneficiary.addName().addGiven(record.nameGiven).setUse(HumanName.NameUse.USUAL);
-		beneficiary.addName().addGiven((String.valueOf(record.nameMiddleInitial))).setUse(HumanName.NameUse.USUAL);
-		beneficiary.addName().addFamily(record.nameSurname).setUse(HumanName.NameUse.USUAL);
-		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_CRNT_HIC_NUM).setValue(record.hicn);
+		/*
+		 * Has been decided that HICN will not be included in FHIR resources
+		 */
+		beneficiary.addName().addGiven(record.nameGiven).addGiven((String.valueOf(record.nameMiddleInitial)))
+				.addFamily(record.nameSurname).setUse(HumanName.NameUse.USUAL);
 		insert(bundle, beneficiary);
 
 		/*
@@ -1049,6 +1012,8 @@ public final class DataTransformer {
 		partA.setSubPlan(COVERAGE_PLAN_PART_A);
 		partA.setIssuer(cmsOrgRef);
 		partA.setSubscriber(referencePatient(record.beneficiaryId));
+		partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
 		/*
 		 * TODO once STU3 is available, transform bene_pta_trmntn_cd into
 		 * partA.status
@@ -1060,6 +1025,8 @@ public final class DataTransformer {
 		partB.setSubPlan(COVERAGE_PLAN_PART_B);
 		partB.setIssuer(cmsOrgRef);
 		partB.setSubscriber(referencePatient(record.beneficiaryId));
+		partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
 		/*
 		 * TODO once STU3 is available, transform bene_ptb_trmntn_cd into
 		 * partB.status
@@ -1071,6 +1038,8 @@ public final class DataTransformer {
 		partD.setSubPlan(COVERAGE_PLAN_PART_D);
 		partD.setIssuer(cmsOrgRef);
 		partD.setSubscriber(referencePatient(record.beneficiaryId));
+		partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
 		insert(bundle, partD);
 
 		return new TransformedBundle(rifRecordEvent, bundle);
