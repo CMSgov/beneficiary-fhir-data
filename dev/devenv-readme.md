@@ -80,6 +80,7 @@ If you're using Eclipse for development, you'll want to configure its preference
 1. Select **Java > Editor > Save Actions**.
     1. Enable the **Perform the selected actions on save** option.
     1. Enable the **Format source code** option.
+    1. Select the **Format edited lines** option.
 1. Click **OK**.
 
 ## Maven GPG Signing
