@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,12 +203,8 @@ public final class DataTransformerTest {
 		ItemsComponent eobSoleItem = eob.getItem().get(0);
 		Assert.assertEquals(Date.valueOf(sourceClaim.getDateAdmission()), eobSoleItem.getServicedPeriod().getStart());
 		Assert.assertEquals(Date.valueOf(sourceClaim.getDateDischarge()), eobSoleItem.getServicedPeriod().getEnd());
-		Assert.assertEquals(
-				eob.getProvider()
-						.getReference(),
-				bundle.getFhirResources().stream()
-						.filter(r -> r instanceof Practitioner).map(
-								r -> (Practitioner) r)
+		Assert.assertEquals(eob.getProvider().getReference(),
+				bundle.getFhirResources().stream().filter(r -> r instanceof Practitioner).map(r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
 								.filter(i -> sourceClaim.getProviderAtTimeOfClaimNpi().toString().equals(i.getValue()))
@@ -245,12 +242,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(
 				eob.getExtension().stream()
 						.filter(x -> DataTransformer.EXTENSION_CMS_ATTENDING_PHYSICIAN.equals(x.getUrl()))
-						.map(x -> ((Reference) x.getValue())
-								.getReference())
-						.findAny().get(),
-				bundle.getFhirResources().stream()
-						.filter(r -> r instanceof Practitioner).map(
-								r -> (Practitioner) r)
+						.map(x -> ((Reference) x.getValue()).getReference()).findAny().get(),
+				bundle.getFhirResources().stream().filter(r -> r instanceof Practitioner).map(r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
 								.filter(i -> sourceClaim.getAttendingPhysicianNpi().toString().equals(i.getValue()))
@@ -259,12 +252,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(
 				eob.getExtension().stream()
 						.filter(x -> DataTransformer.EXTENSION_CMS_OPERATING_PHYSICIAN.equals(x.getUrl()))
-						.map(x -> ((Reference) x.getValue())
-								.getReference())
-						.findAny().get(),
-				bundle.getFhirResources().stream()
-						.filter(r -> r instanceof Practitioner).map(
-								r -> (Practitioner) r)
+						.map(x -> ((Reference) x.getValue()).getReference()).findAny().get(),
+				bundle.getFhirResources().stream().filter(r -> r instanceof Practitioner).map(r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
 								.filter(i -> sourceClaim.getOperatingPhysicianNpi().toString().equals(i.getValue()))
@@ -273,12 +262,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(
 				eob.getExtension().stream()
 						.filter(x -> DataTransformer.EXTENSION_CMS_OTHER_PHYSICIAN.equals(x.getUrl()))
-						.map(x -> ((Reference) x.getValue())
-								.getReference())
-						.findAny().get(),
-				bundle.getFhirResources().stream()
-						.filter(r -> r instanceof Practitioner).map(
-								r -> (Practitioner) r)
+						.map(x -> ((Reference) x.getValue()).getReference()).findAny().get(),
+				bundle.getFhirResources().stream().filter(r -> r instanceof Practitioner).map(r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
 								.filter(i -> sourceClaim.getOtherPhysicianNpi().toString().equals(i.getValue()))
@@ -492,12 +477,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(carrierClaimForBeneA.getDiagnosisCode2(),
 				carrierEob.getDiagnosis().get(1).getDiagnosis().getCode());
 		Assert.assertNotNull(carrierEob.getProvider().getReference());
-		Assert.assertEquals(
-				carrierEob.getProvider()
-						.getReference(),
-				bundle.getFhirResources().stream()
-						.filter(r -> r instanceof Practitioner).map(
-								r -> (Practitioner) r)
+		Assert.assertEquals(carrierEob.getProvider().getReference(),
+				bundle.getFhirResources().stream().filter(r -> r instanceof Practitioner).map(r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
 								.filter(i -> carrierClaimForBeneA.getProviderNpi().toString().equals(i.getValue()))
@@ -513,15 +494,10 @@ public final class DataTransformerTest {
 				carrierEobItem.getServicedPeriod().getStart());
 		Assert.assertEquals(Date.valueOf(carrierClaimLineForBeneA.getDateThrough()),
 				carrierEobItem.getServicedPeriod().getEnd());
-		Assert.assertEquals(carrierClaimLineForBeneA.getAllowedAmount(),
-				carrierEobItem.getAdjudication().stream()
-						.filter(a -> DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE
-								.equals(a.getCategory().getCode()))
-						.findAny().get().getAmount().getValue().doubleValue(),
-				0.0);
-		Assert.assertEquals(
-				carrierClaimLineForBeneA
-						.getDeductibleAmount(),
+		Assert.assertEquals(carrierClaimLineForBeneA.getAllowedAmount(), carrierEobItem.getAdjudication().stream()
+				.filter(a -> DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE.equals(a.getCategory().getCode()))
+				.findAny().get().getAmount().getValue().doubleValue(), 0.0);
+		Assert.assertEquals(carrierClaimLineForBeneA.getDeductibleAmount(),
 				carrierEobItem.getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_DEDUCTIBLE.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
@@ -538,9 +514,7 @@ public final class DataTransformerTest {
 								.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
 				0.0);
-		Assert.assertEquals(
-				carrierClaimLineForBeneA
-						.getNchPaymentAmount(),
+		Assert.assertEquals(carrierClaimLineForBeneA.getNchPaymentAmount(),
 				carrierEobItem.getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_PAYMENT.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
@@ -551,12 +525,8 @@ public final class DataTransformerTest {
 		ExplanationOfBenefit partDEob = bundle.getExplanationOfBenefitsForPartD().get(0);
 		Assert.assertEquals(patientA.getId(), partDEob.getPatient().getReference());
 		Assert.assertEquals("" + partDEventForBeneA.getId(), partDEob.getIdentifier().get(0).getValue());
-		Assert.assertEquals(
-				partDEob.getProvider()
-						.getReference(),
-				bundle.getFhirResources().stream()
-						.filter(r -> r instanceof Practitioner).map(
-								r -> (Practitioner) r)
+		Assert.assertEquals(partDEob.getProvider().getReference(),
+				bundle.getFhirResources().stream().filter(r -> r instanceof Practitioner).map(r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
 								.filter(i -> partDEventForBeneA.getServiceProviderNpi().toString().equals(i.getValue()))
@@ -564,16 +534,12 @@ public final class DataTransformerTest {
 						.findAny().get().getId());
 		Assert.assertEquals(Date.valueOf(partDEventForBeneA.getServiceDate()),
 				partDEob.getItem().get(0).getServicedDateType().getValue());
-		Assert.assertEquals(
-				partDEventForBeneA
-						.getPatientPayAmount(),
+		Assert.assertEquals(partDEventForBeneA.getPatientPayAmount(),
 				partDEob.getItem().get(0).getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_PATIENT_PAY.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
 				0.0);
-		Assert.assertEquals(
-				partDEventForBeneA
-						.getTotalPrescriptionCost(),
+		Assert.assertEquals(partDEventForBeneA.getTotalPrescriptionCost(),
 				partDEob.getItem().get(0).getAdjudication().stream()
 						.filter(a -> DataTransformer.CODED_ADJUDICATION_TOTAL_COST.equals(a.getCategory().getCode()))
 						.findAny().get().getAmount().getValue().doubleValue(),
@@ -583,12 +549,8 @@ public final class DataTransformerTest {
 		MedicationOrder partDOrder = bundle.getFhirResources().stream().filter(r -> r instanceof MedicationOrder)
 				.map(r -> (MedicationOrder) r).findAny().get();
 		Assert.assertEquals(partDOrder.getId(), partDEob.getPrescription().getReference());
-		Assert.assertEquals(
-				partDOrder.getPrescriber()
-						.getReference(),
-				bundle.getFhirResources().stream()
-						.filter(r -> r instanceof Practitioner).map(
-								r -> (Practitioner) r)
+		Assert.assertEquals(partDOrder.getPrescriber().getReference(),
+				bundle.getFhirResources().stream().filter(r -> r instanceof Practitioner).map(r -> (Practitioner) r)
 						.filter(p -> p.getIdentifier().stream()
 								.filter(i -> i.getSystem() == DataTransformer.CODING_SYSTEM_NPI_US)
 								.filter(i -> partDEventForBeneA.getPrescriberNpi().toString().equals(i.getValue()))
@@ -632,6 +594,15 @@ public final class DataTransformerTest {
 		record.stateCode = "HI";
 		record.countyCode = "Transylvania";
 		record.postalCode = "12345";
+		record.birthDate = LocalDate.of(1959, Month.MARCH, 17);
+		record.sex = ('M');
+		record.entitlementCodeOriginal = Optional.of(new Character('1'));
+		record.entitlementCodeCurrent = Optional.of(new Character('1'));
+		record.endStageRenalDiseaseCode = Optional.of(new Character('N'));
+		record.medicareEnrollmentStatusCode = Optional.of(new String("20"));
+		record.nameSurname = "Doe";
+		record.nameGiven = "John";
+		record.nameMiddleInitial = Optional.of(new Character('E'));
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -648,7 +619,10 @@ public final class DataTransformerTest {
 		Assert.assertNotNull(beneBundleWrapper);
 		Assert.assertSame(beneRecordEvent, beneBundleWrapper.getSource());
 		Assert.assertNotNull(beneBundleWrapper.getResult());
-
+		/*
+		 * Bundle should have: 1) Patient, 2) Organization, 3) Coverage (part
+		 * A), 4) Coverage (part B), 5) Coverage (part D).
+		 */
 		Bundle beneBundle = beneBundleWrapper.getResult();
 		Assert.assertEquals(5, beneBundle.getEntry().size());
 		BundleEntryComponent beneEntry = beneBundle.getEntry().stream().filter(r -> r.getResource() instanceof Patient)
@@ -661,7 +635,46 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.stateCode, bene.getAddress().get(0).getState());
 		Assert.assertEquals(record.countyCode, bene.getAddress().get(0).getDistrict());
 		Assert.assertEquals(record.postalCode, bene.getAddress().get(0).getPostalCode());
-		// TODO test the rest of the columns/resource once they're all ready
+		Assert.assertEquals(Date.valueOf(record.birthDate), bene.getBirthDate());
+		Assert.assertEquals("MALE", bene.getGender().toString().trim());
+		/*
+		 * TODO Further research needs to be done so these unmapped fields are
+		 * documented in a JIRA ticket "Finalize fields for Beneficiary"
+		 * BENE_ENTLMT_RSN_ORIG, BENE_ENTLMT_RSN_CURR, BENE_ESRD_IND
+		 */
+
+		Assert.assertEquals(record.nameGiven, bene.getName().get(0).getGiven().get(0).toString());
+		Assert.assertEquals(record.nameMiddleInitial.toString(), bene.getName().get(0).getGiven().get(1).toString());
+		Assert.assertEquals(record.nameSurname, bene.getName().get(0).getFamilyAsSingleString().toString());
+
+		// TODO Need to check the status code for partA
+		// and partB (BENE_PTA_TRMNTN_CD & BENE_PTB_TRMNTN_CD) once STU3 is
+		// available
+
+		BundleEntryComponent[] coverageEntry = beneBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Coverage).toArray(BundleEntryComponent[]::new);
+
+		Coverage partA = (Coverage) coverageEntry[0].getResource();
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partA.getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_A, partA.getSubPlan());
+		Assert.assertEquals(record.medicareEnrollmentStatusCode.toString(),
+				((StringType) partA.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
+						.getValue()).getValue());
+
+		Coverage partB = (Coverage) coverageEntry[1].getResource();
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partB.getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_B, partB.getSubPlan());
+		Assert.assertEquals(record.medicareEnrollmentStatusCode.toString(),
+				((StringType) partB.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
+						.getValue()).getValue());
+
+		Coverage partD = (Coverage) coverageEntry[2].getResource();
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partD.getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, partD.getSubPlan());
+		Assert.assertEquals(record.medicareEnrollmentStatusCode.toString(),
+				((StringType) partD.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
+						.getValue()).getValue());
+
 	}
 
 	/**

@@ -2,6 +2,7 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -19,114 +20,105 @@ public final class BeneficiaryRow {
 	/**
 	 * FIXME is this the schema version or the record version?
 	 */
+	/**
+	 * @see Column#VERSION
+	 */
 	public int version;
 
 	/**
-	 * Indicates whether the record for the row is an insert, update, or delete.
+	 * @see Column#DML_IND
 	 */
 	public RecordAction recordAction;
 
 	/**
-	 * The CCW's assigned ID for this beneficiary.
+	 * @see Column#BENE_ID
 	 */
 	public String beneficiaryId;
 
 	/**
-	 * The two-letter code that represents the US state that the beneficiary
-	 * resides in. TODO: link to state codes dictionary
+	 * @see Column#STATE_CODE
 	 */
 	public String stateCode;
 
 	/**
-	 * The three-letter code that represents the county that the beneficiary
-	 * resides in. TODO: link to county codes dictionary
+	 * @see Column#BENE_COUNTY_CD
 	 */
 	public String countyCode;
 
 	/**
-	 * The five-or-nine-digit postal code that the beneficiary resides in.
-	 * (Note: this is a {@link String} to preserve any leading zeros.)
+	 * @see Column#BENE_ZIP_CD
 	 */
 	public String postalCode;
 
 	/**
-	 * The beneficiary's date of birth.
+	 * @see Column#BENE_BIRTH_DT
 	 */
 	public LocalDate birthDate;
 
 	/**
-	 * The one-letter code that represents the beneficiary's sex. TODO: link to
-	 * sex codes dictionary
+	 * @see Column#BENE_SEX_IDENT_CD
 	 */
 	public char sex;
 
 	/**
-	 * The one-letter code that represents the beneficiary's race. TODO: link to
-	 * race codes dictionary
+	 * @see Column#BENE_RACE_CD
 	 */
 	public char race;
 
 	/**
-	 * The one-letter code that represents the beneficiary's original reason for
-	 * Medicare entitlement. TODO: link to entitlement codes dictionary
+	 * @see Column#BENE_ENTLMT_RSN_ORIG
 	 */
-	public char entitlementCodeOriginal;
+	public Optional<Character> entitlementCodeOriginal;
 
 	/**
-	 * The one-letter code that represents the beneficiary's current reason for
-	 * Medicare entitlement. TODO: link to entitlement codes dictionary
+	 * @see Column#BENE_ENTLMT_RSN_CURR
 	 */
-	public char entitlementCodeCurrent;
+	public Optional<Character> entitlementCodeCurrent;
 
 	/**
-	 * The one-letter code that indicates whether or not the beneficiary is
-	 * classified as being in end-stage renal disease. TODO: link to codes
-	 * dictionary
+	 * @see Column#BENE_ESRD_IND
 	 */
-	public char endStageRenalDiseaseCode;
+	public Optional<Character> endStageRenalDiseaseCode;
 
 	/**
-	 * The two-letter code for the beneficiary's Medicare enrollment status.
-	 * TODO: link to codes dictionary
+	 * @see Column#BENE_MDCR_STATUS_CD
 	 */
-	public String medicareEnrollmentStatusCode;
+	public Optional<String> medicareEnrollmentStatusCode;
 
 	/**
-	 * The one-letter code that details why the beneficiary's Part A enrollment
-	 * was terminated (if it was). TODO: link to codes dictionary
+	 * @see Column#BENE_PTA_TRMNTN_CD
 	 */
-	public char partATerminationCode;
+	public Optional<Character> partATerminationCode;
 
 	/**
-	 * The one-letter code that details why the beneficiary's Part B enrollment
-	 * was terminated (if it was). TODO: link to codes dictionary
+	 * @see Column#BENE_PTB_TRMNTN_CD
 	 */
-	public char partBTerminationCode;
+	public Optional<Character> partBTerminationCode;
 
 	/**
-	 * The beneficiary's twelve-character alphanumeric "HIC Number/HICN", which
-	 * is their Medicare ID.
+	 * @see Column#BENE_CRNT_HIC_NUM
 	 */
 	public String hicn;
 
 	/**
-	 * The beneficiary's surname/last name.
+	 * @see Column#BENE_SRNM_NAME
 	 */
 	public String nameSurname;
 
 	/**
-	 * The beneficiary's given/first name.
+	 * @see Column#BENE_GVN_NAME
 	 */
 	public String nameGiven;
 
 	/**
-	 * The beneficiary's middleInitial.
+	 * @see Column#BENE_MDL_NAME
 	 */
-	public char nameMiddleInitial;
+	public Optional<Character> nameMiddleInitial;
 
 	/**
 	 * @see java.lang.Object#toString()
 	 */
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -189,93 +181,130 @@ public final class BeneficiaryRow {
 		DML_IND,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 15.
+		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
+		 * CCW Data Dictionary: BENE_ID</a>, though note that this instance of
+		 * the field is unencrypted.
 		 */
 		BENE_ID,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2.
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/state_cd.txt">
+		 * CCW Data Dictionary: STATE_CODE</a>.
 		 */
 		STATE_CODE,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 3.
+		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cnty_cd.txt">
+		 * CCW Data Dictionary: BENE_COUNTY_CD</a>.
 		 */
 		BENE_COUNTY_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 9.
+		 * Type: <code>CHAR</code>, max chars: 9. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_zip.txt">
+		 * CCW Data Dictionary: BENE_ZIP_CD</a>.
 		 */
 		BENE_ZIP_CD,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8.
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_dob.txt">
+		 * CCW Data Dictionary: BENE_BIRTH_DT</a>.
 		 */
 		BENE_BIRTH_DT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sex.txt">
+		 * CCW Data Dictionary: BENE_SEX_IDENT_CD</a>.
 		 */
 		BENE_SEX_IDENT_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt">
+		 * CCW Data Dictionary: BENE_RACE_CD</a>.
 		 */
 		BENE_RACE_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt">
+		 * CCW Data Dictionary: BENE_ENTLMT_RSN_ORIG</a>.
 		 */
 		BENE_ENTLMT_RSN_ORIG,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt">
+		 * CCW Data Dictionary: BENE_ENTLMT_RSN_CURR</a>.
 		 */
 		BENE_ENTLMT_RSN_CURR,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt">
+		 * CCW Data Dictionary: BENE_ESRD_IND</a>.
 		 */
 		BENE_ESRD_IND,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2.
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt">
+		 * CCW Data Dictionary: BENE_MDCR_STATUS_CD</a>.
 		 */
 		BENE_MDCR_STATUS_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt">
+		 * CCW Data Dictionary: BENE_PTA_TRMNTN_CD</a>.
 		 */
 		BENE_PTA_TRMNTN_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt">
+		 * CCW Data Dictionary: BENE_PTB_TRMNTN_CD</a>.
 		 */
 		BENE_PTB_TRMNTN_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12.
+		 * <code>CHAR</code>, max chars: 12. This is the beneficiary's current
+		 * HIC number.
 		 */
 		BENE_CRNT_HIC_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 24.
+		 * <code>CHAR</code>, max chars: 24. This is the beneficiary's last
+		 * name.
 		 */
 		BENE_SRNM_NAME,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5.
+		 * <code>CHAR</code>, max chars: 5. This is the beneficiary's first
+		 * name.
 		 */
 		BENE_GVN_NAME,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1.
+		 * <code>CHAR</code>, max chars: 1 <code>Optional</code>. This is the
+		 * beneficiary's middle initial.
 		 */
 		BENE_MDL_NAME;
 
-		/**
+		/*
 		 * @return a {@link String} array containing all of the RIF column
-		 *         names, in order
+		 * names, in order
 		 */
 		public static String[] getColumnNames() {
 			return Arrays.stream(values()).map(c -> c.name()).collect(Collectors.toList())

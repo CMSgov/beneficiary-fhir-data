@@ -24,12 +24,14 @@ import org.hl7.fhir.dstu21.model.Coding;
 import org.hl7.fhir.dstu21.model.Coverage;
 import org.hl7.fhir.dstu21.model.DateType;
 import org.hl7.fhir.dstu21.model.Duration;
+import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DetailComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.SubDetailComponent;
 import org.hl7.fhir.dstu21.model.Extension;
+import org.hl7.fhir.dstu21.model.HumanName;
 import org.hl7.fhir.dstu21.model.IdType;
 import org.hl7.fhir.dstu21.model.Identifier;
 import org.hl7.fhir.dstu21.model.IntegerType;
@@ -157,6 +159,18 @@ public final class DataTransformer {
 	 * CCW Data Dictionary: RX_SRVC_RFRNC_NUM</a>.
 	 */
 	static final String CODING_SYSTEM_RX_SRVC_RFRNC_NUM = "CCW.RX_SRVC_RFRNC_NUM";
+
+	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_ORIG = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
+
+	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_CURR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
+
+	static final String CODING_SYSTEM_CCW_BENE_ESRD_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
+
+	static final String CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt";
+
+	static final String CODING_SYSTEM_CCW_BENE_PTA_TRMNTN_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt";
+
+	static final String CODING_SYSTEM_CCW_BENE_PTB_TRMNTN_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt";
 
 	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
 
@@ -951,7 +965,32 @@ public final class DataTransformer {
 		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID).setValue(record.beneficiaryId);
 		beneficiary.addAddress().setState(record.stateCode).setDistrict(record.countyCode)
 				.setPostalCode(record.postalCode);
-		// TODO rest of mapping
+		if (record.birthDate != null) {
+			beneficiary.setBirthDate(Date.valueOf(record.birthDate));
+		}
+		switch (record.sex) {
+		case ('M'):
+			beneficiary.setGender((AdministrativeGender.MALE));
+			break;
+		case ('F'):
+			beneficiary.setGender((AdministrativeGender.FEMALE));
+			break;
+		default:
+			beneficiary.setGender((AdministrativeGender.UNKNOWN));
+			break;
+		}
+		/*
+		 * TODO Could not map the following fields. Have created a JIRA ticket
+		 * called "Finalize fields for Beneficiary" to revisit on where to best
+		 * map the following fields. BENE_ENTLMT_RSN_ORIG, BENE_ENTLMT_RSN_CURR,
+		 * BENE_ESRD_IND
+		 */
+
+		/*
+		 * Has been decided that HICN will not be included in FHIR resources
+		 */
+		beneficiary.addName().addGiven(record.nameGiven).addGiven((String.valueOf(record.nameMiddleInitial)))
+				.addFamily(record.nameSurname).setUse(HumanName.NameUse.USUAL);
 		insert(bundle, beneficiary);
 
 		/*
@@ -973,6 +1012,12 @@ public final class DataTransformer {
 		partA.setSubPlan(COVERAGE_PLAN_PART_A);
 		partA.setIssuer(cmsOrgRef);
 		partA.setSubscriber(referencePatient(record.beneficiaryId));
+		partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
+		/*
+		 * TODO once STU3 is available, transform bene_pta_trmntn_cd into
+		 * partA.status
+		 */
 		insert(bundle, partA);
 
 		Coverage partB = new Coverage();
@@ -980,6 +1025,12 @@ public final class DataTransformer {
 		partB.setSubPlan(COVERAGE_PLAN_PART_B);
 		partB.setIssuer(cmsOrgRef);
 		partB.setSubscriber(referencePatient(record.beneficiaryId));
+		partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
+		/*
+		 * TODO once STU3 is available, transform bene_ptb_trmntn_cd into
+		 * partB.status
+		 */
 		insert(bundle, partB);
 
 		Coverage partD = new Coverage();
@@ -987,6 +1038,8 @@ public final class DataTransformer {
 		partD.setSubPlan(COVERAGE_PLAN_PART_D);
 		partD.setIssuer(cmsOrgRef);
 		partD.setSubscriber(referencePatient(record.beneficiaryId));
+		partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
 		insert(bundle, partD);
 
 		return new TransformedBundle(rifRecordEvent, bundle);
