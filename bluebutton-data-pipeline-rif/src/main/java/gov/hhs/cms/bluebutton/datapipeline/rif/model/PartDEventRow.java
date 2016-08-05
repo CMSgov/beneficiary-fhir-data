@@ -108,7 +108,7 @@ public class PartDEventRow {
 	public String dispenseAsWrittenProductSelectionCode;
 
 	/**
-	 * @see Column#QTY_DPSNSD_NUM
+	 * @see Column#QTY_DSPNSD_NUM
 	 */
 	public BigDecimal quantityDispensed;
 
@@ -439,9 +439,9 @@ public class PartDEventRow {
 		/**
 		 * Type: <code>NUM</code>, max chars: 12. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qty_dspnsd_num.txt">
-		 * CCW Data Dictionary: QTY_DPSNSD_NUM</a>.
+		 * CCW Data Dictionary: QTY_DSPNSD_NUM</a>.
 		 */
-		QTY_DPSNSD_NUM,
+		QTY_DSPNSD_NUM,
 
 		/**
 		 * Type: <code>NUM</code>, max chars: 3. See <a href=

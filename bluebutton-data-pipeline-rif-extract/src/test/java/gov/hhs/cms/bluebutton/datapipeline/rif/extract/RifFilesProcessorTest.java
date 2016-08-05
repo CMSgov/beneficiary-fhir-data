@@ -217,26 +217,79 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
 		Assert.assertEquals("1", claimGroup.beneficiaryId);
 		Assert.assertEquals("1831831620", claimGroup.claimId);
-		Assert.assertEquals("1831831620", claimGroup.claimId);
+		Assert.assertEquals(new Character('O'), claimGroup.nearLineRecordIdCode);
+		Assert.assertEquals("71", claimGroup.claimTypeCode);
 		Assert.assertEquals(LocalDate.of(2015, 10, 27), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2015, 10, 27), claimGroup.dateThrough);
+		Assert.assertEquals(LocalDate.of(2015, 11, 6), claimGroup.weeklyProcessDate);
+		Assert.assertEquals(new Character('1'), claimGroup.claimEntryCode);
+		Assert.assertEquals("01", claimGroup.claimDispositionCode);
+		Assert.assertEquals("06102", claimGroup.carrierNumber);
+		Assert.assertEquals("1", claimGroup.paymentDenialCode);
+		Assert.assertEquals(new BigDecimal("130.32"), claimGroup.paymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
+		Assert.assertEquals("U91100", claimGroup.referringPhysicianUpin);
 		Assert.assertEquals("1902880057", claimGroup.referringPhysicianNpi);
+		Assert.assertEquals(new Character('A'), claimGroup.providerAssignmentIndicator);
 		Assert.assertEquals(new BigDecimal("130.32"), claimGroup.providerPaymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.beneficiaryPaymentAmount);
+		Assert.assertEquals(new BigDecimal("245.04"), claimGroup.submittedChargeAmount);
+		Assert.assertEquals(new BigDecimal("166.23"), claimGroup.allowedChargeAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.beneficiaryPartBDeductAmount);
+		Assert.assertEquals(new Character('5'), claimGroup.hcpcsYearCode);
+		Assert.assertEquals("K25852", claimGroup.referringProviderIdNumber);
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "H40013"), claimGroup.diagnosisPrincipal);
 		Assert.assertEquals(4, claimGroup.diagnosesAdditional.size());
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "H26493"), claimGroup.diagnosesAdditional.get(2));
 		Assert.assertEquals(7, claimGroup.lines.size());
-		// TODO test the rest of the columns once they're all ready
 
 		// Verify one of the claim lines.
 		CarrierClaimLine claimLine = claimGroup.lines.get(5);
-		Assert.assertEquals(1, claimLine.number);
+		Assert.assertEquals("00000000", claimLine.clinicalTrialNumber);
+		Assert.assertEquals(new Integer(1), claimLine.number);
+		Assert.assertEquals("K25852", claimLine.performingProviderIdNumber);
+		Assert.assertFalse(claimLine.performingPhysicianUpin.isPresent());
+		Assert.assertEquals("1902880057", claimLine.performingPhysicianNpi);
 		Assert.assertFalse(claimLine.organizationNpi.isPresent());
+		Assert.assertEquals(new Character('0'), claimLine.providerTypeCode);
+		Assert.assertEquals("204240126", claimLine.providerTaxNumber);
+		Assert.assertEquals("IL", claimLine.providerStateCode);
+		Assert.assertEquals("604428202", claimLine.providerZipCode);
+		Assert.assertEquals("41", claimLine.providerSpecialityCode);
+		Assert.assertEquals(new Character('1'), claimLine.providerParticipatingIndCode);
+		Assert.assertEquals(new Character('0'), claimLine.reducedPaymentPhysicianAsstCode);
+		Assert.assertEquals(new BigDecimal("1"), claimLine.serviceCount);
 		Assert.assertEquals("1", claimLine.cmsServiceTypeCode);
+		Assert.assertEquals("11", claimLine.placeOfServiceCode);
+		Assert.assertEquals("15", claimLine.linePricingLocalityCode);
+		Assert.assertEquals(LocalDate.of(2015, 10, 27), claimLine.firstExpenseDate);
+		Assert.assertEquals(LocalDate.of(2015, 10, 27), claimLine.lastExpenseDate);
 		Assert.assertEquals("92012", claimLine.hcpcsCode);
+		Assert.assertFalse(claimLine.hcpcsInitialModifierCode.isPresent());
+		Assert.assertFalse(claimLine.hcpcsSecondModifierCode.isPresent());
+		Assert.assertEquals("M5C", claimLine.betosCode);
+		Assert.assertEquals(new BigDecimal("70.79"), claimLine.paymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimLine.beneficiaryPaymentAmount);
 		Assert.assertEquals(new BigDecimal("70.79"), claimLine.providerPaymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimLine.beneficiaryPartBDeductAmount);
+		Assert.assertFalse(claimLine.primaryPayerCode.isPresent());
+		Assert.assertEquals(new BigDecimal("0"), claimLine.primaryPayerPaidAmount);
+		Assert.assertEquals(new BigDecimal("18.06"), claimLine.coinsuranceAmount);
+		Assert.assertEquals(new BigDecimal("110"), claimLine.submittedChargeAmount);
+		Assert.assertEquals(new BigDecimal("90.29"), claimLine.allowedChargeAmount);
+		Assert.assertEquals("A", claimLine.processingIndicatorCode);
+		Assert.assertEquals(new Character('0'), claimLine.paymentCode);
+		Assert.assertEquals(new Character('0'), claimLine.serviceDeductibleCode);
+		Assert.assertEquals(new BigDecimal("1"), claimLine.mtusCount);
+		Assert.assertEquals(new Character('3'), claimLine.mtusCode);
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "H40013"), claimLine.diagnosis);
-		// TODO test the rest of the columns once they're all ready
+		Assert.assertFalse(claimLine.hpsaScarcityCode.isPresent());
+		Assert.assertFalse(claimLine.rxNumber.isPresent());
+		Assert.assertEquals(new BigDecimal("0"), claimLine.hctHgbTestResult);
+		Assert.assertFalse(claimLine.hctHgbTestTypeCode.isPresent());
+		Assert.assertFalse(claimLine.nationalDrugCode.isPresent());
+		Assert.assertFalse(claimLine.cliaLabNumber.isPresent());
+		Assert.assertEquals(new Integer(0), claimLine.anesthesiaUnitCount);
 	}
 
 	/**

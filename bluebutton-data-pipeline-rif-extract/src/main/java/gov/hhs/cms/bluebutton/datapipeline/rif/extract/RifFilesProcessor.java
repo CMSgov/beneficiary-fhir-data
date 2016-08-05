@@ -199,8 +199,8 @@ public final class RifFilesProcessor {
 					if (o2 == null)
 						throw new IllegalArgumentException();
 
-					String claimId1 = o1.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
-					String claimId2 = o2.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
+					String claimId1 = o1.get(CarrierClaimGroup.Column.CLM_ID);
+					String claimId2 = o2.get(CarrierClaimGroup.Column.CLM_ID);
 
 					return claimId1.compareTo(claimId2);
 				}
@@ -330,69 +330,69 @@ public final class RifFilesProcessor {
 			LOGGER.trace(csvRecord.toString());
 
 		PartDEventRow pdeRow = new PartDEventRow();
-		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION.ordinal()));
+		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION));
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != pdeRow.version)
 			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
 
-		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND.ordinal()));
-		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID.ordinal());
-		pdeRow.beneficiaryId = csvRecord.get(PartDEventRow.Column.BENE_ID.ordinal());
-		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT.ordinal()),
+		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND));
+		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID);
+		pdeRow.beneficiaryId = csvRecord.get(PartDEventRow.Column.BENE_ID);
+		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT),
 				RIF_DATE_FORMATTER);
-		pdeRow.paymentDate = parseOptDate(csvRecord.get(PartDEventRow.Column.PD_DT.ordinal()));
-		pdeRow.serviceProviderIdQualiferCode = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD.ordinal());
-		pdeRow.serviceProviderId = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID.ordinal());
-		pdeRow.prescriberIdQualifierCode = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD.ordinal());
-		pdeRow.prescriberId = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID.ordinal());
+		pdeRow.paymentDate = parseOptDate(csvRecord.get(PartDEventRow.Column.PD_DT));
+		pdeRow.serviceProviderIdQualiferCode = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD);
+		pdeRow.serviceProviderId = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID);
+		pdeRow.prescriberIdQualifierCode = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD);
+		pdeRow.prescriberId = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID);
 		pdeRow.prescriptionReferenceNumber = Long
-				.parseLong(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM.ordinal()));
-		pdeRow.nationalDrugCode = csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID.ordinal());
-		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID.ordinal());
-		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM.ordinal());
+				.parseLong(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM));
+		pdeRow.nationalDrugCode = csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID);
+		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID);
+		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM);
 		pdeRow.compoundCode = CompoundCode
-				.parseRifValue(Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD.ordinal())));
-		pdeRow.dispenseAsWrittenProductSelectionCode = csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD.ordinal());
-		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DPSNSD_NUM.ordinal()));
-		pdeRow.daysSupply = Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM.ordinal()));
-		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM.ordinal()));
-		pdeRow.dispensingStatuscode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD.ordinal()));
+				.parseRifValue(Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD)));
+		pdeRow.dispenseAsWrittenProductSelectionCode = csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD);
+		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DSPNSD_NUM));
+		pdeRow.daysSupply = Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM));
+		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM));
+		pdeRow.dispensingStatuscode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD));
 		pdeRow.drugCoverageStatusCode = DrugCoverageStatus
-				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD.ordinal()));
+				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD));
 		pdeRow.adjustmentDeletionCode = parseOptCharacter(
-				csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD.ordinal()));
-		pdeRow.nonstandardFormatCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.NSTD_FRMT_CD.ordinal()));
-		pdeRow.pricingExceptionCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.PRCNG_EXCPTN_CD.ordinal()));
+				csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD));
+		pdeRow.nonstandardFormatCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.NSTD_FRMT_CD));
+		pdeRow.pricingExceptionCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.PRCNG_EXCPTN_CD));
 		pdeRow.catastrophicCoverageCode = parseOptCharacter(
-				csvRecord.get(PartDEventRow.Column.CTSTRPHC_CVRG_CD.ordinal()));
+				csvRecord.get(PartDEventRow.Column.CTSTRPHC_CVRG_CD));
 		pdeRow.grossCostBelowOutOfPocketThreshold = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.GDC_BLW_OOPT_AMT.ordinal()));
+				csvRecord.get(PartDEventRow.Column.GDC_BLW_OOPT_AMT));
 		pdeRow.grossCostAboveOutOfPocketThreshold = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.GDC_ABV_OOPT_AMT.ordinal()));
-		pdeRow.patientPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.PTNT_PAY_AMT.ordinal()));
+				csvRecord.get(PartDEventRow.Column.GDC_ABV_OOPT_AMT));
+		pdeRow.patientPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.PTNT_PAY_AMT));
 		pdeRow.otherTrueOutOfPocketPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.OTHR_TROOP_AMT.ordinal()));
-		pdeRow.lowIncomeSubsidyPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.LICS_AMT.ordinal()));
+				csvRecord.get(PartDEventRow.Column.OTHR_TROOP_AMT));
+		pdeRow.lowIncomeSubsidyPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.LICS_AMT));
 		pdeRow.patientLiabilityReductionOtherPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.PLRO_AMT.ordinal()));
+				csvRecord.get(PartDEventRow.Column.PLRO_AMT));
 		pdeRow.partDPlanCoveredPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.CVRD_D_PLAN_PD_AMT.ordinal()));
+				csvRecord.get(PartDEventRow.Column.CVRD_D_PLAN_PD_AMT));
 		pdeRow.partDPlanNonCoveredPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.NCVRD_PLAN_PD_AMT.ordinal()));
-		pdeRow.totalPrescriptionCost = new BigDecimal(csvRecord.get(PartDEventRow.Column.TOT_RX_CST_AMT.ordinal()));
+				csvRecord.get(PartDEventRow.Column.NCVRD_PLAN_PD_AMT));
+		pdeRow.totalPrescriptionCost = new BigDecimal(csvRecord.get(PartDEventRow.Column.TOT_RX_CST_AMT));
 		pdeRow.prescriptionOriginationCode = parseOptCharacter(
-				csvRecord.get(PartDEventRow.Column.RX_ORGN_CD.ordinal()));
-		pdeRow.gapDiscountAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.RPTD_GAP_DSCNT_NUM.ordinal()));
+				csvRecord.get(PartDEventRow.Column.RX_ORGN_CD));
+		pdeRow.gapDiscountAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.RPTD_GAP_DSCNT_NUM));
 		/*
 		 * TODO Re-enable this mapping once it is determined for sure if this is
 		 * optional or not.
 		 */
 		// pdeRow.brandGenericCode =
-		// csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD.ordinal()).charAt(0);
-		pdeRow.pharmacyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD.ordinal());
-		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD.ordinal());
+		// csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD).charAt(0);
+		pdeRow.pharmacyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD);
+		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD);
 		pdeRow.submissionClarificationCode = parseOptString(
-				csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD.ordinal()));
+				csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD));
 
 		return pdeRow;
 	}
@@ -416,40 +416,119 @@ public final class RifFilesProcessor {
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(CarrierClaimGroup.Column.VERSION.ordinal()));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(CarrierClaimGroup.Column.DML_IND.ordinal()));
-		claimGroup.beneficiaryId = firstClaimLine.get(CarrierClaimGroup.Column.BENE_ID.ordinal());
-		claimGroup.claimId = firstClaimLine.get(CarrierClaimGroup.Column.CLM_ID.ordinal());
-		claimGroup.dateFrom = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_FROM_DT.ordinal()));
-		claimGroup.dateThrough = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_THRU_DT.ordinal()));
-		claimGroup.referringPhysicianNpi = firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_NPI.ordinal());
+		claimGroup.version = parseInt(firstClaimLine.get(CarrierClaimGroup.Column.VERSION));
+		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(CarrierClaimGroup.Column.DML_IND));
+		claimGroup.beneficiaryId = firstClaimLine.get(CarrierClaimGroup.Column.BENE_ID);
+		claimGroup.claimId = firstClaimLine.get(CarrierClaimGroup.Column.CLM_ID);
+		claimGroup.nearLineRecordIdCode = parseCharacter(
+				firstClaimLine.get(CarrierClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
+		claimGroup.claimTypeCode = firstClaimLine.get(CarrierClaimGroup.Column.NCH_CLM_TYPE_CD);
+		claimGroup.dateFrom = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_FROM_DT));
+		claimGroup.dateThrough = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_THRU_DT));
+		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.claimEntryCode = parseCharacter(
+				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_ENTRY_CD));
+		claimGroup.claimDispositionCode = firstClaimLine.get(CarrierClaimGroup.Column.CLM_DISP_CD);
+		claimGroup.carrierNumber = firstClaimLine.get(CarrierClaimGroup.Column.CARR_NUM);
+		claimGroup.paymentDenialCode = firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_PMT_DNL_CD);
+		claimGroup.paymentAmount = parseDecimal(
+				firstClaimLine.get(CarrierClaimGroup.Column.CLM_PMT_AMT));
+		claimGroup.primaryPayerPaidAmount = parseDecimal(
+				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_PRMRY_PYR_PD_AMT));
+		claimGroup.referringPhysicianUpin = firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_UPIN);
+		claimGroup.referringPhysicianNpi = firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_NPI);
+		claimGroup.providerAssignmentIndicator = parseCharacter(
+				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_PRVDR_ASGNMT_IND_SW));
 		claimGroup.providerPaymentAmount = parseDecimal(
-				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CLM_PRVDR_PMT_AMT.ordinal()));
+				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CLM_PRVDR_PMT_AMT));
+		claimGroup.beneficiaryPaymentAmount = parseDecimal(
+				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CLM_BENE_PMT_AMT));
+		claimGroup.submittedChargeAmount = parseDecimal(
+				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CARR_CLM_SBMTD_CHRG_AMT));
+		claimGroup.allowedChargeAmount = parseDecimal(
+				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CARR_CLM_ALOWD_AMT));
+		claimGroup.beneficiaryPartBDeductAmount = parseDecimal(
+				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_CASH_DDCTBL_APLD_AMT));
+		claimGroup.hcpcsYearCode = parseCharacter(firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
+		claimGroup.referringProviderIdNumber = firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_RFRNG_PIN_NUM);
 		claimGroup.diagnosisPrincipal = parseIcdCode(
-				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD.ordinal()),
-				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD.ordinal()));
+				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD),
+				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, CarrierClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				CarrierClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
-		// TODO finish mapping the rest of the columns
-
 		/*
 		 * Parse the claim lines.
 		 */
 		for (CSVRecord claimLineRecord : csvRecords) {
 			CarrierClaimLine claimLine = new CarrierClaimLine();
 
-			claimLine.number = parseInt(claimLineRecord.get(CarrierClaimGroup.Column.LINE_NUM.ordinal()));
+			claimLine.clinicalTrialNumber = claimLineRecord.get(CarrierClaimGroup.Column.CLM_CLNCL_TRIL_NUM);
+			claimLine.number = parseInt(claimLineRecord.get(CarrierClaimGroup.Column.LINE_NUM));
+			claimLine.performingProviderIdNumber = claimLineRecord.get(CarrierClaimGroup.Column.CARR_PRFRNG_PIN_NUM);
+			claimLine.performingPhysicianUpin = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.PRF_PHYSN_UPIN));
+			claimLine.performingPhysicianNpi = claimLineRecord.get(CarrierClaimGroup.Column.PRF_PHYSN_NPI);
 			claimLine.organizationNpi = parseOptString(
-					claimLineRecord.get(CarrierClaimGroup.Column.ORG_NPI_NUM.ordinal()));
+					claimLineRecord.get(CarrierClaimGroup.Column.ORG_NPI_NUM));
+			claimLine.providerTypeCode = parseCharacter(
+					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_PRVDR_TYPE_CD));
+			claimLine.providerTaxNumber = claimLineRecord.get(CarrierClaimGroup.Column.TAX_NUM);
+			claimLine.providerStateCode = claimLineRecord.get(CarrierClaimGroup.Column.PRVDR_STATE_CD);
+			claimLine.providerZipCode = claimLineRecord.get(CarrierClaimGroup.Column.PRVDR_ZIP);
+			claimLine.providerSpecialityCode = claimLineRecord.get(CarrierClaimGroup.Column.PRVDR_SPCLTY);
+			claimLine.providerParticipatingIndCode = parseCharacter(
+					claimLineRecord.get(CarrierClaimGroup.Column.PRTCPTNG_IND_CD));
+			claimLine.reducedPaymentPhysicianAsstCode = parseCharacter(
+					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_RDCD_PMT_PHYS_ASTN_C));
+			claimLine.serviceCount = parseDecimal(claimLineRecord.get(CarrierClaimGroup.Column.LINE_SRVC_CNT));
 			claimLine.cmsServiceTypeCode = claimLineRecord
-					.get(CarrierClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD.ordinal());
-			claimLine.hcpcsCode = claimLineRecord.get(CarrierClaimGroup.Column.HCPCS_CD.ordinal());
+					.get(CarrierClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD);
+			claimLine.placeOfServiceCode = claimLineRecord.get(CarrierClaimGroup.Column.LINE_PLACE_OF_SRVC_CD);
+			claimLine.linePricingLocalityCode = claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_PRCNG_LCLTY_CD);
+			claimLine.firstExpenseDate = parseDate(claimLineRecord.get(CarrierClaimGroup.Column.LINE_1ST_EXPNS_DT));
+			claimLine.lastExpenseDate = parseDate(claimLineRecord.get(CarrierClaimGroup.Column.LINE_LAST_EXPNS_DT));
+			claimLine.hcpcsCode = claimLineRecord.get(CarrierClaimGroup.Column.HCPCS_CD);
+			claimLine.hcpcsInitialModifierCode = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.HCPCS_1ST_MDFR_CD));
+			claimLine.hcpcsSecondModifierCode = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.HCPCS_2ND_MDFR_CD));
+			claimLine.betosCode = claimLineRecord.get(CarrierClaimGroup.Column.BETOS_CD);
+			claimLine.paymentAmount = parseDecimal(claimLineRecord.get(CarrierClaimGroup.Column.LINE_NCH_PMT_AMT));
+			claimLine.beneficiaryPaymentAmount = parseDecimal(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_BENE_PMT_AMT));
 			claimLine.providerPaymentAmount = parseDecimal(
-					claimLineRecord.get(CarrierClaimGroup.Column.LINE_PRVDR_PMT_AMT.ordinal()));
-			claimLine.diagnosis = parseIcdCode(claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_CD.ordinal()),
-					claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD.ordinal()));
-			// TODO finish mapping the rest of the columns
-
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_PRVDR_PMT_AMT));
+			claimLine.beneficiaryPartBDeductAmount = parseDecimal(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_BENE_PTB_DDCTBL_AMT));
+			claimLine.primaryPayerCode = parseOptCharacter(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_BENE_PRMRY_PYR_CD));
+			claimLine.primaryPayerPaidAmount = parseDecimal(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_BENE_PRMRY_PYR_PD_AMT));
+			claimLine.coinsuranceAmount = parseDecimal(claimLineRecord.get(CarrierClaimGroup.Column.LINE_COINSRNC_AMT));
+			claimLine.submittedChargeAmount = parseDecimal(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_SBMTD_CHRG_AMT));
+			claimLine.allowedChargeAmount = parseDecimal(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_ALOWD_CHRG_AMT));
+			claimLine.processingIndicatorCode = claimLineRecord.get(CarrierClaimGroup.Column.LINE_PRCSG_IND_CD);
+			claimLine.paymentCode = parseCharacter(claimLineRecord.get(CarrierClaimGroup.Column.LINE_PMT_80_100_CD));
+			claimLine.serviceDeductibleCode = parseCharacter(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_SERVICE_DEDUCTIBLE));
+			claimLine.mtusCount = parseDecimal(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_MTUS_CNT));
+			claimLine.mtusCode = parseCharacter(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_MTUS_CD));
+			claimLine.diagnosis = parseIcdCode(claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_CD),
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD));
+			claimLine.hpsaScarcityCode = parseOptCharacter(
+					claimLineRecord.get(CarrierClaimGroup.Column.HPSA_SCRCTY_IND_CD));
+			claimLine.rxNumber = parseOptString(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_RX_NUM));
+			claimLine.hctHgbTestResult = parseDecimal(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_HCT_HGB_RSLT_NUM));
+			claimLine.hctHgbTestTypeCode = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_HCT_HGB_TYPE_CD));
+			claimLine.nationalDrugCode = parseOptString(claimLineRecord.get(CarrierClaimGroup.Column.LINE_NDC_CD));
+			claimLine.cliaLabNumber = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_CLIA_LAB_NUM));
+			claimLine.anesthesiaUnitCount = parseInt(
+					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_ANSTHSA_UNIT_CNT));
 			claimGroup.lines.add(claimLine);
 		}
 
