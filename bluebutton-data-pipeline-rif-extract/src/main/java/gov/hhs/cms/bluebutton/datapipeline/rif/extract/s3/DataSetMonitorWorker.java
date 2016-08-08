@@ -130,8 +130,9 @@ final class DataSetMonitorWorker implements Runnable {
 				dataSetComplete = true;
 
 			/*
-			 * We'll loop forever, but it's prudent to pause between each
-			 * iteration.
+			 * We're very patient here, so we keep looping, but it's prudent to
+			 * pause between each iteration. TODO should eventually time out,
+			 * once we know how long transfers might take
 			 */
 			try {
 				Thread.sleep(1000 * 1);
