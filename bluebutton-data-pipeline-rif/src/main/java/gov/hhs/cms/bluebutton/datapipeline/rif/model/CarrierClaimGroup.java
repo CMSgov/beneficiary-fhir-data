@@ -30,9 +30,6 @@ import java.util.stream.Collectors;
  * </p>
  */
 public final class CarrierClaimGroup {
-	/**
-	 * @see java.lang.Object#toString()
-	 */
 
 	/**
 	 * @see Column#VERSION
