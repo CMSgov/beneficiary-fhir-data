@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  * </p>
  */
 public final class CarrierClaimGroup {
+
 	/**
 	 * @see Column#VERSION
 	 */
@@ -51,6 +52,16 @@ public final class CarrierClaimGroup {
 	public String claimId;
 
 	/**
+	 * @see Column#NCH_NEAR_LINE_REC_IDENT_CD
+	 */
+	public Character nearLineRecordIdCode;
+
+	/**
+	 * @see Column#NCH_CLM_TYPE_CD
+	 */
+	public String claimTypeCode;
+
+	/**
 	 * @see Column#CLM_FROM_DT
 	 */
 	public LocalDate dateFrom;
@@ -61,14 +72,89 @@ public final class CarrierClaimGroup {
 	public LocalDate dateThrough;
 
 	/**
+	 * @see Column#NCH_WKLY_PROC_DT
+	 */
+	public LocalDate weeklyProcessDate;
+
+	/**
+	 * @see Column#CARR_CLM_ENTRY_CD
+	 */
+	public Character claimEntryCode;
+
+	/**
+	 * @see Column#CLM_DISP_CD
+	 */
+	public String claimDispositionCode;
+
+	/**
+	 * @see Column#CARR_NUM
+	 */
+	public String carrierNumber;
+
+	/**
+	 * @see Column#CARR_CLM_PMT_DNL_CD
+	 */
+	public String paymentDenialCode;
+
+	/**
+	 * @see Column#CLM_PMT_AMT
+	 */
+	public BigDecimal paymentAmount;
+
+	/**
+	 * @see Column#CARR_CLM_PRMRY_PYR_PD_AMT
+	 */
+	public BigDecimal primaryPayerPaidAmount;
+
+	/**
+	 * @see Column#RFR_PHYSN_UPIN
+	 */
+	public String referringPhysicianUpin;
+
+	/**
 	 * @see Column#RFR_PHYSN_NPI
 	 */
 	public String referringPhysicianNpi;
 
 	/**
+	 * @see Column#CARR_CLM_PRVDR_ASGNMT_IND_SW
+	 */
+	public Character providerAssignmentIndicator;
+
+	/**
 	 * @see Column#NCH_CLM_PRVDR_PMT_AMT
 	 */
 	public BigDecimal providerPaymentAmount;
+
+	/**
+	 * @see Column#NCH_CLM_BENE_PMT_AMT
+	 */
+	public BigDecimal beneficiaryPaymentAmount;
+
+	/**
+	 * @see Column#NCH_CARR_CLM_SBMTD_CHRG_AMT
+	 */
+	public BigDecimal submittedChargeAmount;
+
+	/**
+	 * @see Column#NCH_CARR_CLM_ALOWD_AMT
+	 */
+	public BigDecimal allowedChargeAmount;
+
+	/**
+	 * @see Column#CARR_CLM_CASH_DDCTBL_APLD_AMT
+	 */
+	public BigDecimal beneficiaryPartBDeductAmount;
+
+	/**
+	 * @see Column#CARR_CLM_HCPCS_YR_CD
+	 */
+	public Character hcpcsYearCode;
+
+	/**
+	 * @see Column#CARR_CLM_RFRNG_PIN_NUM
+	 */
+	public String referringProviderIdNumber;
 
 	/**
 	 * @see Column#PRNCPAL_DGNS_CD
@@ -104,14 +190,48 @@ public final class CarrierClaimGroup {
 		builder.append(beneficiaryId);
 		builder.append(", claimId=");
 		builder.append(claimId);
+		builder.append(", nearLineRecordIdCode=");
+		builder.append(nearLineRecordIdCode);
+		builder.append(", claimTypeCode=");
+		builder.append(claimTypeCode);
 		builder.append(", dateFrom=");
 		builder.append(dateFrom);
 		builder.append(", dateThrough=");
 		builder.append(dateThrough);
+		builder.append(", weeklyProcessDate=");
+		builder.append(weeklyProcessDate);
+		builder.append(", claimEntryCode=");
+		builder.append(claimEntryCode);
+		builder.append(", claimDispositionCode=");
+		builder.append(claimDispositionCode);
+		builder.append(", carrierNumber=");
+		builder.append(carrierNumber);
+		builder.append(", paymentDenialCode=");
+		builder.append(paymentDenialCode);
+		builder.append(", paymentAmount=");
+		builder.append(paymentAmount);
+		builder.append(", primaryPayerPaidAmount=");
+		builder.append(primaryPayerPaidAmount);
+		builder.append(", referringPhysicianUpin=");
+		builder.append(referringPhysicianUpin);
 		builder.append(", referringPhysicianNpi=");
 		builder.append(referringPhysicianNpi);
+		builder.append(", providerAssignmentIndicator=");
+		builder.append(providerAssignmentIndicator);
 		builder.append(", providerPaymentAmount=");
 		builder.append(providerPaymentAmount);
+		builder.append(", beneficiaryPaymentAmount=");
+		builder.append(beneficiaryPaymentAmount);
+		builder.append(", submittedChargeAmount=");
+		builder.append(submittedChargeAmount);
+		builder.append(", allowedChargeAmount=");
+		builder.append(allowedChargeAmount);
+		builder.append(", beneficiaryPartBDeductAmount=");
+		builder.append(beneficiaryPartBDeductAmount);
+		builder.append(", hcpcsYearCode=");
+		builder.append(hcpcsYearCode);
+		builder.append(", referringProviderIdNumber=");
+		builder.append(referringProviderIdNumber);
 		builder.append(", diagnosisPrincipal=");
 		builder.append(diagnosisPrincipal);
 		builder.append(", diagnosesAdditional=");
@@ -122,15 +242,38 @@ public final class CarrierClaimGroup {
 		return builder.toString();
 	}
 
+
+
+
 	/**
 	 * Models individual claim lines within a {@link CarrierClaimGroup}
 	 * instance.
 	 */
 	public static final class CarrierClaimLine {
 		/**
+		 * @see Column#CLM_CLNCL_TRIL_NUM
+		 */
+		public String clinicalTrialNumber;
+
+		/**
 		 * @see Column#LINE_NUM
 		 */
-		public int number;
+		public Integer number;
+
+		/**
+		 * @see Column#CARR_PRFRNG_PIN_NUM
+		 */
+		public String performingProviderIdNumber;
+
+		/**
+		 * @see Column#PRF_PHYSN_UPIN
+		 */
+		public Optional<String> performingPhysicianUpin;
+
+		/**
+		 * @see Column#PRF_PHYSN_UPIN
+		 */
+		public String performingPhysicianNpi;
 
 		/**
 		 * @see Column#ORG_NPI_NUM
@@ -138,9 +281,69 @@ public final class CarrierClaimGroup {
 		public Optional<String> organizationNpi;
 
 		/**
+		 * @see Column#CARR_LINE_PRVDR_TYPE_CD
+		 */
+		public Character providerTypeCode;
+
+		/**
+		 * @see Column#TAX_NUM
+		 */
+		public String providerTaxNumber;
+
+		/**
+		 * @see Column#PRVDR_STATE_CD
+		 */
+		public String providerStateCode;
+
+		/**
+		 * @see Column#PRVDR_ZIP
+		 */
+		public String providerZipCode;
+
+		/**
+		 * @see Column#PRVDR_SPCLTY
+		 */
+		public String providerSpecialityCode;
+
+		/**
+		 * @see Column#PRTCPTNG_IND_CD
+		 */
+		public Character providerParticipatingIndCode;
+
+		/**
+		 * @see Column#CARR_LINE_RDCD_PMT_PHYS_ASTN_C
+		 */
+		public Character reducedPaymentPhysicianAsstCode;
+
+		/**
+		 * @see Column#LINE_SRVC_CNT
+		 */
+		public BigDecimal serviceCount;
+
+		/**
 		 * @see Column#LINE_CMS_TYPE_SRVC_CD
 		 */
 		public String cmsServiceTypeCode;
+
+		/**
+		 * @see Column#LINE_PLACE_OF_SRVC_CD
+		 */
+		public String placeOfServiceCode;
+
+		/**
+		 * @see Column#CARR_LINE_PRCNG_LCLTY_CD
+		 */
+		public String linePricingLocalityCode;
+
+		/**
+		 * @see Column#LINE_1ST_EXPNS_DT
+		 */
+		public LocalDate firstExpenseDate;
+
+		/**
+		 * @see Column#LINE_LAST_EXPNS_DT
+		 */
+		public LocalDate lastExpenseDate;
 
 		/**
 		 * @see Column#HCPCS_CD
@@ -148,9 +351,89 @@ public final class CarrierClaimGroup {
 		public String hcpcsCode;
 
 		/**
+		 * @see Column#HCPCS_1ST_MDFR_CD
+		 */
+		public Optional<String> hcpcsInitialModifierCode;
+
+		/**
+		 * @see Column#HCPCS_2ND_MDFR_CD
+		 */
+		public Optional<String> hcpcsSecondModifierCode;
+
+		/**
+		 * @see Column#BETOS_CD
+		 */
+		public String betosCode;
+
+		/**
+		 * @see Column#LINE_NCH_PMT_AMT
+		 */
+		public BigDecimal paymentAmount;
+
+		/**
+		 * @see Column#LINE_BENE_PMT_AMT
+		 */
+		public BigDecimal beneficiaryPaymentAmount;
+
+		/**
 		 * @see Column#LINE_PRVDR_PMT_AMT
 		 */
 		public BigDecimal providerPaymentAmount;
+
+		/**
+		 * @see Column#LINE_BENE_PTB_DDCTBL_AMT
+		 */
+		public BigDecimal beneficiaryPartBDeductAmount;
+
+		/**
+		 * @see Column#LINE_BENE_PRMRY_PYR_CD
+		 */
+		public Optional<Character> primaryPayerCode;
+
+		/**
+		 * @see Column#LINE_BENE_PRMRY_PYR_PD_AMT
+		 */
+		public BigDecimal primaryPayerPaidAmount;
+
+		/**
+		 * @see Column#LINE_COINSRNC_AMT
+		 */
+		public BigDecimal coinsuranceAmount;
+
+		/**
+		 * @see Column#LINE_SBMTD_CHRG_AMT
+		 */
+		public BigDecimal submittedChargeAmount;
+
+		/**
+		 * @see Column#LINE_ALOWD_CHRG_AMT
+		 */
+		public BigDecimal allowedChargeAmount;
+
+		/**
+		 * @see Column#LINE_PRCSG_IND_CD
+		 */
+		public String processingIndicatorCode;
+
+		/**
+		 * @see Column#LINE_PMT_80_100_CD
+		 */
+		public Character paymentCode;
+
+		/**
+		 * @see Column#LINE_SERVICE_DEDUCTIBLE
+		 */
+		public Character serviceDeductibleCode;
+
+		/**
+		 * @see Column#CARR_LINE_MTUS_CNT
+		 */
+		public BigDecimal mtusCount;
+
+		/**
+		 * @see Column#CARR_LINE_MTUS_CD
+		 */
+		public Character mtusCode;
 
 		/**
 		 * @see Column#LINE_ICD_DGNS_CD
@@ -159,23 +442,136 @@ public final class CarrierClaimGroup {
 		public IcdCode diagnosis;
 
 		/**
+		 * @see Column#HPSA_SCRCTY_IND_CD
+		 */
+		public Optional<Character> hpsaScarcityCode;
+
+		/**
+		 * @see Column#CARR_LINE_RX_NUM
+		 */
+		public Optional<String> rxNumber;
+
+		/**
+		 * @see Column#LINE_HCT_HGB_RSLT_NUM
+		 */
+		public BigDecimal hctHgbTestResult;
+
+		/**
+		 * @see Column#LINE_HCT_HGB_TYPE_CD
+		 */
+		public Optional<String> hctHgbTestTypeCode;
+
+		/**
+		 * @see Column#LINE_NDC_CD
+		 */
+		public Optional<String> nationalDrugCode;
+
+		/**
+		 * @see Column#CARR_LINE_CLIA_LAB_NUM
+		 */
+		public Optional<String> cliaLabNumber;
+
+		/**
+		 * @see Column#CARR_LINE_ANSTHSA_UNIT_CNT
+		 */
+		public Integer anesthesiaUnitCount;
+
+		/**
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append("CarrierClaimLine [number=");
+			builder.append("CarrierClaimLine [clinicalTrialNumber=");
+			builder.append(clinicalTrialNumber);
+			builder.append(", number=");
 			builder.append(number);
+			builder.append(", performingProviderIdNumber=");
+			builder.append(performingProviderIdNumber);
+			builder.append(", performingPhysicianUpin=");
+			builder.append(performingPhysicianUpin);
+			builder.append(", performingPhysicianNpi=");
+			builder.append(performingPhysicianNpi);
 			builder.append(", organizationNpi=");
 			builder.append(organizationNpi);
+			builder.append(", providerTypeCode=");
+			builder.append(providerTypeCode);
+			builder.append(", providerTaxNumber=");
+			builder.append(providerTaxNumber);
+			builder.append(", providerStateCode=");
+			builder.append(providerStateCode);
+			builder.append(", providerZipCode=");
+			builder.append(providerZipCode);
+			builder.append(", providerSpecialityCode=");
+			builder.append(providerSpecialityCode);
+			builder.append(", providerParticipatingIndCode=");
+			builder.append(providerParticipatingIndCode);
+			builder.append(", reducedPaymentPhysicianAsstCode=");
+			builder.append(reducedPaymentPhysicianAsstCode);
+			builder.append(", serviceCount=");
+			builder.append(serviceCount);
 			builder.append(", cmsServiceTypeCode=");
 			builder.append(cmsServiceTypeCode);
+			builder.append(", placeOfServiceCode=");
+			builder.append(placeOfServiceCode);
+			builder.append(", linePricingLocalityCode=");
+			builder.append(linePricingLocalityCode);
+			builder.append(", firstExpenseDate=");
+			builder.append(firstExpenseDate);
+			builder.append(", lastExpenseDate=");
+			builder.append(lastExpenseDate);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
+			builder.append(", hcpcsInitialModifierCode=");
+			builder.append(hcpcsInitialModifierCode);
+			builder.append(", hcpcsSecondModifierCode=");
+			builder.append(hcpcsSecondModifierCode);
+			builder.append(", betosCode=");
+			builder.append(betosCode);
+			builder.append(", paymentAmount=");
+			builder.append(paymentAmount);
+			builder.append(", beneficiaryPaymentAmount=");
+			builder.append(beneficiaryPaymentAmount);
 			builder.append(", providerPaymentAmount=");
 			builder.append(providerPaymentAmount);
+			builder.append(", beneficiaryPartBDeductAmount=");
+			builder.append(beneficiaryPartBDeductAmount);
+			builder.append(", primaryPayerCode=");
+			builder.append(primaryPayerCode);
+			builder.append(", primaryPayerPaidAmount=");
+			builder.append(primaryPayerPaidAmount);
+			builder.append(", coinsuranceAmount=");
+			builder.append(coinsuranceAmount);
+			builder.append(", submittedChargeAmount=");
+			builder.append(submittedChargeAmount);
+			builder.append(", allowedChargeAmount=");
+			builder.append(allowedChargeAmount);
+			builder.append(", processingIndicatorCode=");
+			builder.append(processingIndicatorCode);
+			builder.append(", paymentCode=");
+			builder.append(paymentCode);
+			builder.append(", serviceDeductibleCode=");
+			builder.append(serviceDeductibleCode);
+			builder.append(", mtusCount=");
+			builder.append(mtusCount);
+			builder.append(", mtusCode=");
+			builder.append(mtusCode);
 			builder.append(", diagnosis=");
 			builder.append(diagnosis);
+			builder.append(", hpsaScarcityCode=");
+			builder.append(hpsaScarcityCode);
+			builder.append(", rxNumber=");
+			builder.append(rxNumber);
+			builder.append(", hctHgbTestResult=");
+			builder.append(hctHgbTestResult);
+			builder.append(", hctHgbTestTypeCode=");
+			builder.append(hctHgbTestTypeCode);
+			builder.append(", nationalDrugCode=");
+			builder.append(nationalDrugCode);
+			builder.append(", cliaLabNumber=");
+			builder.append(cliaLabNumber);
+			builder.append(", anesthesiaUnitCount=");
+			builder.append(anesthesiaUnitCount);
 			builder.append("]");
 			return builder.toString();
 		}
@@ -556,14 +952,15 @@ public final class CarrierClaimGroup {
 		LINE_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prf_prfl.txt">
 		 * CCW Data Dictionary: PRF_PRFL</a>.
 		 */
 		CARR_PRFRNG_PIN_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prf_upin.txt">
 		 * CCW Data Dictionary: PRF_UPIN</a>.
 		 */
@@ -577,7 +974,8 @@ public final class CarrierClaimGroup {
 		PRF_PHYSN_NPI,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 10. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prgrpnpi.txt">
 		 * CCW Data Dictionary: PRGRPNPI</a>.
 		 */
@@ -682,14 +1080,16 @@ public final class CarrierClaimGroup {
 		HCPCS_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt">
 		 * CCW Data Dictionary: MDFR_CD1</a>.
 		 */
 		HCPCS_1ST_MDFR_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd2.txt">
 		 * CCW Data Dictionary: MDFR_CD2</a>.
 		 */
@@ -724,14 +1124,15 @@ public final class CarrierClaimGroup {
 		LINE_PRVDR_PMT_AMT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ldedamt.txt">
 		 * CCW Data Dictionary: LDEDAMT</a>.
 		 */
 		LINE_BENE_PTB_DDCTBL_AMT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpaycd.txt">
 		 * CCW Data Dictionary: LPRPAYCD</a>.
 		 */
@@ -815,14 +1216,16 @@ public final class CarrierClaimGroup {
 		LINE_ICD_DGNS_VRSN_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hpsasccd.txt">
 		 * CCW Data Dictionary: HPSASCCD</a>.
 		 */
 		HPSA_SCRCTY_IND_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 30. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 30 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carrxnum.txt">
 		 * CCW Data Dictionary: CARRXNUM</a>.
 		 */
@@ -836,21 +1239,24 @@ public final class CarrierClaimGroup {
 		LINE_HCT_HGB_RSLT_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt">
 		 * CCW Data Dictionary: HCTHGBTP</a>.
 		 */
 		LINE_HCT_HGB_TYPE_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 11. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 11 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lnndccd.txt">
 		 * CCW Data Dictionary: LNNDCCD</a>.
 		 */
 		LINE_NDC_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 10. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt">
 		 * CCW Data Dictionary: CARR_LINE_CLIA_LAB_NUM</a>.
 		 */

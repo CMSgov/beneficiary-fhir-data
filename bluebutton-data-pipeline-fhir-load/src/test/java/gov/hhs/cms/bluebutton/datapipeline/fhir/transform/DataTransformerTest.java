@@ -958,7 +958,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(2, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemsComponent eobItem0 = eob.getItem().get(0);
-		Assert.assertEquals(recordLine1.number, eobItem0.getSequence());
+		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 		// TODO Once STU3 is available, verify eob.item.careTeam entries.
 		// TODO Once STU3 is available, verify eob.item.category.
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode, eobItem0.getService());
