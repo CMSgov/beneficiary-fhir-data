@@ -214,6 +214,8 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Line Allowed Charge Amount";
 
+
+
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprvpmt.txt">
@@ -1293,7 +1295,7 @@ public final class DataTransformer {
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
-
+		
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 
@@ -1324,7 +1326,7 @@ public final class DataTransformer {
 		referral.addRecipient(referrerReference);
 		// Set the ReferralRequest as a contained resource in the EOB:
 		eob.setReferral(new Reference(referral));
-
+		
 		/*
 		 * TODO once STU3 is available, transform financial/payment amounts into
 		 * eob.information entries
@@ -1373,7 +1375,8 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.beneficiaryPaymentAmount);
 
-			item.addAdjudication().setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
 							.setCode(CODED_ADJUDICATION_PAYMENT_B))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.providerPaymentAmount);
@@ -1423,6 +1426,7 @@ public final class DataTransformer {
 			}
 
 		}
+
 
 
 		insert(bundle, eob);

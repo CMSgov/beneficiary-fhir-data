@@ -994,9 +994,9 @@ public final class DataTransformerTest {
 		 * providerTypeCode,providerSpecialityCode,
 		 * providerParticipatingIndCode, providerStateCode,providerZipCode
 		 */
-		/*
-		 * TODO Once STU3 is available, verify eob.item.category.
-		 */
+		 /*
+		  * TODO Once STU3 is available, verify eob.item.category.
+		  */
 		/*
 		 * TODO once STU3 is available, verify eob.line.location
 		 */
