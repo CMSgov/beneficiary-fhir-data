@@ -97,6 +97,20 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<!-- Will run the `*IT.java` integration tests in this project, as part 
+					of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

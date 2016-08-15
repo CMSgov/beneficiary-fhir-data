@@ -23,6 +23,8 @@ However, if you'd installed Git LFS *before* cloning, you should already be good
 
 ## Build Dependencies
 
+### HAPI FHIR
+
 This project depends on the [HAPI FHIR](https://github.com/jamesagnew/hapi-fhir) project. Releases of that project are available in the Maven Central repository, which generally makes things pretty simple: our Maven builds will pick up theirs.
 
 Unfortunately, this project will sometimes need to depend on an interim/snapshot build of HAPI FHIR. When that's the case, developers will first need to locally checkout and `mvn install` that interim version themselves, manually. To keep this simpler, a fork of HAPI FHIR is maintained in the [HHSIDEAlab/hapi-fhir](https://github.com/HHSIDEAlab/hapi-fhir) repository on GitHub, which will always point to whatever version of HAPI FHIR this one depends on. You can checkout and build that fork, as follows:
@@ -32,3 +34,9 @@ Unfortunately, this project will sometimes need to depend on an interim/snapshot
     $ mvn clean install -DskipITs=true -DskipTests=true
 
 Once the build is done, the HAPI FHIR artifacts will be placed into your user's local Maven repository (`~/.m2/repository`), available for use by this project or others.
+
+### AWS Credentials
+
+Some of this project's integration tests require AWS credentials. These credentials are used to stand up and tear down AWS resources used in the tests. For example, `DataSetMonitorIT` uses the AWS API to create and manipulate the S3 buckets that it uses during the tests, removing them at the end of each test case. This test code uses the AWS Java API's [DefaultAWSCredentialsProviderChain](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html) class, which will supports multiple different mechanisms for retrieving the credentials to use. Credentials must be supplied via at least one of those mechanisms, or the ITs will fail.
+
+(The project's `Jenkinsfile` uses the environment variable mechanism, which [the project's main Jenkins server](http://builds.hhsdevcloud.us/) has been configured to support.)
