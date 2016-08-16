@@ -893,6 +893,11 @@ public final class DataTransformerTest {
 		record.claimId = "SuttersMill";
 		record.dateFrom = LocalDate.of(1848, 01, 24);
 		record.dateThrough = LocalDate.of(1850, 01, 01);
+		record.nearLineRecordIdCode = '1';
+		record.claimDispositionCode = "01";
+		record.carrierNumber = "06102";
+		record.paymentDenialCode = "1";
+		record.paymentAmount = new BigDecimal("130.32");
 		record.referringPhysicianNpi = "1265415426";
 		record.providerPaymentAmount = new BigDecimal("123.45");
 		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "F63.2");
@@ -902,8 +907,17 @@ public final class DataTransformerTest {
 		recordLine1.number = 1;
 		recordLine1.organizationNpi = Optional.of("1487872263");
 		recordLine1.cmsServiceTypeCode = "90853-HE";
-		recordLine1.providerPaymentAmount = new BigDecimal("123.45");
+		recordLine1.betosCode = "M5C";
+		recordLine1.paymentAmount = new BigDecimal("123.45");
+		recordLine1.beneficiaryPaymentAmount = new BigDecimal("0");
+		recordLine1.providerPaymentAmount = new BigDecimal("120.20");
+		recordLine1.beneficiaryPartBDeductAmount = new BigDecimal("18.00");
+		recordLine1.primaryPayerPaidAmount = new BigDecimal("11.00");
+		recordLine1.coinsuranceAmount = new BigDecimal("20.20");
+		recordLine1.submittedChargeAmount = new BigDecimal("130.45");
+		recordLine1.allowedChargeAmount = new BigDecimal("129.45");
 		recordLine1.diagnosis = new IcdCode(IcdVersion.ICD_10, "F63.2");
+		recordLine1.nationalDrugCode = Optional.of(new String("49884009902"));
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -923,17 +937,30 @@ public final class DataTransformerTest {
 
 		Bundle claimBundle = beneBundleWrapper.getResult();
 		/*
-		 * Bundle should have: 1) EOB, 2) Practitioner (referrer).
+		 * Bundle should have: 1) EOB, 2) Practitioner (referrer) 3) Medication.
 		 */
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(3, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
+		// TODO Verify eob.type once STU3 is available (professional)
+
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(record.nearLineRecordIdCode.toString(), ((StringType) eob
+				.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_RECORD_ID_CD).get(0).getValue()).getValue());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
+		Assert.assertEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_CLAIM_DISPOSITION, eob.getDisposition());
+		Assert.assertEquals(record.carrierNumber.toString(),
+				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_CARRIER_NUMBER).get(0)
+						.getValue()).getValue());
+		Assert.assertEquals(record.paymentDenialCode.toString(),
+				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD).get(0)
+						.getValue()).getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
+
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
 		Assert.assertEquals(1, referral.getRecipient().size());
@@ -959,13 +986,51 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemsComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
-		// TODO Once STU3 is available, verify eob.item.careTeam entries.
-		// TODO Once STU3 is available, verify eob.item.category.
+		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+
+		/*
+		 * TODO Once STU3 is available, verify eob.item.careTeam
+		 * entries.organizationNpi, performingPhysicianNpi,
+		 * providerTypeCode,providerSpecialityCode,
+		 * providerParticipatingIndCode, providerStateCode,providerZipCode
+		 */
+		 /*
+		  * TODO Once STU3 is available, verify eob.item.category.
+		  */
+		/*
+		 * TODO once STU3 is available, verify eob.line.location
+		 */
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode, eobItem0.getService());
+		Assert.assertEquals(recordLine1.betosCode,
+				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_BETOS).get(0).getValue())
+						.getValue());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT, recordLine1.paymentAmount,
+				eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
+				recordLine1.beneficiaryPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT_B, recordLine1.providerPaymentAmount,
 				eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_DEDUCTIBLE,
+				recordLine1.beneficiaryPartBDeductAmount, eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				recordLine1.primaryPayerPaidAmount, eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT,
+				recordLine1.coinsuranceAmount, eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT,
+				recordLine1.submittedChargeAmount, eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE, recordLine1.allowedChargeAmount,
+				eobItem0.getAdjudication());
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
-		// TODO test the rest of the columns/resource once they're all ready
+
+		BundleEntryComponent medicationEntry = claimBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Medication).findAny().get();
+		Medication medication = (Medication) medicationEntry.getResource();
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC, recordLine1.nationalDrugCode.toString(),
+				medication.getCode().getCoding().get(0));
+		Assert.assertEquals(HTTPVerb.PUT, medicationEntry.getRequest().getMethod());
+		Assert.assertEquals("Medication/ndc-" + recordLine1.nationalDrugCode, medicationEntry.getRequest().getUrl());
+
 	}
 
 	/**
