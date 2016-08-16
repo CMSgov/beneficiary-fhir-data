@@ -75,11 +75,16 @@ public final class InpatientClaimGroup {
 	 * @see Column#NCH_WKLY_PROC_DT
 	 */
 	public LocalDate weeklyProcessDate;
+	
+	/**
+	 * @see Column#PRVDR_NUM
+	 */
+	public String providerNumber;
 
 	/**
-	 * @see Column#CARR_CLM_ENTRY_CD
+	 * @see Column#CLM_FAC_TYPE_CD
 	 */
-	public Character claimEntryCode;
+	public Character claimFacilityTypeCode;
 
 	/**
 	 * @see Column#CLM_DISP_CD
@@ -172,7 +177,7 @@ public final class InpatientClaimGroup {
 	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
 	 * columns: one entry for every "claim line" in the claim represented by
-	 * this {@link CarrierClaimGroup} instance.
+	 * this {@link CarrierClaimGroupRenamed} instance.
 	 */
 	public List<CarrierClaimLine> lines = new LinkedList<>();
 
@@ -201,7 +206,6 @@ public final class InpatientClaimGroup {
 		builder.append(", weeklyProcessDate=");
 		builder.append(weeklyProcessDate);
 		builder.append(", claimEntryCode=");
-		builder.append(claimEntryCode);
 		builder.append(", claimDispositionCode=");
 		builder.append(claimDispositionCode);
 		builder.append(", carrierNumber=");
@@ -246,7 +250,7 @@ public final class InpatientClaimGroup {
 
 
 	/**
-	 * Models individual claim lines within a {@link CarrierClaimGroup}
+	 * Models individual claim lines within a {@link CarrierClaimGroupRenamed}
 	 * instance.
 	 */
 	public static final class CarrierClaimLine {
@@ -578,7 +582,7 @@ public final class InpatientClaimGroup {
 	}
 
 	/**
-	 * Enumerates the raw RIF columns represented in {@link CarrierClaimGroup},
+	 * Enumerates the raw RIF columns represented in {@link CarrierClaimGroupRenamed},
 	 * where {@link Column#ordinal()} values represent each column's position in
 	 * the actual data.
 	 */
@@ -644,11 +648,18 @@ public final class InpatientClaimGroup {
 		NCH_WKLY_PROC_DT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/entry_cd.txt">
-		 * CCW Data Dictionary: ENTRY_CD</a>.
+		 * Type: <code>CHAR</code>, max chars: 6. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provider.txt">
+		 * CCW Data Dictionary: PRVDR_NUM</a>.
 		 */
-		CARR_CLM_ENTRY_CD,
+		PRVDR_NUM,
+		
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fac_type.txt">
+		 * CCW Data Dictionary: FAC_TYPE</a>.
+		 */
+		CLM_FAC_TYPE_CD,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 2. See <a href=

@@ -61,8 +61,8 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.Procedure;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SpringConfigForTests;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
@@ -879,14 +879,14 @@ public final class DataTransformerTest {
 
 	/**
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
-	 * single {@link InpatientClaimGroup} {@link RecordAction#INSERT}
+	 * single {@link CarrierClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertCarrierClaimEvent() {
 		// Create the mock bene to test against.
-		InpatientClaimGroup record = new InpatientClaimGroup();
+		CarrierClaimGroup record = new CarrierClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
 		record.recordAction = RecordAction.INSERT;
 		record.beneficiaryId = "42";
@@ -921,7 +921,7 @@ public final class DataTransformerTest {
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent beneRecordEvent = new RifRecordEvent<InpatientClaimGroup>(filesEvent, file, record);
+		RifRecordEvent beneRecordEvent = new RifRecordEvent<CarrierClaimGroup>(filesEvent, file, record);
 
 		Stream source = Arrays.asList(beneRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();

@@ -14,8 +14,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
@@ -209,10 +209,10 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRifFileType(),
 				rifRecordEvent.getFile().getFileType());
 		Assert.assertNotNull(rifRecordEvent.getRecord());
-		Assert.assertTrue(rifRecordEvent.getRecord() instanceof InpatientClaimGroup);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof CarrierClaimGroup);
 
 		// Verify the claim header.
-		InpatientClaimGroup claimGroup = (InpatientClaimGroup) rifRecordEvent.getRecord();
+		CarrierClaimGroup claimGroup = (CarrierClaimGroup) rifRecordEvent.getRecord();
 		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
 		Assert.assertEquals("1", claimGroup.beneficiaryId);
