@@ -64,8 +64,8 @@ import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartBClaimLineFact;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.PartDEventFact;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
@@ -958,8 +958,8 @@ public final class DataTransformer {
 				return transformBeneficiary((RifRecordEvent<BeneficiaryRow>) rifRecordEvent);
 			else if (rifRecordEvent.getRecord() instanceof PartDEventRow)
 				return transformPartDEvent((RifRecordEvent<PartDEventRow>) rifRecordEvent);
-			else if (rifRecordEvent.getRecord() instanceof CarrierClaimGroup)
-				return transformCarrierClaim((RifRecordEvent<CarrierClaimGroup>) rifRecordEvent);
+			else if (rifRecordEvent.getRecord() instanceof InpatientClaimGroup)
+				return transformCarrierClaim((RifRecordEvent<InpatientClaimGroup>) rifRecordEvent);
 
 			throw new BadCodeMonkeyException("Unhandled record type: " + rifRecordEvent.getRecord());
 		});
@@ -1278,10 +1278,10 @@ public final class DataTransformer {
 	 * @return the {@link TransformedBundle} that is the result of transforming
 	 *         the specified {@link RifRecordEvent}
 	 */
-	private TransformedBundle transformCarrierClaim(RifRecordEvent<CarrierClaimGroup> rifRecordEvent) {
+	private TransformedBundle transformCarrierClaim(RifRecordEvent<InpatientClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
 			throw new IllegalArgumentException();
-		CarrierClaimGroup claimGroup = rifRecordEvent.getRecord();
+		InpatientClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
 			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)

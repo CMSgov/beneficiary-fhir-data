@@ -65,7 +65,7 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
@@ -251,8 +251,8 @@ public final class FhirLoaderIT {
 		List<RifRecordEvent<?>> rifRecordEventsCopy = rifRecordEvents.collect(Collectors.toList());
 		RifRecordEvent<BeneficiaryRow> beneRecordEvent = (RifRecordEvent<BeneficiaryRow>) rifRecordEventsCopy.stream()
 				.filter(e -> e.getRecord() instanceof BeneficiaryRow).findAny().get();
-		RifRecordEvent<CarrierClaimGroup> carrierRecordEvent = (RifRecordEvent<CarrierClaimGroup>) rifRecordEventsCopy
-				.stream().filter(e -> e.getRecord() instanceof CarrierClaimGroup).findAny().get();
+		RifRecordEvent<InpatientClaimGroup> carrierRecordEvent = (RifRecordEvent<InpatientClaimGroup>) rifRecordEventsCopy
+				.stream().filter(e -> e.getRecord() instanceof InpatientClaimGroup).findAny().get();
 		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopy.stream()
 				.filter(e -> e.getRecord() instanceof PartDEventRow).findAny().get();
 		rifRecordEvents = rifRecordEventsCopy.stream();

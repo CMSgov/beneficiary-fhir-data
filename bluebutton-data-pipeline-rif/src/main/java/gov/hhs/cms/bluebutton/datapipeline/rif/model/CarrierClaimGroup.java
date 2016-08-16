@@ -172,7 +172,7 @@ public final class CarrierClaimGroup {
 	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
 	 * columns: one entry for every "claim line" in the claim represented by
-	 * this {@link CarrierClaimGroup} instance.
+	 * this {@link InpatientClaimGroup} instance.
 	 */
 	public List<CarrierClaimLine> lines = new LinkedList<>();
 
@@ -246,7 +246,7 @@ public final class CarrierClaimGroup {
 
 
 	/**
-	 * Models individual claim lines within a {@link CarrierClaimGroup}
+	 * Models individual claim lines within a {@link InpatientClaimGroup}
 	 * instance.
 	 */
 	public static final class CarrierClaimLine {
@@ -578,7 +578,7 @@ public final class CarrierClaimGroup {
 	}
 
 	/**
-	 * Enumerates the raw RIF columns represented in {@link CarrierClaimGroup},
+	 * Enumerates the raw RIF columns represented in {@link InpatientClaimGroup},
 	 * where {@link Column#ordinal()} values represent each column's position in
 	 * the actual data.
 	 */
