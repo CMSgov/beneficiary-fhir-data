@@ -15,6 +15,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
@@ -48,6 +51,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
  * </p>
  */
 final class DataSetMonitorWorker implements Runnable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
+
 	private static final Pattern REGEX_MANIFEST = Pattern.compile("^(.*)\\/manifest\\.xml$");
 
 	private final String bucketName;
@@ -74,6 +79,8 @@ final class DataSetMonitorWorker implements Runnable {
 	 */
 	@Override
 	public void run() {
+		LOGGER.info("Scanning for data sets to process...");
+
 		/*
 		 * Request a list of all objects in the configured bucket and directory.
 		 * (In the results, we'll be looking for the oldest manifest file, if
@@ -113,10 +120,13 @@ final class DataSetMonitorWorker implements Runnable {
 		} while (objectListing.isTruncated());
 
 		// If no manifest was found, we're done (until next time).
-		if (manifestToProcessKey == null)
+		if (manifestToProcessKey == null) {
+			LOGGER.info("No data sets to process found.");
 			return;
+		}
 
 		// We've found the oldest manifest. Now go download and parse it.
+		LOGGER.info("Found data set to process: '{}'. Waiting for it to finish uploading...", manifestToProcessKey);
 		DataSetManifest dataSetManifest = readManifest(manifestToProcessKey);
 
 		/*
@@ -155,6 +165,7 @@ final class DataSetMonitorWorker implements Runnable {
 		 * to ensure that we don't end up processing multiple data sets in
 		 * parallel (which would lead to data consistency problems).
 		 */
+		LOGGER.info("Data set finished uploading and ready to process.");
 		Set<RifFile> rifFiles = dataSetManifest.getEntries().stream()
 				.map(e -> String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()),
 						e.getName()))
@@ -175,6 +186,7 @@ final class DataSetMonitorWorker implements Runnable {
 		deleteObjectsRequest.getKeys().add(new KeyVersion(String.format("%s/manifest.xml",
 				DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()))));
 		s3Client.deleteObjects(deleteObjectsRequest);
+		LOGGER.info("Data set deleted, now that processing is complete.");
 	}
 
 	/**
