@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
  * This {@link RifFile} implementation can be used for files that are backed by
@@ -18,6 +19,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
  */
 public final class S3RifFile implements RifFile {
 	private final AmazonS3 s3Client;
+	private final RifFileType fileType;
 	private final GetObjectRequest objectRequest;
 
 	/**
@@ -26,12 +28,16 @@ public final class S3RifFile implements RifFile {
 	 * @param s3Client
 	 *            the {@link AmazonS3} client to use to get the contents of the
 	 *            object that backs this {@link S3RifFile}
+	 * @param fileType
+	 *            the {@link RifFileType} of the object that backs this
+	 *            {@link S3RifFile}
 	 * @param objectRequest
 	 *            an S3 {@link GetObjectRequest} that will retrieve the object
 	 *            represented by this {@link S3RifFile}
 	 */
-	public S3RifFile(AmazonS3 s3Client, GetObjectRequest objectRequest) {
+	public S3RifFile(AmazonS3 s3Client, RifFileType fileType, GetObjectRequest objectRequest) {
 		this.s3Client = s3Client;
+		this.fileType = fileType;
 		this.objectRequest = objectRequest;
 	}
 
@@ -42,6 +48,14 @@ public final class S3RifFile implements RifFile {
 	public String getKey() {
 		// FIXME This op should be removed from the interface as it's not used.
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getFileType()
+	 */
+	@Override
+	public RifFileType getFileType() {
+		return fileType;
 	}
 
 	/**

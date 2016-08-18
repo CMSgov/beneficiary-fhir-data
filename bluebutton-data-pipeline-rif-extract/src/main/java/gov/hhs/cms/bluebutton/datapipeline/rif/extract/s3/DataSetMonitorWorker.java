@@ -166,10 +166,11 @@ final class DataSetMonitorWorker implements Runnable {
 		 * parallel (which would lead to data consistency problems).
 		 */
 		LOGGER.info("Data set finished uploading and ready to process.");
-		Set<RifFile> rifFiles = dataSetManifest.getEntries().stream()
-				.map(e -> String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()),
-						e.getName()))
-				.map(k -> new S3RifFile(s3Client, new GetObjectRequest(bucketName, k))).collect(Collectors.toSet());
+		Set<RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
+			String key = String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()),
+					e.getName());
+			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(bucketName, key));
+		}).collect(Collectors.toSet());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), rifFiles);
 		dataSetProcessor.process(rifFilesEvent);
 
