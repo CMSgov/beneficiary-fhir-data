@@ -9,7 +9,10 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
@@ -25,6 +28,33 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
  * Integration tests for {@link DataSetMonitor}.
  */
 public final class DataSetMonitorIT {
+	/**
+	 * Verifies that {@link DataSetMonitor} handles errors as expected when
+	 * asked to run against an S3 bucket that doesn't exist. This test case
+	 * isn't so much needed to test that one specific failure case, but to
+	 * instead verify the overall error handling.
+	 */
+	@Test
+	@Ignore
+	public void missingBucket() {
+		/*
+		 * FIXME This test case breaks the build completely and in a novel way,
+		 * because DataSetMonitor calls System.exit(...) when errors happen.
+		 * That's a bad design, it turns out, but not worth fixing right now.
+		 * Until then: this is @Ignore'd.
+		 */
+
+		// Start the monitor against a bucket that doesn't exist.
+		MockDataSetProcessor dataSetProcessor = new MockDataSetProcessor(0);
+		DataSetMonitor monitor = new DataSetMonitor("foo", 1, dataSetProcessor);
+		monitor.start();
+
+		// Wait for the monitor to error out.
+		Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> monitor.isStoppedBecauseOfError());
+
+		// If we made it here, things are working correctly. Yay!
+	}
+
 	/**
 	 * Tests {@link DataSetMonitor} when run against an empty bucket.
 	 */
@@ -68,13 +98,13 @@ public final class DataSetMonitorIT {
 			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
 			DataSetManifest manifestA = new DataSetManifest(Instant.now().minus(1L, ChronoUnit.HOURS),
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
-			s3Client.putObject(DataSetMonitorWorkerIT.createPutRequest(bucket, manifestA));
-			s3Client.putObject(DataSetMonitorWorkerIT.createPutRequest(bucket, manifestA, manifestA.getEntries().get(0),
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA));
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA, manifestA.getEntries().get(0),
 					"rif-static-samples/sample-a-beneficiaries.txt"));
 			DataSetManifest manifestB = new DataSetManifest(Instant.now(),
 					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-			s3Client.putObject(DataSetMonitorWorkerIT.createPutRequest(bucket, manifestB));
-			s3Client.putObject(DataSetMonitorWorkerIT.createPutRequest(bucket, manifestB, manifestB.getEntries().get(0),
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB, manifestB.getEntries().get(0),
 					"rif-static-samples/sample-a-bcarrier.txt"));
 
 			// Start the monitor up.
@@ -96,7 +126,7 @@ public final class DataSetMonitorIT {
 			Assert.assertEquals(0, s3Client.listObjects(bucket.getName()).getObjectSummaries().size());
 		} finally {
 			if (bucket != null)
-				DataSetMonitorWorkerIT.deleteObjectsAndBucket(s3Client, bucket);
+				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
 		}
 	}
 

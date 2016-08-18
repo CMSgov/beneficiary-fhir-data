@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,17 +54,24 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 public final class DataSetMonitor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitor.class);
 
+	/**
+	 * This {@link System#exit(int)} value should be used when the application
+	 * exits due to an unhandled exception in {@link DataSetMonitor}.
+	 */
+	public static final int EXIT_CODE_MONITOR_ERROR = 2;
+
 	private final String bucketName;
 	private final int scanRepeatDelay;
 	private final DataSetProcessor dataSetProcessor;
 
 	private ScheduledExecutorService dataSetWatcherService;
 	private ScheduledFuture<?> dataSetWatcherFuture;
+	private boolean isStoppedBecauseOfError;
 
 	/**
-	 * Constructs a new {@link DataSetMonitor} instance. Note that this must be used
-	 * as a singleton service in the application: only one instance running at a
-	 * time is supported.
+	 * Constructs a new {@link DataSetMonitor} instance. Note that this must be
+	 * used as a singleton service in the application: only one instance running
+	 * at a time is supported.
 	 * 
 	 * @param bucketName
 	 *            the name of the AWS S3 bucket to monitor
@@ -79,6 +87,10 @@ public final class DataSetMonitor {
 		this.bucketName = bucketName;
 		this.scanRepeatDelay = scanRepeatDelay;
 		this.dataSetProcessor = dataSetProcessor;
+
+		this.dataSetWatcherService = null;
+		this.dataSetWatcherFuture = null;
+		this.isStoppedBecauseOfError = false;
 	}
 
 	/**
@@ -88,20 +100,50 @@ public final class DataSetMonitor {
 	 * asynchronously until {@link #stop()} is called.
 	 */
 	public void start() {
+		// Instances of this class are single-use-only.
+		if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null)
+			throw new IllegalStateException();
+
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
 		Runnable dataSetWatcher = new DataSetMonitorWorker(bucketName, dataSetProcessor);
+		Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingRunnableWrapper(dataSetWatcher, t -> {
+			/*
+			 * If an error is caught, log it and then shut everything down. Pack
+			 * it up: we're going home, folks.
+			 */
+			LOGGER.error("Data set failed with an unhandled error. Application exiting.", t);
+			this.isStoppedBecauseOfError = true;
+
+			dataSetWatcherService.shutdown();
+
+			/*
+			 * We need to do this here because it's actually our only
+			 * opportunity to set the exit code.
+			 */
+			System.exit(EXIT_CODE_MONITOR_ERROR);
+		});
 
 		/*
 		 * This kicks off the data set watcher, which will be run periodically
-		 * (as configured), until this instance's stop() method is called to
-		 * request a graceful shutdown. In turn, it basically acts as the
-		 * application's main loop, and will drive all of the application's data
-		 * processing, etc. on the ScheduledExecutorService's separate thread.
-		 * (To be clear: this method does not block, and should return normally
-		 * almost immediately.)
+		 * (as configured), until either A) this instance's stop() method is
+		 * called to request a graceful shutdown, or B) one of the watcher
+		 * execution runs fails. In turn, it basically acts as the application's
+		 * main loop, and will drive all of the application's data processing,
+		 * etc. on the ScheduledExecutorService's separate thread. (To be clear:
+		 * this method does not block, and should return normally almost
+		 * immediately.)
 		 */
-		this.dataSetWatcherFuture = dataSetWatcherService.scheduleWithFixedDelay(dataSetWatcher, 0, scanRepeatDelay,
-				TimeUnit.MILLISECONDS);
+		this.dataSetWatcherFuture = dataSetWatcherService.scheduleWithFixedDelay(errorNotifyingDataSetWatcher, 0,
+				scanRepeatDelay, TimeUnit.MILLISECONDS);
+	}
+
+	/**
+	 * @return <code>true</code> if this {@link DataSetMonitor} has halted due
+	 *         to an unhandled error, or <code>false</code> if no such error has
+	 *         (yet?) occurred
+	 */
+	public boolean isStoppedBecauseOfError() {
+		return isStoppedBecauseOfError;
 	}
 
 	/**
@@ -122,6 +164,10 @@ public final class DataSetMonitor {
 		if (dataSetWatcherFuture == null)
 			return;
 
+		// If something has already shut us down, we're done.
+		if (dataSetWatcherService.isShutdown())
+			return;
+
 		// Signal the scheduler to stop after the current execution (if any).
 		dataSetWatcherFuture.cancel(false);
 
@@ -130,8 +176,6 @@ public final class DataSetMonitor {
 
 		// Clean house.
 		dataSetWatcherService.shutdown();
-		dataSetWatcherService = null;
-		dataSetWatcherFuture = null;
 	}
 
 	/**
@@ -153,8 +197,11 @@ public final class DataSetMonitor {
 			 * that time, it will wait for any current execution/iteration of
 			 * the Runnable to complete normally. Then, it will throw a
 			 * CancellationException to signal that things have gracefully
-			 * stopped. A bit counter-intuitive, but it works.
+			 * stopped. A bit counter-intuitive, but it works. Alternatively, if
+			 * one of the Runnable's iterations has failed, this will return an
+			 * ExecutionException that wraps the failure.
 			 */
+			LOGGER.info("Waiting for any in-progress data set processing to gracefully complete...");
 			dataSetWatcherFuture.get();
 		} catch (CancellationException e) {
 			/*
@@ -163,23 +210,74 @@ public final class DataSetMonitor {
 			 * last execution of our Runnable. Accordingly, we'll just log the
 			 * event and allow this method to stop blocking and return.
 			 */
-			LOGGER.info("The data set watcher has been gracefully stopped.");
+			LOGGER.info("Data set processing has been gracefully stopped.");
 			return;
 		} catch (InterruptedException e) {
 			/*
 			 * Many Java applications use InterruptedExceptions to signal that a
 			 * thread should stop what it's doing ASAP. This app doesn't, so
 			 * this is unexpected, and accordingly, we don't know what to do.
-			 * Safest bet is to blow up.
+			 * Safest bet is to shut down and blow up.
 			 */
+			dataSetWatcherService.shutdown();
 			throw new RuntimeException(e);
 		} catch (ExecutionException e) {
 			/*
 			 * This will only occur if the Runnable (dataSetWatcherFuture)
 			 * failed with an unhandled exception. This is unexpected, and
-			 * accordingly, we don't know what to do. Safest bet is to blow up.
+			 * accordingly, we don't know what to do. Safest bet is to shut down
+			 * and blow up.
 			 */
+			dataSetWatcherService.shutdown();
 			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * <p>
+	 * Wraps a {@link Runnable} (presumably our {@link DataSetMonitorWorker})
+	 * and catches any unhandled exceptions if it blows up.
+	 * </p>
+	 * <p>
+	 * This is needed because otherwise, we won't find out about that error
+	 * unless/until we try to call <code>dataSetWatcherFuture.get()</code>. And
+	 * starting up a separate thread to poll that would be silly.
+	 * </p>
+	 */
+	private static final class ErrorNotifyingRunnableWrapper implements Runnable {
+		private final Runnable wrappedRunnable;
+		private final Consumer<Throwable> errorReceiver;
+
+		/**
+		 * Constructs a new {@link RunnableWrapper} instance.
+		 * 
+		 * @param wrappedRunnable
+		 *            the {@link Runnable} to wrap and execute
+		 * @param errorReceiver
+		 *            the {@link Consumer} to send any errors that are caught to
+		 */
+		public ErrorNotifyingRunnableWrapper(Runnable wrappedRunnable, Consumer<Throwable> errorReceiver) {
+			this.wrappedRunnable = wrappedRunnable;
+			this.errorReceiver = errorReceiver;
+		}
+
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run() {
+			try {
+				wrappedRunnable.run();
+			} catch (Throwable t) {
+				errorReceiver.accept(t);
+
+				/*
+				 * Let this error bubble up, which will cause the
+				 * ScheduledExecutorService to avoid any future iterations of
+				 * this scheduled task.
+				 */
+				throw new RuntimeException(t);
+			}
 		}
 	}
 }
