@@ -19,14 +19,6 @@
 		An application that generates sample data and pushes it to a FHIR server.
 	</description>
 
-	<properties>
-		<!-- The version of the capsule library for the capsule-maven-plugin to 
-			use. We need to override the default, to avoid https://github.com/puniverse/capsule/issues/90, 
-			as this is seen in whichever version of the library is used by default in 
-			the 1.0.1 version of the plugin. -->
-		<capsule.version>1.0.1</capsule.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
@@ -100,7 +92,6 @@
 						them. -->
 					<groupId>com.github.chrischristo</groupId>
 					<artifactId>capsule-maven-plugin</artifactId>
-					<version>1.0.1</version>
 					<configuration>
 						<appClass>gov.hhs.cms.bluebutton.datapipeline.fhir.sampledata.FhirSampleDataApp</appClass>
 						<chmod>true</chmod>
