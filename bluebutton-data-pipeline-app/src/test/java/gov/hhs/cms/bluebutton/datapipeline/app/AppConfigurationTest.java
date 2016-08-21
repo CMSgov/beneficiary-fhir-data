@@ -43,7 +43,16 @@ public final class AppConfigurationTest {
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, "http://example.com/bar");
 		Process testApp = testAppBuilder.start();
 
-		Assert.assertEquals(0, testApp.waitFor());
+		int testAppExitCode = testApp.waitFor();
+		/*
+		 * Only pull the output if things failed, as doing so will break the
+		 * deserialization happening below.
+		 */
+		String output = "";
+		if (testAppExitCode != 0)
+			output = collectOutput(testApp);
+		Assert.assertEquals(String.format("Wrong exit code. Output[\n%s]\n", output), 0, testAppExitCode);
+
 		ObjectInputStream testAppOutput = new ObjectInputStream(testApp.getErrorStream());
 		AppConfiguration testAppConfig = (AppConfiguration) testAppOutput.readObject();
 		Assert.assertNotNull(testAppConfig);
@@ -89,6 +98,20 @@ public final class AppConfigurationTest {
 	}
 
 	/**
+	 * @param process
+	 *            the {@link Process} to collect the output of
+	 * @return the output of the specified {@link Process} in a format suitable
+	 *         for debugging
+	 */
+	private static String collectOutput(Process process) {
+		String stderr = new BufferedReader(new InputStreamReader(process.getErrorStream())).lines().map(l -> "\t" + l)
+				.collect(Collectors.joining("\n"));
+		String stdout = new BufferedReader(new InputStreamReader(process.getInputStream())).lines().map(l -> "\t" + l)
+				.collect(Collectors.joining("\n"));
+		return String.format("STDERR:\n%sSTDOUT:\n%s", stderr, stdout);
+	}
+
+	/**
 	 * Calls {@link AppConfiguration#readConfigFromEnvironmentVariables()} and
 	 * serializes the resulting {@link AppConfiguration} instance out to
 	 * {@link System#err}. (Can't use {@link System#out} as it might have
@@ -99,6 +122,7 @@ public final class AppConfigurationTest {
 	 */
 	public static void main(String[] args) {
 		AppConfiguration appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
+		System.exit(1);
 
 		try {
 			// Serialize data object to a file
