@@ -121,13 +121,14 @@ public final class S3ToFhirLoadAppIT {
 			ProcessBuilder appRunBuilder = createAppProcessBuilder(new Bucket("foo"));
 			appRunBuilder.redirectErrorStream(true);
 			appProcess = appRunBuilder.start();
-			new ProcessOutputConsumer(appProcess);
+			ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
 
 			// Wait for it to exit with an error.
 			appProcess.waitFor(1, TimeUnit.MINUTES);
 
 			// Verify that the application exited as expected.
-			Assert.assertEquals(S3ToFhirLoadApp.EXIT_CODE_MONITOR_ERROR, appProcess.exitValue());
+			Assert.assertEquals(String.format("Wrong exit code. Output [\n%s]\n", appRunConsumer.getStdoutContents()),
+					S3ToFhirLoadApp.EXIT_CODE_MONITOR_ERROR, appProcess.exitValue());
 		} finally {
 			if (appProcess != null)
 				appProcess.destroyForcibly();
