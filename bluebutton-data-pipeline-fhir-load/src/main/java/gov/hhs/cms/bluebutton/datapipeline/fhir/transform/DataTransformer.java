@@ -116,6 +116,8 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_HCPCS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typsrvcb.txt";
 
+	static final String CODING_SYSTEM_BETOS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt";
+
 	static final String CODING_SYSTEM_ICD9_DIAG = "http://hl7.org/fhir/sid/icd-9-cm/diagnosis";
 
 	static final String CODING_SYSTEM_ICD9_PROC = "http://hl7.org/fhir/sid/icd-9-cm/procedure";
@@ -172,6 +174,20 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_CCW_BENE_PTB_TRMNTN_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt";
 
+	static final String CODING_SYSTEM_CCW_CARR_RECORD_ID_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt";
+
+	static final String CODING_SYSTEM_CCW_CARR_CARRIER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt";
+
+	static final String CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt";
+
+	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prv_type.txt";
+
+	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt";
+
+	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
+
+	static final String CODING_SYSTEM_CCW_CARR_CLAIM_DISPOSITION = "Debit accepted";
+
 	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
 
 	static final String CODING_SYSTEM_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
@@ -182,15 +198,23 @@ public final class DataTransformer {
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
-	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Line Allowed Charge Amount";
+	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Line Beneficiary Primary Payer Paid Amount";
+
+	static final String CODED_ADJUDICATION_PAYMENT = "Line NCH Payment Amount";
+
+	static final String CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT = "Line Payment Amount to Beneficiary";
 
 	static final String CODED_ADJUDICATION_DEDUCTIBLE = "Line Beneficiary Part B Deductible Amount";
 
-	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Line Beneficiary Primary Payer Paid Amount";
+	static final String CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT = "Line Primary Payer Paid Amount";
 
 	static final String CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT = "Line Coinsurance Amount";
 
-	static final String CODED_ADJUDICATION_PAYMENT = "Line NCH Payment Amount";
+	static final String CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT = "Line Submitted Charge Amount";
+
+	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Line Allowed Charge Amount";
+
+
 
 	/**
 	 * See <a href=
@@ -1271,9 +1295,21 @@ public final class DataTransformer {
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
+		
+		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_RECORD_ID_CD)
+				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
+
+		// TODO Specify eob.type once STU3 is available (professional)
 
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
+
+		eob.setDisposition(CODING_SYSTEM_CCW_CARR_CLAIM_DISPOSITION);
+		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_CARRIER_NUMBER)
+				.setValue(new StringType(claimGroup.carrierNumber));
+		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD)
+				.setValue(new StringType(claimGroup.paymentDenialCode));
+		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 
 		/*
 		 * Referrals are represented as contained resources, because otherwise
@@ -1290,7 +1326,7 @@ public final class DataTransformer {
 		referral.addRecipient(referrerReference);
 		// Set the ReferralRequest as a contained resource in the EOB:
 		eob.setReferral(new Reference(referral));
-
+		
 		/*
 		 * TODO once STU3 is available, transform financial/payment amounts into
 		 * eob.information entries
@@ -1304,9 +1340,19 @@ public final class DataTransformer {
 			ItemsComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
+			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+
+			/*
+			 * TODO once STU3 is available, transform placeofServiceCode into
+			 * eob.line.location
+			 */
+
 			/*
 			 * TODO once STU3 is available, transform these fields into
-			 * eob.item.careTeam entries: organizationNpi.
+			 * eob.item.careTeam entries: organizationNpi,
+			 * performingPhysicianNpi, providerTypeCode,providerSpecialityCode,
+			 * providerParticipatingIndCode, providerStateCode,providerZipCode
 			 */
 
 			/*
@@ -1315,6 +1361,19 @@ public final class DataTransformer {
 			 */
 
 			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode));
+			item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode));
+
+			item.addAdjudication()
+					.setCategory(
+							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.paymentAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.beneficiaryPaymentAmount);
 
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
@@ -1322,8 +1381,53 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.providerPaymentAmount);
 
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_DEDUCTIBLE))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.beneficiaryPartBDeductAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.primaryPayerPaidAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.coinsuranceAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.submittedChargeAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_ALLOWED_CHARGE))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.allowedChargeAmount);
+
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
+
+			/*
+			 * Upsert Medication using NDC as the ID if present.
+			 */
+			if (claimLine.nationalDrugCode.isPresent()) {
+				Medication medication = new Medication();
+				Reference medicationRef = new Reference("Medication/ndc-" + claimLine.nationalDrugCode);
+				CodeableConcept ndcConcept = new CodeableConcept();
+				ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(claimLine.nationalDrugCode.toString());
+				medication.setCode(ndcConcept);
+				upsert(bundle, medication, medicationRef.getReference());
+			}
+
 		}
+
+
 
 		insert(bundle, eob);
 		return new TransformedBundle(rifRecordEvent, bundle);
