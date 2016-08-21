@@ -121,7 +121,6 @@ public final class AppConfigurationTest {
 	 */
 	public static void main(String[] args) {
 		AppConfiguration appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
-		System.exit(1);
 
 		try {
 			// Serialize data object to a file
