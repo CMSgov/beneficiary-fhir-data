@@ -93,7 +93,6 @@ public final class AppConfigurationTest {
 		String classpath = System.getProperty("java.class.path");
 		ProcessBuilder testAppBuilder = new ProcessBuilder(java.toAbsolutePath().toString(), "-classpath", classpath,
 				AppConfigurationTest.class.getName());
-		testAppBuilder.environment().clear();
 		return testAppBuilder;
 	}
 
