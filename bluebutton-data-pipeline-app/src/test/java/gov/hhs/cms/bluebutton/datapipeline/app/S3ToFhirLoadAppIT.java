@@ -25,6 +25,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 
+import gov.hhs.cms.bluebutton.datapipeline.app.AppConfiguration;
+import gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -177,9 +179,10 @@ public final class S3ToFhirLoadAppIT {
 	}
 
 	/**
-	 * Verifies that {@link S3ToFhirLoadApp} works as expected when no data is
-	 * made available for it to process. Basically, it should just sit there and
-	 * wait for data, doing nothing.
+	 * Verifies that {@link S3ToFhirLoadApp} works as expected against a small
+	 * amount of data. We trust that other tests elsewhere are covering the ETL
+	 * results' correctness; here we're just verifying the overall flow. Does it
+	 * find the data set, process it, and then not find a data set anymore?
 	 * 
 	 * @throws IOException
 	 *             (indicates a test error)
