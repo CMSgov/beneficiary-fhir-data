@@ -1,0 +1,236 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+		<artifactId>bluebutton-data-pipeline</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>bluebutton-data-pipeline-app</artifactId>
+	<packaging>jar</packaging>
+
+	<description>
+		An application that pulls CCW RIF data via S3, transforms it, and pushes it to a FHIR server.
+	</description>
+
+	<properties>
+		<!-- These settings are pulled out as POM properties so that they can be 
+			adjusted via profiles. This is required because the CI server doesn't have 
+			enough RAM to run with an in-mem DB, and so requires a different configuration. -->
+		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
+		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
+		<its.bbfhir.db.username></its.bbfhir.db.username>
+		<its.bbfhir.db.password></its.bbfhir.db.password>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-fhir-load</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<!-- Provides various utilities, particularly for managing DB connections. -->
+			<groupId>com.justdavis.karl.jessentials</groupId>
+			<artifactId>jessentials-misc</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Provides a sane facade for the giant mess of incompatible logging 
+				frameworks in Java. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Logback is used as the logging target/backend for SLF4J during runtime: 
+				all logging events will be sent to it. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+				at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to run our unit and integration tests. -->
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+				https://github.com/awaitility/awaitility -->
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-sampledata</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- This must be listed as a dependency in order for the Cargo plugin 
+				to use it below (note: WARs are automatically excluded from any/all classpaths 
+				that Maven generates, so this shouldn't affect anything else). -->
+			<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+			<artifactId>bbonfhir-server-app</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+			<type>war</type>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Used to build executable JARs, with all dependencies included in 
+						them. -->
+					<groupId>com.github.chrischristo</groupId>
+					<artifactId>capsule-maven-plugin</artifactId>
+					<configuration>
+						<appClass>gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp</appClass>
+						<chmod>true</chmod>
+						<types>fat</types>
+						<manifest>
+							<entry>
+								<key>JVM-Args</key>
+								<value>-Xmx1g</value>
+							</entry>
+							<entry>
+								<key>Min-Java-Version</key>
+								<value>1.8.0</value>
+							</entry>
+						</manifest>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- Configure the Cargo plugin to start up an embedded Jetty server, 
+						running the Blue Button FHIR server. This plugin is executed during the project's 
+						ITs, or can be manually launched by running `mvn cargo:run` from this project. -->
+					<groupId>org.codehaus.cargo</groupId>
+					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>1.5.0</version>
+					<configuration>
+						<container>
+							<containerId>jetty9x</containerId>
+							<artifactInstaller>
+								<!-- Use a throwaway Jetty install (in the project's target/ directory) 
+									to run the ITs. Tried using an embedded Jetty instance via Cargo, but the 
+									web application fails to deploy that way for some reason: it throws "java.lang.IllegalStateException: 
+									zip file closed" errors. -->
+								<groupId>org.eclipse.jetty</groupId>
+								<artifactId>jetty-distribution</artifactId>
+								<version>9.3.10.v20160621</version>
+							</artifactInstaller>
+							<log>${project.build.directory}/failsafe-reports/cargo.log</log>
+							<output>${project.build.directory}/failsafe-reports/cargo-container.log</output>
+							<systemProperties>
+								<!-- Configure the FHIR server to use a temporary in-mem DB. -->
+								<bbfhir.db.url>${its.bbfhir.db.url}</bbfhir.db.url>
+								<bbfhir.db.username>${its.bbfhir.db.username}</bbfhir.db.username>
+								<bbfhir.db.password>${its.bbfhir.db.password}</bbfhir.db.password>
+							</systemProperties>
+						</container>
+						<configuration>
+							<properties>
+								<cargo.servlet.port>9093</cargo.servlet.port>
+								<cargo.jvmargs>${its.bbfhir.server.jvmargs}</cargo.jvmargs>
+							</properties>
+						</configuration>
+						<deployables>
+							<deployable>
+								<!-- The WAR for the Blue Button FHIR server. -->
+								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+								<artifactId>bbonfhir-server-app</artifactId>
+								<type>war</type>
+								<properties>
+									<!-- The webapp will be available at 'http://localhost:9093/'. -->
+									<context>/</context>
+								</properties>
+
+								<!-- Wait up to 120s for the webapp to become available at the specified 
+									URL. -->
+								<pingURL>http://localhost:9093/</pingURL>
+								<pingTimeout>120000</pingTimeout>
+							</deployable>
+						</deployables>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<!-- Used to build executable JARs, with all dependencies included in 
+					them. -->
+				<groupId>com.github.chrischristo</groupId>
+				<artifactId>capsule-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Launch an embedded Jetty instance hosting the Blue Button FHIR server 
+					prior to running this project's integration tests, and stop it after the 
+					integration tests. Alternatively, for manual testing, manually run 'mvn cargo:run' 
+					to start the Jetty server. -->
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>start-container</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-container</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Will run the `*IT.java` integration tests in this project, as part 
+					of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

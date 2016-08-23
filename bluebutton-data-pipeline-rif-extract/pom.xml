@@ -77,6 +77,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+				https://github.com/awaitility/awaitility -->
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<!-- Logback is used as the logging target/backend for SLF4J during tests: 
 				all logging events will be sent to it. -->
 			<groupId>ch.qos.logback</groupId>

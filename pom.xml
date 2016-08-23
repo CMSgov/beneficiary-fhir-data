@@ -54,12 +54,19 @@
 		<module>bluebutton-data-pipeline-rif</module>
 		<module>bluebutton-data-pipeline-rif-extract</module>
 		<module>bluebutton-data-pipeline-fhir-load</module>
+		<module>bluebutton-data-pipeline-app</module>
 		<module>bluebutton-data-pipeline-fhir-sampledata</module>
 	</modules>
 
 	<properties>
 		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
 		<metrics.version>3.1.2</metrics.version>
+
+		<!-- The version of the capsule library for the capsule-maven-plugin to 
+			use. We need to override the default, to avoid https://github.com/puniverse/capsule/issues/90, 
+			as this is seen in whichever version of the library is used by default in 
+			the 1.0.1 version of the plugin. -->
+		<capsule.version>1.0.1</capsule.version>
 	</properties>
 
 	<dependencyManagement>
@@ -193,6 +200,13 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					</configuration>
+				</plugin>
+				<plugin>
+					<!-- Used to build executable JARs, with all dependencies included in 
+						them. -->
+					<groupId>com.github.chrischristo</groupId>
+					<artifactId>capsule-maven-plugin</artifactId>
+					<version>1.0.1</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-scm-plugin</artifactId>

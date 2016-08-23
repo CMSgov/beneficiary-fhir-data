@@ -17,9 +17,6 @@ import javax.jdo.PersistenceManager;
 import org.datanucleus.api.jdo.JDOPersistenceManagerFactory;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu21.model.Conformance;
-import org.hl7.fhir.dstu21.model.Conformance.ConditionalDeleteStatus;
-import org.hl7.fhir.dstu21.model.Conformance.RestfulConformanceMode;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.junit.After;
@@ -44,9 +41,7 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.datasources.provisioners.IProvisioningRequest;
 import com.justdavis.karl.misc.datasources.provisioners.hsql.HsqlProvisioningRequest;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.AllClaimsProfile;
 import gov.hhs.cms.bluebutton.datapipeline.ccw.jdo.ClaimType;
@@ -60,6 +55,7 @@ import gov.hhs.cms.bluebutton.datapipeline.desynpuf.SynpufArchive;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirResult;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.BeneficiaryBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
@@ -292,7 +288,7 @@ public final class FhirLoaderIT {
 		 * Run some spot-checks against the server, to verify that things look
 		 * as expected.
 		 */
-		IGenericClient client = createFhirClient(fhirServer);
+		IGenericClient client = FhirTestUtilities.createFhirClient(FHIR_API);
 		Assert.assertEquals(1,
 				client.search().forResource(Patient.class)
 						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
@@ -364,7 +360,7 @@ public final class FhirLoaderIT {
 		 * Run some spot-checks against the server, to verify that things look
 		 * as expected.
 		 */
-		IGenericClient client = createFhirClient(fhirServer);
+		IGenericClient client = FhirTestUtilities.createFhirClient(FHIR_API);
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(),
 				client.search().forResource(Patient.class).returnBundle(Bundle.class).execute().getTotal());
 
@@ -378,86 +374,12 @@ public final class FhirLoaderIT {
 	}
 
 	/**
-	 * Ensures that {@link #cleanFhirServer()} is called after each test case.
-	 * 
-	 * @throws URISyntaxException
-	 *             (won't happen: URI is hardcoded)
+	 * Ensures that {@link FhirTestUtilities#cleanFhirServer()} is called after
+	 * each test case.
 	 */
 	@After
-	public void cleanFhirServerAfterEachTest() throws URISyntaxException {
-		cleanFhirServer();
-	}
-
-	/**
-	 * <strong>Serious Business:</strong> deletes all resources from the FHIR
-	 * server at {@link #FHIR_API}.
-	 * 
-	 * @throws URISyntaxException
-	 *             (won't happen: URI is hardcoded)
-	 */
-	private static void cleanFhirServer() throws URISyntaxException {
-		// Before disabling this check, please go and update your resume.
-		if (!FHIR_API.contains("localhost"))
-			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
-
-		IGenericClient fhirClient = createFhirClient(new URI(FHIR_API));
-		Conformance conformance = fhirClient.fetchConformance().ofType(Conformance.class).execute();
-
-		/*
-		 * This is ugly code, but not worth making more readable. Here's what it
-		 * does: grabs the server's conformance statement, looks at the
-		 * supported resources, and then grabs all of the resource type names
-		 * that support bulk conditional delete operations.
-		 */
-		List<String> resourcesToDelete = conformance.getRest().stream()
-				.filter(r -> r.getMode() == RestfulConformanceMode.SERVER).flatMap(r -> r.getResource().stream())
-				.filter(r -> r.getConditionalDelete() != null)
-				.filter(r -> r.getConditionalDelete() == ConditionalDeleteStatus.MULTIPLE).map(r -> r.getType())
-				.collect(Collectors.toList());
-
-		// Loop over each resource that can be deleted, and delete all of them.
-		/*
-		 * TODO This commented-out version should work, given HAPI 1.4's
-		 * conformance statement, but doesn't. Try again in a later version? The
-		 * not-commented-out version below does work, but is slower.
-		 */
-		// for (String resourceTypeName : resourcesToDelete)
-		// fhirClient.delete().resourceConditionalByUrl(resourceTypeName).execute();
-		for (String resourceTypeName : resourcesToDelete) {
-			Bundle results = fhirClient.search().forResource(resourceTypeName).returnBundle(Bundle.class).execute();
-			while (true) {
-				for (BundleEntryComponent resourceEntry : results.getEntry())
-					fhirClient.delete()
-							.resourceById(resourceTypeName, resourceEntry.getResource().getIdElement().getIdPart())
-							.execute();
-
-				// Get next page of results (if there is one), or exit loop.
-				if (results.getLink(Bundle.LINK_NEXT) != null)
-					results = fhirClient.loadPage().next(results).execute();
-				else
-					break;
-			}
-		}
-	}
-
-	/**
-	 * @param fhirServer
-	 *            the "base" FHIR API endpoint of the server to create a client
-	 *            for
-	 * @return a FHIR {@link IGenericClient} that can be used to query the
-	 *         specified FHIR server
-	 */
-	private static IGenericClient createFhirClient(URI fhirServer) {
-		FhirContext ctx = FhirContext.forDstu2_1();
-		IGenericClient client = ctx.newRestfulGenericClient(fhirServer.toString());
-
-		// Client logging can be enabled here, when needed.
-		// LoggingInterceptor clientLogger = new LoggingInterceptor();
-		// clientLogger.setLogRequestBody(false);
-		// clientLogger.setLogResponseBody(false);
-		// client.registerInterceptor(clientLogger);
-
-		return client;
+	public void cleanFhirServerAfterEachTestCase() {
+		FhirTestUtilities.cleanFhirServer(FHIR_API);
 	}
 
 	/**
