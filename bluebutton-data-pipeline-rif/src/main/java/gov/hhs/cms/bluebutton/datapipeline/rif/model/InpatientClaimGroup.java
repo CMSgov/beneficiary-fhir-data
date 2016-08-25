@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 /**
  * <p>
- * Models rows from {@link RifFileType#CARRIER} RIF files. Rows in this file are
- * grouped, such that there is one group per claim, with multiple rows: one for
- * each claim line.
+ * Models rows from {@link RifFileType#INPATIENT} RIF files. Rows in this file
+ * are grouped, such that there is one group per claim, with multiple rows: one
+ * for each claim line.
  * </p>
  * <p>
  * The RIF file layout used here is specific to the Blue Button API's ETL
@@ -87,19 +88,14 @@ public final class InpatientClaimGroup {
 	public Character claimFacilityTypeCode;
 
 	/**
-	 * @see Column#CLM_DISP_CD
+	 * @see Column#CLM_SRVC_CLSFCTN_TYPE_CD
 	 */
-	public String claimDispositionCode;
+	public Character claimServiceClassificationTypeCode;
 
 	/**
-	 * @see Column#CARR_NUM
+	 * @see Column#CLM_MDCR_NON_PMT_RSN_CD
 	 */
-	public String carrierNumber;
-
-	/**
-	 * @see Column#CARR_CLM_PMT_DNL_CD
-	 */
-	public String paymentDenialCode;
+	public Optional<String> claimNonPaymentReasonCode;
 
 	/**
 	 * @see Column#CLM_PMT_AMT
@@ -107,59 +103,86 @@ public final class InpatientClaimGroup {
 	public BigDecimal paymentAmount;
 
 	/**
-	 * @see Column#CARR_CLM_PRMRY_PYR_PD_AMT
+	 * @see Column#NCH_PRMRY_PYR_CLM_PD_AMT
 	 */
 	public BigDecimal primaryPayerPaidAmount;
 
 	/**
-	 * @see Column#RFR_PHYSN_UPIN
+	 * @see Column#PRVDR_STATE_CD
 	 */
-	public String referringPhysicianUpin;
+	public String providerStateCode;
 
 	/**
-	 * @see Column#RFR_PHYSN_NPI
+	 * @see Column#ORG_NPI_NUM
 	 */
-	public String referringPhysicianNpi;
+	public String organizationNpi;
 
 	/**
-	 * @see Column#CARR_CLM_PRVDR_ASGNMT_IND_SW
+	 * @see Column#AT_PHYSN_NPI
 	 */
-	public Character providerAssignmentIndicator;
+	public String attendingPhysicianNpi;
 
 	/**
-	 * @see Column#NCH_CLM_PRVDR_PMT_AMT
+	 * @see Column#OP_PHYSN_NPI
 	 */
-	public BigDecimal providerPaymentAmount;
+	public String operatingPhysicianNpi;
 
 	/**
-	 * @see Column#NCH_CLM_BENE_PMT_AMT
+	 * @see Column#OT_PHYSN_NPI
 	 */
-	public BigDecimal beneficiaryPaymentAmount;
+	public String otherPhysicianNpi;
 
 	/**
-	 * @see Column#NCH_CARR_CLM_SBMTD_CHRG_AMT
+	 * @see Column#PTNT_DSCHRG_STUS_CD
 	 */
-	public BigDecimal submittedChargeAmount;
+	public String patientDischargeStatusCode;
 
 	/**
-	 * @see Column#NCH_CARR_CLM_ALOWD_AMT
+	 * @see Column#CLM_TOT_CHRG_AMT
 	 */
-	public BigDecimal allowedChargeAmount;
+	public BigDecimal totalChargeAmount;
+
 
 	/**
-	 * @see Column#CARR_CLM_CASH_DDCTBL_APLD_AMT
+	 * @see Column#CLM_PASS_THRU_PER_DIEM_AMT
 	 */
-	public BigDecimal beneficiaryPartBDeductAmount;
+	public BigDecimal passThruPerDiemAmount;
 
 	/**
-	 * @see Column#CARR_CLM_HCPCS_YR_CD
+	 * @see Column#NCH_BENE_IP_DDCTBL_AMT
 	 */
-	public Character hcpcsYearCode;
+	public BigDecimal deductibleAmount;
 
 	/**
-	 * @see Column#CARR_CLM_RFRNG_PIN_NUM
+	 * @see Column#NCH_BENE_PTA_COINSRNC_LBLTY_AM
 	 */
-	public String referringProviderIdNumber;
+	public BigDecimal partACoinsuranceLiabilityAmount;
+
+	/**
+	 * @see Column#NCH_BENE_BLOOD_DDCTBL_LBLTY_AM
+	 */
+	public BigDecimal bloodDeductibleLiabilityAmount;
+
+	/**
+	 * @see Column#NCH_PROFNL_CMPNT_CHRG_AMT
+	 */
+	public BigDecimal professionalComponentCharge;
+
+	/**
+	 * @see Column#NCH_IP_NCVRD_CHRG_AMT
+	 */
+	public BigDecimal noncoveredCharge;
+
+	/**
+	 * @see Column#NCH_IP_TOT_DDCTN_AMT
+	 */
+	public BigDecimal totalDeductionAmount;
+
+	/**
+	 * @see Column#ADMTG_DGNS_CD
+	 * @see Column#ADMTG_DGNS_VRSN_CD
+	 */
+	public IcdCode diagnosisAdmitting;
 
 	/**
 	 * @see Column#PRNCPAL_DGNS_CD
@@ -168,18 +191,33 @@ public final class InpatientClaimGroup {
 	public IcdCode diagnosisPrincipal;
 
 	/**
-	 * See {@link Column#ICD_DGNS_CD1} through {@link Column#ICD_DGNS_CD12} and
+	 * See {@link Column#ICD_DGNS_CD1} through {@link Column#ICD_DGNS_CD25} and
 	 * {@link Column#ICD_DGNS_VRSN_CD1} through
-	 * {@link Column#ICD_DGNS_VRSN_CD12}.
+	 * {@link Column#ICD_DGNS_VRSN_CD25} and {@link Column#CLM_POA_IND_SW1}
+	 * through {@link Column#CLM_POA_IND_SW25}.
 	 */
 	public List<IcdCode> diagnosesAdditional = new LinkedList<>();
 
 	/**
+	 * @see Column#FST_DGNS_E_CD
+	 * @see Column#FST_DGNS_E_VRSN_CD
+	 */
+	public Optional<IcdCode> diagnosisFirstClaimExternal;
+
+	/**
+	 * See {@link Column#ICD_DGNS_E_CD1} through {@link Column#ICD_DGNS_E_CD12}
+	 * and {@link Column#ICD_DGNS_E_VRSN_CD1} through
+	 * {@link Column#ICD_DGNS_E_VRSN_CD12} and {@link Column#CLM_E_POA_IND_SW1}
+	 * through {@link Column#CLM_E_POA_IND_SW12}.
+	 */
+	public List<IcdCode> diagnosesExternal = new LinkedList<>();
+
+	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
 	 * columns: one entry for every "claim line" in the claim represented by
-	 * this {@link CarrierClaimGroupRenamed} instance.
+	 * this {@link InpatientClaimGroup} instance.
 	 */
-	public List<CarrierClaimLine> lines = new LinkedList<>();
+	public List<InpatientClaimLine> lines = new LinkedList<>();
 
 	/**
 	 * @see java.lang.Object#toString()
@@ -187,7 +225,7 @@ public final class InpatientClaimGroup {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("CarrierClaimGroup [version=");
+		builder.append("InpatientClaimGroup [version=");
 		builder.append(version);
 		builder.append(", recordAction=");
 		builder.append(recordAction);
@@ -205,149 +243,72 @@ public final class InpatientClaimGroup {
 		builder.append(dateThrough);
 		builder.append(", weeklyProcessDate=");
 		builder.append(weeklyProcessDate);
-		builder.append(", claimEntryCode=");
-		builder.append(", claimDispositionCode=");
-		builder.append(claimDispositionCode);
-		builder.append(", carrierNumber=");
-		builder.append(carrierNumber);
-		builder.append(", paymentDenialCode=");
-		builder.append(paymentDenialCode);
+		builder.append(", providerNumber=");
+		builder.append(providerNumber);
+		builder.append(", claimFacilityTypeCode=");
+		builder.append(claimFacilityTypeCode);
+		builder.append(", claimServiceClassificationTypeCode=");
+		builder.append(claimServiceClassificationTypeCode);
+		builder.append(", claimNonPaymentReasonCode=");
+		builder.append(claimNonPaymentReasonCode);
 		builder.append(", paymentAmount=");
 		builder.append(paymentAmount);
 		builder.append(", primaryPayerPaidAmount=");
 		builder.append(primaryPayerPaidAmount);
-		builder.append(", referringPhysicianUpin=");
-		builder.append(referringPhysicianUpin);
-		builder.append(", referringPhysicianNpi=");
-		builder.append(referringPhysicianNpi);
-		builder.append(", providerAssignmentIndicator=");
-		builder.append(providerAssignmentIndicator);
-		builder.append(", providerPaymentAmount=");
-		builder.append(providerPaymentAmount);
-		builder.append(", beneficiaryPaymentAmount=");
-		builder.append(beneficiaryPaymentAmount);
-		builder.append(", submittedChargeAmount=");
-		builder.append(submittedChargeAmount);
-		builder.append(", allowedChargeAmount=");
-		builder.append(allowedChargeAmount);
-		builder.append(", beneficiaryPartBDeductAmount=");
-		builder.append(beneficiaryPartBDeductAmount);
-		builder.append(", hcpcsYearCode=");
-		builder.append(hcpcsYearCode);
-		builder.append(", referringProviderIdNumber=");
-		builder.append(referringProviderIdNumber);
+		builder.append(", providerStateCode=");
+		builder.append(providerStateCode);
+		builder.append(", organizationNpi=");
+		builder.append(organizationNpi);
+		builder.append(", attendingPhysicianNpi=");
+		builder.append(attendingPhysicianNpi);
+		builder.append(", operatingPhysicianNpi=");
+		builder.append(operatingPhysicianNpi);
+		builder.append(", otherPhysicianNpi=");
+		builder.append(otherPhysicianNpi);
+		builder.append(", patientDischargeStatusCode=");
+		builder.append(patientDischargeStatusCode);
+		builder.append(", totalChargeAmount=");
+		builder.append(totalChargeAmount);
+		builder.append(", passThruPerDiemAmount=");
+		builder.append(passThruPerDiemAmount);
+		builder.append(", deductibleAmount=");
+		builder.append(deductibleAmount);
+		builder.append(", partACoinsuranceLiabilityAmount=");
+		builder.append(partACoinsuranceLiabilityAmount);
+		builder.append(", bloodDeductibleLiabilityAmount=");
+		builder.append(bloodDeductibleLiabilityAmount);
+		builder.append(", professionalComponentCharge=");
+		builder.append(professionalComponentCharge);
+		builder.append(", noncoveredCharge=");
+		builder.append(noncoveredCharge);
+		builder.append(", totalDeductionAmount=");
+		builder.append(totalDeductionAmount);
+		builder.append(", diagnosisAdmitting=");
+		builder.append(diagnosisAdmitting);
 		builder.append(", diagnosisPrincipal=");
 		builder.append(diagnosisPrincipal);
 		builder.append(", diagnosesAdditional=");
 		builder.append(diagnosesAdditional);
+		builder.append(", diagnosisFirstClaimExternal=");
+		builder.append(diagnosisFirstClaimExternal);
+		builder.append(", diagnosesExternal=");
+		builder.append(diagnosesExternal);
 		builder.append(", lines=");
 		builder.append(lines);
 		builder.append("]");
 		return builder.toString();
 	}
 
-
-
-
 	/**
-	 * Models individual claim lines within a {@link CarrierClaimGroupRenamed}
+	 * Models individual claim lines within a {@link InpatientClaimGroup}
 	 * instance.
 	 */
-	public static final class CarrierClaimLine {
-		/**
-		 * @see Column#CLM_CLNCL_TRIL_NUM
-		 */
-		public String clinicalTrialNumber;
+	public static final class InpatientClaimLine {
 
 		/**
-		 * @see Column#LINE_NUM
+		 * @see Column#CLM_LINE_NUM
 		 */
-		public Integer number;
-
-		/**
-		 * @see Column#CARR_PRFRNG_PIN_NUM
-		 */
-		public String performingProviderIdNumber;
-
-		/**
-		 * @see Column#PRF_PHYSN_UPIN
-		 */
-		public Optional<String> performingPhysicianUpin;
-
-		/**
-		 * @see Column#PRF_PHYSN_UPIN
-		 */
-		public String performingPhysicianNpi;
-
-		/**
-		 * @see Column#ORG_NPI_NUM
-		 */
-		public Optional<String> organizationNpi;
-
-		/**
-		 * @see Column#CARR_LINE_PRVDR_TYPE_CD
-		 */
-		public Character providerTypeCode;
-
-		/**
-		 * @see Column#TAX_NUM
-		 */
-		public String providerTaxNumber;
-
-		/**
-		 * @see Column#PRVDR_STATE_CD
-		 */
-		public String providerStateCode;
-
-		/**
-		 * @see Column#PRVDR_ZIP
-		 */
-		public String providerZipCode;
-
-		/**
-		 * @see Column#PRVDR_SPCLTY
-		 */
-		public String providerSpecialityCode;
-
-		/**
-		 * @see Column#PRTCPTNG_IND_CD
-		 */
-		public Character providerParticipatingIndCode;
-
-		/**
-		 * @see Column#CARR_LINE_RDCD_PMT_PHYS_ASTN_C
-		 */
-		public Character reducedPaymentPhysicianAsstCode;
-
-		/**
-		 * @see Column#LINE_SRVC_CNT
-		 */
-		public BigDecimal serviceCount;
-
-		/**
-		 * @see Column#LINE_CMS_TYPE_SRVC_CD
-		 */
-		public String cmsServiceTypeCode;
-
-		/**
-		 * @see Column#LINE_PLACE_OF_SRVC_CD
-		 */
-		public String placeOfServiceCode;
-
-		/**
-		 * @see Column#CARR_LINE_PRCNG_LCLTY_CD
-		 */
-		public String linePricingLocalityCode;
-
-		/**
-		 * @see Column#LINE_1ST_EXPNS_DT
-		 */
-		public LocalDate firstExpenseDate;
-
-		/**
-		 * @see Column#LINE_LAST_EXPNS_DT
-		 */
-		public LocalDate lastExpenseDate;
+		public Integer lineNumber;
 
 		/**
 		 * @see Column#HCPCS_CD
@@ -355,236 +316,24 @@ public final class InpatientClaimGroup {
 		public String hcpcsCode;
 
 		/**
-		 * @see Column#HCPCS_1ST_MDFR_CD
-		 */
-		public Optional<String> hcpcsInitialModifierCode;
-
-		/**
-		 * @see Column#HCPCS_2ND_MDFR_CD
-		 */
-		public Optional<String> hcpcsSecondModifierCode;
-
-		/**
-		 * @see Column#BETOS_CD
-		 */
-		public String betosCode;
-
-		/**
-		 * @see Column#LINE_NCH_PMT_AMT
-		 */
-		public BigDecimal paymentAmount;
-
-		/**
-		 * @see Column#LINE_BENE_PMT_AMT
-		 */
-		public BigDecimal beneficiaryPaymentAmount;
-
-		/**
-		 * @see Column#LINE_PRVDR_PMT_AMT
-		 */
-		public BigDecimal providerPaymentAmount;
-
-		/**
-		 * @see Column#LINE_BENE_PTB_DDCTBL_AMT
-		 */
-		public BigDecimal beneficiaryPartBDeductAmount;
-
-		/**
-		 * @see Column#LINE_BENE_PRMRY_PYR_CD
-		 */
-		public Optional<Character> primaryPayerCode;
-
-		/**
-		 * @see Column#LINE_BENE_PRMRY_PYR_PD_AMT
-		 */
-		public BigDecimal primaryPayerPaidAmount;
-
-		/**
-		 * @see Column#LINE_COINSRNC_AMT
-		 */
-		public BigDecimal coinsuranceAmount;
-
-		/**
-		 * @see Column#LINE_SBMTD_CHRG_AMT
-		 */
-		public BigDecimal submittedChargeAmount;
-
-		/**
-		 * @see Column#LINE_ALOWD_CHRG_AMT
-		 */
-		public BigDecimal allowedChargeAmount;
-
-		/**
-		 * @see Column#LINE_PRCSG_IND_CD
-		 */
-		public String processingIndicatorCode;
-
-		/**
-		 * @see Column#LINE_PMT_80_100_CD
-		 */
-		public Character paymentCode;
-
-		/**
-		 * @see Column#LINE_SERVICE_DEDUCTIBLE
-		 */
-		public Character serviceDeductibleCode;
-
-		/**
-		 * @see Column#CARR_LINE_MTUS_CNT
-		 */
-		public BigDecimal mtusCount;
-
-		/**
-		 * @see Column#CARR_LINE_MTUS_CD
-		 */
-		public Character mtusCode;
-
-		/**
-		 * @see Column#LINE_ICD_DGNS_CD
-		 * @see Column#LINE_ICD_DGNS_VRSN_CD
-		 */
-		public IcdCode diagnosis;
-
-		/**
-		 * @see Column#HPSA_SCRCTY_IND_CD
-		 */
-		public Optional<Character> hpsaScarcityCode;
-
-		/**
-		 * @see Column#CARR_LINE_RX_NUM
-		 */
-		public Optional<String> rxNumber;
-
-		/**
-		 * @see Column#LINE_HCT_HGB_RSLT_NUM
-		 */
-		public BigDecimal hctHgbTestResult;
-
-		/**
-		 * @see Column#LINE_HCT_HGB_TYPE_CD
-		 */
-		public Optional<String> hctHgbTestTypeCode;
-
-		/**
-		 * @see Column#LINE_NDC_CD
-		 */
-		public Optional<String> nationalDrugCode;
-
-		/**
-		 * @see Column#CARR_LINE_CLIA_LAB_NUM
-		 */
-		public Optional<String> cliaLabNumber;
-
-		/**
-		 * @see Column#CARR_LINE_ANSTHSA_UNIT_CNT
-		 */
-		public Integer anesthesiaUnitCount;
-
-		/**
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append("CarrierClaimLine [clinicalTrialNumber=");
-			builder.append(clinicalTrialNumber);
-			builder.append(", number=");
-			builder.append(number);
-			builder.append(", performingProviderIdNumber=");
-			builder.append(performingProviderIdNumber);
-			builder.append(", performingPhysicianUpin=");
-			builder.append(performingPhysicianUpin);
-			builder.append(", performingPhysicianNpi=");
-			builder.append(performingPhysicianNpi);
-			builder.append(", organizationNpi=");
-			builder.append(organizationNpi);
-			builder.append(", providerTypeCode=");
-			builder.append(providerTypeCode);
-			builder.append(", providerTaxNumber=");
-			builder.append(providerTaxNumber);
-			builder.append(", providerStateCode=");
-			builder.append(providerStateCode);
-			builder.append(", providerZipCode=");
-			builder.append(providerZipCode);
-			builder.append(", providerSpecialityCode=");
-			builder.append(providerSpecialityCode);
-			builder.append(", providerParticipatingIndCode=");
-			builder.append(providerParticipatingIndCode);
-			builder.append(", reducedPaymentPhysicianAsstCode=");
-			builder.append(reducedPaymentPhysicianAsstCode);
-			builder.append(", serviceCount=");
-			builder.append(serviceCount);
-			builder.append(", cmsServiceTypeCode=");
-			builder.append(cmsServiceTypeCode);
-			builder.append(", placeOfServiceCode=");
-			builder.append(placeOfServiceCode);
-			builder.append(", linePricingLocalityCode=");
-			builder.append(linePricingLocalityCode);
-			builder.append(", firstExpenseDate=");
-			builder.append(firstExpenseDate);
-			builder.append(", lastExpenseDate=");
-			builder.append(lastExpenseDate);
+			builder.append("InpatientClaimLine [lineNumber=");
+			builder.append(lineNumber);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
-			builder.append(", hcpcsInitialModifierCode=");
-			builder.append(hcpcsInitialModifierCode);
-			builder.append(", hcpcsSecondModifierCode=");
-			builder.append(hcpcsSecondModifierCode);
-			builder.append(", betosCode=");
-			builder.append(betosCode);
-			builder.append(", paymentAmount=");
-			builder.append(paymentAmount);
-			builder.append(", beneficiaryPaymentAmount=");
-			builder.append(beneficiaryPaymentAmount);
-			builder.append(", providerPaymentAmount=");
-			builder.append(providerPaymentAmount);
-			builder.append(", beneficiaryPartBDeductAmount=");
-			builder.append(beneficiaryPartBDeductAmount);
-			builder.append(", primaryPayerCode=");
-			builder.append(primaryPayerCode);
-			builder.append(", primaryPayerPaidAmount=");
-			builder.append(primaryPayerPaidAmount);
-			builder.append(", coinsuranceAmount=");
-			builder.append(coinsuranceAmount);
-			builder.append(", submittedChargeAmount=");
-			builder.append(submittedChargeAmount);
-			builder.append(", allowedChargeAmount=");
-			builder.append(allowedChargeAmount);
-			builder.append(", processingIndicatorCode=");
-			builder.append(processingIndicatorCode);
-			builder.append(", paymentCode=");
-			builder.append(paymentCode);
-			builder.append(", serviceDeductibleCode=");
-			builder.append(serviceDeductibleCode);
-			builder.append(", mtusCount=");
-			builder.append(mtusCount);
-			builder.append(", mtusCode=");
-			builder.append(mtusCode);
-			builder.append(", diagnosis=");
-			builder.append(diagnosis);
-			builder.append(", hpsaScarcityCode=");
-			builder.append(hpsaScarcityCode);
-			builder.append(", rxNumber=");
-			builder.append(rxNumber);
-			builder.append(", hctHgbTestResult=");
-			builder.append(hctHgbTestResult);
-			builder.append(", hctHgbTestTypeCode=");
-			builder.append(hctHgbTestTypeCode);
-			builder.append(", nationalDrugCode=");
-			builder.append(nationalDrugCode);
-			builder.append(", cliaLabNumber=");
-			builder.append(cliaLabNumber);
-			builder.append(", anesthesiaUnitCount=");
-			builder.append(anesthesiaUnitCount);
 			builder.append("]");
 			return builder.toString();
 		}
 	}
 
 	/**
-	 * Enumerates the raw RIF columns represented in {@link CarrierClaimGroupRenamed},
-	 * where {@link Column#ordinal()} values represent each column's position in
-	 * the actual data.
+	 * Enumerates the raw RIF columns represented in
+	 * {@link InpatientClaimGroup}, where {@link Column#ordinal()} values
+	 * represent each column's position in the actual data.
 	 */
 	public static enum Column {
 		/**
@@ -646,6 +395,16 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: WKLY_DT</a>.
 		 */
 		NCH_WKLY_PROC_DT,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		FI_CLM_PROC_DT,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		CLAIM_QUERY_CODE,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 6. See <a href=
@@ -662,26 +421,30 @@ public final class InpatientClaimGroup {
 		CLM_FAC_TYPE_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/disp_cd.txt">
-		 * CCW Data Dictionary: DISP_CD</a>.
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrvc.txt">
+		 * CCW Data Dictionary: TYPESRVC</a>.
 		 */
-		CLM_DISP_CD,
+		CLM_SRVC_CLSFCTN_TYPE_CD,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_FREQ_CD,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		FI_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt">
-		 * CCW Data Dictionary: CARR_NUM</a>.
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt">
+		 * CCW Data Dictionary: NOPAY_CD</a>.
 		 */
-		CARR_NUM,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt">
-		 * CCW Data Dictionary: PMTDNLCD</a>.
-		 */
-		CARR_CLM_PMT_DNL_CD,
-
+		CLM_MDCR_NON_PMT_RSN_CD,
+		
 		/**
 		 * Type: <code>NUM</code>, max chars: 12. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmt_amt.txt">
@@ -694,77 +457,279 @@ public final class InpatientClaimGroup {
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt">
 		 * CCW Data Dictionary: PRPAYAMT</a>.
 		 */
-		CARR_CLM_PRMRY_PYR_PD_AMT,
+		NCH_PRMRY_PYR_CLM_PD_AMT,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_PRMRY_PYR_CD,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		FI_CLM_ACTN_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prstate.txt">
+		 * CCW Data Dictionary: PRSTATE</a>.
+		 */
+		PRVDR_STATE_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 10. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orgnpinm.txt">
+		 * CCW Data Dictionary: ORGNPINM</a>.
+		 */
+		ORG_NPI_NUM,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		AT_PHYSN_UPIN,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_upin.txt">
-		 * CCW Data Dictionary: RFR_UPIN</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_npi.txt">
+		 * CCW Data Dictionary: AT_NPI</a>.
 		 */
-		RFR_PHYSN_UPIN,
+		AT_PHYSN_NPI,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		OP_PHYSN_UPIN,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_npi.txt">
-		 * CCW Data Dictionary: RFR_NPI</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/op_npi.txt">
+		 * CCW Data Dictionary: OP_NPI</a>.
 		 */
-		RFR_PHYSN_NPI,
+		OP_PHYSN_NPI,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		OT_PHYSN_UPIN,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ot_npi.txt">
+		 * CCW Data Dictionary: OT_NPI</a>.
+		 */
+		OT_PHYSN_NPI,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_MCO_PD_SW,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/stus_cd.txt">
+		 * CCW Data Dictionary: STUS_CD</a>.
+		 */
+		PTNT_DSCHRG_STUS_CD,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_IND_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_chrg.txt">
+		 * CCW Data Dictionary: TOT_CHRG</a>.
+		 */
+		CLM_TOT_CHRG_AMT,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_ADMSN_DT,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_IP_ADMSN_TYPE_CD,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_SRC_IP_ADMSN_CD,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_PTNT_STATUS_IND_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/per_diem.txt">
+		 * CCW Data Dictionary: PER_DIEM</a>.
+		 */
+		CLM_PASS_THRU_PER_DIEM_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_amt.txt">
+		 * CCW Data Dictionary: DED_AMT</a>.
+		 */
+		NCH_BENE_IP_DDCTBL_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coin_amt.txt">
+		 * CCW Data Dictionary: COIN_AMT</a>.
+		 */
+		NCH_BENE_PTA_COINSRNC_LBLTY_AM,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/blddedam.txt">
+		 * CCW Data Dictionary: BLDDEDAM</a>.
+		 */
+		NCH_BENE_BLOOD_DDCTBL_LBLTY_AM,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pcchgamt.txt">
+		 * CCW Data Dictionary: PCCHGAMT </a>.
+		 */
+		NCH_PROFNL_CMPNT_CHRG_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncchgamt.txt">
+		 * CCW Data Dictionary: NCCHGAMT </a>.
+		 */
+		NCH_IP_NCVRD_CHRG_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tdedamt.txt">
+		 * CCW Data Dictionary: TDEDAMT </a>.
+		 */
+		NCH_IP_TOT_DDCTN_AMT,
+		
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_TOT_PPS_CPTL_AMT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_CPTL_FSP_AMT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_CPTL_OUTLIER_AMT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_CPTL_IME_AMT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_CPTL_EXCPTN_AMT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_PPS_CPTL_DRG_WT_NUM,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_UTLZTN_DAY_CNT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		BENE_TOT_COINSRNC_DAYS_CNT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		BENE_LRD_USED_CNT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_NON_UTLZTN_DAYS_CNT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_BLOOD_PNTS_FRNSHD_QTY,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_VRFD_NCVRD_STAY_FROM_DT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_VRFD_NCVRD_STAY_THRU_DT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_ACTV_OR_CVRD_LVL_CARE_THRU,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_BENE_DSCHRG_DT,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_DRG_CD,
+
+		/**
+		 * NOT MAPPED
+		 */
+		CLM_DRG_OUTLIER_STAY_CD,
+
+		/**
+		 * NOT MAPPED
+		 */
+		NCH_DRG_OUTLIER_APRVD_PMT_AMT,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/admtg_dgns_cd.txt">
+		 * CCW Data Dictionary: ADMTG_DGNS_CD</a>.
+		 */
+		ADMTG_DGNS_CD,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt">
-		 * CCW Data Dictionary: ASGMNTCD</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/admtg_dgns_vrsn_cd.txt">
+		 * CCW Data Dictionary: ADMTG_DGNS_VRSN_CD</a>.
 		 */
-		CARR_CLM_PRVDR_ASGNMT_IND_SW,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prov_pmt.txt">
-		 * CCW Data Dictionary: PROV_PMT</a>.
-		 */
-		NCH_CLM_PRVDR_PMT_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_pmt.txt">
-		 * CCW Data Dictionary: BENE_PMT</a>.
-		 */
-		NCH_CLM_BENE_PMT_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sbmtchrg.txt">
-		 * CCW Data Dictionary: SBMTCHRG</a>.
-		 */
-		NCH_CARR_CLM_SBMTD_CHRG_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/alowchrg.txt">
-		 * CCW Data Dictionary: ALOWCHRG</a>.
-		 */
-		NCH_CARR_CLM_ALOWD_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dedapply.txt">
-		 * CCW Data Dictionary: DEDAPPLY</a>.
-		 */
-		CARR_CLM_CASH_DDCTBL_APLD_AMT,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_yr.txt">
-		 * CCW Data Dictionary: HCPCS_YR</a>.
-		 */
-		CARR_CLM_HCPCS_YR_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 14. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_prfl.txt">
-		 * CCW Data Dictionary: RFR_PRFL</a>.
-		 */
-		CARR_CLM_RFRNG_PIN_NUM,
+		ADMTG_DGNS_VRSN_CD,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
@@ -795,6 +760,13 @@ public final class InpatientClaimGroup {
 		ICD_DGNS_VRSN_CD1,
 
 		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw1.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW1</a>.
+		 */
+		CLM_POA_IND_SW1,
+
+		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd2.txt">
 		 * CCW Data Dictionary: ICD_DGNS_CD2</a>.
@@ -807,6 +779,13 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD2</a>.
 		 */
 		ICD_DGNS_VRSN_CD2,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw2.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW2</a>.
+		 */
+		CLM_POA_IND_SW2,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
@@ -823,6 +802,13 @@ public final class InpatientClaimGroup {
 		ICD_DGNS_VRSN_CD3,
 
 		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw3.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW3</a>.
+		 */
+		CLM_POA_IND_SW3,
+
+		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd4.txt">
 		 * CCW Data Dictionary: ICD_DGNS_CD4</a>.
@@ -835,6 +821,13 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD4</a>.
 		 */
 		ICD_DGNS_VRSN_CD4,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw4.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW4</a>.
+		 */
+		CLM_POA_IND_SW4,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
@@ -851,6 +844,13 @@ public final class InpatientClaimGroup {
 		ICD_DGNS_VRSN_CD5,
 
 		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw5.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW5</a>.
+		 */
+		CLM_POA_IND_SW5,
+
+		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd6.txt">
 		 * CCW Data Dictionary: ICD_DGNS_CD6</a>.
@@ -863,6 +863,13 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD6</a>.
 		 */
 		ICD_DGNS_VRSN_CD6,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw6.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW6</a>.
+		 */
+		CLM_POA_IND_SW6,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
@@ -879,6 +886,13 @@ public final class InpatientClaimGroup {
 		ICD_DGNS_VRSN_CD7,
 
 		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw7.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW7</a>.
+		 */
+		CLM_POA_IND_SW7,
+
+		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd8.txt">
 		 * CCW Data Dictionary: ICD_DGNS_CD8</a>.
@@ -891,6 +905,13 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD8</a>.
 		 */
 		ICD_DGNS_VRSN_CD8,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw8.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW8</a>.
+		 */
+		CLM_POA_IND_SW8,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
@@ -907,6 +928,13 @@ public final class InpatientClaimGroup {
 		ICD_DGNS_VRSN_CD9,
 
 		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw9.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW9</a>.
+		 */
+		CLM_POA_IND_SW9,
+
+		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd10.txt">
 		 * CCW Data Dictionary: ICD_DGNS_CD10</a>.
@@ -919,6 +947,13 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD10</a>.
 		 */
 		ICD_DGNS_VRSN_CD10,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw10.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW10</a>.
+		 */
+		CLM_POA_IND_SW10,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
@@ -935,6 +970,13 @@ public final class InpatientClaimGroup {
 		ICD_DGNS_VRSN_CD11,
 
 		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw11.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW11</a>.
+		 */
+		CLM_POA_IND_SW11,
+
+		/**
 		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd12.txt">
 		 * CCW Data Dictionary: ICD_DGNS_CD12</a>.
@@ -949,336 +991,602 @@ public final class InpatientClaimGroup {
 		ICD_DGNS_VRSN_CD12,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 8. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt">
-		 * CCW Data Dictionary: CCLTRNUM</a>.
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw12.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW12</a>.
 		 */
-		CLM_CLNCL_TRIL_NUM,
+		CLM_POA_IND_SW12,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd13.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD13</a>.
+		 */
+		ICD_DGNS_CD13,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd13.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD13</a>.
+		 */
+		ICD_DGNS_VRSN_CD13,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw13.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW13</a>.
+		 */
+		CLM_POA_IND_SW13,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd14.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD14</a>.
+		 */
+		ICD_DGNS_CD14,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd14.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD14</a>.
+		 */
+		ICD_DGNS_VRSN_CD14,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw14.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW14</a>.
+		 */
+		CLM_POA_IND_SW14,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_c15.txt">
+		 * CCW Data Dictionary: ICD_DGNS_C15</a>.
+		 */
+		ICD_DGNS_C15,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_c15.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_C15</a>.
+		 */
+		ICD_DGNS_VRSN_C15,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw15.txt">
+		 * CCW Data Diction ary: CLM_POA_IND_SW15</a>.
+		 */
+		CLM_POA_IND_SW15,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_c16.txt">
+		 * CCW Data Dictionary: ICD_DGNS_C16</a>.
+		 */
+		ICD_DGNS_C16,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_c16.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_C16</a>.
+		 */
+		ICD_DGNS_VRSN_C16,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw16.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW16</a>.
+		 */
+		CLM_POA_IND_SW16,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd17.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD17</a>.
+		 */
+		ICD_DGNS_CD17,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd17.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD17</a>.
+		 */
+		ICD_DGNS_VRSN_CD17,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw17.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW17</a>.
+		 */
+		CLM_POA_IND_SW17,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd18.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD18</a>.
+		 */
+		ICD_DGNS_CD18,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd18.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD18</a>.
+		 */
+		ICD_DGNS_VRSN_CD18,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw18.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW18</a>.
+		 */
+		CLM_POA_IND_SW18,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd19.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD19</a>.
+		 */
+		ICD_DGNS_CD19,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd19.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD19</a>.
+		 */
+		ICD_DGNS_VRSN_CD19,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw19.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW19</a>.
+		 */
+		CLM_POA_IND_SW19,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd20.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD20</a>.
+		 */
+		ICD_DGNS_CD20,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd20.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD20</a>.
+		 */
+		ICD_DGNS_VRSN_CD20,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw20.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW20</a>.
+		 */
+		CLM_POA_IND_SW20,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd21.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD21</a>.
+		 */
+		ICD_DGNS_CD21,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd21.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD21</a>.
+		 */
+		ICD_DGNS_VRSN_CD21,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw21.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW21</a>.
+		 */
+		CLM_POA_IND_SW21,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd22.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD22</a>.
+		 */
+		ICD_DGNS_CD22,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd22.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD22</a>.
+		 */
+		ICD_DGNS_VRSN_CD22,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw22.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW22</a>.
+		 */
+		CLM_POA_IND_SW22,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd23.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD23</a>.
+		 */
+		ICD_DGNS_CD23,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd23.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD23</a>.
+		 */
+		ICD_DGNS_VRSN_CD23,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw23.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW23</a>.
+		 */
+		CLM_POA_IND_SW23,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd24.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD24</a>.
+		 */
+		ICD_DGNS_CD24,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd24.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD24</a>.
+		 */
+		ICD_DGNS_VRSN_CD24,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw24.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW24</a>.
+		 */
+		CLM_POA_IND_SW24,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd25.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD25</a>.
+		 */
+		ICD_DGNS_CD25,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd25.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRSN_CD25</a>.
+		 */
+		ICD_DGNS_VRSN_CD25,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw25.txt">
+		 * CCW Data Dictionary: CLM_POA_IND_SW25</a>.
+		 */
+		CLM_POA_IND_SW25,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_cd.txt">
+		 * CCW Data Dictionary: FST_DGNS_E_CD</a>.
+		 */
+		FST_DGNS_E_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fst_dgns_e_vrsn_cd.txt">
+		 * CCW Data Dictionary: FST_DGNS_E_VRSN_CD</a>.
+		 */
+		FST_DGNS_E_VRSN_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd1.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD1</a>.
+		 */
+		ICD_DGNS_E_CD1,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd1.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD1</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD1,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw1.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW1</a>.
+		 */
+		CLM_E_POA_IND_SW1,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd2.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD2</a>.
+		 */
+		ICD_DGNS_E_CD2,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd2.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD2</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD2,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw2.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW2</a>.
+		 */
+		CLM_E_POA_IND_SW2,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd3.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD3</a>.
+		 */
+		ICD_DGNS_E_CD3,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd3.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD3</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD3,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw3.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW3</a>.
+		 */
+		CLM_E_POA_IND_SW3,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd4.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD4</a>.
+		 */
+		ICD_DGNS_E_CD4,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd4.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD4</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD4,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw4.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW4</a>.
+		 */
+		CLM_E_POA_IND_SW4,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd5.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD5</a>.
+		 */
+		ICD_DGNS_E_CD5,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd5.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD5</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD5,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw5.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW5</a>.
+		 */
+		CLM_E_POA_IND_SW5,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd6.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD6</a>.
+		 */
+		ICD_DGNS_E_CD6,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd6.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD6</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD6,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw6.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW6</a>.
+		 */
+		CLM_E_POA_IND_SW6,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd7.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD7</a>.
+		 */
+		ICD_DGNS_E_CD7,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd7.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD7</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD7,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw7.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW7</a>.
+		 */
+		CLM_E_POA_IND_SW7,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd8.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD8</a>.
+		 */
+		ICD_DGNS_E_CD8,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd8.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD8</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD8,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw8.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW8</a>.
+		 */
+		CLM_E_POA_IND_SW8,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd9.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD9</a>.
+		 */
+		ICD_DGNS_E_CD9,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd9.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD9</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD9,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw9.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW9</a>.
+		 */
+		CLM_E_POA_IND_SW9,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd10.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD10</a>.
+		 */
+		ICD_DGNS_E_CD10,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd10.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD10</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD10,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw10.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW10</a>.
+		 */
+		CLM_E_POA_IND_SW10,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd11.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD11</a>.
+		 */
+		ICD_DGNS_E_CD11,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd11.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD11</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD11,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw11.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW11</a>.
+		 */
+		CLM_E_POA_IND_SW11,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_cd12.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_CD12</a>.
+		 */
+		ICD_DGNS_E_CD12,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_e_vrsn_cd12.txt">
+		 * CCW Data Dictionary: ICD_DGNS_E_VRSN_CD12</a>.
+		 */
+		ICD_DGNS_E_VRSN_CD12,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_e_poa_ind_sw12.txt">
+		 * CCW Data Dictionary: CLM_E_POA_IND_SW12</a>.
+		 */
+		CLM_E_POA_IND_SW12,
 
 		/**
 		 * Type: <code>NUM</code>, max chars: 13. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_num.txt">
-		 * CCW Data Dictionary: LINE_NUM</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_ln.txt">
+		 * CCW Data Dictionary: CLM_LN</a>.
 		 */
-		LINE_NUM,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 15. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prf_prfl.txt">
-		 * CCW Data Dictionary: PRF_PRFL</a>.
-		 */
-		CARR_PRFRNG_PIN_NUM,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prf_upin.txt">
-		 * CCW Data Dictionary: PRF_UPIN</a>.
-		 */
-		PRF_PHYSN_UPIN,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prfnpi.txt">
-		 * CCW Data Dictionary: PRFNPI</a>.
-		 */
-		PRF_PHYSN_NPI,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 10 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prgrpnpi.txt">
-		 * CCW Data Dictionary: PRGRPNPI</a>.
-		 */
-		ORG_NPI_NUM,
+		CLM_LINE_NUM,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prv_type.txt">
-		 * CCW Data Dictionary: PRV_TYPE</a>.
-		 */
-		CARR_LINE_PRVDR_TYPE_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 10. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tax_num.txt">
-		 * CCW Data Dictionary: TAX_NUM</a>.
-		 */
-		TAX_NUM,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvstate.txt">
-		 * CCW Data Dictionary: PRVSTATE</a>.
-		 */
-		PRVDR_STATE_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 9. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provzip.txt">
-		 * CCW Data Dictionary: PROVZIP</a>.
-		 */
-		PRVDR_ZIP,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt">
-		 * CCW Data Dictionary: HCFASPCL</a>.
-		 */
-		PRVDR_SPCLTY,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt">
-		 * CCW Data Dictionary: PRTCPTG</a>.
-		 */
-		PRTCPTNG_IND_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/astnt_cd.txt">
-		 * CCW Data Dictionary: ASTNT_CD</a>.
-		 */
-		CARR_LINE_RDCD_PMT_PHYS_ASTN_C,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 4. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_cnt.txt">
-		 * CCW Data Dictionary: SRVC_CNT</a>.
-		 */
-		LINE_SRVC_CNT,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typsrvcb.txt">
-		 * CCW Data Dictionary: TYPSRVCB</a>.
-		 */
-		LINE_CMS_TYPE_SRVC_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt">
-		 * CCW Data Dictionary: PLCSRVC</a>.
-		 */
-		LINE_PLACE_OF_SRVC_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lclty_cd.txt">
-		 * CCW Data Dictionary: LCLTY_CD</a>.
-		 */
-		CARR_LINE_PRCNG_LCLTY_CD,
-
-		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/expnsdt1.txt">
-		 * CCW Data Dictionary: EXPNSDT1</a>.
-		 */
-		LINE_1ST_EXPNS_DT,
-
-		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/expnsdt2.txt">
-		 * CCW Data Dictionary: EXPNSDT2</a>.
-		 */
-		LINE_LAST_EXPNS_DT,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
 		 */
-		HCPCS_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt">
-		 * CCW Data Dictionary: MDFR_CD1</a>.
-		 */
-		HCPCS_1ST_MDFR_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd2.txt">
-		 * CCW Data Dictionary: MDFR_CD2</a>.
-		 */
-		HCPCS_2ND_MDFR_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt">
-		 * CCW Data Dictionary: BETOS</a>.
-		 */
-		BETOS_CD,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/linepmt.txt">
-		 * CCW Data Dictionary: LINEPMT</a>.
-		 */
-		LINE_NCH_PMT_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lbenpmt.txt">
-		 * CCW Data Dictionary: LBENPMT</a>.
-		 */
-		LINE_BENE_PMT_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprvpmt.txt">
-		 * CCW Data Dictionary: LPRVPMT</a>.
-		 */
-		LINE_PRVDR_PMT_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ldedamt.txt">
-		 * CCW Data Dictionary: LDEDAMT</a>.
-		 */
-		LINE_BENE_PTB_DDCTBL_AMT,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpaycd.txt">
-		 * CCW Data Dictionary: LPRPAYCD</a>.
-		 */
-		LINE_BENE_PRMRY_PYR_CD,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpdamt.txt">
-		 * CCW Data Dictionary: LPRPDAMT</a>.
-		 */
-		LINE_BENE_PRMRY_PYR_PD_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coinamt.txt">
-		 * CCW Data Dictionary: COINAMT</a>.
-		 */
-		LINE_COINSRNC_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lsbmtchg.txt">
-		 * CCW Data Dictionary: LSBMTCHG</a>.
-		 */
-		LINE_SBMTD_CHRG_AMT,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 12. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lalowchg.txt">
-		 * CCW Data Dictionary: LALOWCHG</a>.
-		 */
-		LINE_ALOWD_CHRG_AMT,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt">
-		 * CCW Data Dictionary: PRCNGIND</a>.
-		 */
-		LINE_PRCSG_IND_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt">
-		 * CCW Data Dictionary: PMTINDSW</a>.
-		 */
-		LINE_PMT_80_100_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt">
-		 * CCW Data Dictionary: DED_SW</a>.
-		 */
-		LINE_SERVICE_DEDUCTIBLE,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 5. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_cnt.txt">
-		 * CCW Data Dictionary: MTUS_CNT</a>.
-		 */
-		CARR_LINE_MTUS_CNT,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_ind.txt">
-		 * CCW Data Dictionary: MTUS_IND</a>.
-		 */
-		CARR_LINE_MTUS_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_icd_dgns_cd.txt">
-		 * CCW Data Dictionary: LINE_ICD_DGNS_CD</a>.
-		 */
-		LINE_ICD_DGNS_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/line_icd_dgns_vrsn_cd.txt">
-		 * CCW Data Dictionary: LINE_ICD_DGNS_VRSN_CD</a>.
-		 */
-		LINE_ICD_DGNS_VRSN_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hpsasccd.txt">
-		 * CCW Data Dictionary: HPSASCCD</a>.
-		 */
-		HPSA_SCRCTY_IND_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 30 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carrxnum.txt">
-		 * CCW Data Dictionary: CARRXNUM</a>.
-		 */
-		CARR_LINE_RX_NUM,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 4. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbrs.txt">
-		 * CCW Data Dictionary: HCTHGBRS</a>.
-		 */
-		LINE_HCT_HGB_RSLT_NUM,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt">
-		 * CCW Data Dictionary: HCTHGBTP</a>.
-		 */
-		LINE_HCT_HGB_TYPE_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 11 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lnndccd.txt">
-		 * CCW Data Dictionary: LNNDCCD</a>.
-		 */
-		LINE_NDC_CD,
-
-		/**
-		 * Type: <code>CHAR</code>, max chars: 10 <code>Optional</code>. See
-		 * <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt">
-		 * CCW Data Dictionary: CARR_LINE_CLIA_LAB_NUM</a>.
-		 */
-		CARR_LINE_CLIA_LAB_NUM,
-
-		/**
-		 * Type: <code>NUM</code>, max chars: 2. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_ansthsa_unit_cnt.txt">
-		 * CCW Data Dictionary: CARR_LINE_ANSTHSA_UNIT_CNT</a>.
-		 */
-		CARR_LINE_ANSTHSA_UNIT_CNT;
+		HCPCS_CD;
 
 		/**
 		 * @return a {@link String} array containing all of the RIF column
