@@ -14,10 +14,17 @@ public enum StaticRifResource {
 
 	/**
 	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_B_CARRIER}, and adjusting its beneficiary
+	 * {@link StaticRifResource#SAMPLE_A_CARRIER}, and adjusting its beneficiary
 	 * to match {@link #SAMPLE_A_BENES}.
 	 */
 	SAMPLE_A_CARRIER("rif-static-samples/sample-a-bcarrier.txt", RifFileType.CARRIER, 1),
+
+	/**
+	 * This file was manually created by copying a single claim from
+	 * {@link StaticRifResource#SAMPLE_A_INPATIENT}, and adjusting its
+	 * beneficiary to match {@link #SAMPLE_A_BENES}.
+	 */
+	SAMPLE_A_INPATIENT("rif-static-samples/sample-a-inpatient.txt", RifFileType.INPATIENT, 1),
 
 	/**
 	 * This file was manually created by copying a single claim from
@@ -35,6 +42,8 @@ public enum StaticRifResource {
 	 * .
 	 */
 	SAMPLE_B_CARRIER("rif-static-samples/sample-b-bcarrier.txt", RifFileType.CARRIER, 1477),
+
+	SAMPLE_B_INPATIENT("rif-static-samples/sample-b-inpatient.txt", RifFileType.INPATIENT, 27),
 
 	SAMPLE_B_PDE("rif-static-samples/sample-b-pde.txt", RifFileType.PDE, 1195);
 

@@ -36,6 +36,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.InpatientClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
@@ -213,6 +215,32 @@ public final class RifFilesProcessor {
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
 				RifRecordEvent<CarrierClaimGroup> recordEvent = new RifRecordEvent<CarrierClaimGroup>(rifFilesEvent,
 						file, buildCarrierClaimEvent(csvRecordGroup));
+				closeParserIfDone(parser, csvIterator);
+				return recordEvent;
+			});
+		} else if (file.getFileType() == RifFileType.INPATIENT) {
+			CsvRecordGrouper grouper = new CsvRecordGrouper() {
+				@Override
+				public int compare(CSVRecord o1, CSVRecord o2) {
+					if (o1 == null)
+						throw new IllegalArgumentException();
+					if (o2 == null)
+						throw new IllegalArgumentException();
+
+					String claimId1 = o1.get(InpatientClaimGroup.Column.CLM_ID);
+					String claimId2 = o2.get(InpatientClaimGroup.Column.CLM_ID);
+
+					return claimId1.compareTo(claimId2);
+				}
+			};
+
+			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
+
+			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
+				RifRecordEvent<InpatientClaimGroup> recordEvent = new RifRecordEvent<InpatientClaimGroup>(rifFilesEvent,
+						file, buildInpatientClaimEvent(csvRecordGroup));
 				closeParserIfDone(parser, csvIterator);
 				return recordEvent;
 			});
@@ -539,6 +567,94 @@ public final class RifFilesProcessor {
 		return claimGroup;
 	}
 
+	private static InpatientClaimGroup buildInpatientClaimEvent(List<CSVRecord> csvRecords) {
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecords.toString());
+
+		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		InpatientClaimGroup claimGroup = new InpatientClaimGroup();
+
+		/*
+		 * Parse the claim header fields.
+		 */
+		claimGroup.version = parseInt(firstClaimLine.get(InpatientClaimGroup.Column.VERSION));
+		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(InpatientClaimGroup.Column.DML_IND));
+		claimGroup.beneficiaryId = firstClaimLine.get(InpatientClaimGroup.Column.BENE_ID);
+		claimGroup.claimId = firstClaimLine.get(InpatientClaimGroup.Column.CLM_ID);
+		claimGroup.nearLineRecordIdCode = parseCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
+		claimGroup.claimTypeCode = firstClaimLine.get(InpatientClaimGroup.Column.NCH_CLM_TYPE_CD);
+		claimGroup.dateFrom = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_FROM_DT));
+		claimGroup.dateThrough = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_THRU_DT));
+		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.providerNumber = firstClaimLine.get(InpatientClaimGroup.Column.PRVDR_NUM);
+		claimGroup.claimFacilityTypeCode = parseCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_FAC_TYPE_CD));
+		claimGroup.claimServiceClassificationTypeCode = parseCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_SRVC_CLSFCTN_TYPE_CD));
+		claimGroup.claimNonPaymentReasonCode = parseOptString(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_MDCR_NON_PMT_RSN_CD));
+		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PMT_AMT));
+		claimGroup.primaryPayerPaidAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_PRMRY_PYR_CLM_PD_AMT));
+		claimGroup.providerStateCode = firstClaimLine.get(InpatientClaimGroup.Column.PRVDR_STATE_CD);
+		claimGroup.organizationNpi = firstClaimLine.get(InpatientClaimGroup.Column.ORG_NPI_NUM);
+		claimGroup.attendingPhysicianNpi = firstClaimLine.get(InpatientClaimGroup.Column.AT_PHYSN_NPI);
+		claimGroup.operatingPhysicianNpi = firstClaimLine.get(InpatientClaimGroup.Column.OP_PHYSN_NPI);
+		claimGroup.otherPhysicianNpi = firstClaimLine.get(InpatientClaimGroup.Column.OT_PHYSN_NPI);
+		claimGroup.patientDischargeStatusCode = firstClaimLine.get(InpatientClaimGroup.Column.PTNT_DSCHRG_STUS_CD);
+		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_TOT_CHRG_AMT));
+		claimGroup.passThruPerDiemAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_PASS_THRU_PER_DIEM_AMT));
+		claimGroup.deductibleAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_IP_DDCTBL_AMT));
+		claimGroup.partACoinsuranceLiabilityAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_PTA_COINSRNC_LBLTY_AM));
+		claimGroup.bloodDeductibleLiabilityAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+		claimGroup.professionalComponentCharge = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_PROFNL_CMPNT_CHRG_AMT));
+		claimGroup.noncoveredCharge = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_NCVRD_CHRG_AMT));
+		claimGroup.totalDeductionAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_TOT_DDCTN_AMT));
+		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_CD),
+				firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
+		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
+				firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
+		claimGroup.diagnosesAdditional = parseIcdCodesWithPOA(firstClaimLine,
+				InpatientClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
+				InpatientClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
+		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(
+				firstClaimLine.get(InpatientClaimGroup.Column.FST_DGNS_E_CD),
+				firstClaimLine.get(InpatientClaimGroup.Column.FST_DGNS_E_VRSN_CD));
+		claimGroup.diagnosesExternal = parseIcdCodesWithPOA(firstClaimLine,
+				InpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
+				InpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+
+		/*
+		 * TODO Need to parse procedure codes once STU3 is available
+		 * 
+		 */
+		/*
+		 * Parse the claim lines.
+		 */
+		for (CSVRecord claimLineRecord : csvRecords) {
+			InpatientClaimLine claimLine = new InpatientClaimLine();
+
+			claimLine.lineNumber = parseInt(claimLineRecord.get(InpatientClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.hcpcsCode = claimLineRecord.get(InpatientClaimGroup.Column.HCPCS_CD);
+
+			claimGroup.lines.add(claimLine);
+		}
+
+		// Sanity check:
+		if (RECORD_FORMAT_VERSION != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+
+		return claimGroup;
+	}
 	/**
 	 * @param string
 	 *            the value to parse
@@ -650,6 +766,36 @@ public final class RifFilesProcessor {
 	}
 
 	/**
+	 * @param icdCode
+	 *            the value to use for {@link IcdCode#getCode()}
+	 * @param icdVersion
+	 *            the value to parse and use for {@link IcdCode#getVersion()}
+	 * @return an {@link Optional} populated with a {@link IcdCode} if the input
+	 *         has data, or an empty Optional if not
+	 */
+	private static Optional<IcdCode> parseOptIcdCode(String icdCode, String icdVersion) {
+		if (icdCode.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return Optional.of(new IcdCode(IcdVersion.parse(icdVersion), icdCode));
+		}
+	}
+
+	/**
+	 * @param icdCode
+	 *            the value to use for {@link IcdCode#getCode()}
+	 * @param icdVersion
+	 *            the value to parse and use for {@link IcdCode#getVersion()}
+	 * @param icdPresentOnAdmission
+	 *            the value to parse and use for
+	 *            {@link IcdCode#getPresentOnAdmission()}
+	 * @return an {@link IcdCode} instance built from the specified values
+	 */
+	private static IcdCode parseIcdCode(String icdCode, String icdVersion, String icdPresentOnAdmission) {
+		return new IcdCode(IcdVersion.parse(icdVersion), icdCode, icdPresentOnAdmission);
+	}
+
+	/**
 	 * Parses {@link IcdCode}s out of the specified columns of the specified
 	 * {@link CSVRecord}. The columns must be arranged in code and version
 	 * pairs; the first column specified must represent an ICD code, the next
@@ -686,6 +832,50 @@ public final class RifFilesProcessor {
 			else
 				throw new IllegalArgumentException(
 						String.format("Unexpected ICD code pair: '%s' and '%s'.", icdCodeText, icdVersionText));
+		}
+
+		return icdCodes;
+	}
+
+	/**
+	 * Parses {@link IcdCode}s out of the specified columns of the specified
+	 * {@link CSVRecord}. The columns must be arranged in order of code, version
+	 * and present on admission; the first column specified must represent an
+	 * ICD code, the next column must represent an ICD version (as can be parsed
+	 * by {@link IcdVersion#parse(String)}), next column is present on admission
+	 * and this sequence must repeat for all of the specified columns.
+	 * 
+	 * @param csvRecord
+	 *            the {@link CSVRecord} to parse the {@link IcdCode}s from
+	 * @param icdColumnFirst
+	 *            the first column ordinal to parse from, which must contain an
+	 *            {@link IcdCode#getCode()} value
+	 * @param icdColumnLast
+	 *            the last column ordinal to parse from, which must contain a
+	 *            value that could be parsed by {@link IcdVersion#parse(String)}
+	 * @return the {@link IcdCode}s contained in the specified columns of the
+	 *         specified {@link CSVRecord}
+	 */
+	private static List<IcdCode> parseIcdCodesWithPOA(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
+		if ((icdColumnLast - icdColumnFirst) < 1)
+			throw new BadCodeMonkeyException();
+		if ((icdColumnLast - icdColumnFirst + 2) % 3 != 0)
+			throw new BadCodeMonkeyException();
+
+		List<IcdCode> icdCodes = new LinkedList<>();
+		for (int i = icdColumnFirst; i < icdColumnLast; i += 3) {
+			String icdCodeText = csvRecord.get(i);
+			String icdVersionText = csvRecord.get(i + 1);
+			String icdPresentOnAdmissionCode = csvRecord.get(i + 2);
+			if (icdCodeText.isEmpty() && icdVersionText.isEmpty() && icdPresentOnAdmissionCode.isEmpty())
+				continue;
+			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty()
+					&& !icdPresentOnAdmissionCode.toString().isEmpty())
+				icdCodes.add(parseIcdCode(icdCodeText, icdVersionText, icdPresentOnAdmissionCode));
+			else
+				throw new IllegalArgumentException(
+						String.format("Unexpected ICD code/ver/poa : '%s' and '%s' and '%s'.", icdCodeText,
+								icdVersionText, icdPresentOnAdmissionCode));
 		}
 
 		return icdCodes;

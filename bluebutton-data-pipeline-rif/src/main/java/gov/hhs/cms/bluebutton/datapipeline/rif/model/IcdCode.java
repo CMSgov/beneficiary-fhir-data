@@ -6,6 +6,7 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 public final class IcdCode {
 	private final IcdVersion version;
 	private final String code;
+	private final String presentOnAdmission;
 
 	/**
 	 * Constructs a new {@link IcdCode} instance.
@@ -14,12 +15,20 @@ public final class IcdCode {
 	 *            the value to use for {@link #getVersion()}
 	 * @param code
 	 *            the value to use for {@link #getCode()}
+	 * @param code
+	 *            the value to use for {@link #getPresentOnAdmission()}
 	 */
 	public IcdCode(IcdVersion version, String code) {
 		this.version = version;
 		this.code = code;
+		this.presentOnAdmission = "";
 	}
 
+	public IcdCode(IcdVersion version, String code, String presentOnAdmission) {
+		this.version = version;
+		this.code = code;
+		this.presentOnAdmission = presentOnAdmission;
+	}
 	/**
 	 * @return the {@link IcdVersion} of this {@link IcdCode}
 	 */
@@ -32,6 +41,13 @@ public final class IcdCode {
 	 */
 	public String getCode() {
 		return code;
+	}
+
+	/**
+	 * @return the ICD present on admission value
+	 */
+	public String getPresentOnAdmission() {
+			return presentOnAdmission;
 	}
 
 	/**
@@ -78,6 +94,8 @@ public final class IcdCode {
 		builder.append(version);
 		builder.append(", code=");
 		builder.append(code);
+		builder.append(", presentOnAdmission=");
+		builder.append(presentOnAdmission);
 		builder.append("]");
 		return builder.toString();
 	}
