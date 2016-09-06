@@ -281,7 +281,7 @@
 		<Set name="EndpointIdentificationAlgorithm"></Set>
 		<Set name="NeedClientAuth">
 			<Property name="jetty.sslContext.needClientAuth" deprecated="jetty.ssl.needClientAuth"
-				default="false" />
+				default="true" />
 		</Set>
 		<Set name="WantClientAuth">
 			<Property name="jetty.sslContext.wantClientAuth" deprecated="jetty.ssl.wantClientAuth"
