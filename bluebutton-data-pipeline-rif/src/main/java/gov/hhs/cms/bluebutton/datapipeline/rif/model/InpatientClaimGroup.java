@@ -213,9 +213,9 @@ public final class InpatientClaimGroup {
 	public List<IcdCode> diagnosesExternal = new LinkedList<>();
 
 	/**
-	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
-	 * columns: one entry for every "claim line" in the claim represented by
-	 * this {@link InpatientClaimGroup} instance.
+	 * Represents the data contained in {@link Column#CLM_LINE_NUM} and
+	 * subsequent columns: one entry for every "claim line" in the claim
+	 * represented by this {@link InpatientClaimGroup} instance.
 	 */
 	public List<InpatientClaimLine> lines = new LinkedList<>();
 
