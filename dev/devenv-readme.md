@@ -37,11 +37,17 @@ Note that, because the Jetty client SSL configuration has "`NeedClientAuth`" set
 
 For your convenience, a dev-only-really-don't-use-these-anywhere-else server keystore and client truststore (with certs) have been generated and saved in this project's `dev/ssl-stores` directory. Originally, these were generated as follows:
 
-1. Generate a new server keypair that's valid for `localhost` and `127.0.0.1` and a new keystore for it using Java's `keytool` in the WildFly server's `standalone/configuration` directory, e.g.:
+1. Generate a new server keypair that's valid for `localhost` and `127.0.0.1` and a new keystore for it using Java's `keytool`, e.g.:
     
     ```
     $ keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname "cn=localhost" -ext "san=ip:127.0.0.1" -validity 3650 -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/server.keystore -storepass changeit
-    $ cp bbonfhir-server.git/dev/ssl-stores/server.keystore ~/workspaces/tools/wildfly-10.1.0.Final/standalone/configuration/
+    ```
+    
+1. Export the server certificate to a new file that clients can use as their truststore:
+    
+    ```
+    $ keytool -exportcert -alias server -file bbonfhir-server.git/dev/ssl-stores/server.cer -keystore bbonfhir-server.git/dev/ssl-stores/server.keystore -storepass changeit
+    $ keytool -importcert -noprompt -trustcacerts -alias server -file bbonfhir-server.git/dev/ssl-stores/server.cer -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/client.truststore -storepass changeit
     ```
     
 1. Generate a new client certificate that can be used in tests and place it in a new server truststore:
@@ -50,7 +56,6 @@ For your convenience, a dev-only-really-don't-use-these-anywhere-else server key
     $ keytool -genkeypair -alias client-local-dev -keyalg RSA -keysize 4096 -dname "cn=client-local-dev" -validity 3650 -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/client.keystore -storepass changeit
     $ keytool -exportcert -alias client-local-dev -file bbonfhir-server.git/dev/ssl-stores/client.cer -keystore bbonfhir-server.git/dev/ssl-stores/client.keystore -storepass changeit
     $ keytool -importcert -noprompt -trustcacerts -alias client-local-dev -file bbonfhir-server.git/dev/ssl-stores/client.cer -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/server.truststore -storepass changeit
-    $ cp bbonfhir-server.git/dev/ssl-stores/server.truststore ~/workspaces/tools/wildfly-10.1.0.Final/standalone/configuration/
     ```
     
 1. Export the client certificate to a PFX file that you can use in your browser, if need be:
