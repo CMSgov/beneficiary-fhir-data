@@ -78,12 +78,6 @@
 		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
 		<its.bbfhir.db.username></its.bbfhir.db.username>
 		<its.bbfhir.db.password></its.bbfhir.db.password>
-
-		<!-- Configure the SSL keystores that Jetty will use (e.g. during the ITs). 
-			These were just manually copied from `bbonfhir-server.git/dev/ssl-stores/`, 
-			for convenience. -->
-		<jetty.sslContext.keyStorePath>${project.build.directory}/../../dev/ssl-stores/server.keystore</jetty.sslContext.keyStorePath>
-		<jetty.sslContext.trustStorePath>${project.build.directory}/../../dev/ssl-stores/server.truststore</jetty.sslContext.trustStorePath>
 	</properties>
 
 	<dependencyManagement>
@@ -257,20 +251,26 @@
 						<jettyXml>${project.build.directory}/bbonfhir-server/bbonfhir-server-app-${bbonfhir-server.version}-jetty-config.xml</jettyXml>
 
 						<systemProperties>
-							<!-- Set the HTTP port for Jetty to use. -->
+							<!-- Set the HTTP(S) ports for Jetty to use. If you modify these, 
+								be sure to also update `FhirTestUtilities.FHIR_API`. -->
 							<systemProperty>
 								<name>jetty.http.port</name>
 								<value>9093</value>
 							</systemProperty>
+							<systemProperty>
+								<name>jetty.ssl.port</name>
+								<value>9094</value>
+							</systemProperty>
 
-							<!-- Configure Jetty's SSL. -->
+							<!-- Configure Jetty's SSL keystores. These were just manually copied 
+								from `bbonfhir-server.git/dev/ssl-stores/`, for convenience. -->
 							<systemProperty>
 								<name>jetty.sslContext.keyStorePath</name>
-								<value>${jetty.sslContext.keyStorePath}</value>
+								<value>${project.build.directory}/../../dev/ssl-stores/server.keystore</value>
 							</systemProperty>
 							<systemProperty>
 								<name>jetty.sslContext.trustStorePath</name>
-								<value>${jetty.sslContext.trustStorePath}</value>
+								<value>${project.build.directory}/../../dev/ssl-stores/server.truststore</value>
 							</systemProperty>
 
 							<!-- Configure the DB to be used by the FHIR server. The defaults 
