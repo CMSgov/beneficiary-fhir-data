@@ -79,7 +79,12 @@ public final class FhirSampleDataApp {
 		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		LOGGER.info("Pushing sample data to FHIR...");
-		FhirLoader fhirLoader = new FhirLoader(metricsFhir, new LoadAppOptions(options.getServer()));
+		/*
+		 * FIXME The LoadAppOptions used here are invalid and will cause
+		 * IllegalArgumentExceptions.
+		 */
+		FhirLoader fhirLoader = new FhirLoader(metricsFhir,
+				new LoadAppOptions(options.getServer(), null, null, null, null));
 		Stream<BeneficiaryBundle> fhirStream = new DataTransformer().transformSourceData(sampleBeneficiaries.stream());
 		fhirLoader.insertFhirRecords(fhirStream);
 

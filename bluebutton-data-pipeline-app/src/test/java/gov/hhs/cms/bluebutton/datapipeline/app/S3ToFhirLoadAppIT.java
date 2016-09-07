@@ -25,8 +25,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 
-import gov.hhs.cms.bluebutton.datapipeline.app.AppConfiguration;
-import gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -66,12 +64,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
  * </p>
  */
 public final class S3ToFhirLoadAppIT {
-	/**
-	 * The address of the FHIR server to run against. See this project's
-	 * <code>pom.xml</code> for details on how it's stood up.
-	 */
-	private static final String FHIR_API = "http://localhost:9093/baseDstu2";
-
 	/**
 	 * The POSIX signal number for the <code>SIGTERM</code> signal.
 	 */
@@ -322,7 +314,7 @@ public final class S3ToFhirLoadAppIT {
 	 */
 	@After
 	public void cleanFhirServerAfterEachTestCase() {
-		FhirTestUtilities.cleanFhirServer(FHIR_API);
+		FhirTestUtilities.cleanFhirServer();
 	}
 
 	/**
@@ -337,7 +329,15 @@ public final class S3ToFhirLoadAppIT {
 		ProcessBuilder appRunBuilder = new ProcessBuilder(command);
 
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
-		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, FHIR_API);
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, FhirTestUtilities.FHIR_API);
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH,
+				FhirTestUtilities.getClientKeyStorePath().toString());
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD,
+				String.valueOf(FhirTestUtilities.CLIENT_KEY_STORE_PASSWORD));
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PATH,
+				FhirTestUtilities.getClientTrustStorePath().toString());
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD,
+				String.valueOf(FhirTestUtilities.CLIENT_TRUST_STORE_PASSWORD));
 		/*
 		 * Note: Not explicitly providing AWS credentials here, as the child
 		 * process will inherit any that are present in this build/test process.

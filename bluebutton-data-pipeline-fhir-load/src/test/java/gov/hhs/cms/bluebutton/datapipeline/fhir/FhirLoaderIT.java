@@ -1,7 +1,5 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -97,12 +95,6 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
 @ContextConfiguration(classes = { SpringConfigForTests.class })
 @RunWith(Parameterized.class)
 public final class FhirLoaderIT {
-	/**
-	 * The address of the FHIR server to run against. See this project's
-	 * <code>pom.xml</code> for details on how it's stood up.
-	 */
-	private static final String FHIR_API = "http://localhost:9093/baseDstu2";
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoaderIT.class);
 
 	@ClassRule
@@ -128,13 +120,10 @@ public final class FhirLoaderIT {
 	/**
 	 * Verifies that {@link FhirLoader} works correctly when passed a small,
 	 * hand-crafted data set.
-	 * 
-	 * @throws URISyntaxException
-	 *             (won't happen: URI is hardcoded)
 	 */
 	@Test
 	@Ignore
-	public void loadHandcraftedSample() throws URISyntaxException {
+	public void loadHandcraftedSample() {
 		// Use the DataTransformer to create some sample FHIR resources.
 		CurrentBeneficiary beneA = new CurrentBeneficiary().setId(0).setBirthDate(LocalDate.now());
 		PartAClaimFact outpatientClaimForBeneA = new PartAClaimFact().setId(0L).setBeneficiary(beneA)
@@ -156,9 +145,7 @@ public final class FhirLoaderIT {
 		// TODO need to expand the test data here
 
 		// Push the data to FHIR.
-		URI fhirServer = new URI(FHIR_API);
-		LoadAppOptions options = new LoadAppOptions(fhirServer);
-		FhirLoader loader = new FhirLoader(new MetricRegistry(), options);
+		FhirLoader loader = new FhirLoader(new MetricRegistry(), FhirTestUtilities.getLoadOptions());
 		List<FhirResult> results = loader.insertFhirRecords(fhirStream);
 
 		// Verify the results.
@@ -174,13 +161,10 @@ public final class FhirLoaderIT {
 	 * populating a mock CCW schema with DE-SynPUF sample data through
 	 * extracting, transform, and finally loading that data into a live FHIR
 	 * server.
-	 * 
-	 * @throws URISyntaxException
-	 *             (won't happen: URI is hardcoded)
 	 */
 	@Test
 	@Ignore
-	public void loadSynpufDataSampleA() throws URISyntaxException {
+	public void loadSynpufDataSampleA() {
 		JDOPersistenceManagerFactory pmf = ccwHelper.provisionMockCcwDatabase(provisioningRequest, tearDown);
 
 		try (PersistenceManager pm = pmf.getPersistenceManager();) {
@@ -203,11 +187,7 @@ public final class FhirLoaderIT {
 			fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 			// Push the data to FHIR.
-			// URI fhirServer = new
-			// URI("http://ec2-52-4-198-86.compute-1.amazonaws.com:8081/baseDstu2");
-			URI fhirServer = new URI(FHIR_API);
-			LoadAppOptions options = new LoadAppOptions(fhirServer);
-			FhirLoader loader = new FhirLoader(fhirMetrics, options);
+			FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
 			List<FhirResult> results = loader.insertFhirRecords(fhirStream);
 			LOGGER.info("FHIR resources loaded.");
 			fhirMetricsReporter.stop();
@@ -226,13 +206,10 @@ public final class FhirLoaderIT {
 	 * generating sample data through extracting, transform, and finally loading
 	 * that data into a live FHIR server. Runs against
 	 * {@link StaticRifResourceGroup#SAMPLE_A}.
-	 * 
-	 * @throws URISyntaxException
-	 *             (won't happen: URI is hardcoded)
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void loadRifDataSampleA() throws URISyntaxException {
+	public void loadRifDataSampleA() {
 		// Generate the sample RIF data to feed through the pipeline.
 		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_A.getResources();
 		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
@@ -265,9 +242,7 @@ public final class FhirLoaderIT {
 		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Initialize the Load phase of the pipeline.
-		URI fhirServer = new URI(FHIR_API);
-		LoadAppOptions options = new LoadAppOptions(fhirServer);
-		FhirLoader loader = new FhirLoader(fhirMetrics, options);
+		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
 		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
 
 		/*
@@ -288,7 +263,7 @@ public final class FhirLoaderIT {
 		 * Run some spot-checks against the server, to verify that things look
 		 * as expected.
 		 */
-		IGenericClient client = FhirTestUtilities.createFhirClient(FHIR_API);
+		IGenericClient client = FhirTestUtilities.createFhirClient();
 		Assert.assertEquals(1,
 				client.search().forResource(Patient.class)
 						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
@@ -310,12 +285,9 @@ public final class FhirLoaderIT {
 	 * generating sample data through extracting, transform, and finally loading
 	 * that data into a live FHIR server. Runs against
 	 * {@link StaticRifResourceGroup#SAMPLE_B}.
-	 * 
-	 * @throws URISyntaxException
-	 *             (won't happen: URI is hardcoded)
 	 */
 	@Test
-	public void loadRifDataSampleB() throws URISyntaxException {
+	public void loadRifDataSampleB() {
 		// Generate the sample RIF data to feed through the pipeline.
 		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_B.getResources();
 		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
@@ -338,9 +310,7 @@ public final class FhirLoaderIT {
 		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Initialize the Load phase of the pipeline.
-		URI fhirServer = new URI(FHIR_API);
-		LoadAppOptions options = new LoadAppOptions(fhirServer);
-		FhirLoader loader = new FhirLoader(fhirMetrics, options);
+		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
 		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
 
 		/*
@@ -360,7 +330,7 @@ public final class FhirLoaderIT {
 		 * Run some spot-checks against the server, to verify that things look
 		 * as expected.
 		 */
-		IGenericClient client = FhirTestUtilities.createFhirClient(FHIR_API);
+		IGenericClient client = FhirTestUtilities.createFhirClient();
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(),
 				client.search().forResource(Patient.class).returnBundle(Bundle.class).execute().getTotal());
 
@@ -379,7 +349,7 @@ public final class FhirLoaderIT {
 	 */
 	@After
 	public void cleanFhirServerAfterEachTestCase() {
-		FhirTestUtilities.cleanFhirServer(FHIR_API);
+		FhirTestUtilities.cleanFhirServer();
 	}
 
 	/**

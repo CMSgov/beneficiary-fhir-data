@@ -1,7 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.app;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -14,7 +13,6 @@ import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 
-import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
@@ -83,13 +81,7 @@ public final class S3ToFhirLoadApp {
 		 */
 		RifFilesProcessor rifProcessor = new RifFilesProcessor();
 		DataTransformer rifToFhirTransformer = new DataTransformer();
-		FhirLoader fhirLoader;
-		try {
-			fhirLoader = new FhirLoader(metrics, new LoadAppOptions(appConfig.getFhirServer().toURI()));
-		} catch (URISyntaxException e) {
-			// TODO have FhirLoader take a URL to avoid this conversion
-			throw new AppConfigurationException("Bad FHIR server URL.", e);
-		}
+		FhirLoader fhirLoader = new FhirLoader(metrics, appConfig.getLoadOptions());
 
 		/*
 		 * Create the DataSetProcessor that will glue those stages together and

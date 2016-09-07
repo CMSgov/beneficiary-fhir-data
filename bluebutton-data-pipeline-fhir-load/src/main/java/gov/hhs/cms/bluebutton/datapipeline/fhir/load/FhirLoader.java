@@ -1,10 +1,28 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
@@ -35,6 +53,61 @@ public final class FhirLoader {
 	private final IGenericClient client;
 
 	/**
+	 * A utility method that centralizes the creation of FHIR
+	 * {@link IGenericClient}s.
+	 * 
+	 * @param options
+	 *            the {@link LoadAppOptions} to use
+	 * @return a new FHIR {@link IGenericClient} for use
+	 */
+	public static IGenericClient createFhirClient(LoadAppOptions options) {
+		FhirContext ctx = FhirContext.forDstu2_1();
+
+		/*
+		 * The default timeout is 10s, which was failing for batches of 100. A
+		 * 300s timeout was failing for batches of 100 once Part B claims were
+		 * mostly mapped, so batches were cut to 10, which ran at 12s or so,
+		 * each.
+		 */
+		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
+
+		/*
+		 * We need to override the FHIR client's SSLContext. Unfortunately, that
+		 * requires overriding the entire HttpClient that it uses. Otherwise,
+		 * the settings used here mirror those that the default FHIR HttpClient
+		 * would use.
+		 */
+		try {
+			SSLContext sslContext = SSLContexts.custom()
+					.loadKeyMaterial(options.getKeyStorePath().toFile(), options.getKeyStorePassword(),
+							options.getKeyStorePassword())
+					.loadTrustMaterial(options.getTrustStorePath().toFile(), options.getTrustStorePassword()).build();
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
+					RegistryBuilder.<ConnectionSocketFactory> create()
+							.register("http", PlainConnectionSocketFactory.getSocketFactory())
+							.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
+					null, null, null, 5000, TimeUnit.MILLISECONDS);
+			@SuppressWarnings("deprecation")
+			RequestConfig defaultRequestConfig = RequestConfig.custom()
+					.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
+					.setConnectTimeout(ctx.getRestfulClientFactory().getConnectTimeout())
+					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
+					.setStaleConnectionCheckEnabled(true).build();
+			HttpClient httpClient = HttpClients.custom().setConnectionManager(connectionManager)
+					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement().build();
+			ctx.getRestfulClientFactory().setHttpClient(httpClient);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} catch (KeyManagementException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException
+				| CertificateException e) {
+			throw new IllegalStateException(e);
+		}
+
+		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
+		return client;
+	}
+
+	/**
 	 * Constructs a new {@link FhirLoader} instance.
 	 * 
 	 * @param metrics
@@ -46,15 +119,7 @@ public final class FhirLoader {
 	public FhirLoader(MetricRegistry metrics, LoadAppOptions options) {
 		this.metrics = metrics;
 
-		FhirContext ctx = FhirContext.forDstu2_1();
-		/*
-		 * The default timeout is 10s, which was failing for batches of 100. A
-		 * 300s timeout was failing for batches of 100 once Part B claims were
-		 * mostly mapped, so batches were cut to 10, which ran at 12s or so,
-		 * each.
-		 */
-		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
-		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
+		IGenericClient client = createFhirClient(options);
 		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
 		fhirClientLogging.setLogRequestBody(LOGGER.isTraceEnabled());
 		fhirClientLogging.setLogResponseBody(LOGGER.isTraceEnabled());

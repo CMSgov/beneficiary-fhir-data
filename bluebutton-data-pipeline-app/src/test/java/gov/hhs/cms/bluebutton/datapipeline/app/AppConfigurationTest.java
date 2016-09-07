@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
@@ -35,12 +36,18 @@ public final class AppConfigurationTest {
 	 *             (indicates a test error)
 	 * @throws ClassNotFoundException
 	 *             (indicates a test error)
+	 * @throws URISyntaxException
+	 *             (indicates a test error)
 	 */
 	@Test
-	public void normalUsage() throws IOException, InterruptedException, ClassNotFoundException {
+	public void normalUsage() throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException {
 		ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, "http://example.com/bar");
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH, "../../fizz");
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD, "buzz");
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PATH, "../../tom");
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD, "george");
 		Process testApp = testAppBuilder.start();
 
 		int testAppExitCode = testApp.waitFor();
@@ -58,8 +65,18 @@ public final class AppConfigurationTest {
 		Assert.assertNotNull(testAppConfig);
 		Assert.assertEquals(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_BUCKET),
 				testAppConfig.getS3BucketName());
-		Assert.assertEquals(new URL(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_FHIR)),
-				testAppConfig.getFhirServer());
+		Assert.assertEquals(new URI(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_FHIR)),
+				testAppConfig.getLoadOptions().getFhirServer());
+		Assert.assertEquals(Paths.get(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH)),
+				testAppConfig.getLoadOptions().getKeyStorePath());
+		Assert.assertArrayEquals(
+				testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD).toCharArray(),
+				testAppConfig.getLoadOptions().getKeyStorePassword());
+		Assert.assertEquals(Paths.get(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PATH)),
+				testAppConfig.getLoadOptions().getTrustStorePath());
+		Assert.assertArrayEquals(
+				testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD).toCharArray(),
+				testAppConfig.getLoadOptions().getTrustStorePassword());
 	}
 
 	/**
@@ -107,7 +124,7 @@ public final class AppConfigurationTest {
 				.collect(Collectors.joining("\n"));
 		String stdout = new BufferedReader(new InputStreamReader(process.getInputStream())).lines().map(l -> "\t" + l)
 				.collect(Collectors.joining("\n"));
-		return String.format("STDERR:\n%sSTDOUT:\n%s", stderr, stdout);
+		return String.format("STDERR:\n[%s]\nSTDOUT:\n[%s]", stderr, stdout);
 	}
 
 	/**
@@ -128,6 +145,7 @@ public final class AppConfigurationTest {
 			out.writeObject(appConfig);
 			out.close();
 		} catch (IOException e) {
+			System.out.printf("Error occurred: %s: '%s'", e.getClass().getName(), e.getMessage());
 			System.exit(2);
 		}
 	}

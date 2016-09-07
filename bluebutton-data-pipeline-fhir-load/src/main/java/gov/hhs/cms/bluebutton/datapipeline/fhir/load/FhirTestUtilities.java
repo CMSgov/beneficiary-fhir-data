@@ -1,5 +1,10 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,9 +15,10 @@ import org.hl7.fhir.dstu21.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu21.model.Conformance.RestfulConformanceMode;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.justdavis.karl.misc.exceptions.unchecked.UncheckedUriSyntaxException;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 
 /**
  * <p>
@@ -25,19 +31,32 @@ import ca.uhn.fhir.rest.client.IGenericClient;
  */
 public final class FhirTestUtilities {
 	/**
-	 * <strong>Serious Business:</strong> deletes all resources from the
-	 * specified FHIR server.
-	 * 
-	 * @param fhirApiUrl
-	 *            the "base" FHIR API endpoint of the server to create a client
-	 *            for, e.g. <code>http://localhost:9093/baseDstu2</code>
+	 * The address of the FHIR server to run tests against. See the parent
+	 * project's <code>pom.xml</code> for details on how it's stood up.
 	 */
-	public static void cleanFhirServer(String fhirApiUrl) {
+	public static final String FHIR_API = "https://localhost:9094/baseDstu2";
+
+	/**
+	 * The password for {@link #getClientKeyStorePath()} and the key inside of
+	 * it.
+	 */
+	public static final char[] CLIENT_KEY_STORE_PASSWORD = "changeit".toCharArray();
+
+	/**
+	 * The password for {@link #getClientTrustStorePath()}.
+	 */
+	public static final char[] CLIENT_TRUST_STORE_PASSWORD = "changeit".toCharArray();
+
+	/**
+	 * <strong>Serious Business:</strong> deletes all resources from the FHIR
+	 * server used in tests.
+	 */
+	public static void cleanFhirServer() {
 		// Before disabling this check, please go and update your resume.
-		if (!fhirApiUrl.contains("localhost"))
+		if (!FHIR_API.contains("localhost"))
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
 
-		IGenericClient fhirClient = createFhirClient(fhirApiUrl);
+		IGenericClient fhirClient = createFhirClient();
 		Conformance conformance = fhirClient.fetchConformance().ofType(Conformance.class).execute();
 
 		/*
@@ -78,15 +97,54 @@ public final class FhirTestUtilities {
 	}
 
 	/**
-	 * @param fhirApiUrl
-	 *            the "base" FHIR API endpoint of the server to create a client
-	 *            for, e.g. <code>http://example.com:9093/baseDstu2</code>
-	 * @return a FHIR {@link IGenericClient} that can be used to query the
-	 *         specified FHIR server
+	 * @return the local {@link Path} to the key store that FHIR clients should
+	 *         use
 	 */
-	public static IGenericClient createFhirClient(String fhirApiUrl) {
-		FhirContext ctx = FhirContext.forDstu2_1();
-		IGenericClient client = ctx.newRestfulGenericClient(fhirApiUrl);
+	public static Path getClientKeyStorePath() {
+		/*
+		 * The working directory for tests will either be the module directory
+		 * or their parent directory. With that knowledge, we're searching for
+		 * the ssl-stores directory.
+		 */
+		Path sslStoresDir = Paths.get("..", "dev", "ssl-stores");
+		if (!Files.isDirectory(sslStoresDir))
+			sslStoresDir = Paths.get("dev", "ssl-stores");
+		if (!Files.isDirectory(sslStoresDir))
+			throw new IllegalStateException();
+
+		Path keyStorePath = sslStoresDir.resolve("client.keystore");
+		return keyStorePath;
+	}
+
+	/**
+	 * @return the local {@link Path} to the trust store that FHIR clients
+	 *         should use
+	 */
+	public static Path getClientTrustStorePath() {
+		Path trustStorePath = getClientKeyStorePath().getParent().resolve("client.truststore");
+		return trustStorePath;
+	}
+
+	/**
+	 * @return the {@link LoadAppOptions} that should be used in tests, which
+	 *         specifies how to connect to the FHIR server that tests should be
+	 *         run against
+	 */
+	public static LoadAppOptions getLoadOptions() {
+		try {
+			return new LoadAppOptions(new URI(FHIR_API), getClientKeyStorePath(), CLIENT_KEY_STORE_PASSWORD,
+					getClientTrustStorePath(), CLIENT_TRUST_STORE_PASSWORD);
+		} catch (URISyntaxException e) {
+			throw new UncheckedUriSyntaxException(e);
+		}
+	}
+
+	/**
+	 * @return a FHIR {@link IGenericClient} that can be used to query the FHIR
+	 *         server used in tests
+	 */
+	public static IGenericClient createFhirClient() {
+		IGenericClient client = FhirLoader.createFhirClient(getLoadOptions());
 
 		// Client logging can be enabled here, when needed.
 		// LoggingInterceptor clientLogger = new LoggingInterceptor();

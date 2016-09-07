@@ -67,6 +67,17 @@
 			as this is seen in whichever version of the library is used by default in 
 			the 1.0.1 version of the plugin. -->
 		<capsule.version>1.0.1</capsule.version>
+
+		<!-- The version of the Blue Button FHIR server to test against. -->
+		<bbonfhir-server.version>0.1.0-44</bbonfhir-server.version>
+
+		<!-- Configure the Blue Button FHIR Server, as it will be run via the Jetty 
+			plugin. These settings are pulled out as POM properties so that they can 
+			be adjusted via profiles. This is required because the CI server doesn't 
+			have enough RAM to run with an in-mem DB, and so requires a different configuration. -->
+		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
+		<its.bbfhir.db.username></its.bbfhir.db.username>
+		<its.bbfhir.db.password></its.bbfhir.db.password>
 	</properties>
 
 	<dependencyManagement>
@@ -194,6 +205,100 @@
 					</configuration>
 				</plugin>
 				<plugin>
+					<!-- Configure the dependency plugin such that it can be used to grab 
+						the Blue Button FHIR Server and its config, for manual testing or for use 
+						in integration tests. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.10</version>
+					<configuration>
+						<artifactItems>
+							<artifactItem>
+								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+								<artifactId>bbonfhir-server-app</artifactId>
+								<version>${bbonfhir-server.version}</version>
+								<type>war</type>
+								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+							</artifactItem>
+							<artifactItem>
+								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+								<artifactId>bbonfhir-server-app</artifactId>
+								<version>${bbonfhir-server.version}</version>
+								<type>xml</type>
+								<classifier>jetty-config</classifier>
+								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+							</artifactItem>
+						</artifactItems>
+						<outputDirectory>${project.build.directory}/wars</outputDirectory>
+						<overWriteReleases>false</overWriteReleases>
+						<overWriteSnapshots>true</overWriteSnapshots>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- Configure the Jetty plugin such that it can be used to launch the 
+						Blue Button FHIR Server, for manual testing or for use in integration tests. -->
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>9.3.11.v20160721</version>
+					<configuration>
+						<!-- Specify the WAR to run. -->
+						<war>${project.build.directory}/bbonfhir-server/bbonfhir-server-app-${bbonfhir-server.version}.war</war>
+						<webApp>
+							<contextPath>/</contextPath>
+						</webApp>
+
+						<!-- The Jetty config file to use. -->
+						<jettyXml>${project.build.directory}/bbonfhir-server/bbonfhir-server-app-${bbonfhir-server.version}-jetty-config.xml</jettyXml>
+
+						<systemProperties>
+							<!-- Set the HTTP(S) ports for Jetty to use. If you modify these, 
+								be sure to also update `FhirTestUtilities.FHIR_API`. -->
+							<systemProperty>
+								<name>jetty.http.port</name>
+								<value>9093</value>
+							</systemProperty>
+							<systemProperty>
+								<name>jetty.ssl.port</name>
+								<value>9094</value>
+							</systemProperty>
+
+							<!-- Configure Jetty's SSL keystores. These were just manually copied 
+								from `bbonfhir-server.git/dev/ssl-stores/`, for convenience. -->
+							<systemProperty>
+								<name>jetty.sslContext.keyStorePath</name>
+								<value>${project.build.directory}/../../dev/ssl-stores/server.keystore</value>
+							</systemProperty>
+							<systemProperty>
+								<name>jetty.sslContext.trustStorePath</name>
+								<value>${project.build.directory}/../../dev/ssl-stores/server.truststore</value>
+							</systemProperty>
+
+							<!-- Configure the DB to be used by the FHIR server. The defaults 
+								(above) are to use a temporary in-mem DB. Can be overridden if needed by 
+								properties specified in devs' settings.xml. -->
+							<systemProperty>
+								<name>bbfhir.db.url</name>
+								<value>${its.bbfhir.db.url}</value>
+							</systemProperty>
+							<systemProperty>
+								<name>bbfhir.db.username</name>
+								<value>${its.bbfhir.db.username}</value>
+							</systemProperty>
+							<systemProperty>
+								<name>bbfhir.db.password</name>
+								<value>${its.bbfhir.db.password}</value>
+							</systemProperty>
+						</systemProperties>
+
+						<!-- Used by the 'stop' goal. -->
+						<stopPort>9966</stopPort>
+						<stopKey>doesntmatter</stopKey>
+
+						<!-- Don't run any of this plugin's goals if the ITs are being skipped. -->
+						<skip>${skipITs}</skip>
+					</configuration>
+				</plugin>
+				<plugin>
 					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
@@ -248,5 +353,51 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<!-- This profile will only be active for builds inside of Eclipse (managed 
+				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<!--This plugin's configuration is used to store Eclipse m2e settings 
+								only. It has no influence on the Maven build itself. -->
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-dependency-plugin</artifactId>
+												<versionRange>[1.0.0,)</versionRange>
+												<goals>
+													<goal>copy</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<!-- Don't run this plugin inside m2e; necessary to disable a 
+													POM warning in Eclipse, caused by https://issues.apache.org/jira/browse/MDEP-187. -->
+												<ignore />
+											</action>
+										</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
