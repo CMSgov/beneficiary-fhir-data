@@ -18,3 +18,49 @@ Unfortunately, this project will sometimes need to depend on an interim/snapshot
     $ mvn clean install -DskipITs=true -DskipTests=true
 
 Once the build is done, the HAPI FHIR artifacts will be placed into your user's local Maven repository (`~/.m2/repository`), available for use by this project or others.
+
+## Jetty
+
+References:
+
+* [Jetty Docs: Configuring SSL/TLS](http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html)
+* [Jetty Docs: jetty.xml](http://www.eclipse.org/jetty/documentation/9.3.x/jetty-xml-config.html)
+* [Jetty Docs: Configuring the Jetty Maven Plugin](https://www.eclipse.org/jetty/documentation/9.3.x/jetty-maven-plugin.html#jetty-stop-goal)
+
+In the HealthAPT dev, test, and prod environments in AWS, this application is deployed to a Jetty container. The `bbonfhir-server-app` module also attaches to its build the Jetty XML configuration that should be used to run the application
+
+TODO: document how to run Jetty in prod
+
+Note that, because the Jetty client SSL configuration has "`NeedClientAuth`" set to "`true`", you will be unable to access HAPI's testing UI in your web browser unless you first deploy the `client.pfx` file to your browser (temporarily!). All API access will also require a trusted client certificate, as well. If you just want to poke around in the Testing UI, you can temporarily adjust "`NeedClientAuth`" "`false`". Note, though, that this **must not** be done in production, as it completely disables the application's authentication requirements.
+
+### SSL Development Keystores
+
+For your convenience, a dev-only-really-don't-use-these-anywhere-else server keystore and client truststore (with certs) have been generated and saved in this project's `dev/ssl-stores` directory. Originally, these were generated as follows:
+
+1. Generate a new server keypair that's valid for `localhost` and `127.0.0.1` and a new keystore for it using Java's `keytool`, e.g.:
+    
+    ```
+    $ keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname "cn=localhost" -ext "san=ip:127.0.0.1" -validity 3650 -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/server.keystore -storepass changeit
+    ```
+    
+1. Export the server certificate to a new file that clients can use as their truststore:
+    
+    ```
+    $ keytool -exportcert -alias server -file bbonfhir-server.git/dev/ssl-stores/server.cer -keystore bbonfhir-server.git/dev/ssl-stores/server.keystore -storepass changeit
+    $ keytool -importcert -noprompt -trustcacerts -alias server -file bbonfhir-server.git/dev/ssl-stores/server.cer -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/client.truststore -storepass changeit
+    ```
+    
+1. Generate a new client certificate that can be used in tests and place it in a new server truststore:
+    
+    ```
+    $ keytool -genkeypair -alias client-local-dev -keyalg RSA -keysize 4096 -dname "cn=client-local-dev" -validity 3650 -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/client.keystore -storepass changeit
+    $ keytool -exportcert -alias client-local-dev -file bbonfhir-server.git/dev/ssl-stores/client.cer -keystore bbonfhir-server.git/dev/ssl-stores/client.keystore -storepass changeit
+    $ keytool -importcert -noprompt -trustcacerts -alias client-local-dev -file bbonfhir-server.git/dev/ssl-stores/client.cer -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/server.truststore -storepass changeit
+    ```
+    
+1. Export the client certificate to a PFX file that you can use in your browser, if need be:
+    
+    ```
+    $ keytool -importkeystore -srckeystore bbonfhir-server.git/dev/ssl-stores/client.keystore -destkeystore bbonfhir-server.git/dev/ssl-stores/client.pfx -deststoretype PKCS12 -srcstorepass changeit -deststorepass changeit -srcalias client-local-dev
+    ```
+    
