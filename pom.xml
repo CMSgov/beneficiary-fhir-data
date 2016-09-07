@@ -293,6 +293,7 @@
 						<!-- Used by the 'stop' goal. -->
 						<stopPort>9966</stopPort>
 						<stopKey>doesntmatter</stopKey>
+						<stopWait>120</stopWait>
 
 						<!-- Don't run any of this plugin's goals if the ITs are being skipped. -->
 						<skip>${skipITs}</skip>
