@@ -1115,7 +1115,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
-		Assert.assertEquals(record.patientDischargeStatusCode, eob.getDisposition());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.toString(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
@@ -1280,7 +1279,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
-		Assert.assertEquals(record.patientDischargeStatusCode, eob.getDisposition());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.toString(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
