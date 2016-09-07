@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 /**
  * <p>
- * Models rows from {@link RifFileType#Outpatient} RIF files. Rows in this file
+ * Models rows from {@link RifFileType#OUTPATIENT} RIF files. Rows in this file
  * are grouped, such that there is one group per claim, with multiple rows: one
  * for each claim line.
  * </p>
