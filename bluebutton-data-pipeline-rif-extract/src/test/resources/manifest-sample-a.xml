@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v1"
+	timestamp="2016-09-08T15:18:34.345Z">
+	
+	<entry name="foo.xml" type="BENEFICIARY" />
+	<entry name="bar.xml" type="PDE" />
+	
+</dataSetManifest>
