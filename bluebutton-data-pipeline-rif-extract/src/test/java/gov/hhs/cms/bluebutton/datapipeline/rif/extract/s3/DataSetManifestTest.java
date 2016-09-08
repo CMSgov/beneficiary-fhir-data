@@ -2,6 +2,9 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
 import java.io.InputStream;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -33,7 +36,13 @@ public final class DataSetManifestTest {
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
 		DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
+
 		Assert.assertNotNull(manifest);
+		Assert.assertEquals(1994,
+				LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault()).get(ChronoField.YEAR));
+		Assert.assertEquals(2, manifest.getEntries().size());
+		Assert.assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
+		Assert.assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
 	}
 
 	/**
