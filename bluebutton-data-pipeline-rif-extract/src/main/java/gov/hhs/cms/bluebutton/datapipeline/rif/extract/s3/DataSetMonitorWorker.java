@@ -143,8 +143,9 @@ final class DataSetMonitorWorker implements Runnable {
 		}
 
 		// We've found the oldest manifest. Now go download and parse it.
-		LOGGER.info("Found data set to process: '{}'. Waiting for it to finish uploading...", manifestToProcessKey);
 		DataSetManifest dataSetManifest = readManifest(manifestToProcessKey);
+		LOGGER.info("Found data set to process at '{}': '{}'. Waiting for it to finish uploading...",
+				manifestToProcessKey, dataSetManifest.toString());
 
 		/*
 		 * We've got a dataset to process. However, it might still be uploading
@@ -301,7 +302,8 @@ final class DataSetMonitorWorker implements Runnable {
 			 * stripping the timestamp prefix and slash from each of them.
 			 */
 			Set<String> namesForObjectsInPage = objectListing.getObjectSummaries().stream().map(s -> s.getKey())
-					.map(k -> k.substring(dataSetKeyPrefix.length())).collect(Collectors.toSet());
+					.peek(s -> LOGGER.debug("Found object: '{}'", s)).map(k -> k.substring(dataSetKeyPrefix.length()))
+					.collect(Collectors.toSet());
 			dataSetObjectNames.addAll(namesForObjectsInPage);
 
 			// On to the next page! (If any.)

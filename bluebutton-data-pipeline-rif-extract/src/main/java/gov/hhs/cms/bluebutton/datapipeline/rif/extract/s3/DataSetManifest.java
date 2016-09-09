@@ -85,6 +85,20 @@ public final class DataSetManifest {
 	}
 
 	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("DataSetManifest [timestamp=");
+		builder.append(timestamp);
+		builder.append(", entries=");
+		builder.append(entries);
+		builder.append("]");
+		return builder.toString();
+	}
+
+	/**
 	 * Each {@link DataSetManifestEntry} instance represents a single file
 	 * included in a {@link DataSetManifest}.
 	 */
@@ -135,6 +149,20 @@ public final class DataSetManifest {
 		 */
 		public RifFileType getType() {
 			return type;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("DataSetManifestEntry [name=");
+			builder.append(name);
+			builder.append(", type=");
+			builder.append(type);
+			builder.append("]");
+			return builder.toString();
 		}
 	}
 }
