@@ -346,12 +346,12 @@
 	<!-- Configure Jetty to, you know, actually run the webapp. -->
 	<New id="webAppContext" class="org.eclipse.jetty.webapp.WebAppContext">
 		<!-- Configure the WAR to be run. -->
-		<Arg name="webApp">
+		<Set name="war">
 			<Property name="bbfhir.war.path" />
-		</Arg>
+		</Set>
 
 		<!-- Configure the WAR to run at the root context, i.e. "/". -->
-		<Arg name="contextPath">/</Arg>
+		<Set name="contextPath">/</Set>
 
 		<!-- Enable some of the required configurators for this context. This is 
 			derived from the docs here: http://www.eclipse.org/jetty/documentation/9.3.x/configuring-webapps.html. 
