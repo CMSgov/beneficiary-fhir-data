@@ -146,7 +146,7 @@
 						<id>jetty-start</id>
 						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>deploy-war</goal>
+							<goal>run-forked</goal>
 						</goals>
 					</execution>
 					<execution>
