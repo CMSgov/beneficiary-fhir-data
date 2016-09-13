@@ -46,6 +46,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
 
 /**
  * Contains services responsible for handling new RIF files.
@@ -272,6 +274,33 @@ public final class RifFilesProcessor {
 				closeParserIfDone(parser, csvIterator);
 				return recordEvent;
 			});
+		} else if (file.getFileType() == RifFileType.SNF) {
+			CsvRecordGrouper grouper = new CsvRecordGrouper() {
+				@Override
+				public int compare(CSVRecord o1, CSVRecord o2) {
+					if (o1 == null)
+						throw new IllegalArgumentException();
+					if (o2 == null)
+						throw new IllegalArgumentException();
+
+					String claimId1 = o1.get(SNFClaimGroup.Column.CLM_ID);
+					String claimId2 = o2.get(SNFClaimGroup.Column.CLM_ID);
+
+					return claimId1.compareTo(claimId2);
+				}
+			};
+
+			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
+
+			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
+				RifRecordEvent<SNFClaimGroup> recordEvent = new RifRecordEvent<SNFClaimGroup>(rifFilesEvent, file,
+						buildSNFClaimEvent(csvRecordGroup));
+				closeParserIfDone(parser, csvIterator);
+				return recordEvent;
+			});
+
 		} else {
 			throw new BadCodeMonkeyException();
 		}
@@ -780,6 +809,85 @@ public final class RifFilesProcessor {
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 			 
+			claimGroup.lines.add(claimLine);
+		}
+
+		// Sanity check:
+		if (RECORD_FORMAT_VERSION != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+
+		return claimGroup;
+	}
+
+	private static SNFClaimGroup buildSNFClaimEvent(List<CSVRecord> csvRecords) {
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecords.toString());
+
+		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		SNFClaimGroup claimGroup = new SNFClaimGroup();
+
+		/*
+		 * Parse the claim header fields.
+		 */
+		claimGroup.version = parseInt(firstClaimLine.get(SNFClaimGroup.Column.VERSION));
+		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(SNFClaimGroup.Column.DML_IND));
+		claimGroup.beneficiaryId = firstClaimLine.get(SNFClaimGroup.Column.BENE_ID);
+		claimGroup.claimId = firstClaimLine.get(SNFClaimGroup.Column.CLM_ID);
+		claimGroup.nearLineRecordIdCode = parseCharacter(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
+		claimGroup.claimTypeCode = firstClaimLine.get(SNFClaimGroup.Column.NCH_CLM_TYPE_CD);
+		claimGroup.dateFrom = parseDate(firstClaimLine.get(SNFClaimGroup.Column.CLM_FROM_DT));
+		claimGroup.dateThrough = parseDate(firstClaimLine.get(SNFClaimGroup.Column.CLM_THRU_DT));
+		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(SNFClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.providerNumber = firstClaimLine.get(SNFClaimGroup.Column.PRVDR_NUM);
+		claimGroup.claimFacilityTypeCode = parseCharacter(firstClaimLine.get(SNFClaimGroup.Column.CLM_FAC_TYPE_CD));
+		claimGroup.claimServiceClassificationTypeCode = parseCharacter(
+				firstClaimLine.get(SNFClaimGroup.Column.CLM_SRVC_CLSFCTN_TYPE_CD));
+		claimGroup.claimNonPaymentReasonCode = parseOptString(
+				firstClaimLine.get(SNFClaimGroup.Column.CLM_MDCR_NON_PMT_RSN_CD));
+		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_PMT_AMT));
+		claimGroup.primaryPayerPaidAmount = parseDecimal(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_PRMRY_PYR_CLM_PD_AMT));
+		claimGroup.providerStateCode = firstClaimLine.get(SNFClaimGroup.Column.PRVDR_STATE_CD);
+		claimGroup.organizationNpi = firstClaimLine.get(SNFClaimGroup.Column.ORG_NPI_NUM);
+		claimGroup.attendingPhysicianNpi = firstClaimLine.get(SNFClaimGroup.Column.AT_PHYSN_NPI);
+		claimGroup.operatingPhysicianNpi = firstClaimLine.get(SNFClaimGroup.Column.OP_PHYSN_NPI);
+		claimGroup.otherPhysicianNpi = firstClaimLine.get(SNFClaimGroup.Column.OT_PHYSN_NPI);
+		claimGroup.patientDischargeStatusCode = firstClaimLine.get(SNFClaimGroup.Column.PTNT_DSCHRG_STUS_CD);
+		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_TOT_CHRG_AMT));
+		claimGroup.deductibleAmount = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_IP_DDCTBL_AMT));
+		claimGroup.partACoinsuranceLiabilityAmount = parseDecimal(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_PTA_COINSRNC_LBLTY_AM));
+		claimGroup.bloodDeductibleLiabilityAmount = parseDecimal(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+		claimGroup.noncoveredCharge = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.NCH_IP_NCVRD_CHRG_AMT));
+		claimGroup.totalDeductionAmount = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.NCH_IP_TOT_DDCTN_AMT));
+		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_CD),
+				firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
+		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(SNFClaimGroup.Column.PRNCPAL_DGNS_CD),
+				firstClaimLine.get(SNFClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
+		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine,
+				SNFClaimGroup.Column.ICD_DGNS_CD1.ordinal(), SNFClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
+		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(firstClaimLine.get(SNFClaimGroup.Column.FST_DGNS_E_CD),
+				firstClaimLine.get(SNFClaimGroup.Column.FST_DGNS_E_VRSN_CD));
+		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine,
+				SNFClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(), SNFClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+
+		/*
+		 * TODO Need to parse procedure codes once STU3 is available
+		 * 
+		 */
+		/*
+		 * Parse the claim lines.
+		 */
+		for (CSVRecord claimLineRecord : csvRecords) {
+			SNFClaimLine claimLine = new SNFClaimLine();
+			claimLine.lineNumber = parseInt(claimLineRecord.get(SNFClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.hcpcsCode = claimLineRecord.get(SNFClaimGroup.Column.HCPCS_CD);
+			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
+			claimLine.nonCoveredChargeAmount = parseDecimal(
+					claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 			claimGroup.lines.add(claimLine);
 		}
 
