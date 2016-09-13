@@ -343,4 +343,38 @@
 		</Call>
 	</Ref>
 
+	<!-- Configure Jetty to, you know, actually run the webapp. -->
+	<New id="webAppContext" class="org.eclipse.jetty.webapp.WebAppContext">
+		<!-- Configure the WAR to be run. -->
+		<Set name="war">
+			<Property name="bbfhir.war.path" />
+		</Set>
+
+		<!-- Configure the WAR to run at the root context, i.e. "/". -->
+		<Set name="contextPath">/</Set>
+
+		<!-- Enable some of the required configurators for this context. This is 
+			derived from the docs here: http://www.eclipse.org/jetty/documentation/9.3.x/configuring-webapps.html. 
+			Not exactly sure which of these are required, but I know from past experience 
+			that at least WebInf and Annotation are. -->
+		<Set name="configurationClasses">
+			<Array type="java.lang.String">
+				<Item>org.eclipse.jetty.webapp.WebInfConfiguration</Item>
+				<Item>org.eclipse.jetty.annotations.AnnotationConfiguration</Item>
+				<Item>org.eclipse.jetty.webapp.WebXmlConfiguration</Item>
+
+				<!-- <Item>org.eclipse.jetty.webapp.MetaInfConfiguration</Item> <Item>org.eclipse.jetty.webapp.FragmentConfiguration</Item> 
+					<Item>org.eclipse.jetty.plus.webapp.EnvConfiguration</Item> <Item>org.eclipse.jetty.plus.webapp.PlusConfiguration</Item> 
+					<Item>org.eclipse.jetty.webapp.JettyWebXmlConfiguration</Item> -->
+			</Array>
+		</Set>
+	</New>
+	<Ref refid="Contexts">
+		<Call name="addHandler">
+			<Arg name="handler">
+				<Ref refid="webAppContext" />
+			</Arg>
+		</Call>
+	</Ref>
+
 </Configure>
