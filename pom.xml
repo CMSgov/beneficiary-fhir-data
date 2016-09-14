@@ -215,11 +215,19 @@
 					<configuration>
 						<artifactItems>
 							<artifactItem>
+								<groupId>org.eclipse.jetty</groupId>
+								<artifactId>jetty-distribution</artifactId>
+								<version>9.3.11.v20160721</version>
+								<type>tar.gz</type>
+								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+							</artifactItem>
+							<artifactItem>
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
 								<artifactId>bbonfhir-server-app</artifactId>
 								<version>${bbonfhir-server.version}</version>
 								<type>war</type>
 								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+								<destFileName>bbonfhir-server-app.war</destFileName>
 							</artifactItem>
 							<artifactItem>
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
@@ -228,6 +236,7 @@
 								<type>xml</type>
 								<classifier>jetty-config</classifier>
 								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+								<destFileName>bbonfhir-server-app-jetty-config.xml</destFileName>
 							</artifactItem>
 						</artifactItems>
 						<outputDirectory>${project.build.directory}/wars</outputDirectory>
@@ -236,41 +245,12 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- Configure the Jetty plugin such that it can be used to launch the 
-						Blue Button FHIR Server, for manual testing or for use in integration tests. -->
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-maven-plugin</artifactId>
-					<version>9.3.11.v20160721</version>
-					<configuration>
-						<!-- The Jetty config file to use. -->
-						<jettyXml>${project.build.directory}/bbonfhir-server/bbonfhir-server-app-${bbonfhir-server.version}-jetty-config.xml</jettyXml>
-						
-						<!-- Ensure that the run-forked goal is non-blocking. -->
-						<waitForChild>false</waitForChild>
-
-						<!-- Configure the JVM to: -->
-						<!-- * Set the JVM's max heap size. -->
-						<!-- * Set the HTTP(S) ports for Jetty to use. If you modify these, 
-							be sure to also update `FhirTestUtilities.FHIR_API`. -->
-						<!-- * Configure Jetty's SSL keystores. These were just manually copied 
-							from `bbonfhir-server.git/dev/ssl-stores/`, for convenience. -->
-						<!-- * Specify the WAR to run. -->
-						<!-- * Configure the DB to be used by the FHIR server. The defaults 
-							(above) are to use a temporary in-mem DB. Can be overridden if needed by 
-							properties specified in devs' settings.xml. -->
-						<!-- Notes on how this property is handled: 1) Don't let auto-formatting 
-							of this POm add extra spaces or line breaks: you'll get weird errors if you 
-							do, 2) don't quote any of the values: you'll get weird errors if you do. -->
-						<jvmArgs>${its.bbfhir.server.jvmargs} -Djetty.ssl.port=9094 -Djetty.sslContext.keyStorePath=${project.build.directory}/../../dev/ssl-stores/server.keystore -Djetty.sslContext.trustStorePath=${project.build.directory}/../../dev/ssl-stores/server.truststore -Dbbfhir.war.path=${project.build.directory}/bbonfhir-server/bbonfhir-server-app-${bbonfhir-server.version}.war -Dbbfhir.db.url=${its.bbfhir.db.url} -Dbbfhir.db.username=${its.bbfhir.db.username} -Dbbfhir.db.password=${its.bbfhir.db.password}</jvmArgs>
-
-						<!-- Used by the 'stop' goal. -->
-						<stopPort>9966</stopPort>
-						<stopKey>doesntmatter</stopKey>
-						<stopWait>120</stopWait>
-
-						<!-- Don't run any of this plugin's goals if the ITs are being skipped. -->
-						<skip>${skipITs}</skip>
-					</configuration>
+					<!-- The exec plugin can be used in child modules to run the 'dev/bluebutton-fhir-server-*.sh' 
+						scripts, which will start and stop the Blue Button API FHIR server for use 
+						in testing. -->
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.5.0</version>
 				</plugin>
 				<plugin>
 					<!-- Can be used to run any `*IT.java` integration tests in a project. -->

@@ -135,26 +135,57 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Launch Jetty instance hosting the Blue Button FHIR server prior 
+				<!-- Launch a Jetty instance hosting the Blue Button FHIR server prior 
 					to running this project's integration tests, and stop it after the integration 
 					tests. Alternatively, for manual testing, manually run 'mvn dependency:copy 
-					org.eclipse.jetty:jetty-maven-plugin:run-war' to start the Jetty server. -->
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
+					org.codehaus.mojo:exec-maven-plugin:exec@jetty-start' to start the Jetty 
+					server. -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>jetty-start</id>
 						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>run-forked</goal>
+							<goal>exec</goal>
 						</goals>
+						<configuration>
+							<executable>${project.build.directory}/../../dev/bluebutton-fhir-server-start.sh</executable>
+							<arguments>
+								<argument>--javahome</argument>
+								<argument>${java.home}</argument>
+								<argument>--maxheaparg</argument>
+								<argument>${its.bbfhir.server.jvmargs}</argument>
+								<argument>--directory</argument>
+								<argument>${project.build.directory}/bbonfhir-server</argument>
+								<argument>--dburl</argument>
+								<argument>${its.bbfhir.db.url}</argument>
+								<argument>--dbusername</argument>
+								<argument>${its.bbfhir.db.username}</argument>
+								<argument>--dbpassword</argument>
+								<argument>${its.bbfhir.db.password}</argument>
+							</arguments>
+
+							<!-- Don't start Jetty if the ITs are being skipped. -->
+							<skip>${skipITs}</skip>
+						</configuration>
 					</execution>
 					<execution>
 						<id>jetty-stop</id>
 						<phase>post-integration-test</phase>
 						<goals>
-							<goal>stop</goal>
+							<goal>exec</goal>
 						</goals>
+						<configuration>
+							<executable>${project.build.directory}/../../dev/bluebutton-fhir-server-stop.sh</executable>
+							<arguments>
+								<argument>--directory</argument>
+								<argument>${project.build.directory}/bbonfhir-server</argument>
+							</arguments>
+
+							<!-- Don't start Jetty if the ITs are being skipped. -->
+							<skip>${skipITs}</skip>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
