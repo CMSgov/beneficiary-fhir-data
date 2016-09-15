@@ -29,6 +29,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
@@ -487,4 +489,85 @@ public final class RifFilesProcessorTest {
 				rifEventsList.get(0).getFile().getFileType());
 	}
 
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_A_SNF}.
+	 */
+	@Test
+	public void process1SNFClaimRecord() {
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_SNF);
+		Stream<RifFile> rifFiles = generator.generate();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifEvents = processor.process(filesEvent);
+
+		Assert.assertNotNull(rifEvents);
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_SNF.getRecordCount(), rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_SNF.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent.getRecord());
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof SNFClaimGroup);
+
+		// Verify the claim header.
+		SNFClaimGroup claimGroup = (SNFClaimGroup) rifRecordEvent.getRecord();
+		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
+		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals("74", claimGroup.beneficiaryId);
+		Assert.assertEquals("4706073107", claimGroup.claimId);
+		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
+		Assert.assertEquals("20", claimGroup.claimTypeCode);
+		Assert.assertEquals(LocalDate.of(2013, 12, 01), claimGroup.dateFrom);
+		Assert.assertEquals(LocalDate.of(2013, 12, 18), claimGroup.dateThrough);
+		Assert.assertEquals("295052", claimGroup.providerNumber);
+		Assert.assertFalse(claimGroup.claimNonPaymentReasonCode.isPresent());
+		Assert.assertEquals(new BigDecimal("3063.35"), claimGroup.paymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
+		Assert.assertEquals("NV", claimGroup.providerStateCode);
+		Assert.assertEquals("1407894314", claimGroup.organizationNpi);
+		Assert.assertEquals("1629099379", claimGroup.attendingPhysicianNpi);
+		// Assert.assertEquals("1053393819", claimGroup.operatingPhysicianNpi);
+		// Assert.assertEquals("1619130515", claimGroup.otherPhysicianNpi);
+		Assert.assertEquals("01", claimGroup.patientDischargeStatusCode);
+		Assert.assertEquals(new BigDecimal("5156.03"), claimGroup.totalChargeAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.deductibleAmount);
+		Assert.assertEquals(new BigDecimal("2516"), claimGroup.partACoinsuranceLiabilityAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.bloodDeductibleLiabilityAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.noncoveredCharge);
+		Assert.assertEquals(new BigDecimal("2516"), claimGroup.totalDeductionAmount);
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "V5789"), claimGroup.diagnosisAdmitting);
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "V5789"), claimGroup.diagnosisPrincipal);
+		Assert.assertEquals(13, claimGroup.diagnosesAdditional.size());
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "V5789"), claimGroup.diagnosesAdditional.get(0));
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "49121"), claimGroup.diagnosesAdditional.get(1));
+		Assert.assertFalse(claimGroup.diagnosisFirstClaimExternal.isPresent());
+		Assert.assertEquals(7, claimGroup.lines.size());
+		// Verify one of the claim lines.
+		SNFClaimLine claimLine = claimGroup.lines.get(0);
+		Assert.assertEquals(new BigDecimal("66.66"), claimLine.totalChargeAmount);
+		Assert.assertEquals(new BigDecimal("45.23"), claimLine.nonCoveredChargeAmount);
+
+	}
+
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_B_SNF}.
+	 */
+	@Test
+	public void processSNFClaimRecords() {
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_SNF);
+		Stream<RifFile> rifFiles = generator.generate();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifEvents = processor.process(filesEvent);
+
+		Assert.assertNotNull(rifEvents);
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_SNF.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_SNF.getRifFileType(),
+				rifEventsList.get(0).getFile().getFileType());
+	}
 }

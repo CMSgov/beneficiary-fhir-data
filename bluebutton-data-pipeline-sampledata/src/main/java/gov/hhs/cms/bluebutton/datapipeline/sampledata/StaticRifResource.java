@@ -36,6 +36,13 @@ public enum StaticRifResource {
 
 	/**
 	 * This file was manually created by copying a single claim from
+	 * {@link StaticRifResource#SAMPLE_A_SNF}, and adjusting its beneficiary to
+	 * match {@link #SAMPLE_A_SNF}.
+	 */
+	SAMPLE_A_SNF("rif-static-samples/sample-a-snf.txt", RifFileType.SNF, 1),
+
+	/**
+	 * This file was manually created by copying a single claim from
 	 * {@link StaticRifResource#SAMPLE_B_CARRIER}, adjusting its beneficiary to
 	 * match {@link #SAMPLE_A_BENES}, and editing some of the values to be
 	 * better suited for testing against.
@@ -54,6 +61,8 @@ public enum StaticRifResource {
 	SAMPLE_B_INPATIENT("rif-static-samples/sample-b-inpatient.txt", RifFileType.INPATIENT, 27),
 
 	SAMPLE_B_OUTPATIENT("rif-static-samples/sample-b-outpatient.txt", RifFileType.OUTPATIENT, 340),
+
+	SAMPLE_B_SNF("rif-static-samples/sample-b-snf.txt", RifFileType.SNF, 78),
 
 	SAMPLE_B_PDE("rif-static-samples/sample-b-pde.txt", RifFileType.PDE, 1195);
 

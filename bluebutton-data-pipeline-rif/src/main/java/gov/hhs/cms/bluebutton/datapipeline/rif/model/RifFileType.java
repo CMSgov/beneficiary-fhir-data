@@ -25,8 +25,7 @@ public enum RifFileType {
 
 	PDE(Pattern.compile(".*pde.*")),
 
-	// TODO
-	SNF(Pattern.compile("TODO"));
+	SNF(Pattern.compile(".*snf.*"));
 
 	private final Pattern filenameRegex;
 
