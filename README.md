@@ -26,17 +26,13 @@ These parameters should be specified as Java system properties on the command li
 This project can be built and run, as follows:
 
     $ mvn clean install
-    $ mvn --projects bbonfhir-server-app jetty:run -Dbbfhir.db.url=jdbc:hsqldb:mem:test -Dbbfhir.db.username="" -Dbbfhir.db.password=""
+    $ mvn --projects bbonfhir-server-app package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
 
-This will start the server using a local, in-memory database that will be deleted once the server is stopped. If you need a different database or permanent storage, see the options listed above.    
+This will start the server using a local, in-memory database that will be deleted once the server is stopped. The server can take a few minutes to finish starting up, and Maven will exit with a "`BUILD SUCCESSFUL`" message once it's ready. The server will be running at <https://localhost:9094/baseDstu2>. Please note that it is set by default to require SSL mutual authentication, so accessing it via a browser isn't simple. See [Development Environment Setup](./dev/devenv-readme.md) for details on how to work with this, if needed.
 
-The server can take a few minutes to finish starting up. Wait for the following message to appear at the bottom of the console output:
+Once the server is no longer needed, you can stop it by running the following command:
 
-    [INFO] Started Jetty Server
-
-Once that appears, the server is ready to go. A couple lines above, it will mention the port being used, but the default is `8080`, so you can generally access the web frontend for HAPI FHIR (if you need to) at <http://localhost:8080/hapi-fhir>.
-
-Once the server is no longer needed, you can stop it by pressing `ctrl+c` in the console.
+    $ mvn --projects bbonfhir-server-app org.codehaus.mojo:exec-maven-plugin:exec@server-stop
 
 ## License
 

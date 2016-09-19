@@ -19,19 +19,13 @@ Unfortunately, this project will sometimes need to depend on an interim/snapshot
 
 Once the build is done, the HAPI FHIR artifacts will be placed into your user's local Maven repository (`~/.m2/repository`), available for use by this project or others.
 
-## Jetty
+## JBoss / Wildfly
 
-References:
+In the HealthAPT dev, test, and prod environments in AWS, this application is deployed to a JBoss EAP 7 container. For the automated integration tests, this project will run the application in Wildfly 8.1, instead, as this is the upstream release that JBoss EAP 7 is based on, and it's freely available (and this easy to automate).
 
-* [Jetty Docs: Configuring SSL/TLS](http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html)
-* [Jetty Docs: jetty.xml](http://www.eclipse.org/jetty/documentation/9.3.x/jetty-xml-config.html)
-* [Jetty Docs: Configuring the Jetty Maven Plugin](https://www.eclipse.org/jetty/documentation/9.3.x/jetty-maven-plugin.html#jetty-stop-goal)
+The `bbonfhir-server-app` module also attaches to its build a `server-config.sh` script that manages the configuration that should be used to run the application.
 
-In the HealthAPT dev, test, and prod environments in AWS, this application is deployed to a Jetty container. The `bbonfhir-server-app` module also attaches to its build the Jetty XML configuration that should be used to run the application
-
-TODO: document how to run Jetty in prod
-
-Note that, because the Jetty client SSL configuration has "`NeedClientAuth`" set to "`true`", you will be unable to access HAPI's testing UI in your web browser unless you first deploy the `client.pfx` file to your browser (temporarily!). All API access will also require a trusted client certificate, as well. If you just want to poke around in the Testing UI, you can temporarily adjust "`NeedClientAuth`" "`false`". Note, though, that this **must not** be done in production, as it completely disables the application's authentication requirements.
+Note that, because the server's SSL configuration has "`verify-client`" set to "`REQUIRED`", you will be unable to access HAPI's testing UI in your web browser unless you first deploy the `client.pfx` file to your browser (temporarily!). All API access will also require a trusted client certificate, as well. If you just want to poke around in the Testing UI, you can temporarily adjust "`verify-client`" "`REQUESTED`". Note, though, that this **must not** be done in production, as it completely disables the application's authentication requirements.
 
 ### SSL Development Keystores
 
