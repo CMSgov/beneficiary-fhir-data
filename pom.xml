@@ -69,9 +69,10 @@
 		<capsule.version>1.0.1</capsule.version>
 
 		<!-- The version of the Blue Button FHIR server to test against. -->
-		<bbonfhir-server.version>0.1.0-45</bbonfhir-server.version>
+		<!-- FIXME: Switch back to the master branch, once it's been updated. -->
+		<bbonfhir-server.version>0.1.0-cbbf-31-switch-to-wildfly-1</bbonfhir-server.version>
 
-		<!-- Configure the Blue Button FHIR Server, as it will be run via the Jetty 
+		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 
 			be adjusted via profiles. This is required because the CI server doesn't 
 			have enough RAM to run with an in-mem DB, and so requires a different configuration. -->
@@ -215,9 +216,13 @@
 					<configuration>
 						<artifactItems>
 							<artifactItem>
-								<groupId>org.eclipse.jetty</groupId>
-								<artifactId>jetty-distribution</artifactId>
-								<version>9.3.11.v20160721</version>
+								<!-- Wildfly 8.1 is the upstream release that JBoss EAP 7 is based 
+									on. Though our application will run in JBoss EAP in production, we test it 
+									against Wildfly here because Wildfly is available for unauthenticated download 
+									(and JBoss EAP isn't). -->
+								<groupId>org.wildfly</groupId>
+								<artifactId>wildfly-dist</artifactId>
+								<version>8.1.0.Final</version>
 								<type>tar.gz</type>
 								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
 							</artifactItem>
@@ -233,10 +238,10 @@
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
 								<artifactId>bbonfhir-server-app</artifactId>
 								<version>${bbonfhir-server.version}</version>
-								<type>xml</type>
-								<classifier>jetty-config</classifier>
+								<type>sh</type>
+								<classifier>server-config</classifier>
 								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
-								<destFileName>bbonfhir-server-app-jetty-config.xml</destFileName>
+								<destFileName>bbonfhir-server-app-server-config.sh</destFileName>
 							</artifactItem>
 						</artifactItems>
 						<outputDirectory>${project.build.directory}/wars</outputDirectory>

@@ -113,13 +113,6 @@
 			<artifactId>metrics-jvm</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<!-- Used in ITs to launch embedded instances of the Blue Button FHIR 
-				server. -->
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -144,16 +137,17 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Launch a Jetty instance hosting the Blue Button FHIR server prior 
+				<!-- Launch a Java web server hosting the Blue Button FHIR server prior 
 					to running this project's integration tests, and stop it after the integration 
-					tests. Alternatively, for manual testing, manually run 'mvn dependency:copy 
-					org.codehaus.mojo:exec-maven-plugin:exec@jetty-start' to start the Jetty 
-					server. -->
+					tests. The server will serve HTTPS on port 9094 (as configured in the script), 
+					and the FHIR server will be hosted at the root ("/") context. Alternatively, 
+					for manual testing, manually run 'mvn dependency:copy org.codehaus.mojo:exec-maven-plugin:exec@server-start' 
+					to start the server. -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>jetty-start</id>
+						<id>server-start</id>
 						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
@@ -175,12 +169,12 @@
 								<argument>${its.bbfhir.db.password}</argument>
 							</arguments>
 
-							<!-- Don't start Jetty if the ITs are being skipped. -->
+							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
 						</configuration>
 					</execution>
 					<execution>
-						<id>jetty-stop</id>
+						<id>server-stop</id>
 						<phase>post-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
@@ -192,7 +186,7 @@
 								<argument>${project.build.directory}/bbonfhir-server</argument>
 							</arguments>
 
-							<!-- Don't start Jetty if the ITs are being skipped. -->
+							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
 						</configuration>
 					</execution>

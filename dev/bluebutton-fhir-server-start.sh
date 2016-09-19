@@ -1,14 +1,13 @@
 #!/bin/bash
 
 # Constants.
-jettyVersion='9.3.11.v20160721'
-jettyArtifact="jetty-distribution-${jettyVersion}.tar.gz"
-jettyInstall="jetty-distribution-${jettyVersion}"
-jettyPortHttps=9094
-jettyPortStop=9095
-jettyTimeoutSeconds=120
+serverVersion='8.1.0.Final'
+serverArtifact="wildfly-dist-${serverVersion}.tar.gz"
+serverInstall="wildfly-${serverVersion}"
+serverPortHttps=9094
+serverTimeoutSeconds=120
 warArtifact='bbonfhir-server-app.war'
-configArtifact='bbonfhir-server-app-jetty-config.xml'
+configArtifact='bbonfhir-server-app-server-config.sh'
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -24,7 +23,7 @@ if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 
 # Parse the getopt results.
-javaBinDir=""
+javaHome=""
 maxHeapArg="-Xmx4g"
 directory=
 dbUrl="jdbc:hsqldb:mem:test"
@@ -33,7 +32,7 @@ dbPassword=""
 while true; do
 	case "$1" in
 		-j | --javahome )
-			javaBinDir="${2}/bin/"; shift 2 ;;
+			javaHome="$2"; shift 2 ;;
 		-m | --maxheaparg )
 			maxHeapArg="$2"; shift 2 ;;
 		-d | --directory )
@@ -53,139 +52,102 @@ done
 if [[ -z "${directory}" ]]; then >&2 echo 'The --directory option is required.'; exit 1; fi
 
 # Verify that java was found.
-command -v "${javaBinDir}java" >/dev/null 2>&1 || { echo >&2 "Java not found. Specify --javahome option."; exit 1; }
+if [[ -z "${javaHome}" ]]; then
+	command -v java >/dev/null 2>&1 || { echo >&2 "Java not found. Specify --javahome option."; exit 1; }
+else
+	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in --javahome: '${javaHome}'"; exit 1; }
+fi
 
 # Exit immediately if something fails.
 set -e
 
 # Check for required files.
-for f in "${directory}/${jettyArtifact}" "${directory}/${warArtifact}" "${directory}/${configArtifact}"; do
+for f in "${directory}/${serverArtifact}" "${directory}/${warArtifact}" "${directory}/${configArtifact}"; do
 	if [[ ! -f "${f}" ]]; then
 		>&2 echo "The following file is required but is missing: '${f}'."
 		exit 1
 	fi
 done
 
-# Unzip Jetty.
-if [[ ! -d "${directory}/${jettyInstall}" ]]; then
-	tar --extract \
-		--file "${directory}/${jettyArtifact}" \
-		--directory "${directory}"
-	echo "Unpacked Jetty dist: '${directory}/${jettyInstall}'"
-
-	# By default, Jetty will enable all sorts of things that we don't need. 
-	# Some of them, e.g. HTTP, are giant security holes. So: disable all 
-	# the things!
-	mv "${directory}/${jettyInstall}/start.ini" "${directory}/${jettyInstall}/start.ini.original"
+# If the server install already exists, clean it out to start fresh.
+if [[ -d "${directory}/${serverInstall}" ]]; then
+	echo "Previous server install found. Removing..."
+	rm -rf "${directory}/${serverInstall}"
+	echo "Previous server install removed."
 fi
 
-# Copy the Jetty resources into its directory (required by Jetty).
-cp "${directory}/${configArtifact}" "${directory}/${jettyInstall}/etc/bbfhir.xml"
-cp "${directory}/bbonfhir-server-app.war" "${directory}/${jettyInstall}"
+# Unzip the server.
+if [[ ! -d "${directory}/${serverInstall}" ]]; then
+	tar --extract \
+		--file "${directory}/${serverArtifact}" \
+		--directory "${directory}"
+	echo "Unpacked server dist: '${directory}/${serverInstall}'"
+fi
 
-# Create the Blue Button module for Jetty to load.
-cat <<EOF > "${directory}/${jettyInstall}/modules/bbfhir.mod"
-#
-# A custom Jetty configuration module for the Blue Button API FHIR Server web application.
-#
+# Rename the original server conf file.
+if [[ ! -f "${directory}/${serverInstall}/bin/standalone.conf.original" ]]; then
+	mv "${directory}/${serverInstall}/bin/standalone.conf" "${directory}/${serverInstall}/bin/standalone.conf.original"
+fi
 
-# As much as possible, use existing modules to pull in the libraries we need.
-# DO NOT, however, pull in any modules that include XML configuration (watch 
-# out for transitive dependencies with this!).
-[depend]
-ext
-
-[lib]
-
-# From modules/server.mod:
-lib/servlet-api-3.1.jar
-lib/jetty-schemas-3.1.jar
-lib/jetty-http-${jettyVersion}.jar
-lib/jetty-server-${jettyVersion}.jar
-lib/jetty-xml-${jettyVersion}.jar
-lib/jetty-util-${jettyVersion}.jar
-lib/jetty-io-${jettyVersion}.jar
-
-# From modules/deploy.mod:
-lib/jetty-deploy-${jettyVersion}.jar
-
-# From modules/webapp.mod:
-lib/jetty-webapp-${jettyVersion}.jar
-
-# From modules/servlet.mod:
-lib/jetty-servlet-${jettyVersion}.jar
-
-# From modules/security.mod:
-lib/jetty-security-${jettyVersion}.jar
-
-# From modules/annotations.mod:
-lib/jetty-annotations-${jettyVersion}.jar
-lib/annotations/*.jar
-
-# From modules/plus.mod:
-lib/jetty-plus-${jettyVersion}.jar
-
-# From modules/jndi.mod:
-lib/jetty-jndi-${jettyVersion}.jar
-lib/jndi/*.jar
-
-[xml]
-etc/bbfhir.xml
+# Write a correct server conf file.
+javaHomeLine=''
+if [[ -z "${javaHome}" ]]; then
+	javaHomeLine=''
+else
+	javaHomeLine="JAVA_HOME=${javaHome}"
+fi
+cat <<EOF > "${directory}/${serverInstall}/bin/standalone.conf"
+## -*- shell-script -*- ######################################################
+##                                                                          ##
+##  JBoss Bootstrap Script Configuration                                    ##
+##                                                                          ##
+##############################################################################
+${javaHomeLine}
+JAVA_OPTS="-Xms64m ${maxHeapArg} -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"
+JAVA_OPTS="\$JAVA_OPTS -Djboss.modules.system.pkgs=\$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
 EOF
 
-# Create a new start.ini for Jetty.
-cat <<EOF > "${directory}/${jettyInstall}/start.ini"
+# Launch the server in the background.
 #
-# A trimmed-down start.ini, which only enables this app's actual 
-# dependencies.
-#
---module=bbfhir
-
-# Set the Jetty configuration properties.
-jetty.ssl.port=${jettyPortHttps}
-jetty.sslContext.keyStorePath=${scriptDirectory}/ssl-stores/server.keystore
-jetty.sslContext.trustStorePath=${scriptDirectory}/ssl-stores/server.truststore
-bbfhir.war.path=bbonfhir-server-app.war
-EOF
-
-# Launch Jetty in the background.
-cd "${directory}/${jettyInstall}"
-jettyLog='logs/jetty-console.log'
-jobs &> /dev/null
-"${javaBinDir}java" \
-	"${maxHeapArg}" \
-	-DSTOP.PORT=${jettyPortStop} \
-	-DSTOP.KEY='supersecure' \
-	-Dbbfhir.db.url="${dbUrl}" \
-	-Dbbfhir.db.username="${dbUsername}" \
-	-Dbbfhir.db.password="${dbPassword}" \
-	-jar start.jar \
-	&> "${jettyLog}" \
+# Note: there's no reliable way to get the PID of the actual java process for
+# the server, as it's spawned as a child of standalone.sh. Unfortunately, even
+# the JBOSS_PIDFILE option just seems to give us the PID of the script. Signals
+# sent to the script are (unfortunately) not passed through to the child Java
+# process. I think this is all just buggy in Wildfly 8.1. The only thing that
+# mitigates the mess is that the script process does exit once the java process
+# does.
+serverLog="${directory}/${serverInstall}/server-console.log"
+"${directory}/${serverInstall}/bin/standalone.sh" \
+	&> "${serverLog}" \
 	&
 
-# Calculate Jetty's PID. (Reference: http://unix.stackexchange.com/a/90250)
-newJobStarted="$(jobs -n)"
-if [ -n "${newJobStarted}" ]; then jettyPid=$!; else jettyPid=; fi
-if [[ -z "${jettyPid}" ]]; then
-	>&2 echo 'Server launch failed. Exiting.'
-	exit 2
-fi
-
-# Wait for the "...INFO:oejs.Server:main: Started @..." in the log.
-echo "Server launched with PID '${jettyPid}', logging to '${jettyLog}'. Waiting for it to finish starting..."
+# Wait for the server to be ready.
+echo "Server launched, logging to '${serverLog}'. Waiting for it to finish starting..."
 startSeconds=$SECONDS
-endSeconds=$(($startSeconds + $jettyTimeoutSeconds))
+endSeconds=$(($startSeconds + $serverTimeoutSeconds))
 while true; do
-	if grep --quiet "INFO:oejs.Server:main: Started @" "${jettyLog}"; then
+	if grep --quiet "JBAS015874" "${serverLog}"; then
 		echo "Server started in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
-		>&2 echo "Error: Server failed to start within ${jettyTimeoutSeconds} seconds."
-		kill "${jettyPid}"
-		>&2 echo "Server with PID '${jettyPid}' killed. Exiting."
+		>&2 echo "Error: Server failed to start within ${serverTimeoutSeconds} seconds. Trying to stop it..."
+		"${scriptDirectory}/bluebutton-fhir-server-stop.sh" --directory "${directory}"
 		exit 3
 	fi
 	sleep 1
 done
+
+# Configure the server.
+echo "Configuring server..."
+chmod a+x "${directory}/${configArtifact}"
+"${directory}/${configArtifact}" \
+	--serverhome "${directory}/${serverInstall}" \
+	--httpsport "${serverPortHttps}" \
+	--keystore "${scriptDirectory}/ssl-stores/server.keystore" \
+	--truststore "${scriptDirectory}/ssl-stores/server.truststore" \
+	--war "${directory}/${warArtifact}" \
+	--dburl "${dbUrl}" \
+	--dbusername "${dbUsername}" \
+	--dbpassword "${dbPassword}"
 

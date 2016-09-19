@@ -71,25 +71,29 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
 
 /**
  * <p>
- * Integration tests for {@link FhirLoader}. When run on the command line via
- * Maven, these tests rely on a local FHIR server provided by the Cargo plugin.
- * To run these tests in Eclipse, you can launch the server manually, as
- * follows:
+ * Integration tests for {@link FhirLoader}.
+ * </p>
+ * <p>
+ * These tests require a local FHIR server to be running. This is handled
+ * automatically by the POm when run as part of a Maven build. To run these
+ * tests in Eclipse, you can launch the server manually, as follows:
  * </p>
  * <ol>
  * <li>Right-click the <code>bluebutton-data-pipeline-fhir-load</code> project,
  * and select <strong>Run As > Maven build...</strong>.</li>
- * <li>Set <strong>goal</strong> to <code>cargo:run</code>.</li>
+ * <li>Set <strong>goal</strong> to
+ * <code>dependency:copy org.codehaus.mojo:exec-maven-plugin:exec@server-start</code>
+ * .</li>
  * <li>Click <strong>Run</strong>.</li>
  * </ol>
  * <p>
- * When done with the server, you can stop it by terminating the launch in
- * Eclipse's <em>Console</em> view (with the red "Stop" button). Once it's been
- * run the first time, the server can be re-launched from Eclipse's
- * <strong>Run</strong> toolbar dropdown button, just like any other Java
- * application, unit test, etc. Logs from the server can be found in the
- * project's <code>target/failsafe-reports</code> and
- * <code>target/cargo/configurations/jetty9x/logs</code> directories.
+ * When done with the server, you can stop it by running the
+ * <code>org.codehaus.mojo:exec-maven-plugin:exec@server-stop</code> goal in a
+ * similar fashion. Once it's been run the first time, the server can be
+ * re-launched from Eclipse's <strong>Run</strong> toolbar dropdown button, just
+ * like any other Java application, unit test, etc. Logs from the server can be
+ * found in the project's <code>target/bbonfhir-server/wildfly-*</code>
+ * directory.
  * </p>
  */
 @ContextConfiguration(classes = { SpringConfigForTests.class })
