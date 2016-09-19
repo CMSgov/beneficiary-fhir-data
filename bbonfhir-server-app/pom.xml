@@ -211,6 +211,11 @@
 								<type>xml</type>
 								<classifier>jetty-config</classifier>
 							</artifact>
+							<artifact>
+								<file>src/main/config/server-config.sh</file>
+								<type>sh</type>
+								<classifier>server-config</classifier>
+							</artifact>
 						</artifacts>
 					</configuration>
 				</plugin>
