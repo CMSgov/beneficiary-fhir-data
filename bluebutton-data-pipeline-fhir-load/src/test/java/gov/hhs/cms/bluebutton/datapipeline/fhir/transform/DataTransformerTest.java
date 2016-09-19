@@ -1380,7 +1380,7 @@ public final class DataTransformerTest {
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
 		record.recordAction = RecordAction.INSERT;
 		record.beneficiaryId = "42";
-		record.claimId = "SuttersMill";
+		record.claimId = "9302293110";
 		record.dateFrom = LocalDate.of(1848, 01, 24);
 		record.dateThrough = LocalDate.of(1850, 01, 01);
 		record.patientDischargeStatusCode = "01";
