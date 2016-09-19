@@ -82,7 +82,7 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
  * <li>Right-click the <code>bluebutton-data-pipeline-fhir-load</code> project,
  * and select <strong>Run As > Maven build...</strong>.</li>
  * <li>Set <strong>goal</strong> to
- * <code>dependency:copy org.codehaus.mojo:exec-maven-plugin:exec@server-start</code>
+ * <code>dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start</code>
  * .</li>
  * <li>Click <strong>Run</strong>.</li>
  * </ol>

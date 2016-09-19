@@ -70,7 +70,7 @@
 
 		<!-- The version of the Blue Button FHIR server to test against. -->
 		<!-- FIXME: Switch back to the master branch, once it's been updated. -->
-		<bbonfhir-server.version>0.1.0-cbbf-31-switch-to-wildfly-1</bbonfhir-server.version>
+		<bbonfhir-server.version>0.1.0-cbbf-31-switch-to-wildfly-5</bbonfhir-server.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 
@@ -224,14 +224,14 @@
 								<artifactId>wildfly-dist</artifactId>
 								<version>8.1.0.Final</version>
 								<type>tar.gz</type>
-								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
 							</artifactItem>
 							<artifactItem>
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
 								<artifactId>bbonfhir-server-app</artifactId>
 								<version>${bbonfhir-server.version}</version>
 								<type>war</type>
-								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
 								<destFileName>bbonfhir-server-app.war</destFileName>
 							</artifactItem>
 							<artifactItem>
@@ -240,17 +240,41 @@
 								<version>${bbonfhir-server.version}</version>
 								<type>sh</type>
 								<classifier>server-config</classifier>
-								<outputDirectory>${project.build.directory}/bbonfhir-server</outputDirectory>
+								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
 								<destFileName>bbonfhir-server-app-server-config.sh</destFileName>
 							</artifactItem>
+							<artifactItem>
+								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+								<artifactId>bbonfhir-server-app</artifactId>
+								<version>${bbonfhir-server.version}</version>
+								<type>sh</type>
+								<classifier>server-start</classifier>
+								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
+								<destFileName>bbonfhir-server-app-server-start.sh</destFileName>
+							</artifactItem>
+							<artifactItem>
+								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+								<artifactId>bbonfhir-server-app</artifactId>
+								<version>${bbonfhir-server.version}</version>
+								<type>sh</type>
+								<classifier>server-stop</classifier>
+								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
+								<destFileName>bbonfhir-server-app-server-stop.sh</destFileName>
+							</artifactItem>
 						</artifactItems>
-						<outputDirectory>${project.build.directory}/wars</outputDirectory>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- The exec plugin can be used in child modules to run the 'dev/bluebutton-fhir-server-*.sh' 
+					<!-- Can be used as part of the integration test setup to mark the `bluebutton-server-app-server-*.sh` 
+						scripts as executable. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.6</version>
+				</plugin>
+				<plugin>
+					<!-- The exec plugin can be used in child modules to run the `bluebutton-server-app-server-*.sh` 
 						scripts, which will start and stop the Blue Button API FHIR server for use 
 						in testing. -->
 					<groupId>org.codehaus.mojo</groupId>
