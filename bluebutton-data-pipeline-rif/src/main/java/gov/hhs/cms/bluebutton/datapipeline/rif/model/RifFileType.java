@@ -16,8 +16,7 @@ public enum RifFileType {
 	// TODO
 	HHA(Pattern.compile("TODO")),
 
-	// TODO
-	HOSPICE(Pattern.compile("TODO")),
+	HOSPICE(Pattern.compile(".*hospice.*")),
 
 	INPATIENT(Pattern.compile(".*inpatient.*")),
 

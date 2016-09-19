@@ -66,6 +66,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.InpatientClaimLine;
@@ -1004,6 +1006,8 @@ public final class DataTransformer {
 				return transformOutpatientClaim((RifRecordEvent<OutpatientClaimGroup>) rifRecordEvent);
 			else if (rifRecordEvent.getRecord() instanceof SNFClaimGroup)
 				return transformSNFClaim((RifRecordEvent<SNFClaimGroup>) rifRecordEvent);
+			else if (rifRecordEvent.getRecord() instanceof HospiceClaimGroup)
+				return transformHospiceClaim((RifRecordEvent<HospiceClaimGroup>) rifRecordEvent);
 
 
 			throw new BadCodeMonkeyException("Unhandled record type: " + rifRecordEvent.getRecord());
@@ -1865,6 +1869,121 @@ public final class DataTransformer {
 			 * TODO once STU3 available, transform revenue center to
 			 * eob.item.revenue
 			 */
+		}
+
+		insert(bundle, eob);
+		return new TransformedBundle(rifRecordEvent, bundle);
+	}
+
+	/**
+	 * @param rifRecordEvent
+	 *            the source {@link RifRecordEvent} to be transformed
+	 * @return the {@link TransformedBundle} that is the result of transforming
+	 *         the specified {@link RifRecordEvent}
+	 */
+	private TransformedBundle transformHospiceClaim(RifRecordEvent<HospiceClaimGroup> rifRecordEvent) {
+		if (rifRecordEvent == null)
+			throw new IllegalArgumentException();
+		HospiceClaimGroup claimGroup = rifRecordEvent.getRecord();
+		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+		if (claimGroup.recordAction != RecordAction.INSERT)
+			// Will need refactoring to support other ops.
+			throw new BadCodeMonkeyException();
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+
+		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
+		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
+				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
+
+		// TODO Specify eob.type once STU3 is available (institutional)
+
+		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
+		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
+
+		// TODO Set eob.disposition to descriptive value of code once code is
+		// created - claimGroup.patientDischargeStatusCode
+
+		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
+					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.toString()));
+		}
+		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
+
+		Organization serviceProviderOrg = new Organization();
+		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.organizationNpi);
+		serviceProviderOrg.setType(new CodeableConcept().addCoding(new Coding()
+				.setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD).setCode(claimGroup.claimFacilityTypeCode.toString())));
+		Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
+				referenceOrganizationByNpi(claimGroup.organizationNpi).getReference());
+		eob.setOrganization(serviceProviderOrgReference);
+
+		if (!claimGroup.attendingPhysicianNpi.isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi));
+		}
+
+		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
+		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
+			addDiagnosisCode(eob, diagnosis);
+
+		if (claimGroup.diagnosisFirstClaimExternal.isPresent()) {
+			addDiagnosisCode(eob, (claimGroup.diagnosisFirstClaimExternal.get()));
+		}
+
+		for (IcdCode diagnosis : claimGroup.diagnosesExternal)
+			if (!diagnosis.getCode().isEmpty()) {
+				addDiagnosisCode(eob, diagnosis);
+			}
+
+		for (HospiceClaimLine claimLine : claimGroup.lines) {
+			ItemsComponent item = eob.addItem();
+			item.setSequence(claimLine.lineNumber);
+
+			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+
+			/*
+			 * TODO once STU3 available, transform
+			 * claimServiceClassificationTypeCode into eob.item.category.
+			 */
+			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode));
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.providerPaymentAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.benficiaryPaymentAmount);
+
+			item.addAdjudication()
+					.setCategory(
+							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.paymentAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.totalChargeAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.nonCoveredChargeAmount);
 		}
 
 		insert(bundle, eob);

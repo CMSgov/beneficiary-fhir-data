@@ -18,6 +18,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
@@ -570,4 +572,80 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_SNF.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
 	}
+
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_A_HOSPICE}.
+	 */
+	@Test
+	public void process1HospiceClaimRecord() {
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_HOSPICE);
+		Stream<RifFile> rifFiles = generator.generate();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifEvents = processor.process(filesEvent);
+
+		Assert.assertNotNull(rifEvents);
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_HOSPICE.getRecordCount(), rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_HOSPICE.getRifFileType(),
+				rifRecordEvent.getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent.getRecord());
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof HospiceClaimGroup);
+
+		// Verify the claim header.
+		HospiceClaimGroup claimGroup = (HospiceClaimGroup) rifRecordEvent.getRecord();
+		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
+		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals("246", claimGroup.beneficiaryId);
+		Assert.assertEquals("9302293110", claimGroup.claimId);
+		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
+		Assert.assertEquals("50", claimGroup.claimTypeCode);
+		Assert.assertEquals(LocalDate.of(2014, 9, 01), claimGroup.dateFrom);
+		Assert.assertEquals(LocalDate.of(2014, 9, 30), claimGroup.dateThrough);
+		Assert.assertEquals("051543", claimGroup.providerNumber);
+		Assert.assertFalse(claimGroup.claimNonPaymentReasonCode.isPresent());
+		Assert.assertEquals(new BigDecimal("5558.52"), claimGroup.paymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
+		Assert.assertEquals("CA", claimGroup.providerStateCode);
+		Assert.assertEquals("1043326531", claimGroup.organizationNpi);
+		Assert.assertEquals("1154428621", claimGroup.attendingPhysicianNpi);
+		Assert.assertEquals("30", claimGroup.patientDischargeStatusCode);
+		Assert.assertEquals(new BigDecimal("6158.1"), claimGroup.totalChargeAmount);
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "3310"), claimGroup.diagnosisPrincipal);
+		Assert.assertEquals(1, claimGroup.diagnosesAdditional.size());
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "3310"), claimGroup.diagnosesAdditional.get(0));
+		Assert.assertFalse(claimGroup.diagnosisFirstClaimExternal.isPresent());
+		Assert.assertEquals(9, claimGroup.lines.size());
+		// Verify one of the claim lines.
+		HospiceClaimLine claimLine = claimGroup.lines.get(5);
+		Assert.assertEquals(new Integer(6), claimLine.lineNumber);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.lines.get(0).paymentAmount);
+		Assert.assertEquals(new BigDecimal("5672.1"), claimGroup.lines.get(0).nonCoveredChargeAmount);
+
+	}
+
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_B_HOSPICE}.
+	 */
+	@Test
+	public void processHospiceClaimRecords() {
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_HOSPICE);
+		Stream<RifFile> rifFiles = generator.generate();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifEvents = processor.process(filesEvent);
+
+		Assert.assertNotNull(rifEvents);
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_HOSPICE.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_HOSPICE.getRifFileType(),
+				rifEventsList.get(0).getFile().getFileType());
+	}
+
 }
