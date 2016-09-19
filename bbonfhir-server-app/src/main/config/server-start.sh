@@ -113,6 +113,11 @@ cat <<EOF > "${directory}/${serverInstall}/bin/standalone.conf"
 ${javaHomeLine}
 JAVA_OPTS="-Xms64m ${maxHeapArg} -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"
 JAVA_OPTS="\$JAVA_OPTS -Djboss.modules.system.pkgs=\$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
+
+# These ports are only used until the server is configured, but need to be
+# set anyways, as the defaults on first launch conflict with Jenkins and other 
+# such services.
+JAVA_OPTS="\$JAVA_OPTS -Djboss.http.port=7780 -Djboss.https.port=7743"
 EOF
 
 # Launch the server in the background.
