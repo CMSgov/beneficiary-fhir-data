@@ -113,13 +113,6 @@
 			<artifactId>metrics-jvm</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<!-- Used in ITs to launch embedded instances of the Blue Button FHIR 
-				server. -->
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-webapp</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -135,7 +128,7 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy-bbonfhir-server</id>
+						<id>server-copy-artifacts</id>
 						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>copy</goal>
@@ -144,29 +137,57 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Launch a Jetty instance hosting the Blue Button FHIR server prior 
+				<!-- Marks the `bluebutton-server-app-server-*.sh` scripts as executable. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>server-fix-artifacts-permissions</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<chmod perm="a+x">
+									<fileset dir="${project.build.directory}/bluebutton-server">
+										<include name="*.sh" />
+									</fileset>
+								</chmod>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Launch a Java web server hosting the Blue Button FHIR server prior 
 					to running this project's integration tests, and stop it after the integration 
-					tests. Alternatively, for manual testing, manually run 'mvn dependency:copy 
-					org.codehaus.mojo:exec-maven-plugin:exec@jetty-start' to start the Jetty 
-					server. -->
+					tests. The server will serve HTTPS on port 9094 (as configured in the script), 
+					and the FHIR server will be hosted at the root ("/") context. Alternatively, 
+					for manual testing, manually run 'mvn dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start' 
+					to start the server. -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>jetty-start</id>
+						<id>server-start</id>
 						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.build.directory}/../../dev/bluebutton-fhir-server-start.sh</executable>
+							<executable>${project.build.directory}/bluebutton-server/bbonfhir-server-app-server-start.sh</executable>
 							<arguments>
 								<argument>--javahome</argument>
 								<argument>${java.home}</argument>
 								<argument>--maxheaparg</argument>
 								<argument>${its.bbfhir.server.jvmargs}</argument>
 								<argument>--directory</argument>
-								<argument>${project.build.directory}/bbonfhir-server</argument>
+								<argument>${project.build.directory}/bluebutton-server</argument>
+								<argument>--keystore</argument>
+								<argument>${project.build.directory}/../../dev/ssl-stores/server.keystore</argument>
+								<argument>--truststore</argument>
+								<argument>${project.build.directory}/../../dev/ssl-stores/server.truststore</argument>
 								<argument>--dburl</argument>
 								<argument>${its.bbfhir.db.url}</argument>
 								<argument>--dbusername</argument>
@@ -175,24 +196,24 @@
 								<argument>${its.bbfhir.db.password}</argument>
 							</arguments>
 
-							<!-- Don't start Jetty if the ITs are being skipped. -->
+							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
 						</configuration>
 					</execution>
 					<execution>
-						<id>jetty-stop</id>
+						<id>server-stop</id>
 						<phase>post-integration-test</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.build.directory}/../../dev/bluebutton-fhir-server-stop.sh</executable>
+							<executable>${project.build.directory}/bluebutton-server/bbonfhir-server-app-server-stop.sh</executable>
 							<arguments>
 								<argument>--directory</argument>
-								<argument>${project.build.directory}/bbonfhir-server</argument>
+								<argument>${project.build.directory}/bluebutton-server</argument>
 							</arguments>
 
-							<!-- Don't start Jetty if the ITs are being skipped. -->
+							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
 						</configuration>
 					</execution>
