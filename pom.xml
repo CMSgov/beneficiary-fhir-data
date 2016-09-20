@@ -69,8 +69,7 @@
 		<capsule.version>1.0.1</capsule.version>
 
 		<!-- The version of the Blue Button FHIR server to test against. -->
-		<!-- FIXME: Switch back to the master branch, once it's been updated. -->
-		<bbonfhir-server.version>0.1.0-cbbf-31-switch-to-wildfly-5</bbonfhir-server.version>
+		<bbonfhir-server.version>0.1.0-46</bbonfhir-server.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 
