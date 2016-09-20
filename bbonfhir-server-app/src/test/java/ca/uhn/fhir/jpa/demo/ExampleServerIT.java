@@ -2,35 +2,40 @@ package ca.uhn.fhir.jpa.demo;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.concurrent.TimeUnit;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
 import org.hl7.fhir.dstu21.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class ExampleServerIT {
-
-	private static IGenericClient ourClient;
-	private static final FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleServerIT.class);
-
-	private static int ourPort;
-
-	private static Server ourServer;
-	private static String ourServerBase;
-
 	@Test
 	public void testCreateAndRead() throws IOException {
+		IGenericClient ourClient = createFhirClient();
 		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
@@ -41,45 +46,82 @@ public class ExampleServerIT {
 		assertEquals(methodName, pt2.getName().get(0).getFamily().get(0).getValue());
 	}
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
+	/**
+	 * @return a new FHIR {@link IGenericClient} for use
+	 */
+	public static IGenericClient createFhirClient() {
+		FhirContext ctx = FhirContext.forDstu2_1();
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		System.setProperty(FhirServerConfig.PROP_DB_URL, "jdbc:hsqldb:mem:test");
-		System.setProperty(FhirServerConfig.PROP_DB_USERNAME, "");
-		System.setProperty(FhirServerConfig.PROP_DB_PASSWORD, "");
-		
 		/*
-		 * This runs under maven, and I'm not sure how else to figure out the target directory from code..
+		 * The default timeout is 10s, which was failing for batches of 100. A
+		 * 300s timeout was failing for batches of 100 once Part B claims were
+		 * mostly mapped, so batches were cut to 10, which ran at 12s or so,
+		 * each.
 		 */
-		String path = ExampleServerIT.class.getClassLoader().getResource(".keep_hapi-fhir-jpaserver-example").getPath();
-		path = new File(path).getParent();
-		path = new File(path).getParent();
-		path = new File(path).getParent();
+		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
 
-		ourLog.info("Project base path is: {}", path);
+		/*
+		 * We need to override the FHIR client's SSLContext. Unfortunately, that
+		 * requires overriding the entire HttpClient that it uses. Otherwise,
+		 * the settings used here mirror those that the default FHIR HttpClient
+		 * would use.
+		 */
+		try {
+			SSLContext sslContext = SSLContexts.custom()
+					.loadKeyMaterial(getClientKeyStorePath().toFile(), "changeit".toCharArray(),
+							"changeit".toCharArray())
+					.loadTrustMaterial(getClientTrustStorePath().toFile(), "changeit".toCharArray()).build();
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
+					RegistryBuilder.<ConnectionSocketFactory> create()
+							.register("http", PlainConnectionSocketFactory.getSocketFactory())
+							.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
+					null, null, null, 5000, TimeUnit.MILLISECONDS);
+			@SuppressWarnings("deprecation")
+			RequestConfig defaultRequestConfig = RequestConfig.custom()
+					.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
+					.setConnectTimeout(ctx.getRestfulClientFactory().getConnectTimeout())
+					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
+					.setStaleConnectionCheckEnabled(true).build();
+			HttpClient httpClient = HttpClients.custom().setConnectionManager(connectionManager)
+					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement().build();
+			ctx.getRestfulClientFactory().setHttpClient(httpClient);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} catch (KeyManagementException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException
+				| CertificateException e) {
+			throw new IllegalStateException(e);
+		}
 
-		ourPort = RandomServerPortProvider.findFreePort();
-		ourServer = new Server(ourPort);
-
-		WebAppContext webAppContext = new WebAppContext();
-		webAppContext.setContextPath("/");
-		webAppContext.setDescriptor(path + "/src/main/webapp/WEB-INF/web.xml");
-		webAppContext.setResourceBase(path + "/target/hapi-fhir-jpaserver-example");
-		webAppContext.setParentLoaderPriority(true);
-
-		ourServer.setHandler(webAppContext);
-		ourServer.start();
-
-		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourServerBase = "http://localhost:" + ourPort + "/baseDstu2";
-		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
-
+		IGenericClient client = ctx.newRestfulGenericClient("https://localhost:9094/baseDstu2".toString());
+		return client;
 	}
 
+	/**
+	 * @return the local {@link Path} to the key store that FHIR clients should
+	 *         use
+	 */
+	public static Path getClientKeyStorePath() {
+		/*
+		 * The working directory for tests will either be the module directory
+		 * or their parent directory. With that knowledge, we're searching for
+		 * the ssl-stores directory.
+		 */
+		Path sslStoresDir = Paths.get("..", "dev", "ssl-stores");
+		if (!Files.isDirectory(sslStoresDir))
+			sslStoresDir = Paths.get("dev", "ssl-stores");
+		if (!Files.isDirectory(sslStoresDir))
+			throw new IllegalStateException();
+
+		Path keyStorePath = sslStoresDir.resolve("client.keystore");
+		return keyStorePath;
+	}
+
+	/**
+	 * @return the local {@link Path} to the trust store that FHIR clients
+	 *         should use
+	 */
+	public static Path getClientTrustStorePath() {
+		Path trustStorePath = getClientKeyStorePath().getParent().resolve("client.truststore");
+		return trustStorePath;
+	}
 }
