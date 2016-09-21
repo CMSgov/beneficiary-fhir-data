@@ -13,8 +13,8 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o h:s:k:t:w:u:n:p: \
-	--long serverhome:,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
+	-o h:as:k:t:w:u:n:p: \
+	--long serverhome:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
 	-n 'bbonfhir-server-app-server-config-healthapt.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -23,6 +23,7 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 serverHome=
+auth=false
 httpsPort=
 keyStore=
 trustStore=
@@ -34,6 +35,8 @@ while true; do
 	case "$1" in
 		-h | --serverhome )
 			serverHome="$2"; shift 2 ;;
+		-a | --auth )
+			auth=true; shift 1 ;;
 		-s | --httpsport )
 			httpsPort="$2"; shift 2 ;;
 		-k | --keystore )
@@ -84,6 +87,21 @@ for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}" "${war}"
 		exit 1
 	fi
 done
+
+# Collect the username and password to use with the Wildfly CLI.
+# Note: This isn't 100% secure. The CLI can't read the username and password 
+# from a file, so they have to be specified as command line aguments. Such 
+# arguments are visible in `/proc` and via `ps` while the command is running.
+# For this script, that will only be a brief window, so the risk is acceptable.
+cliArgUsername=""
+cliArgPassword=""
+if [[ "${auth}" = true ]]; then
+	read -p "Wildfly username: " cliUsername
+	cliArgUsername="--user ${cliUsername}"
+	read -s -p "Wildfly password: " cliPassword
+	echo ""
+	cliArgPassword="--password ${cliPassword}"
+fi
 
 # Use the Wildfly CLI to configure the server.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
@@ -136,6 +154,8 @@ end-if
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
 	--connect \
+	${cliArgUsername} \
+	${cliArgPassword} \
 	--file=/dev/stdin \
 	&> "${serverHome}/server-config.log"
 
@@ -144,7 +164,7 @@ echo "Server configured. Waiting for it to finish reloading..."
 startSeconds=$SECONDS
 endSeconds=$(($startSeconds + $serverTimeoutSeconds))
 while true; do
-	if "${serverHome}/bin/jboss-cli.sh" --connect --command=":read-attribute(name=server-state)" | grep --quiet "\"result\" => \"running\""; then
+	if "${serverHome}/bin/jboss-cli.sh" --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
 		echo "Server reloaded in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
@@ -158,6 +178,8 @@ done
 echo "Deploying application: '${war}'..."
 "${serverHome}/bin/jboss-cli.sh" \
 	--connect \
+	${cliArgUsername} \
+	${cliArgPassword} \
 	"deploy ${war} --name=ROOT.war --force" \
 	&>> "${serverHome}/server-config.log"
 # Note: No need to do extra waiting/watching here, as the command blocks until 
