@@ -224,6 +224,11 @@
 								<classifier>server-config</classifier>
 							</artifact>
 							<artifact>
+								<file>src/main/config/server-config-healthapt.sh</file>
+								<type>sh</type>
+								<classifier>server-config-healthapt</classifier>
+							</artifact>
+							<artifact>
 								<file>src/main/config/server-start.sh</file>
 								<type>sh</type>
 								<classifier>server-start</classifier>
