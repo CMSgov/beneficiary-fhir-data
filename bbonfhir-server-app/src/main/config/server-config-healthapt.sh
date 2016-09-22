@@ -3,6 +3,10 @@
 ##
 # This script can be used to configure the JBoss EAP 7 instances used in the
 # HealthAPT AWS environments to host the Blue Button API WAR.
+#
+# Usage:
+# 
+# $ bbonfhir-server-app-server-config-healthapt.sh --serverhome /path-to-jboss --auth --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --war /path-to-war --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password"
 ##
 
 # Constants.
@@ -97,15 +101,55 @@ cliArgUsername=""
 cliArgPassword=""
 if [[ "${auth}" = true ]]; then
 	read -p "Wildfly username: " cliUsername
-	cliArgUsername="--user ${cliUsername}"
+	cliArgUsername="--user=${cliUsername}"
 	read -s -p "Wildfly password: " cliPassword
 	echo ""
-	cliArgPassword="--password ${cliPassword}"
+	cliArgPassword="--password=${cliPassword}"
 fi
+
+# Define a function that can wait for the server to be ready.
+waitForServerReady() {
+	echo "Waiting for server to be ready..."
+	startSeconds=$SECONDS
+	endSeconds=$(($startSeconds + $serverTimeoutSeconds))
+	while true; do
+		if "${serverHome}/bin/jboss-cli.sh" --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
+			echo "Server ready after $(($SECONDS - $startSeconds)) seconds."
+			break
+		fi
+		if [[ $SECONDS -gt $endSeconds ]]; then
+			error ${LINENO} "Error: Server failed to be ready within ${serverTimeoutSeconds} seconds." 3
+		fi
+		sleep 1
+	done
+}
+
+# Use the Wildfly CLI to configure the server.
+# This has to be run first as until it's done and the server has reloaded, any 
+# attempts to add an `https-listener` will fail.
+# (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
+echo "Configuring server (enabling HTTPS)..."
+cat <<EOF |
+# Enable HTTPS.
+if (outcome != success) of /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:read-resource
+	/core-service=management/security-realm=ApplicationRealm/server-identity=ssl:add(keystore-path="${keyStore}",keystore-password="changeit",key-password="changeit")
+
+	# Reload the server to apply those changes.
+	:reload
+end-if
+EOF
+"${serverHome}/bin/jboss-cli.sh" \
+	--connect \
+	${cliArgUsername} \
+	${cliArgPassword} \
+	--file=/dev/stdin \
+	&> "${serverHome}/server-config.log"
+echo "Server configured successfully (HTTPS enabled)."
+waitForServerReady
 
 # Use the Wildfly CLI to configure the server.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
-echo "Configuring server..."
+echo "Configuring server (everything else)..."
 cat <<EOF |
 # Set the Java system properties that are required to configure the FHIR server.
 if (outcome == success) of /system-property=bbfhir.db.url:read-resource
@@ -121,15 +165,13 @@ end-if
 /system-property=bbfhir.db.username:add(value="${dbUsername}")
 /system-property=bbfhir.db.password:add(value="${dbPassword}")
 
-# Enable and configure HTTPS.
+# Configure HTTPS.
+/core-service=management/security-realm=ApplicationRealm/server-identity=ssl:remove
+/core-service=management/security-realm=ApplicationRealm/server-identity=ssl:add(keystore-path="${keyStore}",keystore-password="changeit",key-password="changeit")
 if (outcome != success) of /subsystem=undertow/server=default-server/https-listener=https:read-resource
 	/subsystem=undertow/server=default-server/https-listener=https:add(socket-binding=https,security-realm=ApplicationRealm)
 end-if
 /socket-binding-group=standard-sockets/socket-binding=https/:write-attribute(name=port,value="${httpsPort}")
-if (outcome == success) of /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:read-resource
-	/core-service=management/security-realm=ApplicationRealm/server-identity=ssl:remove
-end-if
-/core-service=management/security-realm=ApplicationRealm/server-identity=ssl:add(keystore-path="${keyStore}",keystore-password="changeit",key-password="changeit")
 
 # Configure and enable mandatory client-auth SSL.
 if (outcome == success) of /core-service=management/security-realm=ApplicationRealm/authentication=truststore:read-resource
@@ -157,22 +199,9 @@ EOF
 	${cliArgUsername} \
 	${cliArgPassword} \
 	--file=/dev/stdin \
-	&> "${serverHome}/server-config.log"
-
-# Wait for the server to be ready again.
-echo "Server configured. Waiting for it to finish reloading..."
-startSeconds=$SECONDS
-endSeconds=$(($startSeconds + $serverTimeoutSeconds))
-while true; do
-	if "${serverHome}/bin/jboss-cli.sh" --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
-		echo "Server reloaded in $(($SECONDS - $startSeconds)) seconds."
-		break
-	fi
-	if [[ $SECONDS -gt $endSeconds ]]; then
-		error ${LINENO} "Error: Server failed to reload within ${serverTimeoutSeconds} seconds." 3
-	fi
-	sleep 1
-done
+	&>> "${serverHome}/server-config.log"
+echo "Server configured successfully."
+waitForServerReady
 
 # Deploy the application to the now-configured server.
 echo "Deploying application: '${war}'..."
@@ -185,4 +214,3 @@ echo "Deploying application: '${war}'..."
 # Note: No need to do extra waiting/watching here, as the command blocks until 
 # deployment is completed, and returns a non-zero exit code if it fails.
 echo 'Application deployed.'
-
