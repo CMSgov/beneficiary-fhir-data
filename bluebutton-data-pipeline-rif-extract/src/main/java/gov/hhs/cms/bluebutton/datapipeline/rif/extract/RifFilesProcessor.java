@@ -34,6 +34,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup.HHAClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
@@ -325,6 +327,32 @@ public final class RifFilesProcessor {
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
 				RifRecordEvent<HospiceClaimGroup> recordEvent = new RifRecordEvent<HospiceClaimGroup>(rifFilesEvent,
 						file, buildHospiceClaimEvent(csvRecordGroup));
+				closeParserIfDone(parser, csvIterator);
+				return recordEvent;
+			});
+		} else if (file.getFileType() == RifFileType.HHA) {
+			CsvRecordGrouper grouper = new CsvRecordGrouper() {
+				@Override
+				public int compare(CSVRecord o1, CSVRecord o2) {
+					if (o1 == null)
+						throw new IllegalArgumentException();
+					if (o2 == null)
+						throw new IllegalArgumentException();
+
+					String claimId1 = o1.get(HHAClaimGroup.Column.CLM_ID);
+					String claimId2 = o2.get(HHAClaimGroup.Column.CLM_ID);
+
+					return claimId1.compareTo(claimId2);
+				}
+			};
+
+			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
+
+			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
+				RifRecordEvent<HHAClaimGroup> recordEvent = new RifRecordEvent<HHAClaimGroup>(rifFilesEvent, file,
+						buildHHAClaimEvent(csvRecordGroup));
 				closeParserIfDone(parser, csvIterator);
 				return recordEvent;
 			});
@@ -988,6 +1016,73 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+
+			claimGroup.lines.add(claimLine);
+		}
+
+		// Sanity check:
+		if (RECORD_FORMAT_VERSION != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+
+		return claimGroup;
+	}
+
+	private static HHAClaimGroup buildHHAClaimEvent(List<CSVRecord> csvRecords) {
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecords.toString());
+
+		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		HHAClaimGroup claimGroup = new HHAClaimGroup();
+
+		/*
+		 * Parse the claim header fields.
+		 */
+		claimGroup.version = parseInt(firstClaimLine.get(HHAClaimGroup.Column.VERSION));
+		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(HHAClaimGroup.Column.DML_IND));
+		claimGroup.beneficiaryId = firstClaimLine.get(HHAClaimGroup.Column.BENE_ID);
+		claimGroup.claimId = firstClaimLine.get(HHAClaimGroup.Column.CLM_ID);
+		claimGroup.nearLineRecordIdCode = parseCharacter(
+				firstClaimLine.get(HHAClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
+		claimGroup.claimTypeCode = firstClaimLine.get(HHAClaimGroup.Column.NCH_CLM_TYPE_CD);
+		claimGroup.dateFrom = parseDate(firstClaimLine.get(HHAClaimGroup.Column.CLM_FROM_DT));
+		claimGroup.dateThrough = parseDate(firstClaimLine.get(HHAClaimGroup.Column.CLM_THRU_DT));
+		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(HHAClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.providerNumber = firstClaimLine.get(HHAClaimGroup.Column.PRVDR_NUM);
+		claimGroup.claimFacilityTypeCode = parseCharacter(firstClaimLine.get(HHAClaimGroup.Column.CLM_FAC_TYPE_CD));
+		claimGroup.claimServiceClassificationTypeCode = parseCharacter(
+				firstClaimLine.get(HHAClaimGroup.Column.CLM_SRVC_CLSFCTN_TYPE_CD));
+		claimGroup.claimNonPaymentReasonCode = parseOptString(
+				firstClaimLine.get(HHAClaimGroup.Column.CLM_MDCR_NON_PMT_RSN_CD));
+		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(HHAClaimGroup.Column.CLM_PMT_AMT));
+		claimGroup.primaryPayerPaidAmount = parseDecimal(
+				firstClaimLine.get(HHAClaimGroup.Column.NCH_PRMRY_PYR_CLM_PD_AMT));
+		claimGroup.providerStateCode = firstClaimLine.get(HHAClaimGroup.Column.PRVDR_STATE_CD);
+		claimGroup.organizationNpi = firstClaimLine.get(HHAClaimGroup.Column.ORG_NPI_NUM);
+		claimGroup.attendingPhysicianNpi = firstClaimLine.get(HHAClaimGroup.Column.AT_PHYSN_NPI);
+		claimGroup.patientDischargeStatusCode = firstClaimLine.get(HHAClaimGroup.Column.PTNT_DSCHRG_STUS_CD);
+		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(HHAClaimGroup.Column.CLM_TOT_CHRG_AMT));
+		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(HHAClaimGroup.Column.PRNCPAL_DGNS_CD),
+				firstClaimLine.get(HHAClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
+		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, HHAClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
+				HHAClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
+		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(firstClaimLine.get(HHAClaimGroup.Column.FST_DGNS_E_CD),
+				firstClaimLine.get(HHAClaimGroup.Column.FST_DGNS_E_VRSN_CD));
+		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine, HHAClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
+				HHAClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+
+		/*
+		 * Parse the claim lines.
+		 */
+		for (CSVRecord claimLineRecord : csvRecords) {
+			HHAClaimLine claimLine = new HHAClaimLine();
+
+			claimLine.lineNumber = parseInt(claimLineRecord.get(HHAClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.hcpcsCode = claimLineRecord.get(HHAClaimGroup.Column.HCPCS_CD);
+			claimLine.paymentAmount = parseDecimal(claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_PMT_AMT_AMT));
+			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
+			claimLine.nonCoveredChargeAmount = parseDecimal(
+					claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 
 			claimGroup.lines.add(claimLine);
 		}

@@ -13,8 +13,7 @@ public enum RifFileType {
 	// TODO
 	DME(Pattern.compile("TODO")),
 
-	// TODO
-	HHA(Pattern.compile("TODO")),
+	HHA(Pattern.compile(".*hha.*")),
 
 	HOSPICE(Pattern.compile(".*hospice.*")),
 
