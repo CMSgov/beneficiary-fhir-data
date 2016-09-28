@@ -19,7 +19,7 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitor;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetProcessor;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorListener;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 
@@ -84,12 +84,12 @@ public final class S3ToFhirLoadApp {
 		FhirLoader fhirLoader = new FhirLoader(metrics, appConfig.getLoadOptions());
 
 		/*
-		 * Create the DataSetProcessor that will glue those stages together and
-		 * run them all for each data set that is found.
+		 * Create the DataSetMonitorListener that will glue those stages
+		 * together and run them all for each data set that is found.
 		 */
-		DataSetProcessor dataSetProcessor = new DataSetProcessor() {
+		DataSetMonitorListener dataSetMonitorListener = new DataSetMonitorListener() {
 			@Override
-			public void process(RifFilesEvent rifFilesEvent) {
+			public void dataAvailable(RifFilesEvent rifFilesEvent) {
 				/*
 				 * Each ETL stage produces a stream that will be handed off to
 				 * and processed by the next stage.
@@ -124,15 +124,38 @@ public final class S3ToFhirLoadApp {
 					 */
 				});
 			}
+
+			/**
+			 * @see gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorListener#errorOccurred(java.lang.Throwable)
+			 */
+			@Override
+			public void errorOccurred(Throwable error) {
+				/*
+				 * If an error is caught, log it and then shut everything down.
+				 */
+
+				LOGGER.error("Data set failed with an unhandled error. Application will exit.", error);
+
+				/*
+				 * This will trigger the shutdown monitors, block until they
+				 * complete, and then terminate this thread (and all others).
+				 * Accordingly, we can be doubly sure that the data set
+				 * processing will be halted: 1) this thread is the
+				 * DataSetMonitorWorker's and that thread will block then die,
+				 * and 2) the shutdown monitor will call DataSetMonitor.stop().
+				 * Pack it up: we're going home, folks.
+				 */
+				System.exit(EXIT_CODE_MONITOR_ERROR);
+			}
 		};
 
 		/*
 		 * Create and start the DataSetMonitor that will find data sets as
 		 * they're pushed into S3. As each data set is found, it will be handed
-		 * off to the DataSetProcessor to be run through the ETL pipeline.
+		 * off to the DataSetMonitorListener to be run through the ETL pipeline.
 		 */
 		DataSetMonitor s3Monitor = new DataSetMonitor(appConfig.getS3BucketName(), (int) S3_SCAN_INTERVAL.toMillis(),
-				dataSetProcessor);
+				dataSetMonitorListener);
 		registerShutdownHook(metrics, s3Monitor);
 		s3Monitor.start();
 		LOGGER.info("Monitoring S3 for new data sets to process...");
@@ -188,21 +211,19 @@ public final class S3ToFhirLoadApp {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
 			public void run() {
-				if (!s3Monitor.isStoppedBecauseOfError()) {
-					LOGGER.info("Application is shutting down...");
+				LOGGER.info("Application is shutting down...");
 
-					/*
-					 * Just a reminder: this might take a while! It's going to
-					 * wait for any data sets that are being actively processed
-					 * to finish processing.
-					 */
-					s3Monitor.stop();
+				/*
+				 * Just a reminder: this might take a while! It's going to wait
+				 * for any data sets that are being actively processed to finish
+				 * processing.
+				 */
+				s3Monitor.stop();
 
-					// Ensure that the final metrics get logged.
-					Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build().report();
+				// Ensure that the final metrics get logged.
+				Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build().report();
 
-					LOGGER.info("Application has finished shutting down.");
-				}
+				LOGGER.info("Application has finished shutting down.");
 			}
 		}));
 	}
