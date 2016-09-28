@@ -1,8 +1,0 @@
-# Ignore Eclipse metadata files, but include .gitignore itself
-/.*
-!/.gitignore
-
-# Ignore Maven output folders
-/target*/
-
-/target/

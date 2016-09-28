@@ -46,16 +46,11 @@
 	</scm>
 
 	<modules>
-		<module>bluebutton-data-pipeline-desynpuf</module>
-		<module>bluebutton-data-pipeline-ccw</module>
-		<module>bluebutton-data-pipeline-ccw-test</module>
 		<module>bluebutton-data-pipeline-sampledata</module>
-		<module>bluebutton-data-pipeline-ccw-extract</module>
 		<module>bluebutton-data-pipeline-rif</module>
 		<module>bluebutton-data-pipeline-rif-extract</module>
 		<module>bluebutton-data-pipeline-fhir-load</module>
 		<module>bluebutton-data-pipeline-app</module>
-		<module>bluebutton-data-pipeline-fhir-sampledata</module>
 	</modules>
 
 	<properties>
@@ -113,28 +108,6 @@
 			</dependency>
 
 			<dependency>
-				<!-- Locks the versions of all Spring modules that are used in child 
-					projects to ones that are actually compatible with each other. We're not 
-					using most of those modules, but this is our ticket out of dependency-mismatch 
-					hell. -->
-				<groupId>io.spring.platform</groupId>
-				<artifactId>platform-bom</artifactId>
-				<version>2.0.3.RELEASE</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<!-- The JDO API is a more flexible alternative to JPA: an ORM for working 
-					with databases in Java. DataNucleus provides an implementation of the JDO 
-					API. -->
-				<groupId>org.datanucleus</groupId>
-				<artifactId>datanucleus-accessplatform-jdo-rdbms</artifactId>
-				<version>5.0.0-m1</version>
-				<type>pom</type>
-			</dependency>
-
-			<dependency>
 				<!-- Used to measure performance and collect other runtime statistics 
 					within these projects. -->
 				<groupId>io.dropwizard.metrics</groupId>
@@ -147,14 +120,6 @@
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-jvm</artifactId>
 				<version>${metrics.version}</version>
-			</dependency>
-
-			<dependency>
-				<!-- Provides utilities for working with Java 8 streams, including batching 
-					features that are used in this project. -->
-				<groupId>io.reactivex</groupId>
-				<artifactId>rxjava</artifactId>
-				<version>1.1.1</version>
 			</dependency>
 
 			<dependency>
@@ -194,17 +159,6 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<!-- Can be used to run the DataNucleus/JDO bytecode enhancer on projects' 
-						compiled classes. -->
-					<groupId>org.datanucleus</groupId>
-					<artifactId>datanucleus-maven-plugin</artifactId>
-					<version>4.0.2</version>
-					<configuration>
-						<api>JDO</api>
-						<verbose>true</verbose>
-					</configuration>
-				</plugin>
 				<plugin>
 					<!-- Configure the dependency plugin such that it can be used to grab 
 						the Blue Button FHIR Server and its config, for manual testing or for use 
