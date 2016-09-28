@@ -121,7 +121,7 @@ public final class DataSetMonitorIT {
 			Assert.assertEquals(manifestB.getTimestamp(), listener.getDataEvents().get(1).getTimestamp());
 
 			// Verify that the bucket is now empty.
-			Assert.assertEquals(0, s3Client.listObjects(bucket.getName()).getObjectSummaries().size());
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket, 0, java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
