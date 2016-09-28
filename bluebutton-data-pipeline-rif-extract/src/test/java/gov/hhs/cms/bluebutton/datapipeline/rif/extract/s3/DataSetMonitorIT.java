@@ -113,6 +113,7 @@ public final class DataSetMonitorIT {
 
 			// Wait for the monitor to generate events for the two data sets.
 			Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> listener.getDataEvents().size() >= 2);
+			monitor.stop();
 
 			// Verify what was handed off to the DataSetMonitorListener.
 			Assert.assertEquals(2, listener.getDataEvents().size());
