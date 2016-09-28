@@ -23,11 +23,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-ccw</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
 			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -63,19 +58,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides utilities for working with Java 8 streams, including batching 
-				features that are used in this project. -->
-			<groupId>io.reactivex</groupId>
-			<artifactId>rxjava</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- Allows for Spring DI and TX management inside tests. -->
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -86,18 +68,6 @@
 				all logging events will be sent to it. -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-ccw-extract</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-ccw-test</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
