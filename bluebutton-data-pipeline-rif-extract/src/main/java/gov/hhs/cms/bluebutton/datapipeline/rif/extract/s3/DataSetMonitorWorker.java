@@ -15,6 +15,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,14 @@ final class DataSetMonitorWorker implements Runnable {
 	private final AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
 
 	/**
+	 * Tracks the {@link DataSetManifest#getTimestamp()} values of the most
+	 * recently processed data sets, to ensure that the same data set isn't
+	 * processed more than once. It's constrained to a fixed number of items, to
+	 * keep it from becoming a memory leak.
+	 */
+	private CircularFifoQueue<Instant> recentlyProcessedManifests;
+
+	/**
 	 * Constructs a new {@link DataSetMonitorWorker} instance.
 	 * 
 	 * @param bucketName
@@ -70,6 +79,7 @@ final class DataSetMonitorWorker implements Runnable {
 	public DataSetMonitorWorker(String bucketName, DataSetMonitorListener listener) {
 		this.bucketName = bucketName;
 		this.listener = listener;
+		this.recentlyProcessedManifests = new CircularFifoQueue<>(10);
 	}
 
 	/**
@@ -106,10 +116,18 @@ final class DataSetMonitorWorker implements Runnable {
 					 * looking through the other keys.
 					 */
 					Instant dataSetTimestamp = parseDataSetTimestamp(key);
-					if (dataSetTimestamp != null && manifestToProcessKey == null)
+					if (dataSetTimestamp == null)
+						continue;
+
+					// Don't process the same data set more than once.
+					if (recentlyProcessedManifests.contains(dataSetTimestamp)) {
+						LOGGER.debug("Skipping already-processed data set: {}", dataSetTimestamp);
+						continue;
+					}
+
+					if (manifestToProcessKey == null)
 						manifestToProcessKey = key;
-					else if (dataSetTimestamp != null && manifestToProcessKey != null
-							&& (dataSetTimestamp.compareTo(parseDataSetTimestamp(manifestToProcessKey)) < 0))
+					else if (dataSetTimestamp.compareTo(parseDataSetTimestamp(manifestToProcessKey)) < 0)
 						manifestToProcessKey = key;
 				}
 			}
@@ -174,10 +192,14 @@ final class DataSetMonitorWorker implements Runnable {
 		listener.dataAvailable(rifFilesEvent);
 
 		/*
-		 * Now that the data set has been processed, we need to remove it. If we
-		 * don't, we'll just end up reprocessing it again the next time the
-		 * worker runs.
+		 * Now that the data set has been processed, we need to ensure that we
+		 * don't end up processing it again. We ensure this two ways: 1) we keep
+		 * a list of the data sets most recently processed, and 2) we delete the
+		 * S3 objects that comprise that data set. (#1 is required as S3 deletes
+		 * are only *eventually* consistent, so #2 may not take effect right
+		 * away.)
 		 */
+		recentlyProcessedManifests.add(dataSetManifest.getTimestamp());
 		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
 		deleteObjectsRequest.setKeys(dataSetManifest.getEntries()
 				.stream().map(e -> String.format("%s/%s",

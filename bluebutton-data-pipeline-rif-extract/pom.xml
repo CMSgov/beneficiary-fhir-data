@@ -54,6 +54,13 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.2</version>
 		</dependency>
+		<dependency>
+			<!-- Provides some extra collections, e.g. the CircularFifoQueue being 
+				used in DataSetMonitorWorker. -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
 
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 

@@ -3,6 +3,8 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 import javax.xml.bind.JAXBContext;
@@ -98,5 +100,50 @@ public class DataSetTestUtilities {
 		PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContents,
 				new ObjectMetadata());
 		return request;
+	}
+
+	/**
+	 * <p>
+	 * Waits for the number of objects in the specified {@link Bucket} to equal
+	 * the specified count.
+	 * </p>
+	 * <p>
+	 * This is needed because Amazon's S3 API is only <em>eventually</em>
+	 * consistent for deletes, per
+	 * <a href="https://aws.amazon.com/s3/faqs/">Amazon S3 FAQs</a>.
+	 * </p>
+	 * 
+	 * @param s3Client
+	 *            the {@link AmazonS3} client to use
+	 * @param bucket
+	 *            the {@link Bucket} to check
+	 * @param expectedObjectCount
+	 *            the number of objects that should be in the specified
+	 *            {@link Bucket}
+	 * @param waitDuration
+	 *            the length of time to wait for the condition to be met before
+	 *            throwing an error
+	 */
+	public static void waitForBucketObjectCount(AmazonS3 s3Client, Bucket bucket, int expectedObjectCount,
+			Duration waitDuration) {
+		Instant endTime = Instant.now().plus(waitDuration);
+
+		int actualObjectCount = -1;
+		while (Instant.now().isBefore(endTime)) {
+			actualObjectCount = s3Client.listObjects(bucket.getName()).getObjectSummaries().size();
+			if (expectedObjectCount == actualObjectCount)
+				return;
+
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// Shouldn't happen, as we're not using interrupts for anything.
+				throw new IllegalStateException(e);
+			}
+		}
+
+		throw new IllegalStateException(
+				String.format("S3 object count count incorrect. Expected '%d', but actual is '%d'.",
+						expectedObjectCount, actualObjectCount));
 	}
 }

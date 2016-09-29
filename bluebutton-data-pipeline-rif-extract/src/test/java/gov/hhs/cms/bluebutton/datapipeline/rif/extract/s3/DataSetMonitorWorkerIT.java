@@ -87,7 +87,7 @@ public final class DataSetMonitorWorkerIT {
 			Assert.assertEquals(0, listener.getErrorEvents().size());
 
 			// Verify that the bucket is now empty.
-			Assert.assertEquals(0, s3Client.listObjects(bucket.getName()).getObjectSummaries().size());
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket, 0, java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
@@ -132,8 +132,8 @@ public final class DataSetMonitorWorkerIT {
 			Assert.assertEquals(0, listener.getErrorEvents().size());
 
 			// Verify that the bucket now just has the second data set.
-			Assert.assertEquals(1 + manifestB.getEntries().size(),
-					s3Client.listObjects(bucket.getName()).getObjectSummaries().size());
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket, 1 + manifestB.getEntries().size(),
+					java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
