@@ -1415,7 +1415,6 @@ public final class DataTransformerTest {
 		/*
 		 * TODO once STU3 is available, verify eob.line.location
 		 */
-
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode, eobItem0.getService());
 		Assert.assertEquals(recordLine1.betosCode,
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_BETOS).get(0).getValue())
