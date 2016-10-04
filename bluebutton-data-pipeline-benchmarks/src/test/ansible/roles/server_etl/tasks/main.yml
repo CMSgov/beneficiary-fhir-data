@@ -1,0 +1,70 @@
+---
+
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - java-1.8.0-openjdk-devel
+  become: true
+
+- name: Create FHIR Service User
+  user:
+    name: bb-etl
+    shell: /bin/false
+  become: true
+
+- name: Create FHIR Service Directory
+  file:
+    path: /usr/local/bluebutton-data-pipeline-app
+    state: directory
+    owner: bb-etl
+    group: bb-etl
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Copy Artifacts
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "bb-etl"
+    group: "bb-etl"
+    mode: "u=rw,g=r,o=r"
+  with_items:
+    - { src: "../../../target/benchmark-iterations/client-etl-{{ iteration_index }}-keystore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
+    - { src: "../../../target/benchmark-iterations/client-etl-{{ iteration_index }}-truststore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
+    - { src: '../../../target/pipeline-app/', dest: '/usr/local/bluebutton-data-pipeline-app' }
+  become: true
+
+- file:
+    path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.x'
+    mode: 'u=rwx,g=rwx,o=rwx'
+  become: true
+
+- name: Create ETL Service Wrapper Script
+  template:
+    src: bluebutton-data-pipeline-app.sh.j2
+    dest: /usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.sh
+    owner: bb-etl
+    group: bb-etl
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create ETL Service Definition
+  template:
+    src: bluebutton-data-pipeline-app.service.j2
+    dest: /etc/systemd/system/bluebutton-data-pipeline-app.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+
+- name: Load ETL Service Definition
+  command: /usr/bin/systemctl daemon-reload
+  become: true
+
+- name: Start ETL Service
+  service:
+    name: bluebutton-data-pipeline-app
+    state: started
+  become: true

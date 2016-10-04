@@ -1,0 +1,41 @@
+---
+
+- name: Add 'ppa:webupd8team/java' Repo
+  apt_repository: repo='ppa:webupd8team/java'
+
+- name: Accept 'oracle-java8-installer' License
+  # Reference: http://askubuntu.com/a/637514/41593
+  debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+
+- name: Install Java 8 JRE and Other Prerequisites
+  apt: name={{ item }} update_cache=true cache_valid_time="{{ 60 * 15 }}"
+  with_items:
+    - oracle-java8-installer
+    - oracle-java8-set-default
+
+- name: Create Directory '/opt/fhir-stress'
+  file: path=/opt/fhir-stress state=directory
+
+- name: Download and Unpack JMeter
+  unarchive: 
+    src=http://www-us.apache.org/dist//jmeter/binaries/apache-jmeter-2.13.tgz 
+    dest=/opt/fhir-stress/
+    copy=no
+
+- name: Fix JMeter Executable Permissions
+  file: path="{{ item }}" owner=root group=root mode=0774
+  with_items:
+    - /opt/fhir-stress/apache-jmeter-2.13/bin/jmeter-server
+    - /opt/fhir-stress/apache-jmeter-2.13/bin/jmeter
+
+- name: Copy Stress Tests Library
+  copy: 
+    src=../target/fhir-stress-test-0.1.0-SNAPSHOT-uber.jar
+    dest=/opt/fhir-stress/apache-jmeter-2.13/lib/ext/
+    owner=root group=root mode=0664
+
+- name: Copy Test Plan
+  copy: 
+    src=../jmeter-project/jmeter-fhir-test.jmx
+    dest=/opt/fhir-stress/
+    owner=root group=root mode=0664

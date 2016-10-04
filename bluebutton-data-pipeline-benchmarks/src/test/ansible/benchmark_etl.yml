@@ -1,0 +1,228 @@
+---
+# This playbook stands up the systems in AWS needed for one benchmark 
+# iteration, uses them to run the benchmark, and then destroys the systems.
+#
+# Usage:
+#  
+#     $ ansible-playbook benchmark_etl.yml --extra-vars "ec2_key_name=foo iteration_index=42"
+
+- hosts: localhost
+  name: AWS - Provision Resources and Instances
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    
+    - name: Local - whoami
+      local_action: command whoami
+      register: whoami
+    
+    - name: EC2 - Provision Security Group 'ssh-all'
+      ec2_group:
+        name: ssh-all
+        description: Allows incoming traffic on port 22 (from all IPs).
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+    
+# FIXME: Disabled, because I don't have permissions for it.    
+#    - name: IAM - Create EC2 'BenchmarkRunner' Role
+#      iam_policy:
+#        iam_type: role
+#        iam_name: bluebutton-benchmark-runner
+#        state: present
+#        policy_name: BlueButtonBenchmarkETL
+#        policy_document: BlueButtonBenchmarkETL.policy.json
+#    
+    - name: RDS - Provision DB Server
+      rds:
+        command: create
+        region: "{{ region }}"
+        instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
+        db_engine: postgres
+        size: 10
+        instance_type: "{{ rds_instance_type }}"
+        publicly_accessible: false
+        username: "{{ postgres_master_username }}"
+        password: "{{ postgres_master_password }}"
+        tags:
+          CreatedBy: "{{ whoami.stdout }}"
+        wait: true
+        wait_timeout: "{{ rds_wait_timeout }}"
+      register: rds_server
+    
+    # Just here to save time while debugging this script. (Creating the RDS
+    # instance takes over 10 minutes, and this allows us to re-use it if it's
+    # still available from a previous run.)
+    - name: RDS - Gather Facts
+      rds:
+        command: facts
+        region: "{{ region }}"
+        instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
+      register: rds_server
+
+    - name: EC2 - Provision FHIR server
+      ec2:
+        key_name: "{{ ec2_key_name }}"
+        group:
+          - default
+          - ssh-all
+        instance_type: "{{ ec2_instance_type_fhir }}"
+        image: "{{ ami_id }}"
+        region: "{{ region }}"
+        wait: true
+        exact_count: 1
+        count_tag:
+          Name: "bluebutton-etl-benchmark-{{ iteration_index }}-fhir"
+          Application: "BlueButton"
+        instance_tags:
+          Name: "bluebutton-etl-benchmark-{{ iteration_index }}-fhir"
+          Application: "BlueButton"
+          CreatedBy: "{{ whoami.stdout }}"
+      register: ec2_fhir
+    
+    - name: EC2 - Provision ETL server
+      ec2:
+        key_name: "{{ ec2_key_name }}"
+        group:
+          - default
+          - ssh-all
+        instance_type: "{{ ec2_instance_type_etl }}"
+        image: "{{ ami_id }}"
+        region: "{{ region }}"
+        # FIXME: Disabled, because I don't have permissions for it.
+        #instance_profile_name: 'BlueButtonBenchmarkRunner'
+        wait: true
+        exact_count: 1
+        count_tag:
+          Name: "bluebutton-etl-benchmark-{{ iteration_index }}-etl"
+          Application: "BlueButton"
+        instance_tags:
+          Name: "bluebutton-etl-benchmark-{{ iteration_index }}-etl"
+          Application: "BlueButton"
+          CreatedBy: "{{ whoami.stdout }}"
+      register: ec2_etl
+    
+    - name: Add 'rds' to Inventory (In-Memory)
+      add_host:
+        hostname: rds
+        endpoint: "{{ rds_server.instance.endpoint }}"
+        port: "{{ rds_server.instance.port }}"
+    
+    - name: Add 'fhir' to Inventory (In-Memory)
+      add_host:
+        hostname: fhir
+        ansible_host: "{{ ec2_fhir.instances[0].public_dns_name }}"
+    
+    - name: Add 'etl' to Inventory (In-Memory)
+      add_host:
+        hostname: etl
+        ansible_host: "{{ ec2_etl.instances[0].public_dns_name }}"
+    
+    - name: Wait for SSH to come up
+      wait_for:
+        host: "{{ item.public_dns_name }}"
+        port: 22
+        search_regex: OpenSSH
+        state: started
+        # This delay seems to be necessary for the newly-provisioned `etl` 
+        # instance, as it's the last one provisioned. SSH is up for it, but 
+        # it's not immediately configured to accept the SSH key.
+        delay: 30
+        timeout: 320
+      with_flattened:
+        - "{{ ec2_etl.instances }}"
+        - "{{ ec2_fhir.instances }}"
+
+- name: Remove 'requiretty' Setting
+  hosts: fhir:etl
+  user: "{{ ssh_user }}"
+  gather_facts: true
+  vars:
+    ansible_ssh_pipelining: false
+  
+  tasks:
+    
+    - lineinfile: regexp="^Defaults    requiretty" dest=/etc/sudoers state=absent
+      become: true
+
+- name: Configure and Start FHIR Server
+  hosts: fhir
+  user: "{{ ssh_user }}"
+  gather_facts: true
+  roles:
+    - server_fhir
+
+- name: Configure ETL Server
+  hosts: etl
+  user: "{{ ssh_user }}"
+  gather_facts: true
+  roles:
+    - server_etl
+
+- name: Run Benchmark
+  hosts: etl
+  user: "{{ ssh_user }}"
+  gather_facts: true
+  
+  tasks:
+    
+    - name: Wait for ETL to Start Processing Data Set
+      wait_for:
+        path: "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
+        search_regex: 'Data set finished uploading and ready to process'
+        timeout: 60
+
+    # This will take ages, so we watch it asynchronously, to ensure that SSH 
+    # doesn't time out on us.
+    - name: Wait for ETL to Finish Processing Data Set
+      wait_for:
+        path: "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
+        search_regex: 'Data set deleted, now that processing is complete'
+        timeout: 1200
+      # Let it run for 20 minutes, checking it every 30s to see if it's done.
+      async: 1200
+      poll: 30
+
+- name: Collect ETL Log
+  hosts: etl
+  user: "{{ ssh_user }}"
+  gather_facts: true
+  
+  tasks:
+    
+    - fetch:
+        src: "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
+        dest: '../../../target/benchmark-iterations/'
+        flat: true
+        fail_on_missing: true
+
+- name: Terminate instances - Die Die Die
+  hosts: localhost
+  connection: local
+  
+  tasks:
+    
+    - name: Terminate RDS Server
+      rds:
+        command: delete
+        instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
+        region: "{{ region }}"
+        wait: true
+        wait_timeout: "{{ rds_wait_timeout }}"
+    - name: Terminate FHIR Server
+      ec2:
+        state: 'absent'
+        instance_ids: "{{ ec2_fhir.instance_ids }}"
+        region: "{{ region }}"
+    - name: Terminate ETL Server
+      ec2:
+        state: 'absent'
+        instance_ids: "{{ ec2_etl.instance_ids }}"
+        region: "{{ region }}"

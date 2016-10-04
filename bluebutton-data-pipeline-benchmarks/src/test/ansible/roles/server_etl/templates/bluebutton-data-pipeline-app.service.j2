@@ -1,0 +1,10 @@
+[Unit]
+Description=Blue Button ETL Service
+
+[Service]
+WorkingDirectory=/usr/local/bluebutton-data-pipeline-app
+ExecStart=/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.sh
+User=bb-etl
+
+[Install]
+WantedBy=multi-user.target

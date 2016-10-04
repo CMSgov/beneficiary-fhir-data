@@ -1,0 +1,117 @@
+---
+
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - java-1.8.0-openjdk-devel
+    - python-psycopg2
+  become: true
+
+- name: Create FHIR DB
+  postgresql_db:
+    login_host: "{{ hostvars['rds']['endpoint'] }}"
+    port: "{{ hostvars['rds']['port'] }}"
+    login_user: "{{ postgres_master_username }}"
+    login_password: "{{ postgres_master_password }}"
+    name: fhirdb
+    encoding: 'UNICODE'
+    lc_collate: 'C'
+    lc_ctype: 'C'
+    template: 'template0'
+
+- name: Create FHIR Service User
+  user:
+    name: bb-fhir
+    shell: /bin/false
+  become: true
+
+- name: Create FHIR Service Directory
+  file:
+    path: /usr/local/bbonfhir-server-app
+    state: directory
+    owner: bb-fhir
+    group: bb-fhir
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Copy Artifacts
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: bb-fhir
+    group: bb-fhir
+    mode: u=rw,g=r,o=r
+  with_items:
+    - { src: '../../../target/bluebutton-server/', dest: "/usr/local/bbonfhir-server-app" }
+  become: true
+
+- name: Extract Wildfly
+  unarchive:
+    src: /usr/local/bbonfhir-server-app/wildfly-dist-8.1.0.Final.tar.gz
+    dest: /usr/local/bbonfhir-server-app
+    copy: false
+    owner: bb-fhir
+    group: bb-fhir
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create Wildfly 'standalone.conf' File
+  template:
+    src: standalone.conf.j2
+    dest: /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/bin/standalone.conf
+    owner: bb-fhir
+    group: bb-fhir
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create FHIR Service Definition
+  template:
+    src: bbonfhir-server-app.service.j2
+    dest: /etc/systemd/system/bbonfhir-server-app.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+
+- name: Load FHIR Service Definition
+  command: /usr/bin/systemctl daemon-reload
+  become: true
+
+- name: Start FHIR Service
+  service:
+    name: bbonfhir-server-app
+    state: started
+  become: true
+
+- file:
+    path: /usr/local/bbonfhir-server-app/bbonfhir-server-app-server-config-healthapt.sh
+    mode: u=rwx,g=rwx,o=rwx
+  become: true
+
+- name: Create Keystores and Truststores
+  command: "{{ item }}"
+  with_items:
+    - "keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname cn={{ hostvars['fhir']['ansible_host'] }} -validity 3650 -keypass changeit -keystore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/server-keystore.jks -storepass changeit"
+    - "keytool -exportcert -alias server -file /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/server.cer -keystore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/server-keystore.jks -storepass changeit"
+    - "keytool -importcert -noprompt -alias server -file /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/server.cer -keypass changeit -keystore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-{{ iteration_index }}-truststore.jks -storepass changeit"
+    - "keytool -genkeypair -alias client-etl -keyalg RSA -keysize 4096 -dname cn={{ hostvars['etl']['ansible_host'] }} -validity 3650 -keypass changeit -keystore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-{{ iteration_index }}-keystore.jks -storepass changeit"
+    - "keytool -exportcert -alias client-etl -file /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl.cer -keystore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-{{ iteration_index }}-keystore.jks -storepass changeit"
+    - "keytool -importcert -noprompt -alias client-etl -file /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl.cer -keypass changeit -keystore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/server-truststore.jks -storepass changeit"
+  become: true
+
+- name: Fetch Client Keystore and Truststore
+  fetch:
+    src: "{{ item }}"
+    dest: '../../../target/benchmark-iterations/'
+    flat: true
+    fail_on_missing: true
+  with_items:
+    - "/usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-{{ iteration_index }}-keystore.jks"
+    - "/usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-{{ iteration_index }}-truststore.jks"
+  become: true
+
+- name: Run 'server-config-healthapt.sh' to Configure FHIR Server
+  command: "/usr/local/bbonfhir-server-app/bbonfhir-server-app-server-config-healthapt.sh --serverhome /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final --httpsport {{ fhir_port }} --keystore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/server-keystore.jks --truststore /usr/local/bbonfhir-server-app/wildfly-8.1.0.Final/standalone/configuration/server-truststore.jks --war /usr/local/bbonfhir-server-app/bbonfhir-server-app.war --dburl jdbc:postgresql://{{ hostvars['rds']['endpoint'] }}:{{ hostvars['rds']['port'] }}/fhirdb --dbusername {{ postgres_master_username }} --dbpassword {{ postgres_master_password }}"
+  become: true

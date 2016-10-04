@@ -51,6 +51,7 @@
 		<module>bluebutton-data-pipeline-rif-extract</module>
 		<module>bluebutton-data-pipeline-fhir-load</module>
 		<module>bluebutton-data-pipeline-app</module>
+		<module>bluebutton-data-pipeline-benchmarks</module>
 	</modules>
 
 	<properties>
@@ -64,7 +65,7 @@
 		<capsule.version>1.0.1</capsule.version>
 
 		<!-- The version of the Blue Button FHIR server to test against. -->
-		<bbonfhir-server.version>0.1.0-46</bbonfhir-server.version>
+		<bbonfhir-server.version>0.1.0-48</bbonfhir-server.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 

@@ -40,3 +40,17 @@ Once the build is done, the HAPI FHIR artifacts will be placed into your user's 
 Some of this project's integration tests require AWS credentials. These credentials are used to stand up and tear down AWS resources used in the tests. For example, `DataSetMonitorIT` uses the AWS API to create and manipulate the S3 buckets that it uses during the tests, removing them at the end of each test case. This test code uses the AWS Java API's [DefaultAWSCredentialsProviderChain](http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html) class, which will supports multiple different mechanisms for retrieving the credentials to use. Credentials must be supplied via at least one of those mechanisms, or the ITs will fail.
 
 (The project's `Jenkinsfile` uses the environment variable mechanism, which [the project's main Jenkins server](http://builds.hhsdevcloud.us/) has been configured to support.)
+
+## Running the Benchmarks
+
+This project's `bluebutton-data-pipeline-benchmarks` module contains the `S3ToFhirLoadAppBenchmark` class, which runs a series of (time-consuming) benchmarks of this application's performance. See the [Design Decisions](./design-decisions-readme.md) document for a discussion on how these benchmarks were designed.
+
+To run the benchmarks, a number of additional parameters have to be included in the typical Maven build command, as follows:
+
+    $ export AWS_ACCESS_KEY_ID='foo'
+    $  export AWS_SECRET_ACCESS_KEY='bar'
+    $ mvn clean verify -DskipBenchmarks=false -Dec2KeyName=fizz -Dec2KeyFile=/somedir/buzz.pem
+
+The `ec2KeyName` variable must identify the name of the AWS EC2 keypair entry that the benchmark systems should be created with. The `ec2KeyFile` variable must point to the local path to the private key PEM file for that keypair.
+
+In addition, you may optionally specify a path to a different data collection file to use with an argument such as "`-DbenchmarkDataFile=somedir/benchmark-data.csv`". Builds on a build server should do this to ensure that benchmark runs from all builds write to a central location.
