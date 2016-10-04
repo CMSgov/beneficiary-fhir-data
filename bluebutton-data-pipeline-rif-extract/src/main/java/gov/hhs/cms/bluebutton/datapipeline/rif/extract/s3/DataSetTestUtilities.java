@@ -2,7 +2,9 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -69,10 +71,15 @@ public class DataSetTestUtilities {
 
 			String objectKey = String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()),
 					"manifest.xml");
-			InputStream manifestInputStream = new ByteArrayInputStream(manifestOutputStream.toByteArray());
+			byte[] manifestByteArray = manifestOutputStream.toByteArray();
+			InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
+
+			// If this isn't specified, the AWS API logs annoying warnings.
+			ObjectMetadata manifestMetadata = new ObjectMetadata();
+			manifestMetadata.setContentLength(manifestByteArray.length);
 
 			PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, manifestInputStream,
-					new ObjectMetadata());
+					manifestMetadata);
 			return request;
 		} catch (JAXBException e) {
 			throw new RuntimeException(e);
@@ -97,8 +104,18 @@ public class DataSetTestUtilities {
 				manifestEntry.getName());
 		InputStream objectContents = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
 
-		PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContents,
-				new ObjectMetadata());
+		// If this isn't specified, the AWS API logs annoying warnings.
+		long objectContentLength;
+		try {
+			objectContentLength = Thread.currentThread().getContextClassLoader().getResource(resourceName)
+					.openConnection().getContentLength();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+		ObjectMetadata objectMetadata = new ObjectMetadata();
+		objectMetadata.setContentLength(objectContentLength);
+
+		PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContents, objectMetadata);
 		return request;
 	}
 
