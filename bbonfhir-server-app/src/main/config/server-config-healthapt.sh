@@ -10,7 +10,8 @@
 ##
 
 # Constants.
-serverTimeoutSeconds=120
+serverReadyTimeoutSeconds=120
+serverConnectTimeoutMilliseconds=$((30 * 1000))
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -111,14 +112,14 @@ fi
 waitForServerReady() {
 	echo "Waiting for server to be ready..."
 	startSeconds=$SECONDS
-	endSeconds=$(($startSeconds + $serverTimeoutSeconds))
+	endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 	while true; do
 		if "${serverHome}/bin/jboss-cli.sh" --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
 			echo "Server ready after $(($SECONDS - $startSeconds)) seconds."
 			break
 		fi
 		if [[ $SECONDS -gt $endSeconds ]]; then
-			error ${LINENO} "Error: Server failed to be ready within ${serverTimeoutSeconds} seconds." 3
+			error ${LINENO} "Error: Server failed to be ready within ${serverReadyTimeoutSeconds} seconds." 3
 		fi
 		sleep 1
 	done
@@ -144,6 +145,7 @@ end-if
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
 	--connect \
+	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
 	${cliArgPassword} \
 	--file=/dev/stdin \
@@ -203,6 +205,7 @@ end-if
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
 	--connect \
+	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
 	${cliArgPassword} \
 	--file=/dev/stdin \
@@ -214,6 +217,7 @@ waitForServerReady
 echo "Deploying application: '${war}'..."
 "${serverHome}/bin/jboss-cli.sh" \
 	--connect \
+	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
 	${cliArgPassword} \
 	"deploy ${war} --name=ROOT.war --force" \

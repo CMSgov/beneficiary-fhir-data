@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Constants.
-serverTimeoutSeconds=120
+serverReadyTimeoutSeconds=120
+serverConnectTimeoutMilliseconds=$((30 * 1000))
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -98,20 +99,21 @@ run-batch
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
 	--connect \
+	--timeout=${serverConnectTimeoutMilliseconds} \
 	--file=/dev/stdin \
 	&> "${serverHome}/server-config.log"
 
 # Wait for the server to be ready again.
 echo "Server configured. Waiting for it to finish reloading..."
 startSeconds=$SECONDS
-endSeconds=$(($startSeconds + $serverTimeoutSeconds))
+endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 while true; do
 	if "${serverHome}/bin/jboss-cli.sh" --connect --command="ls" &> /dev/null; then
 		echo "Server reloaded in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
-		>&2 echo "Error: Server failed to reload within ${serverTimeoutSeconds} seconds. Trying to stop it..."
+		>&2 echo "Error: Server failed to reload within ${serverReadyTimeoutSeconds} seconds. Trying to stop it..."
 		"${scriptDirectory}/bluebutton-fhir-server-stop.sh" --directory "${directory}"
 		exit 3
 	fi
@@ -122,6 +124,7 @@ done
 echo "Deploying application: '${war}'..."
 "${serverHome}/bin/jboss-cli.sh" \
 	--connect \
+	--timeout=${serverConnectTimeoutMilliseconds} \
 	"deploy ${war} --name=ROOT.war" \
 	&>> "${serverHome}/server-config.log"
 # Note: No need to watch log here, as the command blocks until deployment is 
