@@ -103,6 +103,20 @@
 						</manifest>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.12</version>
+					<configuration>
+						<artifacts>
+							<artifact>
+								<file>${project.build.directory}/${project.artifactId}-${project.version}-capsule-fat.x</file>
+								<type>x</type>
+								<classifier>capsule-fat</classifier>
+							</artifact>
+						</artifacts>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -115,6 +129,19 @@
 					<execution>
 						<goals>
 							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-capsule-x</id>
+						<phase>package</phase>
+						<goals>
+							<goal>attach-artifact</goal>
 						</goals>
 					</execution>
 				</executions>
