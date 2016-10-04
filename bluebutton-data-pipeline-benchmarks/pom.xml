@@ -1,0 +1,179 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+		<artifactId>bluebutton-data-pipeline</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>bluebutton-data-pipeline-benchmarks</artifactId>
+	<packaging>jar</packaging>
+
+	<description>
+		A set of benchmarks/performance tests for the application.
+	</description>
+
+	<properties>
+		<!-- Override this in the build command, e.g. `-DskipBenchmarks=false`, 
+			to run this project's benchmarks as part of the build. (See `failsafe` plugin 
+			below for details.) -->
+		<skipBenchmarks>true</skipBenchmarks>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-app</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<!-- Provides various utilities, particularly for managing DB connections. -->
+			<groupId>com.justdavis.karl.jessentials</groupId>
+			<artifactId>jessentials-misc</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to write the benchmark data CSV files. -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<!-- Provides the maths necessary to analyze the benchmark results. -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
+		<dependency>
+			<!-- Provides a sane facade for the giant mess of incompatible logging 
+				frameworks in Java. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+				at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to run our unit and integration tests. -->
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Logback is used as the logging target/backend for SLF4J during tests: 
+				all logging events will be sent to it. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+				https://github.com/awaitility/awaitility -->
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-sampledata</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Configure failsafe to run the `*Benchmark.java` benchmark JUnit 
+						cases in this project, as part of the build. Disabled by default, unless 
+						`-DskipBenchmarks=false` is specified in the build command line. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<configuration>
+						<skipITs>${skipBenchmarks}</skipITs>
+						<includes>
+							<include>**/*Benchmark.java</include>
+						</includes>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- Use the dependency plugin to copy the Blue Button FHIR Server, 
+							for use in benchmarks. -->
+						<id>server-copy-artifacts</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+					<execution>
+						<!-- Also copy some additional artifacts needed for use in benchmarks. -->
+						<id>benchmarks-copy-artifacts</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+									<artifactId>bbonfhir-server-app</artifactId>
+									<version>${bbonfhir-server.version}</version>
+									<type>sh</type>
+									<classifier>server-config-healthapt</classifier>
+									<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
+									<destFileName>bbonfhir-server-app-server-config-healthapt.sh</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>bluebutton-data-pipeline-app</artifactId>
+									<version>${project.version}</version>
+									<classifier>capsule-fat</classifier>
+									<type>x</type>
+									<outputDirectory>${project.build.directory}/pipeline-app</outputDirectory>
+									<destFileName>bluebutton-data-pipeline-app-capsule-fat.x</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Will run the `*Benchmark.java` integration tests in this project, 
+					as part of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

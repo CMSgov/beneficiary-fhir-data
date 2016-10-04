@@ -1,0 +1,7 @@
+## -*- shell-script -*- ######################################################
+##                                                                          ##
+##  JBoss Bootstrap Script Configuration                                    ##
+##                                                                          ##
+##############################################################################
+JAVA_OPTS="-Xmx5g -XX:MaxMetaspaceSize=2g -Djava.net.preferIPv4Stack=true"
+JAVA_OPTS="$JAVA_OPTS -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+export S3_BUCKET_NAME='bb-benchmark-{{ iteration_index }}'
+export FHIR_SERVER_URL='https://{{ hostvars['fhir']['ansible_host'] }}:{{ fhir_port }}/baseDstu2'
+export KEY_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-{{ iteration_index }}-keystore.jks'
+export KEY_STORE_PASSWORD='changeit'
+export TRUST_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-{{ iteration_index }}-truststore.jks'
+export TRUST_STORE_PASSWORD='changeit'
+
+{# The 'env' lookup plugin retries values from the management machine. #}
+{# This test will fail if both variables aren't defined and non-empty. #}
+{% if lookup('env','AWS_ACCESS_KEY_ID') and lookup('env','AWS_SECRET_KEY') %}
+export AWS_ACCESS_KEY_ID='{{ lookup('env','AWS_ACCESS_KEY_ID') }}'
+export AWS_SECRET_ACCESS_KEY='{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}'
+{% endif %}
+
+"/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.x" \
+	&> "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
