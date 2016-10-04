@@ -124,6 +124,10 @@ waitForServerReady() {
 	done
 }
 
+# Wait for the server to be ready, in case this script is being called right
+# after the server is started/restarted.
+waitForServerReady
+
 # Use the Wildfly CLI to configure the server.
 # This has to be run first as until it's done and the server has reloaded, any 
 # attempts to add an `https-listener` will fail.
@@ -190,6 +194,9 @@ end-if
 if (outcome == success) of /subsystem=datasources/data-source=fhirds:read-resource
 	/subsystem=datasources/data-source=fhirds:remove
 end-if
+
+# Configure the server to listen on all configured IPs.
+/interface=public:write-attribute(name=inet-address,value="0.0.0.0")
 
 # Reload the server to apply those changes.
 :reload
