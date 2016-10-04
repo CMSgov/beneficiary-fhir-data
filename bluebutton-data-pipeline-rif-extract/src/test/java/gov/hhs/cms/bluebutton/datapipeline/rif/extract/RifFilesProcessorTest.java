@@ -17,6 +17,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup.DMEClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup.HHAClaimLine;
@@ -722,6 +724,119 @@ public final class RifFilesProcessorTest {
 		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_HHA.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_HHA.getRifFileType(),
+				rifEventsList.get(0).getFile().getFileType());
+	}
+
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_A_DME}.
+	 */
+	@Test
+	public void process1DMEClaimRecord() {
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_DME);
+		Stream<RifFile> rifFiles = generator.generate();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifEvents = processor.process(filesEvent);
+
+		Assert.assertNotNull(rifEvents);
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_DME.getRecordCount(), rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_DME.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent.getRecord());
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof DMEClaimGroup);
+
+		// Verify the claim header.
+		DMEClaimGroup claimGroup = (DMEClaimGroup) rifRecordEvent.getRecord();
+		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
+		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals("7", claimGroup.beneficiaryId);
+		Assert.assertEquals("02199961612", claimGroup.claimId);
+		Assert.assertEquals(new Character('M'), claimGroup.nearLineRecordIdCode);
+		Assert.assertEquals("82", claimGroup.claimTypeCode);
+		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimGroup.dateFrom);
+		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimGroup.dateThrough);
+		Assert.assertEquals(LocalDate.of(2014, 02, 14), claimGroup.weeklyProcessDate);
+		Assert.assertEquals(new Character('1'), claimGroup.claimEntryCode);
+		Assert.assertEquals("01", claimGroup.claimDispositionCode);
+		Assert.assertEquals("18003", claimGroup.carrierNumber);
+		Assert.assertEquals("1", claimGroup.paymentDenialCode);
+		Assert.assertEquals(new BigDecimal("591.75"), claimGroup.paymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
+		Assert.assertEquals("I61917", claimGroup.referringPhysicianUpin);
+		Assert.assertEquals("1891704375", claimGroup.referringPhysicianNpi);
+		Assert.assertEquals(new Character('A'), claimGroup.providerAssignmentIndicator);
+		Assert.assertEquals(new BigDecimal("591.75"), claimGroup.providerPaymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.beneficiaryPaymentAmount);
+		Assert.assertEquals(new BigDecimal("1752.75"), claimGroup.submittedChargeAmount);
+		Assert.assertEquals(new BigDecimal("754.79"), claimGroup.allowedChargeAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimGroup.beneficiaryPartBDeductAmount);
+		Assert.assertEquals(new Character('3'), claimGroup.hcpcsYearCode);
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "496"), claimGroup.diagnosisPrincipal);
+		Assert.assertEquals(1, claimGroup.diagnosesAdditional.size());
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "496"), claimGroup.diagnosesAdditional.get(0));
+		Assert.assertEquals("1891704375", claimGroup.referringPhysicianNpi);
+		Assert.assertEquals("00000000", claimGroup.clinicalTrialNumber);
+		Assert.assertEquals(4, claimGroup.lines.size());
+
+		// Verify one of the claim lines.
+		DMEClaimLine claimLine = claimGroup.lines.get(3);
+
+		Assert.assertEquals(new Integer(4), claimLine.number);
+		Assert.assertEquals("5934931963", claimLine.providerTaxNumber);
+		Assert.assertEquals("A5", claimLine.providerSpecialityCode);
+		Assert.assertEquals(new Character('1'), claimLine.providerParticipatingIndCode);
+		Assert.assertEquals(new BigDecimal("1"), claimLine.serviceCount);
+		Assert.assertEquals("9", claimLine.cmsServiceTypeCode);
+		Assert.assertEquals("12", claimLine.placeOfServiceCode);
+		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimLine.firstExpenseDate);
+		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimLine.lastExpenseDate);
+		Assert.assertEquals("Q0513", claimLine.hcpcsCode);
+		Assert.assertFalse(claimLine.hcpcsInitialModifierCode.isPresent());
+		Assert.assertFalse(claimLine.hcpcsSecondModifierCode.isPresent());
+		Assert.assertEquals("O1E", claimLine.betosCode);
+		Assert.assertEquals(new BigDecimal("25.87"), claimLine.paymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimLine.beneficiaryPaymentAmount);
+		Assert.assertEquals(new BigDecimal("25.87"), claimLine.providerPaymentAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimLine.beneficiaryPartBDeductAmount);
+		Assert.assertFalse(claimLine.primaryPayerCode.isPresent());
+		Assert.assertEquals(new BigDecimal("0"), claimLine.primaryPayerPaidAmount);
+		Assert.assertEquals(new BigDecimal("6.6"), claimLine.coinsuranceAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimLine.primaryPayerAllowedChargeAmount);
+		Assert.assertEquals(new BigDecimal("132"), claimLine.submittedChargeAmount);
+		Assert.assertEquals(new BigDecimal("33"), claimLine.allowedChargeAmount);
+		Assert.assertEquals("A", claimLine.processingIndicatorCode);
+		Assert.assertEquals(new Character('0'), claimLine.paymentCode);
+		Assert.assertEquals(new Character('0'), claimLine.serviceDeductibleCode);
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "496"), claimLine.diagnosis);
+		Assert.assertEquals(new BigDecimal("33"), claimLine.purchasePriceAmount);
+		Assert.assertEquals("1275697435", claimLine.providerNPI);
+		Assert.assertEquals("MO", claimLine.providerStateCode);
+		Assert.assertEquals(new BigDecimal("1"), claimLine.mtusCount);
+		Assert.assertEquals(new Character('4'), claimLine.mtusCode);
+		Assert.assertFalse(claimLine.nationalDrugCode.isPresent());
+	}
+
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_B_DME}.
+	 */
+	@Test
+	public void processDMEClaimRecords() {
+		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_DME);
+		Stream<RifFile> rifFiles = generator.generate();
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
+
+		RifFilesProcessor processor = new RifFilesProcessor();
+		Stream<RifRecordEvent<?>> rifEvents = processor.process(filesEvent);
+
+		Assert.assertNotNull(rifEvents);
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_DME.getRecordCount(), rifEventsList.size());
+		Assert.assertEquals(StaticRifResource.SAMPLE_B_DME.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
 	}
 

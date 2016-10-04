@@ -10,8 +10,7 @@ public enum RifFileType {
 
 	CARRIER(Pattern.compile(".*bcarrier.*")),
 
-	// TODO
-	DME(Pattern.compile("TODO")),
+	DME(Pattern.compile(".*dme.*")),
 
 	HHA(Pattern.compile(".*hha.*")),
 
