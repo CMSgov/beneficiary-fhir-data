@@ -4,3 +4,6 @@
 
 # Ignore Maven output folders
 /target*/
+
+# The Derby driver writes out these obnoxious files even when it's not being used.
+*/derby.log
