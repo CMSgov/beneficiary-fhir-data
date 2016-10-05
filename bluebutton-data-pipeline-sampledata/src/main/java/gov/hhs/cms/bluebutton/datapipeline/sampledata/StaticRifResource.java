@@ -57,6 +57,13 @@ public enum StaticRifResource {
 
 	/**
 	 * This file was manually created by copying a single claim from
+	 * {@link StaticRifResource#SAMPLE_B_DME}, and adjusting its beneficiary to
+	 * match {@link #SAMPLE_A_BENES}.
+	 */
+	SAMPLE_A_DME("rif-static-samples/sample-a-dme.txt", RifFileType.DME, 1),
+
+	/**
+	 * This file was manually created by copying a single claim from
 	 * {@link StaticRifResource#SAMPLE_B_CARRIER}, adjusting its beneficiary to
 	 * match {@link #SAMPLE_A_BENES}, and editing some of the values to be
 	 * better suited for testing against.
@@ -81,6 +88,8 @@ public enum StaticRifResource {
 	SAMPLE_B_HOSPICE("rif-static-samples/sample-b-hospice.txt", RifFileType.HOSPICE, 9),
 
 	SAMPLE_B_HHA("rif-static-samples/sample-b-hha.txt", RifFileType.HHA, 22),
+
+	SAMPLE_B_DME("rif-static-samples/sample-b-dme.txt", RifFileType.DME, 82),
 
 	SAMPLE_B_PDE("rif-static-samples/sample-b-pde.txt", RifFileType.PDE, 1195);
 
