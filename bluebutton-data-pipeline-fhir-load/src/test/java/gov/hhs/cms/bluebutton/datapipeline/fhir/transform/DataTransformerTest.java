@@ -816,11 +816,13 @@ public final class DataTransformerTest {
 		Assert.assertNotNull(OutpatientBundleWrapper.getResult());
 
 		Bundle claimBundle = OutpatientBundleWrapper.getResult();
+
 		/*
 		 * Bundle should have: 1) EOB, 2) Organization, 3) Practitioner
 		 * (attending physician) 4) Practitioner (Operating Physician), 5)
 		 * Practitioner (Other physician)
 		 */
+
 		Assert.assertEquals(5, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
