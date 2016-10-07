@@ -821,16 +821,9 @@ public final class DataTransformer {
 
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
 
-			/*
-			 * Upsert Medication using NDC as the ID if present.
-			 */
 			if (claimLine.nationalDrugCode.isPresent()) {
-				Medication medication = new Medication();
-				Reference medicationRef = new Reference("Medication/ndc-" + claimLine.nationalDrugCode);
-				CodeableConcept ndcConcept = new CodeableConcept();
-				ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(claimLine.nationalDrugCode.toString());
-				medication.setCode(ndcConcept);
-				upsert(bundle, medication, medicationRef.getReference());
+				item.addExtension().setUrl(CODING_SYSTEM_NDC)
+						.setValue(new StringType(claimLine.nationalDrugCode.toString()));
 			}
 
 		}
@@ -888,20 +881,20 @@ public final class DataTransformer {
 				referenceOrganizationByNpi(claimGroup.organizationNpi).getReference());
 		eob.setOrganization(serviceProviderOrgReference);
 
-		Practitioner attendingPhysician = new Practitioner();
-		attendingPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.attendingPhysicianNpi);
-		Reference attendingPhysicianRef = referencePractitioner(claimGroup.attendingPhysicianNpi);
-		upsert(bundle, attendingPhysician, attendingPhysicianRef.getReference());
+		if (!claimGroup.attendingPhysicianNpi.isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi));
+		}
 
-		Practitioner operatingPhysician = new Practitioner();
-		operatingPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.operatingPhysicianNpi);
-		Reference operatingPhysicianRef = referencePractitioner(claimGroup.operatingPhysicianNpi);
-		upsert(bundle, operatingPhysician, operatingPhysicianRef.getReference());
+		if (!claimGroup.operatingPhysicianNpi.isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
+					.setValue(new StringType(claimGroup.operatingPhysicianNpi));
+		}
 
-		Practitioner otherPhysician = new Practitioner();
-		otherPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.otherPhysicianNpi);
-		Reference otherPhysicianRef = referencePractitioner(claimGroup.otherPhysicianNpi);
-		upsert(bundle, otherPhysician, otherPhysicianRef.getReference());
+		if (!claimGroup.otherPhysicianNpi.isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
+					.setValue(new StringType(claimGroup.otherPhysicianNpi));
+		}
 
 		/*
 		 * TODO once STU3 is available, transform financial/payment amounts into
@@ -933,10 +926,19 @@ public final class DataTransformer {
 			 * claimServiceClassificationTypeCode into eob.item.category.
 			 */
 			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode));
-			// Only add adjudication to first line
-			if (claimLine.lineNumber.equals(1)) {
-				addItemAdjudications(item, claimGroup);
-			}
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.totalChargeAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
+					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+					.setValue(claimLine.nonCoveredChargeAmount);
+
 			/*
 			 * TODO once STU3 available, transform revenue line items to
 			 * eob.item.revenue and eob.item.careteam
@@ -996,21 +998,20 @@ public final class DataTransformer {
 				referenceOrganizationByNpi(claimGroup.organizationNpi).getReference());
 		eob.setOrganization(serviceProviderOrgReference);
 
-		Practitioner attendingPhysician = new Practitioner();
-		attendingPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.attendingPhysicianNpi);
-		Reference attendingPhysicianRef = referencePractitioner(claimGroup.attendingPhysicianNpi);
-		upsert(bundle, attendingPhysician, attendingPhysicianRef.getReference());
+		if (!claimGroup.attendingPhysicianNpi.isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi));
+		}
 
-		Practitioner operatingPhysician = new Practitioner();
-		operatingPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.operatingPhysicianNpi);
-		Reference operatingPhysicianRef = referencePractitioner(claimGroup.operatingPhysicianNpi);
-		upsert(bundle, operatingPhysician, operatingPhysicianRef.getReference());
+		if (!claimGroup.operatingPhysicianNpi.isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
+					.setValue(new StringType(claimGroup.operatingPhysicianNpi));
+		}
 
-		Practitioner otherPhysician = new Practitioner();
-		otherPhysician.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-				.setValue(claimGroup.otherPhysicianNpi.toString());
-		Reference otherPhysicianRef = referencePractitioner(claimGroup.otherPhysicianNpi.toString());
-		upsert(bundle, otherPhysician, otherPhysicianRef.getReference());
+		if (!claimGroup.otherPhysicianNpi.toString().isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
+					.setValue(new StringType(claimGroup.otherPhysicianNpi.toString()));
+		}
 
 		/*
 		 * TODO once STU3 is available, transform financial/payment amounts into
@@ -1601,16 +1602,9 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.purchasePriceAmount);
 
-			/*
-			 * Upsert Medication using NDC as the ID if present.
-			 */
 			if (claimLine.nationalDrugCode.isPresent()) {
-				Medication medication = new Medication();
-				Reference medicationRef = new Reference("Medication/ndc-" + claimLine.nationalDrugCode);
-				CodeableConcept ndcConcept = new CodeableConcept();
-				ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(claimLine.nationalDrugCode.toString());
-				medication.setCode(ndcConcept);
-				upsert(bundle, medication, medicationRef.getReference());
+				item.addExtension().setUrl(CODING_SYSTEM_NDC)
+						.setValue(new StringType(claimLine.nationalDrugCode.toString()));
 			}
 
 		}
@@ -1867,60 +1861,4 @@ public final class DataTransformer {
 		item.addDiagnosisLinkId(diagnosisSequence);
 	}
 
-	/**
-	 * 
-	 * @param item
-	 *            {@link ItemsComponent} to add adjudication entries to
-	 * @param claimGroup
-	 *            the claim group line where amounts are located
-	 */
-	private static void addItemAdjudications(ItemsComponent item, InpatientClaimGroup claimGroup) {
-		item.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.primaryPayerPaidAmount);
-
-		item.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_PASS_THRU_PER_DIEM_AMOUNT))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.passThruPerDiemAmount);
-
-		item.addAdjudication()
-				.setCategory(
-						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_DEDUCTIBLE))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.deductibleAmount);
-
-		item.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.partACoinsuranceLiabilityAmount);
-
-		item.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_BLOOD_DEDUCTIBLE))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.bloodDeductibleLiabilityAmount);
-
-		item.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_PROFESSIONAL_COMP_CHARGE))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.professionalComponentCharge);
-
-		item.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.noncoveredCharge);
-
-		item.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_TOTAL_DEDUCTION_AMOUNT))
-				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-				.setValue(claimGroup.totalDeductionAmount);
-	}
 }
