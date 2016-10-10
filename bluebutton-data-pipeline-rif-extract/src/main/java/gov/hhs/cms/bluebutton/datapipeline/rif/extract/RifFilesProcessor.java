@@ -786,6 +786,10 @@ public final class RifFilesProcessor {
 
 			claimLine.lineNumber = parseInt(claimLineRecord.get(InpatientClaimGroup.Column.CLM_LINE_NUM));
 			claimLine.hcpcsCode = claimLineRecord.get(InpatientClaimGroup.Column.HCPCS_CD);
+			claimLine.totalChargeAmount = parseDecimal(
+					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
+			claimLine.nonCoveredChargeAmount = parseDecimal(
+					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 
 			claimGroup.lines.add(claimLine);
 		}
@@ -1276,8 +1280,11 @@ public final class RifFilesProcessor {
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
 		 */
-
-		return new BigDecimal(decimalText);
+		if (decimalText.isEmpty()) {
+			return new BigDecimal(0);
+		} else {
+			return new BigDecimal(decimalText);
+		}
 	}
 
 	/**

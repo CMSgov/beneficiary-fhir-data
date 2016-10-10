@@ -316,6 +316,16 @@ public final class InpatientClaimGroup {
 		public String hcpcsCode;
 
 		/**
+		 * @see Column#REV_CNTR_TOT_CHRG_AMT
+		 */
+		public BigDecimal totalChargeAmount;
+
+		/**
+		 * @see Column#REV_CNTR_NCVRD_CHRG_AMT
+		 */
+		public BigDecimal nonCoveredChargeAmount;
+
+		/**
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
@@ -325,6 +335,10 @@ public final class InpatientClaimGroup {
 			builder.append(lineNumber);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
+			builder.append(", totalChargeAmount=");
+			builder.append(totalChargeAmount);
+			builder.append(", nonCoveredChargeAmount=");
+			builder.append(nonCoveredChargeAmount);
 			builder.append("]");
 			return builder.toString();
 		}
@@ -1586,7 +1600,21 @@ public final class InpatientClaimGroup {
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
 		 */
-		HCPCS_CD;
+		HCPCS_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_chrg.txt">
+		 * CCW Data Dictionary: REV_CHRG </a>.
+		 */
+		REV_CNTR_TOT_CHRG_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_ncvr.txt">
+		 * CCW Data Dictionary: REV_NCVR </a>.
+		 */
+		REV_CNTR_NCVRD_CHRG_AMT;
 
 		/**
 		 * @return a {@link String} array containing all of the RIF column

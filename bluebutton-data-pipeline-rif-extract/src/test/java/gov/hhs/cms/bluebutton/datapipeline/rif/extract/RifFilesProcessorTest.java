@@ -96,7 +96,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_BENES}.
 	 */
 	@Test
-	public void process1000BeneRecords() {
+	public void processBeneRecords() {
 		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_BENES);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
@@ -185,7 +185,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_PDE}.
 	 */
 	@Test
-	public void process1195PDERecords() {
+	public void processPDERecords() {
 		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_PDE);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
@@ -309,7 +309,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_CARRIER}.
 	 */
 	@Test
-	public void process1091CarrierClaimRecords() {
+	public void processCarrierClaimRecords() {
 		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_CARRIER);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
@@ -383,11 +383,9 @@ public final class RifFilesProcessorTest {
 		Assert.assertFalse(claimGroup.diagnosisFirstClaimExternal.isPresent());
 		Assert.assertEquals(25, claimGroup.lines.size());
 		// Verify one of the claim lines.
-		InpatientClaimLine claimLine = claimGroup.lines.get(5);
-		// TODO Inpatient claim file at line level doesn't match record
-		// layout Scott K. is researching. Just want to make sure test file in
-		// project is correct at line level.
-		// Assert.assertEquals(new Integer(5), claimLine.lineNumber);
+		InpatientClaimLine claimLine = claimGroup.lines.get(0);
+		Assert.assertEquals(new BigDecimal("0"), claimLine.totalChargeAmount);
+		Assert.assertEquals(new BigDecimal("0"), claimLine.nonCoveredChargeAmount);
 
 	}
 
@@ -396,7 +394,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_INPATIENT}.
 	 */
 	@Test
-	public void process27InpatientClaimRecords() {
+	public void processInpatientClaimRecords() {
 		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_INPATIENT);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
@@ -480,7 +478,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_OUTPATIENT}.
 	 */
 	@Test
-	public void process340OutpatientClaimRecords() {
+	public void processOutpatientClaimRecords() {
 		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_OUTPATIENT);
 		Stream<RifFile> rifFiles = generator.generate();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
