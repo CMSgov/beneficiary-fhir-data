@@ -720,6 +720,7 @@ public final class DataTransformerTest {
 				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT, recordLine1.totalChargeAmount,
 				eobItem0.getAdjudication());
+
 	}
 
 	/**
