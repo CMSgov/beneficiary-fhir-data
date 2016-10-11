@@ -3,6 +3,7 @@
 # Constants.
 serverVersion='8.1.0.Final'
 serverInstall="wildfly-${serverVersion}"
+serverConnectTimeoutMilliseconds=$((30 * 1000))
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -36,6 +37,7 @@ serverLogRun="${directory}/${serverInstall}/server-console.log"
 serverLogStop="${directory}/${serverInstall}/server-stop.log"
 "${directory}/${serverInstall}/bin/jboss-cli.sh" \
 	--connect \
+	--timeout=${serverConnectTimeoutMilliseconds} \
 	--command=shutdown \
 	&> "${serverLogStop}"
 
