@@ -145,7 +145,7 @@ while true; do
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to start within ${serverTimeoutSeconds} seconds. Trying to stop it..."
-		"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+		"${scriptDirectory}/bbonfhir-server-app-server-stop.sh" --directory "${directory}"
 		exit 3
 	fi
 	sleep 1
