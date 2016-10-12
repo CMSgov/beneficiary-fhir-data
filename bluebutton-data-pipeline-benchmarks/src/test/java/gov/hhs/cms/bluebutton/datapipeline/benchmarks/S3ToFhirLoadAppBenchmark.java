@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -159,8 +160,11 @@ public final class S3ToFhirLoadAppBenchmark {
 			Future<BenchmarkResult> benchmarkResultFuture = benchmarkExecutorService.submit(benchmarkTask);
 			benchmarkTasks.put(benchmarkTask, benchmarkResultFuture);
 		}
+		LOGGER.info("Initialized benchmarks: '{}' iterations, across '{}' threads.", NUMBER_OF_ITERATIONS,
+				MAX_ACTIVE_ENVIRONMENTS);
 
 		// Wait for all iterations to finish, collecting results.
+		int numberOfFailedIterations = 0;
 		List<BenchmarkResult> benchmarkResults = new ArrayList<>(NUMBER_OF_ITERATIONS);
 		for (BenchmarkTask benchmarkTask : benchmarkTasks.keySet()) {
 			BenchmarkResult benchmarkResult;
@@ -174,10 +178,22 @@ public final class S3ToFhirLoadAppBenchmark {
 				 */
 				throw new BadCodeMonkeyException(e);
 			} catch (ExecutionException e) {
-				throw new BenchmarkError("Benchmark iteration failed.", e);
+				/*
+				 * Given the large number of iterations we'd like to run here,
+				 * it's become clear that we're going to be playing whack-a-mole
+				 * with intermittent problems for a while. Accordingly, we'll
+				 * allow a small number of failures before giving up.
+				 */
+				LOGGER.warn("Benchmark iteration failed due to exception.", e);
+				numberOfFailedIterations++;
 			}
 		}
 		benchmarkExecutorService.shutdown();
+		int failedIterationsPercentage = 100 * numberOfFailedIterations / NUMBER_OF_ITERATIONS;
+		if (failedIterationsPercentage >= 10)
+			throw new BenchmarkError("Too many failed benchmark iterations: " + numberOfFailedIterations);
+		Collections.sort(benchmarkResults,
+				(o1, o2) -> Integer.valueOf(o1.getIterationIndex()).compareTo(Integer.valueOf(o2.getIterationIndex())));
 
 		// Find the benchmark data file to write the results to.
 		String benchmarkResultsFile = System.getProperty(SYS_PROP_RESULTS_FILE, null);
@@ -252,7 +268,7 @@ public final class S3ToFhirLoadAppBenchmark {
 					.ofMillis(Math.round(millisecondsPerRecord) * initialLoadRecordCount);
 			LOGGER.info(
 					"Projection: '{}' records in an initial load would take '{}',"
-							+ " at a rate of '{}' milliseconds per record (at a '{}' confidence interval).",
+							+ " averaging a record every '{}' milliseconds (at a '{}' confidence interval).",
 					initialLoadRecordCount, initialLoadDuration.toString(), millisecondsPerRecord, confidenceLevel);
 		}
 		LOGGER.info("This benchmark took '{}' to run, in wall clock time.",
