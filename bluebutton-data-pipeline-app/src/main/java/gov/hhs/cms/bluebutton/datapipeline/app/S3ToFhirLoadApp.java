@@ -2,7 +2,10 @@ package gov.hhs.cms.bluebutton.datapipeline.app;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -10,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import com.codahale.metrics.Timer;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 
@@ -90,39 +94,63 @@ public final class S3ToFhirLoadApp {
 		DataSetMonitorListener dataSetMonitorListener = new DataSetMonitorListener() {
 			@Override
 			public void dataAvailable(RifFilesEvent rifFilesEvent) {
+				Timer.Context timerDataSet = metrics
+						.timer(MetricRegistry.name(S3ToFhirLoadApp.class, "dataSet", "processed")).time();
+
 				/*
 				 * Each ETL stage produces a stream that will be handed off to
 				 * and processed by the next stage.
 				 */
-				Stream<RifRecordEvent<?>> rifRecordsStream = rifProcessor.process(rifFilesEvent);
-				Stream<TransformedBundle> transformedFhirStream = rifToFhirTransformer.transform(rifRecordsStream);
-				Stream<FhirBundleResult> fhirLoadResultsStream = fhirLoader.process(transformedFhirStream);
-
-				/*
-				 * Unless those streams are terminated by wiring them up to a
-				 * terminal operation (i.e. something that consumes them),
-				 * they'll just sit there, doing nothing. That's really the main
-				 * point of this `forEach(...)` block here.
-				 */
-				fhirLoadResultsStream.forEach(fhirResult -> {
-					/*
-					 * Don't really *need* to do anything here. The FhirLoader
-					 * already records metrics for each data set.
-					 */
-					LOGGER.debug("FHIR bundle load returned %d response entries.",
-							fhirResult.getOutputBundle().getTotal());
+				for (Stream<RifRecordEvent<?>> rifRecordStream : rifProcessor.process(rifFilesEvent)) {
+					Stream<TransformedBundle> transformedFhirStream = rifToFhirTransformer.transform(rifRecordStream);
+					Stream<CompletableFuture<FhirBundleResult>> fhirLoadResultsStream = fhirLoader
+							.process(transformedFhirStream);
+					Timer.Context timerDataSetFile = metrics
+							.timer(MetricRegistry.name(S3ToFhirLoadApp.class, "dataSet", "file", "processed")).time();
 
 					/*
-					 * TODO This is too late to do any error *recovery*, but the
-					 * result objects should contain some information that we
-					 * can check to see if a load operation
-					 * really-actually-couldn't-recover-failed. If one of those
-					 * is detected, we should stop processing and bail out of
-					 * the application. Or perhaps we should rely on the
-					 * FhirLoader to blow up if that happens? Whatever. One of
-					 * those.
+					 * We need to completely process each RifFile's records,
+					 * before moving onto the next file, to avoid data races and
+					 * foreign key violations. This is tricky to do right:
+					 * Streams are lazy, so none of the loading will even get
+					 * started until we try to access each Future. But if we
+					 * just `.forEach(future -> future.join())`, we're
+					 * processing things synchronously again. So: first collect
+					 * all the Futures to ensure they've started, then block
+					 * until they're all done.
 					 */
-				});
+					// FIXME switch from collect to count, to avoid mem errors
+					fhirLoadResultsStream.collect(Collectors.toList()).forEach(f -> {
+						Function<Throwable, ? extends FhirBundleResult> errorHandler = error -> {
+							/*
+							 * TODO This is probably not the right place to do
+							 * any error _recovery_, but it is likely the right
+							 * place to decide when/if a failure is "bad enough"
+							 * that the rest of processing should be stopped.
+							 * Right now we don't stop that way for _any_
+							 * failure, but we probably want to be more
+							 * discriminating than that.
+							 */
+							LOGGER.warn("Bundle failed to load.", error);
+							// throw new IllegalStateException(
+							// "Bundle failed to load, and we have no error
+							// recovery strategy yet.", error);
+							return null;
+						};
+
+						FhirBundleResult result = f.exceptionally(errorHandler).join();
+
+						/*
+						 * Don't really *need* to do anything else here. The
+						 * FhirLoader already records metrics for each data set.
+						 */
+						if (result != null)
+							LOGGER.debug("FHIR bundle load returned %d response entries.",
+									result.getOutputBundle().getTotal());
+					});
+					timerDataSetFile.stop();
+				}
+				timerDataSet.stop();
 			}
 
 			/**

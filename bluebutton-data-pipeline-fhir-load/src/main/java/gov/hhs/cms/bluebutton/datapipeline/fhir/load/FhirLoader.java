@@ -7,6 +7,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -43,8 +46,15 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 public final class FhirLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoader.class);
 
+	/**
+	 * The number of threads that will be used to simultaneously process
+	 * {@link #process(TransformedBundle)} operations.
+	 */
+	private static final int PARALLELISM = 10;
+
 	private final MetricRegistry metrics;
 	private final IGenericClient client;
+	private final ExecutorService loadExecutorService;
 
 	/**
 	 * A utility method that centralizes the creation of FHIR
@@ -81,6 +91,8 @@ public final class FhirLoader {
 							.register("http", PlainConnectionSocketFactory.getSocketFactory())
 							.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
 					null, null, null, 5000, TimeUnit.MILLISECONDS);
+			connectionManager.setDefaultMaxPerRoute(PARALLELISM * 2);
+			connectionManager.setMaxTotal(PARALLELISM * 2);
 			@SuppressWarnings("deprecation")
 			RequestConfig defaultRequestConfig = RequestConfig.custom()
 					.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
@@ -98,6 +110,12 @@ public final class FhirLoader {
 		}
 
 		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
+
+		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+		loggingInterceptor.setLogRequestSummary(true);
+		loggingInterceptor.setLogRequestBody(true);
+		client.registerInterceptor(loggingInterceptor);
+
 		return client;
 	}
 
@@ -121,42 +139,58 @@ public final class FhirLoader {
 			client.registerInterceptor(fhirClientLogging);
 
 		this.client = client;
+		this.loadExecutorService = Executors.newFixedThreadPool(PARALLELISM);
 	}
 
 	/**
 	 * @param dataToLoad
 	 *            the FHIR {@link TransformedBundle}s to be loaded to a FHIR
 	 *            server
-	 * @return the {@link FhirResult}s that record the results of each batch
-	 *         FHIR operation
+	 * @return the {@link Stream} of {@link CompletableFuture}
+	 *         {@link FhirResult}s that, when run, will push each
+	 *         {@link TransformedBundle} to the configured FHIR server and
+	 *         return the {@link FhirResult} for each operation
 	 */
-	public Stream<FhirBundleResult> process(Stream<TransformedBundle> dataToLoad) {
-		Timer.Context timerContextStream = metrics.timer(MetricRegistry.name(getClass(), "stream")).time();
-		Stream<FhirBundleResult> resultsStream = dataToLoad.map(bundle -> process(bundle));
-		timerContextStream.stop();
-
+	public Stream<CompletableFuture<FhirBundleResult>> process(Stream<TransformedBundle> dataToLoad) {
+		Stream<CompletableFuture<FhirBundleResult>> resultsStream = dataToLoad.map(bundle -> process(bundle));
 		return resultsStream;
 	}
 
 	/**
 	 * @param inputBundle
 	 *            the input {@link TransformedBundle} to process
-	 * @return a {@link FhirBundleResult} that models the results of the
-	 *         operation
+	 * @return a {@link CompletableFuture} for the {@link FhirBundleResult} that
+	 *         models the results of the operation
 	 */
-	private FhirBundleResult process(TransformedBundle inputBundle) {
-		Timer.Context timerContextBatch = metrics.timer(MetricRegistry.name(getClass(), "stream", "bundle")).time();
+	private CompletableFuture<FhirBundleResult> process(TransformedBundle inputBundle) {
+		return CompletableFuture.supplyAsync(() -> {
+			// Only one of these two Timer.Contexts will be applied.
+			Timer.Context timerBundleSuccess = metrics
+					.timer(MetricRegistry.name(getClass(), "timer", "bundles", "loaded")).time();
+			Timer.Context timerBundleFailure = metrics
+					.timer(MetricRegistry.name(getClass(), "timer", "bundles", "failed")).time();
 
-		// Push the input bundle.
-		int inputBundleCount = inputBundle.getResult().getEntry().size();
-		LOGGER.trace("Loading bundle with {} resources", inputBundleCount);
-		Bundle resultBundle = client.transaction().withBundle(inputBundle.getResult()).execute();
+			int inputBundleCount = inputBundle.getResult().getEntry().size();
+			try {
+				// Push the input bundle.
+				LOGGER.trace("Loading bundle with {} resources", inputBundleCount);
+				Bundle resultBundle = client.transaction().withBundle(inputBundle.getResult()).execute();
+				LOGGER.trace("Loaded bundle with {} resources", inputBundleCount);
 
-		// Update the metrics now that things have been pushed.
-		timerContextBatch.stop();
-		metrics.meter(MetricRegistry.name(getClass(), "stream", "processed-bundles")).mark(1);
-		metrics.meter(MetricRegistry.name(getClass(), "stream", "processed-resources")).mark(inputBundleCount);
+				// Update the metrics now that things have been pushed.
+				timerBundleSuccess.stop();
+				metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "loaded")).mark(1);
+				metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "loaded")).mark(inputBundleCount);
 
-		return new FhirBundleResult(inputBundle, resultBundle);
+				return new FhirBundleResult(inputBundle, resultBundle);
+			} catch (Throwable t) {
+				timerBundleFailure.stop();
+				metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "failed")).mark(1);
+				metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "failed")).mark(inputBundleCount);
+				LOGGER.trace("Failed to load bundle with {} resources", inputBundleCount);
+
+				throw new FhirLoadFailure(inputBundle, t);
+			}
+		}, loadExecutorService);
 	}
 }

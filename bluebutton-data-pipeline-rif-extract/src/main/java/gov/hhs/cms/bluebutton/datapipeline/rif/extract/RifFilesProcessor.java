@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -110,10 +111,12 @@ public final class RifFilesProcessor {
 	 * 
 	 * @param event
 	 *            the {@link RifFilesEvent} to be processed
-	 * @return the {@link RifRecordEvent}s that are produced from the specified
-	 *         {@link RifFilesEvent}
+	 * @return a {@link List} of {@link RifRecordEvent} {@link Stream}s, one
+	 *         {@link Stream} per {@link RifFile}, where each {@link Stream}
+	 *         must be processed serially in a single thread, to avoid data race
+	 *         conditions
 	 */
-	public Stream<RifRecordEvent<?>> process(RifFilesEvent event) {
+	public List<Stream<RifRecordEvent<?>>> process(RifFilesEvent event) {
 		/*
 		 * Given that the bottleneck in our ETL processing is the Load phase
 		 * (and likely always will be, due to network overhead and the FHIR
@@ -142,19 +145,13 @@ public final class RifFilesProcessor {
 		Collections.sort(filesOrderedSafely, someComparator);
 
 		/*
-		 * The flatMap(...) call is used here instead map(...), to merge the
-		 * Streams produced by produceRecords(...) into a single, flat/combined
-		 * Stream.
-		 */
-
-		/*
 		 * FIXME I've got a resource ownership problem: no way to tell when the
 		 * stream is fully mapped, such that it's safe to close the parser. I be
 		 * fucked.
 		 */
 
-		Stream<RifRecordEvent<?>> recordProducer = filesOrderedSafely.stream()
-				.flatMap(file -> produceRecords(event, file));
+		List<Stream<RifRecordEvent<?>>> recordProducer = filesOrderedSafely.stream()
+				.map(file -> produceRecords(event, file)).collect(Collectors.toList());
 		return recordProducer;
 	}
 
@@ -182,7 +179,8 @@ public final class RifFilesProcessor {
 		Stream<RifRecordEvent<?>> rifRecordStream;
 		if (file.getFileType() == RifFileType.BENEFICIARY) {
 			Iterator<CSVRecord> csvIterator = parser.iterator();
-			Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<CSVRecord> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecord -> {
@@ -193,7 +191,8 @@ public final class RifFilesProcessor {
 			});
 		} else if (file.getFileType() == RifFileType.PDE) {
 			Iterator<CSVRecord> csvIterator = parser.iterator();
-			Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<CSVRecord> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecord -> {
@@ -219,7 +218,8 @@ public final class RifFilesProcessor {
 			};
 
 			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
@@ -245,7 +245,8 @@ public final class RifFilesProcessor {
 			};
 
 			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
@@ -271,7 +272,8 @@ public final class RifFilesProcessor {
 			};
 
 			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
@@ -297,7 +299,8 @@ public final class RifFilesProcessor {
 			};
 
 			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
@@ -323,7 +326,8 @@ public final class RifFilesProcessor {
 			};
 
 			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
@@ -349,7 +353,8 @@ public final class RifFilesProcessor {
 			};
 
 			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
@@ -375,7 +380,8 @@ public final class RifFilesProcessor {
 			};
 
 			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator, 0);
+			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
 			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
 
 			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
@@ -466,8 +472,7 @@ public final class RifFilesProcessor {
 				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_ORIG));
 		beneficiaryRow.entitlementCodeCurrent = parseOptCharacter(
 				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_CURR));
-		beneficiaryRow.endStageRenalDiseaseCode = parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_ESRD_IND));
+		beneficiaryRow.endStageRenalDiseaseCode = parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_ESRD_IND));
 		beneficiaryRow.medicareEnrollmentStatusCode = parseOptString(
 				csvRecord.get(BeneficiaryRow.Column.BENE_MDCR_STATUS_CD));
 		beneficiaryRow.partATerminationCode = parseOptCharacter(
@@ -477,8 +482,7 @@ public final class RifFilesProcessor {
 		beneficiaryRow.hicn = csvRecord.get(BeneficiaryRow.Column.BENE_CRNT_HIC_NUM);
 		beneficiaryRow.nameSurname = csvRecord.get(BeneficiaryRow.Column.BENE_SRNM_NAME);
 		beneficiaryRow.nameGiven = csvRecord.get(BeneficiaryRow.Column.BENE_GVN_NAME);
-		beneficiaryRow.nameMiddleInitial = parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_MDL_NAME));
+		beneficiaryRow.nameMiddleInitial = parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_MDL_NAME));
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != beneficiaryRow.version)
@@ -507,15 +511,13 @@ public final class RifFilesProcessor {
 		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND));
 		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID);
 		pdeRow.beneficiaryId = csvRecord.get(PartDEventRow.Column.BENE_ID);
-		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT),
-				RIF_DATE_FORMATTER);
+		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT), RIF_DATE_FORMATTER);
 		pdeRow.paymentDate = parseOptDate(csvRecord.get(PartDEventRow.Column.PD_DT));
 		pdeRow.serviceProviderIdQualiferCode = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID_QLFYR_CD);
 		pdeRow.serviceProviderId = csvRecord.get(PartDEventRow.Column.SRVC_PRVDR_ID);
 		pdeRow.prescriberIdQualifierCode = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID_QLFYR_CD);
 		pdeRow.prescriberId = csvRecord.get(PartDEventRow.Column.PRSCRBR_ID);
-		pdeRow.prescriptionReferenceNumber = Long
-				.parseLong(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM));
+		pdeRow.prescriptionReferenceNumber = Long.parseLong(csvRecord.get(PartDEventRow.Column.RX_SRVC_RFRNC_NUM));
 		pdeRow.nationalDrugCode = csvRecord.get(PartDEventRow.Column.PROD_SRVC_ID);
 		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID);
 		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM);
@@ -528,29 +530,22 @@ public final class RifFilesProcessor {
 		pdeRow.dispensingStatuscode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD));
 		pdeRow.drugCoverageStatusCode = DrugCoverageStatus
 				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD));
-		pdeRow.adjustmentDeletionCode = parseOptCharacter(
-				csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD));
+		pdeRow.adjustmentDeletionCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD));
 		pdeRow.nonstandardFormatCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.NSTD_FRMT_CD));
 		pdeRow.pricingExceptionCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.PRCNG_EXCPTN_CD));
-		pdeRow.catastrophicCoverageCode = parseOptCharacter(
-				csvRecord.get(PartDEventRow.Column.CTSTRPHC_CVRG_CD));
+		pdeRow.catastrophicCoverageCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.CTSTRPHC_CVRG_CD));
 		pdeRow.grossCostBelowOutOfPocketThreshold = new BigDecimal(
 				csvRecord.get(PartDEventRow.Column.GDC_BLW_OOPT_AMT));
 		pdeRow.grossCostAboveOutOfPocketThreshold = new BigDecimal(
 				csvRecord.get(PartDEventRow.Column.GDC_ABV_OOPT_AMT));
 		pdeRow.patientPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.PTNT_PAY_AMT));
-		pdeRow.otherTrueOutOfPocketPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.OTHR_TROOP_AMT));
+		pdeRow.otherTrueOutOfPocketPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.OTHR_TROOP_AMT));
 		pdeRow.lowIncomeSubsidyPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.LICS_AMT));
-		pdeRow.patientLiabilityReductionOtherPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.PLRO_AMT));
-		pdeRow.partDPlanCoveredPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.CVRD_D_PLAN_PD_AMT));
-		pdeRow.partDPlanNonCoveredPaidAmount = new BigDecimal(
-				csvRecord.get(PartDEventRow.Column.NCVRD_PLAN_PD_AMT));
+		pdeRow.patientLiabilityReductionOtherPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.PLRO_AMT));
+		pdeRow.partDPlanCoveredPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.CVRD_D_PLAN_PD_AMT));
+		pdeRow.partDPlanNonCoveredPaidAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.NCVRD_PLAN_PD_AMT));
 		pdeRow.totalPrescriptionCost = new BigDecimal(csvRecord.get(PartDEventRow.Column.TOT_RX_CST_AMT));
-		pdeRow.prescriptionOriginationCode = parseOptCharacter(
-				csvRecord.get(PartDEventRow.Column.RX_ORGN_CD));
+		pdeRow.prescriptionOriginationCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.RX_ORGN_CD));
 		pdeRow.gapDiscountAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.RPTD_GAP_DSCNT_NUM));
 		/*
 		 * TODO Re-enable this mapping once it is determined for sure if this is
@@ -560,8 +555,7 @@ public final class RifFilesProcessor {
 		// csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD).charAt(0);
 		pdeRow.pharmacyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD);
 		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD);
-		pdeRow.submissionClarificationCode = parseOptString(
-				csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD));
+		pdeRow.submissionClarificationCode = parseOptString(csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD));
 
 		return pdeRow;
 	}
@@ -595,13 +589,11 @@ public final class RifFilesProcessor {
 		claimGroup.dateFrom = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_FROM_DT));
 		claimGroup.dateThrough = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.CLM_THRU_DT));
 		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(CarrierClaimGroup.Column.NCH_WKLY_PROC_DT));
-		claimGroup.claimEntryCode = parseCharacter(
-				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_ENTRY_CD));
+		claimGroup.claimEntryCode = parseCharacter(firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_ENTRY_CD));
 		claimGroup.claimDispositionCode = firstClaimLine.get(CarrierClaimGroup.Column.CLM_DISP_CD);
 		claimGroup.carrierNumber = firstClaimLine.get(CarrierClaimGroup.Column.CARR_NUM);
 		claimGroup.paymentDenialCode = firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_PMT_DNL_CD);
-		claimGroup.paymentAmount = parseDecimal(
-				firstClaimLine.get(CarrierClaimGroup.Column.CLM_PMT_AMT));
+		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(CarrierClaimGroup.Column.CLM_PMT_AMT));
 		claimGroup.primaryPayerPaidAmount = parseDecimal(
 				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_PRMRY_PYR_PD_AMT));
 		claimGroup.referringPhysicianUpin = firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_UPIN);
@@ -620,8 +612,7 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_CASH_DDCTBL_APLD_AMT));
 		claimGroup.hcpcsYearCode = parseCharacter(firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
 		claimGroup.referringProviderIdNumber = firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_RFRNG_PIN_NUM);
-		claimGroup.diagnosisPrincipal = parseIcdCode(
-				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD),
+		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, CarrierClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				CarrierClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
@@ -637,8 +628,7 @@ public final class RifFilesProcessor {
 			claimLine.performingPhysicianUpin = parseOptString(
 					claimLineRecord.get(CarrierClaimGroup.Column.PRF_PHYSN_UPIN));
 			claimLine.performingPhysicianNpi = claimLineRecord.get(CarrierClaimGroup.Column.PRF_PHYSN_NPI);
-			claimLine.organizationNpi = parseOptString(
-					claimLineRecord.get(CarrierClaimGroup.Column.ORG_NPI_NUM));
+			claimLine.organizationNpi = parseOptString(claimLineRecord.get(CarrierClaimGroup.Column.ORG_NPI_NUM));
 			claimLine.providerTypeCode = parseCharacter(
 					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_PRVDR_TYPE_CD));
 			claimLine.providerTaxNumber = claimLineRecord.get(CarrierClaimGroup.Column.TAX_NUM);
@@ -650,8 +640,7 @@ public final class RifFilesProcessor {
 			claimLine.reducedPaymentPhysicianAsstCode = parseCharacter(
 					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_RDCD_PMT_PHYS_ASTN_C));
 			claimLine.serviceCount = parseDecimal(claimLineRecord.get(CarrierClaimGroup.Column.LINE_SRVC_CNT));
-			claimLine.cmsServiceTypeCode = claimLineRecord
-					.get(CarrierClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD);
+			claimLine.cmsServiceTypeCode = claimLineRecord.get(CarrierClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD);
 			claimLine.placeOfServiceCode = claimLineRecord.get(CarrierClaimGroup.Column.LINE_PLACE_OF_SRVC_CD);
 			claimLine.linePricingLocalityCode = claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_PRCNG_LCLTY_CD);
 			claimLine.firstExpenseDate = parseDate(claimLineRecord.get(CarrierClaimGroup.Column.LINE_1ST_EXPNS_DT));
@@ -879,9 +868,12 @@ public final class RifFilesProcessor {
 
 			claimLine.lineNumber = parseInt(claimLineRecord.get(OutpatientClaimGroup.Column.CLM_LINE_NUM));
 			claimLine.hcpcsCode = claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_CD);
-			claimLine.bloodDeductibleAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT)); 
-			claimLine.cashDeductibleAmount = parseDecimal( claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_CASH_DDCTBL_AMT));
-			claimLine.wageAdjustedCoinsuranceAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_COINSRNC_WGE_ADJSTD_C));
+			claimLine.bloodDeductibleAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT));
+			claimLine.cashDeductibleAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_CASH_DDCTBL_AMT));
+			claimLine.wageAdjustedCoinsuranceAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_COINSRNC_WGE_ADJSTD_C));
 			claimLine.reducedCoinsuranceAmount = parseDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_RDCD_COINSRNC_AMT));
 			claimLine.providerPaymentAmount = parseDecimal(
@@ -896,7 +888,7 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
-			 
+
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -955,12 +947,12 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
 		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(SNFClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(SNFClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
-		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine,
-				SNFClaimGroup.Column.ICD_DGNS_CD1.ordinal(), SNFClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
+		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, SNFClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
+				SNFClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
 		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(firstClaimLine.get(SNFClaimGroup.Column.FST_DGNS_E_CD),
 				firstClaimLine.get(SNFClaimGroup.Column.FST_DGNS_E_VRSN_CD));
-		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine,
-				SNFClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(), SNFClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine, SNFClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
+				SNFClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
 
 		/*
 		 * TODO Need to parse procedure codes once STU3 is available
