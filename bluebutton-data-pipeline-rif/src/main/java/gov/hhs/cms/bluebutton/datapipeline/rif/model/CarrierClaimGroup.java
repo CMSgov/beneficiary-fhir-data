@@ -114,7 +114,7 @@ public final class CarrierClaimGroup {
 	/**
 	 * @see Column#RFR_PHYSN_NPI
 	 */
-	public String referringPhysicianNpi;
+	public Optional<String> referringPhysicianNpi;
 
 	/**
 	 * @see Column#CARR_CLM_PRVDR_ASGNMT_IND_SW
@@ -273,7 +273,7 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#PRF_PHYSN_UPIN
 		 */
-		public String performingPhysicianNpi;
+		public Optional<String> performingPhysicianNpi;
 
 		/**
 		 * @see Column#ORG_NPI_NUM
@@ -293,12 +293,12 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#PRVDR_STATE_CD
 		 */
-		public String providerStateCode;
+		public Optional<String> providerStateCode;
 
 		/**
 		 * @see Column#PRVDR_ZIP
 		 */
-		public String providerZipCode;
+		public Optional<String> providerZipCode;
 
 		/**
 		 * @see Column#PRVDR_SPCLTY
@@ -348,7 +348,7 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#HCPCS_CD
 		 */
-		public String hcpcsCode;
+		public Optional<String> hcpcsCode;
 
 		/**
 		 * @see Column#HCPCS_1ST_MDFR_CD
@@ -363,7 +363,7 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#BETOS_CD
 		 */
-		public String betosCode;
+		public Optional<String> betosCode;
 
 		/**
 		 * @see Column#LINE_NCH_PMT_AMT
@@ -693,7 +693,8 @@ public final class CarrierClaimGroup {
 		RFR_PHYSN_UPIN,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_npi.txt">
 		 * CCW Data Dictionary: RFR_NPI</a>.
 		 */
@@ -996,14 +997,16 @@ public final class CarrierClaimGroup {
 		TAX_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvstate.txt">
 		 * CCW Data Dictionary: PRVSTATE</a>.
 		 */
 		PRVDR_STATE_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 9. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 9 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provzip.txt">
 		 * CCW Data Dictionary: PROVZIP</a>.
 		 */
@@ -1073,7 +1076,8 @@ public final class CarrierClaimGroup {
 		LINE_LAST_EXPNS_DT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
 		 */
@@ -1096,7 +1100,8 @@ public final class CarrierClaimGroup {
 		HCPCS_2ND_MDFR_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 3 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt">
 		 * CCW Data Dictionary: BETOS</a>.
 		 */

@@ -115,17 +115,17 @@ public final class OutpatientClaimGroup {
 	/**
 	 * @see Column#ORG_NPI_NUM
 	 */
-	public String organizationNpi;
+	public Optional<String> organizationNpi;
 
 	/**
 	 * @see Column#AT_PHYSN_NPI
 	 */
-	public String attendingPhysicianNpi;
+	public Optional<String> attendingPhysicianNpi;
 
 	/**
 	 * @see Column#OP_PHYSN_NPI
 	 */
-	public String operatingPhysicianNpi;
+	public Optional<String> operatingPhysicianNpi;
 
 	/**
 	 * @see Column#OT_PHYSN_NPI
@@ -135,7 +135,7 @@ public final class OutpatientClaimGroup {
 	/**
 	 * @see Column#PTNT_DSCHRG_STUS_CD
 	 */
-	public String patientDischargeStatusCode;
+	public Optional<String> patientDischargeStatusCode;
 
 	/**
 	 * @see Column#CLM_TOT_CHRG_AMT
@@ -304,7 +304,7 @@ public final class OutpatientClaimGroup {
 		/**
 		 * @see Column#HCPCS_CD
 		 */
-		public String hcpcsCode;
+		public Optional<String> hcpcsCode;
 
 		/**
 		 * @see Column#REV_CNTR_BLOOD_DDCTBL_AMT
@@ -534,7 +534,8 @@ public final class OutpatientClaimGroup {
 		PRVDR_STATE_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 10. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orgnpinm.txt">
 		 * CCW Data Dictionary: ORGNPINM</a>.
 		 */
@@ -546,7 +547,8 @@ public final class OutpatientClaimGroup {
 		AT_PHYSN_UPIN,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_npi.txt">
 		 * CCW Data Dictionary: AT_NPI</a>.
 		 */
@@ -558,7 +560,8 @@ public final class OutpatientClaimGroup {
 		OP_PHYSN_UPIN,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/op_npi.txt">
 		 * CCW Data Dictionary: OP_NPI</a>.
 		 */
@@ -583,7 +586,8 @@ public final class OutpatientClaimGroup {
 		CLM_MCO_PD_SW,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/stus_cd.txt">
 		 * CCW Data Dictionary: STUS_CD</a>.
 		 */
@@ -1651,7 +1655,8 @@ public final class OutpatientClaimGroup {
 
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
 		 */
