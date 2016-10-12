@@ -49,6 +49,7 @@
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
         db_engine: postgres
         size: 10
+        backup_retention: 0
         instance_type: "{{ rds_instance_type }}"
         publicly_accessible: false
         username: "{{ postgres_master_username }}"
