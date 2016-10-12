@@ -390,40 +390,85 @@ public final class S3ToFhirLoadAppBenchmark {
 			AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
 			Path benchmarksDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations");
 
-			Path ansibleLog = benchmarksDir.resolve(String.format("ansible-%d.log", iterationIndex));
-			Files.createDirectories(ansibleLog.getParent());
-
+			/*
+			 * Run Ansible to: 1) create the benchmark systems in AWS, and 2)
+			 * configure the systems, starting the FHIR server and ETL service.
+			 */
 			Bucket bucket = null;
-			Process ansibleProcess = null;
+			Path benchmarkLog = benchmarksDir.resolve(String.format("ansible_benchmark_etl-%d.log", iterationIndex));
+			Files.createDirectories(benchmarkLog.getParent());
+			Process benchmarkProcess = null;
+			int benchmarkExitCode = -1;
 			try {
 				bucket = s3Client.createBucket(String.format("bb-benchmark-%d", iterationIndex));
 				pushDataSetToS3(s3Client, bucket, sampleData);
 
 				Path benchmarkScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
 						.resolve("test").resolve("ansible").resolve("benchmark_etl.sh");
-				ProcessBuilder ansibleProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
+				ProcessBuilder benchmarkProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
 						("" + iterationIndex), "--ec2keyname", ec2KeyName, "--ec2keyfile", ec2KeyFile.toString());
-				ansibleProcessBuilder.redirectErrorStream(true);
-				ansibleProcessBuilder.redirectOutput(ansibleLog.toFile());
+				benchmarkProcessBuilder.redirectErrorStream(true);
+				benchmarkProcessBuilder.redirectOutput(benchmarkLog.toFile());
 
-				ansibleProcess = ansibleProcessBuilder.start();
-				int ansibleExitCode = ansibleProcess.waitFor();
-				if (ansibleExitCode != 0)
-					throw new BenchmarkError(
-							String.format("Ansible failed with exit code '%d' for benchmark iteration '%d'.",
-									ansibleExitCode, iterationIndex));
+				benchmarkProcess = benchmarkProcessBuilder.start();
+				benchmarkExitCode = benchmarkProcess.waitFor();
+
+				/*
+				 * We don't want to check the value of the Ansible exit code yet
+				 * (and blow up if it != 0), because that would not give the
+				 * teardown a chance to run, which could leave things running in
+				 * AWS, wasting money. We'll do that after the teardown.
+				 */
 			} finally {
-				if (ansibleProcess != null)
-					ansibleProcess.destroyForcibly();
+				if (benchmarkProcess != null)
+					benchmarkProcess.destroyForcibly();
 				if (bucket != null)
 					DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
 			}
+
+			/*
+			 * Run Ansible again to: 1) Collect the ETL and FHIR logs, and 2)
+			 * destroy the benchmark systems in AWS.
+			 */
+			Path teardownLog = benchmarksDir
+					.resolve(String.format("ansible_benchmark_etl_teardown-%d.log", iterationIndex));
+			Process teardownProcess = null;
+			try {
+				Path teardownScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
+						.resolve("test").resolve("ansible").resolve("benchmark_etl_teardown.sh");
+				ProcessBuilder teardownProcessBuilder = new ProcessBuilder(teardownScript.toString(), "--iteration",
+						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
+				teardownProcessBuilder.redirectErrorStream(true);
+				teardownProcessBuilder.redirectOutput(teardownLog.toFile());
+
+				teardownProcess = teardownProcessBuilder.start();
+				int teardownExitCode = teardownProcess.waitFor();
+				if (teardownExitCode != 0)
+					throw new BenchmarkError(
+							String.format("Ansible failed with exit code '%d' for benchmark teardown iteration '%d'.",
+									teardownExitCode, iterationIndex));
+			} finally {
+				if (teardownProcess != null)
+					teardownProcess.destroyForcibly();
+			}
+
+			/*
+			 * Now that we've given the teardown a chance to run, blow up if the
+			 * initial Ansible run failed.
+			 */
+			if (benchmarkExitCode != 0)
+				throw new BenchmarkError(
+						String.format("Ansible failed with exit code '%d' for benchmark iteration '%d'.",
+								benchmarkExitCode, iterationIndex));
 
 			/*
 			 * Parse the ETL log that Ansible pulled to find out how long things
 			 * took.
 			 */
 			Path etlLogPath = benchmarksDir.resolve(String.format("etl-%d.log", iterationIndex));
+			if (!Files.isReadable(etlLogPath))
+				throw new BenchmarkError(
+						String.format("Failed to collect ETL log for benchmark iteration '%d'.", iterationIndex));
 			String dataSetStartText = Files.lines(etlLogPath).map(l -> PATTERN_DATA_SET_START.matcher(l))
 					.filter(m -> m.matches()).map(m -> m.group(1)).findFirst().get();
 			LocalDateTime dataSetStart = LocalDateTime.parse(dataSetStartText, ETL_LOG_DATE_TIME_FORMATTER);

@@ -1,10 +1,12 @@
 ---
+##
 # This playbook stands up the systems in AWS needed for one benchmark 
 # iteration, uses them to run the benchmark, and then destroys the systems.
 #
 # Usage:
-#  
+# 
 #     $ ansible-playbook benchmark_etl.yml --extra-vars "ec2_key_name=foo iteration_index=42"
+##
 
 - hosts: localhost
   name: AWS - Provision Resources and Instances
@@ -39,7 +41,7 @@
 #        state: present
 #        policy_name: BlueButtonBenchmarkETL
 #        policy_document: BlueButtonBenchmarkETL.policy.json
-#    
+    
     - name: RDS - Provision DB Server
       rds:
         command: create
@@ -66,8 +68,14 @@
         region: "{{ region }}"
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
       register: rds_server
-
-    - name: EC2 - Provision FHIR server
+    
+    - name: Add 'rds' to Inventory (In-Memory)
+      add_host:
+        hostname: rds
+        endpoint: "{{ rds_server.instance.endpoint }}"
+        port: "{{ rds_server.instance.port }}"
+    
+    - name: EC2 - Provision FHIR Server
       ec2:
         key_name: "{{ ec2_key_name }}"
         group:
@@ -87,7 +95,20 @@
           CreatedBy: "{{ whoami.stdout }}"
       register: ec2_fhir
     
-    - name: EC2 - Provision ETL server
+    - name: EC2 - Add FHIR Server to Inventory (In-Memory)
+      add_host:
+        hostname: fhir
+        ansible_host: "{{ ec2_fhir.instances[0].public_dns_name }}"
+    
+    - name: EC2 - Add FHIR Server to Inventory (for Teardown)
+      lineinfile:
+        dest: "../../../target/benchmark-iterations/hosts-{{ iteration_index }}"
+        regexp: '^fhir.*$'
+        line: "fhir ansible_host={{ ec2_fhir.instances[0].public_dns_name }} ec2_instance_id={{ ec2_fhir.instance_ids[0] }}"
+        state: present
+        create: true
+    
+    - name: EC2 - Provision ETL Server
       ec2:
         key_name: "{{ ec2_key_name }}"
         group:
@@ -109,21 +130,18 @@
           CreatedBy: "{{ whoami.stdout }}"
       register: ec2_etl
     
-    - name: Add 'rds' to Inventory (In-Memory)
-      add_host:
-        hostname: rds
-        endpoint: "{{ rds_server.instance.endpoint }}"
-        port: "{{ rds_server.instance.port }}"
-    
-    - name: Add 'fhir' to Inventory (In-Memory)
-      add_host:
-        hostname: fhir
-        ansible_host: "{{ ec2_fhir.instances[0].public_dns_name }}"
-    
-    - name: Add 'etl' to Inventory (In-Memory)
+    - name: EC2 - Add ETL Server to Inventory (In-Memory)
       add_host:
         hostname: etl
         ansible_host: "{{ ec2_etl.instances[0].public_dns_name }}"
+    
+    - name: EC2 - Add ETL Server to Inventory (for Teardown)
+      lineinfile:
+        dest: "../../../target/benchmark-iterations/hosts-{{ iteration_index }}"
+        regexp: '^etl.*$'
+        line: "etl ansible_host={{ ec2_etl.instances[0].public_dns_name }} ec2_instance_id={{ ec2_etl.instance_ids[0] }}"
+        state: present
+        create: true
     
     - name: Wait for SSH to come up
       wait_for:
@@ -189,40 +207,3 @@
       # Let it run for 20 minutes, checking it every 30s to see if it's done.
       async: 1200
       poll: 30
-
-- name: Collect ETL Log
-  hosts: etl
-  user: "{{ ssh_user }}"
-  gather_facts: true
-  
-  tasks:
-    
-    - fetch:
-        src: "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
-        dest: '../../../target/benchmark-iterations/'
-        flat: true
-        fail_on_missing: true
-
-- name: Terminate instances - Die Die Die
-  hosts: localhost
-  connection: local
-  
-  tasks:
-    
-    - name: Terminate RDS Server
-      rds:
-        command: delete
-        instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
-        region: "{{ region }}"
-        wait: true
-        wait_timeout: "{{ rds_wait_timeout }}"
-    - name: Terminate FHIR Server
-      ec2:
-        state: 'absent'
-        instance_ids: "{{ ec2_fhir.instance_ids }}"
-        region: "{{ region }}"
-    - name: Terminate ETL Server
-      ec2:
-        state: 'absent'
-        instance_ids: "{{ ec2_etl.instance_ids }}"
-        region: "{{ region }}"
