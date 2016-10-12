@@ -5,7 +5,7 @@
 #
 # Usage:
 # 
-# $ benchmark_etl.sh --iteration 42 ec2keyname bar
+# $ benchmark_etl.sh --iteration 42 --ec2keyname foo --ec2keyfile somedir/foo
 ##
 
 # Constants.
@@ -61,7 +61,7 @@ error() {
 }
 trap 'error ${LINENO}' ERR
 
-# If the virtualenv hasn't already been created, do so.
+# If the virtualenv hasn't already been created, error out.
 virtualEnvDirectory="${scriptDirectory}/../../../target/python-venv-ansible"
 if [[ ! -d "${virtualEnvDirectory}" ]]; then
 	>&2 echo "Virtual directory missing: '${virtualEnvDirectory}'."
