@@ -111,10 +111,11 @@ public final class FhirLoader {
 
 		IGenericClient client = ctx.newRestfulGenericClient(options.getFhirServer().toString());
 
-		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-		loggingInterceptor.setLogRequestSummary(true);
-		loggingInterceptor.setLogRequestBody(true);
-		client.registerInterceptor(loggingInterceptor);
+		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
+		fhirClientLogging.setLogRequestBody(LOGGER.isTraceEnabled());
+		fhirClientLogging.setLogResponseBody(LOGGER.isTraceEnabled());
+		if (LOGGER.isDebugEnabled())
+			client.registerInterceptor(fhirClientLogging);
 
 		return client;
 	}
@@ -132,12 +133,6 @@ public final class FhirLoader {
 		this.metrics = metrics;
 
 		IGenericClient client = createFhirClient(options);
-		LoggingInterceptor fhirClientLogging = new LoggingInterceptor();
-		fhirClientLogging.setLogRequestBody(LOGGER.isTraceEnabled());
-		fhirClientLogging.setLogResponseBody(LOGGER.isTraceEnabled());
-		if (LOGGER.isInfoEnabled())
-			client.registerInterceptor(fhirClientLogging);
-
 		this.client = client;
 		this.loadExecutorService = Executors.newFixedThreadPool(PARALLELISM);
 	}
