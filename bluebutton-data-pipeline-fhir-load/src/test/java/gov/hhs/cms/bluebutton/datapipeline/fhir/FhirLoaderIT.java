@@ -3,7 +3,6 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,8 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
-import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
-import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
@@ -87,8 +85,6 @@ public final class FhirLoaderIT {
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
-		fhirMetrics.registerAll(new MemoryUsageGaugeSet());
-		fhirMetrics.registerAll(new GarbageCollectorMetricSet());
 		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
 		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
@@ -115,17 +111,14 @@ public final class FhirLoaderIT {
 		List<FhirBundleResult> resultsList = new ArrayList<>();
 		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
 			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
-			Stream<CompletableFuture<FhirBundleResult>> resultStream = loader.process(fhirInputBundles);
-
-			/*
-			 * Block until each RifFile has finished processing, to avoid data
-			 * races and foreign key violations.
-			 */
-			resultStream.forEach(f -> resultsList.add(f.join()));
+			loader.process(fhirInputBundles, error -> {
+				throw new RuntimeException(error);
+			}, result -> {
+				resultsList.add(result);
+			});
 		}
 
 		LOGGER.info("FHIR resources loaded.");
-		fhirMetricsReporter.stop();
 		fhirMetricsReporter.report();
 
 		// Verify the results.
@@ -170,10 +163,7 @@ public final class FhirLoaderIT {
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
-		fhirMetrics.registerAll(new MemoryUsageGaugeSet());
-		fhirMetrics.registerAll(new GarbageCollectorMetricSet());
 		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
-		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Create the processors that will handle each stage of the pipeline.
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -181,26 +171,20 @@ public final class FhirLoaderIT {
 		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
 
 		// Link up the pipeline and run it.
+		Timer.Context timerDataSet = fhirMetrics.timer(MetricRegistry.name(FhirLoaderIT.class, "dataSet", "processed"))
+				.time();
 		List<FhirBundleResult> resultsList = new ArrayList<>();
 		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
 			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
-			Stream<CompletableFuture<FhirBundleResult>> resultStream = loader.process(fhirInputBundles);
-
-			/*
-			 * We need to completely process each RifFile's records, before
-			 * moving onto the next file, to avoid data races and foreign key
-			 * violations. This is tricky to do right: Streams are lazy, so none
-			 * of the loading will even get started until we try to access each
-			 * Future. But if we just `.forEach(future -> future.join())`, we're
-			 * processing things synchronously again. So: first collect all the
-			 * Futures to ensure they've started, then block until they're all
-			 * done.
-			 */
-			resultStream.collect(Collectors.toList()).forEach(f -> f.join());
+			loader.process(fhirInputBundles, error -> {
+				throw new RuntimeException(error);
+			}, result -> {
+				resultsList.add(result);
+			});
 		}
+		timerDataSet.stop();
 
 		LOGGER.info("FHIR resources loaded.");
-		fhirMetricsReporter.stop();
 		fhirMetricsReporter.report();
 
 		// Verify the results.

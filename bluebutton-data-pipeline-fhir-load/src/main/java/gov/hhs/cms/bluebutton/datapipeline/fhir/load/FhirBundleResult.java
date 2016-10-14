@@ -1,14 +1,16 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
 
+import java.util.function.Consumer;
+
 import org.hl7.fhir.dstu21.model.Bundle;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 
 /**
  * Helps model the results of
- * {@link FhirLoader#process(java.util.stream.Stream)} operations. Each
- * {@link FhirBundleResult} instance represents the results of a single
- * {@link TransformedBundle} entry's processing.
+ * {@link FhirLoader#process(java.util.stream.Stream, Consumer, Consumer)}
+ * operations. Each {@link FhirBundleResult} instance represents the results of
+ * a single {@link TransformedBundle} entry's processing.
  */
 public final class FhirBundleResult {
 	private final TransformedBundle inputBundle;

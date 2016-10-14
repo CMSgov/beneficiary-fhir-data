@@ -3,10 +3,8 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.codahale.metrics.MetricRegistry;
@@ -34,8 +32,10 @@ public final class FhirLoaderTest {
 		FhirLoader loader = new FhirLoader(new MetricRegistry(), options);
 
 		Stream<TransformedBundle> fhirStream = new ArrayList<TransformedBundle>().stream();
-		Stream<CompletableFuture<FhirBundleResult>> results = loader.process(fhirStream);
-		Assert.assertNotNull(results);
-		Assert.assertEquals(0L, results.count());
+		loader.process(fhirStream, error -> {
+			throw new AssertionError();
+		}, error -> {
+			throw new AssertionError();
+		});
 	}
 }
