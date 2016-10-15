@@ -48,6 +48,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 
 /**
@@ -59,7 +60,7 @@ public final class FhirLoader {
 
 	/**
 	 * The number of threads that will be used to simultaneously process
-	 * {@link #process(TransformedBundle)} operations.
+	 * {@link #processAsync(TransformedBundle)} operations.
 	 */
 	private static final int PARALLELISM = 10;
 
@@ -237,7 +238,7 @@ public final class FhirLoader {
 				resultHandler.accept(future.exceptionally(errorHandlerWrapper).join());
 			});
 		};
-		dataToLoad.map(bundle -> process(bundle))
+		dataToLoad.map(bundle -> processAsync(bundle))
 				.collect(BatchCollector.batchCollector(WINDOW_SIZE, futureBatchProcessor));
 
 		LOGGER.trace("Completed process(...).");
@@ -245,40 +246,50 @@ public final class FhirLoader {
 
 	/**
 	 * @param inputBundle
-	 *            the input {@link TransformedBundle} to process
+	 *            the input {@link LoadableFhirBundle} to process
 	 * @return a {@link CompletableFuture} for the {@link FhirBundleResult} that
 	 *         models the results of the operation
 	 */
-	private CompletableFuture<FhirBundleResult> process(TransformedBundle inputBundle) {
+	private CompletableFuture<FhirBundleResult> processAsync(LoadableFhirBundle inputBundle) {
 		return CompletableFuture.supplyAsync(() -> {
-			// Only one of these two Timer.Contexts will be applied.
-			Timer.Context timerBundleSuccess = metrics
-					.timer(MetricRegistry.name(getClass(), "timer", "bundles", "loaded")).time();
-			Timer.Context timerBundleFailure = metrics
-					.timer(MetricRegistry.name(getClass(), "timer", "bundles", "failed")).time();
-
-			int inputBundleCount = inputBundle.getResult().getEntry().size();
-			try {
-				// Push the input bundle.
-				LOGGER.trace("Loading bundle with {} resources", inputBundleCount);
-				Bundle resultBundle = client.transaction().withBundle(inputBundle.getResult()).execute();
-				LOGGER.trace("Loaded bundle with {} resources", inputBundleCount);
-
-				// Update the metrics now that things have been pushed.
-				timerBundleSuccess.stop();
-				metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "loaded")).mark(1);
-				metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "loaded")).mark(inputBundleCount);
-
-				return new FhirBundleResult(inputBundle, resultBundle);
-			} catch (Throwable t) {
-				timerBundleFailure.stop();
-				metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "failed")).mark(1);
-				metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "failed")).mark(inputBundleCount);
-				LOGGER.trace("Failed to load bundle with {} resources", inputBundleCount);
-
-				throw new FhirLoadFailure(inputBundle, t);
-			}
+			return process(inputBundle);
 		}, loadExecutorService);
+	}
+
+	/**
+	 * @param inputBundle
+	 *            the input {@link LoadableFhirBundle} to process
+	 * @return the {@link FhirBundleResult} that models the results of the
+	 *         operation
+	 */
+	public FhirBundleResult process(LoadableFhirBundle inputBundle) {
+		// Only one of these two Timer.Contexts will be applied.
+		Timer.Context timerBundleSuccess = metrics.timer(MetricRegistry.name(getClass(), "timer", "bundles", "loaded"))
+				.time();
+		Timer.Context timerBundleFailure = metrics.timer(MetricRegistry.name(getClass(), "timer", "bundles", "failed"))
+				.time();
+
+		int inputBundleCount = inputBundle.getResult().getEntry().size();
+		try {
+			// Push the input bundle.
+			LOGGER.trace("Loading bundle with {} resources", inputBundleCount);
+			Bundle resultBundle = client.transaction().withBundle(inputBundle.getResult()).execute();
+			LOGGER.trace("Loaded bundle with {} resources", inputBundleCount);
+
+			// Update the metrics now that things have been pushed.
+			timerBundleSuccess.stop();
+			metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "loaded")).mark(1);
+			metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "loaded")).mark(inputBundleCount);
+
+			return new FhirBundleResult(inputBundle, resultBundle);
+		} catch (Throwable t) {
+			timerBundleFailure.stop();
+			metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "failed")).mark(1);
+			metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "failed")).mark(inputBundleCount);
+			LOGGER.trace("Failed to load bundle with {} resources", inputBundleCount);
+
+			throw new FhirLoadFailure(inputBundle, t);
+		}
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import org.hl7.fhir.dstu21.model.Bundle;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 
 /**
@@ -13,7 +14,7 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
  * a single {@link TransformedBundle} entry's processing.
  */
 public final class FhirBundleResult {
-	private final TransformedBundle inputBundle;
+	private final LoadableFhirBundle inputBundle;
 	private final Bundle outputBundle;
 
 	/**
@@ -24,15 +25,15 @@ public final class FhirBundleResult {
 	 * @param outputBundle
 	 *            the value to use for {@link #getOutputBundle()}
 	 */
-	public FhirBundleResult(TransformedBundle inputBundle, Bundle outputBundle) {
+	public FhirBundleResult(LoadableFhirBundle inputBundle, Bundle outputBundle) {
 		this.inputBundle = inputBundle;
 		this.outputBundle = outputBundle;
 	}
 
 	/**
-	 * @return the input {@link TransformedBundle} that was processed
+	 * @return the input {@link LoadableFhirBundle} that was processed
 	 */
-	public TransformedBundle getInputBundle() {
+	public LoadableFhirBundle getInputBundle() {
 		return inputBundle;
 	}
 

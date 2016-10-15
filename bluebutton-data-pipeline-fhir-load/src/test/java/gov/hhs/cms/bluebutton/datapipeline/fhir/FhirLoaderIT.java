@@ -93,6 +93,9 @@ public final class FhirLoaderIT {
 		DataTransformer transformer = new DataTransformer();
 		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
 
+		// Create/update the shared data that FhirLoader will require.
+		new SharedDataManager(loader).upsertSharedData();
+
 		/*
 		 * Run the extraction an extra time upfront to grab some data for the
 		 * assertions below.
@@ -169,6 +172,9 @@ public final class FhirLoaderIT {
 		RifFilesProcessor processor = new RifFilesProcessor();
 		DataTransformer transformer = new DataTransformer();
 		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
+
+		// Create/update the shared data that FhirLoader will require.
+		new SharedDataManager(loader).upsertSharedData();
 
 		// Link up the pipeline and run it.
 		Timer.Context timerDataSet = fhirMetrics.timer(MetricRegistry.name(FhirLoaderIT.class, "dataSet", "processed"))

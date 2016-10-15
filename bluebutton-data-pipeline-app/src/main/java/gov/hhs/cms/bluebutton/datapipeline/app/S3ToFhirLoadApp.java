@@ -15,6 +15,7 @@ import com.codahale.metrics.Timer;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.SharedDataManager;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
@@ -84,6 +85,9 @@ public final class S3ToFhirLoadApp {
 		RifFilesProcessor rifProcessor = new RifFilesProcessor();
 		DataTransformer rifToFhirTransformer = new DataTransformer();
 		FhirLoader fhirLoader = new FhirLoader(metrics, appConfig.getLoadOptions());
+
+		// Create/update the shared data that FhirLoader will require.
+		new SharedDataManager(fhirLoader).upsertSharedData();
 
 		/*
 		 * Create the DataSetMonitorListener that will glue those stages
