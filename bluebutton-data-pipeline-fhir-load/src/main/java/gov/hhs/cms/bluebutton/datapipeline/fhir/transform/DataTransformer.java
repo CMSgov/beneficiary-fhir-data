@@ -444,8 +444,10 @@ public final class DataTransformer {
 		partA.setSubPlan(COVERAGE_PLAN_PART_A);
 		partA.setIssuer(cmsOrgRef);
 		partA.setSubscriber(referencePatient(record.beneficiaryId));
-		partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
-				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
+		if (record.medicareEnrollmentStatusCode.isPresent()) {
+			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
+		}
 		/*
 		 * TODO once STU3 is available, transform bene_pta_trmntn_cd into
 		 * partA.status
@@ -457,8 +459,10 @@ public final class DataTransformer {
 		partB.setSubPlan(COVERAGE_PLAN_PART_B);
 		partB.setIssuer(cmsOrgRef);
 		partB.setSubscriber(referencePatient(record.beneficiaryId));
-		partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
-				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
+		if (record.medicareEnrollmentStatusCode.isPresent()) {
+			partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
+		}
 		/*
 		 * TODO once STU3 is available, transform bene_ptb_trmntn_cd into
 		 * partB.status
@@ -470,8 +474,11 @@ public final class DataTransformer {
 		partD.setSubPlan(COVERAGE_PLAN_PART_D);
 		partD.setIssuer(cmsOrgRef);
 		partD.setSubscriber(referencePatient(record.beneficiaryId));
-		partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
-				.setValue(new StringType(record.medicareEnrollmentStatusCode.toString()));
+		if (record.medicareEnrollmentStatusCode.isPresent()) {
+			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
+					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
+		}
+
 		insert(bundle, partD);
 
 		return new TransformedBundle(rifRecordEvent, bundle);
@@ -727,9 +734,9 @@ public final class DataTransformer {
 		if (claimGroup.referringPhysicianNpi.isPresent()) {
 			Practitioner referrer = new Practitioner();
 			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.referringPhysicianNpi.toString());
+					.setValue(claimGroup.referringPhysicianNpi.get());
 			Reference referrerReference = upsert(bundle, referrer,
-					referencePractitioner(claimGroup.referringPhysicianNpi.toString()).getReference());
+					referencePractitioner(claimGroup.referringPhysicianNpi.get()).getReference());
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
@@ -771,11 +778,11 @@ public final class DataTransformer {
 			 * eob.item.category.
 			 */
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.toString()));
+				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS)
-						.setValue(new StringType(claimLine.betosCode.toString()));
+						.setValue(new StringType(claimLine.betosCode.get()));
 			}
 
 			item.addAdjudication()
@@ -830,7 +837,7 @@ public final class DataTransformer {
 
 			if (claimLine.nationalDrugCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_NDC)
-						.setValue(new StringType(claimLine.nationalDrugCode.toString()));
+						.setValue(new StringType(claimLine.nationalDrugCode.get()));
 			}
 
 		}
@@ -875,7 +882,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
-					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.toString()));
+					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
 		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
@@ -883,27 +890,27 @@ public final class DataTransformer {
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.organizationNpi.toString());
+					.setValue(claimGroup.organizationNpi.get());
 			serviceProviderOrg.setType(new CodeableConcept().addCoding(new Coding()
 				.setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD).setCode(claimGroup.claimFacilityTypeCode.toString())));
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
-					referenceOrganizationByNpi(claimGroup.organizationNpi.toString()).getReference());
+					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
 		}
 
 		if (claimGroup.operatingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.operatingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.operatingPhysicianNpi.get()));
 		}
 
 		if (claimGroup.otherPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.otherPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.otherPhysicianNpi.get()));
 		}
 
 		/*
@@ -937,7 +944,7 @@ public final class DataTransformer {
 			 */
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.toString()));
+				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 
 			item.addAdjudication()
@@ -998,7 +1005,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
-					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.toString()));
+					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
 		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
@@ -1006,27 +1013,27 @@ public final class DataTransformer {
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.organizationNpi.toString());
+					.setValue(claimGroup.organizationNpi.get());
 			serviceProviderOrg.setType(new CodeableConcept().addCoding(new Coding()
 				.setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD).setCode(claimGroup.claimFacilityTypeCode.toString())));
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
-					referenceOrganizationByNpi(claimGroup.organizationNpi.toString()).getReference());
+					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
 		}
 
 		if (claimGroup.operatingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.operatingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.operatingPhysicianNpi.get()));
 		}
 
 		if (claimGroup.otherPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.otherPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.otherPhysicianNpi.get()));
 		}
 
 		/*
@@ -1063,7 +1070,7 @@ public final class DataTransformer {
 			 * TODO once STU3 available, transform
 			 * claimServiceClassificationTypeCode into eob.item.category.
 			 */
-			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.toString()));
+			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
@@ -1166,7 +1173,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
-					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.toString()));
+					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
 		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
@@ -1174,27 +1181,27 @@ public final class DataTransformer {
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.organizationNpi.toString());
+					.setValue(claimGroup.organizationNpi.get());
 			serviceProviderOrg.setType(new CodeableConcept().addCoding(new Coding()
 				.setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD).setCode(claimGroup.claimFacilityTypeCode.toString())));
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
-					referenceOrganizationByNpi(claimGroup.organizationNpi.toString()).getReference());
+					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
 		}
 
 		if (claimGroup.operatingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.operatingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.operatingPhysicianNpi.get()));
 		}
 
 		if (claimGroup.otherPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.otherPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.otherPhysicianNpi.get()));
 		}
 
 		/*
@@ -1228,7 +1235,7 @@ public final class DataTransformer {
 			 * claimServiceClassificationTypeCode into eob.item.category.
 			 */
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.toString()));
+				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 
 			item.addAdjudication()
@@ -1289,7 +1296,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
-					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.toString()));
+					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
 		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
@@ -1297,17 +1304,17 @@ public final class DataTransformer {
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.organizationNpi.toString());
+					.setValue(claimGroup.organizationNpi.get());
 			serviceProviderOrg.setType(new CodeableConcept().addCoding(new Coding()
 				.setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD).setCode(claimGroup.claimFacilityTypeCode.toString())));
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
-					referenceOrganizationByNpi(claimGroup.organizationNpi.toString()).getReference());
+					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
 		}
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
@@ -1335,7 +1342,7 @@ public final class DataTransformer {
 			 * claimServiceClassificationTypeCode into eob.item.category.
 			 */
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.toString()));
+				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 
 			item.addAdjudication()
@@ -1409,7 +1416,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
-					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.toString()));
+					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
 		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
@@ -1417,17 +1424,17 @@ public final class DataTransformer {
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.organizationNpi.toString());
+					.setValue(claimGroup.organizationNpi.get());
 			serviceProviderOrg.setType(new CodeableConcept().addCoding(new Coding()
 				.setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD).setCode(claimGroup.claimFacilityTypeCode.toString())));
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
-					referenceOrganizationByNpi(claimGroup.organizationNpi.toString()).getReference());
+					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.toString()));
+					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
 		}
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
@@ -1455,7 +1462,7 @@ public final class DataTransformer {
 			 * claimServiceClassificationTypeCode into eob.item.category.
 			 */
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.toString()));
+				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 
 			item.addAdjudication()
@@ -1528,9 +1535,9 @@ public final class DataTransformer {
 		if (claimGroup.referringPhysicianNpi.isPresent()) {
 			Practitioner referrer = new Practitioner();
 			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.referringPhysicianNpi.toString());
+					.setValue(claimGroup.referringPhysicianNpi.get());
 			Reference referrerReference = upsert(bundle, referrer,
-					referencePractitioner(claimGroup.referringPhysicianNpi.toString()).getReference());
+					referencePractitioner(claimGroup.referringPhysicianNpi.get()).getReference());
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
@@ -1571,11 +1578,11 @@ public final class DataTransformer {
 			 * eob.item.category.
 			 */
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.toString()));
+				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS)
-						.setValue(new StringType(claimLine.betosCode.toString()));
+						.setValue(new StringType(claimLine.betosCode.get()));
 			}
 
 			item.addAdjudication()
@@ -1642,7 +1649,7 @@ public final class DataTransformer {
 
 			if (claimLine.nationalDrugCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_NDC)
-						.setValue(new StringType(claimLine.nationalDrugCode.toString()));
+						.setValue(new StringType(claimLine.nationalDrugCode.get()));
 			}
 
 		}
