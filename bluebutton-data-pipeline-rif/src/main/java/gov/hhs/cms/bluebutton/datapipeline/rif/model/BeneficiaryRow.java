@@ -63,7 +63,7 @@ public final class BeneficiaryRow {
 	/**
 	 * @see Column#BENE_RACE_CD
 	 */
-	public char race;
+	public Optional<Character> race;
 
 	/**
 	 * @see Column#BENE_ENTLMT_RSN_ORIG
@@ -224,7 +224,8 @@ public final class BeneficiaryRow {
 		BENE_SEX_IDENT_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt">
 		 * CCW Data Dictionary: BENE_RACE_CD</a>.
 		 */
