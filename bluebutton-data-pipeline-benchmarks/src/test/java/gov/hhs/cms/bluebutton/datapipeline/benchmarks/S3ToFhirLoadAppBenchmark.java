@@ -48,6 +48,7 @@ import com.codahale.metrics.SlidingWindowReservoir;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
@@ -87,7 +88,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	/**
 	 * The number of iterations that will be performed for each benchmark.
 	 */
-	private static final int NUMBER_OF_ITERATIONS = 2;
+	private static final int NUMBER_OF_ITERATIONS = 30;
 
 	/**
 	 * <p>
@@ -101,7 +102,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	 * be increased.
 	 * </p>
 	 */
-	private static final int MAX_ACTIVE_ENVIRONMENTS = 2;
+	private static final int MAX_ACTIVE_ENVIRONMENTS = 10;
 
 	/**
 	 * Benchmarks against {@link StaticRifResourceGroup#SAMPLE_B}.
@@ -225,7 +226,9 @@ public final class S3ToFhirLoadAppBenchmark {
 					benchmarkResult.getIterationTotalRunTime().toMillis());
 			Object[] recordFields = new String[] {
 					String.format("%s:%s", this.getClass().getSimpleName(), sampleData.name()), gitBranchName,
-					gitCommitSha, projectVersion, "AWS: DB=db.t2.micro, FHIR=m4.large, ETL=m4.large",
+					gitCommitSha, projectVersion,
+					String.format("AWS: DB=db.m4.2xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=%d",
+							FhirLoader.PARALLELISM),
 					DateTimeFormatter.ISO_INSTANT.format(startInstant), "" + benchmarkResult.getIterationIndex(),
 					"" + benchmarkResult.getDataSetProcessingTime().toMillis(), "" + recordCount, "" + beneficiaryCount,
 					testCaseExecutionData };
