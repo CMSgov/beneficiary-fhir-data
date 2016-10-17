@@ -162,7 +162,7 @@ public final class DMEClaimGroup {
 	/**
 	 * @see Column#RFR_PHYSN_NPI
 	 */
-	public String referringPhysicianNpi;
+	public Optional<String> referringPhysicianNpi;
 
 	/**
 	 * @see Column#CLM_CLNCL_TRIL_NUM
@@ -295,7 +295,7 @@ public final class DMEClaimGroup {
 		/**
 		 * @see Column#HCPCS_CD
 		 */
-		public String hcpcsCode;
+		public Optional<String> hcpcsCode;
 
 		/**
 		 * @see Column#HCPCS_1ST_MDFR_CD
@@ -310,7 +310,7 @@ public final class DMEClaimGroup {
 		/**
 		 * @see Column#BETOS_CD
 		 */
-		public String betosCode;
+		public Optional<String> betosCode;
 
 		/**
 		 * @see Column#LINE_NCH_PMT_AMT
@@ -835,7 +835,8 @@ public final class DMEClaimGroup {
 		RFR_PHYSN_UPIN,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rfr_npi.txt">
 		 * CCW Data Dictionary: RFR_NPI</a>.
 		 */
@@ -912,7 +913,8 @@ public final class DMEClaimGroup {
 		LINE_LAST_EXPNS_DT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
 		 */
@@ -935,7 +937,8 @@ public final class DMEClaimGroup {
 		HCPCS_2ND_MDFR_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
+		 * Type: <code>CHAR</code>, max chars : 3 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt">
 		 * CCW Data Dictionary: BETOS</a>.
 		 */

@@ -114,22 +114,22 @@ public final class SNFClaimGroup {
 	/**
 	 * @see Column#ORG_NPI_NUM
 	 */
-	public String organizationNpi;
+	public Optional<String> organizationNpi;
 
 	/**
 	 * @see Column#AT_PHYSN_NPI
 	 */
-	public String attendingPhysicianNpi;
+	public Optional<String> attendingPhysicianNpi;
 
 	/**
 	 * @see Column#OP_PHYSN_NPI
 	 */
-	public String operatingPhysicianNpi;
+	public Optional<String> operatingPhysicianNpi;
 
 	/**
 	 * @see Column#OT_PHYSN_NPI
 	 */
-	public String otherPhysicianNpi;
+	public Optional<String> otherPhysicianNpi;
 
 	/**
 	 * @see Column#PTNT_DSCHRG_STUS_CD
@@ -294,7 +294,7 @@ public final class SNFClaimGroup {
 		/**
 		 * @see Column#HCPCS_CD
 		 */
-		public String hcpcsCode;
+		public Optional<String> hcpcsCode;
 
 		/**
 		 * @see Column#REV_CNTR_TOT_CHRG_AMT
@@ -472,7 +472,8 @@ public final class SNFClaimGroup {
 		PRVDR_STATE_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 10. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orgnpinm.txt">
 		 * CCW Data Dictionary: ORGNPINM</a>.
 		 */
@@ -484,7 +485,8 @@ public final class SNFClaimGroup {
 		AT_PHYSN_UPIN,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_npi.txt">
 		 * CCW Data Dictionary: AT_NPI</a>.
 		 */
@@ -496,7 +498,8 @@ public final class SNFClaimGroup {
 		OP_PHYSN_UPIN,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/op_npi.txt">
 		 * CCW Data Dictionary: OP_NPI</a>.
 		 */
@@ -1658,7 +1661,8 @@ public final class SNFClaimGroup {
 		REV_CNTR,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
 		 */

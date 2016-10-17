@@ -114,12 +114,12 @@ public final class HospiceClaimGroup {
 	/**
 	 * @see Column#ORG_NPI_NUM
 	 */
-	public String organizationNpi;
+	public Optional<String> organizationNpi;
 
 	/**
 	 * @see Column#AT_PHYSN_NPI
 	 */
-	public String attendingPhysicianNpi;
+	public Optional<String> attendingPhysicianNpi;
 
 	/**
 	 * @see Column#PTNT_DSCHRG_STUS_CD
@@ -238,7 +238,7 @@ public final class HospiceClaimGroup {
 		/**
 		 * @see Column#HCPCS_CD
 		 */
-		public String hcpcsCode;
+		public Optional<String> hcpcsCode;
 
 		/**
 		 * @see Column#REV_CNTR_PRVDR_PMT_AMT
@@ -427,7 +427,8 @@ public final class HospiceClaimGroup {
 		PRVDR_STATE_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 10. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orgnpinm.txt">
 		 * CCW Data Dictionary: ORGNPINM</a>.
 		 */
@@ -439,7 +440,8 @@ public final class HospiceClaimGroup {
 		AT_PHYSN_UPIN,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 12. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 12 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/at_npi.txt">
 		 * CCW Data Dictionary: AT_NPI</a>.
 		 */
@@ -1074,7 +1076,8 @@ public final class HospiceClaimGroup {
 		REV_CNTR_DT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
 		 */
