@@ -6,10 +6,10 @@
 region: us-east-1
 
 # The EC2/RDS instance types to use for each system.
-ec2_instance_type_fhir: "m4.large"
-ec2_instance_type_etl: "m4.large"
-#rds_instance_type: "db.m4.large"
-rds_instance_type: "db.t2.micro"
+ec2_instance_type_fhir: "c4.8xlarge"
+ec2_instance_type_etl: "c4.8xlarge"
+rds_instance_type: "db.m4.2xlarge"
+#rds_instance_type: "db.t2.micro"
 
 # RDS can be really, really slow to create and delete instances. Give it 20m.
 rds_wait_timeout: 1200

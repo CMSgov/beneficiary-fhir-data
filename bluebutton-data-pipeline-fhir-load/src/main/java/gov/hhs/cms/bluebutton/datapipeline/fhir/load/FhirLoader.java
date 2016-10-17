@@ -59,10 +59,21 @@ public final class FhirLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoader.class);
 
 	/**
+	 * <p>
 	 * The number of threads that will be used to simultaneously process
-	 * {@link #processAsync(TransformedBundle)} operations.
+	 * {@link #processAsync(LoadableFhirBundle)} operations.
+	 * </p>
+	 * <p>
+	 * Design note: right now, this is set to be tied to the number of CPUs
+	 * available to the system running this ETL process. That isn't
+	 * <em>quite</em> correct: what we really want if for it to be tied to the
+	 * number of CPUs that the <em>FHIR server</em> has. This is good enough for
+	 * the time being, as we're currently using the same EC2 instance types for
+	 * both systems. If this becomes a problem, though, this value should be
+	 * moved into {@link LoadAppOptions} and made configurable.
+	 * </p>
 	 */
-	private static final int PARALLELISM = 10;
+	public static final int PARALLELISM = Math.max(1, (Runtime.getRuntime().availableProcessors() - 1));
 
 	/**
 	 * The maximum number of FHIR transactions that will be collected before

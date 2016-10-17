@@ -48,7 +48,6 @@ import com.codahale.metrics.SlidingWindowReservoir;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
@@ -96,10 +95,10 @@ public final class S3ToFhirLoadAppBenchmark {
 	 * time in AWS.
 	 * </p>
 	 * <p>
-	 * As of 2016-10-03, this is the most that the HHS IDEA Lab AWS sandbox can
-	 * support. An AWS support ticket has been filed to increase the number of
-	 * EC2 instances that we can run at one time, which will allow this value to
-	 * be increased.
+	 * As of 2016-10-17, I've verified that the HHS IDEA Lab AWS sandbox can
+	 * support up to at least 10 environments (20 EC2 instances, 10 RDS
+	 * instances) at one time. This is after requesting Amazon raise our EC2
+	 * instance cap to 50.
 	 * </p>
 	 */
 	private static final int MAX_ACTIVE_ENVIRONMENTS = 10;
@@ -227,8 +226,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			Object[] recordFields = new String[] {
 					String.format("%s:%s", this.getClass().getSimpleName(), sampleData.name()), gitBranchName,
 					gitCommitSha, projectVersion,
-					String.format("AWS: DB=db.m4.2xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=%d",
-							FhirLoader.PARALLELISM),
+					"AWS: DB=db.m4.2xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=35",
 					DateTimeFormatter.ISO_INSTANT.format(startInstant), "" + benchmarkResult.getIterationIndex(),
 					"" + benchmarkResult.getDataSetProcessingTime().toMillis(), "" + recordCount, "" + beneficiaryCount,
 					testCaseExecutionData };
