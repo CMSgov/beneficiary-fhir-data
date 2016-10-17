@@ -9,10 +9,15 @@
 		</encoder>
 	</appender>
 
-	<!-- Disable the FHIR client logging by default, as it's super annoying 
-		(unless I'm actually debugging with it, of course). -->
+	<!-- At 'debug', this will ensure that request and response headers are logged. 
+		At 'trace', this will ensure that request and response bodies are logged. -->
+	<logger name="gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader"
+		level="info" />
+
+	<!-- This logger should be controlled by modifying the 'gov.**.FhirLoader' 
+		levels, as specified above. -->
 	<logger name="ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor"
-		level="off" />
+		level="all" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->

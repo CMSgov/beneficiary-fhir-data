@@ -23,9 +23,10 @@ import org.apache.commons.csv.CSVRecord;
  * batching/grouping has to be performed upstream. So.
  * </p>
  * <p>
- * This class is laughably non-thread-safe. That said, it shouldn't need to be,
- * as even Java 8's parallel {@link Stream}s use only a single thread for record
- * production. TODO verify this assertion!!!!
+ * This class is laughably non-thread-safe. But I'm not aware of any way to
+ * ensure that {@link Iterator}s in general are ever thread-safe. Anyways:
+ * <strong>this may not be used with parallel {@link Stream}s</strong>, only
+ * sequential ones.
  * </p>
  */
 public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>> {

@@ -2,13 +2,14 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
 import org.hl7.fhir.dstu21.model.Bundle;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 
 /**
  * Models a completed {@link DataTransformer#transform(java.util.stream.Stream)}
  * operation, for a single element.
  */
-public final class TransformedBundle {
+public final class TransformedBundle implements LoadableFhirBundle {
 	private final RifRecordEvent<?> source;
 	private final Bundle result;
 
@@ -30,6 +31,14 @@ public final class TransformedBundle {
 	 */
 	public RifRecordEvent<?> getSource() {
 		return source;
+	}
+
+	/**
+	 * @see gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle#getSourceType()
+	 */
+	@Override
+	public String getSourceType() {
+		return getSource().getRecord().getClass().getSimpleName();
 	}
 
 	/**

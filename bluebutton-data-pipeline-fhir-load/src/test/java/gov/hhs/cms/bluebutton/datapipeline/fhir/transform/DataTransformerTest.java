@@ -177,11 +177,11 @@ public final class DataTransformerTest {
 		Assert.assertSame(beneRecordEvent, beneBundleWrapper.getSource());
 		Assert.assertNotNull(beneBundleWrapper.getResult());
 		/*
-		 * Bundle should have: 1) Patient, 2) Organization, 3) Coverage (part
-		 * A), 4) Coverage (part B), 5) Coverage (part D).
+		 * Bundle should have: 1) Patient, 2) Coverage (part A), 3) Coverage
+		 * (part B), 4) Coverage (part D).
 		 */
 		Bundle beneBundle = beneBundleWrapper.getResult();
-		Assert.assertEquals(5, beneBundle.getEntry().size());
+		Assert.assertEquals(4, beneBundle.getEntry().size());
 		BundleEntryComponent beneEntry = beneBundle.getEntry().stream().filter(r -> r.getResource() instanceof Patient)
 				.findAny().get();
 		Assert.assertEquals(HTTPVerb.PUT, beneEntry.getRequest().getMethod());

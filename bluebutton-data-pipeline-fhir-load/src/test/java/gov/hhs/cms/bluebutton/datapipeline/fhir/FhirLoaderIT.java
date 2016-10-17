@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -18,8 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
-import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
-import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
@@ -83,42 +83,45 @@ public final class FhirLoaderIT {
 		Stream<RifFile> rifFilesStream = rifGenerator.generate();
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
 
-		// Initialize the Extract phase of the pipeline.
-		RifFilesProcessor processor = new RifFilesProcessor();
-		Stream<RifRecordEvent<?>> rifRecordEvents = processor.process(rifFilesEvent);
-
-		// Grab a copy of that stream (for testing, below).
-		List<RifRecordEvent<?>> rifRecordEventsCopy = rifRecordEvents.collect(Collectors.toList());
-		RifRecordEvent<BeneficiaryRow> beneRecordEvent = (RifRecordEvent<BeneficiaryRow>) rifRecordEventsCopy.stream()
-				.filter(e -> e.getRecord() instanceof BeneficiaryRow).findAny().get();
-		RifRecordEvent<CarrierClaimGroup> carrierRecordEvent = (RifRecordEvent<CarrierClaimGroup>) rifRecordEventsCopy
-				.stream().filter(e -> e.getRecord() instanceof CarrierClaimGroup).findAny().get();
-		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopy.stream()
-				.filter(e -> e.getRecord() instanceof PartDEventRow).findAny().get();
-		rifRecordEvents = rifRecordEventsCopy.stream();
-
-		// Initialize the Transform phase of the pipeline.
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
-
-		// Setup the metrics for FhirLoader to use.
+		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
-		fhirMetrics.registerAll(new MemoryUsageGaugeSet());
-		fhirMetrics.registerAll(new GarbageCollectorMetricSet());
 		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
 		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
-		// Initialize the Load phase of the pipeline.
+		// Create the processors that will handle each stage of the pipeline.
+		RifFilesProcessor processor = new RifFilesProcessor();
+		DataTransformer transformer = new DataTransformer();
 		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
-		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
+
+		// Create/update the shared data that FhirLoader will require.
+		new SharedDataManager(loader).upsertSharedData();
 
 		/*
-		 * Collect all of the results, which will actually start data processing
-		 * through the pipeline (streams are lazy).
+		 * Run the extraction an extra time upfront to grab some data for the
+		 * assertions below.
 		 */
-		List<FhirBundleResult> resultsList = resultsStream.collect(Collectors.toList());
+		List<Stream<RifRecordEvent<?>>> rifRecordEventsCopy = processor.process(rifFilesEvent);
+		List<RifRecordEvent<?>> rifRecordEventsCopyFlat = rifRecordEventsCopy.stream()
+				.flatMap(s -> s.collect(Collectors.toList()).stream()).collect(Collectors.toList());
+		RifRecordEvent<BeneficiaryRow> beneRecordEvent = (RifRecordEvent<BeneficiaryRow>) rifRecordEventsCopyFlat
+				.stream().filter(e -> e.getRecord() instanceof BeneficiaryRow).findAny().get();
+		RifRecordEvent<CarrierClaimGroup> carrierRecordEvent = (RifRecordEvent<CarrierClaimGroup>) rifRecordEventsCopyFlat
+				.stream().filter(e -> e.getRecord() instanceof CarrierClaimGroup).findAny().get();
+		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopyFlat.stream()
+				.filter(e -> e.getRecord() instanceof PartDEventRow).findAny().get();
+
+		// Link up the pipeline and run it.
+		List<FhirBundleResult> resultsList = new ArrayList<>();
+		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
+			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
+			loader.process(fhirInputBundles, error -> {
+				throw new RuntimeException(error);
+			}, result -> {
+				resultsList.add(result);
+			});
+		}
+
 		LOGGER.info("FHIR resources loaded.");
-		fhirMetricsReporter.stop();
 		fhirMetricsReporter.report();
 
 		// Verify the results.
@@ -161,32 +164,33 @@ public final class FhirLoaderIT {
 		Stream<RifFile> rifFilesStream = rifGenerator.generate();
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
 
-		// Initialize the Extract phase of the pipeline.
-		RifFilesProcessor processor = new RifFilesProcessor();
-		Stream<RifRecordEvent<?>> rifRecordEvents = processor.process(rifFilesEvent);
-
-		// Initialize the Transform phase of the pipeline.
-		DataTransformer transformer = new DataTransformer();
-		Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
-
-		// Setup the metrics for FhirLoader to use.
+		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
-		fhirMetrics.registerAll(new MemoryUsageGaugeSet());
-		fhirMetrics.registerAll(new GarbageCollectorMetricSet());
 		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
-		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
-		// Initialize the Load phase of the pipeline.
+		// Create the processors that will handle each stage of the pipeline.
+		RifFilesProcessor processor = new RifFilesProcessor();
+		DataTransformer transformer = new DataTransformer();
 		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
-		Stream<FhirBundleResult> resultsStream = loader.process(fhirInputBundles);
 
-		/*
-		 * Collect all of the results, which will actually start data processing
-		 * through the pipeline (streams are lazy).
-		 */
-		List<FhirBundleResult> resultsList = resultsStream.collect(Collectors.toList());
+		// Create/update the shared data that FhirLoader will require.
+		new SharedDataManager(loader).upsertSharedData();
+
+		// Link up the pipeline and run it.
+		Timer.Context timerDataSet = fhirMetrics.timer(MetricRegistry.name(FhirLoaderIT.class, "dataSet", "processed"))
+				.time();
+		List<FhirBundleResult> resultsList = new ArrayList<>();
+		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
+			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
+			loader.process(fhirInputBundles, error -> {
+				throw new RuntimeException(error);
+			}, result -> {
+				resultsList.add(result);
+			});
+		}
+		timerDataSet.stop();
+
 		LOGGER.info("FHIR resources loaded.");
-		fhirMetricsReporter.stop();
 		fhirMetricsReporter.report();
 
 		// Verify the results.

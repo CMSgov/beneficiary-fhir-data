@@ -1,0 +1,102 @@
+---
+##
+# This playbook collects data from and deletes the systems in AWS that were 
+# created by the `benchmark_etl.yml` playbook.
+# 
+# Usage:
+#  
+#     $ ansible-playbook benchmark_etl_teardown.yml --inventory-file=somedir/bar --extra-vars "iteration_index=42"
+##
+
+- name: Collect FHIR Server Log
+  hosts: fhir
+  user: "{{ ssh_user }}"
+  gather_facts: false
+  vars:
+    ansible_ssh_pipelining: false
+  
+  tasks:
+    
+    - shell: "journalctl --unit=bbonfhir-server-app.service --no-pager &> /usr/local/bbonfhir-server-app/bbonfhir-server-app-{{ iteration_index }}.log"
+      args:
+        executable: /bin/bash
+      become: true
+      ignore_errors: true
+    
+    - fetch:
+        src: "/usr/local/bbonfhir-server-app/bbonfhir-server-app-{{ iteration_index }}.log"
+        dest: '../../../target/benchmark-iterations/'
+        flat: true
+        fail_on_missing: false
+
+- name: Collect ETL Log
+  hosts: etl
+  user: "{{ ssh_user }}"
+  gather_facts: false
+  vars:
+    ansible_ssh_pipelining: false
+  
+  tasks:
+    
+    # Not strictly necessary, but ensures that metrics are included in the log.
+    - name: Stop ETL Service
+      service:
+        name: bluebutton-data-pipeline-app
+        state: stopped
+      become: true
+      ignore_errors: true
+    
+    - fetch:
+        src: "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
+        dest: '../../../target/benchmark-iterations/'
+        flat: true
+        fail_on_missing: false
+
+- name: EC2 - Terminate Servers
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    
+    - name: EC2 - Terminate ETL Server
+      ec2:
+        state: 'absent'
+        instance_ids: "{{ hostvars['etl']['ec2_instance_id'] }}"
+        region: "{{ region }}"
+      ignore_errors: true
+    
+    - name: EC2 - Remove ETL Server from Inventory
+      lineinfile:
+        dest: "../../../target/benchmark-iterations/hosts-{{ iteration_index }}"
+        regexp: '^etl.*$'
+        state: absent
+    
+    - name: EC2 - Terminate FHIR Server
+      ec2:
+        state: 'absent'
+        instance_ids: "{{ hostvars['fhir']['ec2_instance_id'] }}"
+        region: "{{ region }}"
+      ignore_errors: true
+    
+    - name: EC2 - Remove FHIR Server from Inventory
+      lineinfile:
+        dest: "../../../target/benchmark-iterations/hosts-{{ iteration_index }}"
+        regexp: '^fhir.*$'
+        state: absent
+    
+- name: RDS - Delete Instance
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    
+    - name: Terminate RDS Server
+      rds:
+        command: delete
+        instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
+        region: "{{ region }}"
+        wait: true
+        wait_timeout: "{{ rds_wait_timeout }}"
+      ignore_errors: true

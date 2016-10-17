@@ -9,3 +9,6 @@ bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample
 
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
+
+# Apache Commons CSV always uses CRLF for CSV files.
+dev/benchmark-data.csv -text

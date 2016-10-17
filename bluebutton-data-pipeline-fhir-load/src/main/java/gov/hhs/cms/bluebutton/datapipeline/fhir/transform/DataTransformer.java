@@ -85,8 +85,6 @@ public final class DataTransformer {
 
 	static final String EXTENSION_CMS_DIAGNOSIS_LINK_ID = "http://bluebutton.cms.hhs.gov/extensions#diagnosisLinkId";
 
-	static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
-
 	static final String COVERAGE_PLAN = "Medicare";
 
 	/**
@@ -426,15 +424,6 @@ public final class DataTransformer {
 		insert(bundle, beneficiary);
 
 		/*
-		 * To prevent an extra round-trip to the FHIR server (which would
-		 * greatly complicate this class' code, since it doesn't even know about
-		 * the FHIR server), we always just upsert this org, whenever it's used.
-		 */
-		Organization cms = new Organization();
-		cms.setName(COVERAGE_ISSUER);
-		Reference cmsOrgRef = upsert(bundle, cms, referenceOrganizationByName(COVERAGE_ISSUER).getReference());
-
-		/*
 		 * We don't have detailed enough data on this right now, so we'll just
 		 * assume that everyone has Part A, B, and D.
 		 */
@@ -442,7 +431,8 @@ public final class DataTransformer {
 		Coverage partA = new Coverage();
 		partA.setPlan(COVERAGE_PLAN);
 		partA.setSubPlan(COVERAGE_PLAN_PART_A);
-		partA.setIssuer(cmsOrgRef);
+		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
+		// partA.setIssuer(SharedDataManager.createReferenceToCms());
 		partA.setSubscriber(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -457,7 +447,8 @@ public final class DataTransformer {
 		Coverage partB = new Coverage();
 		partB.setPlan(COVERAGE_PLAN);
 		partB.setSubPlan(COVERAGE_PLAN_PART_B);
-		partB.setIssuer(cmsOrgRef);
+		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
+		// partB.setIssuer(SharedDataManager.createReferenceToCms());
 		partB.setSubscriber(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -472,7 +463,8 @@ public final class DataTransformer {
 		Coverage partD = new Coverage();
 		partD.setPlan(COVERAGE_PLAN);
 		partD.setSubPlan(COVERAGE_PLAN_PART_D);
-		partD.setIssuer(cmsOrgRef);
+		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
+		// partD.setIssuer(SharedDataManager.createReferenceToCms());
 		partD.setSubscriber(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -1663,7 +1655,7 @@ public final class DataTransformer {
 	 *            the URL or URL portion to be encoded
 	 * @return a URL-encoded version of the specified text
 	 */
-	private static String urlEncode(String urlText) {
+	public static String urlEncode(String urlText) {
 		try {
 			return URLEncoder.encode(urlText, StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
@@ -1724,7 +1716,7 @@ public final class DataTransformer {
 	 * @return a {@link Reference} instance, which must be used for any
 	 *         references to the {@link Resource} within the same {@link Bundle}
 	 */
-	private static Reference upsert(Bundle bundle, Resource resource, String resourceUrl) {
+	public static Reference upsert(Bundle bundle, Resource resource, String resourceUrl) {
 		if (bundle == null)
 			throw new IllegalArgumentException();
 		if (resource == null)
@@ -1781,16 +1773,6 @@ public final class DataTransformer {
 		bundleEntry.setFullUrl(entryId.getValue());
 
 		return new Reference(entryId);
-	}
-
-	/**
-	 * @param orgName
-	 *            the {@link Organization#getName()} value to match
-	 * @return a {@link Reference} to the {@link Organization} resource that
-	 *         matches the specified parameters
-	 */
-	private Reference referenceOrganizationByName(String orgName) {
-		return new Reference(String.format("Organization?name=" + urlEncode(orgName)));
 	}
 
 	/**

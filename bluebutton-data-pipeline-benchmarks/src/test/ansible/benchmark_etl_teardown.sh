@@ -1,11 +1,11 @@
 #!/bin/bash
 
 ##
-# This script will run the `benchmark_etl.yml` Ansible playbook.
+# This script will run the `benchmark_etl_teardown.yml` Ansible playbook.
 #
 # Usage:
 # 
-# $ benchmark_etl.sh --iteration 42 --ec2keyname foo --ec2keyfile somedir/foo
+# $ benchmark_etl.sh --iteration 42 --ec2keyfile somedir/bar
 ##
 
 # Constants.
@@ -17,7 +17,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
 	-o i:n:f: \
-	--long iteration:,ec2keyname:,ec2keyfile: \
+	--long iteration:,ec2keyfile: \
 	-n 'benchmark_etl.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -32,8 +32,6 @@ while true; do
 	case "$1" in
 		-i | --iteration )
 			iteration="$2"; shift 2 ;;
-		-n | --ec2keyname )
-			ec2KeyName="$2"; shift 2 ;;
 		-f | --ec2keyfile )
 			ec2KeyFile="$2"; shift 2 ;;
 		-- ) shift; break ;;
@@ -43,7 +41,6 @@ done
 
 # Verify that all required options were specified.
 if [[ -z "${iteration}" ]]; then >&2 echo 'The --iteration option is required.'; exit 1; fi
-if [[ -z "${ec2KeyName}" ]]; then >&2 echo 'The --ec2keyname option is required.'; exit 1; fi
 
 # Exit immediately if something fails.
 error() {
@@ -79,10 +76,18 @@ fi
 # `ansible-playbook` this way.
 ##
 
-# Run the Ansible playbook.
-cd "${scriptDirectory}"
-echo 'Running Ansible playbook...'
-python `which ansible-playbook` \
-	benchmark_etl.yml \
-	--extra-vars "ec2_key_name=${ec2KeyName} iteration_index=${iteration}"
-echo 'Ansible playbook completed successfully.'
+# Run the Ansible playbook, if there's an inventory to run against. (There 
+# may not be, if the `benchmark_etl.yml` playbook failed very early.)
+inventory="${scriptDirectory}/../../../target/benchmark-iterations/hosts-${iteration}"
+if [[ -f "${inventory}" ]]; then
+	echo 'Running Ansible playbook...'
+	cd "${scriptDirectory}"
+	virtualEnvDirectory="${scriptDirectory}/../../../target/python-venv-ansible"
+	python `which ansible-playbook` \
+		benchmark_etl_teardown.yml \
+		--inventory-file="${inventory}" \
+		--extra-vars "ec2_key_name=${ec2KeyName} iteration_index=${iteration}"
+	echo 'Ansible playbook completed successfully.'
+else
+	echo 'No Ansible inventory found, so skipping teardown.'
+fi
