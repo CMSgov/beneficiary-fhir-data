@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
+		<hapi-fhir.version>2.0</hapi-fhir.version>
 		<jersey.version>2.22.1</jersey.version>
 		<jetty.version>9.3.6.v20151106</jetty.version>
 		<derby.version>10.12.1.1</derby.version>
@@ -42,7 +42,7 @@
 		<!-- At least one "structures" JAR must also be included -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
 
