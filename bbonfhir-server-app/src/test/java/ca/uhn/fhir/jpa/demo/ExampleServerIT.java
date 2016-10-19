@@ -92,7 +92,7 @@ public class ExampleServerIT {
 			throw new IllegalStateException(e);
 		}
 
-		IGenericClient client = ctx.newRestfulGenericClient("https://localhost:9094/baseDstu2".toString());
+		IGenericClient client = ctx.newRestfulGenericClient("https://localhost:9094/baseDstu3".toString());
 		return client;
 	}
 
