@@ -29,7 +29,7 @@ node {
 			managedFiles: [[fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:cms-bluebutton-settings-xml', 
 			variable: 'SETTINGS_PATH']]
 		]) {
-			// Run the build.
+			// Run the build..
 			mvn "--settings ${env.SETTINGS_PATH} -Dits.bbfhir.server.jvmargs=-Xmx2g -Dmaven.test.failure.ignore clean deploy scm:tag"
 		}
 	
