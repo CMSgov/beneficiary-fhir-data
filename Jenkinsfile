@@ -30,7 +30,7 @@ node {
 			variable: 'SETTINGS_PATH']]
 		]) {
 			// Run the build...
-			mvn "--settings ${env.SETTINGS_PATH} -Dits.bbfhir.server.jvmargs=-Xmx2g -Dmaven.test.failure.ignore clean deploy scm:tag"
+			mvn "--settings ${env.SETTINGS_PATH} -Dits.bbfhir.server.jvmargs=-Xmx1g -Dmaven.test.failure.ignore clean deploy scm:tag"
 		}
 	
 	stage 'Archive'
