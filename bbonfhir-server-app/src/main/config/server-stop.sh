@@ -56,8 +56,8 @@ while true; do
 		break
 	fi
 	if grep --quiet "JBAS015950" "${serverLogRun}"; then
-		echo "Server stopped in $(($SECONDS - $startSeconds)) seconds."
-		exit 0
+		echo "Server stopped (we think) in $(($SECONDS - $startSeconds)) seconds."
+		break
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to stop within ${serverTimeoutSeconds} seconds."
@@ -66,7 +66,17 @@ while true; do
 	sleep 1
 done
 
-# The server didn't die the nice way, so now let's be mean about it.
-echo "Killing server processes with KILL signal..."
-pkill -KILL --full ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*"
-echo "Sent KILL signal to all 'bluebutton-server' processes."
+# The above block might not have been able to actually stop the server, either 
+# because the server's management console wasn't up, or because the server 
+# _said_ it stopped, but really didn't (I've observed this happening). So here,
+# we just double check via the process list, and kill it the mean way if 
+# needed.
+serverPids=$(pgrep --full ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*")
+if [[ -z "${serverPids}" ]]; then
+	echo "Server did actually stop."
+	exit 0
+else
+	>&2 echo "Server processes still found. Sending KILL signal to all 'bluebutton-server' processes."
+	pkill -KILL --full ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*"
+	>&2 echo "Server processes sent KILL signal."
+fi
