@@ -40,7 +40,12 @@
 		<!-- Exclusions allow you to prevent the server from automatically adding 
 			some dependencies. -->
 		<exclusions>
-			<!-- <module name="org.javassist" /> -->
+
+			<!-- Disabled per http://stackoverflow.com/a/22187710/1851299, as otherwise 
+				we get errors like the following when deploying on Wildfly/JBoss: "NoSuchMethodError: 
+				com.fasterxml.jackson.databind.ObjectMapper.disable(...)". -->
+			<module name="org.jboss.resteasy.resteasy-jackson2-provider" />
+
 		</exclusions>
 	</deployment>
 
