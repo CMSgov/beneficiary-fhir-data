@@ -67,7 +67,25 @@ else
 fi
 
 # Exit immediately if something fails.
-set -e
+error() {
+	local parent_lineno="$1"
+	local message="$2"
+	local code="${3:-1}"
+
+	if [[ -n "$message" ]] ; then
+		>&2 echo "Error on or near line ${parent_lineno}: ${message}."
+	else
+		>&2 echo "Error on or near line ${parent_lineno}."
+	fi
+	
+	# Before bailing, always try to stop any running servers.
+	>&2 echo "Trying to stop any running servers before exiting..."
+	"${scriptDirectory}/bbonfhir-server-app-server-stop.sh" --directory "${directory}"
+
+	>&2 echo "Exiting with status ${code}."
+	exit "${code}"
+}
+trap 'error ${LINENO}' ERR
 
 # Check for required files.
 for f in "${directory}/${serverArtifact}" "${directory}/${warArtifact}" "${directory}/${configArtifact}" "${keyStore}" "${trustStore}"; do
@@ -117,7 +135,11 @@ JAVA_OPTS="\$JAVA_OPTS -Djboss.modules.system.pkgs=\$JBOSS_MODULES_SYSTEM_PKGS -
 # These ports are only used until the server is configured, but need to be
 # set anyways, as the defaults on first launch conflict with Jenkins and other 
 # such services.
-JAVA_OPTS="\$JAVA_OPTS -Djboss.http.port=7780 -Djboss.https.port=7743"
+JAVA_OPTS="\$JAVA_OPTS -Djboss.http.port=7780 -Djboss.https.port=${serverPortHttps}"
+
+# This just adds a searchable bit of text to the command line, so we can 
+# determine which java processes were started by this script.
+JAVA_OPTS="\$JAVA_OPTS -Dbluebutton-server"
 EOF
 
 # Launch the server in the background.

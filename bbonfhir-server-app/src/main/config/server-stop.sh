@@ -32,6 +32,10 @@ done
 # Verify that all required options were specified.
 if [[ -z "${directory}" ]]; then >&2 echo 'The --directory option is required.'; exit 1; fi
 
+# If the server isn't actually running, just exit.
+serverPids=$(pgrep --full ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*")
+if [[ -z "${serverPids}" ]]; then echo 'No 'bluebutton-server' processes found to stop.'; exit 0; fi
+
 # Use the Wildfly CLI to stop the server.
 serverLogRun="${directory}/${serverInstall}/server-console.log"
 serverLogStop="${directory}/${serverInstall}/server-stop.log"
@@ -53,12 +57,16 @@ while true; do
 	fi
 	if grep --quiet "JBAS015950" "${serverLogRun}"; then
 		echo "Server stopped in $(($SECONDS - $startSeconds)) seconds."
-		break
+		exit 0
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to stop within ${serverTimeoutSeconds} seconds."
-		exit 3
+		break
 	fi
 	sleep 1
 done
 
+# The server didn't die the nice way, so now let's be mean about it.
+echo "Killing server processes with KILL signal..."
+pkill -KILL --full ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*"
+echo "Sent KILL signal to all 'bluebutton-server' processes."
