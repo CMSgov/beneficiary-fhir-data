@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir;
 
-import org.hl7.fhir.dstu21.model.Bundle;
+
+import org.hl7.fhir.dstu3.model.Bundle;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
 

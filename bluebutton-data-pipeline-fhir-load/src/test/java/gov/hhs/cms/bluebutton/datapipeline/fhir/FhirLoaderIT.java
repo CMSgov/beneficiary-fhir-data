@@ -7,10 +7,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -139,12 +139,14 @@ public final class FhirLoaderIT {
 						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
 						.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
+				.where(ExplanationOfBenefit.PATIENTREFERENCE
+						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						carrierRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
+				.where(ExplanationOfBenefit.PATIENTREFERENCE
+						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
 						pdeRecordEvent.getRecord().partDEventId))
 				.returnBundle(Bundle.class).execute().getTotal());
