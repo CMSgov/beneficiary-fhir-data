@@ -1,9 +1,9 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir;
 
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Bundle.BundleType;
-import org.hl7.fhir.dstu21.model.Organization;
-import org.hl7.fhir.dstu21.model.Reference;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;

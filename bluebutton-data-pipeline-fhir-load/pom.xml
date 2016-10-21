@@ -54,7 +54,7 @@
 		<dependency>
 			<!-- At least one "structures" JAR must also be included -->
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 		</dependency>
 
 		<dependency>

@@ -1,7 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir;
 
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Organization;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;

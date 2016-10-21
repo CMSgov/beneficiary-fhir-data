@@ -3,45 +3,44 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu21.model.Bundle.BundleEntryRequestComponent;
-import org.hl7.fhir.dstu21.model.Bundle.BundleType;
-import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu21.model.CodeableConcept;
-import org.hl7.fhir.dstu21.model.Coding;
-import org.hl7.fhir.dstu21.model.Coverage;
-import org.hl7.fhir.dstu21.model.DateType;
-import org.hl7.fhir.dstu21.model.Duration;
-import org.hl7.fhir.dstu21.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DiagnosisComponent;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
-import org.hl7.fhir.dstu21.model.HumanName;
-import org.hl7.fhir.dstu21.model.IdType;
-import org.hl7.fhir.dstu21.model.Identifier;
-import org.hl7.fhir.dstu21.model.Medication;
-import org.hl7.fhir.dstu21.model.MedicationOrder;
-import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
-import org.hl7.fhir.dstu21.model.Money;
-import org.hl7.fhir.dstu21.model.Organization;
-import org.hl7.fhir.dstu21.model.Patient;
-import org.hl7.fhir.dstu21.model.Period;
-import org.hl7.fhir.dstu21.model.Practitioner;
-import org.hl7.fhir.dstu21.model.Reference;
-import org.hl7.fhir.dstu21.model.ReferralRequest;
-import org.hl7.fhir.dstu21.model.ReferralRequest.ReferralStatus;
-import org.hl7.fhir.dstu21.model.Resource;
-import org.hl7.fhir.dstu21.model.SimpleQuantity;
-import org.hl7.fhir.dstu21.model.StringType;
-import org.hl7.fhir.dstu21.model.TemporalPrecisionEnum;
-import org.hl7.fhir.dstu21.model.valuesets.Adjudication;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleType;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.Duration;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationOrder;
+import org.hl7.fhir.dstu3.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
+import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralStatus;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -396,7 +395,7 @@ public final class DataTransformer {
 		beneficiary.addAddress().setState(record.stateCode).setDistrict(record.countyCode)
 				.setPostalCode(record.postalCode);
 		if (record.birthDate != null) {
-			beneficiary.setBirthDate(Date.valueOf(record.birthDate));
+			beneficiary.setBirthDate(convertToDate(record.birthDate));
 		}
 		switch (record.sex) {
 		case ('M'):
@@ -433,7 +432,7 @@ public final class DataTransformer {
 		partA.setSubPlan(COVERAGE_PLAN_PART_A);
 		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
 		// partA.setIssuer(SharedDataManager.createReferenceToCms());
-		partA.setSubscriber(referencePatient(record.beneficiaryId));
+		partA.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
 					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
@@ -449,7 +448,7 @@ public final class DataTransformer {
 		partB.setSubPlan(COVERAGE_PLAN_PART_B);
 		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
 		// partB.setIssuer(SharedDataManager.createReferenceToCms());
-		partB.setSubscriber(referencePatient(record.beneficiaryId));
+		partB.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
 					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
@@ -465,7 +464,7 @@ public final class DataTransformer {
 		partD.setSubPlan(COVERAGE_PLAN_PART_D);
 		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
 		// partD.setIssuer(SharedDataManager.createReferenceToCms());
-		partD.setSubscriber(referencePatient(record.beneficiaryId));
+		partD.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
 					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
@@ -501,31 +500,39 @@ public final class DataTransformer {
 		Reference patientRef = referencePatient(record.beneficiaryId);
 		eob.setPatient(patientRef);
 		if (record.paymentDate.isPresent()) {
-			eob.setPaymentDate(Date.valueOf(record.paymentDate.get()));
+			eob.getPayment().setDate(convertToDate(record.paymentDate.get()));
 		}
 
-		ItemsComponent rxItem = eob.addItem();
+		ItemComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
-		switch (record.compoundCode) {
-		case COMPOUNDED:
-			/* Pharmacy dispense invoice for a compound */
-			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
-			break;
-		case NOT_COMPOUNDED:
-			/*
-			 * Pharmacy dispense invoice not involving a compound
-			 */
-			rxItem.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
-			break;
-		default:
-			/*
-			 * Unexpected value encountered - compound code should be either
-			 * compounded or not compounded.
-			 */
-			throw new BadCodeMonkeyException();
-		}
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// switch (record.compoundCode) {
+		// case COMPOUNDED:
+		// /* Pharmacy dispense invoice for a compound */
+		// rxItem.setType(new
+		// Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
+		// break;
+		// case NOT_COMPOUNDED:
+		// /*
+		// * Pharmacy dispense invoice not involving a compound
+		// */
+		// rxItem.setType(new
+		// Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+		// break;
+		// default:
+		// /*
+		// * Unexpected value encountered - compound code should be either
+		// * compounded or not compounded.
+		// */
+		// throw new BadCodeMonkeyException();
+		// }
 
-		rxItem.setServiced(new DateType().setValue(Date.valueOf(record.prescriptionFillDate)));
+		rxItem.setServiced(new DateType().setValue(convertToDate(record.prescriptionFillDate)));
 
 		switch (record.drugCoverageStatusCode) {
 		/*
@@ -716,7 +723,8 @@ public final class DataTransformer {
 				.setValue(new StringType(claimGroup.carrierNumber));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD)
 				.setValue(new StringType(claimGroup.paymentDenialCode));
-		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.getPayment()
+				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 
 		/*
 		 * Referrals are represented as contained resources, because otherwise
@@ -747,11 +755,18 @@ public final class DataTransformer {
 			addDiagnosisCode(eob, diagnosis);
 
 		for (CarrierClaimLine claimLine : claimGroup.lines) {
-			ItemsComponent item = eob.addItem();
+			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
-			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			/*
+			 * FIXME item.type field for
+			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
+			 * missing in STU3 (though present in item.detail). Sent email to
+			 * Mark/FM working group about this on 2016-10-20.
+			 */
+			// item.setType(new
+			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * TODO once STU3 is available, transform placeofServiceCode into
@@ -773,8 +788,7 @@ public final class DataTransformer {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
-				item.addExtension().setUrl(CODING_SYSTEM_BETOS)
-						.setValue(new StringType(claimLine.betosCode.get()));
+				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
 			}
 
 			item.addAdjudication()
@@ -876,8 +890,9 @@ public final class DataTransformer {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
 					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
-		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
-		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
+		eob.getPayment()
+				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
@@ -924,11 +939,18 @@ public final class DataTransformer {
 			}
 
 		for (InpatientClaimLine claimLine : claimGroup.lines) {
-			ItemsComponent item = eob.addItem();
+			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			/*
+			 * FIXME item.type field for
+			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
+			 * missing in STU3 (though present in item.detail). Sent email to
+			 * Mark/FM working group about this on 2016-10-20.
+			 */
+			// item.setType(new
+			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * TODO once STU3 available, transform
@@ -999,8 +1021,9 @@ public final class DataTransformer {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
 					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
-		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
-		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
+		eob.getPayment()
+				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
@@ -1052,11 +1075,18 @@ public final class DataTransformer {
 			}
 
 		for (OutpatientClaimLine claimLine : claimGroup.lines) {
-			ItemsComponent item = eob.addItem();
+			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			/*
+			 * FIXME item.type field for
+			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
+			 * missing in STU3 (though present in item.detail). Sent email to
+			 * Mark/FM working group about this on 2016-10-20.
+			 */
+			// item.setType(new
+			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * TODO once STU3 available, transform
@@ -1167,8 +1197,9 @@ public final class DataTransformer {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
 					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
-		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
-		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
+		eob.getPayment()
+				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
@@ -1216,11 +1247,18 @@ public final class DataTransformer {
 			}
 
 		for (SNFClaimLine claimLine : claimGroup.lines) {
-			ItemsComponent item = eob.addItem();
+			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			/*
+			 * FIXME item.type field for
+			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
+			 * missing in STU3 (though present in item.detail). Sent email to
+			 * Mark/FM working group about this on 2016-10-20.
+			 */
+			// item.setType(new
+			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * TODO once STU3 available, transform
@@ -1290,8 +1328,9 @@ public final class DataTransformer {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
 					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
-		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
-		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
+		eob.getPayment()
+				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
@@ -1323,11 +1362,18 @@ public final class DataTransformer {
 			}
 
 		for (HospiceClaimLine claimLine : claimGroup.lines) {
-			ItemsComponent item = eob.addItem();
+			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			/*
+			 * FIXME item.type field for
+			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
+			 * missing in STU3 (though present in item.detail). Sent email to
+			 * Mark/FM working group about this on 2016-10-20.
+			 */
+			// item.setType(new
+			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * TODO once STU3 available, transform
@@ -1410,8 +1456,9 @@ public final class DataTransformer {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
 					.setValue(new StringType(claimGroup.claimNonPaymentReasonCode.get()));
 		}
-		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
-		eob.setClaimTotal((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
+		eob.getPayment()
+				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
@@ -1443,11 +1490,18 @@ public final class DataTransformer {
 			}
 
 		for (HHAClaimLine claimLine : claimGroup.lines) {
-			ItemsComponent item = eob.addItem();
+			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			/*
+			 * FIXME item.type field for
+			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
+			 * missing in STU3 (though present in item.detail). Sent email to
+			 * Mark/FM working group about this on 2016-10-20.
+			 */
+			// item.setType(new
+			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * TODO once STU3 available, transform
@@ -1517,7 +1571,8 @@ public final class DataTransformer {
 				.setValue(new StringType(claimGroup.carrierNumber));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD)
 				.setValue(new StringType(claimGroup.paymentDenialCode));
-		eob.setPaymentAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
+		eob.getPayment()
+				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 
 		/*
 		 * Referrals are represented as contained resources, because otherwise
@@ -1526,8 +1581,7 @@ public final class DataTransformer {
 		 */
 		if (claimGroup.referringPhysicianNpi.isPresent()) {
 			Practitioner referrer = new Practitioner();
-			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
-					.setValue(claimGroup.referringPhysicianNpi.get());
+			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.referringPhysicianNpi.get());
 			Reference referrerReference = upsert(bundle, referrer,
 					referencePractitioner(claimGroup.referringPhysicianNpi.get()).getReference());
 			ReferralRequest referral = new ReferralRequest();
@@ -1548,11 +1602,18 @@ public final class DataTransformer {
 			addDiagnosisCode(eob, diagnosis);
 
 		for (DMEClaimLine claimLine : claimGroup.lines) {
-			ItemsComponent item = eob.addItem();
+			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
-			item.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-					.setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			/*
+			 * FIXME item.type field for
+			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
+			 * missing in STU3 (though present in item.detail). Sent email to
+			 * Mark/FM working group about this on 2016-10-20.
+			 */
+			// item.setType(new
+			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * TODO once STU3 is available, transform placeofServiceCode into
@@ -1573,8 +1634,7 @@ public final class DataTransformer {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
-				item.addExtension().setUrl(CODING_SYSTEM_BETOS)
-						.setValue(new StringType(claimLine.betosCode.get()));
+				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
 			}
 
 			item.addAdjudication()
@@ -1877,16 +1937,29 @@ public final class DataTransformer {
 	/**
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} that the specified
-	 *            {@link ItemsComponent} is a child of
+	 *            {@link ItemComponent} is a child of
 	 * @param item
-	 *            the {@link ItemsComponent} to add an
-	 *            {@link ItemsComponent#getDiagnosisLinkId()} entry to
+	 *            the {@link ItemComponent} to add an
+	 *            {@link ItemComponent#getDiagnosisLinkId()} entry to
 	 * @param diagnosis
 	 *            the diagnosis code to add a link for
 	 */
-	private static void addDiagnosisLink(ExplanationOfBenefit eob, ItemsComponent item, IcdCode diagnosis) {
+	private static void addDiagnosisLink(ExplanationOfBenefit eob, ItemComponent item, IcdCode diagnosis) {
 		int diagnosisSequence = addDiagnosisCode(eob, diagnosis);
 		item.addDiagnosisLinkId(diagnosisSequence);
 	}
 
+	/**
+	 * @param localDate
+	 *            the {@link LocalDate} to convert
+	 * @return a {@link Date} version of the specified {@link LocalDate}
+	 */
+	private static Date convertToDate(LocalDate localDate) {
+		/*
+		 * We use the system TZ here to ensure that the date doesn't shift at
+		 * all, as FHIR will just use this as an unzoned Date (I think, and if
+		 * not, it's almost certainly using the same TZ as this system).
+		 */
+		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
 }

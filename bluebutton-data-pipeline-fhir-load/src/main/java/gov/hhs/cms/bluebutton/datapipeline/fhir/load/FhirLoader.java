@@ -36,8 +36,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ public final class FhirLoader {
 	 * @return a new FHIR {@link IGenericClient} for use
 	 */
 	public static IGenericClient createFhirClient(LoadAppOptions options) {
-		FhirContext ctx = FhirContext.forDstu2_1();
+		FhirContext ctx = FhirContext.forDstu3();
 
 		/*
 		 * The default timeout is 10s, which was failing for batches of 100. A

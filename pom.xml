@@ -55,7 +55,7 @@
 	</modules>
 
 	<properties>
-		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
+		<hapi-fhir.version>2.0</hapi-fhir.version>
 		<metrics.version>3.1.2</metrics.version>
 
 		<!-- The version of the capsule library for the capsule-maven-plugin to 
@@ -65,7 +65,7 @@
 		<capsule.version>1.0.1</capsule.version>
 
 		<!-- The version of the Blue Button FHIR server to test against. -->
-		<bbonfhir-server.version>0.1.0-50</bbonfhir-server.version>
+		<bbonfhir-server.version>0.1.0-51</bbonfhir-server.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 
@@ -89,7 +89,7 @@
 			<dependency>
 				<!-- At least one "structures" JAR must also be included -->
 				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+				<artifactId>hapi-fhir-structures-dstu3</artifactId>
 				<version>${hapi-fhir.version}</version>
 			</dependency>
 

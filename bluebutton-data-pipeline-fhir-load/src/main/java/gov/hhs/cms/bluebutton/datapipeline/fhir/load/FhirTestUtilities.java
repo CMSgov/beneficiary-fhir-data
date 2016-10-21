@@ -8,11 +8,11 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu21.model.Conformance;
-import org.hl7.fhir.dstu21.model.Conformance.ConditionalDeleteStatus;
-import org.hl7.fhir.dstu21.model.Conformance.RestfulConformanceMode;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Conformance;
+import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
+import org.hl7.fhir.dstu3.model.Conformance.RestfulConformanceMode;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedUriSyntaxException;
@@ -34,7 +34,7 @@ public final class FhirTestUtilities {
 	 * The address of the FHIR server to run tests against. See the parent
 	 * project's <code>pom.xml</code> for details on how it's stood up.
 	 */
-	public static final String FHIR_API = "https://localhost:9094/baseDstu2";
+	public static final String FHIR_API = "https://localhost:9094/baseDstu3";
 
 	/**
 	 * The password for {@link #getClientKeyStorePath()} and the key inside of

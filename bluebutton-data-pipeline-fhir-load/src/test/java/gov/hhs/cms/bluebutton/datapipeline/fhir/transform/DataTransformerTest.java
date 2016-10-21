@@ -14,28 +14,28 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu21.exceptions.FHIRException;
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu21.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu21.model.Coding;
-import org.hl7.fhir.dstu21.model.Coverage;
-import org.hl7.fhir.dstu21.model.DateTimeType;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.DiagnosisComponent;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemAdjudicationComponent;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit.ItemsComponent;
-import org.hl7.fhir.dstu21.model.Identifier;
-import org.hl7.fhir.dstu21.model.Medication;
-import org.hl7.fhir.dstu21.model.MedicationOrder;
-import org.hl7.fhir.dstu21.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
-import org.hl7.fhir.dstu21.model.Organization;
-import org.hl7.fhir.dstu21.model.Patient;
-import org.hl7.fhir.dstu21.model.Practitioner;
-import org.hl7.fhir.dstu21.model.Reference;
-import org.hl7.fhir.dstu21.model.ReferralRequest;
-import org.hl7.fhir.dstu21.model.StringType;
-import org.hl7.fhir.dstu21.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationOrder;
+import org.hl7.fhir.dstu3.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -259,12 +259,18 @@ public final class DataTransformerTest {
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_PDE_ID, pdeRecord.partDEventId, eob.getIdentifier());
 		// TODO verify eob.type once STU3 available
-		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, eob.getPatient().getReference());
-		Assert.assertEquals(Date.valueOf(pdeRecord.paymentDate.get()), eob.getPaymentDate());
+		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, eob.getPatientReference().getReference());
+		Assert.assertEquals(Date.valueOf(pdeRecord.paymentDate.get()), eob.getPayment().getDate());
 
-		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
 		// Default case has compound code = not a compound
-		Assert.assertEquals("RXDINV", rxItem.getType().getCode());
+		// Assert.assertEquals("RXDINV", rxItem.getType().getCode());
 		Assert.assertEquals(Date.valueOf(pdeRecord.prescriptionFillDate), rxItem.getServicedDateType().getValue());
 
 		// Default case has drug coverage status code as Covered
@@ -304,7 +310,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(HTTPVerb.PUT, medicationEntry.getRequest().getMethod());
 		Assert.assertEquals("Medication/ndc-" + pdeRecord.nationalDrugCode, medicationEntry.getRequest().getUrl());
 
-		MedicationOrder medicationOrder = (MedicationOrder) eob.getPrescription().getResource();
+		MedicationOrder medicationOrder = (MedicationOrder) eob.getPrescriptionReference().getResource();
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_RX_SRVC_RFRNC_NUM,
 				String.valueOf(pdeRecord.prescriptionReferenceNumber), medicationOrder.getIdentifier());
 		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, medicationOrder.getPatient().getReference());
@@ -366,8 +372,14 @@ public final class DataTransformerTest {
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
-		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-		Assert.assertEquals("RXCINV", rxItem.getType().getCode());
+		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("RXCINV", rxItem.getType().getCode());
 	}
 
 	/**
@@ -388,7 +400,7 @@ public final class DataTransformerTest {
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
-		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
 		/*
 		 * Assert that when the drug coverage status code equals non-covered
@@ -420,7 +432,7 @@ public final class DataTransformerTest {
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
-		ItemsComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
+		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
 		/*
 		 * Assert that when the drug coverage status code equals non-covered
@@ -438,10 +450,13 @@ public final class DataTransformerTest {
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
 	 * single {@link CarrierClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertCarrierClaimEvent() {
+	public void transformInsertCarrierClaimEvent() throws FHIRException {
 		// Create the mock bene to test against.
 		CarrierClaimGroup record = new CarrierClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
@@ -505,7 +520,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (professional)
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		Assert.assertEquals(record.nearLineRecordIdCode.toString(), ((StringType) eob
 				.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD).get(0).getValue()).getValue());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
@@ -517,9 +532,9 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.paymentDenialCode,
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
-		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 
-		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+		ReferralRequest referral = (ReferralRequest) eob.getReferralReference().getResource();
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
 		Assert.assertEquals(1, referral.getRecipient().size());
 		Assert.assertEquals(claimBundle.getEntry().stream()
@@ -544,9 +559,15 @@ public final class DataTransformerTest {
 		 */
 		Assert.assertEquals(2, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		ItemsComponent eobItem0 = eob.getItem().get(0);
+		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
-		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
 
 		/*
 		 * TODO Once STU3 is available, verify eob.item.careTeam
@@ -593,10 +614,13 @@ public final class DataTransformerTest {
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
 	 * single {@link InpatientClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertInpatientClaimEvent() {
+	public void transformInsertInpatientClaimEvent() throws FHIRException {
 		// Create the mock bene to test against.
 		InpatientClaimGroup record = new InpatientClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
@@ -664,14 +688,14 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional)
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
-		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
-		Assert.assertEquals(record.totalChargeAmount, eob.getClaimTotal().getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
+		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
 		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Organization).findAny().get();
@@ -703,17 +727,23 @@ public final class DataTransformerTest {
 		 */
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		ItemsComponent eobItem0 = eob.getItem().get(0);
+		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
-		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
 
 		/*
 		 * TODO Once STU3 is available, verify eob.item.careTeam for rendering
 		 * physician npi
 		 */
-		 /*
-		  * TODO Once STU3 is available, verify eob.item.category.
-		  */
+		/*
+		 * TODO Once STU3 is available, verify eob.item.category.
+		 */
 		/*
 		 * TODO once STU3 is available, verify eob.line.location
 		 */
@@ -733,10 +763,13 @@ public final class DataTransformerTest {
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
 	 * single {@link OutpatientClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertOutpatientClaimEvent() {
+	public void transformInsertOutpatientClaimEvent() throws FHIRException {
 		// Create the mock bene to test against.
 		OutpatientClaimGroup record = new OutpatientClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
@@ -810,14 +843,14 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional).
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
-		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
-		Assert.assertEquals(record.totalChargeAmount, eob.getClaimTotal().getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
+		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
 		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Organization).findAny().get();
@@ -849,9 +882,15 @@ public final class DataTransformerTest {
 		 */
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		ItemsComponent eobItem0 = eob.getItem().get(0);
+		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
-		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
 
 		/*
 		 * TODO Once STU3 is available, verify eob.item.careTeam for rendering
@@ -893,10 +932,13 @@ public final class DataTransformerTest {
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
 	 * single {@link SNFClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertSNFClaimEvent() {
+	public void transformInsertSNFClaimEvent() throws FHIRException {
 		// Create the mock bene to test against.
 		SNFClaimGroup record = new SNFClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
@@ -962,14 +1004,14 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional)
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
-		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
-		Assert.assertEquals(record.totalChargeAmount, eob.getClaimTotal().getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
+		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
 		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Organization).findAny().get();
@@ -1001,9 +1043,15 @@ public final class DataTransformerTest {
 		 */
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		ItemsComponent eobItem0 = eob.getItem().get(0);
+		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
-		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
 
 		/*
 		 * TODO Once STU3 is available, verify eob.item.careTeam for rendering
@@ -1030,10 +1078,13 @@ public final class DataTransformerTest {
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
 	 * single {@link HospiceClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertHospiceClaimEvent() {
+	public void transformInsertHospiceClaimEvent() throws FHIRException {
 		// Create the mock bene to test against.
 		HospiceClaimGroup record = new HospiceClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
@@ -1094,14 +1145,14 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional).
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
-		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
-		Assert.assertEquals(record.totalChargeAmount, eob.getClaimTotal().getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
+		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
 		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Organization).findAny().get();
@@ -1109,8 +1160,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				organization.getIdentifier());
 		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get()).getReference(),
+		Assert.assertEquals(DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get()).getReference(),
 				organizationEntry.getRequest().getUrl());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
 				organization.getType().getCoding().get(0));
@@ -1122,9 +1172,15 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		ItemsComponent eobItem0 = eob.getItem().get(0);
+		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
-		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
 
 		/*
 		 * TODO Once STU3 is available, verify eob.item.careTeam for rendering
@@ -1156,10 +1212,13 @@ public final class DataTransformerTest {
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
 	 * single {@link HHAClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertHHAClaimEvent() {
+	public void transformInsertHHAClaimEvent() throws FHIRException {
 		// Create the mock bene to test against.
 		HHAClaimGroup record = new HHAClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
@@ -1218,14 +1277,14 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional).
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
-		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
-		Assert.assertEquals(record.totalChargeAmount, eob.getClaimTotal().getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
+		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
 		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Organization).findAny().get();
@@ -1245,9 +1304,15 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		ItemsComponent eobItem0 = eob.getItem().get(0);
+		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
-		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
 
 		/*
 		 * TODO Once STU3 is available, verify eob.item.careTeam for rendering
@@ -1275,10 +1340,13 @@ public final class DataTransformerTest {
 	 * Verifies that {@link DataTransformer} works correctly when when passed a
 	 * single {@link DMEClaimGroup} {@link RecordAction#INSERT}
 	 * {@link RifRecordEvent}.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void transformInsertDMEClaimEvent() {
+	public void transformInsertDMEClaimEvent() throws FHIRException {
 		// Create the mock bene to test against.
 		DMEClaimGroup record = new DMEClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
@@ -1343,7 +1411,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (professional)
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		Assert.assertEquals(record.nearLineRecordIdCode.toString(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD).get(0).getValue())
 						.getValue());
@@ -1356,9 +1424,9 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.paymentDenialCode,
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
-		Assert.assertEquals(record.paymentAmount, eob.getPaymentAmount().getValue());
+		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 
-		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+		ReferralRequest referral = (ReferralRequest) eob.getReferralReference().getResource();
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
 		Assert.assertEquals(1, referral.getRecipient().size());
 		Assert.assertEquals(claimBundle.getEntry().stream()
@@ -1384,9 +1452,15 @@ public final class DataTransformerTest {
 		 */
 		Assert.assertEquals(2, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		ItemsComponent eobItem0 = eob.getItem().get(0);
+		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
-		Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
+		/*
+		 * FIXME item.type field for
+		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
+		 * in STU3 (though present in item.detail). Sent email to Mark/FM
+		 * working group about this on 2016-10-20.
+		 */
+		// Assert.assertEquals("CSPINV", eobItem0.getType().getCode());
 
 		/*
 		 * TODO Once STU3 is available, verify eob.item.careTeam
@@ -1480,16 +1554,15 @@ public final class DataTransformerTest {
 	/**
 	 * @param expectedCategoryCode
 	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link ItemAdjudicationComponent#getCategory()} to find and
-	 *            verify
+	 *            {@link AdjudicationComponent#getCategory()} to find and verify
 	 * @param expectedAmount
-	 *            the expected {@link ItemAdjudicationComponent#getAmount()}
+	 *            the expected {@link AdjudicationComponent#getAmount()}
 	 * @param actuals
-	 *            the actual {@link ItemAdjudicationComponent}s to verify
+	 *            the actual {@link AdjudicationComponent}s to verify
 	 */
 	private static void assertAdjudicationEquals(String expectedCategoryCode, BigDecimal expectedAmount,
-			List<ItemAdjudicationComponent> actuals) {
-		Optional<ItemAdjudicationComponent> adjudication = actuals.stream()
+			List<AdjudicationComponent> actuals) {
+		Optional<AdjudicationComponent> adjudication = actuals.stream()
 				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
 				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
 		Assert.assertTrue(adjudication.isPresent());
@@ -1499,14 +1572,13 @@ public final class DataTransformerTest {
 	/**
 	 * @param expectedCategoryCode
 	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link ItemAdjudicationComponent#getCategory()} to verify is
-	 *            not present
+	 *            {@link AdjudicationComponent#getCategory()} to verify is not
+	 *            present
 	 * @param actuals
-	 *            the actual {@link ItemAdjudicationComponent}s to verify
+	 *            the actual {@link AdjudicationComponent}s to verify
 	 */
-	private static void assertAdjudicationNotPresent(String expectedCategoryCode,
-			List<ItemAdjudicationComponent> actuals) {
-		Optional<ItemAdjudicationComponent> adjudication = actuals.stream()
+	private static void assertAdjudicationNotPresent(String expectedCategoryCode, List<AdjudicationComponent> actuals) {
+		Optional<AdjudicationComponent> adjudication = actuals.stream()
 				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
 				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
 		Assert.assertFalse(adjudication.isPresent());
@@ -1515,14 +1587,14 @@ public final class DataTransformerTest {
 	/**
 	 * @param expectedDiagnosis
 	 *            the expected {@link IcdCode} to verify the presence of in the
-	 *            {@link ItemsComponent}
+	 *            {@link ItemComponent}
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to verify
 	 * @param eobItem
-	 *            the {@link ItemsComponent} to verify
+	 *            the {@link ItemComponent} to verify
 	 */
 	private static void assertDiagnosisLinkPresent(IcdCode expectedDiagnosis, ExplanationOfBenefit eob,
-			ItemsComponent eobItem) {
+			ItemComponent eobItem) {
 		Optional<DiagnosisComponent> eobDiagnosis = eob.getDiagnosis().stream()
 				.filter(d -> expectedDiagnosis.getVersion().getFhirSystem().equals(d.getDiagnosis().getSystem()))
 				.filter(d -> expectedDiagnosis.getCode().equals(d.getDiagnosis().getCode())).findAny();

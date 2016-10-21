@@ -2,7 +2,7 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
 
 import java.util.function.Consumer;
 
-import org.hl7.fhir.dstu21.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
