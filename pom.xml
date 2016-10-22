@@ -335,6 +335,26 @@
 				</pluginManagement>
 			</build>
 		</profile>
+
+		<profile>
+			<!-- When activated via '-Prun-its-with-db-on-disk' this profile sets 
+				the ITs to run with an on-disk DB, instead of an in-memory one. This needs 
+				to be activated when running on systems without a lot of memory (such as 
+				the CI server). Note that, on Karl's personal laptop, this adds an extra 
+				40 minutes or so to the project's build time. -->
+			<!-- Note: As of 2016-07-23, the CI server for this project only has 4 
+				GB of memory, and no swap space. Running FhirLoaderIT.loadRifDataSampleB() 
+				takes at least 2.5 GB of free memory (when the DB was configured to be in-memory), 
+				and Cargo was failing on the CI server due to its inability to reserve that 
+				much. -->
+			<id>run-its-with-db-on-disk</id>
+			<properties>
+				<its.bbfhir.server.jvmargs>-Xmx1g</its.bbfhir.server.jvmargs>
+				<its.bbfhir.db.url>jdbc:hsqldb:file:test</its.bbfhir.db.url>
+				<its.bbfhir.db.username></its.bbfhir.db.username>
+				<its.bbfhir.db.password></its.bbfhir.db.password>
+			</properties>
+		</profile>
 	</profiles>
 
 </project>
