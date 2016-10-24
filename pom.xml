@@ -349,7 +349,7 @@
 				much. -->
 			<id>run-its-with-db-on-disk</id>
 			<properties>
-				<its.bbfhir.server.jvmargs>-Xmx2g</its.bbfhir.server.jvmargs>
+				<its.bbfhir.server.jvmargs>-Xmx1g</its.bbfhir.server.jvmargs>
 				<its.bbfhir.db.url>jdbc:hsqldb:file:test</its.bbfhir.db.url>
 				<its.bbfhir.db.username></its.bbfhir.db.username>
 				<its.bbfhir.db.password></its.bbfhir.db.password>
