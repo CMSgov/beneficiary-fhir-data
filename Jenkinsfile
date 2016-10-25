@@ -12,7 +12,7 @@
  * </p>
  * <p>
  * The canonical Jenkins server job for this project is located here: 
- * <a href="http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bbonfhir-server/">bbonfhir-server</a>.
+ * <a href="http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bluebutton-server/">bluebutton-server</a>.
  * </p>
  */
 

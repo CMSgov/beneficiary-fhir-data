@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.demo;
+package gov.hhs.cms.bluebutton.server.app;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,10 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
+/**
+ * Provides the configuration for {@link BlueButtonServer} (and is activated via
+ * Spring classpath scanning).
+ */
 @Configuration
 @EnableTransactionManagement()
 public class FhirServerConfig extends BaseJavaConfigDstu3 {

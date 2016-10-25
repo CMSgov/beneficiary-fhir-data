@@ -23,7 +23,7 @@ Once the build is done, the HAPI FHIR artifacts will be placed into your user's 
 
 In the HealthAPT dev, test, and prod environments in AWS, this application is deployed to a JBoss EAP 7 container. For the automated integration tests, this project will run the application in Wildfly 8.1, instead, as this is the upstream release that JBoss EAP 7 is based on, and it's freely available (and this easy to automate).
 
-The `bbonfhir-server-app` module also attaches to its build a `server-config.sh` script that manages the configuration that should be used to run the application.
+The `bluebutton-server-app` module also attaches to its build a `server-config.sh` script that manages the configuration that should be used to run the application.
 
 Note that, because the server's SSL configuration has "`verify-client`" set to "`REQUIRED`", you will be unable to access HAPI's testing UI in your web browser unless you first deploy the `client.pfx` file to your browser (temporarily!). All API access will also require a trusted client certificate, as well. If you just want to poke around in the Testing UI, you can temporarily adjust "`verify-client`" "`REQUESTED`". Note, though, that this **must not** be done in production, as it completely disables the application's authentication requirements.
 
@@ -34,27 +34,27 @@ For your convenience, a dev-only-really-don't-use-these-anywhere-else server key
 1. Generate a new server keypair that's valid for `localhost` and `127.0.0.1` and a new keystore for it using Java's `keytool`, e.g.:
     
     ```
-    $ keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname "cn=localhost" -ext "san=ip:127.0.0.1" -validity 3650 -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/server.keystore -storepass changeit
+    $ keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname "cn=localhost" -ext "san=ip:127.0.0.1" -validity 3650 -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/server.keystore -storepass changeit
     ```
     
 1. Export the server certificate to a new file that clients can use as their truststore:
     
     ```
-    $ keytool -exportcert -alias server -file bbonfhir-server.git/dev/ssl-stores/server.cer -keystore bbonfhir-server.git/dev/ssl-stores/server.keystore -storepass changeit
-    $ keytool -importcert -noprompt -trustcacerts -alias server -file bbonfhir-server.git/dev/ssl-stores/server.cer -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/client.truststore -storepass changeit
+    $ keytool -exportcert -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keystore bluebutton-server.git/dev/ssl-stores/server.keystore -storepass changeit
+    $ keytool -importcert -noprompt -trustcacerts -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/client.truststore -storepass changeit
     ```
     
 1. Generate a new client certificate that can be used in tests and place it in a new server truststore:
     
     ```
-    $ keytool -genkeypair -alias client-local-dev -keyalg RSA -keysize 4096 -dname "cn=client-local-dev" -validity 3650 -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/client.keystore -storepass changeit
-    $ keytool -exportcert -alias client-local-dev -file bbonfhir-server.git/dev/ssl-stores/client.cer -keystore bbonfhir-server.git/dev/ssl-stores/client.keystore -storepass changeit
-    $ keytool -importcert -noprompt -trustcacerts -alias client-local-dev -file bbonfhir-server.git/dev/ssl-stores/client.cer -keypass changeit -keystore bbonfhir-server.git/dev/ssl-stores/server.truststore -storepass changeit
+    $ keytool -genkeypair -alias client-local-dev -keyalg RSA -keysize 4096 -dname "cn=client-local-dev" -validity 3650 -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/client.keystore -storepass changeit
+    $ keytool -exportcert -alias client-local-dev -file bluebutton-server.git/dev/ssl-stores/client.cer -keystore bluebutton-server.git/dev/ssl-stores/client.keystore -storepass changeit
+    $ keytool -importcert -noprompt -trustcacerts -alias client-local-dev -file bluebutton-server.git/dev/ssl-stores/client.cer -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/server.truststore -storepass changeit
     ```
     
 1. Export the client certificate to a PFX file that you can use in your browser, if need be:
     
     ```
-    $ keytool -importkeystore -srckeystore bbonfhir-server.git/dev/ssl-stores/client.keystore -destkeystore bbonfhir-server.git/dev/ssl-stores/client.pfx -deststoretype PKCS12 -srcstorepass changeit -deststorepass changeit -srcalias client-local-dev
+    $ keytool -importkeystore -srckeystore bluebutton-server.git/dev/ssl-stores/client.keystore -destkeystore bluebutton-server.git/dev/ssl-stores/client.pfx -deststoretype PKCS12 -srcstorepass changeit -deststorepass changeit -srcalias client-local-dev
     ```
     

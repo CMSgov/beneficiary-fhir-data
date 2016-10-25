@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.demo;
+package gov.hhs.cms.bluebutton.server.app;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,7 +32,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
-public class ExampleServerIT {
+public class BlueButtonServerIT {
 	@Test
 	public void testCreateAndRead() throws IOException {
 		IGenericClient ourClient = createFhirClient();

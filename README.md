@@ -25,13 +25,13 @@ These parameters should be specified as Java system properties on the command li
 This project can be built and run, as follows:
 
     $ mvn clean install
-    $ mvn --projects bbonfhir-server-app package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
+    $ mvn --projects bluebutton-server-app package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
 
 This will start the server using a local, in-memory database that will be deleted once the server is stopped. The server can take a few minutes to finish starting up, and Maven will exit with a "`BUILD SUCCESSFUL`" message once it's ready. The server will be running at <https://localhost:9094/baseDstu2>. Please note that it is set by default to require SSL mutual authentication, so accessing it via a browser isn't simple. See [Development Environment Setup](./dev/devenv-readme.md) for details on how to work with this, if needed.
 
 Once the server is no longer needed, you can stop it by running the following command:
 
-    $ mvn --projects bbonfhir-server-app org.codehaus.mojo:exec-maven-plugin:exec@server-stop
+    $ mvn --projects bluebutton-server-app org.codehaus.mojo:exec-maven-plugin:exec@server-stop
 
 ## License
 

@@ -10,7 +10,7 @@
 	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>ca.uhn.fhir.jpa.demo.FhirServerConfig</param-value>
+		<param-value>gov.hhs.cms.bluebutton.server.app.FhirServerConfig</param-value>
 	</context-param>
 
 	<!-- Servlets -->
@@ -27,10 +27,10 @@
 
 	<servlet>
 		<servlet-name>fhirServlet</servlet-name>
-		<servlet-class>ca.uhn.fhir.jpa.demo.JpaServerDemo</servlet-class>
+		<servlet-class>gov.hhs.cms.bluebutton.server.app.BlueButtonServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>FHIR JPA Server</param-value>
+			<param-value>Blue Button API Server</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
