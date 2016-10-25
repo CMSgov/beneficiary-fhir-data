@@ -1,8 +1,9 @@
-package ca.uhn.fhir.jpa.demo;
+package gov.hhs.cms.bluebutton.server.app;
 
 import java.util.Collection;
 import java.util.List;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.hl7.fhir.dstu3.model.Meta;
@@ -31,16 +32,22 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
-public class JpaServerDemo extends RestfulServer {
-
+/**
+ * The primary {@link Servlet} for this web application. Uses the
+ * <a href="http://hapifhir.io/">HAPI FHIR</a> framework to provide a fully
+ * functional and persistent FHIR API server.
+ * 
+ * @see FhirServerConfig
+ */
+public class BlueButtonServer extends RestfulServer {
 	private static final long serialVersionUID = 1L;
 
 	private WebApplicationContext myAppCtx;
 
 	/**
-	 * Constructs a new {@link JpaServerDemo} instance.
+	 * Constructs a new {@link BlueButtonServer} instance.
 	 */
-	public JpaServerDemo() {
+	public BlueButtonServer() {
 		super();
 
 		setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
@@ -61,13 +68,15 @@ public class JpaServerDemo extends RestfulServer {
 		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU3;
 		setFhirContext(new FhirContext(fhirVersion));
 
-		// Get the spring context from the web container (it's declared in web.xml)
+		// Get the spring context from the web container (it's declared in
+		// web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
-		/* 
-		 * The hapi-fhir-server-resourceproviders-dev.xml file is a spring configuration
-		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
-		 * contains bean definitions for a resource provider for each resource type
+		/*
+		 * The hapi-fhir-server-resourceproviders-dev.xml file is a spring
+		 * configuration file which is automatically generated as a part of
+		 * hapi-fhir-jpaserver-base and contains bean definitions for a resource
+		 * provider for each resource type
 		 */
 		String resourceProviderBeanName;
 		if (fhirVersion == FhirVersionEnum.DSTU1) {
@@ -81,8 +90,8 @@ public class JpaServerDemo extends RestfulServer {
 		}
 		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
 		setResourceProviders(beans);
-		
-		/* 
+
+		/*
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
@@ -99,9 +108,9 @@ public class JpaServerDemo extends RestfulServer {
 		setPlainProviders(systemProvider);
 
 		/*
-		 * The conformance provider exports the supported resources, search parameters, etc for
-		 * this server. The JPA version adds resource counts to the exported statement, so it
-		 * is a nice addition.
+		 * The conformance provider exports the supported resources, search
+		 * parameters, etc for this server. The JPA version adds resource counts
+		 * to the exported statement, so it is a nice addition.
 		 */
 		if (fhirVersion == FhirVersionEnum.DSTU1) {
 			IFhirSystemDao<List<IResource>, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu1",
@@ -116,8 +125,8 @@ public class JpaServerDemo extends RestfulServer {
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx
-					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
+			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3",
+					IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
 					myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
@@ -152,7 +161,8 @@ public class JpaServerDemo extends RestfulServer {
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 		/*
-		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
+		 * Load interceptors for the server from Spring (these are defined in
+		 * FhirServerConfig.java)
 		 */
 		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
 		for (IServerInterceptor interceptor : interceptorBeans) {
