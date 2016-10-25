@@ -45,22 +45,6 @@
 			<version>${hapi-fhir.version}</version>
 		</dependency>
 
-		<!-- This dependency is used for the "FHIR Tester" web app overlay -->
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>${hapi-fhir.version}</version>
-			<type>war</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>${hapi-fhir.version}</version>
-			<classifier>classes</classifier>
-			<scope>provided</scope>
-		</dependency>
-
 		<dependency>
 			<!-- HAPI-FHIR uses Logback for logging support. The logback library is 
 				included automatically by Maven as a part of the hapi-fhir-base dependency, 
@@ -324,20 +308,9 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- The configuration here tells the WAR plugin to include the FHIR 
-					Tester overlay. You can omit it if you are not using that feature. -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<overlays>
-						<overlay>
-							<groupId>ca.uhn.hapi.fhir</groupId>
-							<artifactId>hapi-fhir-testpage-overlay</artifactId>
-							<excludes>
-								<exclude>WEB-INF/lib/hapi-fhir-structures-*.jar</exclude>
-							</excludes>
-						</overlay>
-					</overlays>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 				</configuration>
 			</plugin>
