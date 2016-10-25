@@ -6,8 +6,8 @@ serverArtifact="wildfly-dist-${serverVersion}.tar.gz"
 serverInstall="wildfly-${serverVersion}"
 serverPortHttps=9094
 serverTimeoutSeconds=120
-warArtifact='bbonfhir-server-app.war'
-configArtifact='bbonfhir-server-app-server-config.sh'
+warArtifact='bluebutton-server-app.war'
+configArtifact='bluebutton-server-app-server-config.sh'
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -80,7 +80,7 @@ error() {
 	
 	# Before bailing, always try to stop any running servers.
 	>&2 echo "Trying to stop any running servers before exiting..."
-	"${scriptDirectory}/bbonfhir-server-app-server-stop.sh" --directory "${directory}"
+	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
 
 	>&2 echo "Exiting with status ${code}."
 	exit "${code}"
@@ -167,7 +167,7 @@ while true; do
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to start within ${serverTimeoutSeconds} seconds. Trying to stop it..."
-		"${scriptDirectory}/bbonfhir-server-app-server-stop.sh" --directory "${directory}"
+		"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
 		exit 3
 	fi
 	sleep 1

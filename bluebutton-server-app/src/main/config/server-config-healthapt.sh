@@ -6,7 +6,7 @@
 #
 # Usage:
 # 
-# $ bbonfhir-server-app-server-config-healthapt.sh --serverhome /path-to-jboss --auth --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --war /path-to-war --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password"
+# $ bluebutton-server-app-server-config-healthapt.sh --serverhome /path-to-jboss --auth --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --war /path-to-war --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password"
 ##
 
 # Constants.
@@ -20,7 +20,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEMP=`getopt \
 	-o h:as:k:t:w:u:n:p: \
 	--long serverhome:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
-	-n 'bbonfhir-server-app-server-config-healthapt.sh' -- "$@"`
+	-n 'bluebutton-server-app-server-config-healthapt.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
 # Note the quotes around `$TEMP': they are essential!
