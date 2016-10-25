@@ -22,10 +22,6 @@
 			<param-name>contextClass</param-name>
 			<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
 		</init-param>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>ca.uhn.fhir.jpa.demo.FhirTesterConfig</param-value>
-		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 

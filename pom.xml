@@ -52,6 +52,17 @@
 		<module>bbonfhir-server-app</module>
 	</modules>
 
+	<properties>
+		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
+			plugin. These settings are pulled out as POM properties so that they can 
+			be adjusted via profiles. This is required because the CI server doesn't 
+			have enough RAM to run with an in-mem DB, and so requires a different configuration. -->
+		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
+		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
+		<its.bbfhir.db.username></its.bbfhir.db.username>
+		<its.bbfhir.db.password></its.bbfhir.db.password>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -84,5 +95,23 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<profiles>
+		<profile>
+			<!-- When activated via '-Prun-its-with-db-on-disk' this profile sets 
+				the ITs to run with an on-disk DB, instead of an in-memory one. This needs 
+				to be activated when running on systems without a lot of memory (such as 
+				the CI server). -->
+			<!-- Note: As of 2016-07-23, the CI server for this project only has 4 
+				GB of memory, and no swap space. -->
+			<id>run-its-with-db-on-disk</id>
+			<properties>
+				<its.bbfhir.server.jvmargs>-Xmx1g</its.bbfhir.server.jvmargs>
+				<its.bbfhir.db.url>jdbc:hsqldb:file:target/hsql-db-for-its</its.bbfhir.db.url>
+				<its.bbfhir.db.username></its.bbfhir.db.username>
+				<its.bbfhir.db.password></its.bbfhir.db.password>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
