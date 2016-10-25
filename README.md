@@ -12,9 +12,8 @@ Going to work on this project? Great! You can follow the instructions in [Develo
 
 This application has the following configuration parameters:
 
-* `bbfhir.db.url`: The JDBC URL of the database to use. Supports HSQL, Derby, and PostgreSQL. Samples:
+* `bbfhir.db.url`: The JDBC URL of the database to use. Supports HSQL and PostgreSQL. Samples:
     * `jdbc:hsqldb:mem:test`
-    * `jdbc:derby:directory:target/jpaserver_derby_files;create=true`
     * `jdbc:postgresql://example.com:5432/fhir`
 * `bbfhir.db.username`: The JDBC username to use with the database.
 * `bbfhir.db.password`: The JDBC password to use with the database.
