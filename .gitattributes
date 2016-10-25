@@ -12,3 +12,7 @@ bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample
 
 # Apache Commons CSV always uses CRLF for CSV files.
 dev/benchmark-data.csv -text
+
+# RIF files come in as CRLF, so we'll keep them that way.
+bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-*.txt -text
+
