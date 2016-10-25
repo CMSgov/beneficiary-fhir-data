@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.demo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
@@ -18,7 +20,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
@@ -29,6 +33,56 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	public static final String PROP_DB_URL = "bbfhir.db.url";
 	public static final String PROP_DB_USERNAME = "bbfhir.db.username";
 	public static final String PROP_DB_PASSWORD = "bbfhir.db.password";
+
+	/**
+	 * @see ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3#resourceProvidersDstu3()
+	 */
+	@Bean(name = "myResourceProvidersDstu3")
+	@Override
+	public List<IResourceProvider> resourceProvidersDstu3() {
+		/*
+		 * This is overridden to reduce the default "surface area" of our FHIR
+		 * server: only support the resource types that are actually needed.
+		 */
+
+		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();
+		retVal.add(rpBundleDstu3());
+		retVal.add(rpConformanceDstu3());
+		retVal.add(rpCoverageDstu3());
+		retVal.add(rpExplanationOfBenefitDstu3());
+		retVal.add(rpMedicationDstu3());
+		retVal.add(rpMedicationOrderDstu3());
+		retVal.add(rpOrganizationDstu3());
+		retVal.add(rpPatientDstu3());
+		retVal.add(rpPractitionerDstu3());
+		retVal.add(rpReferralRequestDstu3());
+		return retVal;
+	}
+
+	/**
+	 * @see ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3#resourceDaosDstu3()
+	 */
+	@Bean(name = "myResourceDaosDstu3")
+	@Override
+	public List<IFhirResourceDao<?>> resourceDaosDstu3() {
+		/*
+		 * This is overridden to reduce the default "surface area" of our FHIR
+		 * server: only support the resource types that are actually needed.
+		 */
+
+		List<IFhirResourceDao<?>> retVal = new ArrayList<IFhirResourceDao<?>>();
+		retVal.add(daoBundleDstu3());
+		retVal.add(daoConformanceDstu3());
+		retVal.add(daoCoverageDstu3());
+		retVal.add(daoExplanationOfBenefitDstu3());
+		retVal.add(daoMedicationDstu3());
+		retVal.add(daoMedicationOrderDstu3());
+		retVal.add(daoOrganizationDstu3());
+		retVal.add(daoPatientDstu3());
+		retVal.add(daoPractitionerDstu3());
+		retVal.add(daoReferralRequestDstu3());
+		return retVal;
+	}
 
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
