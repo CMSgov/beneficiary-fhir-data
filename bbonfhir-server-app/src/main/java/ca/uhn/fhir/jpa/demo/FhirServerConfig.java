@@ -165,7 +165,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	 */
 	public IServerInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
-		retVal.setLoggerName("fhirtest.access");
+		retVal.setLoggerName("hapi.access");
 		retVal.setMessageFormat(
 				"Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${operationName} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] ResponseEncoding[${responseEncodingNoDefault}]");
 		retVal.setLogExceptions(true);
