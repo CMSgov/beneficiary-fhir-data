@@ -13,43 +13,43 @@
 	</parent>
 
 	<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-	<artifactId>bbonfhir-server-parent</artifactId>
+	<artifactId>bluebutton-server-parent</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>bbonfhir-server-parent</name>
+	<name>bluebutton-server-parent</name>
 	<description>
-		The CMS Blue Button project provides Medicare beneficiaries with access
+		The CMS Blue Button API project provides Medicare beneficiaries with access
         to their health care data, and supports an ecosystem of third-party 
         applications that can leverage that data. This is the parent POM for 
         the project.
 	</description>
-	<url>https://github.com/karlmdavis/bbonfhir-server</url>
+	<url>https://github.com/HHSIDEAlab/bluebutton-server</url>
 
 	<issueManagement>
 		<!-- There doesn't seem to be any tooling support for this yet, but it 
 			doesn't hurt to include it. -->
 		<system>GitHub Issues</system>
-		<url>https://github.com/karlmdavis/bbonfhir-server/issues</url>
+		<url>https://github.com/HHSIDEAlab/bluebutton-server/issues</url>
 	</issueManagement>
 
 	<ciManagement>
 		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
 			Sonar (at least) can use this information. -->
 		<system>jenkins</system>
-		<url>http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bbonfhir-server/</url>
+		<url>http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bluebutton-server/</url>
 	</ciManagement>
 
 	<scm>
 		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-		<connection>scm:git:git@github.com:karlmdavis/bbonfhir-server.git</connection>
-		<developerConnection>scm:git:git@github.com:karlmdavis/bbonfhir-server.git</developerConnection>
-		<url>https://github.com/karlmdavis/bbonfhir-server</url>
+		<connection>scm:git:git@github.com:HHSIDEAlab/bluebutton-server.git</connection>
+		<developerConnection>scm:git:git@github.com:HHSIDEAlab/bluebutton-server.git</developerConnection>
+		<url>https://github.com/HHSIDEAlab/bluebutton-server</url>
 		<tag>HEAD</tag>
 	</scm>
 
 	<modules>
-		<module>bbonfhir-server-app</module>
+		<module>bluebutton-server-app</module>
 	</modules>
 
 	<properties>

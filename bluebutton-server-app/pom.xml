@@ -4,15 +4,15 @@
 
 	<parent>
 		<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-		<artifactId>bbonfhir-server-parent</artifactId>
+		<artifactId>bluebutton-server-parent</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bbonfhir-server-app</artifactId>
+	<artifactId>bluebutton-server-app</artifactId>
 	<packaging>war</packaging>
 
 	<description>
-		The primary WAR for the CMS Blue Button project. Provides a FHIR API.
+		The primary WAR for the CMS Blue Button API project. Provides a FHIR API.
 	</description>
 
 	<properties>
