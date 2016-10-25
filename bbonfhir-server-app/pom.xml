@@ -20,15 +20,6 @@
 		<jersey.version>2.23.1</jersey.version>
 		<jetty.version>9.3.10.v20160621</jetty.version>
 		<derby.version>10.12.1.1</derby.version>
-
-		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
-			plugin. These settings are pulled out as POM properties so that they can 
-			be adjusted via profiles. This is required because the CI server doesn't 
-			have enough RAM to run with an in-mem DB, and so requires a different configuration. -->
-		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
-		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
-		<its.bbfhir.db.username></its.bbfhir.db.username>
-		<its.bbfhir.db.password></its.bbfhir.db.password>
 	</properties>
 
 	<dependencies>
