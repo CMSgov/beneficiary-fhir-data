@@ -44,10 +44,13 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	}
 
 	/**
-	 * The following bean configures the database connection. The 'url' property value of "jdbc:derby:directory:jpaserver_derby_files;create=true" indicates that the server should save resources in a
-	 * directory called "jpaserver_derby_files".
+	 * The following bean configures the database connection. The 'url' property
+	 * value of "jdbc:derby:directory:jpaserver_derby_files;create=true"
+	 * indicates that the server should save resources in a directory called
+	 * "jpaserver_derby_files".
 	 * 
-	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
+	 * A URL to a remote database could also be placed here, along with login
+	 * credentials and other properties supported by BasicDataSource.
 	 */
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource(@Value("${" + PROP_DB_URL + "}") String url,
@@ -85,11 +88,26 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
+
+		/*
+		 * Disable Hibernate Search/Lucene indexing, as it slows writes down by
+		 * about half. See this thread for some details on what the tradeoffs
+		 * are: https://groups.google.com/forum/#!topic/hapi-fhir/lF9b_cLfgA4.
+		 */
+		extraProperties.put("hibernate.search.autoregister_listeners", "false");
+
+		/*
+		 * This property was used to disable Lucene in HAPI 1.4. Pretty sure
+		 * it's not needed anymore, but seems worth keeping around, just in
+		 * case.
+		 */
+		// extraProperties.put("hibernate.search.indexing_strategy", "manual");
 		return extraProperties;
 	}
 
 	/**
-	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * Do some fancy logging to create a nice access log that has details about
+	 * each incoming request.
 	 */
 	public IServerInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
@@ -102,7 +120,8 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	}
 
 	/**
-	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
+	 * This interceptor adds some pretty syntax highlighting in responses when a
+	 * browser is detected
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IServerInterceptor responseHighlighterInterceptor() {
@@ -122,5 +141,4 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
 	}
-
 }
