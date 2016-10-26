@@ -3,38 +3,28 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
  * A mock {@link RifFile} implementation.
  */
 public final class MockRifFile implements RifFile {
-	private final Instant timestamp = Instant.now();
-
-	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getKey()
-	 */
-	@Override
-	public String getKey() {
-		return "foo";
-	}
-
 	/**
 	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getDisplayName()
 	 */
 	@Override
 	public String getDisplayName() {
-		return getKey();
+		return "foo";
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getLastModifiedTimestamp()
+	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getFileType()
 	 */
 	@Override
-	public Instant getLastModifiedTimestamp() {
-		return timestamp;
+	public RifFileType getFileType() {
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -50,14 +40,6 @@ public final class MockRifFile implements RifFile {
 	 */
 	@Override
 	public InputStream open() {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#delete()
-	 */
-	@Override
-	public void delete() {
 		throw new UnsupportedOperationException();
 	}
 }

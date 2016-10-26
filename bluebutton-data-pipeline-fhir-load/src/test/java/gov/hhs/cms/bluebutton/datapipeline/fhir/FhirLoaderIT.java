@@ -31,10 +31,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
 
@@ -78,10 +76,7 @@ public final class FhirLoaderIT {
 	@Test
 	public void loadRifDataSampleA() {
 		// Generate the sample RIF data to feed through the pipeline.
-		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_A.getResources();
-		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
-		Stream<RifFile> rifFilesStream = rifGenerator.generate();
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), StaticRifResourceGroup.SAMPLE_A.toRifFiles());
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
@@ -126,7 +121,7 @@ public final class FhirLoaderIT {
 
 		// Verify the results.
 		Assert.assertNotNull(resultsList);
-		Assert.assertEquals(rifResources.length, resultsList.size());
+		Assert.assertEquals(rifFilesEvent.getFiles().size(), resultsList.size());
 		assertResultIsLegit(resultsList);
 
 		/*
@@ -161,10 +156,7 @@ public final class FhirLoaderIT {
 	@Test
 	public void loadRifDataSampleB() {
 		// Generate the sample RIF data to feed through the pipeline.
-		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_B.getResources();
-		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
-		Stream<RifFile> rifFilesStream = rifGenerator.generate();
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), StaticRifResourceGroup.SAMPLE_B.toRifFiles());
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();

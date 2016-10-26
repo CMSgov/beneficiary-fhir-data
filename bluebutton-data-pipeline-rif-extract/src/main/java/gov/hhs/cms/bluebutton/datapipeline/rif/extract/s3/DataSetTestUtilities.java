@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -93,30 +94,27 @@ public class DataSetTestUtilities {
 	 *            the {@link DataSetManifest} to create an object for
 	 * @param manifestEntry
 	 *            the {@link DataSetManifestEntry} to create an object for
-	 * @param resourceName
-	 *            the name of the classpath resource to push as the new object's
-	 *            content
+	 * @param objectContentsUrl
+	 *            a {@link URL} to the data to push as the new object's content
 	 * @return a {@link PutObjectRequest} for the specified content
 	 */
 	public static PutObjectRequest createPutRequest(Bucket bucket, DataSetManifest manifest,
-			DataSetManifestEntry manifestEntry, String resourceName) {
+			DataSetManifestEntry manifestEntry, URL objectContentsUrl) {
 		String objectKey = String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()),
 				manifestEntry.getName());
-		InputStream objectContents = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
 
-		// If this isn't specified, the AWS API logs annoying warnings.
-		long objectContentLength;
 		try {
-			objectContentLength = Thread.currentThread().getContextClassLoader().getResource(resourceName)
-					.openConnection().getContentLength();
+			// If this isn't specified, the AWS API logs annoying warnings.
+			long objectContentLength = objectContentsUrl.openConnection().getContentLength();
+			ObjectMetadata objectMetadata = new ObjectMetadata();
+			objectMetadata.setContentLength(objectContentLength);
+
+			PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContentsUrl.openStream(),
+					objectMetadata);
+			return request;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-		ObjectMetadata objectMetadata = new ObjectMetadata();
-		objectMetadata.setContentLength(objectContentLength);
-
-		PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContents, objectMetadata);
-		return request;
 	}
 
 	/**

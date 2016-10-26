@@ -3,7 +3,6 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -42,15 +41,6 @@ public final class S3RifFile implements RifFile {
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getKey()
-	 */
-	@Override
-	public String getKey() {
-		// FIXME This op should be removed from the interface as it's not used.
-		throw new UnsupportedOperationException();
-	}
-
-	/**
 	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getFileType()
 	 */
 	@Override
@@ -67,15 +57,6 @@ public final class S3RifFile implements RifFile {
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getLastModifiedTimestamp()
-	 */
-	@Override
-	public Instant getLastModifiedTimestamp() {
-		// FIXME This op should be removed from the interface as it's not used.
-		throw new UnsupportedOperationException();
-	}
-
-	/**
 	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getCharset()
 	 */
 	@Override
@@ -89,17 +70,5 @@ public final class S3RifFile implements RifFile {
 	@Override
 	public InputStream open() {
 		return s3Client.getObject(objectRequest).getObjectContent();
-	}
-
-	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#delete()
-	 */
-	@Override
-	public void delete() {
-		/*
-		 * FIXME This op should be removed from the interface; wrong place for
-		 * it.
-		 */
-		throw new UnsupportedOperationException();
 	}
 }

@@ -18,6 +18,7 @@ import com.amazonaws.services.s3.model.Bucket;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
  * Integration tests for {@link DataSetMonitor}.
@@ -99,12 +100,12 @@ public final class DataSetMonitorIT {
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA, manifestA.getEntries().get(0),
-					"rif-static-samples/sample-a-beneficiaries.txt"));
+					StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
 			DataSetManifest manifestB = new DataSetManifest(Instant.now(),
 					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB, manifestB.getEntries().get(0),
-					"rif-static-samples/sample-a-bcarrier.txt"));
+					StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
 			// Start the monitor up.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();

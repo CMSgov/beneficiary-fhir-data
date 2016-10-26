@@ -1,5 +1,11 @@
 package gov.hhs.cms.bluebutton.datapipeline.sampledata;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
+
 /**
  * Enumerates groups of related {@link StaticRifResource}s that can be processed
  * together.
@@ -27,5 +33,13 @@ public enum StaticRifResourceGroup {
 	 */
 	public StaticRifResource[] getResources() {
 		return resources;
+	}
+
+	/**
+	 * @return a {@link Set} of {@link RifFile}s based on
+	 *         {@link #getResources()}
+	 */
+	public Set<RifFile> toRifFiles() {
+		return Arrays.stream(resources).map(resource -> resource.toRifFile()).collect(Collectors.toSet());
 	}
 }
