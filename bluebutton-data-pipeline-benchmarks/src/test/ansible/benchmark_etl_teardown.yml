@@ -17,14 +17,14 @@
   
   tasks:
     
-    - shell: "journalctl --unit=bbonfhir-server-app.service --no-pager &> /usr/local/bbonfhir-server-app/bbonfhir-server-app-{{ iteration_index }}.log"
+    - shell: "journalctl --unit=bluebutton-server-app.service --no-pager &> /usr/local/bluebutton-server-app/bluebutton-server-app-{{ iteration_index }}.log"
       args:
         executable: /bin/bash
       become: true
       ignore_errors: true
     
     - fetch:
-        src: "/usr/local/bbonfhir-server-app/bbonfhir-server-app-{{ iteration_index }}.log"
+        src: "/usr/local/bluebutton-server-app/bluebutton-server-app-{{ iteration_index }}.log"
         dest: '../../../target/benchmark-iterations/'
         flat: true
         fail_on_missing: false
