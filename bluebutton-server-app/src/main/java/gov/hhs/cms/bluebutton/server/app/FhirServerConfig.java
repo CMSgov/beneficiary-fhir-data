@@ -153,13 +153,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		 * are: https://groups.google.com/forum/#!topic/hapi-fhir/lF9b_cLfgA4.
 		 */
 		extraProperties.put("hibernate.search.autoregister_listeners", "false");
-
-		/*
-		 * This property was used to disable Lucene in HAPI 1.4. Pretty sure
-		 * it's not needed anymore, but seems worth keeping around, just in
-		 * case.
-		 */
-		// extraProperties.put("hibernate.search.indexing_strategy", "manual");
+		extraProperties.put("hibernate.search.indexing_strategy", "manual");
 		return extraProperties;
 	}
 
