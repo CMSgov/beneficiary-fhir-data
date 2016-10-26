@@ -201,7 +201,7 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.build.directory}/bluebutton-server/bbonfhir-server-app-server-start.sh</executable>
+							<executable>${project.build.directory}/bluebutton-server/bluebutton-server-app-server-start.sh</executable>
 							<arguments>
 								<argument>--javahome</argument>
 								<argument>${java.home}</argument>
@@ -232,7 +232,7 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.build.directory}/bluebutton-server/bbonfhir-server-app-server-stop.sh</executable>
+							<executable>${project.build.directory}/bluebutton-server/bluebutton-server-app-server-stop.sh</executable>
 							<arguments>
 								<argument>--directory</argument>
 								<argument>${project.build.directory}/bluebutton-server</argument>

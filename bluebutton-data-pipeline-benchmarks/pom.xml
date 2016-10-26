@@ -138,12 +138,12 @@
 							<artifactItems>
 								<artifactItem>
 									<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-									<artifactId>bbonfhir-server-app</artifactId>
-									<version>${bbonfhir-server.version}</version>
+									<artifactId>bluebutton-server-app</artifactId>
+									<version>${bluebutton-server.version}</version>
 									<type>sh</type>
 									<classifier>server-config-healthapt</classifier>
 									<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-									<destFileName>bbonfhir-server-app-server-config-healthapt.sh</destFileName>
+									<destFileName>bluebutton-server-app-server-config-healthapt.sh</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>

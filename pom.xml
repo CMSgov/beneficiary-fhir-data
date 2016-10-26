@@ -65,7 +65,7 @@
 		<capsule.version>1.0.1</capsule.version>
 
 		<!-- The version of the Blue Button FHIR server to test against. -->
-		<bbonfhir-server.version>0.1.0-51</bbonfhir-server.version>
+		<bluebutton-server.version>1.0.0-3</bluebutton-server.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 
@@ -182,38 +182,38 @@
 							</artifactItem>
 							<artifactItem>
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bbonfhir-server-app</artifactId>
-								<version>${bbonfhir-server.version}</version>
+								<artifactId>bluebutton-server-app</artifactId>
+								<version>${bluebutton-server.version}</version>
 								<type>war</type>
 								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bbonfhir-server-app.war</destFileName>
+								<destFileName>bluebutton-server-app.war</destFileName>
 							</artifactItem>
 							<artifactItem>
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bbonfhir-server-app</artifactId>
-								<version>${bbonfhir-server.version}</version>
+								<artifactId>bluebutton-server-app</artifactId>
+								<version>${bluebutton-server.version}</version>
 								<type>sh</type>
 								<classifier>server-config</classifier>
 								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bbonfhir-server-app-server-config.sh</destFileName>
+								<destFileName>bluebutton-server-app-server-config.sh</destFileName>
 							</artifactItem>
 							<artifactItem>
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bbonfhir-server-app</artifactId>
-								<version>${bbonfhir-server.version}</version>
+								<artifactId>bluebutton-server-app</artifactId>
+								<version>${bluebutton-server.version}</version>
 								<type>sh</type>
 								<classifier>server-start</classifier>
 								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bbonfhir-server-app-server-start.sh</destFileName>
+								<destFileName>bluebutton-server-app-server-start.sh</destFileName>
 							</artifactItem>
 							<artifactItem>
 								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bbonfhir-server-app</artifactId>
-								<version>${bbonfhir-server.version}</version>
+								<artifactId>bluebutton-server-app</artifactId>
+								<version>${bluebutton-server.version}</version>
 								<type>sh</type>
 								<classifier>server-stop</classifier>
 								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bbonfhir-server-app-server-stop.sh</destFileName>
+								<destFileName>bluebutton-server-app-server-stop.sh</destFileName>
 							</artifactItem>
 						</artifactItems>
 						<overWriteReleases>false</overWriteReleases>

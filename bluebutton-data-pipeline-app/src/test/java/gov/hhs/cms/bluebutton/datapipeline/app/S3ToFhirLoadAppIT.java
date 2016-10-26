@@ -61,7 +61,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
  * similar fashion. Once it's been run the first time, the server can be
  * re-launched from Eclipse's <strong>Run</strong> toolbar dropdown button, just
  * like any other Java application, unit test, etc. Logs from the server can be
- * found in the project's <code>target/bbonfhir-server/wildfly-*</code>
+ * found in the project's <code>target/bluebutton-server/wildfly-*</code>
  * directory.
  * </p>
  */
