@@ -274,11 +274,16 @@ public final class FhirLoader {
 	 *         operation
 	 */
 	public FhirBundleResult process(LoadableFhirBundle inputBundle) {
-		// Only one of these two Timer.Contexts will be applied.
+		// Only one of each failure/success Timer.Contexts will be applied.
 		Timer.Context timerBundleSuccess = metrics.timer(MetricRegistry.name(getClass(), "timer", "bundles", "loaded"))
+				.time();
+		Timer.Context timerBundleTypeSuccess = metrics
+				.timer(MetricRegistry.name(getClass(), "timer", "bundles", inputBundle.getSourceType(), "loaded"))
 				.time();
 		Timer.Context timerBundleFailure = metrics.timer(MetricRegistry.name(getClass(), "timer", "bundles", "failed"))
 				.time();
+		Timer.Context timerBundleTypeFailure = metrics
+				.timer(MetricRegistry.name(getClass(), "timer", "bundles", inputBundle.getSourceType(), "failed")).time();
 
 		int inputBundleCount = inputBundle.getResult().getEntry().size();
 		try {
@@ -289,12 +294,14 @@ public final class FhirLoader {
 
 			// Update the metrics now that things have been pushed.
 			timerBundleSuccess.stop();
+			timerBundleTypeSuccess.stop();
 			metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "loaded")).mark(1);
 			metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "loaded")).mark(inputBundleCount);
 
 			return new FhirBundleResult(inputBundle, resultBundle);
 		} catch (Throwable t) {
 			timerBundleFailure.stop();
+			timerBundleTypeFailure.stop();
 			metrics.meter(MetricRegistry.name(getClass(), "meter", "bundles", "failed")).mark(1);
 			metrics.meter(MetricRegistry.name(getClass(), "meter", "resources", "failed")).mark(inputBundleCount);
 			LOGGER.trace("Failed to load bundle with {} resources", inputBundleCount);
