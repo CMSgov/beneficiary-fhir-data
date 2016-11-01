@@ -14,8 +14,8 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o j:m:d:k:t:u:n:p: \
-	--long javahome:,maxheaparg:,directory:,keystore:,truststore:,dburl:,dbusername:,dbpassword: \
+	-o j:m:v:d:k:t:u:n:p: \
+	--long javahome:,maxheaparg:,visualvm:,directory:,keystore:,truststore:,dburl:,dbusername:,dbpassword: \
 	-n 'bluebutton-fhir-server-start.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -25,6 +25,7 @@ eval set -- "$TEMP"
 # Parse the getopt results.
 javaHome=""
 maxHeapArg="-Xmx4g"
+visualVm=
 directory=
 keyStore=
 trustStore=
@@ -37,6 +38,8 @@ while true; do
 			javaHome="$2"; shift 2 ;;
 		-m | --maxheaparg )
 			maxHeapArg="$2"; shift 2 ;;
+		-v | --visualvm )
+			visualVm="$2"; shift 2 ;;
 		-d | --directory )
 			directory="$2"; shift 2 ;;
 		-k | --keystore )
@@ -115,6 +118,19 @@ if [[ ! -f "${directory}/${serverInstall}/bin/standalone.conf.original" ]]; then
 	mv "${directory}/${serverInstall}/bin/standalone.conf" "${directory}/${serverInstall}/bin/standalone.conf.original"
 fi
 
+# Build the args to pass to the server for VisualVM (if any).
+if [[ -f "${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so" ]]; then
+	echo "Found VisualVM directory: '${visualVm}'"
+	visualVmArgs="-agentpath:${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so=${visualVm}/profiler/lib,5140"
+	visualVmArgs="${visualVmArgs} -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler.server,org.netbeans.lib.profiler.server.*"
+	visualVmArgs="${visualVmArgs} -Djava.util.logging.manager=org.jboss.logmanager.LogManager" 
+	visualVmArgs="${visualVmArgs} -Xbootclasspath/p:${directory}/${serverInstall}/modules/system/layers/base/org/jboss/logmanager/main/jboss-logmanager-1.5.2.Final.jar" 
+	jbossModulesSystemPackages="org.netbeans.lib.profiler.server,org.jboss.logmanager"
+else
+	echo "VisualVM directory not found: '${visualVm}'"
+	visualVmArgs=""
+fi
+
 # Write a correct server conf file.
 javaHomeLine=''
 if [[ -z "${javaHome}" ]]; then
@@ -129,8 +145,10 @@ cat <<EOF > "${directory}/${serverInstall}/bin/standalone.conf"
 ##                                                                          ##
 ##############################################################################
 ${javaHomeLine}
+JBOSS_MODULES_SYSTEM_PKGS="${jbossModulesSystemPackages}"
 JAVA_OPTS="-Xms64m ${maxHeapArg} -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"
 JAVA_OPTS="\$JAVA_OPTS -Djboss.modules.system.pkgs=\$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
+JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
 
 # These ports are only used until the server is configured, but need to be
 # set anyways, as the defaults on first launch conflict with Jenkins and other 
