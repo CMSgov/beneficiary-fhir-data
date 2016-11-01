@@ -25,7 +25,7 @@ eval set -- "$TEMP"
 # Parse the getopt results.
 javaHome=""
 maxHeapArg="-Xmx4g"
-visualVm=
+visualVm=""
 directory=
 keyStore=
 trustStore=
