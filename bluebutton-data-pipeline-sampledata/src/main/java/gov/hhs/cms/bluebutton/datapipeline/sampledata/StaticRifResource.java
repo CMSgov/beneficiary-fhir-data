@@ -1,7 +1,24 @@
 package gov.hhs.cms.bluebutton.datapipeline.sampledata;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Supplier;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
+
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
@@ -94,7 +111,74 @@ public enum StaticRifResource {
 
 	SAMPLE_B_DME(resourceUrl("rif-static-samples/sample-b-dme.txt"), RifFileType.DME, 82),
 
-	SAMPLE_B_PDE(resourceUrl("rif-static-samples/sample-b-pde.txt"), RifFileType.PDE, 1195);
+	SAMPLE_B_PDE(resourceUrl("rif-static-samples/sample-b-pde.txt"), RifFileType.PDE, 1195),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 bcarrier_sample.txt | awk -F '|' '{print $3}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_BENES(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "bene_sample.txt"), RifFileType.BENEFICIARY, 999999),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 bene_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_CARRIER(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "bcarrier_sample.txt"),
+			RifFileType.CARRIER, 423999),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 dme_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_DME(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "dme_sample.txt"), RifFileType.DME, 103404),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 hha_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_HHA(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "hha_sample.txt"), RifFileType.HHA, 27800),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 hospice_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_HOSPICE(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "hospice_sample.txt"),
+			RifFileType.HOSPICE, 9205),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 inpatient_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_INPATIENT(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "inpatient_sample.txt"),
+			RifFileType.INPATIENT, 28226),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 outpatient_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_OUTPATIENT(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "outpatient_sample.txt"),
+			RifFileType.OUTPATIENT, 278036),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 pde_sample.txt | awk -F '|' '{print $3}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_PDE(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "pde_sample.txt"), RifFileType.PDE, 1195),
+
+	/**
+	 * The record count here was verified with the following shell command:
+	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 snf_sample.txt | awk -F '|' '{print $7}' | tail -n +2 | sort | uniq -c | wc -l</code>
+	 * .
+	 */
+	SAMPLE_C_SNF(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "snf_sample.txt"), RifFileType.SNF, 596);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
@@ -157,5 +241,64 @@ public enum StaticRifResource {
 	 */
 	private static Supplier<URL> resourceUrl(String resourceName) {
 		return () -> Thread.currentThread().getContextClassLoader().getResource(resourceName);
+	}
+
+	/**
+	 * @param archiveName
+	 *            the classpath/resource name of the archive file that the
+	 *            desired resource is contained in (as might be passed to
+	 *            {@link ClassLoader#getResource(String)})
+	 * @param resourceFile
+	 *            the path of the desired resource file within the specified
+	 *            archive
+	 * @return a {@link Supplier} for the {@link URL} to the resource's contents
+	 */
+	private synchronized static Supplier<URL> zippedResourceUrl(String archiveName, String resourceFile) {
+		// Find the build output directory to decompress to.
+		Path targetDir = Paths.get(".", "bluebutton-data-pipeline-sampledata", "target");
+		if (!Files.exists(targetDir))
+			targetDir = Paths.get("..", "bluebutton-data-pipeline-sampledata", "target");
+		if (!Files.exists(targetDir))
+			throw new IllegalStateException();
+
+		// Check to see if it's already decompressed, and return it if so.
+		Path decompressDir = targetDir.resolve(archiveName);
+		Path resourcePath = decompressDir.resolve(resourceFile);
+		Supplier<URL> resourceUrlSupplier = () -> {
+			try {
+				return resourcePath.toUri().toURL();
+			} catch (MalformedURLException e) {
+				throw new BadCodeMonkeyException();
+			}
+		};
+		if (Files.isReadable(resourcePath))
+			return resourceUrlSupplier;
+
+		// Decompress the entire archive.
+		try (InputStream archiveStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream(archiveName);
+				BufferedInputStream bufferedStream = new BufferedInputStream(archiveStream);
+				BZip2CompressorInputStream bzip2Stream = new BZip2CompressorInputStream(bufferedStream);
+				TarArchiveInputStream tarStream = new TarArchiveInputStream(bzip2Stream);) {
+			TarArchiveEntry entry = null;
+			while ((entry = tarStream.getNextTarEntry()) != null) {
+				if (!entry.isFile())
+					throw new IllegalArgumentException(
+							String.format("Unexpected entry '{}' in archive '{}'.", entry.getName(), archiveName));
+				File entryFile = decompressDir.resolve(entry.getName()).toFile();
+				Files.createDirectories(entryFile.toPath().getParent());
+				try (FileOutputStream entryStream = new FileOutputStream(entryFile)) {
+					IOUtils.copy(tarStream, entryStream);
+				}
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+
+		// Verify that the expected file/entry was decompressed and return it.
+		if (!Files.isReadable(resourcePath))
+			throw new BadCodeMonkeyException(
+					String.format("Didn't find resource '{}' in archive '{}'.", resourceFile, archiveName));
+		return resourceUrlSupplier;
 	}
 }
