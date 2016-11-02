@@ -140,6 +140,8 @@ public final class DataTransformer {
 
 	public static final String CODING_SYSTEM_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
 
+	public static final String CODING_SYSTEM_CCW_CLAIM_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt";
+
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
@@ -179,6 +181,8 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
 
 	static final String CODING_SYSTEM_CCW_CARR_CLAIM_DISPOSITION = "Debit accepted";
+
+	static final String CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
 
 	static final String CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt";
 
@@ -620,6 +624,7 @@ public final class DataTransformer {
 		Reference prescriberRef = referencePractitioner(record.prescriberId);
 		upsert(bundle, prescriber, prescriberRef.getReference());
 
+
 		/*
 		 * Upsert Medication using NDC as the ID.
 		 */
@@ -712,9 +717,7 @@ public final class DataTransformer {
 
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
-
-		// TODO Specify eob.type once STU3 is available (professional)
-
+		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -754,6 +757,11 @@ public final class DataTransformer {
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
 
+		if (claimGroup.clinicalTrialNumber.isPresent()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER)
+					.setValue(new StringType(claimGroup.clinicalTrialNumber.get()));
+		}
+
 		for (CarrierClaimLine claimLine : claimGroup.lines) {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
@@ -772,18 +780,33 @@ public final class DataTransformer {
 			 * TODO once STU3 is available, transform placeofServiceCode into
 			 * eob.line.location
 			 */
+			/*item.setLocation(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION)
+					.setCode(claimLine.placeOfServiceCode));*/
 
 			/*
 			 * TODO once STU3 is available, transform these fields into
 			 * eob.item.careTeam entries: organizationNpi,
 			 * performingPhysicianNpi, providerTypeCode,providerSpecialityCode,
 			 * providerParticipatingIndCode, providerStateCode,providerZipCode
+			 * Create practitioner and organization resource - do upsert?
 			 */
-
+			/*
+			 * item.setLocation(new
+			 * Address().sesetSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION)
+			 * .setCode(claimLine.placeOfServiceCode));
+			 */
+			/*
+			 * item.addCareTeam( new
+			 * CareTeamComponent().setProvider(referencePractitioner(claimLine.
+			 * performingPhysicianNpi.get())));
+			 */
 			/*
 			 * TODO once STU3 available, transform cmsServiceTypeCode into
 			 * eob.item.category.
 			 */
+			/*item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION)
+			.setCode(claimLine.placeOfServiceCode));*/
+			
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}

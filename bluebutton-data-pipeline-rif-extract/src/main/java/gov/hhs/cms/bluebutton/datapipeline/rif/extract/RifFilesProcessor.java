@@ -616,6 +616,8 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, CarrierClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				CarrierClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
+		claimGroup.clinicalTrialNumber = parseOptString(
+				firstClaimLine.get(CarrierClaimGroup.Column.CLM_CLNCL_TRIL_NUM));
 		/*
 		 * Parse the claim lines.
 		 */

@@ -466,6 +466,7 @@ public final class DataTransformerTest {
 		record.dateFrom = LocalDate.of(1848, 01, 24);
 		record.dateThrough = LocalDate.of(1850, 01, 01);
 		record.nearLineRecordIdCode = '1';
+		record.claimTypeCode = "71";
 		record.claimDispositionCode = "01";
 		record.carrierNumber = "06102";
 		record.paymentDenialCode = "1";
@@ -474,6 +475,7 @@ public final class DataTransformerTest {
 		record.providerPaymentAmount = new BigDecimal("123.45");
 		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "F63.2");
 		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R44.3"));
+		record.clinicalTrialNumber = Optional.of("12654154");
 		CarrierClaimLine recordLine1 = new CarrierClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.number = 1;
@@ -518,11 +520,10 @@ public final class DataTransformerTest {
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
-		// TODO Verify eob.type once STU3 is available (professional)
-
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		Assert.assertEquals(record.nearLineRecordIdCode.toString(), ((StringType) eob
 				.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD).get(0).getValue()).getValue());
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_CLAIM_DISPOSITION, eob.getDisposition());
@@ -559,6 +560,9 @@ public final class DataTransformerTest {
 		 */
 		Assert.assertEquals(2, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
+		Assert.assertEquals(record.clinicalTrialNumber.get(),
+				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER)
+						.get(0).getValue()).getValue());
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 		/*
@@ -677,6 +681,7 @@ public final class DataTransformerTest {
 		Assert.assertNotNull(inpatientBundleWrapper.getResult());
 
 		Bundle claimBundle = inpatientBundleWrapper.getResult();
+
 		/*
 		 * Bundle should have: 1) EOB, 2) Organization
 		 */
@@ -685,6 +690,7 @@ public final class DataTransformerTest {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional)
 

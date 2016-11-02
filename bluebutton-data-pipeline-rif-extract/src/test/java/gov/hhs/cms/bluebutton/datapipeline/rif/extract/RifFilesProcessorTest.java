@@ -259,6 +259,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(4, claimGroup.diagnosesAdditional.size());
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "H26493"), claimGroup.diagnosesAdditional.get(2));
 		Assert.assertEquals(7, claimGroup.lines.size());
+		Assert.assertEquals("00000000", claimGroup.clinicalTrialNumber.get());
 
 		// Verify one of the claim lines.
 		CarrierClaimLine claimLine = claimGroup.lines.get(5);
