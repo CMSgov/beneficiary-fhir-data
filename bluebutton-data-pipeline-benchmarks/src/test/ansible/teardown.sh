@@ -1,11 +1,11 @@
 #!/bin/bash
 
 ##
-# This script will run the `benchmark_etl_teardown.yml` Ansible playbook.
+# This script will run the `teardown.yml` Ansible playbook.
 #
 # Usage:
 # 
-# $ benchmark_etl.sh --iteration 42 --ec2keyfile somedir/bar
+# $ teardown.sh --iteration 42 --ec2keyfile somedir/bar
 ##
 
 # Constants.
@@ -16,9 +16,9 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o i:n:f: \
+	-o i:f: \
 	--long iteration:,ec2keyfile: \
-	-n 'benchmark_etl.sh' -- "$@"`
+	-n 'teardown.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
 # Note the quotes around `$TEMP': they are essential!
@@ -26,7 +26,6 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 iteration=
-ec2KeyName=
 ec2KeyFile=
 while true; do
 	case "$1" in
@@ -77,16 +76,15 @@ fi
 ##
 
 # Run the Ansible playbook, if there's an inventory to run against. (There 
-# may not be, if the `benchmark_etl.yml` playbook failed very early.)
-inventory="${scriptDirectory}/../../../target/benchmark-iterations/hosts-${iteration}"
+# may not be, if the `provision.yml` playbook failed very early.)
+inventory="${scriptDirectory}/../../../target/benchmark-iterations/${iteration}_ansible_hosts"
 if [[ -f "${inventory}" ]]; then
 	echo 'Running Ansible playbook...'
 	cd "${scriptDirectory}"
-	virtualEnvDirectory="${scriptDirectory}/../../../target/python-venv-ansible"
 	python `which ansible-playbook` \
-		benchmark_etl_teardown.yml \
+		teardown.yml \
 		--inventory-file="${inventory}" \
-		--extra-vars "ec2_key_name=${ec2KeyName} iteration_index=${iteration}"
+		--extra-vars "iteration_index=${iteration}"
 	echo 'Ansible playbook completed successfully.'
 else
 	echo 'No Ansible inventory found, so skipping teardown.'

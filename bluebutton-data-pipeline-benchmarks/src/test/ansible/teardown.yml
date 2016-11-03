@@ -1,11 +1,11 @@
 ---
 ##
 # This playbook collects data from and deletes the systems in AWS that were 
-# created by the `benchmark_etl.yml` playbook.
+# created by the `provision.yml` playbook.
 # 
 # Usage:
 #  
-#     $ ansible-playbook benchmark_etl_teardown.yml --inventory-file=somedir/bar --extra-vars "iteration_index=42"
+#     $ ansible-playbook teardown.yml --inventory-file=somedir/bar --extra-vars "iteration_index=42"
 ##
 
 - name: Collect FHIR Server Log
@@ -17,14 +17,14 @@
   
   tasks:
     
-    - shell: "journalctl --unit=bluebutton-server-app.service --no-pager &> /usr/local/bluebutton-server-app/{{ iteration_index }}_bluebutton_server_app.log"
+    - shell: "journalctl --unit=bluebutton-server-app.service --no-pager &> /usr/local/bluebutton-server-app/{{ iteration_index }}_bluebutton-server-app.log"
       args:
         executable: /bin/bash
       become: true
       ignore_errors: true
     
     - fetch:
-        src: "/usr/local/bluebutton-server-app/{{ iteration_index }}_bluebutton_server_app.log"
+        src: "/usr/local/bluebutton-server-app/{{ iteration_index }}_bluebutton-server-app.log"
         dest: '../../../target/benchmark-iterations/'
         flat: true
         fail_on_missing: false
@@ -47,7 +47,7 @@
       ignore_errors: true
     
     - fetch:
-        src: "/usr/local/bluebutton-data-pipeline-app/{{ iteration_index }}_bluebutton_data_pipeline_app.log"
+        src: "/usr/local/bluebutton-data-pipeline-app/{{ iteration_index }}_bluebutton-data-pipeline-app.log"
         dest: '../../../target/benchmark-iterations/'
         flat: true
         fail_on_missing: false
@@ -68,7 +68,7 @@
     
     - name: EC2 - Remove ETL Server from Inventory
       lineinfile:
-        dest: "../../../target/benchmark-iterations/hosts-{{ iteration_index }}"
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}_ansible_hosts"
         regexp: '^etl.*$'
         state: absent
     
@@ -81,7 +81,7 @@
     
     - name: EC2 - Remove FHIR Server from Inventory
       lineinfile:
-        dest: "../../../target/benchmark-iterations/hosts-{{ iteration_index }}"
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}_ansible_hosts"
         regexp: '^fhir.*$'
         state: absent
     
@@ -92,7 +92,7 @@
   
   tasks:
     
-    - name: Terminate RDS Server
+    - name: RDS - Delete Instance
       rds:
         command: delete
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
@@ -100,3 +100,9 @@
         wait: true
         wait_timeout: "{{ rds_wait_timeout }}"
       ignore_errors: true
+    
+    - name: RDS - Remove Instance from Inventory
+      lineinfile:
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}_ansible_hosts"
+        regexp: '^rds.*$'
+        state: absent
