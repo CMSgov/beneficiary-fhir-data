@@ -47,6 +47,17 @@ public final class HHAClaimGroup {
 	public String beneficiaryId;
 
 	/**
+	 * NO CCW Column associated
+	 */
+	public String status;
+	
+	/**
+	 * @see Column#ORG_NPI_NUM
+	 * put organization reference to it.
+	 */
+	public String author;
+	
+	/**
 	 * @see Column#CLM_ID
 	 */
 	public String claimId;
@@ -111,6 +122,11 @@ public final class HHAClaimGroup {
 	 */
 	public String providerStateCode;
 
+	/**
+	 * @see NO CCW association found
+	 */
+	public String eobStatus;
+	
 	/**
 	 * @see Column#ORG_NPI_NUM
 	 */
@@ -240,6 +256,18 @@ public final class HHAClaimGroup {
 		public Optional<String> hcpcsCode;
 
 		/**
+		 * @see Column#HCPCS_1ST_MDFR_CD
+		 */
+		public Optional<String> hcpcs1stMdfrCode;
+
+		
+		/**
+		 * @see Column#HCPCS_2ST_MDFR_CD
+		 */
+		public Optional<String> hcpcs2stMdfrCode;
+
+		
+		/**
 		 * @see Column#REV_CNTR_PMT_AMT_AMT
 		 */
 		public BigDecimal paymentAmount;
@@ -264,6 +292,10 @@ public final class HHAClaimGroup {
 			builder.append(lineNumber);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
+			builder.append(", hcpcs1stMdfrCode=");
+			builder.append(hcpcs1stMdfrCode);
+			builder.append(", hcpcs2stMdfrCode=");
+			builder.append(hcpcs2stMdfrCode);
 			builder.append(", paymentAmount=");
 			builder.append(paymentAmount);
 			builder.append(", totalChargeAmount=");
@@ -1079,12 +1111,18 @@ public final class HHAClaimGroup {
 		HCPCS_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt">
+		 * CCW Data Dictionary: MDFR_CD1</a>.
 		 */
 		HCPCS_1ST_MDFR_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd2.txt">
+		 * CCW Data Dictionary: MDFR_CD2</a>.
 		 */
 		HCPCS_2ND_MDFR_CD,
 

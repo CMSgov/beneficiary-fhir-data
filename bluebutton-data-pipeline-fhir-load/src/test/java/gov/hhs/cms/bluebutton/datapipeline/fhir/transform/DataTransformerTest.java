@@ -1245,8 +1245,10 @@ public final class DataTransformerTest {
 		record.recordAction = RecordAction.INSERT;
 		record.beneficiaryId = "42";
 		record.claimId = "2929923122";
+		record.claimTypeCode = "10";
 		record.dateFrom = LocalDate.of(1988, 01, 24);
 		record.dateThrough = LocalDate.of(1990, 01, 01);
+		record.status = "active";
 		record.patientDischargeStatusCode = "01";
 		record.nearLineRecordIdCode = '1';
 		record.claimNonPaymentReasonCode = Optional.of("1");
@@ -1256,6 +1258,7 @@ public final class DataTransformerTest {
 		record.organizationNpi = Optional.of("1487872263");
 		record.attendingPhysicianNpi = Optional.of("1265415426");
 		record.claimFacilityTypeCode = '2';
+		record.claimServiceClassificationTypeCode = '3';
 		record.primaryPayerPaidAmount = new BigDecimal("11.00");
 		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "F63.2");
 		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R44.3"));
@@ -1265,6 +1268,8 @@ public final class DataTransformerTest {
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
 		recordLine1.hcpcsCode = Optional.of("M5C");
+		recordLine1.hcpcs1stMdfrCode = Optional.of("x");
+		recordLine1.hcpcs2stMdfrCode = Optional.of("x");
 		recordLine1.paymentAmount = new BigDecimal("26.00");
 		recordLine1.totalChargeAmount = new BigDecimal("25.00");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("24.00");
@@ -1373,6 +1378,7 @@ public final class DataTransformerTest {
 		record.recordAction = RecordAction.INSERT;
 		record.beneficiaryId = "42";
 		record.claimId = "2929923122";
+		record.claimTypeCode = "82";
 		record.dateFrom = LocalDate.of(1848, 01, 24);
 		record.dateThrough = LocalDate.of(1850, 01, 01);
 		record.nearLineRecordIdCode = '1';
@@ -1402,6 +1408,7 @@ public final class DataTransformerTest {
 		recordLine1.diagnosis = new IcdCode(IcdVersion.ICD_10, "F63.2");
 		recordLine1.purchasePriceAmount = new BigDecimal("82.29");
 		recordLine1.nationalDrugCode = Optional.of(new String("49884009902"));
+		recordLine1.placeOfServiceCode = "12";
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
