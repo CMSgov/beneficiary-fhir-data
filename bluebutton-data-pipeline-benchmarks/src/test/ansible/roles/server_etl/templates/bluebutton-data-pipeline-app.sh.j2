@@ -15,4 +15,4 @@ export AWS_SECRET_ACCESS_KEY='{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}'
 {% endif %}
 
 "/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.x" \
-	&> "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
+	&> "/usr/local/bluebutton-data-pipeline-app/{{ iteration_index }}_bluebutton_data_pipeline_app.log"

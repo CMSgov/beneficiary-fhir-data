@@ -420,7 +420,7 @@ public final class S3ToFhirLoadAppBenchmark {
 				pushDataSetToS3(s3Client, bucket, sampleData);
 
 				Path benchmarkLog = benchmarksDir
-						.resolve(String.format("ansible_benchmark_etl-%d.log", iterationIndex));
+						.resolve(String.format("%d_ansible_benchmark_etl.log", iterationIndex));
 				Path benchmarkScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
 						.resolve("test").resolve("ansible").resolve("benchmark_etl.sh");
 				ProcessBuilder benchmarkProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
@@ -443,7 +443,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			 * destroy the benchmark systems in AWS.
 			 */
 			Path teardownLog = benchmarksDir
-					.resolve(String.format("ansible_benchmark_etl_teardown-%d.log", iterationIndex));
+					.resolve(String.format("%d_ansible_benchmark_etl_teardown.log", iterationIndex));
 			Path teardownScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src").resolve("test")
 					.resolve("ansible").resolve("benchmark_etl_teardown.sh");
 			ProcessBuilder teardownProcessBuilder = new ProcessBuilder(teardownScript.toString(), "--iteration",
@@ -467,7 +467,8 @@ public final class S3ToFhirLoadAppBenchmark {
 			 * Parse the ETL log that Ansible pulled to find out how long things
 			 * took.
 			 */
-			Path etlLogPath = benchmarksDir.resolve(String.format("etl-%d.log", iterationIndex));
+			Path etlLogPath = benchmarksDir
+					.resolve(String.format("%d_bluebutton_data_pipeline_app.log", iterationIndex));
 			if (!Files.isReadable(etlLogPath))
 				throw new BenchmarkError(
 						String.format("Failed to collect ETL log for benchmark iteration '%d'.", iterationIndex));
