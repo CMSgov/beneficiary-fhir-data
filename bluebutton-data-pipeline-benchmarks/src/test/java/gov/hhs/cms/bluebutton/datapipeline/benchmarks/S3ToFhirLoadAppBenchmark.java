@@ -130,27 +130,18 @@ public final class S3ToFhirLoadAppBenchmark {
 			throw new IllegalArgumentException(String
 					.format("The '%s' Java system property must specify a valid key file.", SYS_PROP_EC2_KEY_FILE));
 
-		// Prepare the Python/Ansible virtualenv needed for the iterations.
-		Process ansibleInitProcess = null;
-		try {
-			Path ansibleInitLog = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations")
-					.resolve("ansible_init.log");
-			Files.createDirectories(ansibleInitLog.getParent());
-			Path ansibleInitScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
-					.resolve("test").resolve("ansible").resolve("ansible_init.sh");
-			ProcessBuilder ansibleProcessBuilder = new ProcessBuilder(ansibleInitScript.toString());
-			ansibleProcessBuilder.redirectErrorStream(true);
-			ansibleProcessBuilder.redirectOutput(ansibleInitLog.toFile());
+		Path benchmarksDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations");
+		Files.createDirectories(benchmarksDir);
 
-			ansibleInitProcess = ansibleProcessBuilder.start();
-			int ansibleInitExitCode = ansibleInitProcess.waitFor();
-			if (ansibleInitExitCode != 0)
-				throw new BenchmarkError(
-						String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
-		} finally {
-			if (ansibleInitProcess != null)
-				ansibleInitProcess.destroyForcibly();
-		}
+		// Prepare the Python/Ansible virtualenv needed for the iterations.
+		Path ansibleInitLog = benchmarksDir.resolve("ansible_init.log");
+		Path ansibleInitScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src").resolve("test")
+				.resolve("ansible").resolve("ansible_init.sh");
+		ProcessBuilder ansibleProcessBuilder = new ProcessBuilder(ansibleInitScript.toString());
+		int ansibleInitExitCode = runProcessAndLogOutput(ansibleProcessBuilder, ansibleInitLog);
+		if (ansibleInitExitCode != 0)
+			throw new BenchmarkError(
+					String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
 
 		// Submit all of the iterations for execution.
 		ExecutorService benchmarkExecutorService = Executors.newFixedThreadPool(MAX_ACTIVE_ENVIRONMENTS);
@@ -215,8 +206,8 @@ public final class S3ToFhirLoadAppBenchmark {
 		CSVPrinter dataPrinter = CSVFormat.RFC4180.print(dataWriter);
 		String projectVersion = new BufferedReader(new InputStreamReader(
 				Thread.currentThread().getContextClassLoader().getResourceAsStream("project.properties"))).readLine();
-		String gitBranchName = runCommandAndGetOutput("git symbolic-ref --short HEAD");
-		String gitCommitSha = runCommandAndGetOutput("git rev-parse HEAD");
+		String gitBranchName = runProcessAndGetOutput("git symbolic-ref --short HEAD");
+		String gitCommitSha = runProcessAndGetOutput("git rev-parse HEAD");
 		int recordCount = Arrays.stream(sampleData.getResources()).mapToInt(r -> r.getRecordCount()).sum();
 		int beneficiaryCount = Arrays.stream(sampleData.getResources())
 				.filter(r -> r.getRifFileType() == RifFileType.BENEFICIARY).mapToInt(r -> r.getRecordCount()).sum();
@@ -281,7 +272,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	 *            the command to run
 	 * @return the output of running the specified command as a separate process
 	 */
-	private static String runCommandAndGetOutput(String command) {
+	private static String runProcessAndGetOutput(String command) {
 		/*
 		 * This doesn't support quoted args in the command, but we don't
 		 * currently need to.
@@ -315,6 +306,32 @@ public final class S3ToFhirLoadAppBenchmark {
 				LOGGER.warn("Unable to close process STDOUT reader.", e);
 			}
 			if (process != null && process.isAlive())
+				process.destroyForcibly();
+		}
+	}
+
+	/**
+	 * @param processBuilder
+	 *            the process to run
+	 * @param logFile
+	 *            the {@link Path} to write the process' output to
+	 * @return the process' exit code
+	 */
+	private static int runProcessAndLogOutput(ProcessBuilder processBuilder, Path logFile) {
+		Process process = null;
+		try {
+			processBuilder.redirectErrorStream(true);
+			processBuilder.redirectOutput(logFile.toFile());
+
+			process = processBuilder.start();
+			int exitCode = process.waitFor();
+			return exitCode;
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} catch (InterruptedException e) {
+			throw new BadCodeMonkeyException(e);
+		} finally {
+			if (process != null)
 				process.destroyForcibly();
 		}
 	}
@@ -390,29 +407,25 @@ public final class S3ToFhirLoadAppBenchmark {
 
 			AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
 			Path benchmarksDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations");
+			Files.createDirectories(benchmarksDir);
 
 			/*
 			 * Run Ansible to: 1) create the benchmark systems in AWS, and 2)
 			 * configure the systems, starting the FHIR server and ETL service.
 			 */
 			Bucket bucket = null;
-			Path benchmarkLog = benchmarksDir.resolve(String.format("ansible_benchmark_etl-%d.log", iterationIndex));
-			Files.createDirectories(benchmarkLog.getParent());
-			Process benchmarkProcess = null;
 			int benchmarkExitCode = -1;
 			try {
 				bucket = s3Client.createBucket(String.format("bb-benchmark-%d", iterationIndex));
 				pushDataSetToS3(s3Client, bucket, sampleData);
 
+				Path benchmarkLog = benchmarksDir
+						.resolve(String.format("ansible_benchmark_etl-%d.log", iterationIndex));
 				Path benchmarkScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
 						.resolve("test").resolve("ansible").resolve("benchmark_etl.sh");
 				ProcessBuilder benchmarkProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
 						("" + iterationIndex), "--ec2keyname", ec2KeyName, "--ec2keyfile", ec2KeyFile.toString());
-				benchmarkProcessBuilder.redirectErrorStream(true);
-				benchmarkProcessBuilder.redirectOutput(benchmarkLog.toFile());
-
-				benchmarkProcess = benchmarkProcessBuilder.start();
-				benchmarkExitCode = benchmarkProcess.waitFor();
+				benchmarkExitCode = runProcessAndLogOutput(benchmarkProcessBuilder, benchmarkLog);
 
 				/*
 				 * We don't want to check the value of the Ansible exit code yet
@@ -421,8 +434,6 @@ public final class S3ToFhirLoadAppBenchmark {
 				 * AWS, wasting money. We'll do that after the teardown.
 				 */
 			} finally {
-				if (benchmarkProcess != null)
-					benchmarkProcess.destroyForcibly();
 				if (bucket != null)
 					DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
 			}
@@ -433,25 +444,15 @@ public final class S3ToFhirLoadAppBenchmark {
 			 */
 			Path teardownLog = benchmarksDir
 					.resolve(String.format("ansible_benchmark_etl_teardown-%d.log", iterationIndex));
-			Process teardownProcess = null;
-			try {
-				Path teardownScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
-						.resolve("test").resolve("ansible").resolve("benchmark_etl_teardown.sh");
-				ProcessBuilder teardownProcessBuilder = new ProcessBuilder(teardownScript.toString(), "--iteration",
-						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
-				teardownProcessBuilder.redirectErrorStream(true);
-				teardownProcessBuilder.redirectOutput(teardownLog.toFile());
-
-				teardownProcess = teardownProcessBuilder.start();
-				int teardownExitCode = teardownProcess.waitFor();
-				if (teardownExitCode != 0)
-					throw new BenchmarkError(
-							String.format("Ansible failed with exit code '%d' for benchmark teardown iteration '%d'.",
-									teardownExitCode, iterationIndex));
-			} finally {
-				if (teardownProcess != null)
-					teardownProcess.destroyForcibly();
-			}
+			Path teardownScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src").resolve("test")
+					.resolve("ansible").resolve("benchmark_etl_teardown.sh");
+			ProcessBuilder teardownProcessBuilder = new ProcessBuilder(teardownScript.toString(), "--iteration",
+					("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
+			int teardownExitCode = runProcessAndLogOutput(teardownProcessBuilder, teardownLog);
+			if (teardownExitCode != 0)
+				throw new BenchmarkError(
+						String.format("Ansible failed with exit code '%d' for benchmark teardown iteration '%d'.",
+								teardownExitCode, iterationIndex));
 
 			/*
 			 * Now that we've given the teardown a chance to run, blow up if the
