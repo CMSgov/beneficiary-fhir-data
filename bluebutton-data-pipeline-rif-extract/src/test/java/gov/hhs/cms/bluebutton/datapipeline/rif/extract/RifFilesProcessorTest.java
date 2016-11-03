@@ -32,12 +32,10 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
@@ -53,10 +51,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1BeneRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_BENES);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_BENES.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -98,10 +93,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processBeneRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_BENES);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_BENES.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -119,10 +111,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1PDERecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_PDE);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_PDE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -189,10 +178,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processPDERecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_PDE);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_PDE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -210,10 +196,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1CarrierClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_CARRIER);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -315,10 +298,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processCarrierClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_CARRIER);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_CARRIER.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -336,10 +316,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1InpatientClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_INPATIENT);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_INPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -402,10 +379,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processInpatientClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_INPATIENT);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_INPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -423,10 +397,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1OutpatientClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_OUTPATIENT);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_OUTPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -489,10 +460,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processOutpatientClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_OUTPATIENT);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_OUTPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -510,10 +478,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1SNFClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_SNF);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_SNF.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -574,10 +539,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processSNFClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_SNF);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_SNF.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -595,10 +557,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1HospiceClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_HOSPICE);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_HOSPICE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -651,10 +610,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processHospiceClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_HOSPICE);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HOSPICE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -672,10 +628,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1HHAClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_HHA);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_HHA.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -728,10 +681,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processHHAClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_HHA);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HHA.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -749,10 +699,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void process1DMEClaimRecord() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_A_DME);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_DME.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 
@@ -840,10 +787,7 @@ public final class RifFilesProcessorTest {
 	 */
 	@Test
 	public void processDMEClaimRecords() {
-		StaticRifGenerator generator = new StaticRifGenerator(StaticRifResource.SAMPLE_B_DME);
-		Stream<RifFile> rifFiles = generator.generate();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), rifFiles.collect(Collectors.toSet()));
-
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_DME.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
 

@@ -30,6 +30,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
  * <p>
@@ -202,9 +203,9 @@ public final class S3ToFhirLoadAppIT {
 					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(0),
-					"rif-static-samples/sample-a-beneficiaries.txt"));
+					StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(1),
-					"rif-static-samples/sample-a-bcarrier.txt"));
+					StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
 			// Start the app.
 			ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);

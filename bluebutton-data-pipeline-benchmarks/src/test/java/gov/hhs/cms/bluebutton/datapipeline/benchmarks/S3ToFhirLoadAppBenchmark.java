@@ -504,7 +504,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			for (int i = 0; i < dataResources.getResources().length; i++) {
 				StaticRifResource dataResource = dataResources.getResources()[i];
 				s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(i),
-						dataResource.getClasspathName()));
+						dataResource.getResourceUrl()));
 			}
 		}
 	}

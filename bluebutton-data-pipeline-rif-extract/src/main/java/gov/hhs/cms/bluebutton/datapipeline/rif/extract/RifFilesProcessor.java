@@ -92,12 +92,11 @@ public final class RifFilesProcessor {
 	 * order to ensure that FHIR <code>Patient</code> resources are always
 	 * created before (and can be referenced by)
 	 * <code>ExplanationOfBenefit</code> resources.</li>
-	 * <li>While still honoring the previous rule, {@link RifFile}s with earlier
-	 * {@link RifFile#getLastModifiedTimestamp()} values must be processed
-	 * before those with later values. This is necessary in order to ensure
-	 * that, if a backlog of {@link RifFile}s occurs, FHIR updates are not
-	 * pushed out of order, which would result in newer data being overwritten
-	 * by older data.</li>
+	 * <li>While still honoring the previous rule, {@link RifFile}s generated
+	 * earlier must be processed before those with later values. This is
+	 * necessary in order to ensure that, if a backlog of {@link RifFile}s
+	 * occurs, FHIR updates are not pushed out of order, which would result in
+	 * newer data being overwritten by older data.</li>
 	 * </ol>
 	 * <p>
 	 * Please note that, assuming the extraction process that produces
