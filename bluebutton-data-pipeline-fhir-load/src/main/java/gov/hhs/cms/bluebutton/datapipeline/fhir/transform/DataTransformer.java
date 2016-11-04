@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
@@ -23,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -106,7 +108,7 @@ public final class DataTransformer {
 	 * "https://en.wikipedia.org/wiki/Healthcare_Common_Procedure_Coding_System">
 	 * Healthcare Common Procedure Coding System</a>.
 	 */
-	static final String CODING_SYSTEM_HCPCS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typsrvcb.txt";
+	static final String CODING_SYSTEM_HCPCS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt";
 
 	static final String CODING_SYSTEM_BETOS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt";
 
@@ -1955,6 +1957,43 @@ public final class DataTransformer {
 		}
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequence();
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to (possibly) modify
+	 * @param diagnosis
+	 *            the {@link IcdCode} to add, if it's not already present
+	 * @return the {@link ProcedureComponent#getSequence()} of the existing or
+	 *         newly-added entry
+	 */
+	private static int addProcedureCode(ExplanationOfBenefit eob, IcdCode procedure) {
+		Optional<ProcedureComponent> existingProcedure = eob.getProcedure().stream()
+				.filter(d -> {
+					try {
+						return d.getProcedureCoding().getSystem().equals(procedure.getVersion().getFhirSystem());
+					} catch (FHIRException e) {
+						return false;
+					}
+				}).filter(d -> {
+					try {
+						return d.getProcedureCoding().getCode().equals(procedure.getCode());
+					} catch (FHIRException e) {
+						return false;
+					}
+
+				}).findAny();
+		if (existingProcedure.isPresent())
+			return existingProcedure.get().getSequence();
+
+		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size());
+		procedureComponent.setProcedure(
+				new Coding().setSystem(procedure.getVersion().getFhirSystem()).setCode(procedure.getCode()));
+		procedureComponent
+				.setDate(Date.from(procedure.getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+		
+		eob.getProcedure().add(procedureComponent);
+		return procedureComponent.getSequence();
 	}
 
 	/**
