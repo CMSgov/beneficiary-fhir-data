@@ -33,7 +33,6 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 
 /**
@@ -184,12 +183,12 @@ final class DataSetMonitorWorker implements Runnable {
 		 * parallel (which would lead to data consistency problems).
 		 */
 		LOGGER.info("Data set finished uploading and ready to process.");
-		Set<RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
+		Set<S3RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
 			String key = String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()),
 					e.getName());
 			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(bucketName, key));
 		}).collect(Collectors.toSet());
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), rifFiles);
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), new HashSet<>(rifFiles));
 		listener.dataAvailable(rifFilesEvent);
 
 		/*
@@ -200,6 +199,7 @@ final class DataSetMonitorWorker implements Runnable {
 		 * are only *eventually* consistent, so #2 may not take effect right
 		 * away.)
 		 */
+		rifFiles.stream().forEach(f -> f.cleanupTempFile());
 		recentlyProcessedManifests.add(dataSetManifest.getTimestamp());
 		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
 		deleteObjectsRequest.setKeys(dataSetManifest.getEntries()
