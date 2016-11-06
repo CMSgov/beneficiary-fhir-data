@@ -7,7 +7,6 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -17,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import com.zaxxer.hikari.HikariDataSource;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -114,11 +115,15 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	public DataSource dataSource(@Value("${" + PROP_DB_URL + "}") String url,
 			@Value("${" + PROP_DB_USERNAME + "}") String username,
 			@Value("${" + PROP_DB_PASSWORD + "}") String password) {
-		BasicDataSource retVal = new BasicDataSource();
-		retVal.setUrl(url);
-		retVal.setUsername(username);
-		retVal.setPassword(password);
-		return retVal;
+		HikariDataSource poolingDataSource = new HikariDataSource();
+
+		poolingDataSource.setJdbcUrl(url);
+		poolingDataSource.setUsername(username);
+		poolingDataSource.setPassword(password);
+
+		poolingDataSource.setMaximumPoolSize(Runtime.getRuntime().availableProcessors() * 5);
+
+		return poolingDataSource;
 	}
 
 	@Bean()
