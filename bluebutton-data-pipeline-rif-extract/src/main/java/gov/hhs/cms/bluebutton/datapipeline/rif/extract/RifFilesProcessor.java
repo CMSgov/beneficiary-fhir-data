@@ -766,6 +766,9 @@ public final class RifFilesProcessor {
 		claimGroup.diagnosesExternal = parseIcdCodesWithPOA(firstClaimLine,
 				InpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				InpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+		claimGroup.procedureCodes = parseIcdCodesProcedure(firstClaimLine,
+				InpatientClaimGroup.Column.ICD_PRCDR_CD1.ordinal(),
+				InpatientClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
 
 		/*
 		 * TODO Need to parse procedure codes once STU3 is available
@@ -1380,6 +1383,20 @@ public final class RifFilesProcessor {
 	}
 
 	/**
+	 * @param icdCode
+	 *            the value to use for {@link IcdCode#getCode()}
+	 * @param icdVersion
+	 *            the value to parse and use for {@link IcdCode#getVersion()}
+	 * @param icdProcedureDate
+	 *            the value to parse and use for
+	 *            {@link IcdCode#getProcedureDate()}
+	 * @return an {@link IcdCode} instance built from the specified values
+	 */
+	private static IcdCode parseIcdCode(String icdCode, String icdVersion, LocalDate icdProcedureDate) {
+		return new IcdCode(IcdVersion.parse(icdVersion), icdCode, icdProcedureDate);
+	}
+
+	/**
 	 * Parses {@link IcdCode}s out of the specified columns of the specified
 	 * {@link CSVRecord}. The columns must be arranged in code and version
 	 * pairs; the first column specified must represent an ICD code, the next
@@ -1460,6 +1477,49 @@ public final class RifFilesProcessor {
 				throw new IllegalArgumentException(
 						String.format("Unexpected ICD code/ver/poa : '%s' and '%s' and '%s'.", icdCodeText,
 								icdVersionText, icdPresentOnAdmissionCode));
+		}
+
+		return icdCodes;
+	}
+
+	/**
+	 * Parses {@link IcdCode}s out of the specified columns of the specified
+	 * {@link CSVRecord}. The columns must be arranged in order of code, version
+	 * and procedure date; the first column specified must represent an ICD
+	 * code, the next column must represent an ICD version (as can be parsed by
+	 * {@link IcdVersion#parse(String)}), next column is procedure date and this
+	 * sequence must repeat for all of the specified columns.
+	 * 
+	 * @param csvRecord
+	 *            the {@link CSVRecord} to parse the {@link IcdCode}s from
+	 * @param icdColumnFirst
+	 *            the first column ordinal to parse from, which must contain an
+	 *            {@link IcdCode#getCode()} value
+	 * @param icdColumnLast
+	 *            the last column ordinal to parse from, which must contain a
+	 *            value that could be parsed by {@link IcdVersion#parse(String)}
+	 * @return the {@link IcdCode}s contained in the specified columns of the
+	 *         specified {@link CSVRecord}
+	 */
+	private static List<IcdCode> parseIcdCodesProcedure(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
+		if ((icdColumnLast - icdColumnFirst) < 1)
+			throw new BadCodeMonkeyException();
+		if ((icdColumnLast - icdColumnFirst + 2) % 3 != 0)
+			throw new BadCodeMonkeyException();
+
+		List<IcdCode> icdCodes = new LinkedList<>();
+		for (int i = icdColumnFirst; i < icdColumnLast; i += 3) {
+			String icdCodeText = csvRecord.get(i);
+			String icdVersionText = csvRecord.get(i + 1);
+			String icdProcedureDate = csvRecord.get(i + 2);
+			if (icdCodeText.isEmpty() && icdVersionText.isEmpty())
+				continue;
+			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty() && !icdProcedureDate.toString().isEmpty())
+				icdCodes.add(parseIcdCode(icdCodeText, icdVersionText, icdProcedureDate));
+			else
+				throw new IllegalArgumentException(
+						String.format("Unexpected ICD code/ver/date : '%s' and '%s' and '%s'.", icdCodeText,
+								icdVersionText, icdProcedureDate));
 		}
 
 		return icdCodes;

@@ -213,6 +213,14 @@ public final class InpatientClaimGroup {
 	public List<IcdCode> diagnosesExternal = new LinkedList<>();
 
 	/**
+	 * See {@link Column#ICD_PRCDR_CD1} through {@link Column#ICD_PRCDR_CD25}
+	 * and {@link Column#ICD_PRCDR_VRSN_CD1} through
+	 * {@link Column#ICD_PRCDR_VRSN_CD25} and {@link Column#PRCDR_DT1} through
+	 * {@link Column#PRCDR_DT25}.
+	 */
+	public List<IcdCode> procedureCodes = new LinkedList<>();
+
+	/**
 	 * Represents the data contained in {@link Column#CLM_LINE_NUM} and
 	 * subsequent columns: one entry for every "claim line" in the claim
 	 * represented by this {@link InpatientClaimGroup} instance.
@@ -293,6 +301,8 @@ public final class InpatientClaimGroup {
 		builder.append(diagnosisFirstClaimExternal);
 		builder.append(", diagnosesExternal=");
 		builder.append(diagnosesExternal);
+		builder.append(", procedureCodes=");
+		builder.append(procedureCodes);
 		builder.append(", lines=");
 		builder.append(lines);
 		builder.append("]");
@@ -1591,6 +1601,531 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: CLM_E_POA_IND_SW12</a>.
 		 */
 		CLM_E_POA_IND_SW12,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd1.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD1</a>.
+		 */
+		ICD_PRCDR_CD1,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd1.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD1</a>.
+		 */
+		ICD_PRCDR_VRSN_CD1,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt1.txt">
+		 * CCW Data Dictionary: PRCDR_DT1</a>.
+		 */
+		PRCDR_DT1,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd2.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD2</a>.
+		 */
+		ICD_PRCDR_CD2,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd2.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD2</a>.
+		 */
+		ICD_PRCDR_VRSN_CD2,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt2.txt">
+		 * CCW Data Dictionary: PRCDR_DT2</a>.
+		 */
+		PRCDR_DT2,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd3.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD3</a>.
+		 */
+		ICD_PRCDR_CD3,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd3.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD3</a>.
+		 */
+		ICD_PRCDR_VRSN_CD3,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt3.txt">
+		 * CCW Data Dictionary: PRCDR_DT3</a>.
+		 */
+		PRCDR_DT3,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd4.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD4</a>.
+		 */
+		ICD_PRCDR_CD4,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd4.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD4</a>.
+		 */
+		ICD_PRCDR_VRSN_CD4,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt4.txt">
+		 * CCW Data Dictionary: PRCDR_DT4</a>.
+		 */
+		PRCDR_DT4,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd5.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD5</a>.
+		 */
+		ICD_PRCDR_CD5,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd5.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD5</a>.
+		 */
+		ICD_PRCDR_VRSN_CD5,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt5.txt">
+		 * CCW Data Dictionary: PRCDR_DT5</a>.
+		 */
+		PRCDR_DT5,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd6.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD6</a>.
+		 */
+		ICD_PRCDR_CD6,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd6.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD6</a>.
+		 */
+		ICD_PRCDR_VRSN_CD6,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt6.txt">
+		 * CCW Data Dictionary: PRCDR_DT6</a>.
+		 */
+		PRCDR_DT6,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd7.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD7</a>.
+		 */
+		ICD_PRCDR_CD7,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd7.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD7</a>.
+		 */
+		ICD_PRCDR_VRSN_CD7,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt7.txt">
+		 * CCW Data Dictionary: PRCDR_DT7</a>.
+		 */
+		PRCDR_DT7,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd8.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD8</a>.
+		 */
+		ICD_PRCDR_CD8,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd8.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD8</a>.
+		 */
+		ICD_PRCDR_VRSN_CD8,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt8.txt">
+		 * CCW Data Dictionary: PRCDR_DT8</a>.
+		 */
+		PRCDR_DT8,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd9.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD9</a>.
+		 */
+		ICD_PRCDR_CD9,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd9.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD9</a>.
+		 */
+		ICD_PRCDR_VRSN_CD9,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt9.txt">
+		 * CCW Data Dictionary: PRCDR_DT9</a>.
+		 */
+		PRCDR_DT9,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd10.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD10</a>.
+		 */
+		ICD_PRCDR_CD10,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd10.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD10</a>.
+		 */
+		ICD_PRCDR_VRSN_CD10,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt10.txt">
+		 * CCW Data Dictionary: PRCDR_DT10</a>.
+		 */
+		PRCDR_DT10,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd11.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD11</a>.
+		 */
+		ICD_PRCDR_CD11,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd11.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD11</a>.
+		 */
+		ICD_PRCDR_VRSN_CD11,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt11.txt">
+		 * CCW Data Dictionary: PRCDR_DT11</a>.
+		 */
+		PRCDR_DT11,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd12.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD12</a>.
+		 */
+		ICD_PRCDR_CD12,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd12.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD12</a>.
+		 */
+		ICD_PRCDR_VRSN_CD12,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt12.txt">
+		 * CCW Data Dictionary: PRCDR_DT12</a>.
+		 */
+		PRCDR_DT12,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd13.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD13</a>.
+		 */
+		ICD_PRCDR_CD13,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd13.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD13</a>.
+		 */
+		ICD_PRCDR_VRSN_CD13,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt13.txt">
+		 * CCW Data Dictionary: PRCDR_DT13</a>.
+		 */
+		PRCDR_DT13,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd14.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD14</a>.
+		 */
+		ICD_PRCDR_CD14,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd14.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD14</a>.
+		 */
+		ICD_PRCDR_VRSN_CD14,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt14.txt">
+		 * CCW Data Dictionary: PRCDR_DT14</a>.
+		 */
+		PRCDR_DT14,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_c15.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_C15</a>.
+		 */
+		ICD_PRCDR_C15,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_c15.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_C15</a>.
+		 */
+		ICD_PRCDR_VRSN_C15,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt15.txt">
+		 * CCW Data Diction ary: PRCDR_DT15</a>.
+		 */
+		PRCDR_DT15,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_c16.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_C16</a>.
+		 */
+		ICD_PRCDR_C16,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_c16.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_C16</a>.
+		 */
+		ICD_PRCDR_VRSN_C16,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt16.txt">
+		 * CCW Data Dictionary: PRCDR_DT16</a>.
+		 */
+		PRCDR_DT16,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd17.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD17</a>.
+		 */
+		ICD_PRCDR_CD17,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd17.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD17</a>.
+		 */
+		ICD_PRCDR_VRSN_CD17,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt17.txt">
+		 * CCW Data Dictionary: PRCDR_DT17</a>.
+		 */
+		PRCDR_DT17,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd18.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD18</a>.
+		 */
+		ICD_PRCDR_CD18,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd18.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD18</a>.
+		 */
+		ICD_PRCDR_VRSN_CD18,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt18.txt">
+		 * CCW Data Dictionary: PRCDR_DT18</a>.
+		 */
+		PRCDR_DT18,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd19.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD19</a>.
+		 */
+		ICD_PRCDR_CD19,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd19.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD19</a>.
+		 */
+		ICD_PRCDR_VRSN_CD19,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt19.txt">
+		 * CCW Data Dictionary: PRCDR_DT19</a>.
+		 */
+		PRCDR_DT19,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd20.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD20</a>.
+		 */
+		ICD_PRCDR_CD20,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd20.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD20</a>.
+		 */
+		ICD_PRCDR_VRSN_CD20,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt20.txt">
+		 * CCW Data Dictionary: PRCDR_DT20</a>.
+		 */
+		PRCDR_DT20,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd21.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD21</a>.
+		 */
+		ICD_PRCDR_CD21,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd21.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD21</a>.
+		 */
+		ICD_PRCDR_VRSN_CD21,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt21.txt">
+		 * CCW Data Dictionary: PRCDR_DT21</a>.
+		 */
+		PRCDR_DT21,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd22.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD22</a>.
+		 */
+		ICD_PRCDR_CD22,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd22.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD22</a>.
+		 */
+		ICD_PRCDR_VRSN_CD22,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt22.txt">
+		 * CCW Data Dictionary: PRCDR_DT22</a>.
+		 */
+		PRCDR_DT22,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd23.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD23</a>.
+		 */
+		ICD_PRCDR_CD23,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd23.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD23</a>.
+		 */
+		ICD_PRCDR_VRSN_CD23,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt23.txt">
+		 * CCW Data Dictionary: PRCDR_DT23</a>.
+		 */
+		PRCDR_DT23,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd24.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD24</a>.
+		 */
+		ICD_PRCDR_CD24,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd24.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD24</a>.
+		 */
+		ICD_PRCDR_VRSN_CD24,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt24.txt">
+		 * CCW Data Dictionary: PRCDR_DT24</a>.
+		 */
+		PRCDR_DT24,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 7. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd25.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_CD25</a>.
+		 */
+		ICD_PRCDR_CD25,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd25.txt">
+		 * CCW Data Dictionary: ICD_PRCDR_VRSN_CD25</a>.
+		 */
+		ICD_PRCDR_VRSN_CD25,
+
+		/**
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt25.txt">
+		 * CCW Data Dictionary: PRCDR_DT25</a>.
+		 */
+		PRCDR_DT25,
 
 		/**
 		 * Type: <code>NUM</code>, max chars: 13. See <a href=

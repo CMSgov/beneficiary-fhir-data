@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -110,6 +111,10 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_HCPCS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt";
 
+	static final String CODING_SYSTEM_HCPCS_1ST_MDFR_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt";
+
+	static final String CODING_SYSTEM_HCPCS_2ND_MDFR_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd2.txt";
+
 	static final String CODING_SYSTEM_BETOS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt";
 
 	static final String CODING_SYSTEM_ICD9_DIAG = "http://hl7.org/fhir/sid/icd-9-cm/diagnosis";
@@ -186,6 +191,10 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
 
+	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvstate.txt";
+
+	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_ZIP_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provzip.txt";
+
 	static final String CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt";
 
 	static final String CODING_SYSTEM_CCW_INP_POA_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw1.txt";
@@ -205,6 +214,10 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
 
 	static final String CODING_SYSTEM_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
+
+	static final String CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt";
+
+	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
@@ -716,6 +729,7 @@ public final class DataTransformer {
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
@@ -750,11 +764,6 @@ public final class DataTransformer {
 			eob.setReferral(new Reference(referral));
 		}
 
-		/*
-		 * TODO once STU3 is available, transform financial/payment amounts into
-		 * eob.information entries
-		 */
-
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
@@ -768,49 +777,54 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
-			/*
-			 * FIXME item.type field for
-			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
-			 * missing in STU3 (though present in item.detail). Sent email to
-			 * Mark/FM working group about this on 2016-10-20.
-			 */
-			// item.setType(new
-			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			item.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+					.setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
-			/*
-			 * TODO once STU3 is available, transform placeofServiceCode into
-			 * eob.line.location
-			 */
-			/*item.setLocation(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION)
-					.setCode(claimLine.placeOfServiceCode));*/
+			if (claimLine.performingPhysicianNpi.isPresent()) {
+				item.addCareTeam(
+					new ExplanationOfBenefit.CareTeamComponent()
+							.setProvider(new Identifier().setValue(claimLine.performingPhysicianNpi.get())));
+			}
 
-			/*
-			 * TODO once STU3 is available, transform these fields into
-			 * eob.item.careTeam entries: organizationNpi,
-			 * performingPhysicianNpi, providerTypeCode,providerSpecialityCode,
-			 * providerParticipatingIndCode, providerStateCode,providerZipCode
-			 * Create practitioner and organization resource - do upsert?
-			 */
-			/*
-			 * item.setLocation(new
-			 * Address().sesetSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION)
-			 * .setCode(claimLine.placeOfServiceCode));
-			 */
-			/*
-			 * item.addCareTeam( new
-			 * CareTeamComponent().setProvider(referencePractitioner(claimLine.
-			 * performingPhysicianNpi.get())));
-			 */
-			/*
-			 * TODO once STU3 available, transform cmsServiceTypeCode into
-			 * eob.item.category.
-			 */
-			/*item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION)
-			.setCode(claimLine.placeOfServiceCode));*/
+			if (claimLine.organizationNpi.isPresent()) {
+				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
+					.setProvider(new Identifier().setValue(claimLine.organizationNpi.get())));
+				eob.setAuthor(new Identifier().setValue(claimLine.organizationNpi.get()));
+			}
+
+			if (claimLine.providerStateCode.isPresent()) {
+				item.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD)
+						.setValue(new StringType(claimLine.providerStateCode.get()));
+			}
+
+			if (claimLine.providerZipCode.isPresent()) {
+				item.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PROVIDER_ZIP_CD)
+						.setValue(new StringType(claimLine.providerZipCode.get()));
+			}
+
+			item.setCategory(
+					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
+							.setCode(claimLine.cmsServiceTypeCode));
 			
+			item.setLocation(
+					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
+
+			item.setServiced(new Period()
+					.setStart(Date.from(claimLine.firstExpenseDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+							TemporalPrecisionEnum.DAY)
+					.setEnd(Date.from(claimLine.lastExpenseDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+					TemporalPrecisionEnum.DAY));
+
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+			}
+			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
+				item.addModifier(new Coding().setSystem(CODING_SYSTEM_HCPCS_1ST_MDFR_CD)
+						.setCode(claimLine.hcpcsInitialModifierCode.get()));
+			}
+			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
+				item.addModifier(new Coding().setSystem(CODING_SYSTEM_HCPCS_2ND_MDFR_CD)
+						.setCode(claimLine.hcpcsSecondModifierCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
@@ -961,6 +975,11 @@ public final class DataTransformer {
 		for (IcdCode diagnosis : claimGroup.diagnosesExternal)
 			if (!diagnosis.getCode().isEmpty()) {
 				addDiagnosisCode(eob, diagnosis);
+			}
+
+		for (IcdCode procedure : claimGroup.procedureCodes)
+			if (!procedure.getCode().isEmpty()) {
+				addProcedureCode(eob, procedure);
 			}
 
 		for (InpatientClaimLine claimLine : claimGroup.lines) {

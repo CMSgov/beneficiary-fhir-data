@@ -40,8 +40,8 @@ public final class IcdCode {
 	public IcdCode(IcdVersion version, String code, LocalDate procedureDate) {
 		this.version = version;
 		this.code = code;
-		this.presentOnAdmission = "";
 		this.procedureDate = procedureDate;
+		this.presentOnAdmission = "";
 	}
 
 	/**

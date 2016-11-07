@@ -388,6 +388,10 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(25, claimGroup.diagnosesAdditional.size());
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "R310", "Y"), claimGroup.diagnosesAdditional.get(0));
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "A419", "N"), claimGroup.diagnosesAdditional.get(1));
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "0TCC8ZZ", LocalDate.of(2016, 01, 16)).getVersion(),
+				claimGroup.procedureCodes.get(0).getVersion());
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "0TCC8ZZ", LocalDate.of(2016, 01, 16)).getCode(),
+				claimGroup.procedureCodes.get(0).getCode());
 		Assert.assertFalse(claimGroup.diagnosisFirstClaimExternal.isPresent());
 		Assert.assertEquals(25, claimGroup.lines.size());
 		// Verify one of the claim lines.

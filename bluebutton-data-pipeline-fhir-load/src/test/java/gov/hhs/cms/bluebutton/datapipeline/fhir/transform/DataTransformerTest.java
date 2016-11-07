@@ -461,38 +461,49 @@ public final class DataTransformerTest {
 		CarrierClaimGroup record = new CarrierClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
 		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "42";
-		record.claimId = "2929923122";
-		record.dateFrom = LocalDate.of(1848, 01, 24);
-		record.dateThrough = LocalDate.of(1850, 01, 01);
-		record.nearLineRecordIdCode = '1';
+		record.beneficiaryId = "1";
+		record.claimId = "1831831620";
+		record.dateFrom = LocalDate.of(2015, 10, 27);
+		record.dateThrough = LocalDate.of(2015, 10, 27);
+		record.nearLineRecordIdCode = 'O';
 		record.claimTypeCode = "71";
-		record.claimDispositionCode = "01";
+		record.claimDispositionCode = "1";
 		record.carrierNumber = "06102";
 		record.paymentDenialCode = "1";
 		record.paymentAmount = new BigDecimal("130.32");
-		record.referringPhysicianNpi = Optional.of("1265415426");
+		record.referringPhysicianNpi = Optional.of("1902880057");
 		record.providerPaymentAmount = new BigDecimal("123.45");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "F63.2");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R44.3"));
-		record.clinicalTrialNumber = Optional.of("12654154");
+		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "H40013");
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H40013"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H35372"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H26493"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H16143"));
+		record.clinicalTrialNumber = Optional.of("0");
 		CarrierClaimLine recordLine1 = new CarrierClaimLine();
 		record.lines.add(recordLine1);
-		recordLine1.number = 1;
-		recordLine1.organizationNpi = Optional.of("1487872263");
-		recordLine1.cmsServiceTypeCode = "90853-HE";
-		recordLine1.hcpcsCode = Optional.of("324");
-		recordLine1.betosCode = Optional.of("M5C");
-		recordLine1.paymentAmount = new BigDecimal("123.45");
+		recordLine1.number = 6;
+		recordLine1.performingPhysicianNpi = Optional.of("1902880057");
+		recordLine1.organizationNpi = Optional.of("1689653305");
+		recordLine1.providerStateCode = Optional.of("IL");
+		recordLine1.providerZipCode = Optional.of("604428202");
+		recordLine1.cmsServiceTypeCode = "1";
+		recordLine1.placeOfServiceCode = "11";
+		recordLine1.firstExpenseDate = LocalDate.of(2015, 10, 27);
+		recordLine1.lastExpenseDate = LocalDate.of(2015, 10, 27);
+		recordLine1.hcpcsCode = Optional.of("92134");
+		recordLine1.hcpcsInitialModifierCode = Optional.of("LT");
+		recordLine1.hcpcsSecondModifierCode = Optional.of("");
+		recordLine1.betosCode = Optional.of("T2D");
+		recordLine1.paymentAmount = new BigDecimal("37.5");
 		recordLine1.beneficiaryPaymentAmount = new BigDecimal("0");
-		recordLine1.providerPaymentAmount = new BigDecimal("120.20");
-		recordLine1.beneficiaryPartBDeductAmount = new BigDecimal("18.00");
-		recordLine1.primaryPayerPaidAmount = new BigDecimal("11.00");
-		recordLine1.coinsuranceAmount = new BigDecimal("20.20");
-		recordLine1.submittedChargeAmount = new BigDecimal("130.45");
-		recordLine1.allowedChargeAmount = new BigDecimal("129.45");
-		recordLine1.diagnosis = new IcdCode(IcdVersion.ICD_10, "F63.2");
-		recordLine1.nationalDrugCode = Optional.of(new String("49884009902"));
+		recordLine1.providerPaymentAmount = new BigDecimal("37.5");
+		recordLine1.beneficiaryPartBDeductAmount = new BigDecimal("0");
+		recordLine1.primaryPayerPaidAmount = new BigDecimal("0");
+		recordLine1.coinsuranceAmount = new BigDecimal("9.57");
+		recordLine1.submittedChargeAmount = new BigDecimal("75");
+		recordLine1.allowedChargeAmount = new BigDecimal("47.84");
+		recordLine1.diagnosis = new IcdCode(IcdVersion.ICD_10, "H35372");
+		recordLine1.nationalDrugCode = Optional.of(new String("0777310502"));
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -519,6 +530,7 @@ public final class DataTransformerTest {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		Assert.assertEquals(record.nearLineRecordIdCode.toString(), ((StringType) eob
@@ -558,7 +570,7 @@ public final class DataTransformerTest {
 		 * TODO once STU3 is available, verify amounts in eob.information
 		 * entries
 		 */
-		Assert.assertEquals(2, eob.getDiagnosis().size());
+		Assert.assertEquals(4, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		Assert.assertEquals(record.clinicalTrialNumber.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER)
@@ -657,6 +669,8 @@ public final class DataTransformerTest {
 		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R44.3", "Y"));
 		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "F22.2"));
 		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_10, "R11.3", "N"));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "R11.3", LocalDate.of(2016, 01, 16)));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "R12.3", LocalDate.of(2015, 10, 29)));
 		InpatientClaimLine recordLine1 = new InpatientClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
