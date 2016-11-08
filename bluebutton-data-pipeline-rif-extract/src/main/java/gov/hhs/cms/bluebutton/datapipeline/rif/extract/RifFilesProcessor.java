@@ -66,6 +66,9 @@ public final class RifFilesProcessor {
 	 */
 	public static final int RECORD_FORMAT_VERSION = 5;
 
+	private static DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive()
+			.appendPattern("dd-MMM-yyyy").toFormatter();
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
 	/**
@@ -1511,7 +1514,7 @@ public final class RifFilesProcessor {
 		for (int i = icdColumnFirst; i < icdColumnLast; i += 3) {
 			String icdCodeText = csvRecord.get(i);
 			String icdVersionText = csvRecord.get(i + 1);
-			String icdProcedureDate = csvRecord.get(i + 2);
+			LocalDate icdProcedureDate = LocalDate.parse(csvRecord.get(i + 2), formatter);
 			if (icdCodeText.isEmpty() && icdVersionText.isEmpty())
 				continue;
 			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty() && !icdProcedureDate.toString().isEmpty())
