@@ -7,6 +7,12 @@ serverConnectTimeoutMilliseconds=$((30 * 1000))
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Check to see if we are running in Cygwin.
+case "$( uname )" in
+	CYGWIN*) cygwin=true ;;
+	*) cygwin=false ;;
+esac
+
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
 	-o h:s:k:t:w:u:n:p: \
@@ -49,6 +55,8 @@ while true; do
 	esac
 done
 
+#echo "serverHome: '${serverHome}', httpsPort: '${httpsPort}', keyStore: '${keyStore}', trustStore: '${trustStore}', war: '${war}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
+
 # Verify that all required options were specified.
 if [[ -z "${serverHome}" ]]; then >&2 echo 'The --serverhome option is required.'; exit 1; fi
 if [[ -z "${httpsPort}" ]]; then >&2 echo 'The --httpsport option is required.'; exit 1; fi
@@ -57,7 +65,30 @@ if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.
 if [[ -z "${war}" ]]; then >&2 echo 'The --war option is required.'; exit 1; fi
 
 # Exit immediately if something fails.
-set -e
+error() {
+	local parent_lineno="$1"
+	local message="$2"
+	local code="${3:-1}"
+
+	if [[ -n "$message" ]] ; then
+		>&2 echo "Error on or near line ${parent_lineno}: ${message}."
+	else
+		>&2 echo "Error on or near line ${parent_lineno}."
+	fi
+	
+	# Before bailing, always try to stop any running servers.
+	>&2 echo "Trying to stop any running servers before exiting..."
+	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+
+	>&2 echo "Exiting with status ${code}."
+	exit "${code}"
+}
+trap 'error ${LINENO}' ERR
+
+# Munge paths for Cygwin.
+if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --windows "${keyStore}"); fi
+if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --windows "${trustStore}"); fi
+if [[ "${cygwin}" = true ]]; then war=$(cygpath --windows "${war}"); fi
 
 # Check for required files.
 for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}" "${war}"; do
@@ -67,9 +98,10 @@ for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}" "${war}"
 	fi
 done
 
-# Use the Wildfly CLI to configure the server.
-# (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
-cat <<EOF |
+# Write the Wildfly CLI config script that will be used to configure the server.
+scriptConfig="${serverHome}/jboss-cli-script-config.txt"
+if [[ "${cygwin}" = true ]]; then scriptConfigArg=$(cygpath --windows "${scriptConfig}"); else scriptConfigArg="${scriptConfig}"; fi
+cat <<EOF > "${scriptConfig}"
 # Apply all of the configuration in a single transaction.
 batch
 
@@ -81,10 +113,10 @@ batch
 # Enable and configure HTTPS.
 /subsystem=undertow/server=default-server/https-listener=https/:add(socket-binding=https,security-realm=ApplicationRealm)
 /socket-binding-group=standard-sockets/socket-binding=https/:write-attribute(name=port,value="${httpsPort}")
-/core-service=management/security-realm=ApplicationRealm/server-identity=ssl/:add(keystore-path="${keyStore}",keystore-password="changeit",key-password="changeit")
+/core-service=management/security-realm=ApplicationRealm/server-identity=ssl/:add(keystore-path="${keyStore//\\//}",keystore-password="changeit",key-password="changeit")
 
 # Configure and enable mandatory client-auth SSL.
-/core-service=management/security-realm=ApplicationRealm/authentication=truststore:add(keystore-path="${trustStore}",keystore-password=changeit)
+/core-service=management/security-realm=ApplicationRealm/authentication=truststore:add(keystore-path="${trustStore//\\//}",keystore-password=changeit)
 /subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=verify-client,value=REQUIRED)
 
 # Disable HTTP.
@@ -97,10 +129,27 @@ run-batch
 # Reload the server to apply those changes.
 :reload
 EOF
-"${serverHome}/bin/jboss-cli.sh" \
+
+# Calls the JBoss/Wildfly CLI with the specified arguments.
+jBossCli ()
+{
+	if [[ "${cygwin}" = true ]]; then
+		cliApp="${serverHome}/bin/jboss-cli.bat"
+		chmod a+x "${cliApp}"
+		
+		cmd /C "set NOPAUSE=true && $(cygpath --windows ${cliApp}) $@"
+	else
+		cliApp="${serverHome}/bin/jboss-cli.sh"
+		
+		"${cliApp}" $@
+	fi
+}
+
+# Use the Wildfly CLI to configure the server.
+jBossCli \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
-	--file=/dev/stdin \
+	--file=${scriptConfigArg} \
 	&> "${serverHome}/server-config.log"
 
 # Wait for the server to be ready again.
@@ -108,7 +157,7 @@ echo "Server configured. Waiting for it to finish reloading..."
 startSeconds=$SECONDS
 endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 while true; do
-	if "${serverHome}/bin/jboss-cli.sh" --connect --command="ls" &> /dev/null; then
+	if jBossCli --connect --command="ls" &> /dev/null; then
 		echo "Server reloaded in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
@@ -120,14 +169,20 @@ while true; do
 	sleep 1
 done
 
+# Write the JBoss CLI script that will deploy the WAR.
+scriptDeploy="${serverHome}/jboss-cli-script-deploy.txt"
+if [[ "${cygwin}" = true ]]; then scriptDeployArg=$(cygpath --windows "${scriptDeploy}"); else scriptDeployArg="${scriptDeploy}"; fi
+cat <<EOF > "${scriptDeploy}"
+deploy "${war}" --name=ROOT.war
+EOF
+
 # Deploy the application to the now-configured server.
 echo "Deploying application: '${war}'..."
-"${serverHome}/bin/jboss-cli.sh" \
+jBossCli \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
-	"deploy ${war} --name=ROOT.war" \
+	--file=${scriptDeployArg} \
 	&>> "${serverHome}/server-config.log"
 # Note: No need to watch log here, as the command blocks until deployment is 
 # completed, and returns a non-zero exit code if it fails.
 echo 'Application deployed.'
-
