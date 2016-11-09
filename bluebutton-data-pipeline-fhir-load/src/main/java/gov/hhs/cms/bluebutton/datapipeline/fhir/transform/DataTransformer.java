@@ -18,7 +18,6 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.CareTeam;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -956,8 +955,11 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
-			item.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			DetailComponent detail = new DetailComponent();
+			detail.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
 					.setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+
+			item.addDetail(detail);
 
 			if (claimLine.performingPhysicianNpi.isPresent()) {
 				item.addCareTeam(
@@ -1163,8 +1165,11 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			DetailComponent detail = new DetailComponent();
+			detail.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
 					.setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+
+			item.addDetail(detail);
 
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
@@ -1529,9 +1534,7 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 
-		// DONE: Specify eob.type once STU3 is available (institutional)
-		eob.setType(new Coding(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode, ""));
-
+		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
 		eob.setStatus(ExplanationOfBenefitStatus.valueOf(claimGroup.eobStatus));
 		
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
@@ -1674,9 +1677,7 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 
-		// DONE: Specify eob.type once STU3 is available (institutional)
-		eob.setType(new Coding(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode, ""));
-
+		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
 		eob.setStatus(ExplanationOfBenefitStatus.valueOf(claimGroup.eobStatus));
 		
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
@@ -1804,9 +1805,7 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 
-		// DONE: Specify eob.type once STU3 is available (professional)
-		eob.setType(new Coding(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode, ""));
-
+		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 

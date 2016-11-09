@@ -576,7 +576,8 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 
-		Assert.assertEquals(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS, ((StringType) eobItem0
+		Assert.assertEquals(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS,
+				((StringType) eobItem0.getDetail().get(0)
 				.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).get(0).getValue()).getValue());
 
 		Assert.assertEquals(recordLine1.performingPhysicianNpi.get(),
@@ -647,23 +648,24 @@ public final class DataTransformerTest {
 		InpatientClaimGroup record = new InpatientClaimGroup();
 		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
 		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "42";
-		record.claimId = "2929923122";
-		record.dateFrom = LocalDate.of(1848, 01, 24);
-		record.dateThrough = LocalDate.of(1850, 01, 01);
+		record.beneficiaryId = "18";
+		record.claimId = "364733133";
+		record.claimTypeCode = "60";
+		record.dateFrom = LocalDate.of(2016, 01, 15);
+		record.dateThrough = LocalDate.of(2016, 01, 27);
 		record.patientDischargeStatusCode = "01";
-		record.nearLineRecordIdCode = '1';
+		record.nearLineRecordIdCode = 'V';
 		record.claimServiceClassificationTypeCode = '1';
-		record.claimNonPaymentReasonCode = Optional.of("1");
-		record.providerNumber = "45645";
+		record.claimNonPaymentReasonCode = Optional.of("");
+		record.providerNumber = "230130";
 		record.providerStateCode = "MI";
-		record.paymentAmount = new BigDecimal("130.32");
-		record.totalChargeAmount = new BigDecimal("199.99");
-		record.organizationNpi = Optional.of("1487872263");
-		record.attendingPhysicianNpi = Optional.of("1265415426");
-		record.operatingPhysicianNpi = Optional.of("1265415999");
-		record.otherPhysicianNpi = Optional.of("1265415888");
-		record.claimFacilityTypeCode = '2';
+		record.paymentAmount = new BigDecimal("7634.48");
+		record.totalChargeAmount = new BigDecimal("84993.37");
+		record.organizationNpi = Optional.of("1689653305");
+		record.attendingPhysicianNpi = Optional.of("1619130515");
+		record.operatingPhysicianNpi = Optional.of("1053393819");
+		record.otherPhysicianNpi = Optional.of("1619130515");
+		record.claimFacilityTypeCode = '1';
 		record.primaryPayerPaidAmount = new BigDecimal("11.00");
 		record.passThruPerDiemAmount = new BigDecimal("10.00");
 		record.deductibleAmount = new BigDecimal("112.00");
@@ -672,19 +674,28 @@ public final class DataTransformerTest {
 		record.professionalComponentCharge = new BigDecimal("4.00");
 		record.noncoveredCharge = new BigDecimal("33.00");
 		record.totalDeductionAmount = new BigDecimal("14.00");
-		record.diagnosisAdmitting = new IcdCode(IcdVersion.ICD_10, "F99.2");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "F63.2");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R44.3", "Y"));
-		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "F22.2"));
-		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_10, "R11.3", "N"));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "0TCC8ZZ ", LocalDate.of(2016, 01, 16)));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "30233K1 ", LocalDate.of(2015, 10, 29)));
+		record.diagnosisAdmitting = new IcdCode(IcdVersion.ICD_10, "R310");
+		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "R310");
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R310", "Y"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "A419", "N"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R6521", "N"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "K7200", "N"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "I81", "N"));
+		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "R6521"));
+		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_10, "I81", "N"));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "0TCC8ZZ", LocalDate.of(2016, 01, 16)));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "30233K1", LocalDate.of(2016, 01, 16)));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "30233N1", LocalDate.of(2016, 01, 15)));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "30233R1", LocalDate.of(2016, 10, 17)));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "02HV33Z", LocalDate.of(2016, 01, 24)));
+		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "3E033XZ", LocalDate.of(2016, 01, 24)));
+
 		InpatientClaimLine recordLine1 = new InpatientClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
 		recordLine1.hcpcsCode = Optional.of("M5C");
-		recordLine1.totalChargeAmount = new BigDecimal("5533.00");
-		recordLine1.nonCoveredChargeAmount = new BigDecimal("3.00");
+		recordLine1.totalChargeAmount = new BigDecimal("84993.37");
+		recordLine1.nonCoveredChargeAmount = new BigDecimal("3605.00");
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -756,7 +767,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 
-		Assert.assertEquals(2, eob.getProcedure().size());
+		Assert.assertEquals(6, eob.getProcedure().size());
 		Assert.assertEquals(record.procedureCodes.get(0).getCode(),
 				eob.getProcedure().get(0).getProcedureCoding().getCode());
 		Assert.assertEquals(Date
@@ -772,7 +783,8 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
 
-		Assert.assertEquals(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS, ((StringType) eobItem0
+		Assert.assertEquals(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS,
+				((StringType) eobItem0.getDetail().get(0)
 				.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).get(0).getValue()).getValue());
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
