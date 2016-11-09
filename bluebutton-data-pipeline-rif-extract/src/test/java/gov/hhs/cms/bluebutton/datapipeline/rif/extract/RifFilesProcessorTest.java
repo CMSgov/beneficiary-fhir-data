@@ -366,6 +366,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(LocalDate.of(2016, 01, 15), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2016, 01, 27), claimGroup.dateThrough);
 		Assert.assertEquals("230130", claimGroup.providerNumber);
+		Assert.assertEquals(new Character('1'), claimGroup.claimServiceClassificationTypeCode);
 		Assert.assertFalse(claimGroup.claimNonPaymentReasonCode.isPresent());
 		Assert.assertEquals(new BigDecimal("7634.48"), claimGroup.paymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);

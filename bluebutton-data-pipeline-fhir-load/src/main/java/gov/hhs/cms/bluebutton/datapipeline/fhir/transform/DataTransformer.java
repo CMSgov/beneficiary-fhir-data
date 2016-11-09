@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu3.exceptions.FHIRException;
+import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
@@ -218,6 +219,8 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt";
 
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
+
+	static final String CODING_SYSTEM_SERVICE_CLASSIFICATION_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrv.txt";
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
@@ -917,13 +920,11 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 
-		// TODO Specify eob.type once STU3 is available (institutional)
+		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
-
-		// TODO Set eob.disposition to descriptive value of code once code is
-		// created - claimGroup.patientDischargeStatusCode
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
@@ -942,7 +943,11 @@ public final class DataTransformer {
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
 					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
+			eob.setAuthor(new Identifier().setValue(claimGroup.organizationNpi.get()));
 		}
+
+		eob.addExtension().setUrl(CODING_SYSTEM_SERVICE_CLASSIFICATION_CD)
+				.setValue(new StringType(claimGroup.claimServiceClassificationTypeCode.toString()));
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
@@ -959,10 +964,6 @@ public final class DataTransformer {
 					.setValue(new StringType(claimGroup.otherPhysicianNpi.get()));
 		}
 
-		/*
-		 * TODO once STU3 is available, transform financial/payment amounts into
-		 * eob.information entries
-		 */
 		addDiagnosisCode(eob, claimGroup.diagnosisAdmitting);
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
@@ -986,24 +987,14 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			/*
-			 * FIXME item.type field for
-			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
-			 * missing in STU3 (though present in item.detail). Sent email to
-			 * Mark/FM working group about this on 2016-10-20.
-			 */
-			// item.setType(new
-			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
-
-			/*
-			 * TODO once STU3 available, transform
-			 * claimServiceClassificationTypeCode into eob.item.category.
-			 */
+			item.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+					.setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
+
+			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
 
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
@@ -1017,10 +1008,6 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
-			/*
-			 * TODO once STU3 available, transform revenue line items to
-			 * eob.item.revenue and eob.item.careteam
-			 */
 		}
 
 		insert(bundle, eob);
@@ -1121,6 +1108,9 @@ public final class DataTransformer {
 		for (OutpatientClaimLine claimLine : claimGroup.lines) {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
+
+			item.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+					.setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			/*
 			 * FIXME item.type field for
