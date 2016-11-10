@@ -1221,7 +1221,8 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 
-		// TODO Specify eob.type once STU3 is available (institutional)
+		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
@@ -1246,7 +1247,11 @@ public final class DataTransformer {
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
 					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
+			eob.setAuthor(new Identifier().setValue(claimGroup.organizationNpi.get()));
 		}
+
+		eob.addExtension().setUrl(CODING_SYSTEM_SERVICE_CLASSIFICATION_CD)
+				.setValue(new StringType(claimGroup.claimServiceClassificationTypeCode.toString()));
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
@@ -1281,6 +1286,11 @@ public final class DataTransformer {
 				addDiagnosisCode(eob, diagnosis);
 			}
 
+		for (IcdCode procedure : claimGroup.procedureCodes)
+			if (!procedure.getCode().isEmpty()) {
+				addProcedureCode(eob, procedure);
+			}
+
 		for (IcdCode diagnosis : claimGroup.diagnosesReasonForVisit)
 			if (!diagnosis.getCode().isEmpty()) {
 				addDiagnosisCode(eob, diagnosis);
@@ -1290,24 +1300,24 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
+			DetailComponent detail = new DetailComponent();
+			detail.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
 					.setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
-			/*
-			 * FIXME item.type field for
-			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
-			 * missing in STU3 (though present in item.detail). Sent email to
-			 * Mark/FM working group about this on 2016-10-20.
-			 */
-			// item.setType(new
-			// Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-			// .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+			item.addDetail(detail);
 
-			/*
-			 * TODO once STU3 available, transform
-			 * claimServiceClassificationTypeCode into eob.item.category.
-			 */
+			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
+
 			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+
+			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
+				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
+						.setCode(claimLine.hcpcsInitialModifierCode.get()));
+			}
+			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
+				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
+						.setCode(claimLine.hcpcsSecondModifierCode.get()));
+			}
 
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)

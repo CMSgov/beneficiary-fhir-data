@@ -480,6 +480,8 @@ public final class RifFilesProcessorTest {
 		OutpatientClaimLine claimLine = claimGroup.lines.get(5);
 		Assert.assertEquals(new Integer(6), claimLine.lineNumber);
 		Assert.assertEquals("96374", claimGroup.lines.get(0).hcpcsCode.get());
+		Assert.assertFalse(claimLine.hcpcsInitialModifierCode.isPresent());
+		Assert.assertFalse(claimLine.hcpcsSecondModifierCode.isPresent());
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.lines.get(0).bloodDeductibleAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.lines.get(0).cashDeductibleAmount);
 		Assert.assertEquals(new BigDecimal("66.24"), claimGroup.lines.get(0).paymentAmount);

@@ -774,10 +774,6 @@ public final class RifFilesProcessor {
 				InpatientClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
 
 		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
-		/*
 		 * Parse the claim lines.
 		 */
 		for (CSVRecord claimLineRecord : csvRecords) {
@@ -855,10 +851,9 @@ public final class RifFilesProcessor {
 				OutpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				OutpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
 
-		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
+		claimGroup.procedureCodes = parseIcdCodesProcedure(firstClaimLine,
+				OutpatientClaimGroup.Column.ICD_PRCDR_CD1.ordinal(),
+				OutpatientClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
 
 		claimGroup.diagnosesReasonForVisit = parseIcdCodes(firstClaimLine,
 				OutpatientClaimGroup.Column.RSN_VISIT_CD1.ordinal(),
@@ -879,6 +874,10 @@ public final class RifFilesProcessor {
 
 			claimLine.lineNumber = parseInt(claimLineRecord.get(OutpatientClaimGroup.Column.CLM_LINE_NUM));
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_CD));
+			claimLine.hcpcsInitialModifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_1ST_MDFR_CD));
+			claimLine.hcpcsSecondModifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_2ND_MDFR_CD));
 			claimLine.bloodDeductibleAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT)); 
 			claimLine.cashDeductibleAmount = parseDecimal( claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_CASH_DDCTBL_AMT));
 			claimLine.wageAdjustedCoinsuranceAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_COINSRNC_WGE_ADJSTD_C));
