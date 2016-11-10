@@ -1,8 +1,12 @@
 #!/bin/bash
 
-# Constants.
+# Constants
+# Note: The username and password here are wildly insecure, but this is a dev-
+# only config, so it's fine.
 serverReadyTimeoutSeconds=120
 serverConnectTimeoutMilliseconds=$((30 * 1000))
+wildflyManagementUsername='developer'
+wildflyManagementPassword='notterriblysecure'
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -67,11 +71,27 @@ for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}" "${war}"
 	fi
 done
 
+# Use Wildfly's `add-user.sh` utility to add a management user. This enables 
+# use of JMX with the Wildfly instance. Note that Wildfly/JBoss require the use 
+# of a custom authentication plugin with jConsole. See 
+# https://dzone.com/articles/remote-jmx-access-wildfly-or for details, but the 
+# upshot is that the Wildfly-provided `bin/jconsole.sh` script must be used and 
+# the connection URL (even for local processes) must be of the form 
+# `service:jmx:http-remoting-jmx://localhost:9990`.
+"${serverHome}/bin/add-user.sh" \
+	--silent \
+	"${wildflyManagementUsername}" \
+	"${wildflyManagementPassword}"
+
 # Use the Wildfly CLI to configure the server.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
 cat <<EOF |
 # Apply all of the configuration in a single transaction.
 batch
+
+# Set applications to use SLF4J for the logging, rather than JBoss' builtin 
+# logger. See jboss-deployment-structure.xml for details.
+/system-property=org.jboss.logging.provider:add(value="slf4j")
 
 # Set the Java system properties that are required to configure the FHIR server.
 /system-property=bbfhir.db.url:add(value="${dbUrl}")

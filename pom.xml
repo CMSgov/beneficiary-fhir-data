@@ -53,6 +53,8 @@
 	</modules>
 
 	<properties>
+		<metrics.version>3.1.2</metrics.version>
+
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 
 			be adjusted via profiles. This is required because the CI server doesn't 
@@ -70,6 +72,29 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>1.1.3</version>
+			</dependency>
+
+			<dependency>
+				<!-- Used to measure performance and collect other runtime statistics 
+					within these projects. -->
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-core</artifactId>
+				<version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+					at runtime. -->
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-jvm</artifactId>
+				<version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Provides a Servlet filter which has meters for status codes, a counter 
+					for the number of active requests, and a timer for request duration. Must 
+					be enabled via `web.xml`. -->
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-servlet</artifactId>
+				<version>${metrics.version}</version>
 			</dependency>
 
 			<dependency>

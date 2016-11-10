@@ -8,6 +8,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,10 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.zaxxer.hikari.HikariDataSource;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
@@ -38,6 +43,14 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	public static final String PROP_DB_URL = "bbfhir.db.url";
 	public static final String PROP_DB_USERNAME = "bbfhir.db.username";
 	public static final String PROP_DB_PASSWORD = "bbfhir.db.password";
+
+	/**
+	 * Set this to <code>true</code> to have Hibernate log a ton of info on the
+	 * SQL statements being run and each session's performance. Be sure to also
+	 * adjust the related logging levels in Wildfly or whatever (see
+	 * <code>server-config.sh</code> for details).
+	 */
+	private static final boolean HIBERNATE_DETAILED_LOGGING = false;
 
 	/**
 	 * @see ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3#resourceProvidersDstu3()
@@ -103,6 +116,22 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	}
 
 	/**
+	 * @return the {@link MetricRegistry} for the application, which can be used
+	 *         to collect statistics on the application's performance
+	 */
+	@Bean()
+	public MetricRegistry metricRegistry() {
+		MetricRegistry metricRegistry = new MetricRegistry();
+		metricRegistry.registerAll(new MemoryUsageGaugeSet());
+		metricRegistry.registerAll(new GarbageCollectorMetricSet());
+
+		final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).build();
+		reporter.start();
+
+		return metricRegistry;
+	}
+
+	/**
 	 * The following bean configures the database connection. The 'url' property
 	 * value of "jdbc:derby:directory:jpaserver_derby_files;create=true"
 	 * indicates that the server should save resources in a directory called
@@ -114,7 +143,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource(@Value("${" + PROP_DB_URL + "}") String url,
 			@Value("${" + PROP_DB_USERNAME + "}") String username,
-			@Value("${" + PROP_DB_PASSWORD + "}") String password) {
+			@Value("${" + PROP_DB_PASSWORD + "}") String password, MetricRegistry metricRegistry) {
 		HikariDataSource poolingDataSource = new HikariDataSource();
 
 		poolingDataSource.setJdbcUrl(url);
@@ -122,6 +151,8 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		poolingDataSource.setPassword(password);
 
 		poolingDataSource.setMaximumPoolSize(Runtime.getRuntime().availableProcessors() * 5);
+		poolingDataSource.setRegisterMbeans(true);
+		poolingDataSource.setMetricRegistry(metricRegistry);
 
 		return poolingDataSource;
 	}
@@ -140,8 +171,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.format_sql", "true");
-		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.jdbc.batch_size", "20");
 		extraProperties.put("hibernate.cache.use_query_cache", "false");
@@ -151,6 +180,29 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
+
+		/*
+		 * These configuration settings will set Hibernate to log all SQL
+		 * statements and collect statistics, logging them out at the end of
+		 * each session. They will cause a ton of logging, which will REALLY
+		 * slow things down, so this should generally be disabled in production.
+		 */
+		if (HIBERNATE_DETAILED_LOGGING) {
+			extraProperties.put(AvailableSettings.FORMAT_SQL, "true");
+			extraProperties.put(AvailableSettings.USE_SQL_COMMENTS, "true");
+			extraProperties.put(AvailableSettings.SHOW_SQL, "true");
+			extraProperties.put(AvailableSettings.GENERATE_STATISTICS, "true");
+		}
+
+		/*
+		 * Couldn't get these settings to work. Might need to read
+		 * http://www.codesenior.com/en/tutorial/How-to-Show-Hibernate-
+		 * Statistics-via-JMX-in-Spring-Framework-And-Jetty-Server more closely.
+		 * (But I suspect the reason is that Hibernate's JMX support is just
+		 * poorly tested and flat-out broken.)
+		 */
+		// extraProperties.put(AvailableSettings.JMX_ENABLED, "true");
+		// extraProperties.put(AvailableSettings.JMX_DOMAIN_NAME, "hibernate");
 
 		/*
 		 * Disable Hibernate Search/Lucene indexing, as it slows writes down by

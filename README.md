@@ -12,6 +12,7 @@ Going to work on this project? Great! You can follow the instructions in [Develo
 
 This application has the following configuration parameters:
 
+* `bbfhir.logs.dir`: The directory that the application will write its log files out to, which defaults to `./target/bluebutton-server/`.
 * `bbfhir.db.url`: The JDBC URL of the database to use. Supports HSQL and PostgreSQL. Samples:
     * `jdbc:hsqldb:mem:test`
     * `jdbc:postgresql://example.com:5432/fhir`
