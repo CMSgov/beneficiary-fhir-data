@@ -106,7 +106,7 @@ public final class HospiceClaimGroup {
 	/**
 	 * @see Column#CLM_HOSPC_START_DT_ID
 	 */
-	public Optional<String> claimHospiceStartDate;
+	public LocalDate claimHospiceStartDate;
 	
 	/**
 	 * @see Column#CLM_PMT_AMT

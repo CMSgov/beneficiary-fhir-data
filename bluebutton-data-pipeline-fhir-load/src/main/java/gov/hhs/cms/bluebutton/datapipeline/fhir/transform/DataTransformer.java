@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -21,16 +20,16 @@ import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DetailComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -131,8 +130,6 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_BETOS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt";
 
 	static final String CODING_SYSTEM_ICD9_DIAG = "http://hl7.org/fhir/sid/icd-9-cm/diagnosis";
-
-	static final String CODING_SYSTEM_ICD9_PROC = "http://hl7.org/fhir/sid/icd-9-cm/procedure";
 
 	/**
 	 * The United States National Provider Identifier, as available at
@@ -242,8 +239,6 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt";
 
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
-
-	static final String CODING_SYSTEM_SERVICE_CLASSIFICATION_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrv.txt";
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
@@ -385,155 +380,6 @@ public final class DataTransformer {
 
 	static final String LINE_PLACE_OF_SERVICE_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt";
 	
-	static final String CLAIM_PROCEDURE_CODE1 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd1.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE1 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd1.txt";
-
-	static final String CLAIM_PROCEDURE_DATE1 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt1.txt";
-	
-	static final String CLAIM_PROCEDURE_CODE2 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd2.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE2 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd2.txt";
-
-	static final String CLAIM_PROCEDURE_DATE2 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt2.txt";
-
-	static final String CLAIM_PROCEDURE_CODE3 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd3.txt";
-
-	static final String CLAIM_PROCEDURE_DATE3 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt3.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE3 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd3.txt";
-
-	static final String CLAIM_PROCEDURE_CODE4 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd4.txt";
-
-	static final String CLAIM_PROCEDURE_DATE4 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt4.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE4 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd4.txt";
-
-	static final String CLAIM_PROCEDURE_CODE5 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd5.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE5 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd5.txt";
-
-	static final String CLAIM_PROCEDURE_DATE5 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt5.txt";
-
-	static final String CLAIM_PROCEDURE_CODE6 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd6.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE6 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd6.txt";
-
-	static final String CLAIM_PROCEDURE_DATE6 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt6.txt";
-
-	static final String CLAIM_PROCEDURE_CODE7 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd7.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE7 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd7.txt";
-
-	static final String CLAIM_PROCEDURE_DATE7 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt7.txt";
-
-	static final String CLAIM_PROCEDURE_CODE8 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd8.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE8 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd8.txt";
-
-	static final String CLAIM_PROCEDURE_DATE8 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt8.txt";
-
-	static final String CLAIM_PROCEDURE_CODE9 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd9.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE9 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd9.txt";
-
-	static final String CLAIM_PROCEDURE_DATE9 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt9.txt";
-
-	static final String CLAIM_PROCEDURE_CODE10 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd10.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE10 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd10.txt";
-
-	static final String CLAIM_PROCEDURE_DATE10 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt10.txt";
-
-	static final String CLAIM_PROCEDURE_CODE11 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd11.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE11 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd11.txt";
-
-	static final String CLAIM_PROCEDURE_DATE11 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt11.txt";
-
-	static final String CLAIM_PROCEDURE_CODE12 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd12.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE12 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd12.txt";
-
-	static final String CLAIM_PROCEDURE_DATE12 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt12.txt";
-
-	static final String CLAIM_PROCEDURE_CODE13 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd13.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE13 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd13.txt";
-
-	static final String CLAIM_PROCEDURE_DATE13 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt13.txt";
-
-	static final String CLAIM_PROCEDURE_CODE14 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd14.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE14 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd14.txt";
-
-	static final String CLAIM_PROCEDURE_DATE14 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt14.txt";
-
-	static final String CLAIM_PROCEDURE_CODE15 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd15.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE15 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd15.txt";
-
-	static final String CLAIM_PROCEDURE_DATE15 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt15.txt";
-
-	static final String CLAIM_PROCEDURE_CODE16 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd16.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE16 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd16.txt";
-
-	static final String CLAIM_PROCEDURE_DATE16 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt16.txt";
-
-	static final String CLAIM_PROCEDURE_CODE17 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd17.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE17 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd17.txt";
-
-	static final String CLAIM_PROCEDURE_DATE17 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt17.txt";
-
-	static final String CLAIM_PROCEDURE_CODE18 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd18.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE18 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd18.txt";
-
-	static final String CLAIM_PROCEDURE_DATE18 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt18.txt";
-
-	static final String CLAIM_PROCEDURE_CODE19 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd19.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE19 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd19.txt";
-
-	static final String CLAIM_PROCEDURE_DATE19 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt19.txt";
-
-	static final String CLAIM_PROCEDURE_CODE20 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd20.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE20 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd20.txt";
-
-	static final String CLAIM_PROCEDURE_DATE20 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt20.txt";
-
-	static final String CLAIM_PROCEDURE_CODE21 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd21.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE21 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd21.txt";
-
-	static final String CLAIM_PROCEDURE_DATE21 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt21.txt";
-
-	static final String CLAIM_PROCEDURE_CODE22 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd22.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE22 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd22.txt";
-
-	static final String CLAIM_PROCEDURE_DATE22 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt22.txt";
-
-	static final String CLAIM_PROCEDURE_CODE23 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd23.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE23 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd23.txt";
-
-	static final String CLAIM_PROCEDURE_DATE23 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt23.txt";
-
-	static final String CLAIM_PROCEDURE_CODE24 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd24.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE24 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd24.txt";
-
-	static final String CLAIM_PROCEDURE_DATE24= "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt24.txt";
-
-	static final String CLAIM_PROCEDURE_CODE25 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_cd25.txt";
-
-	static final String CLAIM_PROCEDURE_VERSION_CODE25 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_prcdr_vrsn_cd25.txt";
-
-	static final String CLAIM_PROCEDURE_DATE25 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcdr_dt25.txt";
 
 	/**
 	 * @param rifStream
@@ -1124,7 +970,7 @@ public final class DataTransformer {
 			eob.setAuthor(new Identifier().setValue(claimGroup.organizationNpi.get()));
 		}
 
-		eob.addExtension().setUrl(CODING_SYSTEM_SERVICE_CLASSIFICATION_CD)
+		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(claimGroup.claimServiceClassificationTypeCode.toString()));
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -1154,11 +1000,6 @@ public final class DataTransformer {
 		for (IcdCode diagnosis : claimGroup.diagnosesExternal)
 			if (!diagnosis.getCode().isEmpty()) {
 				addDiagnosisCode(eob, diagnosis);
-			}
-
-		for (IcdCode procedure : claimGroup.procedureCodes)
-			if (!procedure.getCode().isEmpty()) {
-				addProcedureCode(eob, procedure);
 			}
 
 		for (InpatientClaimLine claimLine : claimGroup.lines) {
@@ -1409,6 +1250,7 @@ public final class DataTransformer {
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		// DONE: Specify eob.type once STU3 is available (institutional)
 		eob.setType(new Coding(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode, ""));
@@ -1438,6 +1280,7 @@ public final class DataTransformer {
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
 					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
+			eob.setAuthor(new Identifier().setValue(claimGroup.organizationNpi.get()));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -1543,9 +1386,10 @@ public final class DataTransformer {
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+
 
 		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
-		eob.setStatus(ExplanationOfBenefitStatus.valueOf(claimGroup.eobStatus));
 		
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
@@ -1563,8 +1407,8 @@ public final class DataTransformer {
 
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).setValue(new StringType(claimGroup.claimServiceClassificationTypeCode.toString()));
 
-		eob.addExtension().setUrl(CLAIM_HOSPICE_START_DATE).setValue( new StringType(claimGroup.claimHospiceStartDate.get()));
-
+		setDateInExtension(eob.addExtension(), CLAIM_HOSPICE_START_DATE, claimGroup.claimHospiceStartDate);
+		
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
@@ -1574,7 +1418,7 @@ public final class DataTransformer {
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
 					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
-			eob.setAuthor(serviceProviderOrgReference);
+			eob.setAuthor(new Identifier().setValue(claimGroup.organizationNpi.get()));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -1686,9 +1530,10 @@ public final class DataTransformer {
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
-		eob.setStatus(ExplanationOfBenefitStatus.valueOf(claimGroup.eobStatus));
+		
 		
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
@@ -1713,13 +1558,16 @@ public final class DataTransformer {
 			Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
 					referenceOrganizationByNpi(claimGroup.organizationNpi.get()).getReference());
 			eob.setOrganization(serviceProviderOrgReference);
-			eob.setAuthor(serviceProviderOrgReference);
+			eob.setAuthor(new Identifier().setValue(claimGroup.organizationNpi.get()));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
 					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
 		}
+
+		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
+		.setValue(new StringType(claimGroup.claimServiceClassificationTypeCode.toString()));
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
@@ -1738,26 +1586,11 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			/*
-			 * FIXME item.type field for
-			 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is
-			 * missing in STU3 (though present in item.detail). Sent email to
-			 * Mark/FM working group about this on 2016-10-20.
-			 */
-//			 item.getDetail().set(new
-//			 Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
-//			 .setCode(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
-
 			DetailComponent detail = new DetailComponent();
 			detail.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 			
 			item.addDetail(detail);
 			
-			/*
-			 * DONE: once STU3 available, transform
-			 * claimServiceClassificationTypeCode into eob.item.category.
-			 */
-			item.setCategory(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).setCode(claimGroup.claimServiceClassificationTypeCode.toString()));
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
@@ -1781,7 +1614,7 @@ public final class DataTransformer {
 					.setValue(claimLine.nonCoveredChargeAmount);
 			
 			item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1).setCode(claimLine.hcpcs1stMdfrCode.get()));
-			item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2).setCode(claimLine.hcpcs2stMdfrCode.get()));
+			item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2).setCode(claimLine.hcpcs2ndMdfrCode.get()));
 		}
 
 		insert(bundle, eob);
@@ -1811,6 +1644,12 @@ public final class DataTransformer {
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+
+		if (!claimGroup.clinicalTrialNumber.isEmpty()) {
+			eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER)
+					.setValue(new StringType(claimGroup.clinicalTrialNumber));
+		}
 
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
@@ -1826,8 +1665,6 @@ public final class DataTransformer {
 				.setValue(new StringType(claimGroup.paymentDenialCode));
 		eob.getPayment()
 				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
-
-		eob.setStatus(ExplanationOfBenefitStatus.valueOf(claimGroup.eobStatus));
 		
 		/*
 		 * Referrals are represented as contained resources, because otherwise
@@ -1853,9 +1690,6 @@ public final class DataTransformer {
 		 * eob.information entries
 		 * ?????
 		 */
-
-		eob.addExtension().setUrl(CLAIM_CLINICAL_TRIAL_NUMBER)
-		.setValue(new StringType(claimGroup.clinicalTrialNumber));
 		
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
@@ -1914,13 +1748,13 @@ public final class DataTransformer {
 
 			item.setLocation(new Coding().setSystem(PROVIDER_STATE_CD).setCode(claimLine.providerStateCode));
 			
-			CareTeamComponent ctc = new CareTeamComponent();
-			referrer = new Practitioner();
-			referrer.addIdentifier().setSystem(PROVIDER_NPI).setValue(claimLine.providerNPI);
-			//TODO What is role code here.
-			//referrer.addRole().setCode(value);
-			item.addCareTeam(ctc);
 			
+
+			if (!claimLine.providerNPI.isEmpty()) {
+				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
+					.setProvider(new Identifier().setValue(claimLine.providerNPI)));
+			}
+
 			DetailComponent detail = new DetailComponent();
 			detail.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 			
@@ -2186,6 +2020,11 @@ public final class DataTransformer {
 		period.setStart(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY);
 	}
 
+	private static void setDateInExtension(Extension ext, String systemUrl, LocalDate date) {
+		ext.setUrl(systemUrl);
+		ext.setValue(new DateTimeType(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY));
+	}
+
 	/**
 	 * @param period
 	 *            the {@link Period} to adjust
@@ -2221,43 +2060,6 @@ public final class DataTransformer {
 		}
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequence();
-	}
-
-	/**
-	 * @param eob
-	 *            the {@link ExplanationOfBenefit} to (possibly) modify
-	 * @param diagnosis
-	 *            the {@link IcdCode} to add, if it's not already present
-	 * @return the {@link ProcedureComponent#getSequence()} of the existing or
-	 *         newly-added entry
-	 */
-	private static int addProcedureCode(ExplanationOfBenefit eob, IcdCode procedure) {
-		Optional<ProcedureComponent> existingProcedure = eob.getProcedure().stream()
-				.filter(d -> {
-					try {
-						return d.getProcedureCoding().getSystem().equals(procedure.getVersion().getFhirSystem());
-					} catch (FHIRException e) {
-						return false;
-					}
-				}).filter(d -> {
-					try {
-						return d.getProcedureCoding().getCode().equals(procedure.getCode());
-					} catch (FHIRException e) {
-						return false;
-					}
-
-				}).findAny();
-		if (existingProcedure.isPresent())
-			return existingProcedure.get().getSequence();
-
-		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size());
-		procedureComponent.setProcedure(
-				new Coding().setSystem(procedure.getVersion().getFhirSystem()).setCode(procedure.getCode()));
-		procedureComponent
-				.setDate(Date.from(procedure.getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-		
-		eob.getProcedure().add(procedureComponent);
-		return procedureComponent.getSequence();
 	}
 
 	/**

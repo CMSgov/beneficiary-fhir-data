@@ -262,9 +262,9 @@ public final class HHAClaimGroup {
 
 		
 		/**
-		 * @see Column#HCPCS_2ST_MDFR_CD
+		 * @see Column#HCPCS_2ND_MDFR_CD
 		 */
-		public Optional<String> hcpcs2stMdfrCode;
+		public Optional<String> hcpcs2ndMdfrCode;
 
 		
 		/**
@@ -294,8 +294,8 @@ public final class HHAClaimGroup {
 			builder.append(hcpcsCode);
 			builder.append(", hcpcs1stMdfrCode=");
 			builder.append(hcpcs1stMdfrCode);
-			builder.append(", hcpcs2stMdfrCode=");
-			builder.append(hcpcs2stMdfrCode);
+			builder.append(", hcpcs2ndMdfrCode=");
+			builder.append(hcpcs2ndMdfrCode);
 			builder.append(", paymentAmount=");
 			builder.append(paymentAmount);
 			builder.append(", totalChargeAmount=");

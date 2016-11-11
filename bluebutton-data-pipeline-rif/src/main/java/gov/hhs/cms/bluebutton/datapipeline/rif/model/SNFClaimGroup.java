@@ -50,6 +50,13 @@ public final class SNFClaimGroup {
 	 * @see Column#CLM_ID
 	 */
 	public String claimId;
+	
+	/**
+	 * @see Column#STATUS
+	 * this "STATUS" will not be found from CCW row, its intermediate mapping
+	 */
+	public String status;
+	
 
 	/**
 	 * @see Column#NCH_NEAR_LINE_REC_IDENT_CD
@@ -219,6 +226,8 @@ public final class SNFClaimGroup {
 		builder.append(beneficiaryId);
 		builder.append(", claimId=");
 		builder.append(claimId);
+		builder.append(", status=");
+		builder.append(status);
 		builder.append(", nearLineRecordIdCode=");
 		builder.append(nearLineRecordIdCode);
 		builder.append(", claimTypeCode=");
@@ -561,6 +570,11 @@ public final class SNFClaimGroup {
 		 * NOT MAPPED
 		 */
 		NCH_PTNT_STATUS_IND_CD,
+
+		/**
+		 * NOT MAPPED
+		 */
+		STATUS,
 
 		/**
 		 * Type: <code>NUM</code>, max chars: 12. See <a href=
