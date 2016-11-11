@@ -95,21 +95,21 @@
   with_items:
     - "keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname cn={{ hostvars['fhir']['ansible_host'] }} -validity 3650 -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server-keystore.jks -storepass changeit"
     - "keytool -exportcert -alias server -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server.cer -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server-keystore.jks -storepass changeit"
-    - "keytool -importcert -noprompt -alias server -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server.cer -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/{{ iteration_index }}_client-etl-truststore.jks -storepass changeit"
-    - "keytool -genkeypair -alias client-etl -keyalg RSA -keysize 4096 -dname cn={{ hostvars['etl']['ansible_host'] }} -validity 3650 -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/{{ iteration_index }}_client-etl-keystore.jks -storepass changeit"
-    - "keytool -exportcert -alias client-etl -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl.cer -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/{{ iteration_index }}_client-etl-keystore.jks -storepass changeit"
+    - "keytool -importcert -noprompt -alias server -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server.cer -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-truststore.jks -storepass changeit"
+    - "keytool -genkeypair -alias client-etl -keyalg RSA -keysize 4096 -dname cn={{ hostvars['etl']['ansible_host'] }} -validity 3650 -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-keystore.jks -storepass changeit"
+    - "keytool -exportcert -alias client-etl -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl.cer -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-keystore.jks -storepass changeit"
     - "keytool -importcert -noprompt -alias client-etl -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl.cer -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server-truststore.jks -storepass changeit"
   become: true
 
 - name: Fetch Client Keystore and Truststore
   fetch:
     src: "{{ item }}"
-    dest: '../../../target/benchmark-iterations/'
+    dest: "../../../target/benchmark-iterations/{{ iteration_index }}/"
     flat: true
     fail_on_missing: true
   with_items:
-    - "/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/{{ iteration_index }}_client-etl-keystore.jks"
-    - "/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/{{ iteration_index }}_client-etl-truststore.jks"
+    - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-keystore.jks'
+    - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-truststore.jks'
   become: true
 
 - name: Run 'server-config-healthapt.sh' to Configure FHIR Server

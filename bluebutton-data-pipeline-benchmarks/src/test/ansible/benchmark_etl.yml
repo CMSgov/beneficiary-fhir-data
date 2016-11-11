@@ -43,7 +43,7 @@
     
     - name: Wait for ETL to Start Processing Data Set
       wait_for:
-        path: "/usr/local/bluebutton-data-pipeline-app/{{ iteration_index }}_bluebutton-data-pipeline-app.log"
+        path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log'
         search_regex: 'Data set finished uploading and ready to process'
         timeout: 60
 
@@ -51,7 +51,7 @@
     # doesn't time out on us.
     - name: Wait for ETL to Finish Processing Data Set
       wait_for:
-        path: "/usr/local/bluebutton-data-pipeline-app/{{ iteration_index }}_bluebutton-data-pipeline-app.log"
+        path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log'
         search_regex: 'Data set deleted, now that processing is complete'
         timeout: 28800
       # Let it run for 8h, checking it every 30s to see if it's done.

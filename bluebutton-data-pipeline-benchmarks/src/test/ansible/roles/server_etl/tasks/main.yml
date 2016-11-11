@@ -31,8 +31,8 @@
     group: "bb-etl"
     mode: "u=rw,g=r,o=r"
   with_items:
-    - { src: "../../../target/benchmark-iterations/{{ iteration_index }}_client-etl-keystore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
-    - { src: "../../../target/benchmark-iterations/{{ iteration_index }}_client-etl-truststore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
+    - { src: "../../../target/benchmark-iterations/{{ iteration_index }}/client-etl-keystore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
+    - { src: "../../../target/benchmark-iterations/{{ iteration_index }}/client-etl-truststore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
     - { src: '../../../target/pipeline-app/', dest: '/usr/local/bluebutton-data-pipeline-app' }
   become: true
 

@@ -77,7 +77,7 @@ fi
 
 # Run the Ansible playbook, if there's an inventory to run against. (There 
 # may not be, if the `provision.yml` playbook failed very early.)
-inventory="${scriptDirectory}/../../../target/benchmark-iterations/${iteration}_ansible_hosts"
+inventory="${scriptDirectory}/../../../target/benchmark-iterations/${iteration}/ansible_hosts"
 if [[ -f "${inventory}" ]]; then
 	echo 'Running Ansible playbook...'
 	cd "${scriptDirectory}"

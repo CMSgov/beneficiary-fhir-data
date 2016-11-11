@@ -72,7 +72,7 @@
     
     - name: EC2 - Add RDS Instance to Inventory
       lineinfile:
-        dest: "../../../target/benchmark-iterations/{{ iteration_index }}_ansible_hosts"
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}/ansible_hosts"
         regexp: '^rds.*$'
         line: "rds endpoint={{ rds_server.instance.endpoint }} port={{ rds_server.instance.port }}"
         state: present
@@ -100,7 +100,7 @@
     
     - name: EC2 - Add FHIR Server to Inventory
       lineinfile:
-        dest: "../../../target/benchmark-iterations/{{ iteration_index }}_ansible_hosts"
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}/ansible_hosts"
         regexp: '^fhir.*$'
         line: "fhir ansible_host={{ ec2_fhir.instances[0].public_dns_name }} ec2_instance_id={{ ec2_fhir.instance_ids[0] }}"
         state: present
@@ -130,7 +130,7 @@
     
     - name: EC2 - Add ETL Server to Inventory
       lineinfile:
-        dest: "../../../target/benchmark-iterations/{{ iteration_index }}_ansible_hosts"
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}/ansible_hosts"
         regexp: '^etl.*$'
         line: "etl ansible_host={{ ec2_etl.instances[0].public_dns_name }} ec2_instance_id={{ ec2_etl.instance_ids[0] }}"
         state: present

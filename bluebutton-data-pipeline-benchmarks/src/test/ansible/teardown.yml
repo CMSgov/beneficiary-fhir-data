@@ -8,7 +8,7 @@
 #     $ ansible-playbook teardown.yml --inventory-file=somedir/bar --extra-vars "iteration_index=42"
 ##
 
-- name: Collect FHIR Server Log
+- name: Collect FHIR Server Logs
   hosts: fhir
   user: "{{ ssh_user }}"
   gather_facts: false
@@ -17,17 +17,14 @@
   
   tasks:
     
-    - shell: "journalctl --unit=bluebutton-server-app.service --no-pager &> /usr/local/bluebutton-server-app/{{ iteration_index }}_bluebutton-server-app.log"
-      args:
-        executable: /bin/bash
-      become: true
-      ignore_errors: true
-    
     - fetch:
-        src: "/usr/local/bluebutton-server-app/{{ iteration_index }}_bluebutton-server-app.log"
-        dest: '../../../target/benchmark-iterations/'
+        src: "{{ item }}"
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}/"
         flat: true
         fail_on_missing: false
+      with_items:
+        - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/log/server.log'
+        - '/usr/local/bluebutton-server-app/bluebutton-server-app.log'
 
 - name: Collect ETL Log
   hosts: etl
@@ -47,8 +44,8 @@
       ignore_errors: true
     
     - fetch:
-        src: "/usr/local/bluebutton-data-pipeline-app/{{ iteration_index }}_bluebutton-data-pipeline-app.log"
-        dest: '../../../target/benchmark-iterations/'
+        src: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log'
+        dest: "../../../target/benchmark-iterations/{{ iteration_index }}/"
         flat: true
         fail_on_missing: false
 
