@@ -105,12 +105,20 @@ public class DataSetTestUtilities {
 
 		try {
 			// If this isn't specified, the AWS API logs annoying warnings.
-			long objectContentLength = objectContentsUrl.openConnection().getContentLength();
+			int objectContentLength = objectContentsUrl.openConnection().getContentLength();
 			ObjectMetadata objectMetadata = new ObjectMetadata();
 			objectMetadata.setContentLength(objectContentLength);
 
 			PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContentsUrl.openStream(),
 					objectMetadata);
+
+			/*
+			 * Per https://github.com/aws/aws-sdk-java/issues/427, this is
+			 * required when PUTing objects from an InputStream (as opposed to a
+			 * File). Without it, was seeing intermittent errors.
+			 */
+			request.getRequestClientOptions().setReadLimit(objectContentLength + 1);
+
 			return request;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
