@@ -7,10 +7,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -29,6 +31,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DetailComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -1091,7 +1094,7 @@ public final class DataTransformer {
 			eob.setAuthor(new Identifier().setValue(claimGroup.organizationNpi.get()));
 		}
 
-		eob.addExtension().setUrl(CODING_SYSTEM_SERVICE_CLASSIFICATION_CD)
+		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(claimGroup.claimServiceClassificationTypeCode.toString()));
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -1645,7 +1648,8 @@ public final class DataTransformer {
 		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
-
+		eob.addExtension().setUrl(CLAIM_CLINICAL_TRIAL_NUMBER).setValue(new StringType(claimGroup.clinicalTrialNumber));
+		
 		if (!claimGroup.clinicalTrialNumber.isEmpty()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER)
 					.setValue(new StringType(claimGroup.clinicalTrialNumber));
@@ -1713,7 +1717,6 @@ public final class DataTransformer {
 			 * TODO once STU3 is available, transform placeofServiceCode into
 			 * eob.line.location
 			 */
-			item.addExtension().setUrl(CLAIM_CLINICAL_TRIAL_NUMBER).setValue(new StringType(claimLine.placeOfServiceCode));
 			/*
 			 * TODO once STU3 is available, transform these fields into
 			 * eob.item.careTeam entries: providerNPI, providerSpecialityCode,
@@ -1724,19 +1727,22 @@ public final class DataTransformer {
 			 * TODO once STU3 available, transform cmsServiceTypeCode into
 			 * eob.item.category.
 			 */
+			
+			item.setLocation(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
+			
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
 			}
-			DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+			DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
 
 			item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
 
-			item.setServiced(new Coding().setSystem(LINE_1ST_EXPNS_DATE).setCode(df.format(claimLine.firstExpenseDate)));
+			item.setServiced(new Coding().setSystem(LINE_1ST_EXPNS_DATE).setCode(claimLine.firstExpenseDate.format(df)));
 
-			item.setServiced(new Coding().setSystem(LINE_LAST_EXPNS_DATE).setCode(df.format(claimLine.lastExpenseDate)));
+			item.setServiced(new Coding().setSystem(LINE_LAST_EXPNS_DATE).setCode(claimLine.lastExpenseDate.format(df)));
 			
 			item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1).setCode(claimLine.hcpcsInitialModifierCode.get()));
 
@@ -2090,4 +2096,42 @@ public final class DataTransformer {
 		 */
 		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
+	
+	/**
+  	 * @param eob
+ 	 *            the {@link ExplanationOfBenefit} to (possibly) modify
+ 	 * @param diagnosis
+ 	 *            the {@link IcdCode} to add, if it's not already present
+ 	 * @return the {@link ProcedureComponent#getSequence()} of the existing or
+ 	 *         newly-added entry
+ 	 */
+ 	private static int addProcedureCode(ExplanationOfBenefit eob, IcdCode procedure) {
+ 		Optional<ProcedureComponent> existingProcedure = eob.getProcedure().stream()
+ 				.filter(d -> {
+ 					try {
+ 						return d.getProcedureCoding().getSystem().equals(procedure.getVersion().getFhirSystem());
+ 					} catch (FHIRException e) {
+ 						return false;
+ 					}
+ 				}).filter(d -> {
+ 					try {
+ 						return d.getProcedureCoding().getCode().equals(procedure.getCode());
+ 					} catch (FHIRException e) {
+ 						return false;
+ 					}
+ 
+ 				}).findAny();
+ 		if (existingProcedure.isPresent())
+ 			return existingProcedure.get().getSequence();
+ 
+ 		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size());
+ 		procedureComponent.setProcedure(
+ 				new Coding().setSystem(procedure.getVersion().getFhirSystem()).setCode(procedure.getCode()));
+ 		procedureComponent
+ 				.setDate(Date.from(procedure.getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+ 		
+ 		eob.getProcedure().add(procedureComponent);
+ 		return procedureComponent.getSequence();
+ 	}
+ 
 }

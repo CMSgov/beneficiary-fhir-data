@@ -539,12 +539,14 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
 		Assert.assertEquals("74", claimGroup.beneficiaryId);
 		Assert.assertEquals("4706073107", claimGroup.claimId);
+		Assert.assertEquals("ACTIVE", claimGroup.status);
 		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("20", claimGroup.claimTypeCode);
 		Assert.assertEquals(LocalDate.of(2013, 12, 01), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2013, 12, 18), claimGroup.dateThrough);
 		Assert.assertEquals("295052", claimGroup.providerNumber);
 		Assert.assertFalse(claimGroup.claimNonPaymentReasonCode.isPresent());
+		Assert.assertEquals("1", claimGroup.claimServiceClassificationTypeCode);
 		Assert.assertEquals(new BigDecimal("3063.35"), claimGroup.paymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
 		Assert.assertEquals("NV", claimGroup.providerStateCode);
@@ -565,6 +567,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "V5789"), claimGroup.diagnosesAdditional.get(0));
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "49121"), claimGroup.diagnosesAdditional.get(1));
 		Assert.assertFalse(claimGroup.diagnosisFirstClaimExternal.isPresent());
+
 		Assert.assertEquals(7, claimGroup.lines.size());
 		// Verify one of the claim lines.
 		SNFClaimLine claimLine = claimGroup.lines.get(0);
@@ -625,12 +628,14 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
 		Assert.assertEquals("246", claimGroup.beneficiaryId);
 		Assert.assertEquals("9302293110", claimGroup.claimId);
+		Assert.assertEquals("ACTIVE", claimGroup.status);
 		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("50", claimGroup.claimTypeCode);
 		Assert.assertEquals(LocalDate.of(2014, 9, 01), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2014, 9, 30), claimGroup.dateThrough);
 		Assert.assertEquals("051543", claimGroup.providerNumber);
 		Assert.assertFalse(claimGroup.claimNonPaymentReasonCode.isPresent());
+		Assert.assertEquals("1", claimGroup.claimServiceClassificationTypeCode);
 		Assert.assertEquals(new BigDecimal("5558.52"), claimGroup.paymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
 		Assert.assertEquals("CA", claimGroup.providerStateCode);
@@ -642,12 +647,16 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(1, claimGroup.diagnosesAdditional.size());
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "3310"), claimGroup.diagnosesAdditional.get(0));
 		Assert.assertFalse(claimGroup.diagnosisFirstClaimExternal.isPresent());
+		Assert.assertEquals(LocalDate.of(2014, 9, 01), claimGroup.claimHospiceStartDate);
+				
 		Assert.assertEquals(9, claimGroup.lines.size());
 		// Verify one of the claim lines.
 		HospiceClaimLine claimLine = claimGroup.lines.get(5);
 		Assert.assertEquals(new Integer(6), claimLine.lineNumber);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.lines.get(0).paymentAmount);
 		Assert.assertEquals(new BigDecimal("5672.1"), claimGroup.lines.get(0).nonCoveredChargeAmount);
+		Assert.assertEquals("0", claimGroup.lines.get(0).hcpcsInitialModifierCode);
+		Assert.assertEquals("Q5001", claimGroup.lines.get(0).hcpcsSecondModifierCode);
 
 	}
 
@@ -700,9 +709,12 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
 		Assert.assertEquals("140", claimGroup.beneficiaryId);
+		Assert.assertEquals("ACTIVE", claimGroup.status);
+		Assert.assertEquals(claimGroup.organizationNpi.get(), claimGroup.author);
 		Assert.assertEquals("2929923122", claimGroup.claimId);
 		Assert.assertEquals(new Character('W'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("10", claimGroup.claimTypeCode);
+		Assert.assertEquals("2", claimGroup.claimServiceClassificationTypeCode);
 		Assert.assertEquals(LocalDate.of(2015, 6, 23), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2015, 6, 23), claimGroup.dateThrough);
 		Assert.assertEquals("467248", claimGroup.providerNumber);
@@ -725,6 +737,9 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new BigDecimal("2126.18"), claimGroup.lines.get(0).paymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.lines.get(0).nonCoveredChargeAmount);
 		Assert.assertEquals(new BigDecimal("2126.18"), claimGroup.lines.get(0).totalChargeAmount);
+		Assert.assertEquals("x", claimGroup.lines.get(0).hcpcs1stMdfrCode);
+		Assert.assertEquals("x", claimGroup.lines.get(0).hcpcs2ndMdfrCode);
+		
 
 	}
 
@@ -777,6 +792,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
 		Assert.assertEquals("7", claimGroup.beneficiaryId);
 		Assert.assertEquals("02199961612", claimGroup.claimId);
+		Assert.assertEquals("ACTIVE", claimGroup.status);
 		Assert.assertEquals(new Character('M'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("82", claimGroup.claimTypeCode);
 		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimGroup.dateFrom);
@@ -817,6 +833,8 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("Q0513", claimLine.hcpcsCode.get());
 		Assert.assertFalse(claimLine.hcpcsInitialModifierCode.isPresent());
 		Assert.assertFalse(claimLine.hcpcsSecondModifierCode.isPresent());
+		Assert.assertFalse(claimLine.hcpcsThirdModifierCode.isPresent());
+		Assert.assertFalse(claimLine.hcpcsFourthModifierCode.isPresent());
 		Assert.assertEquals("O1E", claimLine.betosCode.get());
 		Assert.assertEquals(new BigDecimal("25.87"), claimLine.paymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimLine.beneficiaryPaymentAmount);

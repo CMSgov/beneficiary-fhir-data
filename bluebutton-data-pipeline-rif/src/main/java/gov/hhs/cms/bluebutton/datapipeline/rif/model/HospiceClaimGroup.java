@@ -56,7 +56,7 @@ public final class HospiceClaimGroup {
 	/**
 	 * NO associated CCW row
 	 */
-	public String eobStatus;
+	public String status;
 	
 	/**
 	 * @see Column#NCH_NEAR_LINE_REC_IDENT_CD
@@ -184,7 +184,7 @@ public final class HospiceClaimGroup {
 		builder.append(", claimId=");
 		builder.append(claimId);
 		builder.append(", eobStatus=");
-		builder.append(eobStatus);
+		builder.append(status);
 		builder.append(", nearLineRecordIdCode=");
 		builder.append(nearLineRecordIdCode);
 		builder.append(", claimTypeCode=");

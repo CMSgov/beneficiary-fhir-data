@@ -1004,7 +1004,7 @@ public final class RifFilesProcessor {
 		claimGroup.beneficiaryId = firstClaimLine.get(HospiceClaimGroup.Column.BENE_ID);
 
 		//TODO: FIX IT: Need clarity to use this field. Since there is no accociation in CCW for this status field, so I hardcoded here.
-		claimGroup.eobStatus = "ACTIVE"; //
+		claimGroup.status = "ACTIVE"; //
 
 		claimGroup.claimId = firstClaimLine.get(HospiceClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -1165,7 +1165,7 @@ public final class RifFilesProcessor {
 		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(DMEClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(DMEClaimGroup.Column.BENE_ID);
 		//TODO: FIX IT: Need clarity to use this field. Since there is no accociation in CCW for this status field, so I hardcoded here.
-		claimGroup.eobStatus = "ACTIVE"; //
+		claimGroup.status = "ACTIVE"; //
 		claimGroup.claimId = firstClaimLine.get(DMEClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
 				firstClaimLine.get(DMEClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));

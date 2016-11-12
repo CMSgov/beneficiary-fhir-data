@@ -172,7 +172,7 @@ public final class DMEClaimGroup {
 	/**
 	 * NO associated CCW row
 	 */
-	public String eobStatus;
+	public String status;
 	
 	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
@@ -242,7 +242,7 @@ public final class DMEClaimGroup {
 		builder.append(", clinicalTrialNumber=");
 		builder.append(clinicalTrialNumber);
 		builder.append(", status=");
-		builder.append(eobStatus);
+		builder.append(status);
 		builder.append(", lines=");
 		builder.append(lines);
 		builder.append("]");
