@@ -857,7 +857,8 @@ public final class DMEClaimGroup {
 		RFR_PHYSN_NPI,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 8 <Optional>. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt">
 		 * CCW Data Dictionary: CCLTRNUM</a>.
 		 */
