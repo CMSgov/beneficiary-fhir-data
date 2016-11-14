@@ -45,11 +45,6 @@ public final class HHAClaimGroup {
 	 * @see Column#BENE_ID
 	 */
 	public String beneficiaryId;
-
-	/**
-	 * NO CCW Column associated
-	 */
-	public String status;
 	
 	/**
 	 * @see Column#ORG_NPI_NUM
@@ -121,11 +116,6 @@ public final class HHAClaimGroup {
 	 * @see Column#PRVDR_STATE_CD
 	 */
 	public String providerStateCode;
-
-	/**
-	 * @see NO CCW association found
-	 */
-	public String eobStatus;
 	
 	/**
 	 * @see Column#ORG_NPI_NUM
@@ -258,13 +248,13 @@ public final class HHAClaimGroup {
 		/**
 		 * @see Column#HCPCS_1ST_MDFR_CD
 		 */
-		public Optional<String> hcpcs1stMdfrCode;
+		public Optional<String> hcpcsInitialModifierCode;
 
 		
 		/**
 		 * @see Column#HCPCS_2ND_MDFR_CD
 		 */
-		public Optional<String> hcpcs2ndMdfrCode;
+		public Optional<String> hcpcsSecondModifierCode;
 
 		
 		/**
@@ -292,10 +282,10 @@ public final class HHAClaimGroup {
 			builder.append(lineNumber);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
-			builder.append(", hcpcs1stMdfrCode=");
-			builder.append(hcpcs1stMdfrCode);
-			builder.append(", hcpcs2ndMdfrCode=");
-			builder.append(hcpcs2ndMdfrCode);
+			builder.append(", hcpcsInitialModifierCode=");
+			builder.append(hcpcsInitialModifierCode);
+			builder.append(", hcpcsSecondModifierCode=");
+			builder.append(hcpcsSecondModifierCode);
 			builder.append(", paymentAmount=");
 			builder.append(paymentAmount);
 			builder.append(", totalChargeAmount=");

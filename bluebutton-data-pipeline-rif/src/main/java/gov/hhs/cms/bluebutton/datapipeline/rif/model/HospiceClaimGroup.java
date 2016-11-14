@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup.Column;
-
 /**
  * <p>
  * Models rows from {@link RifFileType#HOSPICE} RIF files. Rows in this file are
@@ -52,11 +50,6 @@ public final class HospiceClaimGroup {
 	 * @see Column#CLM_ID
 	 */
 	public String claimId;
-
-	/**
-	 * NO associated CCW row
-	 */
-	public String eobStatus;
 	
 	/**
 	 * @see Column#NCH_NEAR_LINE_REC_IDENT_CD
@@ -183,8 +176,6 @@ public final class HospiceClaimGroup {
 		builder.append(beneficiaryId);
 		builder.append(", claimId=");
 		builder.append(claimId);
-		builder.append(", eobStatus=");
-		builder.append(eobStatus);
 		builder.append(", nearLineRecordIdCode=");
 		builder.append(nearLineRecordIdCode);
 		builder.append(", claimTypeCode=");

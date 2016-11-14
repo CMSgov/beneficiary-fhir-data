@@ -633,10 +633,6 @@ public final class RifFilesProcessor {
 				InpatientClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
 
 		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
-		/*
 		 * Parse the claim lines.
 		 */
 		for (CSVRecord claimLineRecord : csvRecords) {
@@ -714,10 +710,9 @@ public final class RifFilesProcessor {
 				OutpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				OutpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
 
-		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
+		claimGroup.procedureCodes = parseIcdCodesProcedure(firstClaimLine,
+				OutpatientClaimGroup.Column.ICD_PRCDR_CD1.ordinal(),
+				OutpatientClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
 
 		claimGroup.diagnosesReasonForVisit = parseIcdCodes(firstClaimLine,
 				OutpatientClaimGroup.Column.RSN_VISIT_CD1.ordinal(),
@@ -738,6 +733,10 @@ public final class RifFilesProcessor {
 
 			claimLine.lineNumber = parseInt(claimLineRecord.get(OutpatientClaimGroup.Column.CLM_LINE_NUM));
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_CD));
+			claimLine.hcpcsInitialModifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_1ST_MDFR_CD));
+			claimLine.hcpcsSecondModifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_2ND_MDFR_CD));
 			claimLine.bloodDeductibleAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT)); 
 			claimLine.cashDeductibleAmount = parseDecimal( claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_CASH_DDCTBL_AMT));
 			claimLine.wageAdjustedCoinsuranceAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_COINSRNC_WGE_ADJSTD_C));
@@ -922,8 +921,6 @@ public final class RifFilesProcessor {
 		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(SNFClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(SNFClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(SNFClaimGroup.Column.CLM_ID);
-		//TODO: FIX IT: Need clarity to use this field. Since there is no accociation in CCW for this status field, so I hardcoded here.
-		claimGroup.status = "ACTIVE";
 		claimGroup.nearLineRecordIdCode = parseCharacter(
 				firstClaimLine.get(SNFClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
 		claimGroup.claimTypeCode = firstClaimLine.get(SNFClaimGroup.Column.NCH_CLM_TYPE_CD);
@@ -963,11 +960,8 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(SNFClaimGroup.Column.FST_DGNS_E_VRSN_CD));
 		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine, SNFClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				SNFClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
-
-		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
+		claimGroup.procedureCodes = parseIcdCodesProcedure(firstClaimLine,
+				SNFClaimGroup.Column.ICD_PRCDR_CD1.ordinal(), SNFClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
 		/*
 		 * Parse the claim lines.
 		 */
@@ -1002,10 +996,6 @@ public final class RifFilesProcessor {
 		claimGroup.version = parseInt(firstClaimLine.get(HospiceClaimGroup.Column.VERSION));
 		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(HospiceClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(HospiceClaimGroup.Column.BENE_ID);
-
-		//TODO: FIX IT: Need clarity to use this field. Since there is no accociation in CCW for this status field, so I hardcoded here.
-		claimGroup.eobStatus = "ACTIVE"; //
-
 		claimGroup.claimId = firstClaimLine.get(HospiceClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
 				firstClaimLine.get(HospiceClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
@@ -1085,8 +1075,6 @@ public final class RifFilesProcessor {
 		claimGroup.version = parseInt(firstClaimLine.get(HHAClaimGroup.Column.VERSION));
 		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(HHAClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(HHAClaimGroup.Column.BENE_ID);
-		//TODO: FIX IT: Need clarity to use this field. Since there is no accociation in CCW for this status field, so I hardcoded here.
-		claimGroup.status = "ACTIVE"; //
 		claimGroup.claimId = firstClaimLine.get(HHAClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
 				firstClaimLine.get(HHAClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
@@ -1129,9 +1117,10 @@ public final class RifFilesProcessor {
 			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
-			claimLine.hcpcs1stMdfrCode =  Optional.ofNullable(firstClaimLine.get(HHAClaimGroup.Column.HCPCS_1ST_MDFR_CD));
-			claimLine.hcpcs2ndMdfrCode =  Optional.ofNullable(firstClaimLine.get(HHAClaimGroup.Column.HCPCS_2ND_MDFR_CD));
-
+			claimLine.hcpcsInitialModifierCode = parseOptString(
+					claimLineRecord.get(HHAClaimGroup.Column.HCPCS_1ST_MDFR_CD));
+			claimLine.hcpcsSecondModifierCode = parseOptString(
+					claimLineRecord.get(HHAClaimGroup.Column.HCPCS_2ND_MDFR_CD));
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -1164,8 +1153,6 @@ public final class RifFilesProcessor {
 		claimGroup.version = parseInt(firstClaimLine.get(DMEClaimGroup.Column.VERSION));
 		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(DMEClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(DMEClaimGroup.Column.BENE_ID);
-		//TODO: FIX IT: Need clarity to use this field. Since there is no accociation in CCW for this status field, so I hardcoded here.
-		claimGroup.eobStatus = "ACTIVE"; //
 		claimGroup.claimId = firstClaimLine.get(DMEClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
 				firstClaimLine.get(DMEClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
@@ -1196,7 +1183,7 @@ public final class RifFilesProcessor {
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, DMEClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				DMEClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
 		claimGroup.referringPhysicianNpi = parseOptString(firstClaimLine.get(DMEClaimGroup.Column.RFR_PHYSN_NPI));
-		claimGroup.clinicalTrialNumber = firstClaimLine.get(DMEClaimGroup.Column.CLM_CLNCL_TRIL_NUM);
+		claimGroup.clinicalTrialNumber = parseOptString(firstClaimLine.get(DMEClaimGroup.Column.CLM_CLNCL_TRIL_NUM));
 
 		/*
 		 * Parse the claim lines.
@@ -1536,7 +1523,10 @@ public final class RifFilesProcessor {
 		for (int i = icdColumnFirst; i < icdColumnLast; i += 3) {
 			String icdCodeText = csvRecord.get(i);
 			String icdVersionText = csvRecord.get(i + 1);
-			LocalDate icdProcedureDate = LocalDate.parse(csvRecord.get(i + 2), formatter);
+			LocalDate icdProcedureDate = null;
+			if (!csvRecord.get(i + 2).isEmpty()) {
+				icdProcedureDate = LocalDate.parse(csvRecord.get(i + 2), formatter);
+			}
 			if (icdCodeText.isEmpty() && icdVersionText.isEmpty())
 				continue;
 			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty() && !icdProcedureDate.toString().isEmpty())
