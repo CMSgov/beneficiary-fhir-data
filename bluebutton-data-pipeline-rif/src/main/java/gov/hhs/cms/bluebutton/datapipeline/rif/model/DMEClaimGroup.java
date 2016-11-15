@@ -168,11 +168,6 @@ public final class DMEClaimGroup {
 	 * @see Column#CLM_CLNCL_TRIL_NUM
 	 */
 	public Optional<String> clinicalTrialNumber;
-
-	/**
-	 * NO associated CCW row
-	 */
-	public String status;
 	
 	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
@@ -241,8 +236,6 @@ public final class DMEClaimGroup {
 		builder.append(referringPhysicianNpi);
 		builder.append(", clinicalTrialNumber=");
 		builder.append(clinicalTrialNumber);
-		builder.append(", status=");
-		builder.append(status);
 		builder.append(", lines=");
 		builder.append(lines);
 		builder.append("]");
