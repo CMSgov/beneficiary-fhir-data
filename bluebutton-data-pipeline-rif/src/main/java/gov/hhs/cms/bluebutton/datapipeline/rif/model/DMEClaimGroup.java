@@ -168,6 +168,11 @@ public final class DMEClaimGroup {
 	 * @see Column#CLM_CLNCL_TRIL_NUM
 	 */
 	public Optional<String> clinicalTrialNumber;
+
+	/**
+	 * NO associated CCW row
+	 */
+	public String status;
 	
 	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
@@ -236,6 +241,8 @@ public final class DMEClaimGroup {
 		builder.append(referringPhysicianNpi);
 		builder.append(", clinicalTrialNumber=");
 		builder.append(clinicalTrialNumber);
+		builder.append(", status=");
+		builder.append(status);
 		builder.append(", lines=");
 		builder.append(lines);
 		builder.append("]");
@@ -306,6 +313,16 @@ public final class DMEClaimGroup {
 		 * @see Column#HCPCS_2ND_MDFR_CD
 		 */
 		public Optional<String> hcpcsSecondModifierCode;
+
+		/**
+		 * @see Column#HCPCS_3RD_MDFR_CD
+		 */
+		public Optional<String> hcpcsThirdModifierCode;
+
+		/**
+		 * @see Column#HCPCS_4TH_MDFR_CD
+		 */
+		public Optional<String> hcpcsFourthModifierCode;
 		
 		/**
 		 * @see Column#BETOS_CD
@@ -399,16 +416,6 @@ public final class DMEClaimGroup {
 		public String providerStateCode;
 
 		/**
-		 * @see Column#HCPCS_3RD_MDFR_CD
-		 */
-		public Optional<String> hcpcsThirdModifierCode;
-
-		/**
-		 * @see Column#HCPCS_4TH_MDFR_CD
-		 */
-		public Optional<String> hcpcsFourthModifierCode;
-
-		/**
 		 * @see Column#DMERC_LINE_MTUS_CNT
 		 */
 		public BigDecimal mtusCount;
@@ -453,6 +460,10 @@ public final class DMEClaimGroup {
 			builder.append(hcpcsInitialModifierCode);
 			builder.append(", hcpcsSecondModifierCode=");
 			builder.append(hcpcsSecondModifierCode);
+			builder.append(", hcpcsThirdModifierCode=");
+			builder.append(hcpcsThirdModifierCode);
+			builder.append(", hcpcsFourthModifierCode=");
+			builder.append(hcpcsFourthModifierCode);
 			builder.append(", betosCode=");
 			builder.append(betosCode);
 			builder.append(", paymentAmount=");
@@ -489,10 +500,6 @@ public final class DMEClaimGroup {
 			builder.append(providerNPI);
 			builder.append(", providerStateCode=");
 			builder.append(providerStateCode);
-			builder.append(", hcpcsThirdModifierCode=");
-			builder.append(hcpcsThirdModifierCode);
-			builder.append(", hcpcsFourthModifierCode=");
-			builder.append(hcpcsFourthModifierCode);
 			builder.append(", mtusCount=");
 			builder.append(mtusCount);
 			builder.append(", mtusCode=");
@@ -857,8 +864,7 @@ public final class DMEClaimGroup {
 		RFR_PHYSN_NPI,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 8 <code>Optional</code>. See
-		 * <a href=
+		 * Type: <code>CHAR</code>, max chars: 8. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt">
 		 * CCW Data Dictionary: CCLTRNUM</a>.
 		 */
@@ -1184,3 +1190,4 @@ public final class DMEClaimGroup {
 			System.out.print("|" + col);
 	}
 }
+

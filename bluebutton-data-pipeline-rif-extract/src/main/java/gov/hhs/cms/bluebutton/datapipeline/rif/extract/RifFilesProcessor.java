@@ -1,3 +1,4 @@
+
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.IOException;

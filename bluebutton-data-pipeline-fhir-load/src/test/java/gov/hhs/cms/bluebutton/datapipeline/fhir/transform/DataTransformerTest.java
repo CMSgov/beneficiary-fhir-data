@@ -25,6 +25,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationOrder;
@@ -1206,13 +1207,9 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 		
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
-		// FIXME This test is not working
-		/*
-		 * assertDateEquals(record.claimHospiceStartDate,
-		 * (eob.getExtensionsByUrl(DataTransformer.CLAIM_HOSPICE_START_DATE).get
-		 * (0).getValue()).getExtensionFirstRep().getValue().castToDateTime(eob)
-		 * );
-		 */
+		
+		assertDateEquals(record.claimHospiceStartDate,
+				((DateTimeType)(eob.getExtensionsByUrl(DataTransformer.CLAIM_HOSPICE_START_DATE)).get(0).getValue())); 
 				
 		Assert.assertEquals(record.attendingPhysicianNpi.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
