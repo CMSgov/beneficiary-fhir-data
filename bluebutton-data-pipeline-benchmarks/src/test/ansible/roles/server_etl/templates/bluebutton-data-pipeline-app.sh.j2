@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export S3_BUCKET_NAME='bb-benchmark-{{ iteration_index }}'
+export S3_BUCKET_NAME='gov.hhs.cms.bluebutton.datapipeline.benchmark.iteration{{ iteration_index }}'
 export FHIR_SERVER_URL='https://{{ hostvars['fhir']['ansible_host'] }}:{{ fhir_port }}/baseDstu3'
 export KEY_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-keystore.jks'
 export KEY_STORE_PASSWORD='changeit'

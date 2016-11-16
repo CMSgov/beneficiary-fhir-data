@@ -23,7 +23,7 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
-- name: Copy Artifacts
+- name: Copy Key Store and Trust Store
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -33,7 +33,19 @@
   with_items:
     - { src: "../../../target/benchmark-iterations/{{ iteration_index }}/client-etl-keystore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
     - { src: "../../../target/benchmark-iterations/{{ iteration_index }}/client-etl-truststore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
-    - { src: '../../../target/pipeline-app/', dest: '/usr/local/bluebutton-data-pipeline-app' }
+  become: true
+
+- name: Copy Pipeline Application
+  s3:
+    mode: get
+    bucket: "{{ s3_benchmark_resources_bucket }}"
+    object: "{{ item }}"
+    dest: "/usr/local/bluebutton-data-pipeline-app/{{ item }}"
+  with_items:
+    - bluebutton-data-pipeline-app-capsule-fat.x
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+    AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
   become: true
 
 - file:

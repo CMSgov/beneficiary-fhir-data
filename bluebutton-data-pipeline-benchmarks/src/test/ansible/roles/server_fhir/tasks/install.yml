@@ -37,14 +37,18 @@
   become: true
 
 - name: Copy Artifacts
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    owner: bb-fhir
-    group: bb-fhir
-    mode: u=rw,g=r,o=r
+  s3:
+    mode: get
+    bucket: "{{ s3_benchmark_resources_bucket }}"
+    object: "{{ item }}"
+    dest: "/usr/local/bluebutton-server-app/{{ item }}"
   with_items:
-    - { src: '../../../target/bluebutton-server/', dest: "/usr/local/bluebutton-server-app" }
+    - bluebutton-server-app.war
+    - wildfly-dist-8.1.0.Final.tar.gz
+    - bluebutton-server-app-server-config-healthapt.sh
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+    AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
   become: true
 
 - name: Extract Wildfly

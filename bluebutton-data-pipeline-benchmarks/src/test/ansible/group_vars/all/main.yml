@@ -29,6 +29,9 @@ postgres_master_password: "notsecureatall"
 # The port that the FHIR server will run on.
 fhir_port: 8443
 
+# The name of the S3 bucket that the benchmark resources can be found in.
+s3_benchmark_resources_bucket: gov.hhs.cms.bluebutton.datapipeline.benchmark.resources
+
 # When `true`, Ansible will configure the FHIR server to run such that Java
 # flame graphs can be collected. This will incur a performance penalty of 1%-
 # 3%, and so should be left disabled unless specifically needed.
