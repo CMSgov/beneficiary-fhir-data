@@ -27,6 +27,8 @@ import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DetailComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
@@ -961,6 +963,20 @@ public final class DataTransformer {
 				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
+		String CODING_BENEFIT_BALANCE_URL = "http://build.fhir.org/explanationofbenefit-definitions.html#ExplanationOfBenefit.benefitBalance.category";
+		String CODING_CLAIM_PASS_THRU_PER_DIEM_AMT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/per_diem.txt";
+		BenefitBalanceComponent bbc = new BenefitBalanceComponent(new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+		String benefitNamePerDiem = "PER_DIEM";
+		String benefitDescPerDiem = "Claim Pass Thru Per Diem Amt";
+		bbc.setName(benefitNamePerDiem);
+		bbc.setDescription(benefitDescPerDiem);
+		
+		BenefitComponent bc = new BenefitComponent(new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+		bc.setBenefit(new Coding().setSystem(CODING_CLAIM_PASS_THRU_PER_DIEM_AMT).setCode(claimGroup.passThruPerDiemAmount.toString()));
+		bbc.getFinancial().add(bc);
+		
+		eob.getBenefitBalance().add(bbc);
+		
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
