@@ -1,18 +1,6 @@
-bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-1.tar.bz2 filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-a.tar.bz2 filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-b.tar.bz2 filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-sampledata/src/main/resources/pharmacy-names.csv filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-sampledata/src/main/resources/prescriber-names.csv filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-c.tar.bz2 filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-desynpuf/src/main/resources/de-synpuf/sample-test-d.tar.bz2 filter=lfs diff=lfs merge=lfs -text
-bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 filter=lfs diff=lfs merge=lfs -text
-
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
 
 # Apache Commons CSV always uses CRLF for CSV files.
 dev/benchmark-data.csv -text
-
-# RIF files come in as CRLF, so we'll keep them that way.
-bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-*.txt -text
 
