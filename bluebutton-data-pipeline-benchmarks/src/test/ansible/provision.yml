@@ -49,7 +49,8 @@
         zone: "{{ zone }}"
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
         db_engine: postgres
-        size: 500
+        size: 1000
+        iops: 10000
         backup_retention: 0
         instance_type: "{{ rds_instance_type }}"
         publicly_accessible: false
