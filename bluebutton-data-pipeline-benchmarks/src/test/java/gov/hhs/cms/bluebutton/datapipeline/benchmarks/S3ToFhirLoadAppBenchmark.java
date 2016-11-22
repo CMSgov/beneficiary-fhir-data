@@ -234,7 +234,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			Object[] recordFields = new String[] {
 					String.format("%s:%s", this.getClass().getSimpleName(), sampleData.name()), gitBranchName,
 					gitCommitSha, projectVersion,
-					"AWS: DB=db.m4.10xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=35",
+					"AWS: DB=db.m4.10xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=70",
 					DateTimeFormatter.ISO_INSTANT.format(startInstant), "" + benchmarkResult.getIterationIndex(),
 					"" + benchmarkResult.getDataSetProcessingTime().toMillis(), "" + recordCount, "" + beneficiaryCount,
 					testCaseExecutionData };
