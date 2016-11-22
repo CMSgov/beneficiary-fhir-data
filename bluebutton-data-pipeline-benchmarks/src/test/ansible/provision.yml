@@ -46,6 +46,7 @@
       rds:
         command: create
         region: "{{ region }}"
+        zone: "{{ zone }}"
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
         db_engine: postgres
         size: 500
@@ -87,6 +88,7 @@
         instance_type: "{{ ec2_instance_type_fhir }}"
         image: "{{ ami_id }}"
         region: "{{ region }}"
+        zone: "{{ zone }}"
         wait: true
         exact_count: 1
         count_tag:
@@ -115,6 +117,7 @@
         instance_type: "{{ ec2_instance_type_etl }}"
         image: "{{ ami_id }}"
         region: "{{ region }}"
+        zone: "{{ zone }}"
         # FIXME: Disabled, because I don't have permissions for it.
         #instance_profile_name: 'BlueButtonBenchmarkRunner'
         wait: true

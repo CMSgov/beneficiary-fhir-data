@@ -4,6 +4,7 @@
 #
 
 region: us-east-1
+zone: us-east-1a
 
 # The EC2/RDS instance types to use for each system.
 ec2_instance_type_fhir: "c4.8xlarge"
