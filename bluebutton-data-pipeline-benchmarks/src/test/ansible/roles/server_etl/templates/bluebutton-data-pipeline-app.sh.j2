@@ -1,10 +1,10 @@
 #!/bin/bash
 
-export S3_BUCKET_NAME='bb-benchmark-{{ iteration_index }}'
+export S3_BUCKET_NAME='gov.hhs.cms.bluebutton.datapipeline.benchmark.iteration{{ iteration_index }}'
 export FHIR_SERVER_URL='https://{{ hostvars['fhir']['ansible_host'] }}:{{ fhir_port }}/baseDstu3'
-export KEY_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-{{ iteration_index }}-keystore.jks'
+export KEY_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-keystore.jks'
 export KEY_STORE_PASSWORD='changeit'
-export TRUST_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-{{ iteration_index }}-truststore.jks'
+export TRUST_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-truststore.jks'
 export TRUST_STORE_PASSWORD='changeit'
 
 {# The 'env' lookup plugin retries values from the management machine. #}
@@ -15,4 +15,5 @@ export AWS_SECRET_ACCESS_KEY='{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}'
 {% endif %}
 
 "/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.x" \
-	&> "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
+	-Xmx40g \
+	&> "/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log"

@@ -73,7 +73,7 @@ public final class FhirLoader {
 	 * moved into {@link LoadAppOptions} and made configurable.
 	 * </p>
 	 */
-	public static final int PARALLELISM = Math.max(1, (Runtime.getRuntime().availableProcessors() - 1));
+	public static final int PARALLELISM = Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
 	/**
 	 * The maximum number of FHIR transactions that will be collected before
@@ -83,7 +83,7 @@ public final class FhirLoader {
 	 * would effectively make processing serial, and anything less than
 	 * {@link #PARALLELISM} would act as an unintended floor on concurrency.)
 	 */
-	private static final int WINDOW_SIZE = 1000;
+	private static final int WINDOW_SIZE = 10000;
 
 	private final MetricRegistry metrics;
 	private final IGenericClient client;
@@ -168,6 +168,7 @@ public final class FhirLoader {
 		IGenericClient client = createFhirClient(options);
 		this.client = client;
 		this.loadExecutorService = Executors.newFixedThreadPool(PARALLELISM);
+		LOGGER.info("Configured to load in windows of '{}', with '{}' threads.", WINDOW_SIZE, PARALLELISM);
 	}
 
 	/**

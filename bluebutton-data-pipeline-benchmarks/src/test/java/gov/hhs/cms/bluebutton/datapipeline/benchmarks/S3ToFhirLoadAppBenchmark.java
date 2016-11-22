@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -41,6 +42,10 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
@@ -104,18 +109,46 @@ public final class S3ToFhirLoadAppBenchmark {
 	private static final int MAX_ACTIVE_ENVIRONMENTS = 10;
 
 	/**
+	 * The name of the S3 {@link Bucket} to store the original copy of the RIF
+	 * data set to benchmark the processing of in.
+	 */
+	private static final String BUCKET_DATA_SET_MASTER = "gov.hhs.cms.bluebutton.datapipeline.benchmark.dataset";
+
+	/**
 	 * Benchmarks against {@link StaticRifResourceGroup#SAMPLE_B}.
 	 * 
 	 * @throws IOException
 	 *             (shouldn't happen)
-	 * @throws InterruptedException
+	 */
+	@Test
+	public void sampleB() throws IOException {
+		runBenchmark(StaticRifResourceGroup.SAMPLE_B);
+	}
+
+	/**
+	 * Benchmarks against {@link StaticRifResourceGroup#SAMPLE_C}.
+	 * 
+	 * @throws IOException
 	 *             (shouldn't happen)
 	 */
 	@Test
-	public void sampleB() throws IOException, InterruptedException {
+	public void sampleC() throws IOException {
+		runBenchmark(StaticRifResourceGroup.SAMPLE_C);
+	}
+
+	/**
+	 * Runs the ETL benchmark against the specified
+	 * {@link StaticRifResourceGroup} set of of sample data.
+	 * 
+	 * @param sampleData
+	 *            the {@link StaticRifResourceGroup} with the sample data to run
+	 *            against
+	 * @throws IOException
+	 *             (shouldn't happen)
+	 */
+	private void runBenchmark(StaticRifResourceGroup sampleData) throws IOException {
 		skipOnUnsupportedOs();
 		Instant startInstant = Instant.now();
-		StaticRifResourceGroup sampleData = StaticRifResourceGroup.SAMPLE_B;
 
 		String ec2KeyName = System.getProperty(SYS_PROP_EC2_KEY_NAME, null);
 		if (ec2KeyName == null)
@@ -130,65 +163,40 @@ public final class S3ToFhirLoadAppBenchmark {
 			throw new IllegalArgumentException(String
 					.format("The '%s' Java system property must specify a valid key file.", SYS_PROP_EC2_KEY_FILE));
 
+		Path benchmarksDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations");
+		Files.createDirectories(benchmarksDir);
+
 		// Prepare the Python/Ansible virtualenv needed for the iterations.
-		Process ansibleInitProcess = null;
+		Path ansibleInitLog = benchmarksDir.resolve("ansible_init.log");
+		Path ansibleInitScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src").resolve("test")
+				.resolve("ansible").resolve("ansible_init.sh");
+		ProcessBuilder ansibleProcessBuilder = new ProcessBuilder(ansibleInitScript.toString());
+		int ansibleInitExitCode = runProcessAndLogOutput(ansibleProcessBuilder, ansibleInitLog);
+		if (ansibleInitExitCode != 0)
+			throw new BenchmarkError(
+					String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
+
+		// Upload the benchmark file resources to S3.
+		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		Bucket resourcesBucket = null;
+		Bucket dataSetBucket = null;
+		List<BenchmarkResult> benchmarkResults;
 		try {
-			Path ansibleInitLog = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations")
-					.resolve("ansible_init.log");
-			Files.createDirectories(ansibleInitLog.getParent());
-			Path ansibleInitScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
-					.resolve("test").resolve("ansible").resolve("ansible_init.sh");
-			ProcessBuilder ansibleProcessBuilder = new ProcessBuilder(ansibleInitScript.toString());
-			ansibleProcessBuilder.redirectErrorStream(true);
-			ansibleProcessBuilder.redirectOutput(ansibleInitLog.toFile());
+			resourcesBucket = s3Client.createBucket("gov.hhs.cms.bluebutton.datapipeline.benchmark.resources");
+			pushResourcesToS3(s3Client, resourcesBucket);
+			dataSetBucket = s3Client.createBucket(BUCKET_DATA_SET_MASTER);
+			pushDataSetToS3(s3Client, dataSetBucket, sampleData);
 
-			ansibleInitProcess = ansibleProcessBuilder.start();
-			int ansibleInitExitCode = ansibleInitProcess.waitFor();
-			if (ansibleInitExitCode != 0)
-				throw new BenchmarkError(
-						String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
+			benchmarkResults = runBenchmarkIterations(ec2KeyName, ec2KeyFilePath);
 		} finally {
-			if (ansibleInitProcess != null)
-				ansibleInitProcess.destroyForcibly();
+			// Clean up the benchmark resources from S3.
+			if (resourcesBucket != null)
+				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, resourcesBucket);
+			if (dataSetBucket != null)
+				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, dataSetBucket);
 		}
 
-		// Submit all of the iterations for execution.
-		ExecutorService benchmarkExecutorService = Executors.newFixedThreadPool(MAX_ACTIVE_ENVIRONMENTS);
-		Map<BenchmarkTask, Future<BenchmarkResult>> benchmarkTasks = new HashMap<>();
-		for (int i = 0; i < NUMBER_OF_ITERATIONS; i++) {
-			BenchmarkTask benchmarkTask = new BenchmarkTask(i + 1, sampleData, ec2KeyName, ec2KeyFilePath);
-			Future<BenchmarkResult> benchmarkResultFuture = benchmarkExecutorService.submit(benchmarkTask);
-			benchmarkTasks.put(benchmarkTask, benchmarkResultFuture);
-		}
-		LOGGER.info("Initialized benchmarks: '{}' iterations, across '{}' threads.", NUMBER_OF_ITERATIONS,
-				MAX_ACTIVE_ENVIRONMENTS);
-
-		// Wait for all iterations to finish, collecting results.
-		int numberOfFailedIterations = 0;
-		List<BenchmarkResult> benchmarkResults = new ArrayList<>(NUMBER_OF_ITERATIONS);
-		for (BenchmarkTask benchmarkTask : benchmarkTasks.keySet()) {
-			BenchmarkResult benchmarkResult;
-			try {
-				benchmarkResult = benchmarkTasks.get(benchmarkTask).get();
-				benchmarkResults.add(benchmarkResult);
-			} catch (InterruptedException e) {
-				/*
-				 * Shouldn't happen, as we're not using interrupts at this
-				 * level.
-				 */
-				throw new BadCodeMonkeyException(e);
-			} catch (ExecutionException e) {
-				/*
-				 * Given the large number of iterations we'd like to run here,
-				 * it's become clear that we're going to be playing whack-a-mole
-				 * with intermittent problems for a while. Accordingly, we'll
-				 * allow some failures.
-				 */
-				LOGGER.warn("Benchmark iteration failed due to exception.", e);
-				numberOfFailedIterations++;
-			}
-		}
-		benchmarkExecutorService.shutdown();
+		int numberOfFailedIterations = NUMBER_OF_ITERATIONS - benchmarkResults.size();
 		int failedIterationsPercentage = 100 * numberOfFailedIterations / NUMBER_OF_ITERATIONS;
 		if (failedIterationsPercentage >= 100)
 			throw new BenchmarkError("Too many failed benchmark iterations: " + numberOfFailedIterations);
@@ -215,8 +223,8 @@ public final class S3ToFhirLoadAppBenchmark {
 		CSVPrinter dataPrinter = CSVFormat.RFC4180.print(dataWriter);
 		String projectVersion = new BufferedReader(new InputStreamReader(
 				Thread.currentThread().getContextClassLoader().getResourceAsStream("project.properties"))).readLine();
-		String gitBranchName = runCommandAndGetOutput("git symbolic-ref --short HEAD");
-		String gitCommitSha = runCommandAndGetOutput("git rev-parse HEAD");
+		String gitBranchName = runProcessAndGetOutput("git symbolic-ref --short HEAD");
+		String gitCommitSha = runProcessAndGetOutput("git rev-parse HEAD");
 		int recordCount = Arrays.stream(sampleData.getResources()).mapToInt(r -> r.getRecordCount()).sum();
 		int beneficiaryCount = Arrays.stream(sampleData.getResources())
 				.filter(r -> r.getRifFileType() == RifFileType.BENEFICIARY).mapToInt(r -> r.getRecordCount()).sum();
@@ -226,7 +234,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			Object[] recordFields = new String[] {
 					String.format("%s:%s", this.getClass().getSimpleName(), sampleData.name()), gitBranchName,
 					gitCommitSha, projectVersion,
-					"AWS: DB=db.m4.2xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=35",
+					"AWS: DB=db.m4.10xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=70",
 					DateTimeFormatter.ISO_INSTANT.format(startInstant), "" + benchmarkResult.getIterationIndex(),
 					"" + benchmarkResult.getDataSetProcessingTime().toMillis(), "" + recordCount, "" + beneficiaryCount,
 					testCaseExecutionData };
@@ -277,11 +285,115 @@ public final class S3ToFhirLoadAppBenchmark {
 	}
 
 	/**
+	 * @param ec2KeyName
+	 *            the name of the AWS EC2 key that the benchmark systems should
+	 *            use
+	 * @param ec2KeyFile
+	 *            the {@link Path} to the AWS EC2 key PEM file that the
+	 *            benchmark systems should use
+	 * @return the {@link BenchmarkResult}s from the benchmark iterations that
+	 *         completed successfully (failed iterations will be logged)
+	 */
+	private static List<BenchmarkResult> runBenchmarkIterations(String ec2KeyName, Path ec2KeyFilePath) {
+		// Submit all of the iterations for execution.
+		ExecutorService benchmarkExecutorService = Executors.newFixedThreadPool(MAX_ACTIVE_ENVIRONMENTS);
+		Map<BenchmarkTask, Future<BenchmarkResult>> benchmarkTasks = new HashMap<>();
+		for (int i = 1; i <= NUMBER_OF_ITERATIONS; i++) {
+			BenchmarkTask benchmarkTask = new BenchmarkTask(i, ec2KeyName, ec2KeyFilePath);
+			Future<BenchmarkResult> benchmarkResultFuture = benchmarkExecutorService.submit(benchmarkTask);
+			benchmarkTasks.put(benchmarkTask, benchmarkResultFuture);
+		}
+		LOGGER.info("Initialized benchmarks: '{}' iterations, across '{}' threads.", NUMBER_OF_ITERATIONS,
+				MAX_ACTIVE_ENVIRONMENTS);
+
+		// Wait for all iterations to finish, collecting results.
+		List<BenchmarkResult> benchmarkResults = new ArrayList<>(NUMBER_OF_ITERATIONS);
+		for (BenchmarkTask benchmarkTask : benchmarkTasks.keySet()) {
+			BenchmarkResult benchmarkResult;
+			try {
+				benchmarkResult = benchmarkTasks.get(benchmarkTask).get();
+				benchmarkResults.add(benchmarkResult);
+			} catch (InterruptedException e) {
+				/*
+				 * Shouldn't happen, as we're not using interrupts at this
+				 * level.
+				 */
+				throw new BadCodeMonkeyException(e);
+			} catch (ExecutionException e) {
+				/*
+				 * Given the large number of iterations we'd like to run here,
+				 * it's become clear that we're going to be playing whack-a-mole
+				 * with intermittent problems for a while. Accordingly, we'll
+				 * allow some failures.
+				 */
+				LOGGER.warn("Benchmark iteration failed due to exception.", e);
+			}
+		}
+		benchmarkExecutorService.shutdown();
+		return benchmarkResults;
+	}
+
+	/**
+	 * Uploads the resources that will be used by the benchmark iterations to
+	 * S3. We do this here, once for all iterations, to cut down on the transfer
+	 * times (and costs).
+	 * 
+	 * @param s3Client
+	 *            the {@link AmazonS3} client to use
+	 * @param bucket
+	 *            the S3 {@link Bucket} to store the resources in
+	 * @throws IOException
+	 *             Any {@link IOException}s encountered will be bubbled up.
+	 */
+	private static void pushResourcesToS3(AmazonS3 s3Client, Bucket bucket) throws IOException {
+		/*
+		 * Upload all of the files in `target/bluebutton-server/` and
+		 * `target/pipeline-app/`.
+		 */
+		Path targetDir = BenchmarkUtilities.findProjectTargetDir();
+		Path[] directories = new Path[] { targetDir.resolve("bluebutton-server"), targetDir.resolve("pipeline-app") };
+		for (Path directory : directories) {
+			try (Stream<Path> files = Files.find(directory, 1, (f, a) -> Files.isRegularFile(f));) {
+				files.forEach(f -> s3Client
+						.putObject(new PutObjectRequest(bucket.getName(), f.getFileName().toString(), f.toFile())));
+			}
+		}
+
+		LOGGER.info("Resources uploaded to S3.");
+	}
+
+	/**
+	 * Pushes a {@link DataSetManifest} and data objects to S3 for the specified
+	 * data set.
+	 * 
+	 * @param s3Client
+	 *            the {@link AmazonS3} client to use
+	 * @param bucket
+	 *            the S3 {@link Bucket} to push the data to
+	 * @param dataResources
+	 *            the {@link StaticRifResourceGroup} with the data files to push
+	 *            to S3
+	 */
+	private static void pushDataSetToS3(AmazonS3 s3Client, Bucket bucket, StaticRifResourceGroup dataResources) {
+		List<DataSetManifestEntry> manifestEntries = Arrays.stream(dataResources.getResources())
+				.map(r -> new DataSetManifestEntry(r.name(), r.getRifFileType())).collect(Collectors.toList());
+		DataSetManifest manifest = new DataSetManifest(Instant.now(), manifestEntries);
+		s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
+		for (int i = 0; i < dataResources.getResources().length; i++) {
+			StaticRifResource dataResource = dataResources.getResources()[i];
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(i),
+					dataResource.getResourceUrl()));
+		}
+
+		LOGGER.info("Data set uploaded to S3.");
+	}
+
+	/**
 	 * @param command
 	 *            the command to run
 	 * @return the output of running the specified command as a separate process
 	 */
-	private static String runCommandAndGetOutput(String command) {
+	private static String runProcessAndGetOutput(String command) {
 		/*
 		 * This doesn't support quoted args in the command, but we don't
 		 * currently need to.
@@ -320,6 +432,32 @@ public final class S3ToFhirLoadAppBenchmark {
 	}
 
 	/**
+	 * @param processBuilder
+	 *            the process to run
+	 * @param logFile
+	 *            the {@link Path} to write the process' output to
+	 * @return the process' exit code
+	 */
+	private static int runProcessAndLogOutput(ProcessBuilder processBuilder, Path logFile) {
+		Process process = null;
+		try {
+			processBuilder.redirectErrorStream(true);
+			processBuilder.redirectOutput(logFile.toFile());
+
+			process = processBuilder.start();
+			int exitCode = process.waitFor();
+			return exitCode;
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} catch (InterruptedException e) {
+			throw new BadCodeMonkeyException(e);
+		} finally {
+			if (process != null)
+				process.destroyForcibly();
+		}
+	}
+
+	/**
 	 * Throws an {@link AssumptionViolatedException} if the OS doesn't support
 	 * <strong>graceful</strong> shutdowns via {@link Process#destroy()}.
 	 */
@@ -352,9 +490,9 @@ public final class S3ToFhirLoadAppBenchmark {
 				.ofPattern("yyyy-MM-dd HH:mm:ss,SSS");
 
 		private final int iterationIndex;
-		private final StaticRifResourceGroup sampleData;
 		private final String ec2KeyName;
 		private final Path ec2KeyFile;
+		private final Path benchmarkIterationDir;
 
 		/**
 		 * Constructs a new {@link BenchmarkTask} instance.
@@ -362,9 +500,6 @@ public final class S3ToFhirLoadAppBenchmark {
 		 * @param iterationIndex
 		 *            the index that distinguishes this {@link BenchmarkTask}
 		 *            iteration from its peers
-		 * @param sampleData
-		 *            the {@link StaticRifResourceGroup} to push to S3 as a
-		 *            single data set and then benchmark the processing of
 		 * @param ec2KeyName
 		 *            the name of the AWS EC2 key that the benchmark systems
 		 *            should use
@@ -372,12 +507,18 @@ public final class S3ToFhirLoadAppBenchmark {
 		 *            the {@link Path} to the AWS EC2 key PEM file that the
 		 *            benchmark systems should use
 		 */
-		public BenchmarkTask(int iterationIndex, StaticRifResourceGroup sampleData, String ec2KeyName,
-				Path ec2KeyFile) {
+		public BenchmarkTask(int iterationIndex, String ec2KeyName, Path ec2KeyFile) {
 			this.iterationIndex = iterationIndex;
-			this.sampleData = sampleData;
 			this.ec2KeyName = ec2KeyName;
 			this.ec2KeyFile = ec2KeyFile;
+
+			this.benchmarkIterationDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations")
+					.resolve("" + iterationIndex);
+			try {
+				Files.createDirectories(benchmarkIterationDir);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
 		}
 
 		/**
@@ -388,85 +529,62 @@ public final class S3ToFhirLoadAppBenchmark {
 			Instant startInstant = Instant.now();
 			LOGGER.debug("Iteration '{}' started.", iterationIndex);
 
-			AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
-			Path benchmarksDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations");
+			Duration dataSetProcessingTime = provisionAndRunBenchmark();
 
-			/*
-			 * Run Ansible to: 1) create the benchmark systems in AWS, and 2)
-			 * configure the systems, starting the FHIR server and ETL service.
-			 */
-			Bucket bucket = null;
-			Path benchmarkLog = benchmarksDir.resolve(String.format("ansible_benchmark_etl-%d.log", iterationIndex));
-			Files.createDirectories(benchmarkLog.getParent());
-			Process benchmarkProcess = null;
-			int benchmarkExitCode = -1;
+			BenchmarkResult benchmarkResult = new BenchmarkResult(iterationIndex, dataSetProcessingTime,
+					Duration.between(startInstant, Instant.now()));
+			LOGGER.info("Iteration completed: {}.", benchmarkResult);
+			return benchmarkResult;
+		}
+
+		/**
+		 * Runs the whole benchmark (mostly by using various Ansible playbooks).
+		 * Will throw a {@link BenchmarkError} if the benchmark fails.
+		 * 
+		 * @return the data set processing time {@link Duration}
+		 * @throws IOException
+		 *             Any {@link IOException}s that occur will be bubbled up
+		 */
+		private Duration provisionAndRunBenchmark() throws IOException {
+			Path provisionLog = benchmarkIterationDir.resolve(String.format("ansible_provision.log", iterationIndex));
+			Path provisionScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
+					.resolve("test").resolve("ansible").resolve("provision.sh");
+			ProcessBuilder provisionProcessBuilder = new ProcessBuilder(provisionScript.toString(), "--iteration",
+					("" + iterationIndex), "--ec2keyname", ec2KeyName);
+
 			try {
-				bucket = s3Client.createBucket(String.format("bb-benchmark-%d", iterationIndex));
-				pushDataSetToS3(s3Client, bucket, sampleData);
+				// Run Ansible to create the benchmark systems in AWS.
+				int provisionExitCode = runProcessAndLogOutput(provisionProcessBuilder, provisionLog);
+				if (provisionExitCode != 0)
+					throw new BenchmarkError(String.format(
+							"Ansible provisioning failed with exit code '%d' for benchmark iteration '%d'.",
+							provisionExitCode, iterationIndex));
 
-				Path benchmarkScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
-						.resolve("test").resolve("ansible").resolve("benchmark_etl.sh");
-				ProcessBuilder benchmarkProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
-						("" + iterationIndex), "--ec2keyname", ec2KeyName, "--ec2keyfile", ec2KeyFile.toString());
-				benchmarkProcessBuilder.redirectErrorStream(true);
-				benchmarkProcessBuilder.redirectOutput(benchmarkLog.toFile());
-
-				benchmarkProcess = benchmarkProcessBuilder.start();
-				benchmarkExitCode = benchmarkProcess.waitFor();
-
-				/*
-				 * We don't want to check the value of the Ansible exit code yet
-				 * (and blow up if it != 0), because that would not give the
-				 * teardown a chance to run, which could leave things running in
-				 * AWS, wasting money. We'll do that after the teardown.
-				 */
+				runBenchmark();
 			} finally {
-				if (benchmarkProcess != null)
-					benchmarkProcess.destroyForcibly();
-				if (bucket != null)
-					DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
-			}
-
-			/*
-			 * Run Ansible again to: 1) Collect the ETL and FHIR logs, and 2)
-			 * destroy the benchmark systems in AWS.
-			 */
-			Path teardownLog = benchmarksDir
-					.resolve(String.format("ansible_benchmark_etl_teardown-%d.log", iterationIndex));
-			Process teardownProcess = null;
-			try {
+				/*
+				 * Always ensure that the Ansible `teardown.yml` playbook is run
+				 * to: 1) Collect the ETL and FHIR logs, and 2) destroy the
+				 * benchmark systems in AWS.
+				 */
+				Path teardownLog = benchmarkIterationDir.resolve(String.format("ansible_teardown.log", iterationIndex));
 				Path teardownScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
-						.resolve("test").resolve("ansible").resolve("benchmark_etl_teardown.sh");
+						.resolve("test").resolve("ansible").resolve("teardown.sh");
 				ProcessBuilder teardownProcessBuilder = new ProcessBuilder(teardownScript.toString(), "--iteration",
 						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
-				teardownProcessBuilder.redirectErrorStream(true);
-				teardownProcessBuilder.redirectOutput(teardownLog.toFile());
-
-				teardownProcess = teardownProcessBuilder.start();
-				int teardownExitCode = teardownProcess.waitFor();
+				int teardownExitCode = runProcessAndLogOutput(teardownProcessBuilder, teardownLog);
 				if (teardownExitCode != 0)
 					throw new BenchmarkError(
 							String.format("Ansible failed with exit code '%d' for benchmark teardown iteration '%d'.",
 									teardownExitCode, iterationIndex));
-			} finally {
-				if (teardownProcess != null)
-					teardownProcess.destroyForcibly();
 			}
 
 			/*
-			 * Now that we've given the teardown a chance to run, blow up if the
-			 * initial Ansible run failed.
+			 * Parse the ETL log that the Ansible `teardown.yml` playbook pulled
+			 * to find out how long things took.
 			 */
-			if (benchmarkExitCode != 0)
-				throw new BenchmarkError(
-						String.format("Ansible failed with exit code '%d' for benchmark iteration '%d'.",
-								benchmarkExitCode, iterationIndex));
-
-			/*
-			 * Parse the ETL log that Ansible pulled to find out how long things
-			 * took.
-			 */
-			Path etlLogPath = benchmarksDir.resolve(String.format("etl-%d.log", iterationIndex));
+			Path etlLogPath = benchmarkIterationDir
+					.resolve(String.format("bluebutton-data-pipeline-app.log", iterationIndex));
 			if (!Files.isReadable(etlLogPath))
 				throw new BenchmarkError(
 						String.format("Failed to collect ETL log for benchmark iteration '%d'.", iterationIndex));
@@ -478,34 +596,64 @@ public final class S3ToFhirLoadAppBenchmark {
 			LocalDateTime dataSetComplete = LocalDateTime.parse(dataSetCompleteText, ETL_LOG_DATE_TIME_FORMATTER);
 			Duration dataSetProcessingTime = Duration.between(dataSetStart, dataSetComplete);
 
-			BenchmarkResult benchmarkResult = new BenchmarkResult(iterationIndex, dataSetProcessingTime,
-					Duration.between(startInstant, Instant.now()));
-			LOGGER.info("Iteration completed: {}.", benchmarkResult);
-			return benchmarkResult;
+			return dataSetProcessingTime;
 		}
 
 		/**
-		 * Pushes a {@link DataSetManifest} and data objects to S3 for the
-		 * specified data set.
-		 * 
+		 * Configures the benchmark system, kicks off the data set processing on
+		 * them, and waits for that processing to complete. Will throw a
+		 * {@link BenchmarkError} if any of that fails.
+		 */
+		private void runBenchmark() {
+			AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+			Bucket bucket = null;
+			try {
+				bucket = s3Client.createBucket(
+						String.format("gov.hhs.cms.bluebutton.datapipeline.benchmark.iteration%d", iterationIndex));
+				copyDataSetInS3(s3Client, bucket);
+
+				/*
+				 * Run the `benchmark_etl.yml` playbook to do everything we need
+				 * to here.
+				 */
+				Path benchmarkLog = benchmarkIterationDir
+						.resolve(String.format("ansible_benchmark_etl.log", iterationIndex));
+				Path benchmarkScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
+						.resolve("test").resolve("ansible").resolve("benchmark_etl.sh");
+				ProcessBuilder benchmarkProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
+						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
+				int benchmarkExitCode = runProcessAndLogOutput(benchmarkProcessBuilder, benchmarkLog);
+
+				if (benchmarkExitCode != 0)
+					throw new BenchmarkError(
+							String.format("Ansible failed with exit code '%d' for benchmark iteration '%d'.",
+									benchmarkExitCode, iterationIndex));
+			} finally {
+				if (bucket != null)
+					DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+			}
+		}
+
+		/**
 		 * @param s3Client
 		 *            the {@link AmazonS3} client to use
 		 * @param bucket
-		 *            the S3 {@link Bucket} to push the data to
-		 * @param dataResources
-		 *            the {@link StaticRifResourceGroup} with the data files to
-		 *            push to S3
+		 *            the S3 {@link Bucket} to copy the data set to
 		 */
-		private static void pushDataSetToS3(AmazonS3 s3Client, Bucket bucket, StaticRifResourceGroup dataResources) {
-			List<DataSetManifestEntry> manifestEntries = Arrays.stream(dataResources.getResources())
-					.map(r -> new DataSetManifestEntry(r.name(), r.getRifFileType())).collect(Collectors.toList());
-			DataSetManifest manifest = new DataSetManifest(Instant.now(), manifestEntries);
-			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
-			for (int i = 0; i < dataResources.getResources().length; i++) {
-				StaticRifResource dataResource = dataResources.getResources()[i];
-				s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(i),
-						dataResource.getResourceUrl()));
-			}
+		private static void copyDataSetInS3(AmazonS3 s3Client, Bucket bucket) {
+			final ListObjectsRequest bucketListRequest = new ListObjectsRequest()
+					.withBucketName(BUCKET_DATA_SET_MASTER);
+			ObjectListing objectListing;
+			do {
+				objectListing = s3Client.listObjects(bucketListRequest);
+
+				for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+					s3Client.copyObject(BUCKET_DATA_SET_MASTER, objectSummary.getKey(), bucket.getName(),
+							objectSummary.getKey());
+				}
+
+				objectListing = s3Client.listNextBatchOfObjects(objectListing);
+			} while (objectListing.isTruncated());
 		}
 	}
 

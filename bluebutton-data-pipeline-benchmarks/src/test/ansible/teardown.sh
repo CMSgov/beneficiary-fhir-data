@@ -1,12 +1,11 @@
 #!/bin/bash
 
 ##
-# This script will run the `benchmark_etl.yml` Ansible playbook, which will
-# configure the benchmark systems and start the ETL process.
+# This script will run the `teardown.yml` Ansible playbook.
 #
 # Usage:
 # 
-# $ benchmark_etl.sh --iteration 42 --ec2keyfile somedir/foo
+# $ teardown.sh --iteration 42 --ec2keyfile somedir/bar
 ##
 
 # Constants.
@@ -19,7 +18,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEMP=`getopt \
 	-o i:f: \
 	--long iteration:,ec2keyfile: \
-	-n 'benchmark_etl.sh' -- "$@"`
+	-n 'teardown.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
 # Note the quotes around `$TEMP': they are essential!
@@ -83,7 +82,7 @@ if [[ -f "${inventory}" ]]; then
 	echo 'Running Ansible playbook...'
 	cd "${scriptDirectory}"
 	python `which ansible-playbook` \
-		benchmark_etl.yml \
+		teardown.yml \
 		--inventory-file="${inventory}" \
 		--extra-vars "iteration_index=${iteration}"
 	echo 'Ansible playbook completed successfully.'
