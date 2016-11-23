@@ -3,11 +3,8 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -157,6 +154,8 @@ public final class DataTransformer {
 	 * {@link Adjudication}s.
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
+	
+	static final String CODING_REVENUE_CENTER_RENDER_PHY_NPI = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt";
 
 	/**
 	 * See <a href=
@@ -324,6 +323,15 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_COINSURANCE = "NCH Beneficiary Part B Coinsurance Amount";
 
+	static final String CODING_BENEFIT_BALANCE_URL = "http://build.fhir.org/explanationofbenefit-definitions.html#ExplanationOfBenefit.benefitBalance.category";
+	
+	static final String CODING_CLAIM_PASS_THRU_PER_DIEM_AMT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/per_diem.txt";
+
+	static final String CODING_BENEFIT_DEDUCTIBLE_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_amt.txt";
+	
+	static final String BENEFIT_BALANCE_TYPE = "http://bluebutton.cms.hhs.gov/coding#benefitBalanceType";
+
+	
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
@@ -385,7 +393,41 @@ public final class DataTransformer {
 
 	static final String LINE_PLACE_OF_SERVICE_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt";
 	
+	static final String CODING_NCH_PRIMARY_PAYER_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpayamt.txt";
 
+	static final String CODING_NCH_BENEFIT_COIN_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coin_amt.txt";
+
+	static final String CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/blddedam.txt";
+	
+	static final String CODING_NCH_BEN_PART_B_DED_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptb_ded.txt";
+	
+	static final String CODING_NCH_BEN_PART_B_COINSUR_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptb_coin.txt";
+	
+	static final String CODING_CLAIM_OUTPAT_PROVIDER_PAYMENT_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvdrpmt.txt";
+	
+	static final String CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/benepmt.txt";
+	
+	static final String CODING_NCH_PROFFESIONAL_CHARGE_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pcchgamt.txt";
+	
+	static final String CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncchgamt.txt";
+	
+	static final String CODING_NCH_INPATIENT_TOTAL_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tdedamt.txt";
+	
+	static final String CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pps_cptl.txt";
+
+	static final String CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cptl_fsp.txt";
+
+	static final String CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cptloutl.txt";
+
+	static final String CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/disp_shr.txt";
+	
+	static final String CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ime_amt.txt";
+	
+	static final String CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cptl_exp.txt";
+	
+	static final String CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hldhrmls.txt";
+	
+	static final String CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/outlrpmt.txt";
 	/**
 	 * @param rifStream
 	 *            the stream of source {@link RifRecordEvent}s to be transformed
@@ -963,19 +1005,98 @@ public final class DataTransformer {
 				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
-		String CODING_BENEFIT_BALANCE_URL = "http://build.fhir.org/explanationofbenefit-definitions.html#ExplanationOfBenefit.benefitBalance.category";
-		String CODING_CLAIM_PASS_THRU_PER_DIEM_AMT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/per_diem.txt";
-		BenefitBalanceComponent bbc = new BenefitBalanceComponent(new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
-		String benefitNamePerDiem = "PER_DIEM";
-		String benefitDescPerDiem = "Claim Pass Thru Per Diem Amt";
-		bbc.setName(benefitNamePerDiem);
-		bbc.setDescription(benefitDescPerDiem);
+		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+		eob.getBenefitBalance().add(benefitBalances);
 		
-		BenefitComponent bc = new BenefitComponent(new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
-		bc.setBenefit(new Coding().setSystem(CODING_CLAIM_PASS_THRU_PER_DIEM_AMT).setCode(claimGroup.passThruPerDiemAmount.toString()));
-		bbc.getFinancial().add(bc);
+		if (claimGroup.passThruPerDiemAmount != null) {
+			BenefitComponent benefitPerDiem = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PASS_THRU_PER_DIEM_AMT));
+			benefitPerDiem.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.passThruPerDiemAmount));
+			benefitBalances.getFinancial().add(benefitPerDiem);
+		}
+
+		if (claimGroup.deductibleAmount != null) {
+			BenefitComponent benefitInpatientDeductible = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_BENEFIT_DEDUCTIBLE_AMT_URL));
+			benefitInpatientDeductible.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.deductibleAmount));
+			benefitBalances.getFinancial().add(benefitInpatientDeductible);
+		}
+
+		if (claimGroup.primaryPayerPaidAmount  != null) {
+			BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+			benefitInpatientNchPrimaryPayerAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
+			benefitBalances.getFinancial().add(benefitInpatientNchPrimaryPayerAmt);
+		}
+
+		if (claimGroup.partACoinsuranceLiabilityAmount  != null) {
+			BenefitComponent benefitPartACoinsuranceLiabilityAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_COIN_AMT_URL));
+			benefitPartACoinsuranceLiabilityAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.partACoinsuranceLiabilityAmount));
+			benefitBalances.getFinancial().add(benefitPartACoinsuranceLiabilityAmt);
+		}
+
+		if (claimGroup.bloodDeductibleLiabilityAmount  != null) {
+			BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
+			benefitInpatientNchPrimaryPayerAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.bloodDeductibleLiabilityAmount));
+			benefitBalances.getFinancial().add(benefitInpatientNchPrimaryPayerAmt);
+		}
+
+		if (claimGroup.professionalComponentCharge  != null) {
+			BenefitComponent benefitProfessionComponentAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PROFFESIONAL_CHARGE_URL));
+			benefitProfessionComponentAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.professionalComponentCharge));
+			benefitBalances.getFinancial().add(benefitProfessionComponentAmt);
+		}
+	
+		if (claimGroup.noncoveredCharge  != null) {
+			BenefitComponent benefitNonCoveredChangeAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL));
+			benefitNonCoveredChangeAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.noncoveredCharge));
+			benefitBalances.getFinancial().add(benefitNonCoveredChangeAmt);
+		}
 		
-		eob.getBenefitBalance().add(bbc);
+		if (claimGroup.totalDeductionAmount  != null) {
+			BenefitComponent benefitTotalChangeAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_INPATIENT_TOTAL_AMT_URL));
+			benefitTotalChangeAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalDeductionAmount));
+			benefitBalances.getFinancial().add(benefitTotalChangeAmt);
+		}
+
+		if (claimGroup.claimTotalPPSCapitalAmount != null) {
+			BenefitComponent claimTotalPPSAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL));
+			claimTotalPPSAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimTotalPPSCapitalAmount.get()));
+			benefitBalances.getFinancial().add(claimTotalPPSAmt);
+		}
+
+		if (claimGroup.claimPPSCapitalOutlierAmount.isPresent()) {
+			BenefitComponent claimPPSCapitalOutlierAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL));
+			claimPPSCapitalOutlierAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalOutlierAmount.get()));
+			benefitBalances.getFinancial().add(claimPPSCapitalOutlierAmount);
+		}
+
+		if (claimGroup.claimPPSCapitalDisproportionateShareAmt.isPresent()) {
+			BenefitComponent claimPPSCapitalDisproportionateShareAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL));
+			claimPPSCapitalDisproportionateShareAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalDisproportionateShareAmt.get()));
+			benefitBalances.getFinancial().add(claimPPSCapitalDisproportionateShareAmt);
+		}
+
+		if (claimGroup.claimPPSCapitalIMEAmount.isPresent()) {
+			BenefitComponent claimPPSCapitalIMEAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL));
+			claimPPSCapitalIMEAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalIMEAmount.get()));
+			benefitBalances.getFinancial().add(claimPPSCapitalIMEAmount);
+		}
+
+		if (claimGroup.claimPPSCapitalExceptionAmount.isPresent()) {
+			BenefitComponent claimPPSCapitalExceptionAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL));
+			claimPPSCapitalExceptionAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalExceptionAmount.get()));
+			benefitBalances.getFinancial().add(claimPPSCapitalExceptionAmount);
+		}
+
+		if (claimGroup.claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
+			BenefitComponent claimPPSOldCapitalHoldHarmlessAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL));
+			claimPPSOldCapitalHoldHarmlessAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSOldCapitalHoldHarmlessAmount.get()));
+			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
+		}
+		
+		if (claimGroup.nchDrugOutlierApprovedPaymentAmount.isPresent()) {
+			BenefitComponent nchDrugOutlierApprovedPaymentAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL));
+			nchDrugOutlierApprovedPaymentAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.nchDrugOutlierApprovedPaymentAmount.get()));
+			benefitBalances.getFinancial().add(nchDrugOutlierApprovedPaymentAmount);
+		}
 		
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
@@ -1054,12 +1175,15 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				item.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI).setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+			}
+
 		}
 
 		insert(bundle, eob);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
-
 	/**
 	 * @param rifRecordEvent
 	 *            the source {@link RifRecordEvent} to be transformed
@@ -1103,6 +1227,45 @@ public final class DataTransformer {
 				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
+		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+		eob.getBenefitBalance().add(benefitBalances);
+		
+		if (claimGroup.primaryPayerPaidAmount != null) {
+			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+			primaryPayerPaidAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
+			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
+		}
+		
+		if (claimGroup.bloodDeductibleLiabilityAmount != null) {
+			BenefitComponent bloodDeductibleLiabilityAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
+			bloodDeductibleLiabilityAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.bloodDeductibleLiabilityAmount));
+			benefitBalances.getFinancial().add(bloodDeductibleLiabilityAmount);
+		}
+
+		if (claimGroup.deductibleAmount != null) {
+			BenefitComponent deductibleAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BEN_PART_B_DED_AMT_URL));
+			deductibleAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.deductibleAmount));
+			benefitBalances.getFinancial().add(deductibleAmount);
+		}
+
+		if (claimGroup.coninsuranceAmount != null) {
+			BenefitComponent coninsuranceAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BEN_PART_B_COINSUR_AMT_URL));
+			coninsuranceAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.coninsuranceAmount));
+			benefitBalances.getFinancial().add(coninsuranceAmount);
+		}
+
+		if (claimGroup.providerPaymentAmount != null) {
+			BenefitComponent providerPaymentAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_OUTPAT_PROVIDER_PAYMENT_AMT_URL));
+			providerPaymentAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.providerPaymentAmount));
+			benefitBalances.getFinancial().add(providerPaymentAmount);
+		}
+
+		if (claimGroup.beneficiaryPaymentAmount != null) {
+			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL));
+			beneficiaryPaymentAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPaymentAmount));
+			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
+		}
+		
 		if (claimGroup.organizationNpi.isPresent()) {
 			Organization serviceProviderOrg = new Organization();
 			serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US)
@@ -1238,6 +1401,10 @@ public final class DataTransformer {
 							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
+			
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				item.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI).setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+			}
 		}
 
 		insert(bundle, eob);
@@ -1357,6 +1524,10 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				item.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI).setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+			}
+			
 			/*
 			 * TODO once STU3 available, transform revenue center to
 			 * eob.item.revenue
@@ -1494,6 +1665,10 @@ public final class DataTransformer {
 							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
+			
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				item.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI).setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+			}
 		}
 
 		insert(bundle, eob);
@@ -1611,9 +1786,14 @@ public final class DataTransformer {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
 						.setCode(claimLine.hcpcsInitialModifierCode.get()));
 			}
+			
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
 						.setCode(claimLine.hcpcsSecondModifierCode.get()));
+			}
+			
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				item.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI).setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
 			}
 
 		}
@@ -2104,7 +2284,7 @@ public final class DataTransformer {
 		eob.getProcedure().add(procedureComponent);
 		return procedureComponent.getSequence();
 	}
-
+	
 	/**
 	 * @param localDate
 	 *            the {@link LocalDate} to convert

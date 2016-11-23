@@ -179,6 +179,43 @@ public final class InpatientClaimGroup {
 	public BigDecimal totalDeductionAmount;
 
 	/**
+	 * @see Column#CLM_TOT_PPS_CPTL_AMT
+	 */
+	public Optional<BigDecimal> claimTotalPPSCapitalAmount;
+
+	/**
+	 * @see Column#CLM_PPS_CPTL_OUTLIER_AMT
+	 */
+	public Optional<BigDecimal> claimPPSCapitalOutlierAmount;
+	
+	/**
+	 * @see Column#CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT
+	 */
+	public Optional<BigDecimal> claimPPSCapitalDisproportionateShareAmt;
+	
+	/**
+	 * @see Column#CLM_PPS_CPTL_IME_AMT 
+	 */
+	public Optional<BigDecimal> claimPPSCapitalIMEAmount;
+	
+	/**
+	 * @see Column#CLM_PPS_CPTL_EXCPTN_AMT 
+	 */
+	public Optional<BigDecimal> claimPPSCapitalExceptionAmount;
+	
+	/**
+	 * @see Column#CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT
+	 */
+	public Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount;
+
+	/**
+	 * @see Column#NCH_DRG_OUTLIER_APRVD_PMT_AMT
+	 */
+	public Optional<BigDecimal> nchDrugOutlierApprovedPaymentAmount;
+	
+	
+	
+	/**
 	 * @see Column#ADMTG_DGNS_CD
 	 * @see Column#ADMTG_DGNS_VRSN_CD
 	 */
@@ -335,6 +372,13 @@ public final class InpatientClaimGroup {
 		 */
 		public BigDecimal nonCoveredChargeAmount;
 
+		/**
+		 * @see Column#RNDRNG_PHYSN_NPI
+		 */
+		public Optional<String> revenueCenterRenderingPhysicianNPI;
+
+		
+		
 		/**
 		 * @see java.lang.Object#toString()
 		 */
@@ -641,38 +685,52 @@ public final class InpatientClaimGroup {
 		NCH_IP_TOT_DDCTN_AMT,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pps_cptl.txt">
+		 * CCW Data Dictionary: PPS_CPTL </a>.
 		 */
 		CLM_TOT_PPS_CPTL_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cptl_fsp.txt">
+		 * CCW Data Dictionary: CPTLOUTL </a>.
 		 */
 		CLM_PPS_CPTL_FSP_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cptloutl.txt">
+		 * CCW Data Dictionary: CPTL_FSP </a>.
 		 */
 		CLM_PPS_CPTL_OUTLIER_AMT,
 
 		/**
-		 * NOT MAPPED
-		 */
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/disp_shr.txt">
+		 * CCW Data Dictionary: DISP_SHR </a>.
+		 */		
 		CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT,
 
 		/**
-		 * NOT MAPPED
-		 */
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ime_amt.txt">
+		 * CCW Data Dictionary: IME_AMT</a>.
+		 */	
 		CLM_PPS_CPTL_IME_AMT,
 
 		/**
-		 * NOT MAPPED
-		 */
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/cptl_exp.txt">
+		 * CCW Data Dictionary: CPTL_EXP</a>.
+		 */	
 		CLM_PPS_CPTL_EXCPTN_AMT,
 
 		/**
-		 * NOT MAPPED
-		 */
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hldhrmls.txt">
+		 * CCW Data Dictionary: HLDHRMLS</a>.
+		 */	
 		CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT,
 
 		/**
@@ -741,7 +799,9 @@ public final class InpatientClaimGroup {
 		CLM_DRG_OUTLIER_STAY_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/outlrpmt.txt">
+		 * CCW Data Dictionary: OUTLRPMT</a>.
 		 */
 		NCH_DRG_OUTLIER_APRVD_PMT_AMT,
 
@@ -2153,8 +2213,22 @@ public final class InpatientClaimGroup {
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_ncvr.txt">
 		 * CCW Data Dictionary: REV_NCVR </a>.
 		 */
-		REV_CNTR_NCVRD_CHRG_AMT;
+		REV_CNTR_NCVRD_CHRG_AMT,
 
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_upin.txt">
+		 * CCW Data Dictionary: RNDRNG_PHYSN_UPIN </a>.
+		 */
+		RNDRNG_PHYSN_UPIN,
+		
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt">
+		 * CCW Data Dictionary: RNDRNG_PHYSN_NPI </a>.
+		 */
+		RNDRNG_PHYSN_NPI;		
+		
 		/**
 		 * @return a {@link String} array containing all of the RIF column
 		 *         names, in order

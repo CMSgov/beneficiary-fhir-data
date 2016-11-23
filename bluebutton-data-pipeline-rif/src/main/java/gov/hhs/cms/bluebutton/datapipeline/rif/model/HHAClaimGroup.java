@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.Column;
+
 /**
  * <p>
  * Models rows from {@link RifFileType#HHA} RIF files. Rows in this file are
@@ -256,6 +258,10 @@ public final class HHAClaimGroup {
 		 */
 		public Optional<String> hcpcsSecondModifierCode;
 
+		/**
+		 * @see Column#RNDRNG_PHYSN_NPI
+		 */
+		public Optional<String> revenueCenterRenderingPhysicianNPI;
 		
 		/**
 		 * @see Column#REV_CNTR_PMT_AMT_AMT
@@ -1178,7 +1184,9 @@ public final class HHAClaimGroup {
 		RNDRNG_PHYSN_UPIN,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>String</code>, max chars: NA. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt">
+		 * CCW Data Dictionary: RNDRNG_PHYSN_NPI</a>.
 		 */
 		RNDRNG_PHYSN_NPI;
 

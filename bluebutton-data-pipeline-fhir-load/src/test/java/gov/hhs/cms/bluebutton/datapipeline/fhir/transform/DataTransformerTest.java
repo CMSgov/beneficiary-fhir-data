@@ -25,7 +25,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationOrder;
@@ -697,6 +696,7 @@ public final class DataTransformerTest {
 		recordLine1.hcpcsCode = Optional.of("M5C");
 		recordLine1.totalChargeAmount = new BigDecimal("84993.37");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("3605.00");
+		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.ofNullable("0");
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -734,6 +734,66 @@ public final class DataTransformerTest {
 		Assert.assertFalse(record.claimNonPaymentReasonCode.isPresent());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
+
+		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_PASS_THRU_PER_DIEM_AMT)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.deductibleAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_BENEFIT_DEDUCTIBLE_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.partACoinsuranceLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_BENEFIT_COIN_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.bloodDeductibleLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.professionalComponentCharge, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PROFFESIONAL_CHARGE_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.noncoveredCharge, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.totalDeductionAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_INPATIENT_TOTAL_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.claimTotalPPSCapitalAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.claimPPSCapitalOutlierAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.claimPPSCapitalDisproportionateShareAmt, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.claimPPSCapitalIMEAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.claimPPSCapitalExceptionAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.claimPPSOldCapitalHoldHarmlessAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.nchDrugOutlierApprovedPaymentAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
 
 		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Organization).findAny().get();
@@ -788,6 +848,8 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
+		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 
@@ -831,6 +893,9 @@ public final class DataTransformerTest {
 		record.operatingPhysicianNpi = Optional.of("1265494744");
 		record.otherPhysicianNpi = Optional.empty();
 		record.claimFacilityTypeCode = '1';
+		record.coninsuranceAmount = new BigDecimal("0");
+		record.providerPaymentAmount = new BigDecimal("0");
+		record.beneficiaryPaymentAmount = new BigDecimal("0");
 		record.primaryPayerPaidAmount = new BigDecimal("11.00");
 		record.deductibleAmount = new BigDecimal("112.00");
 		record.bloodDeductibleLiabilityAmount = new BigDecimal("6.00");
@@ -858,6 +923,7 @@ public final class DataTransformerTest {
 		recordLine1.paymentAmount = new BigDecimal("5000.00");
 		recordLine1.totalChargeAmount = new BigDecimal("6348.85");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("134.00");
+		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("1234AA");
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -898,7 +964,32 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
+
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
+
+		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.bloodDeductibleLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.deductibleAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_BEN_PART_B_DED_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.coninsuranceAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_BEN_PART_B_COINSUR_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.providerPaymentAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_OUTPAT_PROVIDER_PAYMENT_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+
+		Assert.assertEquals(record.beneficiaryPaymentAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
 
 		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Organization).findAny().get();
@@ -972,6 +1063,8 @@ public final class DataTransformerTest {
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount, eobItem0.getAdjudication());
 
+		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
+
 	}
 
 	/**
@@ -1025,6 +1118,7 @@ public final class DataTransformerTest {
 		recordLine1.hcpcsCode = Optional.of("M5C");
 		recordLine1.totalChargeAmount = new BigDecimal("95.00");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("88.00");
+		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("1234AA");
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -1118,6 +1212,8 @@ public final class DataTransformerTest {
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT, recordLine1.totalChargeAmount,
 				eobItem0.getAdjudication());
 
+		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
+
 	}
 
 	/**
@@ -1168,6 +1264,7 @@ public final class DataTransformerTest {
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("24.00");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("Q5001");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
+		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("1234AA");
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -1262,6 +1359,8 @@ public final class DataTransformerTest {
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount, eobItem0.getAdjudication());
 
+		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
+
 	}
 
 	/**
@@ -1309,6 +1408,7 @@ public final class DataTransformerTest {
 		recordLine1.paymentAmount = new BigDecimal("26.00");
 		recordLine1.totalChargeAmount = new BigDecimal("25.00");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("24.00");
+		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("1234AA");
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -1393,6 +1493,8 @@ public final class DataTransformerTest {
 				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount, eobItem0.getAdjudication());
+		
+		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
 
 	}
 

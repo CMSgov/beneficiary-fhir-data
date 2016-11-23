@@ -376,6 +376,11 @@ public final class OutpatientClaimGroup {
 		 * @see Column#REV_CNTR_NCVRD_CHRG_AMT
 		 */
 		public BigDecimal nonCoveredChargeAmount;
+		
+		/**
+		 * @see Column#RNDRNG_PHYSN_NPI
+		 */
+		public Optional<String> revenueCenterRenderingPhysicianNPI;
 
 		/**
 		 * @see java.lang.Object#toString()
@@ -1945,6 +1950,12 @@ public final class OutpatientClaimGroup {
 		REV_CNTR_NDC_QTY,
 		REV_CNTR_NDC_QTY_QLFR_CD,
 		RNDRNG_PHYSN_UPIN,
+		
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt">
+		 * CCW Data Dictionary: RNDRNG_PHYSN_NPI</a>.
+		 */
 		RNDRNG_PHYSN_NPI;
 		
 		public static String[] getColumnNames() {
