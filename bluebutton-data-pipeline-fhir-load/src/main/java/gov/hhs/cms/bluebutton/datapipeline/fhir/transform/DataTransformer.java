@@ -21,7 +21,6 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -35,9 +34,6 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.MedicationOrder;
-import org.hl7.fhir.dstu3.model.MedicationOrder.MedicationOrderDispenseRequestComponent;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -53,6 +49,7 @@ import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.SharedDataManager;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
@@ -181,6 +178,30 @@ public final class DataTransformer {
 	 * CCW Data Dictionary: RX_SRVC_RFRNC_NUM</a>.
 	 */
 	static final String CODING_SYSTEM_RX_SRVC_RFRNC_NUM = "CCW.RX_SRVC_RFRNC_NUM";
+
+	static final String CODING_SYSTEM_RX_DAW_PRODUCT_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt";
+
+	static final String CODING_SYSTEM_RX_DISPENSE_STATUS_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt";
+
+	static final String CODING_SYSTEM_RX_COVERAGE_STATUS_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt";
+
+	static final String CODING_SYSTEM_RX_ADJUSTMENT_DEL_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt";
+
+	static final String CODING_SYSTEM_RX_NON_STD_FORMAT_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nstd_frmt_cd.txt";
+
+	static final String CODING_SYSTEM_RX_PRICING_EXCEPTION_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_excptn_cd.txt";
+
+	static final String CODING_SYSTEM_RX_CATASTROPHIC_COV_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt";
+
+	static final String CODING_SYSTEM_RX_PRESCRIPTION_ORIGIN_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt";
+
+	static final String CODING_SYSTEM_RX_BRAND_GENERIC_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt";
+
+	static final String CODING_SYSTEM_RX_PHARMACY_SVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
+
+	static final String CODING_SYSTEM_RX_PATIENT_RESIDENCE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_rsdnc_cd.txt";
+
+	static final String CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt";
 
 	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_ORIG = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
 
@@ -381,7 +402,15 @@ public final class DataTransformer {
 	 */
 	static final String CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT = "Medicare Coverage Gap Discount Amount";
 
+	static final String CODED_ADJUDICATION_GDCB = "Gross Drug Cost Below Out-of-Pocket Threshold (GDCB)";
+
+	static final String CODED_ADJUDICATION_GDCA = "Gross Drug Cost Above Out-of-Pocket Threshold (GDCA)";
+
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
+
+	static final String CODING_SYSTEM_FHIR_CLAIM_TYPE = "http://build.fhir.org/valueset-claim-type.html";
+
+	static final String CODING_SYSTEM_PDE_DAYS_SUPPLY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/days_suply_num.txt";
 
 	static final String CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS = "CSPINV";
 
@@ -586,7 +615,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
-		// TODO Specify eob.type once STU3 is available (pharmacy)
+		eob.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_CLAIM_TYPE).setCode("pharmacy"));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+
 		Reference patientRef = referencePatient(record.beneficiaryId);
 		eob.setPatient(patientRef);
 		if (record.paymentDate.isPresent()) {
@@ -595,32 +626,28 @@ public final class DataTransformer {
 
 		ItemComponent rxItem = eob.addItem();
 		rxItem.setSequence(1);
-		/*
-		 * FIXME item.type field for
-		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
-		 * in STU3 (though present in item.detail). Sent email to Mark/FM
-		 * working group about this on 2016-10-20.
-		 */
-		// switch (record.compoundCode) {
-		// case COMPOUNDED:
-		// /* Pharmacy dispense invoice for a compound */
-		// rxItem.setType(new
-		// Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
-		// break;
-		// case NOT_COMPOUNDED:
-		// /*
-		// * Pharmacy dispense invoice not involving a compound
-		// */
-		// rxItem.setType(new
-		// Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
-		// break;
-		// default:
-		// /*
-		// * Unexpected value encountered - compound code should be either
-		// * compounded or not compounded.
-		// */
-		// throw new BadCodeMonkeyException();
-		// }
+
+		DetailComponent detail = new DetailComponent();
+		switch (record.compoundCode) {
+		case COMPOUNDED:
+			/* Pharmacy dispense invoice for a compound */
+			detail.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
+			break;
+		case NOT_COMPOUNDED:
+			/*
+			 * Pharmacy dispense invoice not involving a compound
+			 */
+			detail.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+			break;
+		default:
+			/*
+			 * Unexpected value encountered - compound code should be either
+			 * compounded or not compounded.
+			 */
+			throw new BadCodeMonkeyException();
+		}
+
+		rxItem.addDetail(detail);
 
 		rxItem.setServiced(new DateType().setValue(convertToDate(record.prescriptionFillDate)));
 
@@ -665,6 +692,16 @@ public final class DataTransformer {
 		}
 
 		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_GDCB))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.grossCostBelowOutOfPocketThreshold);
+
+		rxItem.addAdjudication()
+				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_GDCA))
+				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
+				.setValue(record.grossCostAboveOutOfPocketThreshold);
+
+		rxItem.addAdjudication()
 				.setCategory(
 						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PATIENT_PAY))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
@@ -700,57 +737,81 @@ public final class DataTransformer {
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.gapDiscountAmount);
 
-		Practitioner prescriber = new Practitioner();
 		/*
+		 * Practitioner prescriber = new Practitioner();
+		 * 
 		 * Set the coding system for the practitioner if the qualifier code is
 		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
 		 * no other code types should be found here.
+		 * 
+		 * prescriber.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(
+		 * record.prescriberId); Reference prescriberRef =
+		 * referencePractitioner(record.prescriberId); upsert(bundle,
+		 * prescriber, prescriberRef.getReference());
 		 */
-		prescriber.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.prescriberId);
-		Reference prescriberRef = referencePractitioner(record.prescriberId);
-		upsert(bundle, prescriber, prescriberRef.getReference());
 
+		eob.setProvider(new Identifier().setValue(record.prescriberId));
 
 		/*
 		 * Upsert Medication using NDC as the ID.
 		 */
-		Medication medication = new Medication();
-		Reference medicationRef = new Reference("Medication/ndc-" + record.nationalDrugCode);
-		CodeableConcept ndcConcept = new CodeableConcept();
-		ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode);
-		medication.setCode(ndcConcept);
-		upsert(bundle, medication, medicationRef.getReference());
 
+		rxItem.setService(new Coding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode));
+
+		/*
+		 * Medication medication = new Medication(); Reference medicationRef =
+		 * new Reference("Medication/ndc-" + record.nationalDrugCode);
+		 * CodeableConcept ndcConcept = new CodeableConcept();
+		 * ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.
+		 * nationalDrugCode); medication.setCode(ndcConcept); upsert(bundle,
+		 * medication, medicationRef.getReference());
+		 */
 		/*
 		 * MedicationOrders are represented as contained resources inside the
 		 * EOB, as the lifetime of this resource should match with the EOB.
 		 */
-		MedicationOrder medicationOrder = new MedicationOrder();
-		medicationOrder.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
-				.setValue(String.valueOf(record.prescriptionReferenceNumber));
-		medicationOrder.setPatient(patientRef);
-		medicationOrder.setPrescriber(prescriberRef);
-		medicationOrder.setMedication(medicationRef);
-		SimpleQuantity quantity = new SimpleQuantity();
-		quantity.setValue(record.quantityDispensed);
-		Duration daysSupply = new Duration();
-		daysSupply.setUnit("days");
-		daysSupply.setValue(record.daysSupply);
-		medicationOrder.setDispenseRequest(new MedicationOrderDispenseRequestComponent().setQuantity(quantity)
-				.setExpectedSupplyDuration(daysSupply));
+		/*
+		 * MedicationOrder medicationOrder = new MedicationOrder();
+		 * medicationOrder.addIdentifier().setSystem(
+		 * CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
+		 * .setValue(String.valueOf(record.prescriptionReferenceNumber));
+		 * medicationOrder.setPatient(patientRef);
+		 * medicationOrder.setPrescriber(prescriberRef);
+		 * medicationOrder.setMedication(medicationRef);
+		 * 
+		 * Duration daysSupply = new Duration(); daysSupply.setUnit("days");
+		 * daysSupply.setValue(record.daysSupply);
+		 * medicationOrder.setDispenseRequest(new
+		 * MedicationOrderDispenseRequestComponent().setQuantity(quantity)
+		 * .setExpectedSupplyDuration(daysSupply));
+		 */
+
+		SimpleQuantity quantityDispensed = new SimpleQuantity();
+		quantityDispensed.setValue(record.quantityDispensed);
+		rxItem.setQuantity(quantityDispensed);
+
+		rxItem.addModifier(new Coding().setSystem(CODING_SYSTEM_PDE_DAYS_SUPPLY).setCode(record.daysSupply.toString()));
+		rxItem.addModifier(new Coding().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
+				.setCode(record.prescriptionReferenceNumber.toString()));
 		/*
 		 * TODO Populate substitution.allowed and substitution.reason once STU3
 		 * structures are available.
 		 */
-		eob.setPrescription(new Reference(medicationOrder));
+		/* eob.setPrescription(new Reference(medicationOrder)); */
 
-		Organization serviceProviderOrg = new Organization();
-		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.serviceProviderId);
-		serviceProviderOrg.setType(new CodeableConcept().addCoding(
-				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharmacyTypeCode)));
-		Reference serviceProviderOrgReference = upsert(bundle, serviceProviderOrg,
-				referenceOrganizationByNpi(record.serviceProviderId).getReference());
-		eob.setOrganization(serviceProviderOrgReference);
+		/*
+		 * Organization serviceProviderOrg = new Organization();
+		 * serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).
+		 * setValue(record.serviceProviderId); serviceProviderOrg.setType(new
+		 * CodeableConcept().addCoding( new
+		 * Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(
+		 * record.pharmacyTypeCode))); Reference serviceProviderOrgReference =
+		 * upsert(bundle, serviceProviderOrg,
+		 * referenceOrganizationByNpi(record.serviceProviderId).getReference());
+		 */
+		eob.setOrganization(new Identifier().setValue(record.serviceProviderId));
+		eob.setAuthor(new Identifier().setValue(record.serviceProviderId));
+
 
 		/*
 		 * TODO PDE coverage includes unique identifiers where other coverage
@@ -765,13 +826,62 @@ public final class DataTransformer {
 				.setValue(record.planBenefitPackageId);
 		coverage.setPlan(COVERAGE_PLAN);
 		coverage.setSubPlan(COVERAGE_PLAN_PART_D);
+		coverage.setIssuer(SharedDataManager.createReferenceToCms());
+		coverage.setBeneficiary(new Identifier().setValue(record.beneficiaryId));
+		coverage.setPlanholder(new Identifier().setValue(record.beneficiaryId));
+		coverage.setRelationship(new Coding().setCode("self"));
 		upsert(bundle, coverage, coverageRef.getReference());
 		eob.getCoverage().setCoverage(coverageRef);
 
 		/*
-		 * TODO When updated to STU3, use eob.information to store values of
-		 * PRCNG_EXCPTN_CD, CTSTRPHC_CVRG_CD
+		 * Storing code values in EOB.information below
 		 */
+
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+				.setSystem(CODING_SYSTEM_RX_DAW_PRODUCT_CD).setCode(record.dispenseAsWrittenProductSelectionCode)));
+
+		if (record.dispensingStatuscode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+					.setSystem(CODING_SYSTEM_RX_DISPENSE_STATUS_CD).setCode(record.dispensingStatuscode.toString())));
+
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+				.setSystem(CODING_SYSTEM_RX_COVERAGE_STATUS_CD).setCode(record.drugCoverageStatusCode.toString())));
+
+		if (record.adjustmentDeletionCode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+					.setSystem(CODING_SYSTEM_RX_ADJUSTMENT_DEL_CD).setCode(record.adjustmentDeletionCode.toString())));
+
+		if (record.nonstandardFormatCode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+					.setSystem(CODING_SYSTEM_RX_NON_STD_FORMAT_CD).setCode(record.nonstandardFormatCode.toString())));
+
+		if (record.pricingExceptionCode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+					.setSystem(CODING_SYSTEM_RX_PRICING_EXCEPTION_CD).setCode(record.pricingExceptionCode.toString())));
+
+		if (record.catastrophicCoverageCode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					new Coding().setSystem(CODING_SYSTEM_RX_CATASTROPHIC_COV_CD)
+							.setCode(record.catastrophicCoverageCode.toString())));
+
+		if (record.prescriptionOriginationCode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					new Coding().setSystem(CODING_SYSTEM_RX_PRESCRIPTION_ORIGIN_CD)
+							.setCode(record.prescriptionOriginationCode.toString())));
+
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				new Coding().setSystem(CODING_SYSTEM_RX_BRAND_GENERIC_CD).setCode(record.brandGenericCode.toString())));
+
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				new Coding().setSystem(CODING_SYSTEM_RX_PHARMACY_SVC_TYPE_CD).setCode(record.pharmacyTypeCode)));
+
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				new Coding().setSystem(CODING_SYSTEM_RX_PATIENT_RESIDENCE_CD).setCode(record.patientResidenceCode)));
+
+		if (record.submissionClarificationCode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					new Coding().setSystem(CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD)
+							.setCode(record.submissionClarificationCode.get())));
 
 		insert(bundle, eob);
 		return new TransformedBundle(rifRecordEvent, bundle);
@@ -1062,37 +1172,37 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(claimTotalPPSAmt);
 		}
 
-		if (claimGroup.claimPPSCapitalOutlierAmount.isPresent()) {
+		if (claimGroup.claimPPSCapitalOutlierAmount != null) {
 			BenefitComponent claimPPSCapitalOutlierAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL));
 			claimPPSCapitalOutlierAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalOutlierAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalOutlierAmount);
 		}
 
-		if (claimGroup.claimPPSCapitalDisproportionateShareAmt.isPresent()) {
+		if (claimGroup.claimPPSCapitalDisproportionateShareAmt != null) {
 			BenefitComponent claimPPSCapitalDisproportionateShareAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL));
 			claimPPSCapitalDisproportionateShareAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalDisproportionateShareAmt.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalDisproportionateShareAmt);
 		}
 
-		if (claimGroup.claimPPSCapitalIMEAmount.isPresent()) {
+		if (claimGroup.claimPPSCapitalIMEAmount != null) {
 			BenefitComponent claimPPSCapitalIMEAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL));
 			claimPPSCapitalIMEAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalIMEAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalIMEAmount);
 		}
 
-		if (claimGroup.claimPPSCapitalExceptionAmount.isPresent()) {
+		if (claimGroup.claimPPSCapitalExceptionAmount != null) {
 			BenefitComponent claimPPSCapitalExceptionAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL));
 			claimPPSCapitalExceptionAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalExceptionAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalExceptionAmount);
 		}
 
-		if (claimGroup.claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
+		if (claimGroup.claimPPSOldCapitalHoldHarmlessAmount != null) {
 			BenefitComponent claimPPSOldCapitalHoldHarmlessAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL));
 			claimPPSOldCapitalHoldHarmlessAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSOldCapitalHoldHarmlessAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
 		}
 		
-		if (claimGroup.nchDrugOutlierApprovedPaymentAmount.isPresent()) {
+		if (claimGroup.nchDrugOutlierApprovedPaymentAmount != null) {
 			BenefitComponent nchDrugOutlierApprovedPaymentAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL));
 			nchDrugOutlierApprovedPaymentAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.nchDrugOutlierApprovedPaymentAmount.get()));
 			benefitBalances.getFinancial().add(nchDrugOutlierApprovedPaymentAmount);
