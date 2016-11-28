@@ -686,13 +686,14 @@ public final class DataTransformerTest {
 		record.professionalComponentCharge = new BigDecimal("4.00");
 		record.noncoveredCharge = new BigDecimal("33.00");
 		record.totalDeductionAmount = new BigDecimal("14.00");
-		record.claimTotalPPSCapitalAmount = Optional.of(new BigDecimal("11.11"));
-		record.claimPPSCapitalOutlierAmount = Optional.of(new BigDecimal("11.11"));
-		record.claimPPSCapitalDisproportionateShareAmt = Optional.of(new BigDecimal("11.11"));
-		record.claimPPSCapitalIMEAmount = Optional.of(new BigDecimal("11.11"));
-		record.claimPPSCapitalExceptionAmount = Optional.of(new BigDecimal("11.11"));
-		record.claimPPSOldCapitalHoldHarmlessAmount = Optional.of(new BigDecimal("11.11"));
-		record.nchDrugOutlierApprovedPaymentAmount = Optional.of(new BigDecimal("11.11"));
+		record.claimTotalPPSCapitalAmount = Optional.of(new BigDecimal("646.23"));
+		record.claimPPSCapitalFSPAmount = Optional.of(new BigDecimal("552.56"));
+		record.claimPPSCapitalOutlierAmount = Optional.of(new BigDecimal("0"));
+		record.claimPPSCapitalDisproportionateShareAmt = Optional.of(new BigDecimal("25.09"));
+		record.claimPPSCapitalIMEAmount = Optional.of(new BigDecimal("68.58"));
+		record.claimPPSCapitalExceptionAmount = Optional.of(new BigDecimal("0"));
+		record.claimPPSOldCapitalHoldHarmlessAmount = Optional.of(new BigDecimal("0"));
+		record.nchDrugOutlierApprovedPaymentAmount = Optional.of(new BigDecimal("0"));
 		record.diagnosisAdmitting = new IcdCode(IcdVersion.ICD_10, "R310");
 		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "R310");
 		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R310", "Y"));
@@ -794,6 +795,13 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.claimTotalPPSCapitalAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()
 				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
+				);
+		
+		Assert.assertEquals(record.claimPPSCapitalFSPAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue()
 				);
 
 		Assert.assertEquals(record.claimPPSCapitalOutlierAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()

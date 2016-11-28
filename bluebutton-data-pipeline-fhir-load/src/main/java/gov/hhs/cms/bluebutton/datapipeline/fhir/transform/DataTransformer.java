@@ -1172,6 +1172,14 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(claimTotalPPSAmt);
 		}
 
+		if (claimGroup.claimPPSCapitalFSPAmount != null) {
+			BenefitComponent claimPPSCapitalFSPAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE)
+					.setCode(CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL));
+			claimPPSCapitalFSPAmt.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalFSPAmount.get()));
+			benefitBalances.getFinancial().add(claimPPSCapitalFSPAmt);
+		}
+
 		if (claimGroup.claimPPSCapitalOutlierAmount != null) {
 			BenefitComponent claimPPSCapitalOutlierAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL));
 			claimPPSCapitalOutlierAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalOutlierAmount.get()));
@@ -2337,8 +2345,8 @@ public final class DataTransformer {
 		diagnosisComponent.getDiagnosis().setSystem(diagnosis.getVersion().getFhirSystem())
 				.setCode(diagnosis.getCode());
 		if (!diagnosis.getPresentOnAdmission().isEmpty()) {
-			diagnosisComponent.addExtension().setUrl(CODING_SYSTEM_CCW_INP_POA_CD)
-					.setValue(new StringType(diagnosis.getPresentOnAdmission()));
+			diagnosisComponent.addType(
+					new Coding().setSystem(CODING_SYSTEM_CCW_INP_POA_CD).setCode(diagnosis.getPresentOnAdmission()));
 		}
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequence();

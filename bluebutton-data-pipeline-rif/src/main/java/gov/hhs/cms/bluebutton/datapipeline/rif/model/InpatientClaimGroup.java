@@ -184,6 +184,11 @@ public final class InpatientClaimGroup {
 	public Optional<BigDecimal> claimTotalPPSCapitalAmount;
 
 	/**
+	 * @see Column#CLM_PPS_CPTL_FSP_AMT
+	 */
+	public Optional<BigDecimal> claimPPSCapitalFSPAmount;
+
+	/**
 	 * @see Column#CLM_PPS_CPTL_OUTLIER_AMT
 	 */
 	public Optional<BigDecimal> claimPPSCapitalOutlierAmount;
@@ -328,6 +333,22 @@ public final class InpatientClaimGroup {
 		builder.append(noncoveredCharge);
 		builder.append(", totalDeductionAmount=");
 		builder.append(totalDeductionAmount);
+		builder.append(", claimTotalPPSCapitalAmount=");
+		builder.append(claimTotalPPSCapitalAmount);
+		builder.append(", claimPPSCapitalFSPAmount=");
+		builder.append(claimPPSCapitalFSPAmount);
+		builder.append(", claimPPSCapitalOutlierAmount=");
+		builder.append(claimPPSCapitalOutlierAmount);
+		builder.append(", claimPPSCapitalDisproportionateShareAmt=");
+		builder.append(claimPPSCapitalDisproportionateShareAmt);
+		builder.append(", claimPPSCapitalIMEAmount=");
+		builder.append(claimPPSCapitalIMEAmount);
+		builder.append(", claimPPSCapitalExceptionAmount=");
+		builder.append(claimPPSCapitalExceptionAmount);
+		builder.append(", claimPPSOldCapitalHoldHarmlessAmount=");
+		builder.append(claimPPSOldCapitalHoldHarmlessAmount);
+		builder.append(", nchDrugOutlierApprovedPaymentAmount=");
+		builder.append(nchDrugOutlierApprovedPaymentAmount);
 		builder.append(", diagnosisAdmitting=");
 		builder.append(diagnosisAdmitting);
 		builder.append(", diagnosisPrincipal=");
