@@ -13,6 +13,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +32,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifGenerator;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
 
@@ -78,10 +77,7 @@ public final class FhirLoaderIT {
 	@Test
 	public void loadRifDataSampleA() {
 		// Generate the sample RIF data to feed through the pipeline.
-		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_A.getResources();
-		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
-		Stream<RifFile> rifFilesStream = rifGenerator.generate();
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), StaticRifResourceGroup.SAMPLE_A.toRifFiles());
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
@@ -126,7 +122,7 @@ public final class FhirLoaderIT {
 
 		// Verify the results.
 		Assert.assertNotNull(resultsList);
-		Assert.assertEquals(rifResources.length, resultsList.size());
+		Assert.assertEquals(rifFilesEvent.getFiles().size(), resultsList.size());
 		assertResultIsLegit(resultsList);
 
 		/*
@@ -161,10 +157,7 @@ public final class FhirLoaderIT {
 	@Test
 	public void loadRifDataSampleB() {
 		// Generate the sample RIF data to feed through the pipeline.
-		StaticRifResource[] rifResources = StaticRifResourceGroup.SAMPLE_B.getResources();
-		StaticRifGenerator rifGenerator = new StaticRifGenerator(rifResources);
-		Stream<RifFile> rifFilesStream = rifGenerator.generate();
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), rifFilesStream.collect(Collectors.toSet()));
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), StaticRifResourceGroup.SAMPLE_B.toRifFiles());
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
@@ -205,6 +198,70 @@ public final class FhirLoaderIT {
 		 */
 		IGenericClient client = FhirTestUtilities.createFhirClient();
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(),
+				client.search().forResource(Patient.class).returnBundle(Bundle.class).execute().getTotal());
+
+		/*
+		 * Note that we're not really testing much for correctness here. That's
+		 * mostly covered in DataTransformerTest. Instead, the main goal here is
+		 * to ensure that all of the FHIR resources we're pushing are accepted
+		 * by the server as valid. Also: this particular test case benchmarks
+		 * performance a bit, given the number of resources it's pushing.
+		 */
+	}
+
+	/**
+	 * Verifies that the entire data pipeline works correctly: all the way from
+	 * generating sample data through extracting, transform, and finally loading
+	 * that data into a live FHIR server. Runs against
+	 * {@link StaticRifResourceGroup#SAMPLE_C}.
+	 */
+	@Test
+	@Ignore("Way too slow to leave enabled. Would take at least 70h on Karl's laptop, as of 2016-10-26.")
+	public void loadRifDataSampleC() {
+		// Generate the sample RIF data to feed through the pipeline.
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), StaticRifResourceGroup.SAMPLE_C.toRifFiles());
+
+		// Setup the metrics that we'll log to.
+		MetricRegistry fhirMetrics = new MetricRegistry();
+		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
+
+		// Create the processors that will handle each stage of the pipeline.
+		RifFilesProcessor processor = new RifFilesProcessor();
+		DataTransformer transformer = new DataTransformer();
+		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
+
+		// Create/update the shared data that FhirLoader will require.
+		new SharedDataManager(loader).upsertSharedData();
+
+		// Link up the pipeline and run it.
+		fhirMetricsReporter.start(5, TimeUnit.MINUTES);
+		Timer.Context timerDataSet = fhirMetrics.timer(MetricRegistry.name(FhirLoaderIT.class, "dataSet", "processed"))
+				.time();
+		List<FhirBundleResult> resultsList = new ArrayList<>();
+		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
+			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
+			loader.process(fhirInputBundles, error -> {
+				throw new RuntimeException(error);
+			}, result -> {
+				resultsList.add(result);
+			});
+		}
+		timerDataSet.stop();
+		fhirMetricsReporter.stop();
+
+		LOGGER.info("FHIR resources loaded.");
+		fhirMetricsReporter.report();
+
+		// Verify the results.
+		Assert.assertNotNull(resultsList);
+		assertResultIsLegit(resultsList);
+
+		/*
+		 * Run some spot-checks against the server, to verify that things look
+		 * as expected.
+		 */
+		IGenericClient client = FhirTestUtilities.createFhirClient();
+		Assert.assertEquals(StaticRifResource.SAMPLE_C_BENES.getRecordCount(),
 				client.search().forResource(Patient.class).returnBundle(Bundle.class).execute().getTotal());
 
 		/*

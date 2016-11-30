@@ -1,9 +1,16 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -18,9 +25,9 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
  * connections are not opened until needed.
  */
 public final class S3RifFile implements RifFile {
-	private final AmazonS3 s3Client;
 	private final RifFileType fileType;
-	private final GetObjectRequest objectRequest;
+	private final String displayName;
+	private final Path localTempFile;
 
 	/**
 	 * Constructs a new {@link S3RifFile} instance.
@@ -36,18 +43,17 @@ public final class S3RifFile implements RifFile {
 	 *            represented by this {@link S3RifFile}
 	 */
 	public S3RifFile(AmazonS3 s3Client, RifFileType fileType, GetObjectRequest objectRequest) {
-		this.s3Client = s3Client;
 		this.fileType = fileType;
-		this.objectRequest = objectRequest;
-	}
+		this.displayName = String.format("%s:%s", objectRequest.getBucketName(), objectRequest.getKey());
 
-	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getKey()
-	 */
-	@Override
-	public String getKey() {
-		// FIXME This op should be removed from the interface as it's not used.
-		throw new UnsupportedOperationException();
+		try (InputStream s3ObjectStream = s3Client.getObject(objectRequest).getObjectContent();) {
+			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
+			Files.copy(s3ObjectStream, localTempFile, StandardCopyOption.REPLACE_EXISTING);
+
+			this.localTempFile = localTempFile;
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	/**
@@ -63,16 +69,7 @@ public final class S3RifFile implements RifFile {
 	 */
 	@Override
 	public String getDisplayName() {
-		return String.format("%s:%s", objectRequest.getBucketName(), objectRequest.getKey());
-	}
-
-	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getLastModifiedTimestamp()
-	 */
-	@Override
-	public Instant getLastModifiedTimestamp() {
-		// FIXME This op should be removed from the interface as it's not used.
-		throw new UnsupportedOperationException();
+		return displayName;
 	}
 
 	/**
@@ -88,18 +85,22 @@ public final class S3RifFile implements RifFile {
 	 */
 	@Override
 	public InputStream open() {
-		return s3Client.getObject(objectRequest).getObjectContent();
+		try {
+			return new BufferedInputStream(new FileInputStream(localTempFile.toFile()));
+		} catch (FileNotFoundException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#delete()
+	 * Removes the local temporary file that was used to cache this
+	 * {@link S3RifFile}'s corresponding S3 object data locally.
 	 */
-	@Override
-	public void delete() {
-		/*
-		 * FIXME This op should be removed from the interface; wrong place for
-		 * it.
-		 */
-		throw new UnsupportedOperationException();
+	void cleanupTempFile() {
+		try {
+			Files.delete(localTempFile);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 }

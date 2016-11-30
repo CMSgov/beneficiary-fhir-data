@@ -48,7 +48,7 @@
         region: "{{ region }}"
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
         db_engine: postgres
-        size: 10
+        size: 500
         backup_retention: 0
         instance_type: "{{ rds_instance_type }}"
         publicly_accessible: false
@@ -204,7 +204,7 @@
       wait_for:
         path: "/usr/local/bluebutton-data-pipeline-app/etl-{{ iteration_index }}.log"
         search_regex: 'Data set deleted, now that processing is complete'
-        timeout: 1200
-      # Let it run for 20 minutes, checking it every 30s to see if it's done.
-      async: 1200
+        timeout: 28800
+      # Let it run for 8h, checking it every 30s to see if it's done.
+      async: 28800
       poll: 30

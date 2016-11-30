@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- This sample DataSetManifest file can be used for manual testing. Place it 
+	and the sample file(s) that it lists into a directory named: 
+	"1994-11-05T13:15:30Z" (matches the root's timestamp, below.) -->
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v1" 
+	timestamp="1994-11-05T13:15:30Z">
+
+	<!-- Copy from 
+		https://github.com/HHSIDEAlab/bluebutton-data-pipeline/raw/cbbd-55-s3-support/bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-a-beneficiaries.txt
+	-->
+	<entry name="sample-a-beneficiaries.txt" type="BENEFICIARY" />
+	
+	<!-- Copy from 
+		https://github.com/HHSIDEAlab/bluebutton-data-pipeline/raw/cbbd-55-s3-support/bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-a-bcarrier.txt
+	-->
+	<entry name="sample-a-bcarrier.txt" type="CARRIER" />
+
+</dataSetManifest>
