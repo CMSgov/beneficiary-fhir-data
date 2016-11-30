@@ -616,6 +616,31 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_NCVRD_CHRG_AMT));
 		claimGroup.totalDeductionAmount = parseDecimal(
 				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_TOT_DDCTN_AMT));
+
+		if (claimGroup.claimTotalPPSCapitalAmount.isPresent())
+			claimGroup.claimTotalPPSCapitalAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_TOT_PPS_CPTL_AMT)));
+		
+		if (claimGroup.claimPPSCapitalFSPAmount.isPresent())
+			claimGroup.claimPPSCapitalFSPAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_FSP_AMT)));
+		
+		if (claimGroup.claimPPSCapitalOutlierAmount.isPresent())
+			claimGroup.claimPPSCapitalOutlierAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_OUTLIER_AMT)));
+		
+		if (claimGroup.claimPPSCapitalDisproportionateShareAmt.isPresent())
+			claimGroup.claimPPSCapitalDisproportionateShareAmt = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT)));
+		
+		if (claimGroup.claimPPSCapitalIMEAmount.isPresent())
+			claimGroup.claimPPSCapitalIMEAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_IME_AMT)));
+		
+		if (claimGroup.claimPPSCapitalExceptionAmount.isPresent())
+			claimGroup.claimPPSCapitalExceptionAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_EXCPTN_AMT)));
+		
+		if (claimGroup.claimPPSOldCapitalHoldHarmlessAmount.isPresent())
+			claimGroup.claimPPSOldCapitalHoldHarmlessAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT)));
+		
+		if (claimGroup.nchDrugOutlierApprovedPaymentAmount.isPresent())
+			claimGroup.nchDrugOutlierApprovedPaymentAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.NCH_DRG_OUTLIER_APRVD_PMT_AMT)));
+
 		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_CD),
 				firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
 		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
@@ -646,6 +671,9 @@ public final class RifFilesProcessor {
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -726,6 +754,7 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_OP_PRVDR_PMT_AMT));
 		claimGroup.beneficiaryPaymentAmount = parseDecimal(
 				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_OP_BENE_PMT_AMT));
+		
 		/*
 		 * Parse the claim lines.
 		 */
@@ -756,6 +785,10 @@ public final class RifFilesProcessor {
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
+			
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -973,6 +1006,9 @@ public final class RifFilesProcessor {
 			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -1051,7 +1087,9 @@ public final class RifFilesProcessor {
 			claimLine.hcpcsSecondModifierCode = parseOptString(
 					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_2ND_MDFR_CD));
 
-
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -1122,6 +1160,10 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(HHAClaimGroup.Column.HCPCS_1ST_MDFR_CD));
 			claimLine.hcpcsSecondModifierCode = parseOptString(
 					claimLineRecord.get(HHAClaimGroup.Column.HCPCS_2ND_MDFR_CD));
+
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
 			claimGroup.lines.add(claimLine);
 		}
 
