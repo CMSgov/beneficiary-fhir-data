@@ -1,5 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
+import java.time.LocalDate;
+
 /**
  * A simple struct for modeling ICD codes, as stored in the CCW.
  */
@@ -7,6 +9,7 @@ public final class IcdCode {
 	private final IcdVersion version;
 	private final String code;
 	private final String presentOnAdmission;
+	private final LocalDate procedureDate;
 
 	/**
 	 * Constructs a new {@link IcdCode} instance.
@@ -17,18 +20,30 @@ public final class IcdCode {
 	 *            the value to use for {@link #getCode()}
 	 * @param code
 	 *            the value to use for {@link #getPresentOnAdmission()}
+	 * @param code
+	 *            the value to use for {@link #getProcedureDate()}
 	 */
 	public IcdCode(IcdVersion version, String code) {
 		this.version = version;
 		this.code = code;
 		this.presentOnAdmission = "";
+		this.procedureDate = null;
 	}
 
 	public IcdCode(IcdVersion version, String code, String presentOnAdmission) {
 		this.version = version;
 		this.code = code;
 		this.presentOnAdmission = presentOnAdmission;
+		this.procedureDate = null;
 	}
+
+	public IcdCode(IcdVersion version, String code, LocalDate procedureDate) {
+		this.version = version;
+		this.code = code;
+		this.procedureDate = procedureDate;
+		this.presentOnAdmission = "";
+	}
+
 	/**
 	 * @return the {@link IcdVersion} of this {@link IcdCode}
 	 */
@@ -48,6 +63,13 @@ public final class IcdCode {
 	 */
 	public String getPresentOnAdmission() {
 			return presentOnAdmission;
+	}
+
+	/**
+	 * @return the ICD procedure date
+	 */
+	public LocalDate getProcedureDate() {
+		return procedureDate;
 	}
 
 	/**
@@ -96,6 +118,8 @@ public final class IcdCode {
 		builder.append(code);
 		builder.append(", presentOnAdmission=");
 		builder.append(presentOnAdmission);
+		builder.append(", procedureDate=");
+		builder.append(procedureDate);
 		builder.append("]");
 		return builder.toString();
 	}

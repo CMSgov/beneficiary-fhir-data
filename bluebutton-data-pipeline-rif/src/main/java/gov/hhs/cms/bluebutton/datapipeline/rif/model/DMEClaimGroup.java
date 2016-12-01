@@ -167,8 +167,8 @@ public final class DMEClaimGroup {
 	/**
 	 * @see Column#CLM_CLNCL_TRIL_NUM
 	 */
-	public String clinicalTrialNumber;
-
+	public Optional<String> clinicalTrialNumber;
+	
 	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
 	 * columns: one entry for every "claim line" in the claim represented by
@@ -308,6 +308,16 @@ public final class DMEClaimGroup {
 		public Optional<String> hcpcsSecondModifierCode;
 
 		/**
+		 * @see Column#HCPCS_3RD_MDFR_CD
+		 */
+		public Optional<String> hcpcsThirdModifierCode;
+
+		/**
+		 * @see Column#HCPCS_4TH_MDFR_CD
+		 */
+		public Optional<String> hcpcsFourthModifierCode;
+		
+		/**
 		 * @see Column#BETOS_CD
 		 */
 		public Optional<String> betosCode;
@@ -443,6 +453,10 @@ public final class DMEClaimGroup {
 			builder.append(hcpcsInitialModifierCode);
 			builder.append(", hcpcsSecondModifierCode=");
 			builder.append(hcpcsSecondModifierCode);
+			builder.append(", hcpcsThirdModifierCode=");
+			builder.append(hcpcsThirdModifierCode);
+			builder.append(", hcpcsFourthModifierCode=");
+			builder.append(hcpcsFourthModifierCode);
 			builder.append(", betosCode=");
 			builder.append(betosCode);
 			builder.append(", paymentAmount=");
@@ -1091,12 +1105,16 @@ public final class DMEClaimGroup {
 		DMERC_LINE_SUPPLR_TYPE_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd3.txt">
+		 * CCW Data Dictionary: MDFR_CD3</a>.
 		 */
 		HCPCS_3RD_MDFR_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 5. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd4.txt">
+		 * CCW Data Dictionary: MDFR_CD4</a>.
 		 */
 		HCPCS_4TH_MDFR_CD,
 
@@ -1165,3 +1183,4 @@ public final class DMEClaimGroup {
 			System.out.print("|" + col);
 	}
 }
+

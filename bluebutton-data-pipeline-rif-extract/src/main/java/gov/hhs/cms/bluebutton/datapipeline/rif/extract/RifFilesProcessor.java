@@ -1,3 +1,4 @@
+
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.IOException;
@@ -65,6 +66,9 @@ public final class RifFilesProcessor {
 	 * etc. value that is currently supported.
 	 */
 	public static final int RECORD_FORMAT_VERSION = 5;
+
+	private static DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive()
+			.appendPattern("dd-MMM-yyyy").toFormatter();
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
@@ -559,6 +563,241 @@ public final class RifFilesProcessor {
 		return pdeRow;
 	}
 
+	private static InpatientClaimGroup buildInpatientClaimEvent(List<CSVRecord> csvRecords) {
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecords.toString());
+
+		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		InpatientClaimGroup claimGroup = new InpatientClaimGroup();
+
+		/*
+		 * Parse the claim header fields.
+		 */
+		claimGroup.version = parseInt(firstClaimLine.get(InpatientClaimGroup.Column.VERSION));
+		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(InpatientClaimGroup.Column.DML_IND));
+		claimGroup.beneficiaryId = firstClaimLine.get(InpatientClaimGroup.Column.BENE_ID);
+		claimGroup.claimId = firstClaimLine.get(InpatientClaimGroup.Column.CLM_ID);
+		claimGroup.nearLineRecordIdCode = parseCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
+		claimGroup.claimTypeCode = firstClaimLine.get(InpatientClaimGroup.Column.NCH_CLM_TYPE_CD);
+		claimGroup.dateFrom = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_FROM_DT));
+		claimGroup.dateThrough = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_THRU_DT));
+		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.providerNumber = firstClaimLine.get(InpatientClaimGroup.Column.PRVDR_NUM);
+		claimGroup.claimFacilityTypeCode = parseCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_FAC_TYPE_CD));
+		claimGroup.claimServiceClassificationTypeCode = parseCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_SRVC_CLSFCTN_TYPE_CD));
+		claimGroup.claimNonPaymentReasonCode = parseOptString(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_MDCR_NON_PMT_RSN_CD));
+		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PMT_AMT));
+		claimGroup.primaryPayerPaidAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_PRMRY_PYR_CLM_PD_AMT));
+		claimGroup.providerStateCode = firstClaimLine.get(InpatientClaimGroup.Column.PRVDR_STATE_CD);
+		claimGroup.organizationNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.ORG_NPI_NUM));
+		claimGroup.attendingPhysicianNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.AT_PHYSN_NPI));
+		claimGroup.operatingPhysicianNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.OP_PHYSN_NPI));
+		claimGroup.otherPhysicianNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.OT_PHYSN_NPI));
+		claimGroup.patientDischargeStatusCode = firstClaimLine.get(InpatientClaimGroup.Column.PTNT_DSCHRG_STUS_CD);
+		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_TOT_CHRG_AMT));
+		claimGroup.passThruPerDiemAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_PASS_THRU_PER_DIEM_AMT));
+		claimGroup.deductibleAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_IP_DDCTBL_AMT));
+		claimGroup.partACoinsuranceLiabilityAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_PTA_COINSRNC_LBLTY_AM));
+		claimGroup.bloodDeductibleLiabilityAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+		claimGroup.professionalComponentCharge = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_PROFNL_CMPNT_CHRG_AMT));
+		claimGroup.noncoveredCharge = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_NCVRD_CHRG_AMT));
+		claimGroup.totalDeductionAmount = parseDecimal(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_TOT_DDCTN_AMT));
+
+		if (claimGroup.claimTotalPPSCapitalAmount.isPresent())
+			claimGroup.claimTotalPPSCapitalAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_TOT_PPS_CPTL_AMT)));
+		
+		if (claimGroup.claimPPSCapitalFSPAmount.isPresent())
+			claimGroup.claimPPSCapitalFSPAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_FSP_AMT)));
+		
+		if (claimGroup.claimPPSCapitalOutlierAmount.isPresent())
+			claimGroup.claimPPSCapitalOutlierAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_OUTLIER_AMT)));
+		
+		if (claimGroup.claimPPSCapitalDisproportionateShareAmt.isPresent())
+			claimGroup.claimPPSCapitalDisproportionateShareAmt = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT)));
+		
+		if (claimGroup.claimPPSCapitalIMEAmount.isPresent())
+			claimGroup.claimPPSCapitalIMEAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_IME_AMT)));
+		
+		if (claimGroup.claimPPSCapitalExceptionAmount.isPresent())
+			claimGroup.claimPPSCapitalExceptionAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_CPTL_EXCPTN_AMT)));
+		
+		if (claimGroup.claimPPSOldCapitalHoldHarmlessAmount.isPresent())
+			claimGroup.claimPPSOldCapitalHoldHarmlessAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT)));
+		
+		if (claimGroup.nchDrugOutlierApprovedPaymentAmount.isPresent())
+			claimGroup.nchDrugOutlierApprovedPaymentAmount = Optional.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.NCH_DRG_OUTLIER_APRVD_PMT_AMT)));
+
+		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_CD),
+				firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
+		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
+				firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
+		claimGroup.diagnosesAdditional = parseIcdCodesWithPOA(firstClaimLine,
+				InpatientClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
+				InpatientClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
+		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(
+				firstClaimLine.get(InpatientClaimGroup.Column.FST_DGNS_E_CD),
+				firstClaimLine.get(InpatientClaimGroup.Column.FST_DGNS_E_VRSN_CD));
+		claimGroup.diagnosesExternal = parseIcdCodesWithPOA(firstClaimLine,
+				InpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
+				InpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+		claimGroup.procedureCodes = parseIcdCodesProcedure(firstClaimLine,
+				InpatientClaimGroup.Column.ICD_PRCDR_CD1.ordinal(),
+				InpatientClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
+
+		/*
+		 * Parse the claim lines.
+		 */
+		for (CSVRecord claimLineRecord : csvRecords) {
+			InpatientClaimLine claimLine = new InpatientClaimLine();
+
+			claimLine.lineNumber = parseInt(claimLineRecord.get(InpatientClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.HCPCS_CD));
+			claimLine.totalChargeAmount = parseDecimal(
+					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
+			claimLine.nonCoveredChargeAmount = parseDecimal(
+					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
+			claimGroup.lines.add(claimLine);
+		}
+
+		// Sanity check:
+		if (RECORD_FORMAT_VERSION != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+
+		return claimGroup;
+	}
+
+	private static OutpatientClaimGroup buildOutpatientClaimEvent(List<CSVRecord> csvRecords) {
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecords.toString());
+
+		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		OutpatientClaimGroup claimGroup = new OutpatientClaimGroup();
+
+		/*
+		 * Parse the claim header fields.
+		 */
+		claimGroup.version = parseInt(firstClaimLine.get(OutpatientClaimGroup.Column.VERSION));
+		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(OutpatientClaimGroup.Column.DML_IND));
+		claimGroup.beneficiaryId = firstClaimLine.get(OutpatientClaimGroup.Column.BENE_ID);
+		claimGroup.claimId = firstClaimLine.get(OutpatientClaimGroup.Column.CLM_ID);
+		claimGroup.nearLineRecordIdCode = parseCharacter(
+				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
+		claimGroup.claimTypeCode = firstClaimLine.get(OutpatientClaimGroup.Column.NCH_CLM_TYPE_CD);
+		claimGroup.dateFrom = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_FROM_DT));
+		claimGroup.dateThrough = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_THRU_DT));
+		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.providerNumber = firstClaimLine.get(OutpatientClaimGroup.Column.PRVDR_NUM);
+		claimGroup.claimFacilityTypeCode = parseCharacter(
+				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_FAC_TYPE_CD));
+		claimGroup.claimServiceClassificationTypeCode = parseCharacter(
+				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_SRVC_CLSFCTN_TYPE_CD));
+		claimGroup.claimNonPaymentReasonCode = parseOptString(
+				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_MDCR_NON_PMT_RSN_CD));
+		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_PMT_AMT));
+		claimGroup.primaryPayerPaidAmount = parseDecimal(
+				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_PRMRY_PYR_CLM_PD_AMT));
+		claimGroup.providerStateCode = firstClaimLine.get(OutpatientClaimGroup.Column.PRVDR_STATE_CD);
+		claimGroup.organizationNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.ORG_NPI_NUM));
+		claimGroup.attendingPhysicianNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.AT_PHYSN_NPI));
+		claimGroup.operatingPhysicianNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.OP_PHYSN_NPI));
+		claimGroup.otherPhysicianNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.OT_PHYSN_NPI));
+		claimGroup.patientDischargeStatusCode = parseOptString(
+				firstClaimLine.get(OutpatientClaimGroup.Column.PTNT_DSCHRG_STUS_CD));
+		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_TOT_CHRG_AMT));
+		claimGroup.bloodDeductibleLiabilityAmount = parseDecimal(
+				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
+		claimGroup.professionalComponentCharge = parseDecimal(
+				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_PROFNL_CMPNT_CHRG_AMT));
+		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(OutpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
+				firstClaimLine.get(OutpatientClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
+		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine,
+				OutpatientClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
+				OutpatientClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
+		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(
+				firstClaimLine.get(OutpatientClaimGroup.Column.FST_DGNS_E_CD),
+				firstClaimLine.get(OutpatientClaimGroup.Column.FST_DGNS_E_VRSN_CD));
+		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine,
+				OutpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
+				OutpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+
+		claimGroup.procedureCodes = parseIcdCodesProcedure(firstClaimLine,
+				OutpatientClaimGroup.Column.ICD_PRCDR_CD1.ordinal(),
+				OutpatientClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
+
+		claimGroup.diagnosesReasonForVisit = parseIcdCodes(firstClaimLine,
+				OutpatientClaimGroup.Column.RSN_VISIT_CD1.ordinal(),
+				OutpatientClaimGroup.Column.RSN_VISIT_VRSN_CD3.ordinal());
+		claimGroup.deductibleAmount = parseDecimal(
+				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_BENE_PTB_DDCTBL_AMT));
+		claimGroup.coninsuranceAmount = parseDecimal(
+				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_BENE_PTB_COINSRNC_AMT));
+		claimGroup.providerPaymentAmount = parseDecimal(
+				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_OP_PRVDR_PMT_AMT));
+		claimGroup.beneficiaryPaymentAmount = parseDecimal(
+				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_OP_BENE_PMT_AMT));
+		
+		/*
+		 * Parse the claim lines.
+		 */
+		for (CSVRecord claimLineRecord : csvRecords) {
+			OutpatientClaimLine claimLine = new OutpatientClaimLine();
+
+			claimLine.lineNumber = parseInt(claimLineRecord.get(OutpatientClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_CD));
+			claimLine.hcpcsInitialModifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_1ST_MDFR_CD));
+			claimLine.hcpcsSecondModifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_2ND_MDFR_CD));
+			claimLine.bloodDeductibleAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT)); 
+			claimLine.cashDeductibleAmount = parseDecimal( claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_CASH_DDCTBL_AMT));
+			claimLine.wageAdjustedCoinsuranceAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_COINSRNC_WGE_ADJSTD_C));
+			claimLine.reducedCoinsuranceAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_RDCD_COINSRNC_AMT));
+			claimLine.providerPaymentAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_PRVDR_PMT_AMT));
+			claimLine.benficiaryPaymentAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BENE_PMT_AMT));
+			claimLine.patientResponsibilityAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_PTNT_RSPNSBLTY_PMT));
+			claimLine.paymentAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_PMT_AMT_AMT));
+			claimLine.totalChargeAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
+			claimLine.nonCoveredChargeAmount = parseDecimal(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
+			
+			claimGroup.lines.add(claimLine);
+		}
+
+		// Sanity check:
+		if (RECORD_FORMAT_VERSION != claimGroup.version)
+			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+
+		return claimGroup;
+	}
+
 	/**
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
@@ -570,11 +809,11 @@ public final class RifFilesProcessor {
 	private static CarrierClaimGroup buildCarrierClaimEvent(List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
-
+	
 		CSVRecord firstClaimLine = csvRecords.get(0);
-
+	
 		CarrierClaimGroup claimGroup = new CarrierClaimGroup();
-
+	
 		/*
 		 * Parse the claim header fields.
 		 */
@@ -615,12 +854,14 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, CarrierClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				CarrierClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
+		claimGroup.clinicalTrialNumber = parseOptString(
+				firstClaimLine.get(CarrierClaimGroup.Column.CLM_CLNCL_TRIL_NUM));
 		/*
 		 * Parse the claim lines.
 		 */
 		for (CSVRecord claimLineRecord : csvRecords) {
 			CarrierClaimLine claimLine = new CarrierClaimLine();
-
+	
 			claimLine.clinicalTrialNumber = claimLineRecord.get(CarrierClaimGroup.Column.CLM_CLNCL_TRIL_NUM);
 			claimLine.number = parseInt(claimLineRecord.get(CarrierClaimGroup.Column.LINE_NUM));
 			claimLine.performingProviderIdNumber = claimLineRecord.get(CarrierClaimGroup.Column.CARR_PRFRNG_PIN_NUM);
@@ -690,211 +931,11 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_ANSTHSA_UNIT_CNT));
 			claimGroup.lines.add(claimLine);
 		}
-
+	
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
 			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
-
-		return claimGroup;
-	}
-
-	private static InpatientClaimGroup buildInpatientClaimEvent(List<CSVRecord> csvRecords) {
-		if (LOGGER.isTraceEnabled())
-			LOGGER.trace(csvRecords.toString());
-
-		CSVRecord firstClaimLine = csvRecords.get(0);
-
-		InpatientClaimGroup claimGroup = new InpatientClaimGroup();
-
-		/*
-		 * Parse the claim header fields.
-		 */
-		claimGroup.version = parseInt(firstClaimLine.get(InpatientClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(InpatientClaimGroup.Column.DML_IND));
-		claimGroup.beneficiaryId = firstClaimLine.get(InpatientClaimGroup.Column.BENE_ID);
-		claimGroup.claimId = firstClaimLine.get(InpatientClaimGroup.Column.CLM_ID);
-		claimGroup.nearLineRecordIdCode = parseCharacter(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
-		claimGroup.claimTypeCode = firstClaimLine.get(InpatientClaimGroup.Column.NCH_CLM_TYPE_CD);
-		claimGroup.dateFrom = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_FROM_DT));
-		claimGroup.dateThrough = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_THRU_DT));
-		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.NCH_WKLY_PROC_DT));
-		claimGroup.providerNumber = firstClaimLine.get(InpatientClaimGroup.Column.PRVDR_NUM);
-		claimGroup.claimFacilityTypeCode = parseCharacter(
-				firstClaimLine.get(InpatientClaimGroup.Column.CLM_FAC_TYPE_CD));
-		claimGroup.claimServiceClassificationTypeCode = parseCharacter(
-				firstClaimLine.get(InpatientClaimGroup.Column.CLM_SRVC_CLSFCTN_TYPE_CD));
-		claimGroup.claimNonPaymentReasonCode = parseOptString(
-				firstClaimLine.get(InpatientClaimGroup.Column.CLM_MDCR_NON_PMT_RSN_CD));
-		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_PMT_AMT));
-		claimGroup.primaryPayerPaidAmount = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_PRMRY_PYR_CLM_PD_AMT));
-		claimGroup.providerStateCode = firstClaimLine.get(InpatientClaimGroup.Column.PRVDR_STATE_CD);
-		claimGroup.organizationNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.ORG_NPI_NUM));
-		claimGroup.attendingPhysicianNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.AT_PHYSN_NPI));
-		claimGroup.operatingPhysicianNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.OP_PHYSN_NPI));
-		claimGroup.otherPhysicianNpi = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.OT_PHYSN_NPI));
-		claimGroup.patientDischargeStatusCode = firstClaimLine.get(InpatientClaimGroup.Column.PTNT_DSCHRG_STUS_CD);
-		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_TOT_CHRG_AMT));
-		claimGroup.passThruPerDiemAmount = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.CLM_PASS_THRU_PER_DIEM_AMT));
-		claimGroup.deductibleAmount = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_IP_DDCTBL_AMT));
-		claimGroup.partACoinsuranceLiabilityAmount = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_PTA_COINSRNC_LBLTY_AM));
-		claimGroup.bloodDeductibleLiabilityAmount = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
-		claimGroup.professionalComponentCharge = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_PROFNL_CMPNT_CHRG_AMT));
-		claimGroup.noncoveredCharge = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_NCVRD_CHRG_AMT));
-		claimGroup.totalDeductionAmount = parseDecimal(
-				firstClaimLine.get(InpatientClaimGroup.Column.NCH_IP_TOT_DDCTN_AMT));
-		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_CD),
-				firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
-		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
-				firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
-		claimGroup.diagnosesAdditional = parseIcdCodesWithPOA(firstClaimLine,
-				InpatientClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
-				InpatientClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
-		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(
-				firstClaimLine.get(InpatientClaimGroup.Column.FST_DGNS_E_CD),
-				firstClaimLine.get(InpatientClaimGroup.Column.FST_DGNS_E_VRSN_CD));
-		claimGroup.diagnosesExternal = parseIcdCodesWithPOA(firstClaimLine,
-				InpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
-				InpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
-
-		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
-		/*
-		 * Parse the claim lines.
-		 */
-		for (CSVRecord claimLineRecord : csvRecords) {
-			InpatientClaimLine claimLine = new InpatientClaimLine();
-
-			claimLine.lineNumber = parseInt(claimLineRecord.get(InpatientClaimGroup.Column.CLM_LINE_NUM));
-			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.HCPCS_CD));
-			claimLine.totalChargeAmount = parseDecimal(
-					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
-			claimLine.nonCoveredChargeAmount = parseDecimal(
-					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
-
-			claimGroup.lines.add(claimLine);
-		}
-
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
-
-		return claimGroup;
-	}
-
-	private static OutpatientClaimGroup buildOutpatientClaimEvent(List<CSVRecord> csvRecords) {
-		if (LOGGER.isTraceEnabled())
-			LOGGER.trace(csvRecords.toString());
-
-		CSVRecord firstClaimLine = csvRecords.get(0);
-
-		OutpatientClaimGroup claimGroup = new OutpatientClaimGroup();
-
-		/*
-		 * Parse the claim header fields.
-		 */
-		claimGroup.version = parseInt(firstClaimLine.get(OutpatientClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(OutpatientClaimGroup.Column.DML_IND));
-		claimGroup.beneficiaryId = firstClaimLine.get(OutpatientClaimGroup.Column.BENE_ID);
-		claimGroup.claimId = firstClaimLine.get(OutpatientClaimGroup.Column.CLM_ID);
-		claimGroup.nearLineRecordIdCode = parseCharacter(
-				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_NEAR_LINE_REC_IDENT_CD));
-		claimGroup.claimTypeCode = firstClaimLine.get(OutpatientClaimGroup.Column.NCH_CLM_TYPE_CD);
-		claimGroup.dateFrom = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_FROM_DT));
-		claimGroup.dateThrough = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_THRU_DT));
-		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.NCH_WKLY_PROC_DT));
-		claimGroup.providerNumber = firstClaimLine.get(OutpatientClaimGroup.Column.PRVDR_NUM);
-		claimGroup.claimFacilityTypeCode = parseCharacter(
-				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_FAC_TYPE_CD));
-		claimGroup.claimServiceClassificationTypeCode = parseCharacter(
-				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_SRVC_CLSFCTN_TYPE_CD));
-		claimGroup.claimNonPaymentReasonCode = parseOptString(
-				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_MDCR_NON_PMT_RSN_CD));
-		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_PMT_AMT));
-		claimGroup.primaryPayerPaidAmount = parseDecimal(
-				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_PRMRY_PYR_CLM_PD_AMT));
-		claimGroup.providerStateCode = firstClaimLine.get(OutpatientClaimGroup.Column.PRVDR_STATE_CD);
-		claimGroup.organizationNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.ORG_NPI_NUM));
-		claimGroup.attendingPhysicianNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.AT_PHYSN_NPI));
-		claimGroup.operatingPhysicianNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.OP_PHYSN_NPI));
-		claimGroup.otherPhysicianNpi = parseOptString(firstClaimLine.get(OutpatientClaimGroup.Column.OT_PHYSN_NPI));
-		claimGroup.patientDischargeStatusCode = parseOptString(
-				firstClaimLine.get(OutpatientClaimGroup.Column.PTNT_DSCHRG_STUS_CD));
-		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_TOT_CHRG_AMT));
-		claimGroup.bloodDeductibleLiabilityAmount = parseDecimal(
-				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
-		claimGroup.professionalComponentCharge = parseDecimal(
-				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_PROFNL_CMPNT_CHRG_AMT));
-		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(OutpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
-				firstClaimLine.get(OutpatientClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
-		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine,
-				OutpatientClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
-				OutpatientClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
-		claimGroup.diagnosisFirstClaimExternal = parseOptIcdCode(
-				firstClaimLine.get(OutpatientClaimGroup.Column.FST_DGNS_E_CD),
-				firstClaimLine.get(OutpatientClaimGroup.Column.FST_DGNS_E_VRSN_CD));
-		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine,
-				OutpatientClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
-				OutpatientClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
-
-		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
-
-		claimGroup.diagnosesReasonForVisit = parseIcdCodes(firstClaimLine,
-				OutpatientClaimGroup.Column.RSN_VISIT_CD1.ordinal(),
-				OutpatientClaimGroup.Column.RSN_VISIT_VRSN_CD3.ordinal());
-		claimGroup.deductibleAmount = parseDecimal(
-				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_BENE_PTB_DDCTBL_AMT));
-		claimGroup.coninsuranceAmount = parseDecimal(
-				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_BENE_PTB_COINSRNC_AMT));
-		claimGroup.providerPaymentAmount = parseDecimal(
-				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_OP_PRVDR_PMT_AMT));
-		claimGroup.beneficiaryPaymentAmount = parseDecimal(
-				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_OP_BENE_PMT_AMT));
-		/*
-		 * Parse the claim lines.
-		 */
-		for (CSVRecord claimLineRecord : csvRecords) {
-			OutpatientClaimLine claimLine = new OutpatientClaimLine();
-
-			claimLine.lineNumber = parseInt(claimLineRecord.get(OutpatientClaimGroup.Column.CLM_LINE_NUM));
-			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_CD));
-			claimLine.bloodDeductibleAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT)); 
-			claimLine.cashDeductibleAmount = parseDecimal( claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_CASH_DDCTBL_AMT));
-			claimLine.wageAdjustedCoinsuranceAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_COINSRNC_WGE_ADJSTD_C));
-			claimLine.reducedCoinsuranceAmount = parseDecimal(
-					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_RDCD_COINSRNC_AMT));
-			claimLine.providerPaymentAmount = parseDecimal(
-					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_PRVDR_PMT_AMT));
-			claimLine.benficiaryPaymentAmount = parseDecimal(
-					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BENE_PMT_AMT));
-			claimLine.patientResponsibilityAmount = parseDecimal(
-					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_PTNT_RSPNSBLTY_PMT));
-			claimLine.paymentAmount = parseDecimal(
-					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_PMT_AMT_AMT));
-			claimLine.totalChargeAmount = parseDecimal(
-					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
-			claimLine.nonCoveredChargeAmount = parseDecimal(
-					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
-
-			claimGroup.lines.add(claimLine);
-		}
-
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
-
+	
 		return claimGroup;
 	}
 
@@ -952,11 +993,8 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(SNFClaimGroup.Column.FST_DGNS_E_VRSN_CD));
 		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine, SNFClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				SNFClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
-
-		/*
-		 * TODO Need to parse procedure codes once STU3 is available
-		 * 
-		 */
+		claimGroup.procedureCodes = parseIcdCodesProcedure(firstClaimLine,
+				SNFClaimGroup.Column.ICD_PRCDR_CD1.ordinal(), SNFClaimGroup.Column.ICD_PRCDR_VRSN_CD25.ordinal());
 		/*
 		 * Parse the claim lines.
 		 */
@@ -967,6 +1005,9 @@ public final class RifFilesProcessor {
 			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -1021,6 +1062,7 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(HospiceClaimGroup.Column.FST_DGNS_E_VRSN_CD));
 		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine, HospiceClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				HospiceClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+		claimGroup.claimHospiceStartDate = parseDate(firstClaimLine.get(HospiceClaimGroup.Column.CLM_HOSPC_START_DT_ID));
 
 		/*
 		 * Parse the claim lines.
@@ -1039,7 +1081,14 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+			claimLine.hcpcsInitialModifierCode = parseOptString(
+					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_1ST_MDFR_CD));
+			claimLine.hcpcsSecondModifierCode = parseOptString(
+					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_2ND_MDFR_CD));
 
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -1106,7 +1155,14 @@ public final class RifFilesProcessor {
 			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+			claimLine.hcpcsInitialModifierCode = parseOptString(
+					claimLineRecord.get(HHAClaimGroup.Column.HCPCS_1ST_MDFR_CD));
+			claimLine.hcpcsSecondModifierCode = parseOptString(
+					claimLineRecord.get(HHAClaimGroup.Column.HCPCS_2ND_MDFR_CD));
 
+			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
+				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
+			}
 			claimGroup.lines.add(claimLine);
 		}
 
@@ -1169,7 +1225,7 @@ public final class RifFilesProcessor {
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, DMEClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				DMEClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
 		claimGroup.referringPhysicianNpi = parseOptString(firstClaimLine.get(DMEClaimGroup.Column.RFR_PHYSN_NPI));
-		claimGroup.clinicalTrialNumber = firstClaimLine.get(DMEClaimGroup.Column.CLM_CLNCL_TRIL_NUM);
+		claimGroup.clinicalTrialNumber = parseOptString(firstClaimLine.get(DMEClaimGroup.Column.CLM_CLNCL_TRIL_NUM));
 
 		/*
 		 * Parse the claim lines.
@@ -1191,6 +1247,10 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_1ST_MDFR_CD));
 			claimLine.hcpcsSecondModifierCode = parseOptString(
 					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_2ND_MDFR_CD));
+			claimLine.hcpcsThirdModifierCode = parseOptString(
+					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_3RD_MDFR_CD));
+			claimLine.hcpcsFourthModifierCode = parseOptString(
+					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_4TH_MDFR_CD));
 			claimLine.betosCode = parseOptString(claimLineRecord.get(DMEClaimGroup.Column.BETOS_CD));
 			claimLine.paymentAmount = parseDecimal(claimLineRecord.get(DMEClaimGroup.Column.LINE_NCH_PMT_AMT));
 			claimLine.beneficiaryPaymentAmount = parseDecimal(
@@ -1377,6 +1437,20 @@ public final class RifFilesProcessor {
 	}
 
 	/**
+	 * @param icdCode
+	 *            the value to use for {@link IcdCode#getCode()}
+	 * @param icdVersion
+	 *            the value to parse and use for {@link IcdCode#getVersion()}
+	 * @param icdProcedureDate
+	 *            the value to parse and use for
+	 *            {@link IcdCode#getProcedureDate()}
+	 * @return an {@link IcdCode} instance built from the specified values
+	 */
+	private static IcdCode parseIcdCode(String icdCode, String icdVersion, LocalDate icdProcedureDate) {
+		return new IcdCode(IcdVersion.parse(icdVersion), icdCode, icdProcedureDate);
+	}
+
+	/**
 	 * Parses {@link IcdCode}s out of the specified columns of the specified
 	 * {@link CSVRecord}. The columns must be arranged in code and version
 	 * pairs; the first column specified must represent an ICD code, the next
@@ -1457,6 +1531,52 @@ public final class RifFilesProcessor {
 				throw new IllegalArgumentException(
 						String.format("Unexpected ICD code/ver/poa : '%s' and '%s' and '%s'.", icdCodeText,
 								icdVersionText, icdPresentOnAdmissionCode));
+		}
+
+		return icdCodes;
+	}
+
+	/**
+	 * Parses {@link IcdCode}s out of the specified columns of the specified
+	 * {@link CSVRecord}. The columns must be arranged in order of code, version
+	 * and procedure date; the first column specified must represent an ICD
+	 * code, the next column must represent an ICD version (as can be parsed by
+	 * {@link IcdVersion#parse(String)}), next column is procedure date and this
+	 * sequence must repeat for all of the specified columns.
+	 * 
+	 * @param csvRecord
+	 *            the {@link CSVRecord} to parse the {@link IcdCode}s from
+	 * @param icdColumnFirst
+	 *            the first column ordinal to parse from, which must contain an
+	 *            {@link IcdCode#getCode()} value
+	 * @param icdColumnLast
+	 *            the last column ordinal to parse from, which must contain a
+	 *            value that could be parsed by {@link IcdVersion#parse(String)}
+	 * @return the {@link IcdCode}s contained in the specified columns of the
+	 *         specified {@link CSVRecord}
+	 */
+	private static List<IcdCode> parseIcdCodesProcedure(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
+		if ((icdColumnLast - icdColumnFirst) < 1)
+			throw new BadCodeMonkeyException();
+		if ((icdColumnLast - icdColumnFirst + 2) % 3 != 0)
+			throw new BadCodeMonkeyException();
+
+		List<IcdCode> icdCodes = new LinkedList<>();
+		for (int i = icdColumnFirst; i < icdColumnLast; i += 3) {
+			String icdCodeText = csvRecord.get(i);
+			String icdVersionText = csvRecord.get(i + 1);
+			LocalDate icdProcedureDate = null;
+			if (!csvRecord.get(i + 2).isEmpty()) {
+				icdProcedureDate = LocalDate.parse(csvRecord.get(i + 2), formatter);
+			}
+			if (icdCodeText.isEmpty() && icdVersionText.isEmpty())
+				continue;
+			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty() && !icdProcedureDate.toString().isEmpty())
+				icdCodes.add(parseIcdCode(icdCodeText, icdVersionText, icdProcedureDate));
+			else
+				throw new IllegalArgumentException(
+						String.format("Unexpected ICD code/ver/date : '%s' and '%s' and '%s'.", icdCodeText,
+								icdVersionText, icdProcedureDate));
 		}
 
 		return icdCodes;

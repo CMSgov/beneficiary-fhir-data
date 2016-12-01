@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.Column;
+
 /**
  * <p>
  * Models rows from {@link RifFileType#HOSPICE} RIF files. Rows in this file are
@@ -50,7 +52,7 @@ public final class HospiceClaimGroup {
 	 * @see Column#CLM_ID
 	 */
 	public String claimId;
-
+	
 	/**
 	 * @see Column#NCH_NEAR_LINE_REC_IDENT_CD
 	 */
@@ -95,7 +97,12 @@ public final class HospiceClaimGroup {
 	 * @see Column#CLM_MDCR_NON_PMT_RSN_CD
 	 */
 	public Optional<String> claimNonPaymentReasonCode;
-
+	
+	/**
+	 * @see Column#CLM_HOSPC_START_DT_ID
+	 */
+	public LocalDate claimHospiceStartDate;
+	
 	/**
 	 * @see Column#CLM_PMT_AMT
 	 */
@@ -181,6 +188,8 @@ public final class HospiceClaimGroup {
 		builder.append(dateThrough);
 		builder.append(", weeklyProcessDate=");
 		builder.append(weeklyProcessDate);
+		builder.append(", claimHospiceStartDate=");
+		builder.append(claimHospiceStartDate);
 		builder.append(", providerNumber=");
 		builder.append(providerNumber);
 		builder.append(", claimFacilityTypeCode=");
@@ -265,6 +274,22 @@ public final class HospiceClaimGroup {
 		 */
 		public BigDecimal nonCoveredChargeAmount;
 
+		/**
+		 * @see Column#RNDRNG_PHYSN_NPI
+		 */
+		public Optional<String> revenueCenterRenderingPhysicianNPI;
+
+		/**
+		 * @see Column#HCPCS_1ST_MDFR_CD
+		 */
+		public Optional<String> hcpcsInitialModifierCode;
+
+		/**
+		 * @see Column#HCPCS_2ND_MDFR_CD
+		 */
+		public Optional<String> hcpcsSecondModifierCode;
+
+
 	/**
 	 * @see java.lang.Object#toString()
 	 */
@@ -285,6 +310,10 @@ public final class HospiceClaimGroup {
 		builder.append(totalChargeAmount);
 		builder.append(", nonCoveredChargeAmount=");
 		builder.append(nonCoveredChargeAmount);
+		builder.append(", hcpcsInitialModifierCode=");
+		builder.append(hcpcsInitialModifierCode);
+		builder.append(", hcpcsSecondModifierCode=");
+		builder.append(hcpcsSecondModifierCode);
 		builder.append("]");
 		return builder.toString();
 		}
@@ -1049,7 +1078,10 @@ public final class HospiceClaimGroup {
 		ICD_DGNS_E_VRSN_CD12,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hspcstrt.txt">
+		 * CCW Data Dictionary: HSPCSTRT</a>.
 		 */
 		CLM_HOSPC_START_DT_ID,
 
@@ -1159,7 +1191,9 @@ public final class HospiceClaimGroup {
 		RNDRNG_PHYSN_UPIN,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>String</code>, max chars: NA. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt">
+		 * CCW Data Dictionary: RNDRNG_PHYSN_NPI</a>.
 		 */
 		RNDRNG_PHYSN_NPI;
 

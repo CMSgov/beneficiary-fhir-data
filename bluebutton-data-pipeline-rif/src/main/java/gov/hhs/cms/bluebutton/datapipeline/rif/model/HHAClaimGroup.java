@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.Column;
+
 /**
  * <p>
  * Models rows from {@link RifFileType#HHA} RIF files. Rows in this file are
@@ -45,7 +47,13 @@ public final class HHAClaimGroup {
 	 * @see Column#BENE_ID
 	 */
 	public String beneficiaryId;
-
+	
+	/**
+	 * @see Column#ORG_NPI_NUM
+	 * put organization reference to it.
+	 */
+	public String author;
+	
 	/**
 	 * @see Column#CLM_ID
 	 */
@@ -110,7 +118,7 @@ public final class HHAClaimGroup {
 	 * @see Column#PRVDR_STATE_CD
 	 */
 	public String providerStateCode;
-
+	
 	/**
 	 * @see Column#ORG_NPI_NUM
 	 */
@@ -240,6 +248,22 @@ public final class HHAClaimGroup {
 		public Optional<String> hcpcsCode;
 
 		/**
+		 * @see Column#HCPCS_1ST_MDFR_CD
+		 */
+		public Optional<String> hcpcsInitialModifierCode;
+
+		
+		/**
+		 * @see Column#HCPCS_2ND_MDFR_CD
+		 */
+		public Optional<String> hcpcsSecondModifierCode;
+
+		/**
+		 * @see Column#RNDRNG_PHYSN_NPI
+		 */
+		public Optional<String> revenueCenterRenderingPhysicianNPI;
+		
+		/**
 		 * @see Column#REV_CNTR_PMT_AMT_AMT
 		 */
 		public BigDecimal paymentAmount;
@@ -264,6 +288,10 @@ public final class HHAClaimGroup {
 			builder.append(lineNumber);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
+			builder.append(", hcpcsInitialModifierCode=");
+			builder.append(hcpcsInitialModifierCode);
+			builder.append(", hcpcsSecondModifierCode=");
+			builder.append(hcpcsSecondModifierCode);
 			builder.append(", paymentAmount=");
 			builder.append(paymentAmount);
 			builder.append(", totalChargeAmount=");
@@ -1079,12 +1107,18 @@ public final class HHAClaimGroup {
 		HCPCS_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt">
+		 * CCW Data Dictionary: MDFR_CD1</a>.
 		 */
 		HCPCS_1ST_MDFR_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd2.txt">
+		 * CCW Data Dictionary: MDFR_CD2</a>.
 		 */
 		HCPCS_2ND_MDFR_CD,
 
@@ -1150,7 +1184,9 @@ public final class HHAClaimGroup {
 		RNDRNG_PHYSN_UPIN,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>String</code>, max chars: NA. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt">
+		 * CCW Data Dictionary: RNDRNG_PHYSN_NPI</a>.
 		 */
 		RNDRNG_PHYSN_NPI;
 

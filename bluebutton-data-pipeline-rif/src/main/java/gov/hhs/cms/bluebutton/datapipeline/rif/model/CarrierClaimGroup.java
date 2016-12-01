@@ -170,6 +170,11 @@ public final class CarrierClaimGroup {
 	public List<IcdCode> diagnosesAdditional = new LinkedList<>();
 
 	/**
+	 * @see Column#CLM_CLNCL_TRIL_NUM
+	 */
+	public Optional<String> clinicalTrialNumber;
+
+	/**
 	 * Represents the data contained in {@link Column#LINE_NUM} and subsequent
 	 * columns: one entry for every "claim line" in the claim represented by
 	 * this {@link CarrierClaimGroup} instance.
@@ -939,7 +944,8 @@ public final class CarrierClaimGroup {
 		ICD_DGNS_VRSN_CD12,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 8. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt">
 		 * CCW Data Dictionary: CCLTRNUM</a>.
 		 */
