@@ -113,6 +113,8 @@ public final class DataTransformerTest {
 		pdeRecord.pharmacyTypeCode = "01";
 		pdeRecord.patientResidenceCode = "02";
 		pdeRecord.submissionClarificationCode = Optional.of("08");
+		pdeRecord.serviceProviderIdQualiferCode = "01"; 
+		pdeRecord.prescriberIdQualifierCode = "01";
 	}
 
 	/**
@@ -256,6 +258,10 @@ public final class DataTransformerTest {
 		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, eob.getPatientReference().getReference());
 		Assert.assertEquals(Date.valueOf(pdeRecord.paymentDate.get()), eob.getPayment().getDate());
 
+		Assert.assertEquals("01", pdeRecord.serviceProviderIdQualiferCode); 
+		Assert.assertEquals("01", pdeRecord.prescriberIdQualifierCode);
+		
+		
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 		/*
 		 * FIXME item.type field for

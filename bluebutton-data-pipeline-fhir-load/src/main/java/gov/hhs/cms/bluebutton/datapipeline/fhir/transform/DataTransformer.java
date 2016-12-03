@@ -609,7 +609,11 @@ public final class DataTransformer {
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
 			throw new BadCodeMonkeyException();
-
+		if (record.serviceProviderIdQualiferCode == null || !record.serviceProviderIdQualiferCode.equalsIgnoreCase("01")) 
+			throw new IllegalArgumentException("Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
+		if (record.prescriberIdQualifierCode == null || !record.prescriberIdQualifierCode.equalsIgnoreCase("01")) 
+			throw new IllegalArgumentException("Prescriber ID Qualifier Code is invalid: " + record.prescriberIdQualifierCode);
+				
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
