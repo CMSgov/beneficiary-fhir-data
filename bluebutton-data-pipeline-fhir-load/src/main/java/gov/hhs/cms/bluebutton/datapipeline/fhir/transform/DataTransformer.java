@@ -400,6 +400,8 @@ public final class DataTransformer {
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt">
 	 * CCW Data Dictionary: RPTD_GAP_DSCNT_NUM</a>.
 	 */
+	static final String CODED_PRESCRIPTION_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id.txt";
+	
 	static final String CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT = "Medicare Coverage Gap Discount Amount";
 
 	static final String CODED_ADJUDICATION_GDCB = "Gross Drug Cost Below Out-of-Pocket Threshold (GDCB)";
@@ -619,6 +621,8 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
+		eob.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM).setValue(String.valueOf(record.prescriptionReferenceNumber));
+		
 		eob.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_CLAIM_TYPE).setCode("pharmacy"));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
@@ -754,8 +758,10 @@ public final class DataTransformer {
 		 * prescriber, prescriberRef.getReference());
 		 */
 
-		eob.setProvider(new Identifier().setValue(record.prescriberId));
-
+		if (record.prescriberId != null) {
+			rxItem.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODED_PRESCRIPTION_ID).setValue(record.prescriberId));
+		}
+		
 		/*
 		 * Upsert Medication using NDC as the ID.
 		 */
@@ -795,8 +801,7 @@ public final class DataTransformer {
 		rxItem.setQuantity(quantityDispensed);
 
 		rxItem.addModifier(new Coding().setSystem(CODING_SYSTEM_PDE_DAYS_SUPPLY).setCode(record.daysSupply.toString()));
-		rxItem.addModifier(new Coding().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
-				.setCode(record.prescriptionReferenceNumber.toString()));
+
 		/*
 		 * TODO Populate substitution.allowed and substitution.reason once STU3
 		 * structures are available.
