@@ -944,6 +944,7 @@ public final class DataTransformer {
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
+			referral.setRequester(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
 			referral.addRecipient(referrerReference);
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
@@ -1362,6 +1363,14 @@ public final class DataTransformer {
 			BenefitComponent bloodDeductibleLiabilityAmount = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
 			bloodDeductibleLiabilityAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.bloodDeductibleLiabilityAmount));
 			benefitBalances.getFinancial().add(bloodDeductibleLiabilityAmount);
+		}
+
+		if (claimGroup.professionalComponentCharge != null) {
+			BenefitComponent benefitProfessionComponentAmt = new BenefitComponent(
+					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PROFFESIONAL_CHARGE_URL));
+			benefitProfessionComponentAmt.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.professionalComponentCharge));
+			benefitBalances.getFinancial().add(benefitProfessionComponentAmt);
 		}
 
 		if (claimGroup.deductibleAmount != null) {
@@ -1983,6 +1992,7 @@ public final class DataTransformer {
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
+			referral.setRequester(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
 			referral.addRecipient(referrerReference);
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
