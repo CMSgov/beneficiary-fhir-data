@@ -766,6 +766,7 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_1ST_MDFR_CD));
 			claimLine.hcpcsSecondModifierCode = parseOptString(
 					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_2ND_MDFR_CD));
+
 			claimLine.bloodDeductibleAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT)); 
 			claimLine.cashDeductibleAmount = parseDecimal( claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_CASH_DDCTBL_AMT));
 			claimLine.wageAdjustedCoinsuranceAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_COINSRNC_WGE_ADJSTD_C));
@@ -783,6 +784,10 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+
+			claimLine.nationalDrugCodeQuantity = parseOptInteger(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
+
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
 				claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.RNDRNG_PHYSN_NPI));
@@ -1315,8 +1320,21 @@ public final class RifFilesProcessor {
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
 		 */
-
 		return Integer.parseInt(intText);
+	}
+
+	/**
+	 * @param intText
+	 *            the number string to parse
+	 * @return an {@link Optional} populated with a {@link Integer} if the input
+	 *         has data, or an empty Optional if not
+	 */
+	private static Optional<Integer> parseOptInteger(String intText) {
+		if (intText.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return Optional.of(parseInt(intText));
+		}
 	}
 
 	/**

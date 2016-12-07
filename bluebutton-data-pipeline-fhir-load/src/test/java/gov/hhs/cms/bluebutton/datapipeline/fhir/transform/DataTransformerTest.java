@@ -922,6 +922,7 @@ public final class DataTransformerTest {
 		record.recordAction = RecordAction.INSERT;
 		record.beneficiaryId = "444444";
 		record.claimId = "1234567890";
+		record.claimTypeCode = "40";
 		record.dateFrom = LocalDate.of(2011, 01, 24);
 		record.dateThrough = LocalDate.of(2011, 01, 24);
 		record.patientDischargeStatusCode = Optional.of("1");
@@ -957,6 +958,7 @@ public final class DataTransformerTest {
 		recordLine1.hcpcsCode = Optional.of("M99");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("XX");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
+		recordLine1.nationalDrugCode = Optional.of("987654321");
 		recordLine1.bloodDeductibleAmount = new BigDecimal("10.45");
 		recordLine1.cashDeductibleAmount = new BigDecimal("12.89");
 		recordLine1.wageAdjustedCoinsuranceAmount = new BigDecimal("15.23");
@@ -967,6 +969,8 @@ public final class DataTransformerTest {
 		recordLine1.paymentAmount = new BigDecimal("5000.00");
 		recordLine1.totalChargeAmount = new BigDecimal("9999.85");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("134.00");
+		recordLine1.nationalDrugCodeQuantity = Optional.of(new Integer(77));
+		recordLine1.nationalDrugCodeQualifierCode = Optional.of("GG");
 		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("1234AA");
 
 		RifFile file = new MockRifFile();
@@ -988,10 +992,10 @@ public final class DataTransformerTest {
 		Bundle claimBundle = OutpatientBundleWrapper.getResult();
 
 		/*
-		 * Bundle should have: 1) EOB, 2) Organization
+		 * Bundle should have: 1) EOB
 		 */
 
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
@@ -1035,18 +1039,24 @@ public final class DataTransformerTest {
 				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
 				);
 
-		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
-				.filter(r -> r.getResource() instanceof Organization).findAny().get();
-		Organization organization = (Organization) organizationEntry.getResource();
-		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
-				organization.getIdentifier());
-		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get()).getReference(),
-				organizationEntry.getRequest().getUrl());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				organization.getType().getCoding().get(0));
-		Assert.assertEquals(record.organizationNpi.get(), eob.getAuthorIdentifier().getValue());
+		/*
+		 * BundleEntryComponent organizationEntry =
+		 * claimBundle.getEntry().stream() .filter(r -> r.getResource()
+		 * instanceof Organization).findAny().get(); Organization organization =
+		 * (Organization) organizationEntry.getResource();
+		 * assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US,
+		 * record.organizationNpi.get(), organization.getIdentifier());
+		 * Assert.assertEquals(HTTPVerb.PUT,
+		 * organizationEntry.getRequest().getMethod()); Assert.assertEquals(
+		 * DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get
+		 * ()).getReference(), organizationEntry.getRequest().getUrl());
+		 * assertCodingEquals(DataTransformer.
+		 * CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
+		 * record.claimFacilityTypeCode.toString(),
+		 * organization.getType().getCoding().get(0));
+		 * Assert.assertEquals(record.organizationNpi.get(),
+		 * eob.getAuthorIdentifier().getValue());
+		 */
 
 		Assert.assertEquals(record.claimServiceClassificationTypeCode.toString(),
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0)
@@ -1081,9 +1091,10 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC, recordLine1.nationalDrugCode.get(),
 				eobItem0.getService());
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
+		Assert.assertEquals(recordLine1.hcpcsCode.get(), eobItem0.getModifier().get(0).getCode());
+		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(1).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE,
