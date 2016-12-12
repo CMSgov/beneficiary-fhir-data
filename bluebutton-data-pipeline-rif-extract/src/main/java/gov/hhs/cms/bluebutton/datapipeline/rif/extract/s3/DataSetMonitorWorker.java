@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
@@ -53,7 +54,20 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 final class DataSetMonitorWorker implements Runnable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
 
-	private static final Pattern REGEX_MANIFEST = Pattern.compile("^(.*)\\/manifest\\.xml$");
+	/**
+	 * The directory name that pending/incoming RIF data sets will be pulled
+	 * from in S3.
+	 */
+	public static final String S3_PREFIX_PENDING_DATA_SETS = "Incoming";
+
+	/**
+	 * The directory name that completed/done RIF data sets will be moved to in
+	 * S3.
+	 */
+	public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
+
+	private static final Pattern REGEX_PENDING_MANIFEST = Pattern
+			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
 
 	private final String bucketName;
 	private final DataSetMonitorListener listener;
@@ -105,7 +119,7 @@ final class DataSetMonitorWorker implements Runnable {
 		do {
 			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
 				String key = objectSummary.getKey();
-				if (REGEX_MANIFEST.matcher(key).matches()) {
+				if (REGEX_PENDING_MANIFEST.matcher(key).matches()) {
 					/*
 					 * We've got an object that *looks like* it might be a
 					 * manifest file. But we also need to ensure that it starts
@@ -184,8 +198,8 @@ final class DataSetMonitorWorker implements Runnable {
 		 */
 		LOGGER.info("Data set finished uploading and ready to process.");
 		Set<S3RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
-			String key = String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()),
-					e.getName());
+			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
+					DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName());
 			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(bucketName, key));
 		}).collect(Collectors.toSet());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), new HashSet<>(rifFiles));
@@ -194,22 +208,14 @@ final class DataSetMonitorWorker implements Runnable {
 		/*
 		 * Now that the data set has been processed, we need to ensure that we
 		 * don't end up processing it again. We ensure this two ways: 1) we keep
-		 * a list of the data sets most recently processed, and 2) we delete the
-		 * S3 objects that comprise that data set. (#1 is required as S3 deletes
-		 * are only *eventually* consistent, so #2 may not take effect right
-		 * away.)
+		 * a list of the data sets most recently processed, and 2) we rename the
+		 * S3 objects that comprise that data set. (#1 is required as S3
+		 * deletes/moves are only *eventually* consistent, so #2 may not take
+		 * effect right away.)
 		 */
 		rifFiles.stream().forEach(f -> f.cleanupTempFile());
 		recentlyProcessedManifests.add(dataSetManifest.getTimestamp());
-		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
-		deleteObjectsRequest.setKeys(dataSetManifest.getEntries()
-				.stream().map(e -> String.format("%s/%s",
-						DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName()))
-				.map(k -> new KeyVersion(k)).collect(Collectors.toList()));
-		deleteObjectsRequest.getKeys().add(new KeyVersion(String.format("%s/manifest.xml",
-				DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()))));
-		s3Client.deleteObjects(deleteObjectsRequest);
-		LOGGER.info("Data set deleted, now that processing is complete.");
+		markDataSetCompleteInS3(dataSetManifest);
 	}
 
 	/**
@@ -219,7 +225,7 @@ final class DataSetMonitorWorker implements Runnable {
 	 *         manifest object key
 	 */
 	private static Instant parseDataSetTimestamp(String key) {
-		Matcher manifestKeyMatcher = REGEX_MANIFEST.matcher(key);
+		Matcher manifestKeyMatcher = REGEX_PENDING_MANIFEST.matcher(key);
 		manifestKeyMatcher.matches();
 
 		String dataSetId = manifestKeyMatcher.group(1);
@@ -288,7 +294,8 @@ final class DataSetMonitorWorker implements Runnable {
 		 * option #1.
 		 */
 
-		String dataSetKeyPrefix = String.format("%s/", DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()));
+		String dataSetKeyPrefix = String.format("%s/%s/", S3_PREFIX_PENDING_DATA_SETS,
+				DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()));
 
 		ListObjectsRequest bucketListRequest = new ListObjectsRequest();
 		bucketListRequest.setBucketName(bucketName);
@@ -316,5 +323,57 @@ final class DataSetMonitorWorker implements Runnable {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Deletes the (now complete) data set in S3, after copying it to a
+	 * "<code>Done</code>" folder in the same bucket.
+	 * 
+	 * @param dataSetManifest
+	 *            the {@link DataSetManifest} of the data set to mark as
+	 *            complete
+	 */
+	private void markDataSetCompleteInS3(DataSetManifest dataSetManifest) {
+		/*
+		 * S3 doesn't support batch/transactional operations, or an atomic move
+		 * operation. Instead, we have to first copy all of the objects to their
+		 * new location, and then remove the old objects. If something blows up
+		 * in the middle of this method, orphaned S3 object WILL be created.
+		 * That's an unlikely enough occurrence, though, that we're not going to
+		 * engineer around it right now.
+		 */
+
+		// First, get a list of all the object keys to work on.
+		List<String> s3KeySuffixesToMove = dataSetManifest.getEntries()
+				.stream().map(e -> String.format("%s/%s",
+						DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName()))
+				.collect(Collectors.toList());
+		s3KeySuffixesToMove.add(
+				String.format("%s/manifest.xml", DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp())));
+
+		/*
+		 * Then, loop through each of those objects and copy them (S3 has no
+		 * bulk copy operation).
+		 */
+		for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
+			String sourceKey = String.format("%s/%s", S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
+			String targetKey = String.format("%s/%s", S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
+
+			/*
+			 * The S3 API will automatically ensure that the copied object is
+			 * encrypted with the same key (if any) as the source object.
+			 */
+			s3Client.copyObject(bucketName, sourceKey, bucketName, targetKey);
+		}
+		LOGGER.debug("Data set copied in S3 (step 1 of move).");
+
+		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
+		deleteObjectsRequest
+				.setKeys(s3KeySuffixesToMove.stream().map(k -> String.format("%s/%s", S3_PREFIX_PENDING_DATA_SETS, k))
+						.map(k -> new KeyVersion(k)).collect(Collectors.toList()));
+		s3Client.deleteObjects(deleteObjectsRequest);
+		LOGGER.debug("Data set deleted in S3 (step 2 of move).");
+
+		LOGGER.info("Data set renamed in S3, now that processing is complete.");
 	}
 }
