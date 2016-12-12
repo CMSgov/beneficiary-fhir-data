@@ -91,7 +91,7 @@ public final class DataTransformerTest {
 		pdeRecord.quantityDispensed = new BigDecimal(60);
 		pdeRecord.daysSupply = new Integer(30);
 		pdeRecord.fillNumber = new Integer(3);
-		pdeRecord.dispensingStatuscode = Optional.of(new Character('P'));
+		pdeRecord.dispensingStatusCode = Optional.of(new Character('P'));
 		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.COVERED;
 		pdeRecord.adjustmentDeletionCode = Optional.of(new Character('A'));
 		pdeRecord.nonstandardFormatCode = Optional.of(new Character('X'));

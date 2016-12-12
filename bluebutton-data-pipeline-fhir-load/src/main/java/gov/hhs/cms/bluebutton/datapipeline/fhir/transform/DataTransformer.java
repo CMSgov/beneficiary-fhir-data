@@ -615,11 +615,7 @@ public final class DataTransformer {
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
 			throw new BadCodeMonkeyException();
-		if (record.serviceProviderIdQualiferCode == null || !record.serviceProviderIdQualiferCode.equalsIgnoreCase("01")) 
-			throw new IllegalArgumentException("Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
-		if (record.prescriberIdQualifierCode == null || !record.prescriberIdQualifierCode.equalsIgnoreCase("01")) 
-			throw new IllegalArgumentException("Prescriber ID Qualifier Code is invalid: " + record.prescriberIdQualifierCode);
-				
+		
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
@@ -749,6 +745,9 @@ public final class DataTransformer {
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.gapDiscountAmount);
 
+		if (record.prescriberIdQualifierCode == null || !record.prescriberIdQualifierCode.equalsIgnoreCase("01")) 
+			throw new IllegalArgumentException("Prescriber ID Qualifier Code is invalid: " + record.prescriberIdQualifierCode);
+
 		if (record.prescriberId != null) {
 			rxItem.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODED_PRESCRIPTION_ID).setValue(record.prescriberId));
 		}
@@ -760,6 +759,9 @@ public final class DataTransformer {
 		rxItem.setQuantity(quantityDispensed);
 
 		rxItem.addModifier(new Coding().setSystem(CODING_SYSTEM_PDE_DAYS_SUPPLY).setCode(record.daysSupply.toString()));
+
+		if (record.serviceProviderIdQualiferCode == null || !record.serviceProviderIdQualiferCode.equalsIgnoreCase("01")) 
+			throw new IllegalArgumentException("Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
 
 		Organization serviceProviderOrg = new Organization();
 		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.serviceProviderId);
@@ -789,10 +791,10 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
 				.setSystem(CODING_SYSTEM_RX_DAW_PRODUCT_CD).setCode(record.dispenseAsWrittenProductSelectionCode)));
 
-		if (record.dispensingStatuscode.isPresent())
+		if (record.dispensingStatusCode.isPresent())
 			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
 					.setSystem(CODING_SYSTEM_RX_DISPENSE_STATUS_CD)
-					.setCode(record.dispensingStatuscode.get().toString())));
+					.setCode(record.dispensingStatusCode.get().toString())));
 
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
 				.setSystem(CODING_SYSTEM_RX_COVERAGE_STATUS_CD).setCode(record.drugCoverageStatusCode.toString())));

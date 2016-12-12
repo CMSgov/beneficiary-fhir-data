@@ -530,7 +530,7 @@ public final class RifFilesProcessor {
 		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DSPNSD_NUM));
 		pdeRow.daysSupply = Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM));
 		pdeRow.fillNumber = Integer.parseInt(csvRecord.get(PartDEventRow.Column.FILL_NUM));
-		pdeRow.dispensingStatuscode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD));
+		pdeRow.dispensingStatusCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.DSPNSNG_STUS_CD));
 		pdeRow.drugCoverageStatusCode = DrugCoverageStatus
 				.parseRifValue(csvRecord.get(PartDEventRow.Column.DRUG_CVRG_STUS_CD));
 		pdeRow.adjustmentDeletionCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.ADJSTMT_DLTN_CD));

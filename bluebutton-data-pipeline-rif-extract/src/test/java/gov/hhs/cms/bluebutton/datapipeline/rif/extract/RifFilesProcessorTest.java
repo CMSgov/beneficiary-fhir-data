@@ -145,7 +145,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new BigDecimal("60"), pdeRow.quantityDispensed);
 		Assert.assertEquals(new Integer(30), pdeRow.daysSupply);
 		Assert.assertEquals(new Integer(3), pdeRow.fillNumber);
-		Assert.assertEquals(new Character('P'), pdeRow.dispensingStatuscode.get());
+		Assert.assertEquals(new Character('P'), pdeRow.dispensingStatusCode.get());
 		Assert.assertEquals(DrugCoverageStatus.COVERED, pdeRow.drugCoverageStatusCode);
 		Assert.assertEquals(new Character('A'), pdeRow.adjustmentDeletionCode.get());
 		Assert.assertEquals(new Character('X'), pdeRow.nonstandardFormatCode.get());
