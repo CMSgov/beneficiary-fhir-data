@@ -327,6 +327,11 @@ public final class OutpatientClaimGroup {
 		public Optional<String> hcpcsSecondModifierCode;
 
 		/**
+		 * @see Column#REV_CNTR_IDE_NDC_UPC_NUM
+		 */
+		public Optional<String> nationalDrugCode;
+
+		/**
 		 * @see Column#REV_CNTR_BLOOD_DDCTBL_AMT
 		 */
 		public BigDecimal bloodDeductibleAmount;
@@ -378,6 +383,16 @@ public final class OutpatientClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 		
 		/**
+		 * @see Column#REV_CNTR_NDC_QTY
+		 */
+		public Optional<Integer> nationalDrugCodeQuantity;
+
+		/**
+		 * @see Column#REV_CNTR_NDC_QTY_QLFR_CD
+		 */
+		public Optional<String> nationalDrugCodeQualifierCode;
+
+		/**
 		 * @see Column#RNDRNG_PHYSN_NPI
 		 */
 		public Optional<String> revenueCenterRenderingPhysicianNPI;
@@ -396,6 +411,8 @@ public final class OutpatientClaimGroup {
 			builder.append(hcpcsInitialModifierCode);
 			builder.append(", hcpcsSecondModifierCode=");
 			builder.append(hcpcsSecondModifierCode);
+			builder.append(", nationalDrugCode=");
+			builder.append(nationalDrugCode);
 			builder.append(", bloodDeductibleAmount=");
 			builder.append(bloodDeductibleAmount);
 			builder.append(", cashDeductibleAmount=");
@@ -416,6 +433,12 @@ public final class OutpatientClaimGroup {
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", nationalDrugCodeQuantity=");
+			builder.append(nationalDrugCodeQuantity);
+			builder.append(", nationalDrugCodeQualifierCode=");
+			builder.append(nationalDrugCodeQualifierCode);
+			builder.append(", revenueCenterRenderingPhysicianNPI=");
+			builder.append(revenueCenterRenderingPhysicianNPI);
 			builder.append("]");
 			return builder.toString();
 		}
@@ -1861,7 +1884,15 @@ public final class OutpatientClaimGroup {
 		REV_CNTR_DSCNT_IND_CD,
 		REV_CNTR_PACKG_IND_CD,
 		REV_CNTR_OTAF_PMT_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 24 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/idendc.txt">
+		 * CCW Data Dictionary: IDENDC</a>.
+		 */
 		REV_CNTR_IDE_NDC_UPC_NUM,
+
 		REV_CNTR_UNIT_CNT,
 		REV_CNTR_RATE_AMT,
 
@@ -1946,11 +1977,27 @@ public final class OutpatientClaimGroup {
 		 * CCW Data Dictionary: REV_NCVR</a>.
 		 */
 		REV_CNTR_NCVRD_CHRG_AMT,
+
 		REV_CNTR_STUS_IND_CD,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY</a>.
+		 */
 		REV_CNTR_NDC_QTY,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY_QLFR_CD</a>.
+		 */
 		REV_CNTR_NDC_QTY_QLFR_CD,
-		RNDRNG_PHYSN_UPIN,
 		
+		RNDRNG_PHYSN_UPIN,
+
 		/**
 		 * Type: <code>NUM</code>, max chars: 12. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt">

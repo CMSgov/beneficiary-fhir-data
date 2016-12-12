@@ -125,7 +125,7 @@ public class PartDEventRow {
 	/**
 	 * @see Column#DSPNSNG_STUS_CD
 	 */
-	public Optional<Character> dispensingStatuscode;
+	public Optional<Character> dispensingStatusCode;
 
 	/**
 	 * @see Column#DRUG_CVRG_STUS_CD
@@ -274,7 +274,7 @@ public class PartDEventRow {
 		builder.append(", fillNumber=");
 		builder.append(fillNumber);
 		builder.append(", dispensingStatuscode=");
-		builder.append(dispensingStatuscode);
+		builder.append(dispensingStatusCode);
 		builder.append(", drugCoverageStatusCode=");
 		builder.append(drugCoverageStatusCode);
 		builder.append(", adjustmentDeletionCode=");
