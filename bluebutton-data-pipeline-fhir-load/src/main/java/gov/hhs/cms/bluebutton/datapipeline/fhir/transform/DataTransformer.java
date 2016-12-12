@@ -749,56 +749,11 @@ public final class DataTransformer {
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.gapDiscountAmount);
 
-		/*
-		 * Practitioner prescriber = new Practitioner();
-		 * 
-		 * Set the coding system for the practitioner if the qualifier code is
-		 * NPI, otherwise it is unknown. NPI was used starting in April 2013, so
-		 * no other code types should be found here.
-		 * 
-		 * prescriber.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(
-		 * record.prescriberId); Reference prescriberRef =
-		 * referencePractitioner(record.prescriberId); upsert(bundle,
-		 * prescriber, prescriberRef.getReference());
-		 */
-
 		if (record.prescriberId != null) {
 			rxItem.addCareTeam().setProvider(new Practitioner().addIdentifier().setSystem(CODED_PRESCRIPTION_ID).setValue(record.prescriberId));
 		}
 		
-		/*
-		 * Upsert Medication using NDC as the ID.
-		 */
-
 		rxItem.setService(new Coding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode));
-
-		/*
-		 * Medication medication = new Medication(); Reference medicationRef =
-		 * new Reference("Medication/ndc-" + record.nationalDrugCode);
-		 * CodeableConcept ndcConcept = new CodeableConcept();
-		 * ndcConcept.addCoding().setSystem(CODING_SYSTEM_NDC).setCode(record.
-		 * nationalDrugCode); medication.setCode(ndcConcept); upsert(bundle,
-		 * medication, medicationRef.getReference());
-		 */
-		/*
-		 * MedicationOrders are represented as contained resources inside the
-		 * EOB, as the lifetime of this resource should match with the EOB.
-		 */
-		/*
-		 * MedicationOrder medicationOrder = new MedicationOrder();
-		 * medicationOrder.addIdentifier().setSystem(
-		 * CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
-		 * .setValue(String.valueOf(record.prescriptionReferenceNumber));
-		 * medicationOrder.setPatient(patientRef);
-		 * medicationOrder.setPrescriber(prescriberRef);
-		 * medicationOrder.setMedication(medicationRef);
-		 * 
-		 * Duration daysSupply = new Duration(); daysSupply.setUnit("days");
-		 * daysSupply.setValue(record.daysSupply);
-		 * medicationOrder.setDispenseRequest(new
-		 * MedicationOrderDispenseRequestComponent().setQuantity(quantity)
-		 * .setExpectedSupplyDuration(daysSupply));
-		 */
 
 		SimpleQuantity quantityDispensed = new SimpleQuantity();
 		quantityDispensed.setValue(record.quantityDispensed);
@@ -806,31 +761,13 @@ public final class DataTransformer {
 
 		rxItem.addModifier(new Coding().setSystem(CODING_SYSTEM_PDE_DAYS_SUPPLY).setCode(record.daysSupply.toString()));
 
-		/*
-		 * TODO Populate substitution.allowed and substitution.reason once STU3
-		 * structures are available.
-		 */
-		/* eob.setPrescription(new Reference(medicationOrder)); */
+		Organization serviceProviderOrg = new Organization();
+		serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(record.serviceProviderId);
+		serviceProviderOrg.setType(new CodeableConcept().addCoding(
+				new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(
+				record.pharmacyTypeCode)));
+		eob.setOrganization(new Reference(serviceProviderOrg));
 
-		/*
-		 * Organization serviceProviderOrg = new Organization();
-		 * serviceProviderOrg.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).
-		 * setValue(record.serviceProviderId); serviceProviderOrg.setType(new
-		 * CodeableConcept().addCoding( new
-		 * Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(
-		 * record.pharmacyTypeCode))); Reference serviceProviderOrgReference =
-		 * upsert(bundle, serviceProviderOrg,
-		 * referenceOrganizationByNpi(record.serviceProviderId).getReference());
-		 */
-		eob.setOrganization(new Identifier().setValue(record.serviceProviderId));
-		eob.setAuthor(new Identifier().setValue(record.serviceProviderId));
-
-
-		/*
-		 * TODO PDE coverage includes unique identifiers where other coverage
-		 * objects do not yet. Coverage identifiers probably need to be
-		 * standardized across the board?
-		 */
 		Coverage coverage = new Coverage();
 		Reference coverageRef = new Reference(
 				String.format("Coverage?identifier=%s|%s", CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, record.planContractId));
@@ -843,8 +780,7 @@ public final class DataTransformer {
 		coverage.setBeneficiary(new Identifier().setValue(record.beneficiaryId));
 		coverage.setPlanholder(new Identifier().setValue(record.beneficiaryId));
 		coverage.setRelationship(new Coding().setCode("self"));
-		upsert(bundle, coverage, coverageRef.getReference());
-		eob.getCoverage().setCoverage(coverageRef);
+		eob.getCoverage().setCoverage(new Reference(coverage));
 
 		/*
 		 * Storing code values in EOB.information below

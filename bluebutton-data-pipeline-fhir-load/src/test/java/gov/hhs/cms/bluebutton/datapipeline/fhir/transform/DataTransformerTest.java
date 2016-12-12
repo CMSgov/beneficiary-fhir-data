@@ -29,7 +29,6 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
@@ -246,10 +245,9 @@ public final class DataTransformerTest {
 	public void transformInsertPartDEvent() throws FHIRException {
 		Bundle pdeBundle = getBundle(pdeRecord);
 		/*
-		 * Bundle should have: 1) EOB, 2) Practitioner (prescriber), 3)
-		 * Medication, 4) Organization (serviceProviderOrg), 5) Coverage.
+		 * Bundle should have: 1) EOB
 		 */
-		Assert.assertEquals(2, pdeBundle.getEntry().size());
+		Assert.assertEquals(1, pdeBundle.getEntry().size());
 
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
@@ -257,23 +255,17 @@ public final class DataTransformerTest {
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_PDE_ID, pdeRecord.partDEventId, eob.getIdentifier());
-		// TODO verify eob.type once STU3 available
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_CLAIM_TYPE, "pharmacy", eob.getType());
 		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, eob.getPatientReference().getReference());
 		Assert.assertEquals(Date.valueOf(pdeRecord.paymentDate.get()), eob.getPayment().getDate());
 
 		Assert.assertEquals("01", pdeRecord.serviceProviderIdQualiferCode); 
 		Assert.assertEquals("01", pdeRecord.prescriberIdQualifierCode);
 		
-		
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-		/*
-		 * FIXME item.type field for
-		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
-		 * in STU3 (though present in item.detail). Sent email to Mark/FM
-		 * working group about this on 2016-10-20.
-		 */
-		// Default case has compound code = not a compound
-		// Assert.assertEquals("RXDINV", rxItem.getType().getCode());
+
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType());
+
 		Assert.assertEquals(Date.valueOf(pdeRecord.prescriptionFillDate), rxItem.getServicedDateType().getValue());
 
 		// Default case has drug coverage status code as Covered
@@ -295,82 +287,13 @@ public final class DataTransformerTest {
 				rxItem.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT, pdeRecord.gapDiscountAmount,
 				rxItem.getAdjudication());
-		/*
-		 * BundleEntryComponent prescriberEntry = pdeBundle.getEntry().stream()
-		 * .filter(r -> r.getResource() instanceof
-		 * Practitioner).findAny().get(); Practitioner prescriber =
-		 * (Practitioner) prescriberEntry.getResource();
-		 * assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US,
-		 * pdeRecord.prescriberId, prescriber.getIdentifier());
-		 * Assert.assertEquals(HTTPVerb.PUT,
-		 * prescriberEntry.getRequest().getMethod());
-		 * Assert.assertEquals(DataTransformer.referencePractitioner(pdeRecord.
-		 * prescriberId).getReference(), prescriberEntry.getRequest().getUrl());
-		 * 
-		 * BundleEntryComponent medicationEntry = pdeBundle.getEntry().stream()
-		 * .filter(r -> r.getResource() instanceof Medication).findAny().get();
-		 * Medication medication = (Medication) medicationEntry.getResource();
-		 * assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC,
-		 * pdeRecord.nationalDrugCode, medication.getCode().getCoding().get(0));
-		 * Assert.assertEquals(HTTPVerb.PUT,
-		 * medicationEntry.getRequest().getMethod());
-		 * Assert.assertEquals("Medication/ndc-" + pdeRecord.nationalDrugCode,
-		 * medicationEntry.getRequest().getUrl());
-		 * 
-		 * MedicationOrder medicationOrder = (MedicationOrder)
-		 * eob.getPrescriptionReference().getResource();
-		 * assertIdentifierExists(DataTransformer.
-		 * CODING_SYSTEM_RX_SRVC_RFRNC_NUM,
-		 * String.valueOf(pdeRecord.prescriptionReferenceNumber),
-		 * medicationOrder.getIdentifier()); Assert.assertEquals("Patient/bene-"
-		 * + pdeRecord.beneficiaryId,
-		 * medicationOrder.getPatient().getReference());
-		 * Assert.assertEquals(DataTransformer.referencePractitioner(pdeRecord.
-		 * prescriberId).getReference(),
-		 * medicationOrder.getPrescriber().getReference());
-		 * Assert.assertEquals("Medication/ndc-" + pdeRecord.nationalDrugCode,
-		 * medicationOrder.getMedicationReference().getReference());
-		 * MedicationOrderDispenseRequestComponent dispenseRequest =
-		 * medicationOrder.getDispenseRequest();
-		 * Assert.assertEquals(pdeRecord.quantityDispensed,
-		 * dispenseRequest.getQuantity().getValue());
-		 * Assert.assertEquals("days",
-		 * dispenseRequest.getExpectedSupplyDuration().getUnit());
-		 * Assert.assertEquals(new BigDecimal(pdeRecord.daysSupply),
-		 * dispenseRequest.getExpectedSupplyDuration().getValue());
-		 */
-		/*
-		 * TODO verify substitution.allowed and substitution.reason once STU3
-		 * structures are available
-		 */
-		/*
-		 * BundleEntryComponent organizationEntry =
-		 * pdeBundle.getEntry().stream() .filter(r -> r.getResource() instanceof
-		 * Organization).findAny().get(); Organization organization =
-		 * (Organization) organizationEntry.getResource();
-		 * assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US,
-		 * pdeRecord.serviceProviderId, organization.getIdentifier());
-		 * Assert.assertEquals(HTTPVerb.PUT,
-		 * organizationEntry.getRequest().getMethod());
-		 * Assert.assertEquals(DataTransformer.referenceOrganizationByNpi(
-		 * pdeRecord.serviceProviderId).getReference(),
-		 * organizationEntry.getRequest().getUrl());
-		 * assertCodingEquals(DataTransformer.
-		 * CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, pdeRecord.pharmacyTypeCode,
-		 * organization.getType().getCoding().get(0));
-		 */
-		BundleEntryComponent coverageEntry = pdeBundle.getEntry().stream()
-				.filter(r -> r.getResource() instanceof Coverage).findAny().get();
-		Coverage coverage = (Coverage) coverageEntry.getResource();
+
+		Coverage coverage = (Coverage) eob.getCoverage().getCoverageReference().getResource();
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, pdeRecord.planContractId,
 				coverage.getIdentifier());
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
 				pdeRecord.planBenefitPackageId, coverage.getIdentifier());
-		Assert.assertEquals(HTTPVerb.PUT, coverageEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				new Reference(String.format("Coverage?identifier=%s|%s",
-						DataTransformer.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, pdeRecord.planContractId)).getReference(),
-				coverageEntry.getRequest().getUrl());
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, coverage.getPlan());
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, coverage.getSubPlan());
 
@@ -394,13 +317,9 @@ public final class DataTransformerTest {
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
-		/*
-		 * FIXME item.type field for
-		 * http://hl7-fhir.github.io/v3/ActInvoiceGroupCode/vs.html is missing
-		 * in STU3 (though present in item.detail). Sent email to Mark/FM
-		 * working group about this on 2016-10-20.
-		 */
-		// Assert.assertEquals("RXCINV", rxItem.getType().getCode());
+
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_ACT, "RXCINV",
+				rxItem.getDetail().get(0).getType());
 	}
 
 	/**
