@@ -28,7 +28,7 @@ public final class DataSetManifestTest {
 	 *             (indicates test failure)
 	 */
 	@Test
-	public void jaxbUnmarshalling() throws JAXBException {
+	public void jaxbUnmarshallingForSampleA() throws JAXBException {
 		InputStream manifestStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream("manifest-sample-a.xml");
 
@@ -42,6 +42,39 @@ public final class DataSetManifestTest {
 				LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault()).get(ChronoField.YEAR));
 		Assert.assertEquals(2, manifest.getEntries().size());
 		Assert.assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
+		Assert.assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
+	}
+
+	/**
+	 * Verifies that {@link DataSetManifest} can be unmarshalled, as expected.
+	 * The sample XML document used here was produced by Scott Koerselman on
+	 * 2016-12-19.
+	 * 
+	 * @throws JAXBException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void jaxbUnmarshallingForSampleB() throws JAXBException {
+		InputStream manifestStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("manifest-sample-b.xml");
+
+		JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
+		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+		DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
+
+		Assert.assertNotNull(manifest);
+		Assert.assertNotNull(manifest.getTimestamp());
+		Assert.assertEquals(2016,
+				LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault()).get(ChronoField.YEAR));
+		Assert.assertEquals(9, manifest.getEntries().size());
+		Assert.assertEquals("bene.txt", manifest.getEntries().get(0).getName());
+		for (int i = 0; i < manifest.getEntries().size(); i++) {
+			DataSetManifestEntry entry = manifest.getEntries().get(i);
+			Assert.assertNotNull("Null entry: " + i, entry);
+			Assert.assertNotNull("Null entry name: " + i, entry.getName());
+			Assert.assertNotNull("Null entry type: " + i, entry.getType());
+		}
 		Assert.assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
 	}
 
