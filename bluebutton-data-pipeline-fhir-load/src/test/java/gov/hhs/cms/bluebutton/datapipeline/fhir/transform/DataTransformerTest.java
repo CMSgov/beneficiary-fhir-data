@@ -1,3 +1,5 @@
+
+package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
 import java.math.BigDecimal;
@@ -61,7 +63,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
  * Unit tests for {@link DataTransformer}.
@@ -396,7 +397,28 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertCarrierClaimEvent() throws FHIRException {
-
+		// Create the mock bene to test against.
+		CarrierClaimGroup record = new CarrierClaimGroup();
+		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
+		record.recordAction = RecordAction.INSERT;
+		record.beneficiaryId = "3456";
+		record.claimId = "9991831999";
+		record.dateFrom = LocalDate.of(1999, 10, 27);
+		record.dateThrough = LocalDate.of(1999, 10, 27);
+		record.nearLineRecordIdCode = 'O';
+		record.claimTypeCode = "71";
+		record.claimDispositionCode = "1";
+		record.carrierNumber = "061026666";
+		record.paymentDenialCode = "1";
+		record.paymentAmount = new BigDecimal("199.99");
+		record.referringPhysicianNpi = Optional.of("8765676");
+		record.providerPaymentAmount = new BigDecimal("123.45");
+		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "H33333");
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H44444"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H55555"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H66666"));
+		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H77777"));
+		record.clinicalTrialNumber = Optional.of("0");
 		// Read sample data from text file
 		RifFilesEvent filesRifEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -437,8 +459,6 @@ public final class DataTransformerTest {
 		Assert.assertNotNull(carrierBundleWrapper.getResult());
 
 		Bundle claimBundle = carrierBundleWrapper.getResult();
-
-		
 		/*
 		 * Bundle should have: 1) EOB, 2) Practitioner (referrer)
 		 */
@@ -485,7 +505,7 @@ public final class DataTransformerTest {
 				DataTransformer.referencePractitioner(record.referringPhysicianNpi.get()).getReference(),
 				referrerEntry.getRequest().getUrl());
 
-		Assert.assertEquals(4, eob.getDiagnosis().size());
+		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		Assert.assertEquals(record.clinicalTrialNumber.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER)
@@ -520,7 +540,7 @@ public final class DataTransformerTest {
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
 
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
-		Assert.assertTrue(recordLine1.hcpcsSecondModifierCode.isPresent());
+		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
@@ -545,11 +565,9 @@ public final class DataTransformerTest {
 				eobItem0.getAdjudication());
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
 
-		if (recordLine1.nationalDrugCode.isPresent()) {
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_NDC).get(0).getValue())
 						.getValue());
-		}
 	}
 
 	/**
@@ -1772,4 +1790,3 @@ public final class DataTransformerTest {
 		return bundle;
 	}
 }
-

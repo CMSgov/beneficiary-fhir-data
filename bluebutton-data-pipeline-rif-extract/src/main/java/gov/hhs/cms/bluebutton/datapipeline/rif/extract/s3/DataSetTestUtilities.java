@@ -70,8 +70,8 @@ public class DataSetTestUtilities {
 			ByteArrayOutputStream manifestOutputStream = new ByteArrayOutputStream();
 			marshaller.marshal(manifest, manifestOutputStream);
 
-			String objectKey = String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()),
-					"manifest.xml");
+			String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+					DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()), "manifest.xml");
 			byte[] manifestByteArray = manifestOutputStream.toByteArray();
 			InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
 
@@ -100,8 +100,8 @@ public class DataSetTestUtilities {
 	 */
 	public static PutObjectRequest createPutRequest(Bucket bucket, DataSetManifest manifest,
 			DataSetManifestEntry manifestEntry, URL objectContentsUrl) {
-		String objectKey = String.format("%s/%s", DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()),
-				manifestEntry.getName());
+		String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+				DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()), manifestEntry.getName());
 
 		try {
 			// If this isn't specified, the AWS API logs annoying warnings.
@@ -140,6 +140,9 @@ public class DataSetTestUtilities {
 	 *            the {@link AmazonS3} client to use
 	 * @param bucket
 	 *            the {@link Bucket} to check
+	 * @param keyPrefix
+	 *            the S3 object key prefix of the objects to include in the
+	 *            count
 	 * @param expectedObjectCount
 	 *            the number of objects that should be in the specified
 	 *            {@link Bucket}
@@ -147,13 +150,14 @@ public class DataSetTestUtilities {
 	 *            the length of time to wait for the condition to be met before
 	 *            throwing an error
 	 */
-	public static void waitForBucketObjectCount(AmazonS3 s3Client, Bucket bucket, int expectedObjectCount,
-			Duration waitDuration) {
+	public static void waitForBucketObjectCount(AmazonS3 s3Client, Bucket bucket, String keyPrefix,
+			int expectedObjectCount, Duration waitDuration) {
 		Instant endTime = Instant.now().plus(waitDuration);
 
 		int actualObjectCount = -1;
 		while (Instant.now().isBefore(endTime)) {
-			actualObjectCount = s3Client.listObjects(bucket.getName()).getObjectSummaries().size();
+			actualObjectCount = s3Client.listObjects(bucket.getName(), String.format("%s/", keyPrefix))
+					.getObjectSummaries().size();
 			if (expectedObjectCount == actualObjectCount)
 				return;
 
