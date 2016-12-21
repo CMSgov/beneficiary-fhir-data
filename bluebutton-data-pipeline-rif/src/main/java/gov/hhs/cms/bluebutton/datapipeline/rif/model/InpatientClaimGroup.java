@@ -93,6 +93,11 @@ public final class InpatientClaimGroup {
 	public Character claimServiceClassificationTypeCode;
 
 	/**
+	 * @see Column#CLM_FREQ_CD
+	 */
+	public Character claimFrequencyCode;
+
+	/**
 	 * @see Column#CLM_MDCR_NON_PMT_RSN_CD
 	 */
 	public Optional<String> claimNonPaymentReasonCode;
@@ -106,6 +111,11 @@ public final class InpatientClaimGroup {
 	 * @see Column#NCH_PRMRY_PYR_CLM_PD_AMT
 	 */
 	public BigDecimal primaryPayerPaidAmount;
+
+	/**
+	 * @see Column#NCH_PRMRY_PYR_CD
+	 */
+	public Character claimPrimaryPayerCode;
 
 	/**
 	 * @see Column#PRVDR_STATE_CD
@@ -131,6 +141,11 @@ public final class InpatientClaimGroup {
 	 * @see Column#OT_PHYSN_NPI
 	 */
 	public Optional<String> otherPhysicianNpi;
+
+	/**
+	 * @see Column#CLM_MCO_PD_SW
+	 */
+	public Optional<Character> mcoPaidSw;
 
 	/**
 	 * @see Column#PTNT_DSCHRG_STUS_CD
@@ -517,7 +532,9 @@ public final class InpatientClaimGroup {
 		CLM_SRVC_CLSFCTN_TYPE_CD,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt">
+		 * CCW Data Dictionary: FREQ_CD</a>.
 		 */
 		CLM_FREQ_CD,
 		
@@ -549,7 +566,9 @@ public final class InpatientClaimGroup {
 		NCH_PRMRY_PYR_CLM_PD_AMT,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt">
+		 * CCW Data Dictionary: PRPAY_CD</a>.
 		 */
 		NCH_PRMRY_PYR_CD,
 		
@@ -613,7 +632,10 @@ public final class InpatientClaimGroup {
 		OT_PHYSN_NPI,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mcopdsw.txt">
+		 * CCW Data Dictionary: MCOPDSW</a>.
 		 */
 		CLM_MCO_PD_SW,
 

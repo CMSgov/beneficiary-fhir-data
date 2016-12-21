@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.Column;
-
 /**
  * <p>
  * Models rows from {@link RifFileType#HHA} RIF files. Rows in this file are
@@ -100,6 +98,11 @@ public final class HHAClaimGroup {
 	public Character claimServiceClassificationTypeCode;
 
 	/**
+	 * @see Column#CLM_FREQ_CD
+	 */
+	public Character claimFrequencyCode;
+
+	/**
 	 * @see Column#CLM_MDCR_NON_PMT_RSN_CD
 	 */
 	public Optional<String> claimNonPaymentReasonCode;
@@ -113,6 +116,11 @@ public final class HHAClaimGroup {
 	 * @see Column#NCH_PRMRY_PYR_CLM_PD_AMT
 	 */
 	public BigDecimal primaryPayerPaidAmount;
+
+	/**
+	 * @see Column#NCH_PRMRY_PYR_CD
+	 */
+	public Character claimPrimaryPayerCode;
 
 	/**
 	 * @see Column#PRVDR_STATE_CD
@@ -396,7 +404,9 @@ public final class HHAClaimGroup {
 		CLM_SRVC_CLSFCTN_TYPE_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt">
+		 * CCW Data Dictionary: FREQ_CD</a>.
 		 */
 		CLM_FREQ_CD,
 
@@ -428,7 +438,9 @@ public final class HHAClaimGroup {
 		NCH_PRMRY_PYR_CLM_PD_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt">
+		 * CCW Data Dictionary: PRPAY_CD</a>.
 		 */
 		NCH_PRMRY_PYR_CD,
 
