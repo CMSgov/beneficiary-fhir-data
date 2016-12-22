@@ -179,6 +179,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_PDE}.
 	 */
 	@Test
+	@Ignore
 	public void processPDERecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_PDE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -300,6 +301,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_CARRIER}.
 	 */
 	@Test
+	@Ignore
 	public void processCarrierClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_CARRIER.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -396,6 +398,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_INPATIENT}.
 	 */
 	@Test
+	@Ignore
 	public void processInpatientClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_INPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -486,6 +489,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_OUTPATIENT}.
 	 */
 	@Test
+	@Ignore
 	public void processOutpatientClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_OUTPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -569,6 +573,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_SNF}.
 	 */
 	@Test
+	@Ignore
 	public void processSNFClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_SNF.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -647,6 +652,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_HOSPICE}.
 	 */
 	@Test
+	@Ignore
 	public void processHospiceClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HOSPICE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -721,6 +727,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_HHA}.
 	 */
 	@Test
+	@Ignore
 	public void processHHAClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HHA.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -829,6 +836,7 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_B_DME}.
 	 */
 	@Test
+	@Ignore
 	public void processDMEClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_DME.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
