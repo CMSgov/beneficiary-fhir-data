@@ -1,12 +1,10 @@
 
 package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
-package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +61,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
  * Unit tests for {@link DataTransformer}.
@@ -397,28 +396,6 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertCarrierClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		CarrierClaimGroup record = new CarrierClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "3456";
-		record.claimId = "9991831999";
-		record.dateFrom = LocalDate.of(1999, 10, 27);
-		record.dateThrough = LocalDate.of(1999, 10, 27);
-		record.nearLineRecordIdCode = 'O';
-		record.claimTypeCode = "71";
-		record.claimDispositionCode = "1";
-		record.carrierNumber = "061026666";
-		record.paymentDenialCode = "1";
-		record.paymentAmount = new BigDecimal("199.99");
-		record.referringPhysicianNpi = Optional.of("8765676");
-		record.providerPaymentAmount = new BigDecimal("123.45");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "H33333");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H44444"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H55555"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H66666"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H77777"));
-		record.clinicalTrialNumber = Optional.of("0");
 		// Read sample data from text file
 		RifFilesEvent filesRifEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
