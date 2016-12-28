@@ -258,12 +258,16 @@ public final class OutpatientClaimGroup {
 		builder.append(claimFacilityTypeCode);
 		builder.append(", claimServiceClassificationTypeCode=");
 		builder.append(claimServiceClassificationTypeCode);
+		builder.append(", claimFrequencyCode=");
+		builder.append(claimFrequencyCode);
 		builder.append(", claimNonPaymentReasonCode=");
 		builder.append(claimNonPaymentReasonCode);
 		builder.append(", paymentAmount=");
 		builder.append(paymentAmount);
 		builder.append(", primaryPayerPaidAmount=");
 		builder.append(primaryPayerPaidAmount);
+		builder.append(", claimPrimaryPayerCode=");
+		builder.append(claimPrimaryPayerCode);
 		builder.append(", providerStateCode=");
 		builder.append(providerStateCode);
 		builder.append(", organizationNpi=");
@@ -274,6 +278,8 @@ public final class OutpatientClaimGroup {
 		builder.append(operatingPhysicianNpi);
 		builder.append(", otherPhysicianNpi=");
 		builder.append(otherPhysicianNpi);
+		builder.append(", mcoPaidSw=");
+		builder.append(mcoPaidSw);
 		builder.append(", patientDischargeStatusCode=");
 		builder.append(patientDischargeStatusCode);
 		builder.append(", totalChargeAmount=");
@@ -327,6 +333,26 @@ public final class OutpatientClaimGroup {
 		public Integer lineNumber;
 
 		/**
+		 * @see Column#REV_CNTR_1ST_ANSI_CD
+		 */
+		public Optional<String> revCntr1stAnsiCd;
+
+		/**
+		 * @see Column#REV_CNTR_2ND_ANSI_CD
+		 */
+		public Optional<String> revCntr2ndAnsiCd;
+
+		/**
+		 * @see Column#REV_CNTR_3RD_ANSI_CD
+		 */
+		public Optional<String> revCntr3rdAnsiCd;
+
+		/**
+		 * @see Column#REV_CNTR_4TH_ANSI_CD
+		 */
+		public Optional<String> revCntr4thAnsiCd;
+
+		/**
 		 * @see Column#HCPCS_CD
 		 */
 		public Optional<String> hcpcsCode;
@@ -345,6 +371,16 @@ public final class OutpatientClaimGroup {
 		 * @see Column#REV_CNTR_IDE_NDC_UPC_NUM
 		 */
 		public Optional<String> nationalDrugCode;
+
+		/**
+		 * @see Column#REV_CNTR_UNIT_CNT
+		 */
+		public BigDecimal unitCount;
+
+		/**
+		 * @see Column#REV_CNTR_RATE_AMT
+		 */
+		public BigDecimal rateAmount;
 
 		/**
 		 * @see Column#REV_CNTR_BLOOD_DDCTBL_AMT
@@ -366,6 +402,16 @@ public final class OutpatientClaimGroup {
 		 * @see Column#REV_CNTR_RDCD_COINSRNC_AMT
 		 */
 		public BigDecimal reducedCoinsuranceAmount;
+
+		/**
+		 * @see Column#REV_CNTR_1ST_MSP_PD_AMT
+		 */
+		public BigDecimal firstMspPaidAmount;
+
+		/**
+		 * @see Column#REV_CNTR_2ND_MSP_PD_AMT
+		 */
+		public BigDecimal secondMspPaidAmount;
 
 		/**
 		 * @see Column#REV_CNTR_PRVDR_PMT_AMT
@@ -420,6 +466,14 @@ public final class OutpatientClaimGroup {
 			StringBuilder builder = new StringBuilder();
 			builder.append("OutpatientClaimLine [lineNumber=");
 			builder.append(lineNumber);
+			builder.append(", revCntr1stAnsiCd=");
+			builder.append(revCntr1stAnsiCd);
+			builder.append(", revCntr2ndAnsiCd=");
+			builder.append(revCntr2ndAnsiCd);
+			builder.append(", revCntr3rdAnsiCd=");
+			builder.append(revCntr3rdAnsiCd);
+			builder.append(", revCntr4thAnsiCd=");
+			builder.append(revCntr4thAnsiCd);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
 			builder.append(", hcpcsInitialModifierCode=");
@@ -428,6 +482,10 @@ public final class OutpatientClaimGroup {
 			builder.append(hcpcsSecondModifierCode);
 			builder.append(", nationalDrugCode=");
 			builder.append(nationalDrugCode);
+			builder.append(", unitCount=");
+			builder.append(unitCount);
+			builder.append(", rateAmount=");
+			builder.append(rateAmount);
 			builder.append(", bloodDeductibleAmount=");
 			builder.append(bloodDeductibleAmount);
 			builder.append(", cashDeductibleAmount=");
@@ -436,6 +494,10 @@ public final class OutpatientClaimGroup {
 			builder.append(wageAdjustedCoinsuranceAmount);
 			builder.append(", reducedCoinsuranceAmount=");
 			builder.append(reducedCoinsuranceAmount);
+			builder.append(", firstMspPaidAmount=");
+			builder.append(firstMspPaidAmount);
+			builder.append(", secondMspPaidAmount=");
+			builder.append(secondMspPaidAmount);
 			builder.append(", providerPaymentAmount=");
 			builder.append(providerPaymentAmount);
 			builder.append(", benficiaryPaymentAmount=");
@@ -1871,10 +1933,39 @@ public final class OutpatientClaimGroup {
 		
 		REV_CNTR,
 		REV_CNTR_DT,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revansi1.txt">
+		 * CCW Data Dictionary: REVANSI1</a>.
+		 */
 		REV_CNTR_1ST_ANSI_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revansi2.txt">
+		 * CCW Data Dictionary: REVANSI2</a>.
+		 */
 		REV_CNTR_2ND_ANSI_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revansi3.txt">
+		 * CCW Data Dictionary: REVANSI3</a>.
+		 */
 		REV_CNTR_3RD_ANSI_CD,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revansi4.txt">
+		 * CCW Data Dictionary: REVANSI4</a>.
+		 */
 		REV_CNTR_4TH_ANSI_CD,
+
 		REV_CNTR_APC_HIPPS_CD,
 
 
@@ -1915,7 +2006,18 @@ public final class OutpatientClaimGroup {
 		 */
 		REV_CNTR_IDE_NDC_UPC_NUM,
 
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_unit.txt">
+		 * CCW Data Dictionary: REV_UNIT </a>.
+		 */
 		REV_CNTR_UNIT_CNT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_rate.txt">
+		 * CCW Data Dictionary: REV_RATE </a>.
+		 */
 		REV_CNTR_RATE_AMT,
 
 		/**
@@ -1947,14 +2049,16 @@ public final class OutpatientClaimGroup {
 		REV_CNTR_RDCD_COINSRNC_AMT,
 
 		/**
-		 * NOT MAPPED
-		 * 
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_msp1.txt">
+		 * CCW Data Dictionary: REV_MSP1</a>.
 		 */
 		REV_CNTR_1ST_MSP_PD_AMT,
 
 		/**
-		 * NOT MAPPED
-		 * 
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_msp2.txt">
+		 * CCW Data Dictionary: REV_MSP2</a>.
 		 */
 		REV_CNTR_2ND_MSP_PD_AMT,
 

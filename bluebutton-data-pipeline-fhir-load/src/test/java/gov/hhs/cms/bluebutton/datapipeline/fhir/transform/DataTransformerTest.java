@@ -649,8 +649,12 @@ public final class DataTransformerTest {
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
 		recordLine1.hcpcsCode = Optional.of("M55");
+		recordLine1.unitCount = new BigDecimal("111.00");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.totalChargeAmount = new BigDecimal("84888.88");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("3699.00");
+		recordLine1.nationalDrugCodeQuantity = Optional.of(new Integer(77));
+		recordLine1.nationalDrugCodeQualifierCode = Optional.of("GG");
 		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("345345345");
 
 		RifFile file = new MockRifFile();
@@ -815,6 +819,9 @@ public final class DataTransformerTest {
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
+
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount,
 				eobItem0.getAdjudication());
@@ -876,14 +883,22 @@ public final class DataTransformerTest {
 		OutpatientClaimLine recordLine1 = new OutpatientClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 25;
+		recordLine1.revCntr1stAnsiCd = Optional.of("CO120");
+		recordLine1.revCntr2ndAnsiCd = Optional.of("CR121");
+		recordLine1.revCntr3rdAnsiCd = Optional.empty();
+		recordLine1.revCntr4thAnsiCd = Optional.empty();
 		recordLine1.hcpcsCode = Optional.of("M99");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("XX");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
 		recordLine1.nationalDrugCode = Optional.of("987654321");
+		recordLine1.unitCount = new BigDecimal("111.00");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.bloodDeductibleAmount = new BigDecimal("10.45");
 		recordLine1.cashDeductibleAmount = new BigDecimal("12.89");
 		recordLine1.wageAdjustedCoinsuranceAmount = new BigDecimal("15.23");
 		recordLine1.reducedCoinsuranceAmount = new BigDecimal("11.00");
+		recordLine1.firstMspPaidAmount = new BigDecimal("55.00");
+		recordLine1.secondMspPaidAmount = new BigDecimal("65.00");
 		recordLine1.providerPaymentAmount = new BigDecimal("200.00");
 		recordLine1.benficiaryPaymentAmount = new BigDecimal("300.00");
 		recordLine1.patientResponsibilityAmount = new BigDecimal("500.00");
@@ -1000,10 +1015,20 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC, recordLine1.nationalDrugCode.get(),
 				eobItem0.getService());
+
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
+				eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_2ND_ANSI_CD, recordLine1.revCntr2ndAnsiCd.get(),
+				eobItem0.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_3RD_ANSI_CD, eobItem0.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_4TH_ANSI_CD, eobItem0.getAdjudication());
+
 		Assert.assertEquals(recordLine1.hcpcsCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(1).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE,
 				recordLine1.bloodDeductibleAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_CASH_DEDUCTIBLE,
@@ -1012,6 +1037,10 @@ public final class DataTransformerTest {
 				recordLine1.wageAdjustedCoinsuranceAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT,
 				recordLine1.reducedCoinsuranceAmount, eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_MSP_AMOUNT, recordLine1.firstMspPaidAmount,
+				eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_2ND_MSP_AMOUNT, recordLine1.secondMspPaidAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				recordLine1.providerPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
@@ -1081,6 +1110,7 @@ public final class DataTransformerTest {
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
 		recordLine1.hcpcsCode = Optional.of("MMM");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.totalChargeAmount = new BigDecimal("95.00");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("88.00");
 		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("123456789");
@@ -1163,6 +1193,8 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount,
 				eobItem0.getAdjudication());
@@ -1215,6 +1247,7 @@ public final class DataTransformerTest {
 		HospiceClaimLine recordLine1 = new HospiceClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.hcpcsCode = Optional.of("A5C");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("Q9999");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
@@ -1301,6 +1334,8 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				recordLine1.providerPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
@@ -1357,6 +1392,8 @@ public final class DataTransformerTest {
 		HHAClaimLine recordLine1 = new HHAClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
+		recordLine1.revCntr1stAnsiCd = Optional.of("CO120");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.hcpcsCode = Optional.of("2GGGG");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("KO");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
@@ -1428,11 +1465,15 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
+				eobItem0.getAdjudication());
+
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 			
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
-				eobItem0.getService());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT, recordLine1.paymentAmount,
 				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT, recordLine1.totalChargeAmount,
@@ -1696,6 +1737,24 @@ public final class DataTransformerTest {
 				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		Assert.assertEquals(expectedAmount, adjudication.get().getAmount().getValue());
+	}
+
+	/**
+	 * @param expectedCategoryCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link AdjudicationComponent#getCategory()} to find and verify
+	 * @param expectedCode
+	 *            the expected {@link AdjudicationComponent#getReason()}
+	 * @param actuals
+	 *            the actual {@link AdjudicationComponent}s to verify
+	 */
+	private static void assertAdjudicationEquals(String expectedCategoryCode, String expectedCode,
+			List<AdjudicationComponent> actuals) {
+		Optional<AdjudicationComponent> adjudication = actuals.stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
+		Assert.assertTrue(adjudication.isPresent());
+		Assert.assertEquals(expectedCode, adjudication.get().getReason().getCode());
 	}
 
 	/**

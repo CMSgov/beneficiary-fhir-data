@@ -185,6 +185,8 @@ public final class HHAClaimGroup {
 		builder.append(recordAction);
 		builder.append(", beneficiaryId=");
 		builder.append(beneficiaryId);
+		builder.append(", author=");
+		builder.append(author);
 		builder.append(", claimId=");
 		builder.append(claimId);
 		builder.append(", nearLineRecordIdCode=");
@@ -203,12 +205,16 @@ public final class HHAClaimGroup {
 		builder.append(claimFacilityTypeCode);
 		builder.append(", claimServiceClassificationTypeCode=");
 		builder.append(claimServiceClassificationTypeCode);
+		builder.append(", claimFrequencyCode=");
+		builder.append(claimFrequencyCode);
 		builder.append(", claimNonPaymentReasonCode=");
 		builder.append(claimNonPaymentReasonCode);
 		builder.append(", paymentAmount=");
 		builder.append(paymentAmount);
 		builder.append(", primaryPayerPaidAmount=");
 		builder.append(primaryPayerPaidAmount);
+		builder.append(", claimPrimaryPayerCode=");
+		builder.append(claimPrimaryPayerCode);
 		builder.append(", providerStateCode=");
 		builder.append(providerStateCode);
 		builder.append(", organizationNpi=");
@@ -251,6 +257,11 @@ public final class HHAClaimGroup {
 		public Integer lineNumber;
 
 		/**
+		 * @see Column#REV_CNTR_1ST_ANSI_CD
+		 */
+		public Optional<String> revCntr1stAnsiCd;
+
+		/**
 		 * @see Column#HCPCS_CD
 		 */
 		public Optional<String> hcpcsCode;
@@ -259,7 +270,6 @@ public final class HHAClaimGroup {
 		 * @see Column#HCPCS_1ST_MDFR_CD
 		 */
 		public Optional<String> hcpcsInitialModifierCode;
-
 		
 		/**
 		 * @see Column#HCPCS_2ND_MDFR_CD
@@ -267,10 +277,15 @@ public final class HHAClaimGroup {
 		public Optional<String> hcpcsSecondModifierCode;
 
 		/**
-		 * @see Column#RNDRNG_PHYSN_NPI
+		 * @see Column#REV_CNTR_UNIT_CNT
 		 */
-		public Optional<String> revenueCenterRenderingPhysicianNPI;
-		
+		public BigDecimal unitCount;
+
+		/**
+		 * @see Column#REV_CNTR_RATE_AMT
+		 */
+		public BigDecimal rateAmount;
+
 		/**
 		 * @see Column#REV_CNTR_PMT_AMT_AMT
 		 */
@@ -287,6 +302,11 @@ public final class HHAClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#RNDRNG_PHYSN_NPI
+		 */
+		public Optional<String> revenueCenterRenderingPhysicianNPI;
+
+		/**
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
@@ -294,18 +314,26 @@ public final class HHAClaimGroup {
 			StringBuilder builder = new StringBuilder();
 			builder.append("HHAClaimLine [lineNumber=");
 			builder.append(lineNumber);
+			builder.append(", revCntr1stAnsiCd=");
+			builder.append(revCntr1stAnsiCd);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
 			builder.append(", hcpcsInitialModifierCode=");
 			builder.append(hcpcsInitialModifierCode);
 			builder.append(", hcpcsSecondModifierCode=");
 			builder.append(hcpcsSecondModifierCode);
+			builder.append(", unitCount=");
+			builder.append(unitCount);
+			builder.append(", rateAmount=");
+			builder.append(rateAmount);
 			builder.append(", paymentAmount=");
 			builder.append(paymentAmount);
 			builder.append(", totalChargeAmount=");
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", revenueCenterRenderingPhysicianNPI=");
+			builder.append(revenueCenterRenderingPhysicianNPI);
 			builder.append("]");
 			return builder.toString();
 		}
@@ -1101,7 +1129,10 @@ public final class HHAClaimGroup {
 		REV_CNTR_DT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 5 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revansi1.txt">
+		 * CCW Data Dictionary: REVANSI1</a>.
 		 */
 		REV_CNTR_1ST_ANSI_CD,
 
@@ -1140,12 +1171,16 @@ public final class HHAClaimGroup {
 		REV_CNTR_PMT_MTHD_IND_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_unit.txt">
+		 * CCW Data Dictionary: REV_UNIT </a>.
 		 */
 		REV_CNTR_UNIT_CNT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_rate.txt">
+		 * CCW Data Dictionary: REV_RATE </a>.
 		 */
 		REV_CNTR_RATE_AMT,
 
