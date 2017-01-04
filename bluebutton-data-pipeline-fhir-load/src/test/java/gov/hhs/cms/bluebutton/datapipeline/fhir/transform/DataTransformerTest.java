@@ -199,7 +199,8 @@ public final class DataTransformerTest {
 		 */
 
 		Assert.assertEquals(record.nameGiven, bene.getName().get(0).getGiven().get(0).toString());
-		Assert.assertEquals(record.nameMiddleInitial.toString(), bene.getName().get(0).getGiven().get(1).toString());
+		Assert.assertEquals(record.nameMiddleInitial.get().toString(),
+				bene.getName().get(0).getGiven().get(1).toString());
 		Assert.assertEquals(record.nameSurname, bene.getName().get(0).getFamilyAsSingleString().toString());
 
 		// TODO Need to check the status code for partA
@@ -267,6 +268,11 @@ public final class DataTransformerTest {
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType());
 
 		Assert.assertEquals(Date.valueOf(pdeRecord.prescriptionFillDate), rxItem.getServicedDateType().getValue());
+
+		Assert.assertEquals(pdeRecord.serviceProviderId, eob.getOrganizationIdentifier().getValue());
+
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, pdeRecord.pharmacyTypeCode.toString(),
+				eob.castToCoding(eob.getFacility()));
 
 		// Default case has drug coverage status code as Covered
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PART_D_COVERED,
@@ -596,6 +602,8 @@ public final class DataTransformerTest {
 		record.patientDischargeStatusCode = "01";
 		record.nearLineRecordIdCode = 'V';
 		record.claimServiceClassificationTypeCode = '1';
+		record.claimFrequencyCode = '1';
+		record.claimPrimaryPayerCode = 'A';
 		record.claimNonPaymentReasonCode = Optional.empty();
 		record.providerNumber = "7777766666";
 		record.providerStateCode = "IA";
@@ -606,6 +614,7 @@ public final class DataTransformerTest {
 		record.attendingPhysicianNpi = Optional.of("161999999");
 		record.operatingPhysicianNpi = Optional.of("3333444555");
 		record.otherPhysicianNpi = Optional.of("161943433");
+		record.mcoPaidSw = Optional.of('0');
 		record.claimFacilityTypeCode = '1';
 		record.passThruPerDiemAmount = new BigDecimal("10.00");
 		record.deductibleAmount = new BigDecimal("112.00");
@@ -642,8 +651,12 @@ public final class DataTransformerTest {
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
 		recordLine1.hcpcsCode = Optional.of("M55");
+		recordLine1.unitCount = new BigDecimal("111.00");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.totalChargeAmount = new BigDecimal("84888.88");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("3699.00");
+		recordLine1.nationalDrugCodeQuantity = Optional.of(new Integer(77));
+		recordLine1.nationalDrugCodeQualifierCode = Optional.of("GG");
 		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("345345345");
 
 		RifFile file = new MockRifFile();
@@ -665,9 +678,9 @@ public final class DataTransformerTest {
 		Bundle claimBundle = inpatientBundleWrapper.getResult();
 
 		/*
-		 * Bundle should have: 1) EOB, 2) Organization
+		 * Bundle should have: 1) EOB
 		 */
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
@@ -759,18 +772,10 @@ public final class DataTransformerTest {
 				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
 				);
 
-		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
-				.filter(r -> r.getResource() instanceof Organization).findAny().get();
-		Organization organization = (Organization) organizationEntry.getResource();
-		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
-				organization.getIdentifier());
-		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get()).getReference(),
-				organizationEntry.getRequest().getUrl());
+		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				organization.getType().getCoding().get(0));
-		Assert.assertEquals(record.organizationNpi.get(), eob.getAuthorIdentifier().getValue());
+				eob.castToCoding(eob.getFacility()));
 
 		Assert.assertEquals(record.claimServiceClassificationTypeCode.toString(),
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0).getValue()
@@ -816,6 +821,9 @@ public final class DataTransformerTest {
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
+
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount,
 				eobItem0.getAdjudication());
@@ -844,7 +852,7 @@ public final class DataTransformerTest {
 		record.claimTypeCode = "40";
 		record.dateFrom = LocalDate.of(2011, 01, 24);
 		record.dateThrough = LocalDate.of(2011, 01, 24);
-		record.patientDischargeStatusCode = Optional.of("1");
+		record.patientDischargeStatusCode = Optional.of("01");
 		record.nearLineRecordIdCode = 'W';
 		record.claimNonPaymentReasonCode = Optional.of("A");
 		record.providerNumber = "9999999";
@@ -852,10 +860,13 @@ public final class DataTransformerTest {
 		record.paymentAmount = new BigDecimal("693.11");
 		record.totalChargeAmount = new BigDecimal("8888.85");
 		record.claimServiceClassificationTypeCode = '3';
+		record.claimFrequencyCode = '1';
+		record.claimPrimaryPayerCode = 'A';
 		record.organizationNpi = Optional.of("1111111111");
 		record.attendingPhysicianNpi = Optional.of("2222222222");
 		record.operatingPhysicianNpi = Optional.of("3333333333");
 		record.otherPhysicianNpi = Optional.empty();
+		record.mcoPaidSw = Optional.of('0');
 		record.claimFacilityTypeCode = '1';
 		record.primaryPayerPaidAmount = new BigDecimal("11.00");
 		record.bloodDeductibleLiabilityAmount = new BigDecimal("6.00");
@@ -874,14 +885,22 @@ public final class DataTransformerTest {
 		OutpatientClaimLine recordLine1 = new OutpatientClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 25;
+		recordLine1.revCntr1stAnsiCd = Optional.of("CO120");
+		recordLine1.revCntr2ndAnsiCd = Optional.of("CR121");
+		recordLine1.revCntr3rdAnsiCd = Optional.empty();
+		recordLine1.revCntr4thAnsiCd = Optional.empty();
 		recordLine1.hcpcsCode = Optional.of("M99");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("XX");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
 		recordLine1.nationalDrugCode = Optional.of("987654321");
+		recordLine1.unitCount = new BigDecimal("111.00");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.bloodDeductibleAmount = new BigDecimal("10.45");
 		recordLine1.cashDeductibleAmount = new BigDecimal("12.89");
 		recordLine1.wageAdjustedCoinsuranceAmount = new BigDecimal("15.23");
 		recordLine1.reducedCoinsuranceAmount = new BigDecimal("11.00");
+		recordLine1.firstMspPaidAmount = new BigDecimal("55.00");
+		recordLine1.secondMspPaidAmount = new BigDecimal("65.00");
 		recordLine1.providerPaymentAmount = new BigDecimal("200.00");
 		recordLine1.benficiaryPaymentAmount = new BigDecimal("300.00");
 		recordLine1.patientResponsibilityAmount = new BigDecimal("500.00");
@@ -958,24 +977,10 @@ public final class DataTransformerTest {
 				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
 				);
 
-		/*
-		 * BundleEntryComponent organizationEntry =
-		 * claimBundle.getEntry().stream() .filter(r -> r.getResource()
-		 * instanceof Organization).findAny().get(); Organization organization =
-		 * (Organization) organizationEntry.getResource();
-		 * assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US,
-		 * record.organizationNpi.get(), organization.getIdentifier());
-		 * Assert.assertEquals(HTTPVerb.PUT,
-		 * organizationEntry.getRequest().getMethod()); Assert.assertEquals(
-		 * DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get
-		 * ()).getReference(), organizationEntry.getRequest().getUrl());
-		 * assertCodingEquals(DataTransformer.
-		 * CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
-		 * record.claimFacilityTypeCode.toString(),
-		 * organization.getType().getCoding().get(0));
-		 * Assert.assertEquals(record.organizationNpi.get(),
-		 * eob.getAuthorIdentifier().getValue());
-		 */
+		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
+
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
+				eob.castToCoding(eob.getFacility()));
 
 		Assert.assertEquals(record.claimServiceClassificationTypeCode.toString(),
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0)
@@ -1012,10 +1017,20 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC, recordLine1.nationalDrugCode.get(),
 				eobItem0.getService());
+
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
+				eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_2ND_ANSI_CD, recordLine1.revCntr2ndAnsiCd.get(),
+				eobItem0.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_3RD_ANSI_CD, eobItem0.getAdjudication());
+		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_4TH_ANSI_CD, eobItem0.getAdjudication());
+
 		Assert.assertEquals(recordLine1.hcpcsCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(1).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE,
 				recordLine1.bloodDeductibleAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_CASH_DEDUCTIBLE,
@@ -1024,6 +1039,10 @@ public final class DataTransformerTest {
 				recordLine1.wageAdjustedCoinsuranceAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT,
 				recordLine1.reducedCoinsuranceAmount, eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_MSP_AMOUNT, recordLine1.firstMspPaidAmount,
+				eobItem0.getAdjudication());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_2ND_MSP_AMOUNT, recordLine1.secondMspPaidAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				recordLine1.providerPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
@@ -1071,8 +1090,11 @@ public final class DataTransformerTest {
 		record.attendingPhysicianNpi = Optional.of("2222222222");
 		record.operatingPhysicianNpi = Optional.of("3333333333");
 		record.otherPhysicianNpi = Optional.of("4444444444");
+		record.mcoPaidSw = Optional.of('0');
 		record.claimFacilityTypeCode = '2';
 		record.claimServiceClassificationTypeCode = '1';
+		record.claimFrequencyCode = '1';
+		record.claimPrimaryPayerCode = 'A';
 		record.providerStateCode = "FL";
 		record.primaryPayerPaidAmount = new BigDecimal("11.00");
 		record.deductibleAmount = new BigDecimal("112.00");
@@ -1090,6 +1112,7 @@ public final class DataTransformerTest {
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
 		recordLine1.hcpcsCode = Optional.of("MMM");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.totalChargeAmount = new BigDecimal("95.00");
 		recordLine1.nonCoveredChargeAmount = new BigDecimal("88.00");
 		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("123456789");
@@ -1112,9 +1135,9 @@ public final class DataTransformerTest {
 
 		Bundle claimBundle = SNFBundleWrapper.getResult();
 		/*
-		 * Bundle should have: 1) EOB, 2) Organization
+		 * Bundle should have: 1) EOB
 		 */
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
@@ -1132,18 +1155,10 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
-		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
-				.filter(r -> r.getResource() instanceof Organization).findAny().get();
-		Organization organization = (Organization) organizationEntry.getResource();
-		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
-				organization.getIdentifier());
-		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get()).getReference(),
-				organizationEntry.getRequest().getUrl());
+		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				organization.getType().getCoding().get(0));
-		Assert.assertEquals(record.organizationNpi.get(), eob.getAuthorIdentifier().getValue());
+				eob.castToCoding(eob.getFacility()));
 
 		Assert.assertEquals(record.attendingPhysicianNpi.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
@@ -1180,6 +1195,8 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount,
 				eobItem0.getAdjudication());
@@ -1214,6 +1231,8 @@ public final class DataTransformerTest {
 		record.nearLineRecordIdCode = '1';
 		record.claimNonPaymentReasonCode = Optional.of("1");
 		record.claimServiceClassificationTypeCode = '1';
+		record.claimFrequencyCode = '1';
+		record.claimPrimaryPayerCode = 'A';
 		record.providerNumber = "12345";
 		record.providerStateCode = "AZ";
 		record.paymentAmount = new BigDecimal("130.32");
@@ -1230,6 +1249,7 @@ public final class DataTransformerTest {
 		HospiceClaimLine recordLine1 = new HospiceClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.hcpcsCode = Optional.of("A5C");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("Q9999");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
@@ -1258,9 +1278,9 @@ public final class DataTransformerTest {
 
 		Bundle claimBundle = HospiceBundleWrapper.getResult();
 		/*
-		 * Bundle should have: 1) EOB, 2) Organization
+		 * Bundle should have: 1) EOB
 		 */
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
@@ -1286,16 +1306,10 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
 						.getValue()).getValue());
 		
-		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
-				.filter(r -> r.getResource() instanceof Organization).findAny().get();
-		Organization organization = (Organization) organizationEntry.getResource();
-		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
-				organization.getIdentifier());
-		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get()).getReference(),
-				organizationEntry.getRequest().getUrl());
+		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				organization.getType().getCoding().get(0));
+				eob.castToCoding(eob.getFacility()));
 
 		Assert.assertEquals(record.attendingPhysicianNpi.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
@@ -1322,6 +1336,9 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
+
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				recordLine1.providerPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
@@ -1367,9 +1384,10 @@ public final class DataTransformerTest {
 		record.providerStateCode = "UT";
 		record.organizationNpi = Optional.of("1811111111");
 		record.attendingPhysicianNpi = Optional.of("2222222222");
-		record.patientDischargeStatusCode = "30";
 		record.claimFacilityTypeCode = '3';
 		record.claimServiceClassificationTypeCode = '2';
+		record.claimFrequencyCode = '1';
+		record.claimPrimaryPayerCode = 'A';
 		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_9, "9999");
 		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_9, "8888"));
 		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "7777"));
@@ -1377,6 +1395,8 @@ public final class DataTransformerTest {
 		HHAClaimLine recordLine1 = new HHAClaimLine();
 		record.lines.add(recordLine1);
 		recordLine1.lineNumber = 1;
+		recordLine1.revCntr1stAnsiCd = Optional.of("CO120");
+		recordLine1.rateAmount = new BigDecimal("5.00");
 		recordLine1.hcpcsCode = Optional.of("2GGGG");
 		recordLine1.hcpcsInitialModifierCode = Optional.of("KO");
 		recordLine1.hcpcsSecondModifierCode = Optional.empty();
@@ -1403,9 +1423,9 @@ public final class DataTransformerTest {
 
 		Bundle claimBundle = HHABundleWrapper.getResult();
 		/*
-		 * Bundle should have: 1) EOB, 2) Organization
+		 * Bundle should have: 1) EOB
 		 */
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
@@ -1427,19 +1447,10 @@ public final class DataTransformerTest {
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0).getValue()
 						.toString()));
 		
-		Assert.assertEquals(record.organizationNpi.get(), eob.getAuthorIdentifier().getValue());
-		
-		BundleEntryComponent organizationEntry = claimBundle.getEntry().stream()
-				.filter(r -> r.getResource() instanceof Organization).findAny().get();
-		Organization organization = (Organization) organizationEntry.getResource();
-		assertIdentifierExists(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
-				organization.getIdentifier());
-		Assert.assertEquals(HTTPVerb.PUT, organizationEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				DataTransformer.referenceOrganizationByNpi(record.organizationNpi.get()).getReference(),
-				organizationEntry.getRequest().getUrl());
+		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				organization.getType().getCoding().get(0));
+				eob.castToCoding(eob.getFacility()));
 
 		Assert.assertEquals(record.attendingPhysicianNpi.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
@@ -1457,11 +1468,15 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
+				eobItem0.getAdjudication());
+
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 			
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
-				eobItem0.getService());
+		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
+				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT, recordLine1.paymentAmount,
 				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT, recordLine1.totalChargeAmount,
@@ -1725,6 +1740,24 @@ public final class DataTransformerTest {
 				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		Assert.assertEquals(expectedAmount, adjudication.get().getAmount().getValue());
+	}
+
+	/**
+	 * @param expectedCategoryCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link AdjudicationComponent#getCategory()} to find and verify
+	 * @param expectedCode
+	 *            the expected {@link AdjudicationComponent#getReason()}
+	 * @param actuals
+	 *            the actual {@link AdjudicationComponent}s to verify
+	 */
+	private static void assertAdjudicationEquals(String expectedCategoryCode, String expectedCode,
+			List<AdjudicationComponent> actuals) {
+		Optional<AdjudicationComponent> adjudication = actuals.stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
+		Assert.assertTrue(adjudication.isPresent());
+		Assert.assertEquals(expectedCode, adjudication.get().getReason().getCode());
 	}
 
 	/**
