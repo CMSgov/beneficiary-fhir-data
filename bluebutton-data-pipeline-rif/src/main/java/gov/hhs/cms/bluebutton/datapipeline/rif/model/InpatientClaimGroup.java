@@ -93,6 +93,11 @@ public final class InpatientClaimGroup {
 	public Character claimServiceClassificationTypeCode;
 
 	/**
+	 * @see Column#CLM_FREQ_CD
+	 */
+	public Character claimFrequencyCode;
+
+	/**
 	 * @see Column#CLM_MDCR_NON_PMT_RSN_CD
 	 */
 	public Optional<String> claimNonPaymentReasonCode;
@@ -106,6 +111,11 @@ public final class InpatientClaimGroup {
 	 * @see Column#NCH_PRMRY_PYR_CLM_PD_AMT
 	 */
 	public BigDecimal primaryPayerPaidAmount;
+
+	/**
+	 * @see Column#NCH_PRMRY_PYR_CD
+	 */
+	public Character claimPrimaryPayerCode;
 
 	/**
 	 * @see Column#PRVDR_STATE_CD
@@ -131,6 +141,11 @@ public final class InpatientClaimGroup {
 	 * @see Column#OT_PHYSN_NPI
 	 */
 	public Optional<String> otherPhysicianNpi;
+
+	/**
+	 * @see Column#CLM_MCO_PD_SW
+	 */
+	public Optional<Character> mcoPaidSw;
 
 	/**
 	 * @see Column#PTNT_DSCHRG_STUS_CD
@@ -299,12 +314,16 @@ public final class InpatientClaimGroup {
 		builder.append(claimFacilityTypeCode);
 		builder.append(", claimServiceClassificationTypeCode=");
 		builder.append(claimServiceClassificationTypeCode);
+		builder.append(", claimFrequencyCode=");
+		builder.append(claimFrequencyCode);
 		builder.append(", claimNonPaymentReasonCode=");
 		builder.append(claimNonPaymentReasonCode);
 		builder.append(", paymentAmount=");
 		builder.append(paymentAmount);
 		builder.append(", primaryPayerPaidAmount=");
 		builder.append(primaryPayerPaidAmount);
+		builder.append(", claimPrimaryPayerCode=");
+		builder.append(claimPrimaryPayerCode);
 		builder.append(", providerStateCode=");
 		builder.append(providerStateCode);
 		builder.append(", organizationNpi=");
@@ -315,6 +334,8 @@ public final class InpatientClaimGroup {
 		builder.append(operatingPhysicianNpi);
 		builder.append(", otherPhysicianNpi=");
 		builder.append(otherPhysicianNpi);
+		builder.append(", mcoPaidSw=");
+		builder.append(mcoPaidSw);
 		builder.append(", patientDischargeStatusCode=");
 		builder.append(patientDischargeStatusCode);
 		builder.append(", totalChargeAmount=");
@@ -384,6 +405,16 @@ public final class InpatientClaimGroup {
 		public Optional<String> hcpcsCode;
 
 		/**
+		 * @see Column#REV_CNTR_UNIT_CNT
+		 */
+		public BigDecimal unitCount;
+
+		/**
+		 * @see Column#REV_CNTR_RATE_AMT
+		 */
+		public BigDecimal rateAmount;
+
+		/**
 		 * @see Column#REV_CNTR_TOT_CHRG_AMT
 		 */
 		public BigDecimal totalChargeAmount;
@@ -394,11 +425,19 @@ public final class InpatientClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#REV_CNTR_NDC_QTY
+		 */
+		public Optional<Integer> nationalDrugCodeQuantity;
+
+		/**
+		 * @see Column#REV_CNTR_NDC_QTY_QLFR_CD
+		 */
+		public Optional<String> nationalDrugCodeQualifierCode;
+
+		/**
 		 * @see Column#RNDRNG_PHYSN_NPI
 		 */
 		public Optional<String> revenueCenterRenderingPhysicianNPI;
-
-		
 		
 		/**
 		 * @see java.lang.Object#toString()
@@ -410,10 +449,20 @@ public final class InpatientClaimGroup {
 			builder.append(lineNumber);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
+			builder.append(", unitCount=");
+			builder.append(unitCount);
+			builder.append(", rateAmount=");
+			builder.append(rateAmount);
 			builder.append(", totalChargeAmount=");
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", nationalDrugCodeQuantity=");
+			builder.append(nationalDrugCodeQuantity);
+			builder.append(", nationalDrugCodeQualifierCode=");
+			builder.append(nationalDrugCodeQualifierCode);
+			builder.append(", revenueCenterRenderingPhysicianNPI=");
+			builder.append(revenueCenterRenderingPhysicianNPI);
 			builder.append("]");
 			return builder.toString();
 		}
@@ -517,7 +566,9 @@ public final class InpatientClaimGroup {
 		CLM_SRVC_CLSFCTN_TYPE_CD,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt">
+		 * CCW Data Dictionary: FREQ_CD</a>.
 		 */
 		CLM_FREQ_CD,
 		
@@ -549,7 +600,9 @@ public final class InpatientClaimGroup {
 		NCH_PRMRY_PYR_CLM_PD_AMT,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt">
+		 * CCW Data Dictionary: PRPAY_CD</a>.
 		 */
 		NCH_PRMRY_PYR_CD,
 		
@@ -613,7 +666,10 @@ public final class InpatientClaimGroup {
 		OT_PHYSN_NPI,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mcopdsw.txt">
+		 * CCW Data Dictionary: MCOPDSW</a>.
 		 */
 		CLM_MCO_PD_SW,
 
@@ -2224,6 +2280,20 @@ public final class InpatientClaimGroup {
 
 		/**
 		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_unit.txt">
+		 * CCW Data Dictionary: REV_UNIT </a>.
+		 */
+		REV_CNTR_UNIT_CNT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_rate.txt">
+		 * CCW Data Dictionary: REV_RATE </a>.
+		 */
+		REV_CNTR_RATE_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_chrg.txt">
 		 * CCW Data Dictionary: REV_CHRG </a>.
 		 */
@@ -2235,6 +2305,22 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: REV_NCVR </a>.
 		 */
 		REV_CNTR_NCVRD_CHRG_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY</a>.
+		 */
+		REV_CNTR_NDC_QTY,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY_QLFR_CD</a>.
+		 */
+		REV_CNTR_NDC_QTY_QLFR_CD,
 
 		/**
 		 * Type: <code>NUM</code>, max chars: 12. See <a href=
