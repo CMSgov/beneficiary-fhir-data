@@ -198,7 +198,8 @@ public final class DataTransformerTest {
 		 */
 
 		Assert.assertEquals(record.nameGiven, bene.getName().get(0).getGiven().get(0).toString());
-		Assert.assertEquals(record.nameMiddleInitial.toString(), bene.getName().get(0).getGiven().get(1).toString());
+		Assert.assertEquals(record.nameMiddleInitial.get().toString(),
+				bene.getName().get(0).getGiven().get(1).toString());
 		Assert.assertEquals(record.nameSurname, bene.getName().get(0).getFamilyAsSingleString().toString());
 
 		// TODO Need to check the status code for partA

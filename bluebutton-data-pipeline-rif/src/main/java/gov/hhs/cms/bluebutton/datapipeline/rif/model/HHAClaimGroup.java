@@ -47,12 +47,6 @@ public final class HHAClaimGroup {
 	public String beneficiaryId;
 	
 	/**
-	 * @see Column#ORG_NPI_NUM
-	 * put organization reference to it.
-	 */
-	public String author;
-	
-	/**
 	 * @see Column#CLM_ID
 	 */
 	public String claimId;
@@ -185,8 +179,6 @@ public final class HHAClaimGroup {
 		builder.append(recordAction);
 		builder.append(", beneficiaryId=");
 		builder.append(beneficiaryId);
-		builder.append(", author=");
-		builder.append(author);
 		builder.append(", claimId=");
 		builder.append(claimId);
 		builder.append(", nearLineRecordIdCode=");
