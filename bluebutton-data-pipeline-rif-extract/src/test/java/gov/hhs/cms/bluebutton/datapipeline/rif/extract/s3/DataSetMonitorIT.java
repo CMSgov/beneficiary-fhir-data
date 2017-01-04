@@ -80,7 +80,8 @@ public final class DataSetMonitorIT {
 	}
 
 	/**
-	 * Tests {@link DataSetMonitor} when run against an empty bucket.
+	 * Tests {@link DataSetMonitor} when run against a bucket with two data sets
+	 * in it.
 	 * 
 	 * @throws InterruptedException
 	 *             (shouldn't happen)
@@ -122,8 +123,13 @@ public final class DataSetMonitorIT {
 			Assert.assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
 			Assert.assertEquals(manifestB.getTimestamp(), listener.getDataEvents().get(1).getTimestamp());
 
-			// Verify that the bucket is now empty.
-			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket, 0, java.time.Duration.ofSeconds(10));
+			// Verify that the data sets were both renamed.
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, 0, java.time.Duration.ofSeconds(10));
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS,
+					1 + manifestA.getEntries().size() + 1 + manifestB.getEntries().size(),
+					java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);

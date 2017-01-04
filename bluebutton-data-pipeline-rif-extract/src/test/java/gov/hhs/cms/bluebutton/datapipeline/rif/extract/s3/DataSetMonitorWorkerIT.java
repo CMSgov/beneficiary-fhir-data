@@ -87,8 +87,12 @@ public final class DataSetMonitorWorkerIT {
 			Assert.assertEquals(manifest.getEntries().size(), listener.getDataEvents().get(0).getFiles().size());
 			Assert.assertEquals(0, listener.getErrorEvents().size());
 
-			// Verify that the bucket is now empty.
-			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket, 0, java.time.Duration.ofSeconds(10));
+			// Verify that the data set was renamed.
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, 0, java.time.Duration.ofSeconds(10));
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, 1 + manifest.getEntries().size(),
+					java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
@@ -132,8 +136,15 @@ public final class DataSetMonitorWorkerIT {
 			Assert.assertEquals(manifestA.getEntries().size(), listener.getDataEvents().get(0).getFiles().size());
 			Assert.assertEquals(0, listener.getErrorEvents().size());
 
-			// Verify that the bucket now just has the second data set.
-			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket, 1 + manifestB.getEntries().size(),
+			/*
+			 * Verify that the first data set was renamed and the second is
+			 * still there.
+			 */
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, 1 + manifestB.getEntries().size(),
+					java.time.Duration.ofSeconds(10));
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, 1 + manifestA.getEntries().size(),
 					java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)
