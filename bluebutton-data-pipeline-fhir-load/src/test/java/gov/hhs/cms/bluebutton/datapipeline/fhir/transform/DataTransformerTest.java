@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +25,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
@@ -61,6 +59,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
  * Unit tests for {@link DataTransformer}.
@@ -138,26 +137,24 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertBeneficiaryEvent() {
-		// Create the mock bene to test against.
-		BeneficiaryRow record = new BeneficiaryRow();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "567834";
-		record.stateCode = "MO";
-		record.countyCode = "Transylvania";
-		record.postalCode = "12345";
-		record.birthDate = LocalDate.of(1981, Month.MARCH, 17);
-		record.sex = ('M');
-		record.entitlementCodeOriginal = Optional.of(new Character('1'));
-		record.entitlementCodeCurrent = Optional.of(new Character('1'));
-		record.endStageRenalDiseaseCode = Optional.of(new Character('N'));
-		record.medicareEnrollmentStatusCode = Optional.of(new String("20"));
-		record.partATerminationCode = Optional.of(new Character('0'));
-		record.partBTerminationCode = Optional.of(new Character('0'));
-		record.hicn = "543217066U";
-		record.nameSurname = "Doe";
-		record.nameGiven = "John";
-		record.nameMiddleInitial = Optional.of(new Character('A'));
+    // Read data from file
+		RifFilesEvent filesEvent1 = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_BENES.toRifFile());
+		RifFilesProcessor processor = new RifFilesProcessor();
+		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent1);
+
+		Assert.assertNotNull(rifEvents);
+		Assert.assertEquals(1, rifEvents.size());
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRecordCount(), rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent.getRecord());
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryRow);
+    
+    BeneficiaryRow record = (BeneficiaryRow) rifRecordEvent.getRecord();
+		
+		// Create Mock
 
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
@@ -403,54 +400,29 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertCarrierClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		CarrierClaimGroup record = new CarrierClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "3456";
-		record.claimId = "9991831999";
-		record.dateFrom = LocalDate.of(1999, 10, 27);
-		record.dateThrough = LocalDate.of(1999, 10, 27);
-		record.nearLineRecordIdCode = 'O';
-		record.claimTypeCode = "71";
-		record.claimDispositionCode = "1";
-		record.carrierNumber = "061026666";
-		record.paymentDenialCode = "1";
-		record.paymentAmount = new BigDecimal("199.99");
-		record.referringPhysicianNpi = Optional.of("8765676");
-		record.providerPaymentAmount = new BigDecimal("123.45");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "H33333");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H44444"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H55555"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H66666"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "H77777"));
-		record.clinicalTrialNumber = Optional.of("0");
-		CarrierClaimLine recordLine1 = new CarrierClaimLine();
-		record.lines.add(recordLine1);
-		recordLine1.number = 6;
-		recordLine1.performingPhysicianNpi = Optional.of("1923124");
-		recordLine1.organizationNpi = Optional.of("5555553305");
-		recordLine1.providerStateCode = Optional.of("IL");
-		recordLine1.providerZipCode = Optional.of("555558202");
-		recordLine1.cmsServiceTypeCode = "1";
-		recordLine1.placeOfServiceCode = "11";
-		recordLine1.firstExpenseDate = LocalDate.of(1999, 10, 27);
-		recordLine1.lastExpenseDate = LocalDate.of(1999, 10, 27);
-		recordLine1.hcpcsCode = Optional.of("92999");
-		recordLine1.hcpcsInitialModifierCode = Optional.of("LT");
-		recordLine1.hcpcsSecondModifierCode = Optional.empty();
-		recordLine1.betosCode = Optional.of("T2D");
-		recordLine1.paymentAmount = new BigDecimal("37.5");
-		recordLine1.beneficiaryPaymentAmount = new BigDecimal("0");
-		recordLine1.providerPaymentAmount = new BigDecimal("37.5");
-		recordLine1.beneficiaryPartBDeductAmount = new BigDecimal("0");
-		recordLine1.primaryPayerPaidAmount = new BigDecimal("0");
-		recordLine1.coinsuranceAmount = new BigDecimal("9.57");
-		recordLine1.submittedChargeAmount = new BigDecimal("75");
-		recordLine1.allowedChargeAmount = new BigDecimal("47.84");
-		recordLine1.diagnosis = new IcdCode(IcdVersion.ICD_10, "H12345");
-		recordLine1.nationalDrugCode = Optional.of(new String("0777666666"));
+    // Read sample data from text file
+		RifFilesEvent filesRifEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
+		RifFilesProcessor processor = new RifFilesProcessor();
+		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesRifEvent);
 
+		Assert.assertNotNull(rifEvents);
+		Assert.assertEquals(1, rifEvents.size());
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRecordCount(), rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRifFileType(),
+				rifRecordEvent.getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent.getRecord());
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof CarrierClaimGroup);
+    
+    // Verify the claim header.
+		CarrierClaimGroup record = (CarrierClaimGroup) rifRecordEvent.getRecord();
+		
+		// Verify one of the claim lines.
+		CarrierClaimLine recordLine1 = record.lines.get(0);
+		
+		// Creating Mock	
 		RifFile file = new MockRifFile();
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
 		RifRecordEvent carrierRecordEvent = new RifRecordEvent<CarrierClaimGroup>(filesEvent, file, record);
@@ -1826,4 +1798,3 @@ public final class DataTransformerTest {
 		return bundle;
 	}
 }
-

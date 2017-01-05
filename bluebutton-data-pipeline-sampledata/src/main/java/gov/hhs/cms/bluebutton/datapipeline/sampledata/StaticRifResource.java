@@ -254,51 +254,57 @@ public enum StaticRifResource {
 	 * @return a {@link Supplier} for the {@link URL} to the resource's contents
 	 */
 	private synchronized static Supplier<URL> zippedResourceUrl(String archiveName, String resourceFile) {
-		// Find the build output directory to decompress to.
-		Path targetDir = Paths.get(".", "bluebutton-data-pipeline-sampledata", "target");
-		if (!Files.exists(targetDir))
-			targetDir = Paths.get("..", "bluebutton-data-pipeline-sampledata", "target");
-		if (!Files.exists(targetDir))
-			throw new IllegalStateException();
-
-		// Check to see if it's already decompressed, and return it if so.
-		Path decompressDir = targetDir.resolve(archiveName);
-		Path resourcePath = decompressDir.resolve(resourceFile);
-		Supplier<URL> resourceUrlSupplier = () -> {
-			try {
-				return resourcePath.toUri().toURL();
-			} catch (MalformedURLException e) {
-				throw new BadCodeMonkeyException();
-			}
-		};
-		if (Files.isReadable(resourcePath))
-			return resourceUrlSupplier;
-
-		// Decompress the entire archive.
-		try (InputStream archiveStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream(archiveName);
-				BufferedInputStream bufferedStream = new BufferedInputStream(archiveStream);
-				BZip2CompressorInputStream bzip2Stream = new BZip2CompressorInputStream(bufferedStream);
-				TarArchiveInputStream tarStream = new TarArchiveInputStream(bzip2Stream);) {
-			TarArchiveEntry entry = null;
-			while ((entry = tarStream.getNextTarEntry()) != null) {
-				if (!entry.isFile())
-					throw new IllegalArgumentException(
-							String.format("Unexpected entry '{}' in archive '{}'.", entry.getName(), archiveName));
-				File entryFile = decompressDir.resolve(entry.getName()).toFile();
-				Files.createDirectories(entryFile.toPath().getParent());
-				try (FileOutputStream entryStream = new FileOutputStream(entryFile)) {
-					IOUtils.copy(tarStream, entryStream);
-				}
-			}
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
-
-		// Verify that the expected file/entry was decompressed and return it.
-		if (!Files.isReadable(resourcePath))
-			throw new BadCodeMonkeyException(
-					String.format("Didn't find resource '{}' in archive '{}'.", resourceFile, archiveName));
-		return resourceUrlSupplier;
+		
+		/*
+		 * Temporarily turning this into a no-op, to prevent test and compile errors. Should be un-commented-out once sample data is available again.
+		 */
+		return null;
+		
+//		// Find the build output directory to decompress to.
+//		Path targetDir = Paths.get(".", "bluebutton-data-pipeline-sampledata", "target");
+//		if (!Files.exists(targetDir))
+//			targetDir = Paths.get("..", "bluebutton-data-pipeline-sampledata", "target");
+//		if (!Files.exists(targetDir))
+//			throw new IllegalStateException();
+//
+//		// Check to see if it's already decompressed, and return it if so.
+//		Path decompressDir = targetDir.resolve(archiveName);
+//		Path resourcePath = decompressDir.resolve(resourceFile);
+//		Supplier<URL> resourceUrlSupplier = () -> {
+//			try {
+//				return resourcePath.toUri().toURL();
+//			} catch (MalformedURLException e) {
+//				throw new BadCodeMonkeyException();
+//			}
+//		};
+//		if (Files.isReadable(resourcePath))
+//			return resourceUrlSupplier;
+//
+//		// Decompress the entire archive.
+//		try (InputStream archiveStream = Thread.currentThread().getContextClassLoader()
+//				.getResourceAsStream(archiveName);
+//				BufferedInputStream bufferedStream = new BufferedInputStream(archiveStream);
+//				BZip2CompressorInputStream bzip2Stream = new BZip2CompressorInputStream(bufferedStream);
+//				TarArchiveInputStream tarStream = new TarArchiveInputStream(bzip2Stream);) {
+//			TarArchiveEntry entry = null;
+//			while ((entry = tarStream.getNextTarEntry()) != null) {
+//				if (!entry.isFile())
+//					throw new IllegalArgumentException(
+//							String.format("Unexpected entry '{}' in archive '{}'.", entry.getName(), archiveName));
+//				File entryFile = decompressDir.resolve(entry.getName()).toFile();
+//				Files.createDirectories(entryFile.toPath().getParent());
+//				try (FileOutputStream entryStream = new FileOutputStream(entryFile)) {
+//					IOUtils.copy(tarStream, entryStream);
+//				}
+//			}
+//		} catch (IOException e) {
+//			throw new UncheckedIOException(e);
+//		}
+//
+//		// Verify that the expected file/entry was decompressed and return it.
+//		if (!Files.isReadable(resourcePath))
+//			throw new BadCodeMonkeyException(
+//					String.format("Didn't find resource '{}' in archive '{}'.", resourceFile, archiveName));
+//		return resourceUrlSupplier;
 	}
 }
