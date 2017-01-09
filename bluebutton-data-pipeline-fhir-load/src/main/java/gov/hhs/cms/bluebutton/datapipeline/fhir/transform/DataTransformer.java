@@ -17,7 +17,6 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -788,7 +787,8 @@ public final class DataTransformer {
 			throw new IllegalArgumentException("Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
 
 		eob.setOrganization(new Identifier().setValue(record.serviceProviderId).setSystem(ORGANIZATION_NPI));
-		eob.setFacility(new Coding().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setCode(record.pharmacyTypeCode));
+		eob.setFacility(
+				new Identifier().setSystem(CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD).setValue(record.pharmacyTypeCode));
 
 		Coverage coverage = new Coverage();
 		Reference coverageRef = new Reference(
@@ -1204,8 +1204,10 @@ public final class DataTransformer {
 			eob.setOrganization(
 					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
 		}
-		eob.setFacility(new Coding().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.claimFacilityTypeCode)));
+
+		eob.setFacility(
+				new Identifier().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
+						.setValue(String.valueOf(claimGroup.claimFacilityTypeCode)));
 
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.claimServiceClassificationTypeCode)));
@@ -1421,8 +1423,9 @@ public final class DataTransformer {
 					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
 		}
 
-		eob.setFacility(new Coding().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.claimFacilityTypeCode)));
+		eob.setFacility(
+				new Identifier().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
+						.setValue(String.valueOf(claimGroup.claimFacilityTypeCode)));
 
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.claimServiceClassificationTypeCode)));
@@ -1695,8 +1698,8 @@ public final class DataTransformer {
 					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
 		}
 
-		eob.setFacility(new Coding().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.claimFacilityTypeCode)));
+		eob.setFacility(new Identifier().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
+				.setValue(String.valueOf(claimGroup.claimFacilityTypeCode)));
 
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
 				new Coding().setSystem(CODING_SYSTEM_FREQUENCY_CD)
@@ -1851,8 +1854,8 @@ public final class DataTransformer {
 					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
 		}
 
-		eob.setFacility(new Coding().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.claimFacilityTypeCode)));
+		eob.setFacility(new Identifier().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
+				.setValue(String.valueOf(claimGroup.claimFacilityTypeCode)));
 
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
 				new Coding().setSystem(CODING_SYSTEM_FREQUENCY_CD)
@@ -2003,8 +2006,8 @@ public final class DataTransformer {
 					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
 		}
 
-		eob.setFacility(new Coding().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.claimFacilityTypeCode)));
+		eob.setFacility(new Identifier().setSystem(CODING_SYSTEM_CCW_FACILITY_TYPE_CD)
+				.setValue(String.valueOf(claimGroup.claimFacilityTypeCode)));
 
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
 				new Coding().setSystem(CODING_SYSTEM_FREQUENCY_CD).setCode(String.valueOf(claimGroup.claimFrequencyCode))));

@@ -781,6 +781,8 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_1ST_MDFR_CD));
 			claimLine.hcpcsSecondModifierCode = parseOptString(
 					claimLineRecord.get(OutpatientClaimGroup.Column.HCPCS_2ND_MDFR_CD));
+			claimLine.nationalDrugCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_IDE_NDC_UPC_NUM));
 			claimLine.unitCount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_UNIT_CNT));
 			claimLine.rateAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_RATE_AMT));
 			claimLine.bloodDeductibleAmount = parseDecimal(claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_BLOOD_DDCTBL_AMT)); 

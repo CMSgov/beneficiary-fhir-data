@@ -268,8 +268,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(pdeRecord.serviceProviderId, eob.getOrganizationIdentifier().getValue());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, pdeRecord.pharmacyTypeCode.toString(),
-				eob.castToCoding(eob.getFacility()));
+		Assert.assertEquals(String.valueOf(pdeRecord.pharmacyTypeCode), eob.getFacilityIdentifier().getValue());
 
 		// Default case has drug coverage status code as Covered
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PART_D_COVERED,
@@ -746,8 +745,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				eob.castToCoding(eob.getFacility()));
+		Assert.assertEquals(String.valueOf(record.claimFacilityTypeCode), eob.getFacilityIdentifier().getValue());
 
 		Assert.assertEquals(record.claimServiceClassificationTypeCode.toString(),
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0).getValue()
@@ -951,8 +949,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				eob.castToCoding(eob.getFacility()));
+		Assert.assertEquals(String.valueOf(record.claimFacilityTypeCode), eob.getFacilityIdentifier().getValue());
 
 		Assert.assertEquals(record.claimServiceClassificationTypeCode.toString(),
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0)
@@ -1129,8 +1126,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				eob.castToCoding(eob.getFacility()));
+		Assert.assertEquals(String.valueOf(record.claimFacilityTypeCode), eob.getFacilityIdentifier().getValue());
 
 		Assert.assertEquals(record.attendingPhysicianNpi.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
@@ -1280,8 +1276,7 @@ public final class DataTransformerTest {
 		
 		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				eob.castToCoding(eob.getFacility()));
+		Assert.assertEquals(String.valueOf(record.claimFacilityTypeCode), eob.getFacilityIdentifier().getValue());
 
 		Assert.assertEquals(record.attendingPhysicianNpi.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
@@ -1421,8 +1416,7 @@ public final class DataTransformerTest {
 		
 		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, record.claimFacilityTypeCode.toString(),
-				eob.castToCoding(eob.getFacility()));
+		Assert.assertEquals(String.valueOf(record.claimFacilityTypeCode), eob.getFacilityIdentifier().getValue());
 
 		Assert.assertEquals(record.attendingPhysicianNpi.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
