@@ -219,7 +219,7 @@ public final class RifFilesProcessorTest {
 		CarrierClaimGroup claimGroup = (CarrierClaimGroup) rifRecordEvent.getRecord();
 		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
-		Assert.assertEquals("3456", claimGroup.beneficiaryId);
+		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("9991831999", claimGroup.claimId);
 		Assert.assertEquals(new Character('O'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("71", claimGroup.claimTypeCode);
@@ -344,7 +344,7 @@ public final class RifFilesProcessorTest {
 		InpatientClaimGroup claimGroup = (InpatientClaimGroup) rifRecordEvent.getRecord();
 		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
-		Assert.assertEquals("345543", claimGroup.beneficiaryId);
+		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("333333222222", claimGroup.claimId);
 		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("60", claimGroup.claimTypeCode);
@@ -439,7 +439,7 @@ public final class RifFilesProcessorTest {
 		OutpatientClaimGroup claimGroup = (OutpatientClaimGroup) rifRecordEvent.getRecord();
 		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
-		Assert.assertEquals("444444", claimGroup.beneficiaryId);
+		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("1234567890", claimGroup.claimId);
 		Assert.assertEquals(new Character('W'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("40", claimGroup.claimTypeCode);
