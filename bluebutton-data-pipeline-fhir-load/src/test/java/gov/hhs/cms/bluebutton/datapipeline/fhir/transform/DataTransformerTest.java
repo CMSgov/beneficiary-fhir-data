@@ -31,7 +31,6 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
@@ -65,55 +64,6 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
  * Unit tests for {@link DataTransformer}.
  */
 public final class DataTransformerTest {
-	private PartDEventRow pdeRecord;
-
-	@Before
-	public void setup() {
-		// Initialize a default version of the PDE record
-		pdeRecord = new PartDEventRow();
-		pdeRecord.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		pdeRecord.recordAction = RecordAction.INSERT;
-		pdeRecord.partDEventId = "766";
-		pdeRecord.beneficiaryId = "94444";
-		pdeRecord.prescriptionFillDate = LocalDate.of(2015, 5, 12);
-		pdeRecord.paymentDate = Optional.of(LocalDate.of(2015, 5, 27));
-		pdeRecord.serviceProviderIdQualiferCode = "01";
-		pdeRecord.serviceProviderId = "111222333";
-		pdeRecord.prescriberIdQualifierCode = "01";
-		pdeRecord.prescriberId = "444555666";
-		pdeRecord.prescriptionReferenceNumber = new Long(799999);
-		pdeRecord.nationalDrugCode = "987654331212";
-		pdeRecord.planContractId = "H9999";
-		pdeRecord.planBenefitPackageId = "020";
-		pdeRecord.compoundCode = CompoundCode.NOT_COMPOUNDED;
-		pdeRecord.dispenseAsWrittenProductSelectionCode = "0";
-		pdeRecord.quantityDispensed = new BigDecimal(60);
-		pdeRecord.daysSupply = new Integer(30);
-		pdeRecord.fillNumber = new Integer(3);
-		pdeRecord.dispensingStatusCode = Optional.of(new Character('P'));
-		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.COVERED;
-		pdeRecord.adjustmentDeletionCode = Optional.of(new Character('A'));
-		pdeRecord.nonstandardFormatCode = Optional.of(new Character('X'));
-		pdeRecord.pricingExceptionCode = Optional.of(new Character('M'));
-		pdeRecord.catastrophicCoverageCode = Optional.of(new Character('C'));
-		pdeRecord.grossCostBelowOutOfPocketThreshold = new BigDecimal("995.34");
-		pdeRecord.grossCostAboveOutOfPocketThreshold = new BigDecimal("15.25");
-		pdeRecord.patientPaidAmount = new BigDecimal("235.85");
-		pdeRecord.otherTrueOutOfPocketPaidAmount = new BigDecimal("17.30");
-		pdeRecord.lowIncomeSubsidyPaidAmount = new BigDecimal("122.23");
-		pdeRecord.patientLiabilityReductionOtherPaidAmount = new BigDecimal("42.42");
-		pdeRecord.partDPlanCoveredPaidAmount = new BigDecimal("126.99");
-		pdeRecord.partDPlanNonCoveredPaidAmount = new BigDecimal("17.98");
-		pdeRecord.totalPrescriptionCost = new BigDecimal("550.00");
-		pdeRecord.prescriptionOriginationCode = Optional.of(new Character('3'));
-		pdeRecord.gapDiscountAmount = new BigDecimal("317.22");
-		pdeRecord.brandGenericCode = new Character('G');
-		pdeRecord.pharmacyTypeCode = "01";
-		pdeRecord.patientResidenceCode = "02";
-		pdeRecord.submissionClarificationCode = Optional.of("08");
-		pdeRecord.serviceProviderIdQualiferCode = "01"; 
-		pdeRecord.prescriberIdQualifierCode = "01";
-	}
 
 	/**
 	 * Verifies that {@link DataTransformer} works correctly when when passed an
@@ -137,30 +87,14 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertBeneficiaryEvent() {
-    // Read data from file
-		RifFilesEvent filesEvent1 = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_BENES.toRifFile());
-		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent1);
-
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRecordCount(), rifEventsList.size());
-
-		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
-		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRifFileType(), rifRecordEvent.getFile().getFileType());
-		Assert.assertNotNull(rifRecordEvent.getRecord());
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_BENES);
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryRow);
-    
-    BeneficiaryRow record = (BeneficiaryRow) rifRecordEvent.getRecord();
+		BeneficiaryRow record = (BeneficiaryRow) rifRecordEvent.getRecord();
 		
 		// Create Mock
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent beneRecordEvent = new RifRecordEvent<BeneficiaryRow>(filesEvent, file, record);
-
-		Stream source = Arrays.asList(beneRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
@@ -169,7 +103,7 @@ public final class DataTransformerTest {
 
 		TransformedBundle beneBundleWrapper = resultList.get(0);
 		Assert.assertNotNull(beneBundleWrapper);
-		Assert.assertSame(beneRecordEvent, beneBundleWrapper.getSource());
+		Assert.assertSame(rifRecordEvent, beneBundleWrapper.getSource());
 		Assert.assertNotNull(beneBundleWrapper.getResult());
 		/*
 		 * Bundle should have: 1) Patient, 2) Coverage (part A), 3) Coverage
@@ -241,7 +175,13 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEvent() throws FHIRException {
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_PDE);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof PartDEventRow);
+
+		PartDEventRow pdeRecord = (PartDEventRow) rifRecordEvent.getRecord();
 		Bundle pdeBundle = getBundle(pdeRecord);
+
 		/*
 		 * Bundle should have: 1) EOB
 		 */
@@ -311,9 +251,15 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEventCompound() throws FHIRException {
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_PDE);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof PartDEventRow);
+		PartDEventRow pdeRecord = (PartDEventRow) rifRecordEvent.getRecord();
+
 		pdeRecord.compoundCode = CompoundCode.COMPOUNDED;
 
 		Bundle pdeBundle = getBundle(pdeRecord);
+
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
@@ -335,6 +281,11 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEventNonCoveredSupplement() throws FHIRException {
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_PDE);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof PartDEventRow);
+		PartDEventRow pdeRecord = (PartDEventRow) rifRecordEvent.getRecord();
+
 		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.SUPPLEMENTAL;
 
 		Bundle pdeBundle = getBundle(pdeRecord);
@@ -367,6 +318,11 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertPartDEventNonCoveredOTC() throws FHIRException {
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_PDE);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof PartDEventRow);
+		PartDEventRow pdeRecord = (PartDEventRow) rifRecordEvent.getRecord();
+
 		pdeRecord.drugCoverageStatusCode = DrugCoverageStatus.OVER_THE_COUNTER;
 
 		Bundle pdeBundle = getBundle(pdeRecord);
@@ -399,34 +355,18 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertCarrierClaimEvent() throws FHIRException {
-    // Read sample data from text file
-		RifFilesEvent filesRifEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
-		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesRifEvent);
-
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
-		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRecordCount(), rifEventsList.size());
-
-		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
-		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRifFileType(),
-				rifRecordEvent.getFile().getFileType());
-		Assert.assertNotNull(rifRecordEvent.getRecord());
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_CARRIER);
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof CarrierClaimGroup);
     
-    // Verify the claim header.
+		// Verify the claim header.
 		CarrierClaimGroup record = (CarrierClaimGroup) rifRecordEvent.getRecord();
 		
 		// Verify one of the claim lines.
 		CarrierClaimLine recordLine1 = record.lines.get(0);
 		
 		// Creating Mock	
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent carrierRecordEvent = new RifRecordEvent<CarrierClaimGroup>(filesEvent, file, record);
-
-		Stream source = Arrays.asList(carrierRecordEvent).stream();
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
@@ -435,7 +375,7 @@ public final class DataTransformerTest {
 
 		TransformedBundle carrierBundleWrapper = resultList.get(0);
 		Assert.assertNotNull(carrierBundleWrapper);
-		Assert.assertSame(carrierRecordEvent, carrierBundleWrapper.getSource());
+		Assert.assertSame(rifRecordEvent, carrierBundleWrapper.getSource());
 		Assert.assertNotNull(carrierBundleWrapper.getResult());
 
 		Bundle claimBundle = carrierBundleWrapper.getResult();
@@ -561,80 +501,18 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertInpatientClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		InpatientClaimGroup record = new InpatientClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "345543";
-		record.claimId = "333333222222";
-		record.claimTypeCode = "60";
-		record.dateFrom = LocalDate.of(2016, 01, 15);
-		record.dateThrough = LocalDate.of(2016, 01, 27);
-		record.patientDischargeStatusCode = "01";
-		record.nearLineRecordIdCode = 'V';
-		record.claimServiceClassificationTypeCode = '1';
-		record.claimFrequencyCode = '1';
-		record.claimPrimaryPayerCode = 'A';
-		record.claimNonPaymentReasonCode = Optional.empty();
-		record.providerNumber = "7777766666";
-		record.providerStateCode = "IA";
-		record.paymentAmount = new BigDecimal("7699.48");
-		record.primaryPayerPaidAmount = new BigDecimal("11.00");
-		record.totalChargeAmount = new BigDecimal("84999.37");
-		record.organizationNpi = Optional.of("5555553305");
-		record.attendingPhysicianNpi = Optional.of("161999999");
-		record.operatingPhysicianNpi = Optional.of("3333444555");
-		record.otherPhysicianNpi = Optional.of("161943433");
-		record.mcoPaidSw = Optional.of('0');
-		record.claimFacilityTypeCode = '1';
-		record.passThruPerDiemAmount = new BigDecimal("10.00");
-		record.deductibleAmount = new BigDecimal("112.00");
-		record.partACoinsuranceLiabilityAmount = new BigDecimal("5.00");
-		record.bloodDeductibleLiabilityAmount = new BigDecimal("6.00");
-		record.professionalComponentCharge = new BigDecimal("4.00");
-		record.noncoveredCharge = new BigDecimal("33.00");
-		record.totalDeductionAmount = new BigDecimal("14.00");
-		record.claimTotalPPSCapitalAmount = Optional.of(new BigDecimal("646.23"));
-		record.claimPPSCapitalFSPAmount = Optional.of(new BigDecimal("552.56"));
-		record.claimPPSCapitalOutlierAmount = Optional.of(new BigDecimal("0"));
-		record.claimPPSCapitalDisproportionateShareAmt = Optional.of(new BigDecimal("25.09"));
-		record.claimPPSCapitalIMEAmount = Optional.of(new BigDecimal("68.58"));
-		record.claimPPSCapitalExceptionAmount = Optional.of(new BigDecimal("0"));
-		record.claimPPSOldCapitalHoldHarmlessAmount = Optional.of(new BigDecimal("0"));
-		record.nchDrugOutlierApprovedPaymentAmount = Optional.of(new BigDecimal("23.99"));
-		record.diagnosisAdmitting = new IcdCode(IcdVersion.ICD_10, "R4444");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "R5555");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R6666", "Y"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "A7777", "N"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R8888", "N"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "K1234", "N"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "I888", "N"));
-		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "R7654"));
-		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_10, "I9988", "N"));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "0TCDDEE", LocalDate.of(2016, 01, 16)));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "302DDAA", LocalDate.of(2016, 01, 16)));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "302ZZXX", LocalDate.of(2016, 01, 15)));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "5566AAA", LocalDate.of(2016, 10, 17)));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "6677BBB", LocalDate.of(2016, 01, 24)));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "5588DDD", LocalDate.of(2016, 01, 24)));
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_INPATIENT);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof InpatientClaimGroup);
 
-		InpatientClaimLine recordLine1 = new InpatientClaimLine();
-		record.lines.add(recordLine1);
-		recordLine1.lineNumber = 1;
-		recordLine1.hcpcsCode = Optional.of("M55");
-		recordLine1.unitCount = new BigDecimal("111.00");
-		recordLine1.rateAmount = new BigDecimal("5.00");
-		recordLine1.totalChargeAmount = new BigDecimal("84888.88");
-		recordLine1.nonCoveredChargeAmount = new BigDecimal("3699.00");
-		recordLine1.nationalDrugCodeQuantity = Optional.of(new Integer(77));
-		recordLine1.nationalDrugCodeQualifierCode = Optional.of("GG");
-		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("345345345");
+		// Verify the claim header.
+		InpatientClaimGroup record = (InpatientClaimGroup) rifRecordEvent.getRecord();
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent inpatientRecordEvent = new RifRecordEvent<InpatientClaimGroup>(filesEvent, file, record);
+		// Verify one of the claim lines.
+		InpatientClaimLine recordLine1 = record.lines.get(0);
 
-		Stream source = Arrays.asList(inpatientRecordEvent).stream();
+		// Create Mock
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
@@ -643,7 +521,7 @@ public final class DataTransformerTest {
 
 		TransformedBundle inpatientBundleWrapper = resultList.get(0);
 		Assert.assertNotNull(inpatientBundleWrapper);
-		Assert.assertSame(inpatientRecordEvent, inpatientBundleWrapper.getSource());
+		Assert.assertSame(rifRecordEvent, inpatientBundleWrapper.getSource());
 		Assert.assertNotNull(inpatientBundleWrapper.getResult());
 
 		Bundle claimBundle = inpatientBundleWrapper.getResult();
@@ -813,79 +691,17 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertOutpatientClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		OutpatientClaimGroup record = new OutpatientClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "444444";
-		record.claimId = "1234567890";
-		record.claimTypeCode = "40";
-		record.dateFrom = LocalDate.of(2011, 01, 24);
-		record.dateThrough = LocalDate.of(2011, 01, 24);
-		record.patientDischargeStatusCode = Optional.of("01");
-		record.nearLineRecordIdCode = 'W';
-		record.claimNonPaymentReasonCode = Optional.of("A");
-		record.providerNumber = "9999999";
-		record.providerStateCode = "KY";
-		record.paymentAmount = new BigDecimal("693.11");
-		record.totalChargeAmount = new BigDecimal("8888.85");
-		record.claimServiceClassificationTypeCode = '3';
-		record.claimFrequencyCode = '1';
-		record.claimPrimaryPayerCode = 'A';
-		record.organizationNpi = Optional.of("1111111111");
-		record.attendingPhysicianNpi = Optional.of("2222222222");
-		record.operatingPhysicianNpi = Optional.of("3333333333");
-		record.otherPhysicianNpi = Optional.empty();
-		record.mcoPaidSw = Optional.of('0');
-		record.claimFacilityTypeCode = '1';
-		record.primaryPayerPaidAmount = new BigDecimal("11.00");
-		record.bloodDeductibleLiabilityAmount = new BigDecimal("6.00");
-		record.professionalComponentCharge = new BigDecimal("66.89");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "R5555");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "R8888"));
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "I9999"));
-		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "R2222"));
-		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_10, "I5050"));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_10, "0AABBZZ", LocalDate.of(2016, 01, 16)));
-		record.diagnosesReasonForVisit.add(new IcdCode(IcdVersion.ICD_10, "R1122"));
-		record.deductibleAmount = new BigDecimal("112.00");
-		record.coninsuranceAmount = new BigDecimal("175.73");
-		record.providerPaymentAmount = new BigDecimal("693.92");
-		record.beneficiaryPaymentAmount = new BigDecimal("44.00");
-		OutpatientClaimLine recordLine1 = new OutpatientClaimLine();
-		record.lines.add(recordLine1);
-		recordLine1.lineNumber = 25;
-		recordLine1.revCntr1stAnsiCd = Optional.of("CO120");
-		recordLine1.revCntr2ndAnsiCd = Optional.of("CR121");
-		recordLine1.revCntr3rdAnsiCd = Optional.empty();
-		recordLine1.revCntr4thAnsiCd = Optional.empty();
-		recordLine1.hcpcsCode = Optional.of("M99");
-		recordLine1.hcpcsInitialModifierCode = Optional.of("XX");
-		recordLine1.hcpcsSecondModifierCode = Optional.empty();
-		recordLine1.nationalDrugCode = Optional.of("987654321");
-		recordLine1.unitCount = new BigDecimal("111.00");
-		recordLine1.rateAmount = new BigDecimal("5.00");
-		recordLine1.bloodDeductibleAmount = new BigDecimal("10.45");
-		recordLine1.cashDeductibleAmount = new BigDecimal("12.89");
-		recordLine1.wageAdjustedCoinsuranceAmount = new BigDecimal("15.23");
-		recordLine1.reducedCoinsuranceAmount = new BigDecimal("11.00");
-		recordLine1.firstMspPaidAmount = new BigDecimal("55.00");
-		recordLine1.secondMspPaidAmount = new BigDecimal("65.00");
-		recordLine1.providerPaymentAmount = new BigDecimal("200.00");
-		recordLine1.benficiaryPaymentAmount = new BigDecimal("300.00");
-		recordLine1.patientResponsibilityAmount = new BigDecimal("500.00");
-		recordLine1.paymentAmount = new BigDecimal("5000.00");
-		recordLine1.totalChargeAmount = new BigDecimal("9999.85");
-		recordLine1.nonCoveredChargeAmount = new BigDecimal("134.00");
-		recordLine1.nationalDrugCodeQuantity = Optional.of(new Integer(77));
-		recordLine1.nationalDrugCodeQualifierCode = Optional.of("GG");
-		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("1234AA");
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_OUTPATIENT);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof OutpatientClaimGroup);
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent OutpatientRecordEvent = new RifRecordEvent<OutpatientClaimGroup>(filesEvent, file, record);
+		// Verify the claim header.
+		OutpatientClaimGroup record = (OutpatientClaimGroup) rifRecordEvent.getRecord();
 
-		Stream source = Arrays.asList(OutpatientRecordEvent).stream();
+		// Verify one of the claim lines.
+		OutpatientClaimLine recordLine1 = record.lines.get(0);
+
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
@@ -894,7 +710,7 @@ public final class DataTransformerTest {
 
 		TransformedBundle OutpatientBundleWrapper = resultList.get(0);
 		Assert.assertNotNull(OutpatientBundleWrapper);
-		Assert.assertSame(OutpatientRecordEvent, OutpatientBundleWrapper.getSource());
+		Assert.assertSame(rifRecordEvent, OutpatientBundleWrapper.getSource());
 		Assert.assertNotNull(OutpatientBundleWrapper.getResult());
 
 		Bundle claimBundle = OutpatientBundleWrapper.getResult();
@@ -1790,5 +1606,26 @@ public final class DataTransformerTest {
 		Bundle bundle = bundleWrapper.getResult();
 
 		return bundle;
+	}
+
+	/**
+	 * @return a RifRecordEvent for the sample a test file data
+	 */
+	private RifRecordEvent getSampleATestData(StaticRifResource resourceType) {
+		// Read data from sample-a-* text file
+		RifFilesEvent filesRifEvent = new RifFilesEvent(Instant.now(), resourceType.toRifFile());
+		RifFilesProcessor processor = new RifFilesProcessor();
+		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesRifEvent);
+
+		Assert.assertNotNull(rifEvents);
+		Assert.assertEquals(1, rifEvents.size());
+		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertEquals(resourceType.getRecordCount(), rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+		Assert.assertEquals(resourceType.getRifFileType(), rifRecordEvent.getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent.getRecord());
+
+		return rifRecordEvent;
 	}
 }

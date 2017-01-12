@@ -112,7 +112,6 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_A_PDE}.
 	 */
 	@Test
-	@Ignore
 	public void process1PDERecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_PDE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -132,16 +131,16 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, pdeRow.version);
 		Assert.assertEquals(RecordAction.INSERT, pdeRow.recordAction);
 		Assert.assertEquals("89", pdeRow.partDEventId);
-		Assert.assertEquals("1", pdeRow.beneficiaryId);
+		Assert.assertEquals("567834", pdeRow.beneficiaryId);
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.prescriptionFillDate);
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 27), pdeRow.paymentDate.get());
 		Assert.assertEquals("01", pdeRow.serviceProviderIdQualiferCode);
-		Assert.assertEquals("1124137542", pdeRow.serviceProviderId);
+		Assert.assertEquals("111222333", pdeRow.serviceProviderId);
 		Assert.assertEquals("01", pdeRow.prescriberIdQualifierCode);
-		Assert.assertEquals("1225061591", pdeRow.prescriberId);
-		Assert.assertEquals(new Long(791569), pdeRow.prescriptionReferenceNumber);
-		Assert.assertEquals("49884009902", pdeRow.nationalDrugCode);
-		Assert.assertEquals("H8552", pdeRow.planContractId);
+		Assert.assertEquals("444555666", pdeRow.prescriberId);
+		Assert.assertEquals(new Long(799999), pdeRow.prescriptionReferenceNumber);
+		Assert.assertEquals("987654331212", pdeRow.nationalDrugCode);
+		Assert.assertEquals("H9999", pdeRow.planContractId);
 		Assert.assertEquals("020", pdeRow.planBenefitPackageId);
 		Assert.assertEquals(CompoundCode.NOT_COMPOUNDED, pdeRow.compoundCode);
 		Assert.assertEquals("0", pdeRow.dispenseAsWrittenProductSelectionCode);
@@ -154,7 +153,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new Character('X'), pdeRow.nonstandardFormatCode.get());
 		Assert.assertEquals(new Character('M'), pdeRow.pricingExceptionCode.get());
 		Assert.assertEquals(new Character('C'), pdeRow.catastrophicCoverageCode.get());
-		Assert.assertEquals(new BigDecimal("362.84"), pdeRow.grossCostBelowOutOfPocketThreshold);
+		Assert.assertEquals(new BigDecimal("995.34"), pdeRow.grossCostBelowOutOfPocketThreshold);
 		Assert.assertEquals(new BigDecimal("15.25"), pdeRow.grossCostAboveOutOfPocketThreshold);
 		Assert.assertEquals(new BigDecimal("235.85"), pdeRow.patientPaidAmount);
 		Assert.assertEquals(new BigDecimal("17.30"), pdeRow.otherTrueOutOfPocketPaidAmount);
@@ -162,7 +161,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new BigDecimal("42.42"), pdeRow.patientLiabilityReductionOtherPaidAmount);
 		Assert.assertEquals(new BigDecimal("126.99"), pdeRow.partDPlanCoveredPaidAmount);
 		Assert.assertEquals(new BigDecimal("17.98"), pdeRow.partDPlanNonCoveredPaidAmount);
-		Assert.assertEquals(new BigDecimal("362.84"), pdeRow.totalPrescriptionCost);
+		Assert.assertEquals(new BigDecimal("550.00"), pdeRow.totalPrescriptionCost);
 		Assert.assertEquals(new Character('3'), pdeRow.prescriptionOriginationCode.get());
 		Assert.assertEquals(new BigDecimal("317.22"), pdeRow.gapDiscountAmount);
 		/*
