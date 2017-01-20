@@ -31,6 +31,7 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
@@ -111,6 +112,8 @@ public final class FhirLoaderIT {
 				.stream().filter(e -> e.getRecord() instanceof OutpatientClaimGroup).findAny().get();
 		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopyFlat.stream()
 				.filter(e -> e.getRecord() instanceof PartDEventRow).findAny().get();
+		RifRecordEvent<HHAClaimGroup> hhaRecordEvent = (RifRecordEvent<HHAClaimGroup>) rifRecordEventsCopyFlat.stream()
+				.filter(e -> e.getRecord() instanceof HHAClaimGroup).findAny().get();
 
 		// Link up the pipeline and run it.
 		List<FhirBundleResult> resultsList = new ArrayList<>();
@@ -163,6 +166,12 @@ public final class FhirLoaderIT {
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
 						pdeRecordEvent.getRecord().partDEventId))
+				.returnBundle(Bundle.class).execute().getTotal());
+		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENTREFERENCE
+						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
+				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+						hhaRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 	}
 

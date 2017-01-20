@@ -33,6 +33,7 @@ import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
@@ -46,7 +47,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup.HHAClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.InpatientClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup;
@@ -116,6 +116,11 @@ public final class DataTransformerTest {
 		Assert.assertEquals(HTTPVerb.PUT, beneEntry.getRequest().getMethod());
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, beneEntry.getRequest().getUrl());
 		Patient bene = (Patient) beneEntry.getResource();
+
+		FhirContext ctx = FhirContext.forDstu3();
+		String encoded = ctx.newXmlParser().encodeResourceToString(bene);
+		Assert.assertEquals(false, encoded.contains("Optional"));
+
 		Assert.assertEquals(bene.getId(), "Patient/bene-" + record.beneficiaryId);
 		Assert.assertEquals(1, bene.getAddress().size());
 		Assert.assertEquals(record.stateCode, bene.getAddress().get(0).getState());
@@ -191,6 +196,8 @@ public final class DataTransformerTest {
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+
+		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_PDE_ID, pdeRecord.partDEventId, eob.getIdentifier());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_CLAIM_TYPE, "pharmacy", eob.getType());
@@ -388,6 +395,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
+		assertOptionalNotPresent(eob);
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		Assert.assertEquals(record.nearLineRecordIdCode.toString(), ((StringType) eob
@@ -534,6 +543,8 @@ public final class DataTransformerTest {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
@@ -725,6 +736,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
+		assertOptionalNotPresent(eob);
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
@@ -856,57 +869,17 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertSNFClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		SNFClaimGroup record = new SNFClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "74744444";
-		record.claimId = "777777777";
-		record.claimTypeCode = "20";
-		record.dateFrom = LocalDate.of(2013, 12, 01);
-		record.dateThrough = LocalDate.of(2013, 12, 18);
-		record.patientDischargeStatusCode = "01";
-		record.nearLineRecordIdCode = '1';
-		record.claimNonPaymentReasonCode = Optional.of("1");
-		record.providerNumber = "2999999";
-		record.paymentAmount = new BigDecimal("3333.33");
-		record.totalChargeAmount = new BigDecimal("5555.03");
-		record.organizationNpi = Optional.of("1111111111");
-		record.attendingPhysicianNpi = Optional.of("2222222222");
-		record.operatingPhysicianNpi = Optional.of("3333333333");
-		record.otherPhysicianNpi = Optional.of("4444444444");
-		record.mcoPaidSw = Optional.of('0');
-		record.claimFacilityTypeCode = '2';
-		record.claimServiceClassificationTypeCode = '1';
-		record.claimFrequencyCode = '1';
-		record.claimPrimaryPayerCode = 'A';
-		record.providerStateCode = "FL";
-		record.primaryPayerPaidAmount = new BigDecimal("11.00");
-		record.deductibleAmount = new BigDecimal("112.00");
-		record.partACoinsuranceLiabilityAmount = new BigDecimal("5.00");
-		record.bloodDeductibleLiabilityAmount = new BigDecimal("6.00");
-		record.noncoveredCharge = new BigDecimal("33.00");
-		record.totalDeductionAmount = new BigDecimal("14.00");
-		record.diagnosisAdmitting = new IcdCode(IcdVersion.ICD_9, "V11111");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_9, "V22222");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_9, "V33333"));
-		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_9, "V44444"));
-		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_9, "V55555"));
-		record.procedureCodes.add(new IcdCode(IcdVersion.ICD_9, "0TCCCCC", LocalDate.of(2016, 01, 16)));
-		SNFClaimLine recordLine1 = new SNFClaimLine();
-		record.lines.add(recordLine1);
-		recordLine1.lineNumber = 1;
-		recordLine1.hcpcsCode = Optional.of("MMM");
-		recordLine1.rateAmount = new BigDecimal("5.00");
-		recordLine1.totalChargeAmount = new BigDecimal("95.00");
-		recordLine1.nonCoveredChargeAmount = new BigDecimal("88.00");
-		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("123456789");
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_SNF);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof SNFClaimGroup);
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent SNFRecordEvent = new RifRecordEvent<SNFClaimGroup>(filesEvent, file, record);
+		// Verify the claim header.
+		SNFClaimGroup record = (SNFClaimGroup) rifRecordEvent.getRecord();
 
-		Stream source = Arrays.asList(SNFRecordEvent).stream();
+		// Verify one of the claim lines.
+		SNFClaimLine recordLine1 = record.lines.get(0);
+
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
@@ -915,7 +888,7 @@ public final class DataTransformerTest {
 
 		TransformedBundle SNFBundleWrapper = resultList.get(0);
 		Assert.assertNotNull(SNFBundleWrapper);
-		Assert.assertSame(SNFRecordEvent, SNFBundleWrapper.getSource());
+		Assert.assertSame(rifRecordEvent, SNFBundleWrapper.getSource());
 		Assert.assertNotNull(SNFBundleWrapper.getResult());
 
 		Bundle claimBundle = SNFBundleWrapper.getResult();
@@ -927,6 +900,9 @@ public final class DataTransformerTest {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		assertOptionalNotPresent(eob);
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
@@ -934,11 +910,16 @@ public final class DataTransformerTest {
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
+		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
+
+		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
+				.filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
+				.findFirst().get().getBenefitMoney().getValue());
 
 		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
 
@@ -1002,53 +983,17 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertHospiceClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		HospiceClaimGroup record = new HospiceClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "1111114444";
-		record.claimId = "9992223422";
-		record.claimTypeCode = "50";
-		record.dateFrom = LocalDate.of(2014, 01, 01);
-		record.dateThrough = LocalDate.of(2014, 01, 30);
-		record.patientDischargeStatusCode = "01";
-		record.nearLineRecordIdCode = '1';
-		record.claimNonPaymentReasonCode = Optional.of("1");
-		record.claimServiceClassificationTypeCode = '1';
-		record.claimFrequencyCode = '1';
-		record.claimPrimaryPayerCode = 'A';
-		record.providerNumber = "12345";
-		record.providerStateCode = "AZ";
-		record.paymentAmount = new BigDecimal("130.32");
-		record.totalChargeAmount = new BigDecimal("199.99");
-		record.organizationNpi = Optional.of("999999999");
-		record.attendingPhysicianNpi = Optional.of("8888888888");
-		record.claimFacilityTypeCode = '2';
-		record.primaryPayerPaidAmount = new BigDecimal("11.00");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_9, "33444");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_9, "55555"));
-		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "999888"));
-		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_10, "654321"));
-		record.claimHospiceStartDate = LocalDate.of(2014, 07, 06);
-		HospiceClaimLine recordLine1 = new HospiceClaimLine();
-		record.lines.add(recordLine1);
-		recordLine1.lineNumber = 1;
-		recordLine1.rateAmount = new BigDecimal("5.00");
-		recordLine1.hcpcsCode = Optional.of("A5C");
-		recordLine1.hcpcsInitialModifierCode = Optional.of("Q9999");
-		recordLine1.hcpcsSecondModifierCode = Optional.empty();
-		recordLine1.providerPaymentAmount = new BigDecimal("29.00");
-		recordLine1.benficiaryPaymentAmount = new BigDecimal("28.00");
-		recordLine1.paymentAmount = new BigDecimal("26.00");
-		recordLine1.totalChargeAmount = new BigDecimal("2555.00");
-		recordLine1.nonCoveredChargeAmount = new BigDecimal("300.00");
-		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("12ZZZZ");
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_HOSPICE);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof HospiceClaimGroup);
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent HospiceRecordEvent = new RifRecordEvent<HospiceClaimGroup>(filesEvent, file, record);
+		// Verify the claim header.
+		HospiceClaimGroup record = (HospiceClaimGroup) rifRecordEvent.getRecord();
 
-		Stream source = Arrays.asList(HospiceRecordEvent).stream();
+		// Verify one of the claim lines.
+		HospiceClaimLine recordLine1 = record.lines.get(0);
+
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
@@ -1057,7 +1002,7 @@ public final class DataTransformerTest {
 
 		TransformedBundle HospiceBundleWrapper = resultList.get(0);
 		Assert.assertNotNull(HospiceBundleWrapper);
-		Assert.assertSame(HospiceRecordEvent, HospiceBundleWrapper.getSource());
+		Assert.assertSame(rifRecordEvent, HospiceBundleWrapper.getSource());
 		Assert.assertNotNull(HospiceBundleWrapper.getResult());
 
 		Bundle claimBundle = HospiceBundleWrapper.getResult();
@@ -1069,18 +1014,26 @@ public final class DataTransformerTest {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		assertOptionalNotPresent(eob);
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional).
 
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
+		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 		
+		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
+				.filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
+				.findFirst().get().getBenefitMoney().getValue());
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		
 		assertDateEquals(record.claimHospiceStartDate,
@@ -1148,51 +1101,17 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertHHAClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		HHAClaimGroup record = new HHAClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "140";
-		record.claimId = "2925555555";
-		record.claimTypeCode = "10";
-		record.dateFrom = LocalDate.of(2015, 06, 23);
-		record.dateThrough = LocalDate.of(2015, 06, 23);
-		record.patientDischargeStatusCode = "30";
-		record.nearLineRecordIdCode = '1';
-		record.claimNonPaymentReasonCode = Optional.of("1");
-		record.providerNumber = "45645";
-		record.paymentAmount = new BigDecimal("188.00");
-		record.primaryPayerPaidAmount = new BigDecimal("11.00");
-		record.totalChargeAmount = new BigDecimal("199.99");
-		record.providerStateCode = "UT";
-		record.organizationNpi = Optional.of("1811111111");
-		record.attendingPhysicianNpi = Optional.of("2222222222");
-		record.claimFacilityTypeCode = '3';
-		record.claimServiceClassificationTypeCode = '2';
-		record.claimFrequencyCode = '1';
-		record.claimPrimaryPayerCode = 'A';
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_9, "9999");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_9, "8888"));
-		record.diagnosisFirstClaimExternal = Optional.of(new IcdCode(IcdVersion.ICD_10, "7777"));
-		record.diagnosesExternal.add(new IcdCode(IcdVersion.ICD_10, "6666"));
-		HHAClaimLine recordLine1 = new HHAClaimLine();
-		record.lines.add(recordLine1);
-		recordLine1.lineNumber = 1;
-		recordLine1.revCntr1stAnsiCd = Optional.of("CO120");
-		recordLine1.rateAmount = new BigDecimal("5.00");
-		recordLine1.hcpcsCode = Optional.of("2GGGG");
-		recordLine1.hcpcsInitialModifierCode = Optional.of("KO");
-		recordLine1.hcpcsSecondModifierCode = Optional.empty();
-		recordLine1.paymentAmount = new BigDecimal("26.00");
-		recordLine1.totalChargeAmount = new BigDecimal("25.00");
-		recordLine1.nonCoveredChargeAmount = new BigDecimal("24.00");
-		recordLine1.revenueCenterRenderingPhysicianNPI = Optional.of("1234BBB");
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_HHA);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof HHAClaimGroup);
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent HHARecordEvent = new RifRecordEvent<HHAClaimGroup>(filesEvent, file, record);
+		// Verify the claim header.
+		HHAClaimGroup record = (HHAClaimGroup) rifRecordEvent.getRecord();
 
-		Stream source = Arrays.asList(HHARecordEvent).stream();
+		// Verify one of the claim lines.
+		HHAClaimLine recordLine1 = record.lines.get(0);
+
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
@@ -1201,7 +1120,7 @@ public final class DataTransformerTest {
 
 		TransformedBundle HHABundleWrapper = resultList.get(0);
 		Assert.assertNotNull(HHABundleWrapper);
-		Assert.assertSame(HHARecordEvent, HHABundleWrapper.getSource());
+		Assert.assertSame(rifRecordEvent, HHABundleWrapper.getSource());
 		Assert.assertNotNull(HHABundleWrapper.getResult());
 
 		Bundle claimBundle = HHABundleWrapper.getResult();
@@ -1213,11 +1132,17 @@ public final class DataTransformerTest {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		assertOptionalNotPresent(eob);
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
+
+		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
+
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
@@ -1230,6 +1155,10 @@ public final class DataTransformerTest {
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0).getValue()
 						.toString()));
 		
+		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
+				.filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
+				.findFirst().get().getBenefitMoney().getValue());
+
 		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
 
 		Assert.assertEquals(String.valueOf(record.claimFacilityTypeCode), eob.getFacilityIdentifier().getValue());
@@ -1254,7 +1183,7 @@ public final class DataTransformerTest {
 				eobItem0.getAdjudication());
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
+		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(1).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 			
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
@@ -1281,71 +1210,29 @@ public final class DataTransformerTest {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformInsertDMEClaimEvent() throws FHIRException {
-		// Create the mock bene to test against.
-		DMEClaimGroup record = new DMEClaimGroup();
-		record.version = RifFilesProcessor.RECORD_FORMAT_VERSION;
-		record.recordAction = RecordAction.INSERT;
-		record.beneficiaryId = "666666";
-		record.claimId = "2188888888";
-		record.claimTypeCode = "82";
-		record.dateFrom = LocalDate.of(2014, 02, 03);
-		record.dateThrough = LocalDate.of(2014, 02, 03);
-		record.nearLineRecordIdCode = '1';
-		record.claimDispositionCode = "01";
-		record.carrierNumber = "99999";
-		record.paymentDenialCode = "1";
-		record.paymentAmount = new BigDecimal("777.75");
-		record.referringPhysicianNpi = Optional.of("222333222");
-		record.providerPaymentAmount = new BigDecimal("666.75");
-		record.diagnosisPrincipal = new IcdCode(IcdVersion.ICD_10, "222333");
-		record.diagnosesAdditional.add(new IcdCode(IcdVersion.ICD_10, "444555"));
-		record.clinicalTrialNumber = Optional.of("0");
-		DMEClaimLine recordLine1 = new DMEClaimLine();
-		record.lines.add(recordLine1);
-		recordLine1.number = 1;
-		recordLine1.cmsServiceTypeCode = "P";
-		recordLine1.hcpcsCode = Optional.of("345");
-		recordLine1.hcpcsInitialModifierCode = Optional.of("YY");
-		recordLine1.hcpcsSecondModifierCode = Optional.empty();
-		recordLine1.hcpcsThirdModifierCode = Optional.empty();
-		recordLine1.hcpcsFourthModifierCode = Optional.empty();
-		recordLine1.betosCode = Optional.of("D9Z");
-		recordLine1.paymentAmount = new BigDecimal("123.45");
-		recordLine1.beneficiaryPaymentAmount = new BigDecimal("11.00");
-		recordLine1.providerPaymentAmount = new BigDecimal("120.20");
-		recordLine1.beneficiaryPartBDeductAmount = new BigDecimal("18.00");
-		recordLine1.primaryPayerPaidAmount = new BigDecimal("11.00");
-		recordLine1.coinsuranceAmount = new BigDecimal("20.20");
-		recordLine1.primaryPayerAllowedChargeAmount = new BigDecimal("20.29");
-		recordLine1.submittedChargeAmount = new BigDecimal("130.45");
-		recordLine1.allowedChargeAmount = new BigDecimal("129.45");
-		recordLine1.diagnosis = new IcdCode(IcdVersion.ICD_10, "G6666");
-		recordLine1.purchasePriceAmount = new BigDecimal("82.29");
-		recordLine1.placeOfServiceCode = "12";
-		recordLine1.providerNPI = "1244444444";
-		recordLine1.providerStateCode = "MO";
-		recordLine1.firstExpenseDate = LocalDate.of(2014, 02, 03);
-		recordLine1.lastExpenseDate = LocalDate.of(2014, 02, 03);;
+		// Read sample data from text file
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_DME);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof DMEClaimGroup);
 
-		recordLine1.nationalDrugCode = Optional.of(new String("55555009902"));
+		// Verify the claim header.
+		DMEClaimGroup record = (DMEClaimGroup) rifRecordEvent.getRecord();
 
-		RifFile file = new MockRifFile();
-		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), file);
-		RifRecordEvent carrierRecordEvent = new RifRecordEvent<DMEClaimGroup>(filesEvent, file, record);
+		// Verify one of the claim lines.
+		DMEClaimLine recordLine1 = record.lines.get(0);
 
-		Stream source = Arrays.asList(carrierRecordEvent).stream();
+		Stream source = Arrays.asList(rifRecordEvent).stream();
 		DataTransformer transformer = new DataTransformer();
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
 		Assert.assertEquals(1, resultList.size());
 
-		TransformedBundle carrierBundleWrapper = resultList.get(0);
-		Assert.assertNotNull(carrierBundleWrapper);
-		Assert.assertSame(carrierRecordEvent, carrierBundleWrapper.getSource());
-		Assert.assertNotNull(carrierBundleWrapper.getResult());
+		TransformedBundle dmeBundleWrapper = resultList.get(0);
+		Assert.assertNotNull(dmeBundleWrapper);
+		Assert.assertSame(rifRecordEvent, dmeBundleWrapper.getSource());
+		Assert.assertNotNull(dmeBundleWrapper.getResult());
 
-		Bundle claimBundle = carrierBundleWrapper.getResult();
+		Bundle claimBundle = dmeBundleWrapper.getResult();
 		/*
 		 * Bundle should have: 1) EOB, 2) Practitioner (referrer)
 		 */
@@ -1354,6 +1241,9 @@ public final class DataTransformerTest {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
+
+		assertOptionalNotPresent(eob);
+
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (professional)
 
@@ -1375,6 +1265,10 @@ public final class DataTransformerTest {
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		
+		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
+				.filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
+				.findFirst().get().getBenefitMoney().getValue());
+
 		Assert.assertEquals(record.clinicalTrialNumber.get(),
 				(eob.getExtensionsByUrl(DataTransformer.CLAIM_CLINICAL_TRIAL_NUMBER).get(0).getValue()
 						.toString()));
@@ -1587,6 +1481,17 @@ public final class DataTransformerTest {
 	private static void assertIdentifierExists(String expectedSystem, String expectedId, List<Identifier> actuals) {
 		Assert.assertTrue(actuals.stream().filter(i -> expectedSystem.equals(i.getSystem()))
 				.anyMatch(i -> expectedId.equals(i.getValue())));
+	}
+
+	/**
+	 * @param eob
+	 *            - Verify FHIR resource doesn't contain "Optional" value
+	 */
+
+	private static void assertOptionalNotPresent(ExplanationOfBenefit eob) {
+		FhirContext ctx = FhirContext.forDstu3();
+		String encoded = ctx.newXmlParser().encodeResourceToString(eob);
+		Assert.assertEquals(false, encoded.contains("Optional"));
 	}
 
 	/**
