@@ -168,6 +168,26 @@ public final class HHAClaimGroup {
 	public List<IcdCode> diagnosesExternal = new LinkedList<>();
 
 	/**
+	 * @see Column#CLM_HHA_LUPA_IND_CD
+	 */
+	public Optional<Character> claimLUPACode;
+
+	/**
+	 * @see Column#CLM_HHA_RFRL_CD
+	 */
+	public Optional<Character> claimReferralCode;
+
+	/**
+	 * @see Column#CLM_HHA_TOT_VISIT_CNT
+	 */
+	public Integer totalVisitCount;
+
+	/**
+	 * @see Column#CLM_ADMSN_DT
+	 */
+	public LocalDate careStartDate;
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -225,6 +245,14 @@ public final class HHAClaimGroup {
 		builder.append(diagnosisFirstClaimExternal);
 		builder.append(", diagnosesExternal=");
 		builder.append(diagnosesExternal);
+		builder.append(", claimLUPACode=");
+		builder.append(claimLUPACode);
+		builder.append(", claimReferralCode=");
+		builder.append(claimReferralCode);
+		builder.append(", totalVisitCount=");
+		builder.append(totalVisitCount);
+		builder.append(", careStartDate=");
+		builder.append(careStartDate);
 		builder.append(", lines=");
 		builder.append(lines);
 		builder.append("]");
@@ -247,6 +275,11 @@ public final class HHAClaimGroup {
 		 * @see Column#CLM_LINE_NUM
 		 */
 		public Integer lineNumber;
+
+		/**
+		 * @see Column#REV_CNTR
+		 */
+		public String revenueCenter;
 
 		/**
 		 * @see Column#REV_CNTR_1ST_ANSI_CD
@@ -294,6 +327,16 @@ public final class HHAClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#REV_CNTR_NDC_QTY
+		 */
+		public Optional<Integer> nationalDrugCodeQuantity;
+
+		/**
+		 * @see Column#REV_CNTR_NDC_QTY_QLFR_CD
+		 */
+		public Optional<String> nationalDrugCodeQualifierCode;
+
+		/**
 		 * @see Column#RNDRNG_PHYSN_NPI
 		 */
 		public Optional<String> revenueCenterRenderingPhysicianNPI;
@@ -306,6 +349,8 @@ public final class HHAClaimGroup {
 			StringBuilder builder = new StringBuilder();
 			builder.append("HHAClaimLine [lineNumber=");
 			builder.append(lineNumber);
+			builder.append(", revenueCenter=");
+			builder.append(revenueCenter);
 			builder.append(", revCntr1stAnsiCd=");
 			builder.append(revCntr1stAnsiCd);
 			builder.append(", hcpcsCode=");
@@ -324,6 +369,10 @@ public final class HHAClaimGroup {
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", nationalDrugCodeQuantity=");
+			builder.append(nationalDrugCodeQuantity);
+			builder.append(", nationalDrugCodeQualifierCode=");
+			builder.append(nationalDrugCodeQualifierCode);
 			builder.append(", revenueCenterRenderingPhysicianNPI=");
 			builder.append(revenueCenterRenderingPhysicianNPI);
 			builder.append("]");
@@ -1084,22 +1133,32 @@ public final class HHAClaimGroup {
 		ICD_DGNS_E_VRSN_CD12,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lupaind.txt">
+		 * CCW Data Dictionary: LUPAIND</a>.
 		 */
 		CLM_HHA_LUPA_IND_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hha_rfrl.txt">
+		 * CCW Data Dictionary: HHA_RFRL</a>.
 		 */
 		CLM_HHA_RFRL_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/visitcnt.txt">
+		 * CCW Data Dictionary: VISITCNT</a>.
 		 */
 		CLM_HHA_TOT_VISIT_CNT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hhstrtdt.txt">
+		 * CCW Data Dictionary: HHSTRTDT</a>.
 		 */
 		CLM_ADMSN_DT,
 
@@ -1111,7 +1170,10 @@ public final class HHAClaimGroup {
 		CLM_LINE_NUM,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 4 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt">
+		 * CCW Data Dictionary: REV_CNTR</a>.
 		 */
 		REV_CNTR,
 
@@ -1208,12 +1270,18 @@ public final class HHAClaimGroup {
 		REV_CNTR_STUS_IND_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY</a>.
 		 */
 		REV_CNTR_NDC_QTY,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY_QLFR_CD</a>.
 		 */
 		REV_CNTR_NDC_QTY_QLFR_CD,
 

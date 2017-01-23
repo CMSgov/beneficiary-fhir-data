@@ -1179,6 +1179,10 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(HHAClaimGroup.Column.FST_DGNS_E_VRSN_CD));
 		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine, HHAClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				HHAClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
+		claimGroup.claimLUPACode = parseOptCharacter(firstClaimLine.get(HHAClaimGroup.Column.CLM_HHA_LUPA_IND_CD));
+		claimGroup.claimReferralCode = parseOptCharacter(firstClaimLine.get(HHAClaimGroup.Column.CLM_HHA_RFRL_CD));
+		claimGroup.totalVisitCount = parseInt(firstClaimLine.get(HHAClaimGroup.Column.CLM_HHA_TOT_VISIT_CNT));
+		claimGroup.careStartDate = parseDate(firstClaimLine.get(HHAClaimGroup.Column.CLM_ADMSN_DT));
 
 		/*
 		 * Parse the claim lines.
@@ -1187,6 +1191,7 @@ public final class RifFilesProcessor {
 			HHAClaimLine claimLine = new HHAClaimLine();
 
 			claimLine.lineNumber = parseInt(claimLineRecord.get(HHAClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.revenueCenter = claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR);
 			claimLine.revCntr1stAnsiCd = parseOptString(claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_1ST_ANSI_CD));
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(HHAClaimGroup.Column.HCPCS_CD));
 			claimLine.hcpcsInitialModifierCode = parseOptString(
@@ -1199,6 +1204,10 @@ public final class RifFilesProcessor {
 			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+			claimLine.nationalDrugCodeQuantity = parseOptInteger(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
+			claimLine.nationalDrugCodeQualifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY_QLFR_CD));
 			claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(
 					claimLineRecord.get(HHAClaimGroup.Column.RNDRNG_PHYSN_NPI));
 
