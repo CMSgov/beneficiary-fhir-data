@@ -147,6 +147,21 @@ public final class HospiceClaimGroup {
 	public BigDecimal totalChargeAmount;
 
 	/**
+	 * @see Column#NCH_PTNT_STATUS_IND_CD
+	 */
+	public Optional<Character> patientStatusCd;
+
+	/**
+	 * @see Column#CLM_UTLZTN_DAY_CNT
+	 */
+	public Integer utilizationDayCount;
+
+	/**
+	 * @see Column#NCH_BENE_DSCHRG_DT
+	 */
+	public LocalDate beneficiaryDischargeDate;
+
+	/**
 	 * @see Column#PRNCPAL_DGNS_CD
 	 * @see Column#PRNCPAL_DGNS_VRSN_CD
 	 */
@@ -224,6 +239,12 @@ public final class HospiceClaimGroup {
 		builder.append(patientDischargeStatusCode);
 		builder.append(", totalChargeAmount=");
 		builder.append(totalChargeAmount);
+		builder.append(", patientStatusCd=");
+		builder.append(patientStatusCd);
+		builder.append(", utilizationDayCount=");
+		builder.append(utilizationDayCount);
+		builder.append(", beneficiaryDischargeDate=");
+		builder.append(beneficiaryDischargeDate);
 		builder.append(", diagnosisPrincipal=");
 		builder.append(diagnosisPrincipal);
 		builder.append(", diagnosesAdditional=");
@@ -255,6 +276,11 @@ public final class HospiceClaimGroup {
 		 * @see Column#CLM_LINE_NUM
 		 */
 		public Integer lineNumber;
+
+		/**
+		 * @see Column#REV_CNTR
+		 */
+		public String revenueCenter;
 
 		/**
 		 * @see Column#HCPCS_CD
@@ -307,6 +333,16 @@ public final class HospiceClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#REV_CNTR_NDC_QTY
+		 */
+		public Optional<Integer> nationalDrugCodeQuantity;
+
+		/**
+		 * @see Column#REV_CNTR_NDC_QTY_QLFR_CD
+		 */
+		public Optional<String> nationalDrugCodeQualifierCode;
+
+		/**
 		 * @see Column#RNDRNG_PHYSN_NPI
 		 */
 		public Optional<String> revenueCenterRenderingPhysicianNPI;
@@ -319,6 +355,8 @@ public final class HospiceClaimGroup {
 			StringBuilder builder = new StringBuilder();
 			builder.append("HospiceClaimLine [lineNumber=");
 			builder.append(lineNumber);
+			builder.append(", revenueCenter=");
+			builder.append(revenueCenter);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
 			builder.append(", hcpcsInitialModifierCode=");
@@ -339,6 +377,10 @@ public final class HospiceClaimGroup {
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", nationalDrugCodeQuantity=");
+			builder.append(nationalDrugCodeQuantity);
+			builder.append(", nationalDrugCodeQualifierCode=");
+			builder.append(nationalDrugCodeQualifierCode);
 			builder.append(", revenueCenterRenderingPhysicianNPI=");
 			builder.append(revenueCenterRenderingPhysicianNPI);
 			builder.append("]");
@@ -522,17 +564,24 @@ public final class HospiceClaimGroup {
 		CLM_TOT_CHRG_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt">
+		 * CCW Data Dictionary: PTNTSTUS</a>.
 		 */
 		NCH_PTNT_STATUS_IND_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/util_day.txt">
+		 * CCW Data Dictionary: UTIL_DAY</a>.
 		 */
 		CLM_UTLZTN_DAY_CNT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt">
+		 * CCW Data Dictionary: DSCHRGDT</a>.
 		 */
 		NCH_BENE_DSCHRG_DT,
 
@@ -1129,7 +1178,10 @@ public final class HospiceClaimGroup {
 		CLM_LINE_NUM,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 4 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt">
+		 * CCW Data Dictionary: REV_CNTR</a>.
 		 */
 		REV_CNTR,
 
@@ -1211,12 +1263,18 @@ public final class HospiceClaimGroup {
 		REV_CNTR_DDCTBL_COINSRNC_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 10 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY</a>.
 		 */
 		REV_CNTR_NDC_QTY,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt">
+		 * CCW Data Dictionary: REV_CNTR_NDC_QTY_QLFR_CD</a>.
 		 */
 		REV_CNTR_NDC_QTY_QLFR_CD,
 

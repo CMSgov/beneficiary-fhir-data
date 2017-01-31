@@ -588,7 +588,6 @@ public final class RifFilesProcessorTest {
 	 * {@link StaticRifResource#SAMPLE_A_HOSPICE}.
 	 */
 	@Test
-	@Ignore
 	public void process1HospiceClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_HOSPICE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -609,36 +608,40 @@ public final class RifFilesProcessorTest {
 		HospiceClaimGroup claimGroup = (HospiceClaimGroup) rifRecordEvent.getRecord();
 		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
 		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
-		Assert.assertEquals("246", claimGroup.beneficiaryId);
-		Assert.assertEquals("9302293110", claimGroup.claimId);
+		Assert.assertEquals("567834", claimGroup.beneficiaryId);
+		Assert.assertEquals("9992223422", claimGroup.claimId);
 		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
 		Assert.assertEquals("50", claimGroup.claimTypeCode);
-		Assert.assertEquals(LocalDate.of(2014, 9, 01), claimGroup.dateFrom);
-		Assert.assertEquals(LocalDate.of(2014, 9, 30), claimGroup.dateThrough);
-		Assert.assertEquals("051543", claimGroup.providerNumber);
-		Assert.assertFalse(claimGroup.claimNonPaymentReasonCode.isPresent());
+		Assert.assertEquals(LocalDate.of(2014, 1, 01), claimGroup.dateFrom);
+		Assert.assertEquals(LocalDate.of(2014, 1, 30), claimGroup.dateThrough);
+		Assert.assertEquals("12345", claimGroup.providerNumber);
+		Assert.assertEquals("P", claimGroup.claimNonPaymentReasonCode.get());
 		Assert.assertEquals(new Character('1'), claimGroup.claimServiceClassificationTypeCode);
-		Assert.assertEquals(new BigDecimal("5558.52"), claimGroup.paymentAmount);
+		Assert.assertEquals(new BigDecimal("130.32"), claimGroup.paymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
-		Assert.assertEquals("CA", claimGroup.providerStateCode);
-		Assert.assertEquals("1043326531", claimGroup.organizationNpi.get());
-		Assert.assertEquals("1154428621", claimGroup.attendingPhysicianNpi.get());
+		Assert.assertEquals("AZ", claimGroup.providerStateCode);
+		Assert.assertEquals("999999999", claimGroup.organizationNpi.get());
+		Assert.assertEquals("8888888888", claimGroup.attendingPhysicianNpi.get());
 		Assert.assertEquals("30", claimGroup.patientDischargeStatusCode);
-		Assert.assertEquals(new BigDecimal("6158.1"), claimGroup.totalChargeAmount);
-		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "3310"), claimGroup.diagnosisPrincipal);
+		Assert.assertEquals(new BigDecimal("199.99"), claimGroup.totalChargeAmount);
+		Assert.assertEquals(new Character('C'), claimGroup.patientStatusCd.get());
+		Assert.assertEquals(new Integer(30), claimGroup.utilizationDayCount);
+		Assert.assertEquals(LocalDate.of(2015, 6, 29), claimGroup.beneficiaryDischargeDate);
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "33444"), claimGroup.diagnosisPrincipal);
 		Assert.assertEquals(1, claimGroup.diagnosesAdditional.size());
-		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "3310"), claimGroup.diagnosesAdditional.get(0));
-		Assert.assertFalse(claimGroup.diagnosisFirstClaimExternal.isPresent());
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "55555"), claimGroup.diagnosesAdditional.get(0));
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "999888"), claimGroup.diagnosisFirstClaimExternal.get());
+		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "654321"), claimGroup.diagnosesExternal.get(0));
 		Assert.assertEquals(LocalDate.of(2014, 7, 06), claimGroup.claimHospiceStartDate);
 				
-		Assert.assertEquals(9, claimGroup.lines.size());
+		Assert.assertEquals(1, claimGroup.lines.size());
 		// Verify one of the claim lines.
-		HospiceClaimLine claimLine = claimGroup.lines.get(5);
-		Assert.assertEquals(new Integer(6), claimLine.lineNumber);
-		Assert.assertEquals(new BigDecimal("0"), claimGroup.lines.get(0).paymentAmount);
-		Assert.assertEquals(new BigDecimal("5672.1"), claimGroup.lines.get(0).nonCoveredChargeAmount);
-		Assert.assertEquals("00000", claimGroup.lines.get(0).hcpcsInitialModifierCode.get());
-		Assert.assertEquals("Q5001", claimGroup.lines.get(0).hcpcsSecondModifierCode.get());
+		HospiceClaimLine claimLine = claimGroup.lines.get(0);
+		Assert.assertEquals(new Integer(1), claimLine.lineNumber);
+		Assert.assertEquals("651", claimLine.revenueCenter);
+		Assert.assertEquals(new BigDecimal("26.00"), claimGroup.lines.get(0).paymentAmount);
+		Assert.assertEquals(new BigDecimal("300.00"), claimGroup.lines.get(0).nonCoveredChargeAmount);
+		Assert.assertEquals("Q9999", claimGroup.lines.get(0).hcpcsInitialModifierCode.get());
 		Assert.assertEquals("345345345", claimLine.revenueCenterRenderingPhysicianNPI.get());
 	}
 

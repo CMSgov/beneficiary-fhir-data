@@ -937,6 +937,7 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI).get(0)
 						.getValue()).getValue());
 
+
 		/*
 		 * TODO once STU3 is available, verify amounts in eob.information
 		 * entries
@@ -1024,12 +1025,31 @@ public final class DataTransformerTest {
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
+
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 		
+		Assert.assertEquals(String.valueOf(record.patientStatusCd.get()),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_PATIENT_STATUS_CD))
+						.findFirst().get().getCategory().getCode());
+
+		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+						.findFirst().get().getValueQuantity().getValue());
+
+		Assert.assertEquals(record.beneficiaryDischargeDate.toString(),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BENEFICIARY_DISCHARGE_DATE))
+						.findFirst().get().getTiming().primitiveValue());
+
 		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
 				.filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
 				.findFirst().get().getBenefitMoney().getValue());
@@ -1067,11 +1087,12 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
+		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getModifier().get(0).getCode());
+
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
+		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(1).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
-				eobItem0.getService());
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
 				eobItem0.getAdjudication());
