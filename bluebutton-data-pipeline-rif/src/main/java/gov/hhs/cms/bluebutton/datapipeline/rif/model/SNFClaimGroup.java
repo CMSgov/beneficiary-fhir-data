@@ -157,6 +157,11 @@ public final class SNFClaimGroup {
 	public BigDecimal totalChargeAmount;
 
 	/**
+	 * @see Column#NCH_PTNT_STATUS_IND_CD
+	 */
+	public Optional<Character> patientStatusCd;
+
+	/**
 	 * @see Column#NCH_BENE_IP_DDCTBL_AMT
 	 */
 	public BigDecimal deductibleAmount;
@@ -180,6 +185,16 @@ public final class SNFClaimGroup {
 	 * @see Column#NCH_IP_TOT_DDCTN_AMT
 	 */
 	public BigDecimal totalDeductionAmount;
+
+	/**
+	 * @see Column#CLM_UTLZTN_DAY_CNT
+	 */
+	public Integer utilizationDayCount;
+
+	/**
+	 * @see Column#NCH_BENE_DSCHRG_DT
+	 */
+	public LocalDate beneficiaryDischargeDate;
 
 	/**
 	 * @see Column#ADMTG_DGNS_CD
@@ -284,6 +299,8 @@ public final class SNFClaimGroup {
 		builder.append(patientDischargeStatusCode);
 		builder.append(", totalChargeAmount=");
 		builder.append(totalChargeAmount);
+		builder.append(", patientStatusCd=");
+		builder.append(patientStatusCd);
 		builder.append(", deductibleAmount=");
 		builder.append(deductibleAmount);
 		builder.append(", partACoinsuranceLiabilityAmount=");
@@ -294,6 +311,10 @@ public final class SNFClaimGroup {
 		builder.append(noncoveredCharge);
 		builder.append(", totalDeductionAmount=");
 		builder.append(totalDeductionAmount);
+		builder.append(", utilizationDayCount=");
+		builder.append(utilizationDayCount);
+		builder.append(", beneficiaryDischargeDate=");
+		builder.append(beneficiaryDischargeDate);
 		builder.append(", diagnosisAdmitting=");
 		builder.append(diagnosisAdmitting);
 		builder.append(", diagnosisPrincipal=");
@@ -617,7 +638,10 @@ public final class SNFClaimGroup {
 		CLM_SRC_IP_ADMSN_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt">
+		 * CCW Data Dictionary: PTNTSTUS</a>.
 		 */
 		NCH_PTNT_STATUS_IND_CD,
 
@@ -687,7 +711,9 @@ public final class SNFClaimGroup {
 		CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/util_day.txt">
+		 * CCW Data Dictionary: UTIL_DAY</a>.
 		 */
 		CLM_UTLZTN_DAY_CNT,
 
@@ -737,7 +763,9 @@ public final class SNFClaimGroup {
 		NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt">
+		 * CCW Data Dictionary: DSCHRGDT</a>.
 		 */
 		NCH_BENE_DSCHRG_DT,
 

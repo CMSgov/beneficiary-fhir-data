@@ -183,6 +183,12 @@ public final class DataTransformer {
 
 	public static final String CODING_SYSTEM_HHA_CARE_START_DATE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hhstrtdt.txt";
 
+	public static final String CODING_SYSTEM_PATIENT_STATUS_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt";
+
+	public static final String CODING_SYSTEM_UTILIZATION_DAY_COUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/util_day.txt";
+
+	public static final String CODING_SYSTEM_BENEFICIARY_DISCHARGE_DATE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt";
+
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
@@ -1110,6 +1116,12 @@ public final class DataTransformer {
 				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
+		if (claimGroup.patientStatusCd.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					new Coding().setSystem(CODING_SYSTEM_PATIENT_STATUS_CD)
+							.setCode(String.valueOf(claimGroup.patientStatusCd.get()))));
+		}
+
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
 				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
@@ -1234,6 +1246,13 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
 		}
 
+		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+				.setValue(new Quantity(claimGroup.utilizationDayCount));
+
+		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_BENEFICIARY_DISCHARGE_DATE))
+				.setTiming(new DateType(Date
+						.from(claimGroup.beneficiaryDischargeDate.atStartOfDay(ZoneId.systemDefault()).toInstant())));
+
 		if (claimGroup.nchDrugOutlierApprovedPaymentAmount != null) {
 			BenefitComponent nchDrugOutlierApprovedPaymentAmount = new BenefitComponent(new Coding()
 					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL));
@@ -1339,7 +1358,7 @@ public final class DataTransformer {
 			 * if present; otherwise set to 0
 			 */
 			SimpleQuantity qty = new SimpleQuantity();
-			if (!claimLine.unitCount.equals(new BigDecimal("0.00"))) {
+			if (!claimLine.unitCount.equals(new BigDecimal(0))) {
 				qty.setValue(claimLine.unitCount);
 			} else if (claimLine.nationalDrugCodeQuantity.isPresent()) {
 				qty.setValue(claimLine.nationalDrugCodeQuantity.get());
@@ -1675,7 +1694,7 @@ public final class DataTransformer {
 			 * if present; otherwise set to 0
 			 */
 			SimpleQuantity qty = new SimpleQuantity();
-			if (!claimLine.unitCount.equals(new BigDecimal("0.00"))) {
+			if (!claimLine.unitCount.equals(new BigDecimal(0))) {
 				qty.setValue(claimLine.unitCount);
 			} else if (claimLine.nationalDrugCodeQuantity.isPresent()) {
 				qty.setValue(claimLine.nationalDrugCodeQuantity.get());
@@ -1798,6 +1817,19 @@ public final class DataTransformer {
 					.setSystem(CODING_SYSTEM_MCO_PAID_CD).setCode(String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
+		if (claimGroup.patientStatusCd.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					new Coding().setSystem(CODING_SYSTEM_PATIENT_STATUS_CD)
+							.setCode(String.valueOf(claimGroup.patientStatusCd.get()))));
+		}
+
+		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+				.setValue(new Quantity(claimGroup.utilizationDayCount));
+
+		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_BENEFICIARY_DISCHARGE_DATE))
+				.setTiming(new DateType(Date
+						.from(claimGroup.beneficiaryDischargeDate.atStartOfDay(ZoneId.systemDefault()).toInstant())));
+
 		addDiagnosisCode(eob, claimGroup.diagnosisAdmitting);
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
@@ -1916,6 +1948,19 @@ public final class DataTransformer {
 				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
+		if (claimGroup.patientStatusCd.isPresent()) {
+			eob.addInformation().setCategory(
+					new Coding().setSystem(CODING_SYSTEM_PATIENT_STATUS_CD)
+							.setCode(String.valueOf(claimGroup.patientStatusCd.get())));
+		}
+
+		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+				.setValue(new Quantity(claimGroup.utilizationDayCount));
+
+		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_BENEFICIARY_DISCHARGE_DATE))
+				.setTiming(new DateType(Date
+						.from(claimGroup.beneficiaryDischargeDate.atStartOfDay(ZoneId.systemDefault()).toInstant())));
+
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
 				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
@@ -1970,6 +2015,8 @@ public final class DataTransformer {
 		for (HospiceClaimLine claimLine : claimGroup.lines) {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
+
+			item.addModifier(new Coding().setSystem(CODING_SYSTEM_REVENUE_CENTER).setCode(claimLine.revenueCenter));
 
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
@@ -2027,6 +2074,25 @@ public final class DataTransformer {
 							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
+
+			/*
+			 * Set item quantity to Unit Count first if > 0; NDC quantity next
+			 * if present; otherwise set to 0
+			 */
+			SimpleQuantity qty = new SimpleQuantity();
+			if (!claimLine.unitCount.equals(new BigDecimal(0))) {
+				qty.setValue(claimLine.unitCount);
+			} else if (claimLine.nationalDrugCodeQuantity.isPresent()) {
+				qty.setValue(claimLine.nationalDrugCodeQuantity.get());
+			} else {
+				qty.setValue(0);
+			}
+			item.setQuantity(qty);
+
+			if (claimLine.nationalDrugCodeQualifierCode.isPresent()) {
+				item.addModifier(new Coding().setSystem(CODING_SYSTEM_NDC_QLFR_CD)
+						.setCode(claimLine.nationalDrugCodeQualifierCode.get()));
+			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
 				item.addCareTeam()
@@ -2218,7 +2284,7 @@ public final class DataTransformer {
 			 * if present; otherwise set to 0
 			 */
 			SimpleQuantity qty = new SimpleQuantity();
-			if (!claimLine.unitCount.equals(new BigDecimal("0.00"))) {
+			if (!claimLine.unitCount.equals(new BigDecimal(0))) {
 				qty.setValue(claimLine.unitCount);
 			} else if (claimLine.nationalDrugCodeQuantity.isPresent()) {
 				qty.setValue(claimLine.nationalDrugCodeQuantity.get());

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 /**
  * <p>
  * Models rows from {@link RifFileType#INPATIENT} RIF files. Rows in this file
@@ -157,6 +156,10 @@ public final class InpatientClaimGroup {
 	 */
 	public BigDecimal totalChargeAmount;
 
+	/**
+	 * @see Column#NCH_PTNT_STATUS_IND_CD
+	 */
+	public Optional<Character> patientStatusCd;
 
 	/**
 	 * @see Column#CLM_PASS_THRU_PER_DIEM_AMT
@@ -227,6 +230,16 @@ public final class InpatientClaimGroup {
 	 * @see Column#CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT
 	 */
 	public Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount;
+
+	/**
+	 * @see Column#CLM_UTLZTN_DAY_CNT
+	 */
+	public Integer utilizationDayCount;
+
+	/**
+	 * @see Column#NCH_BENE_DSCHRG_DT
+	 */
+	public LocalDate beneficiaryDischargeDate;
 
 	/**
 	 * @see Column#NCH_DRG_OUTLIER_APRVD_PMT_AMT
@@ -340,6 +353,8 @@ public final class InpatientClaimGroup {
 		builder.append(patientDischargeStatusCode);
 		builder.append(", totalChargeAmount=");
 		builder.append(totalChargeAmount);
+		builder.append(", patientStatusCd=");
+		builder.append(patientStatusCd);
 		builder.append(", passThruPerDiemAmount=");
 		builder.append(passThruPerDiemAmount);
 		builder.append(", deductibleAmount=");
@@ -368,6 +383,10 @@ public final class InpatientClaimGroup {
 		builder.append(claimPPSCapitalExceptionAmount);
 		builder.append(", claimPPSOldCapitalHoldHarmlessAmount=");
 		builder.append(claimPPSOldCapitalHoldHarmlessAmount);
+		builder.append(", utilizationDayCount=");
+		builder.append(utilizationDayCount);
+		builder.append(", beneficiaryDischargeDate=");
+		builder.append(beneficiaryDischargeDate);
 		builder.append(", nchDrugOutlierApprovedPaymentAmount=");
 		builder.append(nchDrugOutlierApprovedPaymentAmount);
 		builder.append(", diagnosisAdmitting=");
@@ -708,7 +727,10 @@ public final class InpatientClaimGroup {
 		CLM_SRC_IP_ADMSN_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt">
+		 * CCW Data Dictionary: PTNTSTUS</a>.
 		 */
 		NCH_PTNT_STATUS_IND_CD,
 
@@ -816,7 +838,9 @@ public final class InpatientClaimGroup {
 		CLM_PPS_CPTL_DRG_WT_NUM,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/util_day.txt">
+		 * CCW Data Dictionary: UTIL_DAY</a>.
 		 */
 		CLM_UTLZTN_DAY_CNT,
 
@@ -861,7 +885,9 @@ public final class InpatientClaimGroup {
 		NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt">
+		 * CCW Data Dictionary: DSCHRGDT</a>.
 		 */
 		NCH_BENE_DSCHRG_DT,
 
