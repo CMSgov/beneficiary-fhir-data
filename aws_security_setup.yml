@@ -1,0 +1,83 @@
+---
+
+##
+# Creates the IAM roles, IAM policies, and KMS keys that will be needed by the 
+# other plays.
+#
+# References:
+# 
+# * [IAM Policies and Bucket Policies and ACLs! Oh, My! (Controlling Access to S3 Resources)](https://aws.amazon.com/blogs/security/iam-policies-and-bucket-policies-and-acls-oh-my-controlling-access-to-s3-resources/)
+#     * Opted to go with the policy-on-users/roles option, as it's simpler.
+# * [Keeping Secrets Safe With KMS](http://www.rightbrainnetworks.com/blog/keeping-secrets-safe-with-kms/)
+#     * Not really using these concepts yet, but this is the way to go if it's 
+#       decided that the SSL keys need to be better secured.
+# * [Encrypted Amazon EC2 boot volumes with Packer and Ansible](http://www.davekonopka.com/2016/ec2-encrypted-boot-volumes.html)
+#     * For now, we're just using the default EBS key as all AWS admins should
+#       have access to the data encrypted in this sandbox environment.
+##
+
+- name: Create Encrypted RHEL AMI
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    # Create an IAM role associated with the Blue Button backend services running
+    # in EC2.
+    - name: Create IAM Role for Blue Button Backend Services
+      iam:
+        iam_type: role
+        name: BlueButtonBackend-EC2Services
+        state: present
+        # The `trust_policy` only defines what/who can assume/become this role; it
+        # doesn't define what the role will have access to.
+        trust_policy:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+
+    - name: Give bluebutton-backend/ec2-services Access to S3 Deployment Resources
+      iam_policy:
+        iam_type: role
+        iam_name: BlueButtonBackend-EC2Services
+        policy_name: "BlueButtonBackend-Resources"
+        state: present
+        # Note: Watch out for this Ansible bug: https://github.com/ansible/ansible/issues/19310
+        policy_json: "{{ lookup('template','bluebutton_backend_resources_policy.json.j2') | to_json }}"
+    
+    - name: "Provision EC2 Security Group 'default'"
+      ec2_group:
+        name: 'default'
+        description: 'default VPC security group'
+        region: "{{ aws_region }}"
+        rules:
+          - proto: 'all'
+            group_name: 'default'
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: ec2_group_default
+    - set_fact:
+        ec2_group_default_id: "{{ ec2_group_default.group_id }}"
+    
+    - name: Provision EC2 Security Group 'ssh-all'
+      ec2_group:
+        name: ssh-all
+        description: Allows incoming traffic on port 22 (from all IPs).
+        region: "{{ aws_region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: ec2_group_ssh_all
+    - set_fact:
+        ec2_group_ssh_all_id: "{{ ec2_group_ssh_all.group_id }}"
+

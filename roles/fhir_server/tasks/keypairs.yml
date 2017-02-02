@@ -1,0 +1,98 @@
+---
+
+##
+# Generates the keypairs for the FHIR servers and clients, if they're not 
+# already present in S3.
+##
+
+- name: Check for Keypairs in S3
+  s3:
+    bucket: "{{ s3_bucket_deployment }}"
+    mode: list
+  register: s3_list_keypairs
+  changed_when: false
+
+- block:
+
+    - name: Create FHIR Server Keypair
+      command: "{{ item }}"
+      with_items:
+        - "keytool -genkeypair -alias fhirservers -keyalg RSA -keysize 4096 -dname cn=*.fhir.{{ backend_domain }} -validity 3650 -keypass changeit -keystore /tmp/bluebutton-backend-fhir-servers-keystore.jks -storepass changeit"
+        - "keytool -exportcert -alias fhirservers -file /tmp/bluebutton-backend-fhir-servers.cer -keystore /tmp/bluebutton-backend-fhir-servers-keystore.jks -storepass changeit"
+      become: true
+
+    - name: Upload FHIR Server Keypair to S3
+      s3:
+        bucket: "{{ s3_bucket_deployment }}"
+        object: "{{ item.split('/')[-1] }}"
+        mode: put
+        src: "{{ item }}"
+        encrypt: true
+      with_items:
+        - /tmp/bluebutton-backend-fhir-servers-keystore.jks
+        - /tmp/bluebutton-backend-fhir-servers.cer
+      become: true
+
+    - name: Delete FHIR Server Keypair from Disk
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/bluebutton-backend-fhir-servers-keystore.jks
+        - /tmp/bluebutton-backend-fhir-servers.cer
+      become: true
+
+  when: "'bluebutton-backend-fhir-servers-keystore.jks' not in s3_list_keypairs.s3_keys or 'bluebutton-backend-fhir-servers.cer' not in s3_list_keypairs.s3_keys"
+
+- block:
+
+    - name: Create ETL Client Keypair
+      command: "{{ item }}"
+      with_items:
+        - "keytool -genkeypair -alias client-etl -keyalg RSA -keysize 4096 -dname cn=etl.{{ backend_domain }} -validity 3650 -keypass changeit -keystore /tmp/bluebutton-backend-etl-client-keystore.jks -storepass changeit"
+        - "keytool -exportcert -alias client-etl -file /tmp/bluebutton-backend-etl-client.cer -keystore /tmp/bluebutton-backend-etl-client-keystore.jks -storepass changeit"
+      become: true
+
+    - name: Upload ETL Client Keypair to S3
+      s3:
+        bucket: "{{ s3_bucket_deployment }}"
+        object: "{{ item.split('/')[-1] }}"
+        mode: put
+        src: "{{ item }}"
+        encrypt: true
+      with_items:
+        - /tmp/bluebutton-backend-etl-client-keystore.jks
+        - /tmp/bluebutton-backend-etl-client.cer
+      become: true
+
+    - name: Delete ETL Client Keypair from Disk
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/bluebutton-backend-etl-client-keystore.jks
+        - /tmp/bluebutton-backend-etl-client.cer
+      become: true
+
+  when: "'bluebutton-backend-etl-client-keystore.jks' not in s3_list_keypairs.s3_keys or 'bluebutton-backend-etl-client.cer' not in s3_list_keypairs.s3_keys"
+
+#- name: Create Keystores and Truststores
+#  command: "{{ item }}"
+#  with_items:
+#    - "keytool -importcert -noprompt -alias server -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server.cer -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-truststore.jks -storepass changeit"
+#    - "keytool -genkeypair -alias client-etl -keyalg RSA -keysize 4096 -dname cn={{ hostvars['etl']['ansible_host'] }} -validity 3650 -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-keystore.jks -storepass changeit"
+#    - "keytool -exportcert -alias client-etl -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl.cer -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-keystore.jks -storepass changeit"
+#    - "keytool -importcert -noprompt -alias client-etl -file /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl.cer -keypass changeit -keystore /usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/server-truststore.jks -storepass changeit"
+#  become: true
+#
+#- name: Fetch Client Keystore and Truststore
+#  fetch:
+#    src: "{{ item }}"
+#    dest: "../../../target/benchmark-iterations/{{ iteration_index }}/"
+#    flat: true
+#    fail_on_missing: true
+#  with_items:
+#    - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-keystore.jks'
+#    - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/configuration/client-etl-truststore.jks'
+#  become: true
+

@@ -1,0 +1,50 @@
+---
+
+##
+# This playbook provisions the database server required by the Blue Button
+# API's backend.
+##
+
+- name: Provision Database Servers
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: Provision Backend Database Server
+      rds:
+        command: create
+        region: "{{ aws_region }}"
+        zone: "{{ aws_zone }}"
+        instance_name: bluebutton-sandbox-backend
+        db_engine: postgres
+        #engine_version: 9.6.1
+        engine_version: 9.4.9
+        upgrade: true
+        size: 100
+        iops: 1000
+        backup_retention: 35
+        instance_type: db.t2.medium
+        publicly_accessible: false
+        username: "{{ backend_postgres_master_username }}"
+        password: "{{ backend_postgres_master_password }}"
+        tags:
+          CreatedBy: "{{ whoami.stdout }}"
+        wait: true
+        wait_timeout: 900
+      register: rds_backend
+      
+    - name: Grab Backend Database Server Coordinates
+      set_fact:
+        backend_postgres_endpoint: "{{ rds_backend.instance.endpoint }}"
+        backend_postgres_port: "{{ rds_backend.instance.port }}"
+
+    #- name: Add Backend Database Server to Inventory
+    #  lineinfile:
+    #    dest: "{{ inventory_file }}"
+    #    regexp: "^backend_postgres .*$"
+    #    line: "backend_postgres rds_instance_name=bluebutton-sandbox-backend endpoint={{ rds_backend.instance.endpoint }} port={{ rds_backend.instance.port }}"
+    #    state: present
+    #    create: true
+

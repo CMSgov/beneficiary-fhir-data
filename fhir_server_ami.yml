@@ -1,0 +1,122 @@
+---
+
+##
+# Provisions a single FHIR server in EC2, configures it correctly, creates an
+# AMI of it, then tears down the EC2 instance.
+# 
+# It is expected that later plays will use the resulting EC2 AMI in an auto-
+# scaling group.
+##
+
+- name: Provision FHIR Server Master
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: Provision FHIR Server Master
+      ec2:
+        key_name: "{{ ec2_key_name }}"
+        group:
+          - default
+          - ssh-all
+        instance_type: "{{ ec2_backend_fhir_instance_type }}"
+        image: "{{ ami_id_rhel_7_encrypted }}"
+        region: "{{ aws_region }}"
+        zone: "{{ aws_zone }}"
+        instance_profile_name: BlueButtonBackend-EC2Services
+        wait: true
+        exact_count: 1
+        count_tag:
+          Name: bluebutton-backend-fhir-master
+        instance_tags:
+          Name: bluebutton-backend-fhir-master
+          Application: "{{ ec2_tag_application }}"
+          CreatedBy: "{{ whoami.stdout }}"
+      register: ec2_backend_fhir_master
+    
+    - name: Add FHIR Server to Inventory (transient)
+      add_host:
+        name: backend_fhir_master
+        ansible_user: "{{ ssh_user_rhel }}"
+        ansible_host: "{{ ec2_backend_fhir_master.instances[0].public_dns_name }}"
+    
+    - name: Wait for SSH
+      wait_for:
+        host: "{{ item.public_dns_name }}"
+        port: 22
+        search_regex: OpenSSH
+        state: started
+        # This delay seems to be necessary for newly-provisioned instances.
+        # SSH will be up but it's not immediately configured to accept the SSH 
+        # key.
+        delay: 30
+        timeout: 320
+      with_flattened:
+        - "{{ ec2_backend_fhir_master.instances }}"
+
+- name: Configure RHEL for Ansible Pipelining
+  hosts: backend_fhir_master
+  vars:
+    ansible_ssh_pipelining: false
+  roles:
+    - rhel_ansible_pipelining
+
+- name: Ensure FHIR Database Exists (Using FHIR Server Master)
+  hosts: backend_fhir_master
+  tasks:
+
+    - name: Install Pre-requisites
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - python-psycopg2
+      become: true
+    
+    - name: Create FHIR Database
+      postgresql_db:
+        login_host: "{{ hostvars['localhost']['backend_postgres_endpoint'] }}"
+        port: "{{ hostvars['localhost']['backend_postgres_port'] }}"
+        login_user: "{{ backend_postgres_master_username }}"
+        login_password: "{{ backend_postgres_master_password }}"
+        name: fhirdb
+        encoding: 'UNICODE'
+        lc_collate: 'C'
+        lc_ctype: 'C'
+        template: 'template0'
+
+- name: Configure FHIR Server Master
+  hosts: backend_fhir_master
+  roles:
+    - fhir_server
+
+- name: Convert FHIR Server Master to AMI
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: Create AMI from FHIR Server Master
+      ec2_ami:
+        instance_id: "{{ ec2_backend_fhir_master.instance_ids[0] }}"
+        region: "{{ aws_region }}"
+        wait: true
+        name: "bluebutton-backend-fhir-{{ deploy_id }}"
+        tags:
+          Name: "bluebutton-backend-fhir-{{ deploy_id }}"
+          Application: "{{ ec2_tag_application }}"
+          CreatedBy: "{{ whoami.stdout }}"
+      register: ami_backend_fhir_master
+    - debug: 
+        msg: "Created FHIR Server Master AMI: {{ ami_backend_fhir_master | to_json }}"
+
+    - name: Terminate FHIR Server Master
+      ec2:
+        state: 'absent'
+        instance_ids: "{{ ec2_backend_fhir_master.instance_ids }}"
+        region: "{{ aws_region }}"
+      ignore_errors: true
+

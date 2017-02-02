@@ -1,0 +1,35 @@
+---
+
+##
+# Uploads local resources that will be used during the deployment (e.g. WARs)
+# to S3, for later retrieval by the plays/tasks that need them.
+# 
+# Design Note: Technically, this isn't really necessary, as the individual 
+# plays/tasks could manage this themselves. However, uploads are finicky so
+# I've found that it's best to centralize them for stuff like this. It makes it
+# simpler to disable or rework, when needed.
+##
+
+- name: Provision FHIR Server Master
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: Create S3 Bucket for Deployment Resources
+      s3_bucket:
+        name: "{{ s3_bucket_deployment }}"
+
+    - name: Upload Deployment Resources to S3
+      s3:
+        src: "{{ item.src }}"
+        bucket: "{{ s3_bucket_deployment }}"
+        object: "{{ item.dest_name }}"
+        mode: put
+        overwrite: different
+      with_items:
+        - { src: "{{ maven_repo }}/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ bluebutton_server_version }}/bluebutton-server-app-{{ bluebutton_server_version }}.war", dest_name: 'bluebutton-server-app.war' }
+        - { src: "{{ maven_repo }}/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ bluebutton_server_version }}/bluebutton-server-app-{{ bluebutton_server_version }}-server-config-healthapt.sh", dest_name: 'bluebutton-server-app-server-config-healthapt.sh' }
+        - { src: "{{ maven_repo }}/org/wildfly/wildfly-dist/{{ wildfly_version }}/wildfly-dist-{{ wildfly_version }}.tar.gz", dest_name: 'wildfly-dist.tar.gz' }
+

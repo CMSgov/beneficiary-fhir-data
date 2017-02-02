@@ -5,6 +5,18 @@ This repository contains the Ansible provisioning, roles, etc. used to setup and
 
 While it can be run manually, it is expected that these Ansible playbooks will be run automatically by the Blue Button API's build server as its projects are successfully built. The playbooks will deploy the newly-built artifacts such that they host the public Blue Button sandbox. If the sandbox is already deployed and running, it attempts to manage the updates such that clients will not experience any dropped requests or downtime.
 
+These plays use different deployment approaches, as appropriate, for the different systems being deployed:
+
+* **(Mostly) Permanent Infrastructure** (database servers, S3 buckets, KMS keys, etc.)
+    * These systems are deployed as a "typical" Ansible project: check to see if they're present and if not, fix that. Note that the logic for upgrading these systems will have to be added into the plays, as needed.
+* **Load Balanced Applications** (backend FHIR server)
+    * These systems are deployed using the excellent approach outlined in this article: [Why Ansible 1.8 is the new immutable deployment killer](https://t37.net/why-ansible-1-8-is-the-new-immutable-deployment-killer.html). The Ansible plays stand up a "master" EC2 instance, configure it properly, convert it to an AMI, then terminate it. The "master" AMI is then pushed incrementally out to an EC2 auto-sclaing group (attached to an EC2 load balancer).
+    * The plays could be sped up quite a bit if they were enhanced to create and use "partial master" AMIs, rather than always starting from a completely clean OS image.
+* **Other Non-Load Balanced Infrastructure** (backend ETL service)
+    * The ETL service can't be load-balanced (as it pulls data, rather being pushed requests). In addition, it tolerates downtime as long as care is taken to ensure that it is allowed to shutdown gracefully (ensuring that processing isn't interrupted in the middle of a data set). Accordingly, the deployment of this service just gracefully stops the current ETL EC2 instance, then stands up a new one from scratch.
+
+Note that deployment rollback is not supported for any of these services. Problems should instead be resolved by "rolling forward" to new releases that resolve whatever problems were encountered. This fits the high-velocity DevOps model being used in this project.
+
 ## Development Environment
 
 In order to use and/or modify this repository, a number of tools need to be installed.
@@ -63,7 +75,15 @@ Ensure that the EC2 key to be used is loaded into SSH Agent:
 
 The playbooks can be run, as follows:
 
-TODO
+    $ ansible-playbook sandbox.yml --extra-vars "TODO"
+
+This project has an unfortunately large amount of variables that must be specified for each run. Each of the `extra-vars` should be set, as follows:
+
+* `deploy_id_custom`: Optional. An ID for the deployment to be run, which will be used to tag AMIs, etc. in AWS. By default, a UTC timestamp is used.
+* `ec2_key_name`: The name of the SSH key (as it's labeled in EC2) that all newly-created EC2 instances should be associated with.
+* `maven_repo`: Path to the local Maven repository directory, from which the deployment resources will be pulled.
+* `bluebutton_server_version`: The version of the `gov.hhs.cms.bluebutton.fhir:bluebutton-server-app:war` artifact (and related artifacts) to deploy as the Blue Button backend FHIR server.
+* `wildfly_version`: The version of the `org.wildfly:wildfly-dist:tar.gz` artifact to deploy and use to host the Blue Button backend FHIR server.
 
 ### Teardown
 

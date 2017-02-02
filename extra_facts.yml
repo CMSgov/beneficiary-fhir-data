@@ -1,0 +1,24 @@
+---
+
+- hosts: localhost
+  name: Get Local Username
+  connection: local
+  gather_facts: false
+  
+  tasks:
+    
+    - name: 'Run whoami'
+      command: '/usr/bin/whoami'
+      register: whoami
+      changed_when: false
+
+    - name: "Determine Default 'deploy_id'"
+      command: '/bin/date --utc +%Y-%m-%dT%H-%M-%SZ'
+      register: deploy_id_default
+      changed_when: false
+
+    # This can be overridden on the command line, but defaults to a timestamp.
+    - name: "Calculate 'deploy_id'"
+      set_fact:
+        deploy_id: "{{ deploy_id_custom | default(deploy_id_default.stdout) }}"
+

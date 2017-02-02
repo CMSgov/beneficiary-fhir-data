@@ -1,0 +1,94 @@
+---
+
+##
+# Manages the rollout/upgrade of Blue Button API systems.
+#
+# **Backend - Database Server**: The DB server used in the Blue Button API's
+# backend is currently just an Amazon RDS instance. This script does not 
+# currently support updating this DB; any such updates would have to be 
+# performed manually.
+#
+# **Backend - FHIR Servers**: The FHIR servers used in the Blue Button API's
+# backend are deployed via a phased rollout/rollover approach. This approach
+# ensures that user requests are not dropped during upgrades. This script does
+# not currently support rollbacks if problems are encountered during upgrades;
+# it is instead strongly recommended that developers/admins "roll forward" to
+# resolve such problems.
+#
+# **Backend - ETL Server**: The ETL server used in the Blue Button API's 
+# backend is deployed using a blue-green strategy. This strategy ensures that
+# any in-progress data set processing is completed normally, but that all 
+# further data set processing is handled by the new instance. Again, 
+# developers/admins are encouraged to "roll forward" to resolve any problems
+# encountered during deployment.
+##
+
+- include: extra_facts.yml
+
+# Provision the AWS IAM roles, KMS keys, etc. that will be used.
+- include: aws_security_setup.yml
+
+# Upload local deployment resources to S3.
+- include: upload_resources.yml
+
+# Deploy the DB server that will be used (if it's not already present).
+- include: database_server.yml
+
+# Ensure that we have an encrypted RHEL base AMI to start from.
+- include: rhel_encrypted_ami.yml
+
+# Build an AMI for the new FHIR servers that will be deployed.
+- include: fhir_server_ami.yml
+
+# Ensure that there's an ELB load balancer for the FHIR servers.
+- include: fhir_servers_elb.yml
+
+# Provision the new FHIR servers that will be deployed.
+# TODO
+
+# Using one of the new FHIR servers, ensure that the needed DB exists.
+# TODO
+
+# Configure the FHIR servers.
+# TODO
+
+# Verify that all of the new FHIR servers are up and healthy.
+# TODO
+
+# Update DNS to ensure that new queries are being sent to the new FHIR servers.
+# TODO
+
+# Verify that FHIR queries sent to the shared DNS record are working as expected.
+# TODO
+
+# Gracefully shut down the old FHIR servers (if any).
+# TODO
+
+# Teardown the old FHIR servers (if any).
+# TODO
+
+# Gracefully stop the old ETL service (if any).
+# TODO
+
+# Ensure that the S3 bucket that the ETL service will pull from exists.
+# TODO
+
+# Provision the new ETL server.
+# TODO
+
+# Configure the new ETL server, starting the new ETL service.
+# (Note: It gets dangerous to try and roll back from this point and forward.)
+# TODO
+
+# Push a data set for a full load of the sample data to S3.
+# TODO
+
+# Wait for the ETL service to successfully process that data set.
+# TODO
+
+# Verify that the FHIR server contains some of the sample data, as expected.
+# TODO
+
+# Teardown the old ETL server (if any).
+# TODO
+
