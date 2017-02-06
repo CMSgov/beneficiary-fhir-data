@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -112,6 +113,10 @@ public final class DataTransformer {
 	static final String COVERAGE_PLAN_PART_D = "Part D";
 
 	static final String CODING_SYSTEM_RACE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
+
+	static final String CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
+
+	static final String CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
 
 	/**
 	 * A CMS-controlled standard. More info here: <a href=
@@ -231,10 +236,6 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_RX_PATIENT_RESIDENCE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_rsdnc_cd.txt";
 
 	static final String CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt";
-
-	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_ORIG = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
-
-	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_CURR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
 
 	static final String CODING_SYSTEM_CCW_BENE_ESRD_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
 
@@ -577,9 +578,7 @@ public final class DataTransformer {
 			break;
 		}
 		if (record.race.isPresent()) {
-			CodeableConcept raceCodeableConcept = new CodeableConcept();
-			raceCodeableConcept.addCoding().setSystem(CODING_SYSTEM_RACE).setCode("" + record.race.get());
-			beneficiary.addExtension().setUrl(EXTENSION_US_CORE_RACE).setValue(raceCodeableConcept);
+			addExtensionCoding(beneficiary, EXTENSION_US_CORE_RACE, CODING_SYSTEM_RACE, "" + record.race.get());
 		}
 
 		/*
@@ -610,6 +609,14 @@ public final class DataTransformer {
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
 					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
+		}
+		if (record.entitlementCodeOriginal.isPresent()) {
+			addExtensionCoding(partA, CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
+					CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL, "" + record.entitlementCodeOriginal.get());
+		}
+		if (record.entitlementCodeCurrent.isPresent()) {
+			addExtensionCoding(partA, CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT,
+					CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT, "" + record.entitlementCodeCurrent.get());
 		}
 		/*
 		 * TODO once STU3 is available, transform bene_pta_trmntn_cd into
@@ -643,7 +650,6 @@ public final class DataTransformer {
 			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
 					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
 		}
-
 		insert(bundle, partD);
 
 		return new TransformedBundle(rifRecordEvent, bundle);
@@ -2736,6 +2742,41 @@ public final class DataTransformer {
 	 */
 	private static void setPeriodEnd(Period period, LocalDate date) {
 		period.setEnd(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY);
+	}
+
+	/**
+	 * <p>
+	 * Adds an {@link Extension} to the specified {@link DomainResource}.
+	 * {@link Extension#getValue()} will be set to a {@link CodeableConcept}
+	 * containing a single {@link Coding}, with the specified system and code.
+	 * </p>
+	 * <p>
+	 * Data Architecture Note: The {@link CodeableConcept} might seem extraneous
+	 * -- why not just add the {@link Coding} directly to the {@link Extension}?
+	 * The main reason for doing it this way is consistency: this is what FHIR
+	 * seems to do everywhere.
+	 * </p>
+	 * 
+	 * @param fhirResource
+	 *            the FHIR resource to add the {@link Extension} to
+	 * @param extensionUrl
+	 *            the {@link Extension#getUrl()} to use
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to use
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to use
+	 */
+	private static void addExtensionCoding(DomainResource fhirResource, String extensionUrl, String codingSystem,
+			String codingCode) {
+		Extension extension = fhirResource.addExtension();
+		extension.setUrl(extensionUrl);
+		extension.setValue(new Coding());
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		extension.setValue(codeableConcept);
+
+		Coding coding = codeableConcept.addCoding();
+		coding.setSystem(codingSystem).setCode(codingCode);
 	}
 
 	/**

@@ -156,6 +156,14 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.medicareEnrollmentStatusCode.get(),
 				((StringType) partA.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
 						.getValue()).getValue());
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL, "1",
+				partA.getExtension().stream()
+						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL))
+						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT, "1",
+				partA.getExtension().stream()
+						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT))
+						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
 
 		Coverage partB = (Coverage) coverageEntry[1].getResource();
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partB.getPlan());
@@ -170,7 +178,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.medicareEnrollmentStatusCode.get(),
 				((StringType) partD.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
 						.getValue()).getValue());
-
 	}
 
 	/**
