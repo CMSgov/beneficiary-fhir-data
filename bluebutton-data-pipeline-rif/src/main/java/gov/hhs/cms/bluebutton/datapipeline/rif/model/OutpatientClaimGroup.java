@@ -333,6 +333,11 @@ public final class OutpatientClaimGroup {
 		public Integer lineNumber;
 
 		/**
+		 * @see Column#REV_CNTR
+		 */
+		public String revenueCenter;
+
+		/**
 		 * @see Column#REV_CNTR_1ST_ANSI_CD
 		 */
 		public Optional<String> revCntr1stAnsiCd;
@@ -466,6 +471,8 @@ public final class OutpatientClaimGroup {
 			StringBuilder builder = new StringBuilder();
 			builder.append("OutpatientClaimLine [lineNumber=");
 			builder.append(lineNumber);
+			builder.append(", revenueCenter=");
+			builder.append(revenueCenter);
 			builder.append(", revCntr1stAnsiCd=");
 			builder.append(revCntr1stAnsiCd);
 			builder.append(", revCntr2ndAnsiCd=");
@@ -1931,7 +1938,14 @@ public final class OutpatientClaimGroup {
 		 */
 		CLM_LINE_NUM,
 		
+		/**
+		 * Type: <code>CHAR</code>, max chars: 4 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt">
+		 * CCW Data Dictionary: REV_CNTR</a>.
+		 */
 		REV_CNTR,
+
 		REV_CNTR_DT,
 
 		/**

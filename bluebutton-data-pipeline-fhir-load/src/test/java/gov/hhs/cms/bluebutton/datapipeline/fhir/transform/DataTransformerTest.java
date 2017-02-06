@@ -627,6 +627,30 @@ public final class DataTransformerTest {
 				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
 				);
 
+		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+						.findFirst().get().getValueQuantity().getValue());
+
+		Assert.assertEquals(new BigDecimal(record.coinsuranceDayCount),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
+						.findFirst().get().getValueQuantity().getValue());
+
+		Assert.assertEquals(new BigDecimal(record.nonUtilizationDayCount),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
+						.findFirst().get().getValueQuantity().getValue());
+
+		Assert.assertEquals(new BigDecimal(record.bloodPintsFurnishedQty),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
+						.findFirst().get().getValueQuantity().getValue());
+
 		Assert.assertEquals(record.nchDrugOutlierApprovedPaymentAmount.get(),
 				eob.getBenefitBalanceFirstRep().getFinancial()
 				.stream().filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL)).findFirst().get().getBenefitMoney().getValue()  
@@ -676,6 +700,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
 		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
+
+		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getModifier().get(0).getCode());
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
@@ -823,8 +849,9 @@ public final class DataTransformerTest {
 		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_3RD_ANSI_CD, eobItem0.getAdjudication());
 		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_4TH_ANSI_CD, eobItem0.getAdjudication());
 
-		Assert.assertEquals(recordLine1.hcpcsCode.get(), eobItem0.getModifier().get(0).getCode());
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(1).getCode());
+		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getModifier().get(0).getCode());
+		Assert.assertEquals(recordLine1.hcpcsCode.get(), eobItem0.getModifier().get(1).getCode());
+		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(2).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
@@ -937,11 +964,131 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI).get(0)
 						.getValue()).getValue());
 
+		Assert.assertEquals(record.deductibleAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_BENEFIT_DEDUCTIBLE_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue());
 
-		/*
-		 * TODO once STU3 is available, verify amounts in eob.information
-		 * entries
-		 */
+		Assert.assertEquals(record.partACoinsuranceLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream()
+				.filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_BENEFIT_COIN_AMT_URL))
+				.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.bloodDeductibleLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.noncoveredCharge,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.totalDeductionAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_NCH_INPATIENT_TOTAL_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.claimPPSCapitalFSPAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.claimPPSCapitalOutlierAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.claimPPSCapitalDisproportionateShareAmt.get(), eob.getBenefitBalanceFirstRep()
+				.getFinancial().stream()
+				.filter(bb -> bb.getType().getCode()
+						.equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL))
+				.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.claimPPSCapitalIMEAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()
+				.stream()
+				.filter(bb -> bb.getType().getCode()
+						.equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL))
+				.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.claimPPSCapitalExceptionAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.claimPPSOldCapitalHoldHarmlessAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+						.findFirst().get().getValueQuantity().getValue());
+
+		Assert.assertEquals(new BigDecimal(record.coinsuranceDayCount),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
+						.findFirst().get().getValueQuantity().getValue());
+
+		Assert.assertEquals(new BigDecimal(record.nonUtilizationDayCount),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
+						.findFirst().get().getValueQuantity().getValue());
+
+		Assert.assertEquals(new BigDecimal(record.bloodPintsFurnishedQty),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
+						.findFirst().get().getValueQuantity().getValue());
+
+		assertDateEquals(record.qualifiedStayFromDate.get(),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
+						.findFirst().get().getTimingPeriod().getStartElement());
+
+		assertDateEquals(record.qualifiedStayThroughDate.get(),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
+						.findFirst().get().getTimingPeriod().getEndElement());
+
+		assertDateEquals(record.noncoveredStayFromDate.get(),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
+						.findFirst().get().getTimingPeriod().getStartElement());
+
+		assertDateEquals(record.noncoveredStayThroughDate.get(),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
+						.findFirst().get().getTimingPeriod().getEndElement());
+
+		Assert.assertEquals(record.medicareBenefitsExhaustedDate.get().toString(),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
+						.findFirst().get().getTiming().primitiveValue());
+
+		Assert.assertEquals(record.beneficiaryDischargeDate.get().toString(),
+				eob.getInformation().stream()
+						.filter(bb -> bb.getCategory().getSystem()
+								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BENEFICIARY_DISCHARGE_DATE))
+						.findFirst().get().getTiming().primitiveValue());
+
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(record.procedureCodes.get(0).getCode(),
 				eob.getProcedure().get(0).getProcedureCoding().getCode());
@@ -959,6 +1106,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
+		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getModifier().get(0).getCode());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
@@ -1044,7 +1192,7 @@ public final class DataTransformerTest {
 								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
-		Assert.assertEquals(record.beneficiaryDischargeDate.toString(),
+		Assert.assertEquals(record.beneficiaryDischargeDate.get().toString(),
 				eob.getInformation().stream()
 						.filter(bb -> bb.getCategory().getSystem()
 								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BENEFICIARY_DISCHARGE_DATE))
@@ -1511,7 +1659,8 @@ public final class DataTransformerTest {
 
 	private static void assertOptionalNotPresent(ExplanationOfBenefit eob) {
 		FhirContext ctx = FhirContext.forDstu3();
-		String encoded = ctx.newXmlParser().encodeResourceToString(eob);
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(eob);
+		// System.out.println(encoded);
 		Assert.assertEquals(false, encoded.contains("Optional"));
 	}
 

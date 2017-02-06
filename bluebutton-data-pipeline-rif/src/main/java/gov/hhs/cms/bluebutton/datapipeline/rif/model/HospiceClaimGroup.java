@@ -159,7 +159,7 @@ public final class HospiceClaimGroup {
 	/**
 	 * @see Column#NCH_BENE_DSCHRG_DT
 	 */
-	public LocalDate beneficiaryDischargeDate;
+	public Optional<LocalDate> beneficiaryDischargeDate;
 
 	/**
 	 * @see Column#PRNCPAL_DGNS_CD
@@ -579,7 +579,8 @@ public final class HospiceClaimGroup {
 		CLM_UTLZTN_DAY_CNT,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt">
 		 * CCW Data Dictionary: DSCHRGDT</a>.
 		 */
