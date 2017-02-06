@@ -17,7 +17,6 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -129,9 +128,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.postalCode, bene.getAddress().get(0).getPostalCode());
 		Assert.assertEquals(Date.valueOf(record.birthDate), bene.getBirthDate());
 		Assert.assertEquals("MALE", bene.getGender().toString().trim());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_RACE, "1",
-				bene.getExtension().stream().filter(e -> e.getUrl().equals(DataTransformer.EXTENSION_US_CORE_RACE))
-						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
 		/*
 		 * TODO Further research needs to be done so these unmapped fields are
 		 * documented in a JIRA ticket "Finalize fields for Beneficiary"

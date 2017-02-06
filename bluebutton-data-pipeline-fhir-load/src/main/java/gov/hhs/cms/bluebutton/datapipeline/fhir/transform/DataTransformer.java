@@ -17,7 +17,6 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -78,8 +77,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
  * FHIR {@link TransformedBundle}s.
  */
 public final class DataTransformer {
-	static final String EXTENSION_US_CORE_RACE = "http://hl7.org/fhir/StructureDefinition/us-core-race";
-
 	static final String EXTENSION_CMS_CLAIM_TYPE = "http://bluebutton.cms.hhs.gov/extensions#claimType";
 
 	static final String EXTENSION_CMS_DIAGNOSIS_GROUP = "http://bluebutton.cms.hhs.gov/extensions#diagnosisRelatedGroupCode";
@@ -110,8 +107,6 @@ public final class DataTransformer {
 	 * The {@link Coverage#getPlan()} value for Part D.
 	 */
 	static final String COVERAGE_PLAN_PART_D = "Part D";
-
-	static final String CODING_SYSTEM_RACE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
 
 	/**
 	 * A CMS-controlled standard. More info here: <a href=
@@ -576,12 +571,6 @@ public final class DataTransformer {
 			beneficiary.setGender((AdministrativeGender.UNKNOWN));
 			break;
 		}
-		if (record.race.isPresent()) {
-			CodeableConcept raceCodeableConcept = new CodeableConcept();
-			raceCodeableConcept.addCoding().setSystem(CODING_SYSTEM_RACE).setCode("" + record.race.get());
-			beneficiary.addExtension().setUrl(EXTENSION_US_CORE_RACE).setValue(raceCodeableConcept);
-		}
-
 		/*
 		 * TODO Could not map the following fields. Have created a JIRA ticket
 		 * called "Finalize fields for Beneficiary" to revisit on where to best
