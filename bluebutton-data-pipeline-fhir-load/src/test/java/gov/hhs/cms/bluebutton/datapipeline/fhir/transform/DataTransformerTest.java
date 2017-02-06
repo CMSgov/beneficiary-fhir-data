@@ -164,6 +164,10 @@ public final class DataTransformerTest {
 				partA.getExtension().stream()
 						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT))
 						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR, "N",
+				partA.getExtension().stream()
+						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR))
+						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
 
 		Coverage partB = (Coverage) coverageEntry[1].getResource();
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partB.getPlan());

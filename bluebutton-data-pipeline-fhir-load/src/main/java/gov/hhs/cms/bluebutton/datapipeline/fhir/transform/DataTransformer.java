@@ -237,7 +237,7 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt";
 
-	static final String CODING_SYSTEM_CCW_BENE_ESRD_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
+	static final String CODING_SYSTEM_CCW_ESRD_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
 
 	static final String CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt";
 
@@ -617,6 +617,10 @@ public final class DataTransformer {
 		if (record.entitlementCodeCurrent.isPresent()) {
 			addExtensionCoding(partA, CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT,
 					CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT, "" + record.entitlementCodeCurrent.get());
+		}
+		if (record.endStageRenalDiseaseCode.isPresent()) {
+			addExtensionCoding(partA, CODING_SYSTEM_CCW_ESRD_INDICATOR, CODING_SYSTEM_CCW_ESRD_INDICATOR,
+					"" + record.endStageRenalDiseaseCode.get());
 		}
 		/*
 		 * TODO once STU3 is available, transform bene_pta_trmntn_cd into
