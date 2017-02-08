@@ -130,9 +130,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.postalCode, bene.getAddress().get(0).getPostalCode());
 		Assert.assertEquals(Date.valueOf(record.birthDate), bene.getBirthDate());
 		Assert.assertEquals("MALE", bene.getGender().toString().trim());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_RACE, "1",
-				bene.getExtension().stream().filter(e -> e.getUrl().equals(DataTransformer.EXTENSION_US_CORE_RACE))
-						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
+		assertExtensionCodingEquals(bene, DataTransformer.EXTENSION_US_CORE_RACE,
+				DataTransformer.CODING_SYSTEM_RACE, "1");
 		/*
 		 * TODO Further research needs to be done so these unmapped fields are
 		 * documented in a JIRA ticket "Finalize fields for Beneficiary"
@@ -157,18 +156,12 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.medicareEnrollmentStatusCode.get(),
 				((StringType) partA.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
 						.getValue()).getValue());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL, "1",
-				partA.getExtension().stream()
-						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL))
-						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT, "1",
-				partA.getExtension().stream()
-						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT))
-						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR, "N",
-				partA.getExtension().stream()
-						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR))
-						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
+		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
+				DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL, "1");
+		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT,
+				DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT, "1");
+		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR,
+				DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR, "N");
 
 		Coverage partB = (Coverage) coverageEntry[1].getResource();
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partB.getPlan());
@@ -450,10 +443,8 @@ public final class DataTransformerTest {
 				DataTransformer.referencePractitioner(record.referringPhysicianNpi.get()).getReference(),
 				referrerEntry.getRequest().getUrl());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A",
-				eob.getExtension().stream()
-						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT))
-						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
+		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
