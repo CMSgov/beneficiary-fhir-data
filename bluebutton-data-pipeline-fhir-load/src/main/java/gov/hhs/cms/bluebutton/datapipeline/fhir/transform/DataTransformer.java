@@ -17,10 +17,12 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -47,6 +49,8 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -77,6 +81,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
  * FHIR {@link TransformedBundle}s.
  */
 public final class DataTransformer {
+	static final String EXTENSION_US_CORE_RACE = "http://hl7.org/fhir/StructureDefinition/us-core-race";
+
 	static final String EXTENSION_CMS_CLAIM_TYPE = "http://bluebutton.cms.hhs.gov/extensions#claimType";
 
 	static final String EXTENSION_CMS_DIAGNOSIS_GROUP = "http://bluebutton.cms.hhs.gov/extensions#diagnosisRelatedGroupCode";
@@ -107,6 +113,12 @@ public final class DataTransformer {
 	 * The {@link Coverage#getPlan()} value for Part D.
 	 */
 	static final String COVERAGE_PLAN_PART_D = "Part D";
+
+	static final String CODING_SYSTEM_RACE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
+
+	static final String CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
+
+	static final String CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
 
 	/**
 	 * A CMS-controlled standard. More info here: <a href=
@@ -227,11 +239,7 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt";
 
-	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_ORIG = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
-
-	static final String CODING_SYSTEM_CCW_BENE_ENTLMT_RSN_CURR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
-
-	static final String CODING_SYSTEM_CCW_BENE_ESRD_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
+	static final String CODING_SYSTEM_CCW_ESRD_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
 
 	static final String CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt";
 
@@ -278,6 +286,10 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ot_npi.txt";
 
 	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
+
+	static final String CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt";
+
+	static final String CODING_SYSTEM_CCW_PRICING_LOCALITY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lclty_cd.txt";
 
 	static final String CODING_SYSTEM_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
 
@@ -571,6 +583,10 @@ public final class DataTransformer {
 			beneficiary.setGender((AdministrativeGender.UNKNOWN));
 			break;
 		}
+		if (record.race.isPresent()) {
+			addExtensionCoding(beneficiary, EXTENSION_US_CORE_RACE, CODING_SYSTEM_RACE, "" + record.race.get());
+		}
+
 		/*
 		 * TODO Could not map the following fields. Have created a JIRA ticket
 		 * called "Finalize fields for Beneficiary" to revisit on where to best
@@ -599,6 +615,18 @@ public final class DataTransformer {
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
 					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
+		}
+		if (record.entitlementCodeOriginal.isPresent()) {
+			addExtensionCoding(partA, CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
+					CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL, "" + record.entitlementCodeOriginal.get());
+		}
+		if (record.entitlementCodeCurrent.isPresent()) {
+			addExtensionCoding(partA, CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT,
+					CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT, "" + record.entitlementCodeCurrent.get());
+		}
+		if (record.endStageRenalDiseaseCode.isPresent()) {
+			addExtensionCoding(partA, CODING_SYSTEM_CCW_ESRD_INDICATOR, CODING_SYSTEM_CCW_ESRD_INDICATOR,
+					"" + record.endStageRenalDiseaseCode.get());
 		}
 		/*
 		 * TODO once STU3 is available, transform bene_pta_trmntn_cd into
@@ -632,7 +660,6 @@ public final class DataTransformer {
 			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
 					.setValue(new StringType(record.medicareEnrollmentStatusCode.get()));
 		}
-
 		insert(bundle, partD);
 
 		return new TransformedBundle(rifRecordEvent, bundle);
@@ -942,6 +969,9 @@ public final class DataTransformer {
 			eob.setReferral(new Reference(referral));
 		}
 
+		addExtensionCoding(eob, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+				"" + claimGroup.providerAssignmentIndicator);
+
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
@@ -986,6 +1016,9 @@ public final class DataTransformer {
 
 			item.setLocation(
 					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
+			addExtensionCoding(item.getLocation(),
+					CODING_SYSTEM_CCW_PRICING_LOCALITY, CODING_SYSTEM_CCW_PRICING_LOCALITY,
+					claimLine.linePricingLocalityCode);
 
 			item.setServiced(new Period()
 					.setStart(Date.from(claimLine.firstExpenseDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
@@ -2725,6 +2758,41 @@ public final class DataTransformer {
 	 */
 	private static void setPeriodEnd(Period period, LocalDate date) {
 		period.setEnd(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY);
+	}
+
+	/**
+	 * <p>
+	 * Adds an {@link Extension} to the specified {@link DomainResource}.
+	 * {@link Extension#getValue()} will be set to a {@link CodeableConcept}
+	 * containing a single {@link Coding}, with the specified system and code.
+	 * </p>
+	 * <p>
+	 * Data Architecture Note: The {@link CodeableConcept} might seem extraneous
+	 * -- why not just add the {@link Coding} directly to the {@link Extension}?
+	 * The main reason for doing it this way is consistency: this is what FHIR
+	 * seems to do everywhere.
+	 * </p>
+	 * 
+	 * @param fhirElement
+	 *            the FHIR element to add the {@link Extension} to
+	 * @param extensionUrl
+	 *            the {@link Extension#getUrl()} to use
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to use
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to use
+	 */
+	private static void addExtensionCoding(IBaseHasExtensions fhirElement, String extensionUrl, String codingSystem,
+			String codingCode) {
+		IBaseExtension<?, ?> extension = fhirElement.addExtension();
+		extension.setUrl(extensionUrl);
+		extension.setValue(new Coding());
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		extension.setValue(codeableConcept);
+
+		Coding coding = codeableConcept.addCoding();
+		coding.setSystem(codingSystem).setCode(codingCode);
 	}
 
 	/**

@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -30,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -128,6 +130,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.postalCode, bene.getAddress().get(0).getPostalCode());
 		Assert.assertEquals(Date.valueOf(record.birthDate), bene.getBirthDate());
 		Assert.assertEquals("MALE", bene.getGender().toString().trim());
+		assertExtensionCodingEquals(bene, DataTransformer.EXTENSION_US_CORE_RACE,
+				DataTransformer.CODING_SYSTEM_RACE, "1");
 		/*
 		 * TODO Further research needs to be done so these unmapped fields are
 		 * documented in a JIRA ticket "Finalize fields for Beneficiary"
@@ -152,6 +156,12 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.medicareEnrollmentStatusCode.get(),
 				((StringType) partA.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
 						.getValue()).getValue());
+		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
+				DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_ORIGINAL, "1");
+		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT,
+				DataTransformer.CODING_SYSTEM_CCW_MEDICARE_ENTITLEMENT_CURRENT, "1");
+		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR,
+				DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR, "N");
 
 		Coverage partB = (Coverage) coverageEntry[1].getResource();
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partB.getPlan());
@@ -166,7 +176,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.medicareEnrollmentStatusCode.get(),
 				((StringType) partD.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
 						.getValue()).getValue());
-
 	}
 
 	/**
@@ -434,6 +443,9 @@ public final class DataTransformerTest {
 				DataTransformer.referencePractitioner(record.referringPhysicianNpi.get()).getReference(),
 				referrerEntry.getRequest().getUrl());
 
+		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
+
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		Assert.assertEquals(record.clinicalTrialNumber.get(),
@@ -464,6 +476,8 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, recordLine1.placeOfServiceCode,
 				eobItem0.getLocationCoding());
+		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_PRICING_LOCALITY,
+				DataTransformer.CODING_SYSTEM_CCW_PRICING_LOCALITY, "15");
 
 		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
@@ -1419,6 +1433,24 @@ public final class DataTransformerTest {
 	private static void assertCodingEquals(String expectedSystem, String expectedCode, Coding actual) {
 		Assert.assertEquals(expectedSystem, actual.getSystem());
 		Assert.assertEquals(expectedCode, actual.getCode());
+	}
+
+	/**
+	 * @param fhirElement
+	 *            the FHIR element to check the extension of
+	 * @param expectedExtensionUrl
+	 *            the expected {@link Extension#getUrl()} of the
+	 *            {@link Extension} to look for
+	 * @param expectedCodingSystem
+	 *            the expected {@link Coding#getSystem()}
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()}
+	 */
+	private static void assertExtensionCodingEquals(IBaseHasExtensions fhirElement, String expectedExtensionUrl,
+			String expectedCodingSystem, String expectedCode) {
+		assertCodingEquals(expectedCodingSystem, expectedCode,
+				fhirElement.getExtension().stream().filter(e -> e.getUrl().equals(expectedExtensionUrl))
+						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
 	}
 
 	/**
