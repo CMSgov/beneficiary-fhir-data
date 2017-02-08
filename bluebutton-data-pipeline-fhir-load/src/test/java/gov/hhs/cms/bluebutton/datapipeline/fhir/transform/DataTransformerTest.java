@@ -31,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -484,6 +485,8 @@ public final class DataTransformerTest {
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, recordLine1.placeOfServiceCode,
 				eobItem0.getLocationCoding());
+		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_PRICING_LOCALITY,
+				DataTransformer.CODING_SYSTEM_CCW_PRICING_LOCALITY, "15");
 
 		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
@@ -1439,6 +1442,24 @@ public final class DataTransformerTest {
 	private static void assertCodingEquals(String expectedSystem, String expectedCode, Coding actual) {
 		Assert.assertEquals(expectedSystem, actual.getSystem());
 		Assert.assertEquals(expectedCode, actual.getCode());
+	}
+
+	/**
+	 * @param fhirElement
+	 *            the FHIR element to check the extension of
+	 * @param expectedExtensionUrl
+	 *            the expected {@link Extension#getUrl()} of the
+	 *            {@link Extension} to look for
+	 * @param expectedCodingSystem
+	 *            the expected {@link Coding#getSystem()}
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()}
+	 */
+	private static void assertExtensionCodingEquals(IBaseHasExtensions fhirElement, String expectedExtensionUrl,
+			String expectedCodingSystem, String expectedCode) {
+		assertCodingEquals(expectedCodingSystem, expectedCode,
+				fhirElement.getExtension().stream().filter(e -> e.getUrl().equals(expectedExtensionUrl))
+						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
 	}
 
 	/**

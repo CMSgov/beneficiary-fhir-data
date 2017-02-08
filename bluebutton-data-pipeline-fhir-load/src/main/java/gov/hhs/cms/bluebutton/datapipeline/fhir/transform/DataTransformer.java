@@ -49,6 +49,8 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -286,6 +288,8 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
 
 	static final String CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt";
+
+	static final String CODING_SYSTEM_CCW_PRICING_LOCALITY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lclty_cd.txt";
 
 	static final String CODING_SYSTEM_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
 
@@ -1012,6 +1016,9 @@ public final class DataTransformer {
 
 			item.setLocation(
 					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
+			addExtensionCoding(item.getLocation(),
+					CODING_SYSTEM_CCW_PRICING_LOCALITY, CODING_SYSTEM_CCW_PRICING_LOCALITY,
+					claimLine.linePricingLocalityCode);
 
 			item.setServiced(new Period()
 					.setStart(Date.from(claimLine.firstExpenseDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
@@ -2766,8 +2773,8 @@ public final class DataTransformer {
 	 * seems to do everywhere.
 	 * </p>
 	 * 
-	 * @param fhirResource
-	 *            the FHIR resource to add the {@link Extension} to
+	 * @param fhirElement
+	 *            the FHIR element to add the {@link Extension} to
 	 * @param extensionUrl
 	 *            the {@link Extension#getUrl()} to use
 	 * @param codingSystem
@@ -2775,9 +2782,9 @@ public final class DataTransformer {
 	 * @param codingCode
 	 *            the {@link Coding#getCode()} to use
 	 */
-	private static void addExtensionCoding(DomainResource fhirResource, String extensionUrl, String codingSystem,
+	private static void addExtensionCoding(IBaseHasExtensions fhirElement, String extensionUrl, String codingSystem,
 			String codingCode) {
-		Extension extension = fhirResource.addExtension();
+		IBaseExtension<?, ?> extension = fhirElement.addExtension();
 		extension.setUrl(extensionUrl);
 		extension.setValue(new Coding());
 
