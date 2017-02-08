@@ -449,6 +449,11 @@ public final class DataTransformerTest {
 				DataTransformer.referencePractitioner(record.referringPhysicianNpi.get()).getReference(),
 				referrerEntry.getRequest().getUrl());
 
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A",
+				eob.getExtension().stream()
+						.filter(e -> e.getUrl().equals(DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT))
+						.map(e -> (CodeableConcept) e.getValue()).map(c -> c.getCodingFirstRep()).findAny().get());
+
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		Assert.assertEquals(record.clinicalTrialNumber.get(),

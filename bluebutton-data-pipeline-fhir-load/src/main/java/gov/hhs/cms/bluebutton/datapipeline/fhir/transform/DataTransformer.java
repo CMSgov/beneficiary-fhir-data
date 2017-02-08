@@ -285,6 +285,8 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
 
+	static final String CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt";
+
 	static final String CODING_SYSTEM_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
 
 	static final String CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
@@ -962,6 +964,9 @@ public final class DataTransformer {
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
 		}
+
+		addExtensionCoding(eob, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+				"" + claimGroup.providerAssignmentIndicator);
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
