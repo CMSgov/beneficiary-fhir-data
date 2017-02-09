@@ -185,7 +185,7 @@ public final class HHAClaimGroup {
 	/**
 	 * @see Column#CLM_ADMSN_DT
 	 */
-	public LocalDate careStartDate;
+	public Optional<LocalDate> careStartDate;
 
 	/**
 	 * @see java.lang.Object#toString()
@@ -327,6 +327,11 @@ public final class HHAClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#REV_CNTR_DDCTBL_COINSRNC_CD
+		 */
+		public Optional<Character> deductibleCoinsuranceCd;
+
+		/**
 		 * @see Column#REV_CNTR_NDC_QTY
 		 */
 		public Optional<Integer> nationalDrugCodeQuantity;
@@ -369,6 +374,8 @@ public final class HHAClaimGroup {
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", deductibleCoinsuranceCd=");
+			builder.append(deductibleCoinsuranceCd);
 			builder.append(", nationalDrugCodeQuantity=");
 			builder.append(nationalDrugCodeQuantity);
 			builder.append(", nationalDrugCodeQualifierCode=");
@@ -1156,7 +1163,8 @@ public final class HHAClaimGroup {
 		CLM_HHA_TOT_VISIT_CNT,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hhstrtdt.txt">
 		 * CCW Data Dictionary: HHSTRTDT</a>.
 		 */
@@ -1260,7 +1268,10 @@ public final class HHAClaimGroup {
 		REV_CNTR_NCVRD_CHRG_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt">
+		 * CCW Data Dictionary: REVDEDCD</a>.
 		 */
 		REV_CNTR_DDCTBL_COINSRNC_CD,
 

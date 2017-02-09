@@ -77,6 +77,11 @@ public final class InpatientClaimGroup {
 	public LocalDate weeklyProcessDate;
 	
 	/**
+	 * @see Column#CLAIM_QUERY_CODE
+	 */
+	public Character claimQueryCode;
+
+	/**
 	 * @see Column#PRVDR_NUM
 	 */
 	public String providerNumber;
@@ -155,6 +160,21 @@ public final class InpatientClaimGroup {
 	 * @see Column#CLM_TOT_CHRG_AMT
 	 */
 	public BigDecimal totalChargeAmount;
+
+	/**
+	 * @see Column#CLM_ADMSN_DT
+	 */
+	public Optional<LocalDate> claimAdmissionDate;
+
+	/**
+	 * @see Column#CLM_IP_ADMSN_TYPE_CD
+	 */
+	public Character admissionTypeCd;
+
+	/**
+	 * @see Column#CLM_SRC_IP_ADMSN_CD
+	 */
+	public Optional<Character> sourceAdmissionCd;
 
 	/**
 	 * @see Column#NCH_PTNT_STATUS_IND_CD
@@ -237,9 +257,49 @@ public final class InpatientClaimGroup {
 	public Integer utilizationDayCount;
 
 	/**
+	 * @see Column#BENE_TOT_COINSRNC_DAYS_CNT
+	 */
+	public Integer coinsuranceDayCount;
+
+	/**
+	 * @see Column#CLM_NON_UTLZTN_DAYS_CNT
+	 */
+	public Integer nonUtilizationDayCount;
+
+	/**
+	 * @see Column#NCH_BLOOD_PNTS_FRNSHD_QTY
+	 */
+	public Integer bloodPintsFurnishedQty;
+
+	/**
+	 * @see Column#NCH_VRFD_NCVRD_STAY_FROM_DT
+	 */
+	public Optional<LocalDate> noncoveredStayFromDate;
+
+	/**
+	 * @see Column#NCH_VRFD_NCVRD_STAY_THRU_DT
+	 */
+	public Optional<LocalDate> noncoveredStayThroughDate;
+
+	/**
+	 * @see Column#NCH_ACTV_OR_CVRD_LVL_CARE_THRU
+	 */
+	public Optional<LocalDate> coveredCareThoughDate;
+
+	/**
+	 * @see Column#NCH_BENE_MDCR_BNFTS_EXHTD_DT_I
+	 */
+	public Optional<LocalDate> medicareBenefitsExhaustedDate;
+
+	/**
 	 * @see Column#NCH_BENE_DSCHRG_DT
 	 */
-	public LocalDate beneficiaryDischargeDate;
+	public Optional<LocalDate> beneficiaryDischargeDate;
+
+	/**
+	 * @see Column#CLM_DRG_CD
+	 */
+	public Optional<String> diagnosisRelatedGroupCd;
 
 	/**
 	 * @see Column#NCH_DRG_OUTLIER_APRVD_PMT_AMT
@@ -321,6 +381,8 @@ public final class InpatientClaimGroup {
 		builder.append(dateThrough);
 		builder.append(", weeklyProcessDate=");
 		builder.append(weeklyProcessDate);
+		builder.append(", claimQueryCode=");
+		builder.append(claimQueryCode);
 		builder.append(", providerNumber=");
 		builder.append(providerNumber);
 		builder.append(", claimFacilityTypeCode=");
@@ -353,6 +415,12 @@ public final class InpatientClaimGroup {
 		builder.append(patientDischargeStatusCode);
 		builder.append(", totalChargeAmount=");
 		builder.append(totalChargeAmount);
+		builder.append(", claimAdmissionDate=");
+		builder.append(claimAdmissionDate);
+		builder.append(", admissionTypeCd=");
+		builder.append(admissionTypeCd);
+		builder.append(", sourceAdmissionCd=");
+		builder.append(sourceAdmissionCd);
 		builder.append(", patientStatusCd=");
 		builder.append(patientStatusCd);
 		builder.append(", passThruPerDiemAmount=");
@@ -385,8 +453,24 @@ public final class InpatientClaimGroup {
 		builder.append(claimPPSOldCapitalHoldHarmlessAmount);
 		builder.append(", utilizationDayCount=");
 		builder.append(utilizationDayCount);
+		builder.append(", coinsuranceDayCount=");
+		builder.append(coinsuranceDayCount);
+		builder.append(", nonUtilizationDayCount=");
+		builder.append(nonUtilizationDayCount);
+		builder.append(", bloodPintsFurnishedQty=");
+		builder.append(bloodPintsFurnishedQty);
+		builder.append(", noncoveredStayFromDate=");
+		builder.append(noncoveredStayFromDate);
+		builder.append(", noncoveredStayThroughDate=");
+		builder.append(noncoveredStayThroughDate);
+		builder.append(", coveredCareThoughDate=");
+		builder.append(coveredCareThoughDate);
+		builder.append(", medicareBenefitsExhaustedDate=");
+		builder.append(medicareBenefitsExhaustedDate);
 		builder.append(", beneficiaryDischargeDate=");
 		builder.append(beneficiaryDischargeDate);
+		builder.append(", diagnosisRelatedGroupCd=");
+		builder.append(diagnosisRelatedGroupCd);
 		builder.append(", nchDrugOutlierApprovedPaymentAmount=");
 		builder.append(nchDrugOutlierApprovedPaymentAmount);
 		builder.append(", diagnosisAdmitting=");
@@ -419,6 +503,11 @@ public final class InpatientClaimGroup {
 		public Integer lineNumber;
 
 		/**
+		 * @see Column#REV_CNTR
+		 */
+		public String revenueCenter;
+
+		/**
 		 * @see Column#HCPCS_CD
 		 */
 		public Optional<String> hcpcsCode;
@@ -444,6 +533,11 @@ public final class InpatientClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#REV_CNTR_DDCTBL_COINSRNC_CD
+		 */
+		public Optional<Character> deductibleCoinsuranceCd;
+
+		/**
 		 * @see Column#REV_CNTR_NDC_QTY
 		 */
 		public Optional<Integer> nationalDrugCodeQuantity;
@@ -466,6 +560,8 @@ public final class InpatientClaimGroup {
 			StringBuilder builder = new StringBuilder();
 			builder.append("InpatientClaimLine [lineNumber=");
 			builder.append(lineNumber);
+			builder.append(", revenueCenter=");
+			builder.append(revenueCenter);
 			builder.append(", hcpcsCode=");
 			builder.append(hcpcsCode);
 			builder.append(", unitCount=");
@@ -476,6 +572,8 @@ public final class InpatientClaimGroup {
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", deductibleCoinsuranceCd=");
+			builder.append(deductibleCoinsuranceCd);
 			builder.append(", nationalDrugCodeQuantity=");
 			builder.append(nationalDrugCodeQuantity);
 			builder.append(", nationalDrugCodeQualifierCode=");
@@ -559,7 +657,9 @@ public final class InpatientClaimGroup {
 		FI_CLM_PROC_DT,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/query_cd.txt">
+		 * CCW Data Dictionary: QUERY_CD</a>.
 		 */
 		CLAIM_QUERY_CODE,
 
@@ -712,17 +812,25 @@ public final class InpatientClaimGroup {
 		CLM_TOT_CHRG_AMT,
 		
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/admsn_dt.txt">
+		 * CCW Data Dictionary: ADMSN_DT</a>.
 		 */
 		CLM_ADMSN_DT,
-		
+
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/type_adm.txt">
+		 * CCW Data Dictionary: TYPE_ADM</a>.
 		 */
 		CLM_IP_ADMSN_TYPE_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/src_adms.txt">
+		 * CCW Data Dictionary: SRC_ADMS</a>.
 		 */
 		CLM_SRC_IP_ADMSN_CD,
 
@@ -845,7 +953,9 @@ public final class InpatientClaimGroup {
 		CLM_UTLZTN_DAY_CNT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coin_day.txt">
+		 * CCW Data Dictionary: COIN_DAY</a>.
 		 */
 		BENE_TOT_COINSRNC_DAYS_CNT,
 
@@ -855,44 +965,64 @@ public final class InpatientClaimGroup {
 		BENE_LRD_USED_CNT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 5. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nutilday.txt">
+		 * CCW Data Dictionary: NUTILDAY</a>.
 		 */
 		CLM_NON_UTLZTN_DAYS_CNT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 3. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bldfrnsh.txt">
+		 * CCW Data Dictionary: BLDFRNSH</a>.
 		 */
 		NCH_BLOOD_PNTS_FRNSHD_QTY,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncovfrom.txt">
+		 * CCW Data Dictionary: NCOVFROM</a>.
 		 */
 		NCH_VRFD_NCVRD_STAY_FROM_DT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ncovthru.txt">
+		 * CCW Data Dictionary: NCOVTHRU</a>.
 		 */
 		NCH_VRFD_NCVRD_STAY_THRU_DT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carethru.txt">
+		 * CCW Data Dictionary: CARETHRU</a>.
 		 */
 		NCH_ACTV_OR_CVRD_LVL_CARE_THRU,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/exhst_.txt">
+		 * CCW Data Dictionary: EXHST_DT</a>.
 		 */
 		NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt">
 		 * CCW Data Dictionary: DSCHRGDT</a>.
 		 */
 		NCH_BENE_DSCHRG_DT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 3 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drg_cd.txt">
+		 * CCW Data Dictionary: DRG_CD</a>.
 		 */
 		CLM_DRG_CD,
 
@@ -2298,6 +2428,14 @@ public final class InpatientClaimGroup {
 		CLM_LINE_NUM,
 
 		/**
+		 * Type: <code>CHAR</code>, max chars: 4 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt">
+		 * CCW Data Dictionary: REV_CNTR</a>.
+		 */
+		REV_CNTR,
+
+		/**
 		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt">
 		 * CCW Data Dictionary: HCPCS_CD</a>.
@@ -2331,6 +2469,14 @@ public final class InpatientClaimGroup {
 		 * CCW Data Dictionary: REV_NCVR </a>.
 		 */
 		REV_CNTR_NCVRD_CHRG_AMT,
+
+		/**
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt">
+		 * CCW Data Dictionary: REVDEDCD</a>.
+		 */
+		REV_CNTR_DDCTBL_COINSRNC_CD,
 
 		/**
 		 * Type: <code>NUM</code>, max chars: 10 <code>Optional</code>. See

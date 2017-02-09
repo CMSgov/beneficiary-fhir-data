@@ -584,6 +584,7 @@ public final class RifFilesProcessor {
 		claimGroup.dateFrom = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_FROM_DT));
 		claimGroup.dateThrough = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_THRU_DT));
 		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(InpatientClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.claimQueryCode = parseCharacter(firstClaimLine.get(InpatientClaimGroup.Column.CLAIM_QUERY_CODE));
 		claimGroup.providerNumber = firstClaimLine.get(InpatientClaimGroup.Column.PRVDR_NUM);
 		claimGroup.claimFacilityTypeCode = parseCharacter(
 				firstClaimLine.get(InpatientClaimGroup.Column.CLM_FAC_TYPE_CD));
@@ -605,6 +606,11 @@ public final class RifFilesProcessor {
 		claimGroup.mcoPaidSw = parseOptCharacter(firstClaimLine.get(InpatientClaimGroup.Column.CLM_MCO_PD_SW));
 		claimGroup.patientDischargeStatusCode = firstClaimLine.get(InpatientClaimGroup.Column.PTNT_DSCHRG_STUS_CD);
 		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.CLM_TOT_CHRG_AMT));
+		claimGroup.claimAdmissionDate = parseOptDate(firstClaimLine.get(InpatientClaimGroup.Column.CLM_ADMSN_DT));
+		claimGroup.admissionTypeCd = parseCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_IP_ADMSN_TYPE_CD));
+		claimGroup.sourceAdmissionCd = parseOptCharacter(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_SRC_IP_ADMSN_CD));
 		claimGroup.patientStatusCd = parseOptCharacter(
 				firstClaimLine.get(InpatientClaimGroup.Column.NCH_PTNT_STATUS_IND_CD));
 		claimGroup.passThruPerDiemAmount = parseDecimal(
@@ -640,8 +646,24 @@ public final class RifFilesProcessor {
 				.of(parseDecimal(firstClaimLine.get(InpatientClaimGroup.Column.NCH_DRG_OUTLIER_APRVD_PMT_AMT)));
 
 		claimGroup.utilizationDayCount = parseInt(firstClaimLine.get(InpatientClaimGroup.Column.CLM_UTLZTN_DAY_CNT));
-		claimGroup.beneficiaryDischargeDate = parseDate(
+		claimGroup.coinsuranceDayCount = parseInt(
+				firstClaimLine.get(InpatientClaimGroup.Column.BENE_TOT_COINSRNC_DAYS_CNT));
+		claimGroup.nonUtilizationDayCount = parseInt(
+				firstClaimLine.get(InpatientClaimGroup.Column.CLM_NON_UTLZTN_DAYS_CNT));
+		claimGroup.bloodPintsFurnishedQty = parseInt(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BLOOD_PNTS_FRNSHD_QTY));
+		claimGroup.noncoveredStayFromDate = parseOptDate(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_VRFD_NCVRD_STAY_FROM_DT));
+		claimGroup.noncoveredStayThroughDate = parseOptDate(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_VRFD_NCVRD_STAY_THRU_DT));
+		claimGroup.coveredCareThoughDate = parseOptDate(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_ACTV_OR_CVRD_LVL_CARE_THRU));
+		claimGroup.medicareBenefitsExhaustedDate = parseOptDate(
+				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I));
+		claimGroup.beneficiaryDischargeDate = parseOptDate(
 				firstClaimLine.get(InpatientClaimGroup.Column.NCH_BENE_DSCHRG_DT));
+
+		claimGroup.diagnosisRelatedGroupCd = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.CLM_DRG_CD));
 
 		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_CD),
 				firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
@@ -667,6 +689,7 @@ public final class RifFilesProcessor {
 			InpatientClaimLine claimLine = new InpatientClaimLine();
 
 			claimLine.lineNumber = parseInt(claimLineRecord.get(InpatientClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.revenueCenter = claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR);
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.HCPCS_CD));
 			claimLine.unitCount = parseDecimal(claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_UNIT_CNT));
 			claimLine.rateAmount = parseDecimal(claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_RATE_AMT));
@@ -674,7 +697,8 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
-
+			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
+					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
 			claimLine.nationalDrugCodeQuantity = parseOptInteger(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
 			claimLine.nationalDrugCodeQualifierCode = parseOptString(
@@ -713,6 +737,7 @@ public final class RifFilesProcessor {
 		claimGroup.dateFrom = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_FROM_DT));
 		claimGroup.dateThrough = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.CLM_THRU_DT));
 		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(OutpatientClaimGroup.Column.NCH_WKLY_PROC_DT));
+		claimGroup.claimQueryCode = parseCharacter(firstClaimLine.get(OutpatientClaimGroup.Column.CLAIM_QUERY_CODE));
 		claimGroup.providerNumber = firstClaimLine.get(OutpatientClaimGroup.Column.PRVDR_NUM);
 		claimGroup.claimFacilityTypeCode = parseCharacter(
 				firstClaimLine.get(OutpatientClaimGroup.Column.CLM_FAC_TYPE_CD));
@@ -774,6 +799,7 @@ public final class RifFilesProcessor {
 			OutpatientClaimLine claimLine = new OutpatientClaimLine();
 
 			claimLine.lineNumber = parseInt(claimLineRecord.get(OutpatientClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.revenueCenter = claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR);
 			claimLine.revCntr1stAnsiCd = parseOptString(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_1ST_ANSI_CD));
 			claimLine.revCntr2ndAnsiCd = parseOptString(
@@ -991,6 +1017,7 @@ public final class RifFilesProcessor {
 		claimGroup.claimTypeCode = firstClaimLine.get(SNFClaimGroup.Column.NCH_CLM_TYPE_CD);
 		claimGroup.dateFrom = parseDate(firstClaimLine.get(SNFClaimGroup.Column.CLM_FROM_DT));
 		claimGroup.dateThrough = parseDate(firstClaimLine.get(SNFClaimGroup.Column.CLM_THRU_DT));
+		claimGroup.claimQueryCode = parseCharacter(firstClaimLine.get(SNFClaimGroup.Column.CLAIM_QUERY_CODE));
 		claimGroup.weeklyProcessDate = parseDate(firstClaimLine.get(SNFClaimGroup.Column.NCH_WKLY_PROC_DT));
 		claimGroup.providerNumber = firstClaimLine.get(SNFClaimGroup.Column.PRVDR_NUM);
 		claimGroup.claimFacilityTypeCode = parseCharacter(firstClaimLine.get(SNFClaimGroup.Column.CLM_FAC_TYPE_CD));
@@ -1011,6 +1038,9 @@ public final class RifFilesProcessor {
 		claimGroup.mcoPaidSw = parseOptCharacter(firstClaimLine.get(SNFClaimGroup.Column.CLM_MCO_PD_SW));
 		claimGroup.patientDischargeStatusCode = firstClaimLine.get(SNFClaimGroup.Column.PTNT_DSCHRG_STUS_CD);
 		claimGroup.totalChargeAmount = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_TOT_CHRG_AMT));
+		claimGroup.claimAdmissionDate = parseOptDate(firstClaimLine.get(SNFClaimGroup.Column.CLM_ADMSN_DT));
+		claimGroup.admissionTypeCd = parseCharacter(firstClaimLine.get(SNFClaimGroup.Column.CLM_IP_ADMSN_TYPE_CD));
+		claimGroup.sourceAdmissionCd = parseOptCharacter(firstClaimLine.get(SNFClaimGroup.Column.CLM_SRC_IP_ADMSN_CD));
 		claimGroup.patientStatusCd = parseOptCharacter(firstClaimLine.get(SNFClaimGroup.Column.NCH_PTNT_STATUS_IND_CD));
 		claimGroup.deductibleAmount = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_IP_DDCTBL_AMT));
 		claimGroup.partACoinsuranceLiabilityAmount = parseDecimal(
@@ -1019,8 +1049,40 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
 		claimGroup.noncoveredCharge = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.NCH_IP_NCVRD_CHRG_AMT));
 		claimGroup.totalDeductionAmount = parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.NCH_IP_TOT_DDCTN_AMT));
+		claimGroup.claimPPSCapitalFSPAmount = Optional
+				.of(parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_PPS_CPTL_FSP_AMT)));
+		claimGroup.claimPPSCapitalOutlierAmount = Optional
+				.of(parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_PPS_CPTL_OUTLIER_AMT)));
+		claimGroup.claimPPSCapitalDisproportionateShareAmt = Optional
+				.of(parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT)));
+		claimGroup.claimPPSCapitalIMEAmount = Optional
+				.of(parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_PPS_CPTL_IME_AMT)));
+		claimGroup.claimPPSCapitalExceptionAmount = Optional
+				.of(parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_PPS_CPTL_EXCPTN_AMT)));
+		claimGroup.claimPPSOldCapitalHoldHarmlessAmount = Optional
+				.of(parseDecimal(firstClaimLine.get(SNFClaimGroup.Column.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT)));
+
 		claimGroup.utilizationDayCount = parseInt(firstClaimLine.get(SNFClaimGroup.Column.CLM_UTLZTN_DAY_CNT));
-		claimGroup.beneficiaryDischargeDate = parseDate(firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_DSCHRG_DT));
+		claimGroup.coinsuranceDayCount = parseInt(firstClaimLine.get(SNFClaimGroup.Column.BENE_TOT_COINSRNC_DAYS_CNT));
+		claimGroup.nonUtilizationDayCount = parseInt(firstClaimLine.get(SNFClaimGroup.Column.CLM_NON_UTLZTN_DAYS_CNT));
+		claimGroup.bloodPintsFurnishedQty = parseInt(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_BLOOD_PNTS_FRNSHD_QTY));
+		claimGroup.qualifiedStayFromDate = parseOptDate(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_QLFYD_STAY_FROM_DT));
+		claimGroup.qualifiedStayThroughDate = parseOptDate(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_QLFYD_STAY_THRU_DT));
+		claimGroup.noncoveredStayFromDate = parseOptDate(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_VRFD_NCVRD_STAY_FROM_DT));
+		claimGroup.noncoveredStayThroughDate = parseOptDate(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_VRFD_NCVRD_STAY_THRU_DT));
+		claimGroup.coveredCareThoughDate = parseOptDate(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_ACTV_OR_CVRD_LVL_CARE_THRU));
+		claimGroup.medicareBenefitsExhaustedDate = parseOptDate(
+				firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I));
+		claimGroup.beneficiaryDischargeDate = parseOptDate(firstClaimLine.get(SNFClaimGroup.Column.NCH_BENE_DSCHRG_DT));
+
+		claimGroup.diagnosisRelatedGroupCd = parseOptString(firstClaimLine.get(SNFClaimGroup.Column.CLM_DRG_CD));
+
 		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_CD),
 				firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
 		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(SNFClaimGroup.Column.PRNCPAL_DGNS_CD),
@@ -1039,12 +1101,19 @@ public final class RifFilesProcessor {
 		for (CSVRecord claimLineRecord : csvRecords) {
 			SNFClaimLine claimLine = new SNFClaimLine();
 			claimLine.lineNumber = parseInt(claimLineRecord.get(SNFClaimGroup.Column.CLM_LINE_NUM));
+			claimLine.revenueCenter = claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR);
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(SNFClaimGroup.Column.HCPCS_CD));
 			claimLine.unitCount = parseDecimal(claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_UNIT_CNT));
 			claimLine.rateAmount = parseDecimal(claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_RATE_AMT));
 			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
+					claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
+			claimLine.nationalDrugCodeQuantity = parseOptInteger(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
+			claimLine.nationalDrugCodeQualifierCode = parseOptString(
+					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY_QLFR_CD));
 			claimLine.revenueCenterRenderingPhysicianNPI = parseOptString(
 					claimLineRecord.get(SNFClaimGroup.Column.RNDRNG_PHYSN_NPI));
 
@@ -1099,7 +1168,7 @@ public final class RifFilesProcessor {
 		claimGroup.patientStatusCd = parseOptCharacter(
 				firstClaimLine.get(HospiceClaimGroup.Column.NCH_PTNT_STATUS_IND_CD));
 		claimGroup.utilizationDayCount = parseInt(firstClaimLine.get(HospiceClaimGroup.Column.CLM_UTLZTN_DAY_CNT));
-		claimGroup.beneficiaryDischargeDate = parseDate(
+		claimGroup.beneficiaryDischargeDate = parseOptDate(
 				firstClaimLine.get(HospiceClaimGroup.Column.NCH_BENE_DSCHRG_DT));
 		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(HospiceClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(HospiceClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
@@ -1110,7 +1179,8 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(HospiceClaimGroup.Column.FST_DGNS_E_VRSN_CD));
 		claimGroup.diagnosesExternal = parseIcdCodes(firstClaimLine, HospiceClaimGroup.Column.ICD_DGNS_E_CD1.ordinal(),
 				HospiceClaimGroup.Column.ICD_DGNS_E_VRSN_CD12.ordinal());
-		claimGroup.claimHospiceStartDate = parseDate(firstClaimLine.get(HospiceClaimGroup.Column.CLM_HOSPC_START_DT_ID));
+		claimGroup.claimHospiceStartDate = parseOptDate(
+				firstClaimLine.get(HospiceClaimGroup.Column.CLM_HOSPC_START_DT_ID));
 
 		/*
 		 * Parse the claim lines.
@@ -1134,6 +1204,8 @@ public final class RifFilesProcessor {
 			claimLine.paymentAmount = parseDecimal(claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_PMT_AMT_AMT));
 			claimLine.totalChargeAmount = parseDecimal(
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
+			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
+					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 			claimLine.nationalDrugCodeQuantity = parseOptInteger(
@@ -1201,7 +1273,7 @@ public final class RifFilesProcessor {
 		claimGroup.claimLUPACode = parseOptCharacter(firstClaimLine.get(HHAClaimGroup.Column.CLM_HHA_LUPA_IND_CD));
 		claimGroup.claimReferralCode = parseOptCharacter(firstClaimLine.get(HHAClaimGroup.Column.CLM_HHA_RFRL_CD));
 		claimGroup.totalVisitCount = parseInt(firstClaimLine.get(HHAClaimGroup.Column.CLM_HHA_TOT_VISIT_CNT));
-		claimGroup.careStartDate = parseDate(firstClaimLine.get(HHAClaimGroup.Column.CLM_ADMSN_DT));
+		claimGroup.careStartDate = parseOptDate(firstClaimLine.get(HHAClaimGroup.Column.CLM_ADMSN_DT));
 
 		/*
 		 * Parse the claim lines.
@@ -1223,6 +1295,8 @@ public final class RifFilesProcessor {
 			claimLine.totalChargeAmount = parseDecimal(claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
+			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
+					claimLineRecord.get(HHAClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
 			claimLine.nationalDrugCodeQuantity = parseOptInteger(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
 			claimLine.nationalDrugCodeQualifierCode = parseOptString(

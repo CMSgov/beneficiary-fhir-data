@@ -104,7 +104,7 @@ public final class HospiceClaimGroup {
 	/**
 	 * @see Column#CLM_HOSPC_START_DT_ID
 	 */
-	public LocalDate claimHospiceStartDate;
+	public Optional<LocalDate> claimHospiceStartDate;
 	
 	/**
 	 * @see Column#CLM_PMT_AMT
@@ -159,7 +159,7 @@ public final class HospiceClaimGroup {
 	/**
 	 * @see Column#NCH_BENE_DSCHRG_DT
 	 */
-	public LocalDate beneficiaryDischargeDate;
+	public Optional<LocalDate> beneficiaryDischargeDate;
 
 	/**
 	 * @see Column#PRNCPAL_DGNS_CD
@@ -333,6 +333,11 @@ public final class HospiceClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#REV_CNTR_DDCTBL_COINSRNC_CD
+		 */
+		public Optional<Character> deductibleCoinsuranceCd;
+
+		/**
 		 * @see Column#REV_CNTR_NDC_QTY
 		 */
 		public Optional<Integer> nationalDrugCodeQuantity;
@@ -377,6 +382,8 @@ public final class HospiceClaimGroup {
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", deductibleCoinsuranceCd=");
+			builder.append(deductibleCoinsuranceCd);
 			builder.append(", nationalDrugCodeQuantity=");
 			builder.append(nationalDrugCodeQuantity);
 			builder.append(", nationalDrugCodeQualifierCode=");
@@ -579,7 +586,8 @@ public final class HospiceClaimGroup {
 		CLM_UTLZTN_DAY_CNT,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dschrgdt.txt">
 		 * CCW Data Dictionary: DSCHRGDT</a>.
 		 */
@@ -1158,7 +1166,7 @@ public final class HospiceClaimGroup {
 		ICD_DGNS_E_VRSN_CD12,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 10 <code>Optional</code>. See
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
 		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hspcstrt.txt">
 		 * CCW Data Dictionary: HSPCSTRT</a>.
@@ -1258,7 +1266,10 @@ public final class HospiceClaimGroup {
 		REV_CNTR_NCVRD_CHRG_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt">
+		 * CCW Data Dictionary: REVDEDCD</a>.
 		 */
 		REV_CNTR_DDCTBL_COINSRNC_CD,
 
