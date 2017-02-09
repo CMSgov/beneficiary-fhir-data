@@ -78,6 +78,11 @@ public final class OutpatientClaimGroup {
 	public LocalDate weeklyProcessDate;
 
 	/**
+	 * @see Column#CLAIM_QUERY_CODE
+	 */
+	public Character claimQueryCode;
+
+	/**
 	 * @see Column#PRVDR_NUM
 	 */
 	public String providerNumber;
@@ -600,7 +605,9 @@ public final class OutpatientClaimGroup {
 		FI_CLM_PROC_DT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/query_cd.txt">
+		 * CCW Data Dictionary: QUERY_CD</a>.
 		 */
 		CLAIM_QUERY_CODE,
 

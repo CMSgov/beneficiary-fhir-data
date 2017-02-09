@@ -349,6 +349,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("60", claimGroup.claimTypeCode);
 		Assert.assertEquals(LocalDate.of(2016, 01, 15), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2016, 01, 27), claimGroup.dateThrough);
+		Assert.assertEquals(new Character('3'), claimGroup.claimQueryCode);
 		Assert.assertEquals("7777766666", claimGroup.providerNumber);
 		Assert.assertEquals(new Character('1'), claimGroup.claimServiceClassificationTypeCode);
 		Assert.assertFalse(claimGroup.claimNonPaymentReasonCode.isPresent());
@@ -361,7 +362,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("161943433", claimGroup.otherPhysicianNpi.get());
 		Assert.assertEquals("51", claimGroup.patientDischargeStatusCode);
 		Assert.assertEquals(new BigDecimal("84999.37"), claimGroup.totalChargeAmount);
-		Assert.assertEquals(LocalDate.of(2016, 1, 15), claimGroup.claimAdmissionDate);
+		Assert.assertEquals(LocalDate.of(2016, 1, 15), claimGroup.claimAdmissionDate.get());
 		Assert.assertEquals(new Character('1'), claimGroup.admissionTypeCd);
 		Assert.assertEquals(new Character('4'), claimGroup.sourceAdmissionCd.get());
 		Assert.assertEquals(new BigDecimal("10.00"), claimGroup.passThruPerDiemAmount);
@@ -452,6 +453,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("40", claimGroup.claimTypeCode);
 		Assert.assertEquals(LocalDate.of(2011, 01, 24), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2011, 01, 24), claimGroup.dateThrough);
+		Assert.assertEquals(new Character('3'), claimGroup.claimQueryCode);
 		Assert.assertEquals("9999999", claimGroup.providerNumber);
 		Assert.assertEquals("A", claimGroup.claimNonPaymentReasonCode.get());
 		Assert.assertEquals(new BigDecimal("693.11"), claimGroup.paymentAmount);
@@ -538,6 +540,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("20", claimGroup.claimTypeCode);
 		Assert.assertEquals(LocalDate.of(2013, 12, 01), claimGroup.dateFrom);
 		Assert.assertEquals(LocalDate.of(2013, 12, 18), claimGroup.dateThrough);
+		Assert.assertEquals(new Character('3'), claimGroup.claimQueryCode);
 		Assert.assertEquals("2999999", claimGroup.providerNumber);
 		Assert.assertEquals("B", claimGroup.claimNonPaymentReasonCode.get());
 		Assert.assertEquals(new Character('1'), claimGroup.claimServiceClassificationTypeCode);
@@ -550,7 +553,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("4444444444", claimGroup.otherPhysicianNpi.get());
 		Assert.assertEquals("1", claimGroup.patientDischargeStatusCode);
 		Assert.assertEquals(new BigDecimal("5555.03"), claimGroup.totalChargeAmount);
-		Assert.assertEquals(LocalDate.of(2013, 11, 5), claimGroup.claimAdmissionDate);
+		Assert.assertEquals(LocalDate.of(2013, 11, 5), claimGroup.claimAdmissionDate.get());
 		Assert.assertEquals(new Character('3'), claimGroup.admissionTypeCd);
 		Assert.assertEquals(new Character('4'), claimGroup.sourceAdmissionCd.get());
 		Assert.assertEquals(new BigDecimal("112.00"), claimGroup.deductibleAmount);
@@ -658,7 +661,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_9, "55555"), claimGroup.diagnosesAdditional.get(0));
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "999888"), claimGroup.diagnosisFirstClaimExternal.get());
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "654321"), claimGroup.diagnosesExternal.get(0));
-		Assert.assertEquals(LocalDate.of(2014, 7, 06), claimGroup.claimHospiceStartDate);
+		Assert.assertEquals(LocalDate.of(2014, 7, 06), claimGroup.claimHospiceStartDate.get());
 				
 		Assert.assertEquals(1, claimGroup.lines.size());
 		// Verify one of the claim lines.
@@ -737,7 +740,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new Character('L'), claimGroup.claimLUPACode.get());
 		Assert.assertEquals(new Character('1'), claimGroup.claimReferralCode.get());
 		Assert.assertEquals(new Integer(3), claimGroup.totalVisitCount);
-		Assert.assertEquals(LocalDate.of(2015, 6, 23), claimGroup.careStartDate);
+		Assert.assertEquals(LocalDate.of(2015, 6, 23), claimGroup.careStartDate.get());
 		Assert.assertEquals(1, claimGroup.lines.size());
 		// Verify one of the claim lines.
 		HHAClaimLine claimLine = claimGroup.lines.get(0);

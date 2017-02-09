@@ -77,6 +77,11 @@ public final class SNFClaimGroup {
 	public LocalDate weeklyProcessDate;
 
 	/**
+	 * @see Column#CLAIM_QUERY_CODE
+	 */
+	public Character claimQueryCode;
+
+	/**
 	 * @see Column#PRVDR_NUM
 	 */
 	public String providerNumber;
@@ -159,7 +164,7 @@ public final class SNFClaimGroup {
 	/**
 	 * @see Column#CLM_ADMSN_DT
 	 */
-	public LocalDate claimAdmissionDate;
+	public Optional<LocalDate> claimAdmissionDate;
 
 	/**
 	 * @see Column#CLM_IP_ADMSN_TYPE_CD
@@ -287,6 +292,11 @@ public final class SNFClaimGroup {
 	public Optional<LocalDate> beneficiaryDischargeDate;
 
 	/**
+	 * @see Column#CLM_DRG_CD
+	 */
+	public Optional<String> diagnosisRelatedGroupCd;
+
+	/**
 	 * @see Column#ADMTG_DGNS_CD
 	 * @see Column#ADMTG_DGNS_VRSN_CD
 	 */
@@ -357,6 +367,8 @@ public final class SNFClaimGroup {
 		builder.append(dateThrough);
 		builder.append(", weeklyProcessDate=");
 		builder.append(weeklyProcessDate);
+		builder.append(", claimQueryCode=");
+		builder.append(claimQueryCode);
 		builder.append(", providerNumber=");
 		builder.append(providerNumber);
 		builder.append(", claimFacilityTypeCode=");
@@ -441,6 +453,8 @@ public final class SNFClaimGroup {
 		builder.append(medicareBenefitsExhaustedDate);
 		builder.append(", beneficiaryDischargeDate=");
 		builder.append(beneficiaryDischargeDate);
+		builder.append(", diagnosisRelatedGroupCd=");
+		builder.append(diagnosisRelatedGroupCd);
 		builder.append(", diagnosisAdmitting=");
 		builder.append(diagnosisAdmitting);
 		builder.append(", diagnosisPrincipal=");
@@ -500,6 +514,11 @@ public final class SNFClaimGroup {
 		public BigDecimal nonCoveredChargeAmount;
 
 		/**
+		 * @see Column#REV_CNTR_DDCTBL_COINSRNC_CD
+		 */
+		public Optional<Character> deductibleCoinsuranceCd;
+
+		/**
 		 * @see Column#REV_CNTR_NDC_QTY
 		 */
 		public Optional<Integer> nationalDrugCodeQuantity;
@@ -534,6 +553,8 @@ public final class SNFClaimGroup {
 			builder.append(totalChargeAmount);
 			builder.append(", nonCoveredChargeAmount=");
 			builder.append(nonCoveredChargeAmount);
+			builder.append(", deductibleCoinsuranceCd=");
+			builder.append(deductibleCoinsuranceCd);
 			builder.append(", nationalDrugCodeQuantity=");
 			builder.append(nationalDrugCodeQuantity);
 			builder.append(", nationalDrugCodeQualifierCode=");
@@ -617,7 +638,9 @@ public final class SNFClaimGroup {
 		FI_CLM_PROC_DT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/query_cd.txt">
+		 * CCW Data Dictionary: QUERY_CD</a>.
 		 */
 		CLAIM_QUERY_CODE,
 
@@ -770,7 +793,8 @@ public final class SNFClaimGroup {
 		CLM_TOT_CHRG_AMT,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/admsn_dt.txt">
 		 * CCW Data Dictionary: ADMSN_DT</a>.
 		 */
@@ -961,7 +985,10 @@ public final class SNFClaimGroup {
 		NCH_BENE_DSCHRG_DT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 3 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drg_cd.txt">
+		 * CCW Data Dictionary: DRG_CD</a>.
 		 */
 		CLM_DRG_CD,
 
@@ -2129,7 +2156,10 @@ public final class SNFClaimGroup {
 		REV_CNTR_NCVRD_CHRG_AMT,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt">
+		 * CCW Data Dictionary: REVDEDCD</a>.
 		 */
 		REV_CNTR_DDCTBL_COINSRNC_CD,
 
