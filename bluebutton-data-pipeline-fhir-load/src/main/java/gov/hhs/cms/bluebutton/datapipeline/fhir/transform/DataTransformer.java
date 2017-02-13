@@ -1021,6 +1021,10 @@ public final class DataTransformer {
 					.setReason(new Coding().setSystem(CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION)
 							.setCode("" + claimLine.reducedPaymentPhysicianAsstCode));
 
+			SimpleQuantity serviceCount = new SimpleQuantity();
+			serviceCount.setValue(claimLine.serviceCount);
+			item.setQuantity(serviceCount);
+
 			item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
 					.setCode(claimLine.cmsServiceTypeCode));
 

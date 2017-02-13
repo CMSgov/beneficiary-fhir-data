@@ -471,6 +471,8 @@ public final class DataTransformerTest {
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_ZIP_CD).get(0)
 						.getValue()).getValue());
 
+		Assert.assertEquals(recordLine1.serviceCount, eobItem0.getQuantity().getValue());
+
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, recordLine1.cmsServiceTypeCode,
 				eobItem0.getCategory());
 
