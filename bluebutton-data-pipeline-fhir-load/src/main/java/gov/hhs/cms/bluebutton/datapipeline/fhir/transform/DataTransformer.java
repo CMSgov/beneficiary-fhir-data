@@ -166,6 +166,8 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
 
+	static final String CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/astnt_cd.txt";
+
 	static final String CODING_REVENUE_CENTER_RENDER_PHY_NPI = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt";
 
 	/**
@@ -344,6 +346,8 @@ public final class DataTransformer {
 	static final String CODED_ADJUDICATION_TOTAL_DEDUCTION_AMOUNT = "Line Total Deduction Amount";
 
 	static final String CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT = "Line Total Charge Amount";
+
+	static final String CODED_ADJUDICATION_PHYSICIAN_ASSISTANT = "Carrier Line Reduced Payment Physician Assistant Code";
 
 	/**
 	 * See <a href=
@@ -1010,6 +1014,12 @@ public final class DataTransformer {
 				item.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PROVIDER_ZIP_CD)
 						.setValue(new StringType(claimLine.providerZipCode.get()));
 			}
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PHYSICIAN_ASSISTANT))
+					.setReason(new Coding().setSystem(CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION)
+							.setCode("" + claimLine.reducedPaymentPhysicianAsstCode));
 
 			item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
 					.setCode(claimLine.cmsServiceTypeCode));

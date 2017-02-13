@@ -506,6 +506,10 @@ public final class DataTransformerTest {
 				recordLine1.submittedChargeAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE, recordLine1.allowedChargeAmount,
 				eobItem0.getAdjudication());
+		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_PHYSICIAN_ASSISTANT,
+				DataTransformer.CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION,
+				"" + recordLine1.reducedPaymentPhysicianAsstCode,
+				eobItem0.getAdjudication());
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
 
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),
@@ -1469,6 +1473,29 @@ public final class DataTransformerTest {
 				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		Assert.assertEquals(expectedAmount, adjudication.get().getAmount().getValue());
+	}
+
+	/**
+	 * @param expectedCategoryCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link AdjudicationComponent#getCategory()} to find and verify
+	 * @param expectedReasonSystem
+	 *            the expected {@link Coding#getSystem()} of the
+	 *            {@link AdjudicationComponent#getReason()} to find and verify
+	 * @param expectedReasonCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link AdjudicationComponent#getReason()} to find and verify
+	 * @param actuals
+	 *            the actual {@link AdjudicationComponent}s to verify
+	 */
+	private static void assertAdjudicationReasonEquals(String expectedCategoryCode, String expectedReasonSystem,
+			String expectedReasonCode, List<AdjudicationComponent> actuals) {
+		Optional<AdjudicationComponent> adjudication = actuals.stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
+		Assert.assertTrue(adjudication.isPresent());
+		Assert.assertEquals(expectedReasonSystem, adjudication.get().getReason().getSystem());
+		Assert.assertEquals(expectedReasonCode, adjudication.get().getReason().getCode());
 	}
 
 	/**
