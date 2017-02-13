@@ -512,6 +512,9 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION,
 				"" + recordLine1.reducedPaymentPhysicianAsstCode,
 				eobItem0.getAdjudication());
+		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR, recordLine1.processingIndicatorCode,
+				eobItem0.getAdjudication());
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
 
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),

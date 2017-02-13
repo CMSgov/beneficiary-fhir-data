@@ -168,6 +168,8 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/astnt_cd.txt";
 
+	static final String CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt";
+
 	static final String CODING_REVENUE_CENTER_RENDER_PHY_NPI = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt";
 
 	/**
@@ -324,6 +326,8 @@ public final class DataTransformer {
 	static final String CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT = "Line Purchase Price Amount";
 
 	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Line Allowed Charge Amount";
+
+	static final String CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR = "Line Processing Indicator Code";
 
 	static final String CODED_ADJUDICATION_PASS_THRU_PER_DIEM_AMOUNT = "Line Allowed Charge Amount";
 
@@ -1102,6 +1106,12 @@ public final class DataTransformer {
 							.setCode(CODED_ADJUDICATION_ALLOWED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.allowedChargeAmount);
+
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR))
+					.setReason(new Coding().setSystem(CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR)
+							.setCode(claimLine.processingIndicatorCode));
 
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
 
