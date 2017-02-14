@@ -492,6 +492,10 @@ public final class DataTransformerTest {
 		Assert.assertEquals(recordLine1.betosCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_BETOS).get(0).getValue())
 						.getValue());
+
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH, "" + recordLine1.serviceDeductibleCode);
+
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT, recordLine1.paymentAmount,
 				eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,

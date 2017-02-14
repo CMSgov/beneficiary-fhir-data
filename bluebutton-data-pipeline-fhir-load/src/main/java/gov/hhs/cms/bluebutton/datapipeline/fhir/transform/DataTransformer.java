@@ -305,6 +305,8 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
+	static final String CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt";
+
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
 	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Line Beneficiary Primary Payer Paid Amount";
@@ -1058,6 +1060,9 @@ public final class DataTransformer {
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
 			}
+
+			addExtensionCoding(item, CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH, CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH,
+					"" + claimLine.serviceDeductibleCode);
 
 			item.addAdjudication()
 					.setCategory(
