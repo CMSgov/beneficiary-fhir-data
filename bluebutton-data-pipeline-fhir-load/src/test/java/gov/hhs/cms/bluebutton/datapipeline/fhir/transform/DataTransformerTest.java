@@ -25,9 +25,12 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
@@ -524,6 +527,17 @@ public final class DataTransformerTest {
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_NDC).get(0).getValue())
 						.getValue());
+
+		List<Extension> hctHgbObservationExtension = eobItem0
+				.getExtensionsByUrl(DataTransformer.EXTENSION_CMS_HCT_OR_HGB_RESULTS);
+		Assert.assertEquals(1, hctHgbObservationExtension.size());
+		Assert.assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
+		Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
+		Assert.assertTrue(hctHgbReference.getResource() instanceof Observation);
+		Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE, recordLine1.hctHgbTestTypeCode.get(),
+				hctHgbObservation.getCode().getCodingFirstRep());
+		Assert.assertEquals(recordLine1.hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
 	}
 
 	/**

@@ -37,6 +37,8 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
@@ -96,6 +98,8 @@ public final class DataTransformer {
 	static final String EXTENSION_CMS_ATTENDING_PHYSICIAN = "http://bluebutton.cms.hhs.gov/extensions#attendingPhysician";
 
 	static final String EXTENSION_CMS_DIAGNOSIS_LINK_ID = "http://bluebutton.cms.hhs.gov/extensions#diagnosisLinkId";
+
+	static final String EXTENSION_CMS_HCT_OR_HGB_RESULTS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbrs.txt";
 
 	static final String COVERAGE_PLAN = "Medicare";
 
@@ -306,6 +310,8 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
 	static final String CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt";
+
+	static final String CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt";
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
@@ -1036,9 +1042,8 @@ public final class DataTransformer {
 
 			item.setLocation(
 					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
-			addExtensionCoding(item.getLocation(),
-					CODING_SYSTEM_CCW_PRICING_LOCALITY, CODING_SYSTEM_CCW_PRICING_LOCALITY,
-					claimLine.linePricingLocalityCode);
+			addExtensionCoding(item.getLocation(), CODING_SYSTEM_CCW_PRICING_LOCALITY,
+					CODING_SYSTEM_CCW_PRICING_LOCALITY, claimLine.linePricingLocalityCode);
 
 			item.setServiced(new Period()
 					.setStart(Date.from(claimLine.firstExpenseDate.atStartOfDay(ZoneId.systemDefault()).toInstant()),
@@ -1125,6 +1130,26 @@ public final class DataTransformer {
 						.setValue(new StringType(claimLine.nationalDrugCode.get()));
 			}
 
+			if (claimLine.hctHgbTestTypeCode.isPresent()
+					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) != 0) {
+				Observation hctHgbObservation = new Observation();
+				hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
+				CodeableConcept hctHgbTestType = new CodeableConcept();
+				hctHgbTestType.addCoding().setSystem(CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE)
+						.setCode(claimLine.hctHgbTestTypeCode.get());
+				hctHgbObservation.setCode(hctHgbTestType);
+				hctHgbObservation.setValue(new Quantity().setValue(claimLine.hctHgbTestResult));
+				item.addExtension()
+						.setUrl(EXTENSION_CMS_HCT_OR_HGB_RESULTS)
+						.setValue(new Reference(hctHgbObservation));
+			} else if (!claimLine.hctHgbTestTypeCode.isPresent()
+					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
+				// Nothing to do here; don't map a non-existent Observation.
+			} else {
+				throw new BadCodeMonkeyException(String.format(
+						"Inconsistent hctHgbTestTypeCode and hctHgbTestResult" + " values for claim '%s'.",
+						claimGroup.claimId));
+			}
 		}
 
 		insert(bundle, eob);
