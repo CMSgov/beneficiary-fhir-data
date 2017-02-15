@@ -1008,11 +1008,47 @@ public final class DataTransformer {
 			item.addDetail(detail);
 
 			if (claimLine.performingPhysicianNpi.isPresent()) {
-				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
-						.setProvider(new Identifier().setValue(claimLine.performingPhysicianNpi.get())));
+				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = new ExplanationOfBenefit.CareTeamComponent();
+				performingCareTeamMember.setProvider(new Identifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(claimLine.performingPhysicianNpi.get()));
+				performingCareTeamMember.setResponsible(true);
+
+				/*
+				 * The provider's "specialty" and "type" code are equivalent.
+				 * However, the "specialty" codes are more granular, and seem to
+				 * better match the example FHIR
+				 * `http://hl7.org/fhir/ex-providerqualification` code set.
+				 * Accordingly, we map the "specialty" codes to the
+				 * `qualification` field here, and stick the "type" code into an
+				 * extension. TODO: suggest that the spec allows more than one
+				 * `qualification` entry.
+				 */
+				performingCareTeamMember
+						.setQualification(new Coding().setSystem(CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD)
+								.setCode("" + claimLine.providerSpecialityCode));
+				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD,
+						CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD, "" + claimLine.providerTypeCode);
+
+				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+						CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD, "" + claimLine.providerParticipatingIndCode);
+
+				item.addCareTeam(performingCareTeamMember);
+			} else {
+				/*
+				 * Per Michelle at GDIT, and also Tony Dean at OEDA, the
+				 * performing provider should always be present. I think the
+				 * field is only optional because it wasn't used until the
+				 * switch to NPIs in 2007.
+				 */
+				throw new BadCodeMonkeyException(String
+						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
 			}
 
 			if (claimLine.organizationNpi.isPresent()) {
+				/*
+				 * FIXME This is mis-mapped: it's really an attribute of the
+				 * performing provider.
+				 */
 				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
 						.setProvider(new Identifier().setValue(claimLine.organizationNpi.get())));
 			}

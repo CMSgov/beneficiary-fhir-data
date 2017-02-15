@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -37,6 +38,8 @@ import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
@@ -461,8 +464,17 @@ public final class DataTransformerTest {
 				((StringType) eobItem0.getDetail().get(0)
 				.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).get(0).getValue()).getValue());
 
-		Assert.assertEquals(recordLine1.performingPhysicianNpi.get(),
-				eobItem0.getCareTeam().get(0).getProviderIdentifier().getValue());
+		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(
+				recordLine1.performingPhysicianNpi.get(), eobItem0.getCareTeam());
+		Assert.assertNotNull(performingCareTeamEntry);
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+				recordLine1.providerSpecialityCode, performingCareTeamEntry.getQualification());
+		assertExtensionCodingEquals(performingCareTeamEntry, DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD, "" + recordLine1.providerTypeCode);
+		assertExtensionCodingEquals(performingCareTeamEntry,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				"" + recordLine1.providerParticipatingIndCode);
 		Assert.assertEquals(recordLine1.organizationNpi.get(),
 				eobItem0.getCareTeam().get(1).getProviderIdentifier().getValue());
 
@@ -1436,6 +1448,32 @@ public final class DataTransformerTest {
 			return p.getIdentifier().stream().filter(i -> DataTransformer.CODING_SYSTEM_NPI_US.equals(i.getSystem()))
 					.filter(i -> npi.equals(i.getValue())).findAny().isPresent();
 		};
+	}
+
+	/**
+	 * @param expectedProviderNpi
+	 *            the {@link Identifier#getValue()} of the provider to find a
+	 *            matching {@link CareTeamComponent} for
+	 * @param careTeam
+	 *            the {@link List} of {@link CareTeamComponent}s to search
+	 * @return the {@link CareTeamComponent} whose
+	 *         {@link CareTeamComponent#getProvider()} is an {@link Identifier}
+	 *         with the specified provider NPI, or else <code>null</code> if no
+	 *         such {@link CareTeamComponent} was found
+	 */
+	private static CareTeamComponent findCareTeamEntryForProviderIdentifier(String expectedProviderNpi,
+			List<CareTeamComponent> careTeam) {
+		Optional<CareTeamComponent> careTeamEntry = careTeam.stream()
+				.filter(ctc -> ctc.getProvider() instanceof Identifier).filter(ctc -> {
+					try {
+						return DataTransformer.CODING_SYSTEM_NPI_US.equals(ctc.getProviderIdentifier().getSystem())
+								&& expectedProviderNpi.equals(ctc.getProviderIdentifier().getValue());
+					} catch (FHIRException e) {
+						// Won't happen, due to preceding filter.
+						throw new BadCodeMonkeyException(e);
+					}
+				}).findFirst();
+		return careTeamEntry.orElse(null);
 	}
 
 	/**
