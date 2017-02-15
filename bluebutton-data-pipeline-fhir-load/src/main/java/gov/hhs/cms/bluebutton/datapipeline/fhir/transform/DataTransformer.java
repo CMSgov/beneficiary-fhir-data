@@ -25,6 +25,7 @@ import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DetailComponent;
@@ -310,6 +311,8 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
 	static final String CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt";
+
+	static final String CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
 
 	static final String CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt";
 
@@ -1105,11 +1108,14 @@ public final class DataTransformer {
 			addExtensionCoding(item, CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH, CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH,
 					"" + claimLine.serviceDeductibleCode);
 
-			item.addAdjudication()
+			AdjudicationComponent adjudicationForPayment = item.addAdjudication();
+			adjudicationForPayment
 					.setCategory(
 							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.paymentAmount);
+			addExtensionCoding(adjudicationForPayment, CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH,
+					CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH, "" + claimLine.paymentCode);
 
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)

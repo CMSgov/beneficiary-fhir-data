@@ -513,6 +513,13 @@ public final class DataTransformerTest {
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT, recordLine1.paymentAmount,
 				eobItem0.getAdjudication());
+		AdjudicationComponent adjudicationForPayment = eobItem0.getAdjudication().stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> DataTransformer.CODED_ADJUDICATION_PAYMENT.equals(a.getCategory().getCode())).findAny()
+				.get();
+		assertExtensionCodingEquals(adjudicationForPayment,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH, "" + recordLine1.paymentCode);
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
 				recordLine1.beneficiaryPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT_B, recordLine1.providerPaymentAmount,
