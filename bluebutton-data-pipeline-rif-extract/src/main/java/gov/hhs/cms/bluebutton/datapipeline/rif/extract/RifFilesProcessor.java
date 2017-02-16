@@ -894,7 +894,7 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_PRMRY_PYR_PD_AMT));
 		claimGroup.referringPhysicianUpin = firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_UPIN);
 		claimGroup.referringPhysicianNpi = parseOptString(firstClaimLine.get(CarrierClaimGroup.Column.RFR_PHYSN_NPI));
-		claimGroup.providerAssignmentIndicator = parseCharacter(
+		claimGroup.providerAssignmentIndicator = parseOptCharacter(
 				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_PRVDR_ASGNMT_IND_SW));
 		claimGroup.providerPaymentAmount = parseDecimal(
 				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CLM_PRVDR_PMT_AMT));
@@ -906,7 +906,7 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(CarrierClaimGroup.Column.NCH_CARR_CLM_ALOWD_AMT));
 		claimGroup.beneficiaryPartBDeductAmount = parseDecimal(
 				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_CASH_DDCTBL_APLD_AMT));
-		claimGroup.hcpcsYearCode = parseCharacter(firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
+		claimGroup.hcpcsYearCode = parseOptCharacter(firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
 		claimGroup.referringProviderIdNumber = firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_RFRNG_PIN_NUM);
 		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
@@ -934,8 +934,9 @@ public final class RifFilesProcessor {
 			claimLine.providerTaxNumber = claimLineRecord.get(CarrierClaimGroup.Column.TAX_NUM);
 			claimLine.providerStateCode = parseOptString(claimLineRecord.get(CarrierClaimGroup.Column.PRVDR_STATE_CD));
 			claimLine.providerZipCode = parseOptString(claimLineRecord.get(CarrierClaimGroup.Column.PRVDR_ZIP));
-			claimLine.providerSpecialityCode = claimLineRecord.get(CarrierClaimGroup.Column.PRVDR_SPCLTY);
-			claimLine.providerParticipatingIndCode = parseCharacter(
+			claimLine.providerSpecialityCode = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.PRVDR_SPCLTY));
+			claimLine.providerParticipatingIndCode = parseOptCharacter(
 					claimLineRecord.get(CarrierClaimGroup.Column.PRTCPTNG_IND_CD));
 			claimLine.reducedPaymentPhysicianAsstCode = parseCharacter(
 					claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_RDCD_PMT_PHYS_ASTN_C));
@@ -967,12 +968,13 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(CarrierClaimGroup.Column.LINE_SBMTD_CHRG_AMT));
 			claimLine.allowedChargeAmount = parseDecimal(
 					claimLineRecord.get(CarrierClaimGroup.Column.LINE_ALOWD_CHRG_AMT));
-			claimLine.processingIndicatorCode = claimLineRecord.get(CarrierClaimGroup.Column.LINE_PRCSG_IND_CD);
-			claimLine.paymentCode = parseCharacter(claimLineRecord.get(CarrierClaimGroup.Column.LINE_PMT_80_100_CD));
-			claimLine.serviceDeductibleCode = parseCharacter(
+			claimLine.processingIndicatorCode = parseOptString(
+					claimLineRecord.get(CarrierClaimGroup.Column.LINE_PRCSG_IND_CD));
+			claimLine.paymentCode = parseOptCharacter(claimLineRecord.get(CarrierClaimGroup.Column.LINE_PMT_80_100_CD));
+			claimLine.serviceDeductibleCode = parseOptCharacter(
 					claimLineRecord.get(CarrierClaimGroup.Column.LINE_SERVICE_DEDUCTIBLE));
 			claimLine.mtusCount = parseDecimal(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_MTUS_CNT));
-			claimLine.mtusCode = parseCharacter(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_MTUS_CD));
+			claimLine.mtusCode = parseOptCharacter(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_MTUS_CD));
 			claimLine.diagnosis = parseIcdCode(claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_CD),
 					claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD));
 			claimLine.hpsaScarcityCode = parseOptCharacter(
@@ -1350,7 +1352,7 @@ public final class RifFilesProcessor {
 		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(DMEClaimGroup.Column.CLM_PMT_AMT));
 		claimGroup.primaryPayerPaidAmount = parseDecimal(
 				firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_PRMRY_PYR_PD_AMT));
-		claimGroup.providerAssignmentIndicator = parseCharacter(
+		claimGroup.providerAssignmentIndicator = parseOptCharacter(
 				firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_PRVDR_ASGNMT_IND_SW));
 		claimGroup.providerPaymentAmount = parseDecimal(firstClaimLine.get(DMEClaimGroup.Column.NCH_CLM_PRVDR_PMT_AMT));
 		claimGroup.beneficiaryPaymentAmount = parseDecimal(
@@ -1360,7 +1362,7 @@ public final class RifFilesProcessor {
 		claimGroup.allowedChargeAmount = parseDecimal(firstClaimLine.get(DMEClaimGroup.Column.NCH_CARR_CLM_ALOWD_AMT));
 		claimGroup.beneficiaryPartBDeductAmount = parseDecimal(
 				firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_CASH_DDCTBL_APLD_AMT));
-		claimGroup.hcpcsYearCode = parseCharacter(firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
+		claimGroup.hcpcsYearCode = parseOptCharacter(firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
 		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(DMEClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(DMEClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, DMEClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
@@ -1375,8 +1377,8 @@ public final class RifFilesProcessor {
 			DMEClaimLine claimLine = new DMEClaimLine();
 			claimLine.number = parseInt(claimLineRecord.get(DMEClaimGroup.Column.LINE_NUM));
 			claimLine.providerTaxNumber = claimLineRecord.get(DMEClaimGroup.Column.TAX_NUM);
-			claimLine.providerSpecialityCode = claimLineRecord.get(DMEClaimGroup.Column.PRVDR_SPCLTY);
-			claimLine.providerParticipatingIndCode = parseCharacter(
+			claimLine.providerSpecialityCode = parseOptString(claimLineRecord.get(DMEClaimGroup.Column.PRVDR_SPCLTY));
+			claimLine.providerParticipatingIndCode = parseOptCharacter(
 					claimLineRecord.get(DMEClaimGroup.Column.PRTCPTNG_IND_CD));
 			claimLine.serviceCount = parseDecimal(claimLineRecord.get(DMEClaimGroup.Column.LINE_SRVC_CNT));
 			claimLine.cmsServiceTypeCode = claimLineRecord.get(DMEClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD);
@@ -1410,18 +1412,28 @@ public final class RifFilesProcessor {
 			claimLine.submittedChargeAmount = parseDecimal(
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_SBMTD_CHRG_AMT));
 			claimLine.allowedChargeAmount = parseDecimal(claimLineRecord.get(DMEClaimGroup.Column.LINE_ALOWD_CHRG_AMT));
-			claimLine.processingIndicatorCode = claimLineRecord.get(DMEClaimGroup.Column.LINE_PRCSG_IND_CD);
-			claimLine.paymentCode = parseCharacter(claimLineRecord.get(DMEClaimGroup.Column.LINE_PMT_80_100_CD));
-			claimLine.serviceDeductibleCode = parseCharacter(
+			claimLine.processingIndicatorCode = parseOptString(
+					claimLineRecord.get(DMEClaimGroup.Column.LINE_PRCSG_IND_CD));
+			claimLine.paymentCode = parseOptCharacter(claimLineRecord.get(DMEClaimGroup.Column.LINE_PMT_80_100_CD));
+			claimLine.serviceDeductibleCode = parseOptCharacter(
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_SERVICE_DEDUCTIBLE));
 			claimLine.diagnosis = parseIcdCode(claimLineRecord.get(DMEClaimGroup.Column.LINE_ICD_DGNS_CD),
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD));
 			claimLine.purchasePriceAmount = parseDecimal(
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_DME_PRCHS_PRICE_AMT));
 			claimLine.providerNPI = claimLineRecord.get(DMEClaimGroup.Column.PRVDR_NPI);
+			claimLine.pricingStateCode = parseOptString(
+					claimLineRecord.get(DMEClaimGroup.Column.DMERC_LINE_PRCNG_STATE_CD));
 			claimLine.providerStateCode = claimLineRecord.get(DMEClaimGroup.Column.PRVDR_STATE_CD);
+			claimLine.supplierTypeCode = parseOptCharacter(
+					claimLineRecord.get(DMEClaimGroup.Column.DMERC_LINE_SUPPLR_TYPE_CD));
+			claimLine.screenSavingsAmount = parseDecimal(
+					claimLineRecord.get(DMEClaimGroup.Column.DMERC_LINE_SCRN_SVGS_AMT));
 			claimLine.mtusCount = parseDecimal(claimLineRecord.get(DMEClaimGroup.Column.DMERC_LINE_MTUS_CNT));
-			claimLine.mtusCode = parseCharacter(claimLineRecord.get(DMEClaimGroup.Column.DMERC_LINE_MTUS_CD));
+			claimLine.mtusCode = parseOptCharacter(claimLineRecord.get(DMEClaimGroup.Column.DMERC_LINE_MTUS_CD));
+			claimLine.hctHgbTestResult = parseDecimal(claimLineRecord.get(DMEClaimGroup.Column.LINE_HCT_HGB_RSLT_NUM));
+			claimLine.hctHgbTestTypeCode = parseOptString(
+					claimLineRecord.get(DMEClaimGroup.Column.LINE_HCT_HGB_TYPE_CD));
 			claimLine.nationalDrugCode = parseOptString(claimLineRecord.get(DMEClaimGroup.Column.LINE_NDC_CD));
 
 			claimGroup.lines.add(claimLine);

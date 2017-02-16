@@ -109,7 +109,7 @@ public final class DMEClaimGroup {
 	/**
 	 * @see Column#CARR_CLM_PRVDR_ASGNMT_IND_SW
 	 */
-	public Character providerAssignmentIndicator;
+	public Optional<Character> providerAssignmentIndicator;
 
 	/**
 	 * @see Column#NCH_CLM_PRVDR_PMT_AMT
@@ -139,7 +139,7 @@ public final class DMEClaimGroup {
 	/**
 	 * @see Column#CARR_CLM_HCPCS_YR_CD
 	 */
-	public Character hcpcsYearCode;
+	public Optional<Character> hcpcsYearCode;
 
 	/**
 	 * @see Column#PRNCPAL_DGNS_CD
@@ -260,12 +260,12 @@ public final class DMEClaimGroup {
 		/**
 		 * @see Column#PRVDR_SPCLTY
 		 */
-		public String providerSpecialityCode;
+		public Optional<String> providerSpecialityCode;
 
 		/**
 		 * @see Column#PRTCPTNG_IND_CD
 		 */
-		public Character providerParticipatingIndCode;
+		public Optional<Character> providerParticipatingIndCode;
 
 		/**
 		 * @see Column#LINE_SRVC_CNT
@@ -306,16 +306,6 @@ public final class DMEClaimGroup {
 		 * @see Column#HCPCS_2ND_MDFR_CD
 		 */
 		public Optional<String> hcpcsSecondModifierCode;
-
-		/**
-		 * @see Column#HCPCS_3RD_MDFR_CD
-		 */
-		public Optional<String> hcpcsThirdModifierCode;
-
-		/**
-		 * @see Column#HCPCS_4TH_MDFR_CD
-		 */
-		public Optional<String> hcpcsFourthModifierCode;
 		
 		/**
 		 * @see Column#BETOS_CD
@@ -375,17 +365,17 @@ public final class DMEClaimGroup {
 		/**
 		 * @see Column#LINE_PRCSG_IND_CD
 		 */
-		public String processingIndicatorCode;
+		public Optional<String> processingIndicatorCode;
 
 		/**
 		 * @see Column#LINE_PMT_80_100_CD
 		 */
-		public Character paymentCode;
+		public Optional<Character> paymentCode;
 
 		/**
 		 * @see Column#LINE_SERVICE_DEDUCTIBLE
 		 */
-		public Character serviceDeductibleCode;
+		public Optional<Character> serviceDeductibleCode;
 
 		/**
 		 * @see Column#LINE_ICD_DGNS_CD
@@ -404,9 +394,34 @@ public final class DMEClaimGroup {
 		public String providerNPI;
 
 		/**
+		 * @see Column#DMERC_LINE_PRCNG_STATE_CD
+		 */
+		public Optional<String> pricingStateCode;
+
+		/**
 		 * @see Column#PRVDR_STATE_CD
 		 */
 		public String providerStateCode;
+
+		/**
+		 * @see Column#DMERC_LINE_SUPPLR_TYPE_CD
+		 */
+		public Optional<Character> supplierTypeCode;
+
+		/**
+		 * @see Column#HCPCS_3RD_MDFR_CD
+		 */
+		public Optional<String> hcpcsThirdModifierCode;
+
+		/**
+		 * @see Column#HCPCS_4TH_MDFR_CD
+		 */
+		public Optional<String> hcpcsFourthModifierCode;
+
+		/**
+		 * @see Column#DMERC_LINE_SCRN_SVGS_AMT
+		 */
+		public BigDecimal screenSavingsAmount;
 
 		/**
 		 * @see Column#DMERC_LINE_MTUS_CNT
@@ -416,7 +431,17 @@ public final class DMEClaimGroup {
 		/**
 		 * @see Column#DMERC_LINE_MTUS_CD
 		 */
-		public Character mtusCode;
+		public Optional<Character> mtusCode;
+
+		/**
+		 * @see Column#LINE_HCT_HGB_RSLT_NUM
+		 */
+		public BigDecimal hctHgbTestResult;
+
+		/**
+		 * @see Column#LINE_HCT_HGB_TYPE_CD
+		 */
+		public Optional<String> hctHgbTestTypeCode;
 
 		/**
 		 * @see Column#LINE_NDC_CD
@@ -453,10 +478,6 @@ public final class DMEClaimGroup {
 			builder.append(hcpcsInitialModifierCode);
 			builder.append(", hcpcsSecondModifierCode=");
 			builder.append(hcpcsSecondModifierCode);
-			builder.append(", hcpcsThirdModifierCode=");
-			builder.append(hcpcsThirdModifierCode);
-			builder.append(", hcpcsFourthModifierCode=");
-			builder.append(hcpcsFourthModifierCode);
 			builder.append(", betosCode=");
 			builder.append(betosCode);
 			builder.append(", paymentAmount=");
@@ -491,12 +512,26 @@ public final class DMEClaimGroup {
 			builder.append(purchasePriceAmount);
 			builder.append(", providerNPI=");
 			builder.append(providerNPI);
+			builder.append(", pricingStateCode=");
+			builder.append(pricingStateCode);
 			builder.append(", providerStateCode=");
 			builder.append(providerStateCode);
+			builder.append(", supplierTypeCode=");
+			builder.append(supplierTypeCode);
+			builder.append(", hcpcsThirdModifierCode=");
+			builder.append(hcpcsThirdModifierCode);
+			builder.append(", hcpcsFourthModifierCode=");
+			builder.append(hcpcsFourthModifierCode);
+			builder.append(", screenSavingsAmount=");
+			builder.append(screenSavingsAmount);
 			builder.append(", mtusCount=");
 			builder.append(mtusCount);
 			builder.append(", mtusCode=");
 			builder.append(mtusCode);
+			builder.append(", hctHgbTestResult=");
+			builder.append(hctHgbTestResult);
+			builder.append(", hctHgbTestTypeCode=");
+			builder.append(hctHgbTestTypeCode);
 			builder.append(", nationalDrugCode=");
 			builder.append(nationalDrugCode);
 			builder.append("]");
@@ -612,7 +647,8 @@ public final class DMEClaimGroup {
 		 */
 		CARR_CLM_PRMRY_PYR_PD_AMT,
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt">
 		 * CCW Data Dictionary: ASGMNTCD</a>.
 		 */
@@ -653,7 +689,8 @@ public final class DMEClaimGroup {
 		CARR_CLM_CASH_DDCTBL_APLD_AMT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_yr.txt">
 		 * CCW Data Dictionary: HCPCS_YR</a>.
 		 */
@@ -878,14 +915,16 @@ public final class DMEClaimGroup {
 		TAX_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 3 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt">
 		 * CCW Data Dictionary: HCFASPCL</a>.
 		 */
 		PRVDR_SPCLTY,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt">
 		 * CCW Data Dictionary: PRTCPTG</a>.
 		 */
@@ -1030,21 +1069,24 @@ public final class DMEClaimGroup {
 		LINE_ALOWD_CHRG_AMT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt">
 		 * CCW Data Dictionary: PRCNGIND</a>.
 		 */
 		LINE_PRCSG_IND_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt">
 		 * CCW Data Dictionary: PMTINDSW</a>.
 		 */
 		LINE_PMT_80_100_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt">
 		 * CCW Data Dictionary: DED_SW</a>.
 		 */
@@ -1086,7 +1128,8 @@ public final class DMEClaimGroup {
 		PRVDR_NPI,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_st.txt">
 		 * CCW Data Dictionary: PRCNG_ST</a>.
 		 */
@@ -1100,7 +1143,10 @@ public final class DMEClaimGroup {
 		PRVDR_STATE_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt">
+		 * CCW Data Dictionary: SUP_TYPE</a>.
 		 */
 		DMERC_LINE_SUPPLR_TYPE_CD,
 
@@ -1119,7 +1165,9 @@ public final class DMEClaimGroup {
 		HCPCS_4TH_MDFR_CD,
 
 		/**
-		 * NOT MAPPED
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/scrnsvgs.txt">
+		 * CCW Data Dictionary: SCRNSVGS</a>.
 		 */
 		DMERC_LINE_SCRN_SVGS_AMT,
 
@@ -1131,7 +1179,8 @@ public final class DMEClaimGroup {
 		DMERC_LINE_MTUS_CNT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/unit_ind.txt">
 		 * CCW Data Dictionary: UNIT_IND</a>.
 		 */

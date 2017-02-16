@@ -97,6 +97,8 @@ public final class DataTransformer {
 
 	static final String EXTENSION_CMS_DIAGNOSIS_LINK_ID = "http://bluebutton.cms.hhs.gov/extensions#diagnosisLinkId";
 
+	static final BigDecimal ZERO = new BigDecimal(0);
+
 	static final String COVERAGE_PLAN = "Medicare";
 
 	/**
@@ -126,6 +128,8 @@ public final class DataTransformer {
 	 * Healthcare Common Procedure Coding System</a>.
 	 */
 	static final String CODING_SYSTEM_HCPCS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_cd.txt";
+
+	static final String CODING_SYSTEM_HCPCS_YR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_yr.txt";
 
 	static final String HCPCS_INITIAL_MODIFIER_CODE1 = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mdfr_cd1.txt";
 
@@ -188,6 +192,20 @@ public final class DataTransformer {
 	public static final String CODING_SYSTEM_FREQUENCY_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt";
 
 	public static final String CODING_SYSTEM_PRIMARY_PAYER_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt";
+
+	public static final String CODING_SYSTEM_PRICING_STATE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_st.txt";
+
+	public static final String CODING_SYSTEM_SUPPLIER_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt";
+
+	public static final String CODING_SYSTEM_SCREEN_SAVINGS_AMT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/scrnsvgs.txt";
+
+	public static final String CODING_SYSTEM_MTUS_COUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_cnt.txt";
+
+	public static final String CODING_SYSTEM_MTUS_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_ind.txt";
+
+	public static final String CODING_SYSTEM_HCT_HGB_TEST_RESULTS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbrs.txt";
+
+	public static final String CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt";
 
 	public static final String CODING_SYSTEM_MCO_PAID_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mcopdsw.txt";
 
@@ -285,9 +303,15 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prv_type.txt";
 
-	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt";
+	static final String CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt";
 
-	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
+	static final String CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
+
+	static final String CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt";
+
+	static final String CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
+
+	static final String CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt";
 
 	static final String CODING_SYSTEM_CCW_CARR_CLAIM_DISPOSITION = "Debit accepted";
 
@@ -331,54 +355,49 @@ public final class DataTransformer {
 
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
-	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Line Beneficiary Primary Payer Paid Amount";
+	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Beneficiary Primary Payer Paid Amount";
 
-	static final String CODED_ADJUDICATION_PAYMENT = "Line NCH Payment Amount";
+	static final String CODED_ADJUDICATION_PAYMENT = "NCH Payment Amount";
 
-	static final String CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT = "Line Payment Amount to Beneficiary";
+	static final String CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT = "Payment Amount to Beneficiary";
 
-	static final String CODED_ADJUDICATION_DEDUCTIBLE = "Line Beneficiary Deductible Amount";
+	static final String CODED_ADJUDICATION_DEDUCTIBLE = "Beneficiary Deductible Amount";
 
-	static final String CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT = "Line Primary Payer Paid Amount";
+	static final String CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT = "Primary Payer Paid Amount";
 
-	static final String CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT = "Line Coinsurance Amount";
+	static final String CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT = "Coinsurance Amount";
 
-	static final String CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE = "Line Primary Payer Allowed Charge Amount";
+	static final String CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE = "Primary Payer Allowed Charge Amount";
 
-	static final String CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT = "Line Submitted Charge Amount";
+	static final String CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT = "Submitted Charge Amount";
 
-	static final String CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT = "Line Purchase Price Amount";
+	static final String CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT = "Purchase Price Amount";
 
-	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Line Allowed Charge Amount";
+	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Allowed Charge Amount";
 
-	static final String CODED_ADJUDICATION_PASS_THRU_PER_DIEM_AMOUNT = "Line Allowed Charge Amount";
+	static final String CODED_ADJUDICATION_PASS_THRU_PER_DIEM_AMOUNT = "Allowed Charge Amount";
 
-	static final String CODED_ADJUDICATION_BLOOD_DEDUCTIBLE = "Line Blood Deductible Amount";
+	static final String CODED_ADJUDICATION_BLOOD_DEDUCTIBLE = "Blood Deductible Amount";
 
-	static final String CODED_ADJUDICATION_CASH_DEDUCTIBLE = "Line Cash Deductible Amount";
+	static final String CODED_ADJUDICATION_CASH_DEDUCTIBLE = "Cash Deductible Amount";
 
-	static final String CODED_ADJUDICATION_WAGE_ADJ_COINSURANCE_AMOUNT = "Line Wage Adj Coinsurance Amount";
+	static final String CODED_ADJUDICATION_WAGE_ADJ_COINSURANCE_AMOUNT = "Wage Adj Coinsurance Amount";
 
-	static final String CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT = "Line Reduced Coinsurance Amount";
+	static final String CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT = "Reduced Coinsurance Amount";
 
-	static final String CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT = "Line Provider Payment Amount";
+	static final String CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT = "Provider Payment Amount";
 
-	static final String CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT = "Line Patient Responsibility Amount";
+	static final String CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT = "Patient Responsibility Amount";
 
-	static final String CODED_ADJUDICATION_PROFESSIONAL_COMP_CHARGE = "Line Professional Component Charge Amount";
+	static final String CODED_ADJUDICATION_PROFESSIONAL_COMP_CHARGE = "Professional Component Charge Amount";
 
-	static final String CODED_ADJUDICATION_NONCOVERED_CHARGE = "Line Noncovered Charge";
+	static final String CODED_ADJUDICATION_NONCOVERED_CHARGE = "Noncovered Charge";
 
-	static final String CODED_ADJUDICATION_TOTAL_DEDUCTION_AMOUNT = "Line Total Deduction Amount";
+	static final String CODED_ADJUDICATION_TOTAL_DEDUCTION_AMOUNT = "Total Deduction Amount";
 
-	static final String CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT = "Line Total Charge Amount";
+	static final String CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT = "Total Charge Amount";
 
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprvpmt.txt">
-	 * CCW Data Dictionary: LPRVPMT</a>.
-	 */
-	static final String CODED_ADJUDICATION_PAYMENT_B = "Line Provider Payment Amount";
+	static final String CODED_ADJUDICATION_PAYMENT_B = "Provider Payment Amount";
 
 	static final String CODED_ADJUDICATION_PASS_THROUGH_PER_DIEM_AMOUNT = "Claim Pass Thru Per Diem Amount";
 
@@ -890,11 +909,6 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
 				.setSystem(CODING_SYSTEM_RX_DAW_PRODUCT_CD).setCode(record.dispenseAsWrittenProductSelectionCode)));
 
-		if (record.dispensingStatusCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_DISPENSE_STATUS_CD)
-							.setCode(String.valueOf(record.dispensingStatusCode.get()))));
-
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
 				new Coding().setSystem(CODING_SYSTEM_RX_COVERAGE_STATUS_CD)
 						.setCode(String.valueOf(record.drugCoverageStatusCode))));
@@ -1000,8 +1014,59 @@ public final class DataTransformer {
 			eob.setReferral(new Reference(referral));
 		}
 
-		addExtensionCoding(eob, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
-				"" + claimGroup.providerAssignmentIndicator);
+		if (claimGroup.providerAssignmentIndicator.isPresent()) {
+			addExtensionCoding(eob, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+					String.valueOf(claimGroup.providerAssignmentIndicator.get()));
+		}
+
+		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
+				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+		eob.getBenefitBalance().add(benefitBalances);
+
+		if (!claimGroup.providerPaymentAmount.equals(ZERO)) {
+			BenefitComponent providerPaymentAmount = new BenefitComponent(
+					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_PAYMENT_B));
+			providerPaymentAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.providerPaymentAmount));
+			benefitBalances.getFinancial().add(providerPaymentAmount);
+		}
+
+		if (!claimGroup.beneficiaryPaymentAmount.equals(ZERO)) {
+			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(new Coding()
+					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
+			beneficiaryPaymentAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPaymentAmount));
+			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
+		}
+
+		if (!claimGroup.submittedChargeAmount.equals(ZERO)) {
+			BenefitComponent submittedChargeAmount = new BenefitComponent(
+					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
+			submittedChargeAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.submittedChargeAmount));
+			benefitBalances.getFinancial().add(submittedChargeAmount);
+		}
+
+		if (!claimGroup.allowedChargeAmount.equals(ZERO)) {
+			BenefitComponent allowedChargeAmount = new BenefitComponent(
+					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_ALLOWED_CHARGE));
+			allowedChargeAmount
+					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.allowedChargeAmount));
+			benefitBalances.getFinancial().add(allowedChargeAmount);
+		}
+
+		if (!claimGroup.beneficiaryPartBDeductAmount.equals(ZERO)) {
+			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(new Coding()
+					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
+			beneficiaryPartBDeductAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPartBDeductAmount));
+			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
+		}
+
+		if (claimGroup.hcpcsYearCode.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+					.setSystem(CODING_SYSTEM_HCPCS_YR).setCode(String.valueOf(claimGroup.hcpcsYearCode.get()))));
+		}
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
@@ -1040,6 +1105,17 @@ public final class DataTransformer {
 			if (claimLine.providerZipCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PROVIDER_ZIP_CD)
 						.setValue(new StringType(claimLine.providerZipCode.get()));
+			}
+
+			if (claimLine.providerSpecialityCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
+						CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD, claimLine.providerSpecialityCode.get());
+			}
+
+			if (claimLine.providerParticipatingIndCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
+						CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
+						String.valueOf(claimLine.providerParticipatingIndCode.get()));
 			}
 
 			item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
@@ -1096,6 +1172,11 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.beneficiaryPartBDeductAmount);
 
+			if (claimLine.primaryPayerCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_PRIMARY_PAYER_CD, CODING_SYSTEM_PRIMARY_PAYER_CD,
+						String.valueOf(claimLine.primaryPayerCode.get()));
+			}
+
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
 							.setCode(CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
@@ -1120,7 +1201,43 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.allowedChargeAmount);
 
+			if (claimLine.processingIndicatorCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD,
+						CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD, claimLine.processingIndicatorCode.get());
+			}
+
+			if (claimLine.paymentCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD,
+						CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD, String.valueOf(claimLine.paymentCode.get()));
+			}
+
+			if (claimLine.serviceDeductibleCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
+						CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
+						String.valueOf(claimLine.serviceDeductibleCode.get()));
+			}
+
+			if (claimLine.mtusCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_MTUS_CD, CODING_SYSTEM_MTUS_CD,
+						String.valueOf(claimLine.mtusCode.get()));
+			}
+
+			if (!claimLine.mtusCount.equals(ZERO)) {
+				addExtensionCoding(item, CODING_SYSTEM_MTUS_COUNT, CODING_SYSTEM_MTUS_COUNT,
+						String.valueOf(claimLine.mtusCount));
+			}
+
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
+
+			if (!claimLine.hctHgbTestResult.equals(ZERO)) {
+				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_RESULTS, CODING_SYSTEM_HCT_HGB_TEST_RESULTS,
+						String.valueOf(claimLine.hctHgbTestResult));
+			}
+
+			if (claimLine.hctHgbTestTypeCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD,
+						claimLine.hctHgbTestTypeCode.get());
+			}
 
 			if (claimLine.nationalDrugCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_NDC)
@@ -2697,6 +2814,56 @@ public final class DataTransformer {
 			eob.setReferral(new Reference(referral));
 		}
 
+		if (claimGroup.providerAssignmentIndicator.isPresent()) {
+			addExtensionCoding(eob, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+					String.valueOf(claimGroup.providerAssignmentIndicator.get()));
+		}
+
+		if (!claimGroup.providerPaymentAmount.equals(ZERO)) {
+			BenefitComponent providerPaymentAmount = new BenefitComponent(
+					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_PAYMENT_B));
+			providerPaymentAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.providerPaymentAmount));
+			benefitBalances.getFinancial().add(providerPaymentAmount);
+		}
+
+		if (!claimGroup.beneficiaryPaymentAmount.equals(ZERO)) {
+			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(new Coding()
+					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
+			beneficiaryPaymentAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPaymentAmount));
+			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
+		}
+
+		if (!claimGroup.submittedChargeAmount.equals(ZERO)) {
+			BenefitComponent submittedChargeAmount = new BenefitComponent(
+					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
+			submittedChargeAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.submittedChargeAmount));
+			benefitBalances.getFinancial().add(submittedChargeAmount);
+		}
+
+		if (!claimGroup.allowedChargeAmount.equals(ZERO)) {
+			BenefitComponent allowedChargeAmount = new BenefitComponent(
+					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_ALLOWED_CHARGE));
+			allowedChargeAmount
+					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.allowedChargeAmount));
+			benefitBalances.getFinancial().add(allowedChargeAmount);
+		}
+
+		if (!claimGroup.beneficiaryPartBDeductAmount.equals(ZERO)) {
+			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(new Coding()
+					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
+			beneficiaryPartBDeductAmount.setBenefit(
+					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPartBDeductAmount));
+			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
+		}
+
+		if (claimGroup.hcpcsYearCode.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
+					.setSystem(CODING_SYSTEM_HCPCS_YR).setCode(String.valueOf(claimGroup.hcpcsYearCode.get()))));
+		}
+
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
@@ -2708,22 +2875,33 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
+			if (claimLine.providerSpecialityCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
+						CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
+						claimLine.providerSpecialityCode.get());
+			}
+
+			if (claimLine.providerParticipatingIndCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
+						CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
+						String.valueOf(claimLine.providerParticipatingIndCode.get()));
+			}
+
 			DetailComponent detail = new DetailComponent();
 			detail.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
 					.setValue(new StringType(CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 			item.addDetail(detail);
 
-			if (!claimLine.providerStateCode.isEmpty()) {
-				item.addExtension().setUrl(CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD)
-						.setValue(new StringType(claimLine.providerStateCode));
-			}
-
 			item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
 					.setCode(claimLine.cmsServiceTypeCode));
 
 			item.setLocation(
 					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
+			if (!claimLine.providerStateCode.isEmpty()) {
+				addExtensionCoding(item.getLocation(), CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
+						CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, claimLine.providerStateCode);
+			}
 
 			item.setServiced(new Period()
 					.setStart((convertToDate(claimLine.firstExpenseDate)),
@@ -2741,15 +2919,6 @@ public final class DataTransformer {
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
 						.setCode(claimLine.hcpcsSecondModifierCode.get()));
-			}
-
-			if (claimLine.hcpcsThirdModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE3)
-						.setCode(claimLine.hcpcsThirdModifierCode.get()));
-			}
-			if (claimLine.hcpcsFourthModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE4)
-						.setCode(claimLine.hcpcsFourthModifierCode.get()));
 			}
 
 			if (claimLine.betosCode.isPresent()) {
@@ -2785,6 +2954,12 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.beneficiaryPartBDeductAmount);
 
+			if (claimLine.primaryPayerCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_PRIMARY_PAYER_CD,
+						CODING_SYSTEM_PRIMARY_PAYER_CD,
+						String.valueOf(claimLine.primaryPayerCode.get()));
+			}
+
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
 							.setCode(CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
@@ -2815,6 +2990,22 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.allowedChargeAmount);
 
+			if (claimLine.processingIndicatorCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD,
+						CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD, claimLine.processingIndicatorCode.get());
+			}
+
+			if (claimLine.paymentCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD,
+						CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD, String.valueOf(claimLine.paymentCode.get()));
+			}
+
+			if (claimLine.serviceDeductibleCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
+						CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
+						String.valueOf(claimLine.serviceDeductibleCode.get()));
+			}
+
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
 
 			item.addAdjudication()
@@ -2822,6 +3013,50 @@ public final class DataTransformer {
 							.setCode(CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.purchasePriceAmount);
+
+			if (claimLine.pricingStateCode.isPresent()) {
+				addExtensionCoding(item.getLocation(), CODING_SYSTEM_PRICING_STATE_CD, CODING_SYSTEM_PRICING_STATE_CD,
+						claimLine.pricingStateCode.get());
+			}
+
+			if (claimLine.supplierTypeCode.isPresent()) {
+				addExtensionCoding(item.getLocation(), CODING_SYSTEM_SUPPLIER_TYPE_CD, CODING_SYSTEM_SUPPLIER_TYPE_CD,
+						String.valueOf(claimLine.supplierTypeCode.get()));
+			}
+
+			if (claimLine.hcpcsThirdModifierCode.isPresent()) {
+				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE3)
+						.setCode(claimLine.hcpcsThirdModifierCode.get()));
+			}
+			if (claimLine.hcpcsFourthModifierCode.isPresent()) {
+				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE4)
+						.setCode(claimLine.hcpcsFourthModifierCode.get()));
+			}
+
+			if (!claimLine.screenSavingsAmount.equals(ZERO)) {
+				addExtensionCoding(item, CODING_SYSTEM_SCREEN_SAVINGS_AMT, CODING_SYSTEM_SCREEN_SAVINGS_AMT,
+						String.valueOf(claimLine.screenSavingsAmount));
+			}
+
+			if (claimLine.mtusCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_MTUS_CD, CODING_SYSTEM_MTUS_CD,
+						String.valueOf(claimLine.mtusCode.get()));
+			}
+
+			if (!claimLine.mtusCount.equals(ZERO)) {
+				addExtensionCoding(item, CODING_SYSTEM_MTUS_COUNT, CODING_SYSTEM_MTUS_COUNT,
+						String.valueOf(claimLine.mtusCount));
+			}
+
+			if (!claimLine.hctHgbTestResult.equals(ZERO)) {
+				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_RESULTS, CODING_SYSTEM_HCT_HGB_TEST_RESULTS,
+						String.valueOf(claimLine.hctHgbTestResult));
+			}
+
+			if (claimLine.hctHgbTestTypeCode.isPresent()) {
+				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD,
+						claimLine.hctHgbTestTypeCode.get());
+			}
 
 			if (claimLine.nationalDrugCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_NDC)
