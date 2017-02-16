@@ -499,11 +499,13 @@ public final class DataTransformerTest {
 		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
 
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
-		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
-
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
+		Assert.assertEquals(1, eobItem0.getModifier().size());
+		assertCodingEquals(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, "" + record.hcpcsYearCode,
+				recordLine1.hcpcsInitialModifierCode.get(),
+				eobItem0.getModifier().get(0));
+
 		Assert.assertEquals(recordLine1.betosCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_BETOS).get(0).getValue())
 						.getValue());
@@ -1503,7 +1505,23 @@ public final class DataTransformerTest {
 	 *            the actual {@link Coding} to verify
 	 */
 	private static void assertCodingEquals(String expectedSystem, String expectedCode, Coding actual) {
+		assertCodingEquals(expectedSystem, null, expectedCode, actual);
+	}
+
+	/**
+	 * @param expectedSystem
+	 *            the expected {@link Coding#getSystem()} value
+	 * @param expectedVersion
+	 *            the expected {@link Coding#getVersion()} value
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()} value
+	 * @param actual
+	 *            the actual {@link Coding} to verify
+	 */
+	private static void assertCodingEquals(String expectedSystem, String expectedVersion, String expectedCode,
+			Coding actual) {
 		Assert.assertEquals(expectedSystem, actual.getSystem());
+		Assert.assertEquals(expectedVersion, actual.getVersion());
 		Assert.assertEquals(expectedCode, actual.getCode());
 	}
 

@@ -1091,14 +1091,17 @@ public final class DataTransformer {
 							TemporalPrecisionEnum.DAY));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setVersion("" + claimGroup.hcpcsYearCode)
+						.setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
+				item.addModifier(
+						new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1).setVersion("" + claimGroup.hcpcsYearCode)
 						.setCode(claimLine.hcpcsInitialModifierCode.get()));
 			}
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
+						.setVersion("" + claimGroup.hcpcsYearCode)
 						.setCode(claimLine.hcpcsSecondModifierCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
