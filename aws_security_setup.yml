@@ -16,7 +16,7 @@
 #       have access to the data encrypted in this sandbox environment.
 ##
 
-- name: Create Encrypted RHEL AMI
+- name: Configure AWS Security
   hosts: localhost
   connection: local
   gather_facts: false
