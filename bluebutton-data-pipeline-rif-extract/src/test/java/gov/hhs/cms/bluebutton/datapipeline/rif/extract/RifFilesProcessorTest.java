@@ -292,7 +292,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "H12345"), claimLine.diagnosis);
 		Assert.assertFalse(claimLine.hpsaScarcityCode.isPresent());
 		Assert.assertFalse(claimLine.rxNumber.isPresent());
-		Assert.assertEquals(new BigDecimal("775"), claimLine.hctHgbTestResult);
+		Assert.assertEquals(new BigDecimal("42.0"), claimLine.hctHgbTestResult);
 		Assert.assertEquals("R1", claimLine.hctHgbTestTypeCode.get());
 		Assert.assertEquals("777666666", claimLine.nationalDrugCode.get());
 		Assert.assertFalse(claimLine.cliaLabNumber.isPresent());
@@ -807,7 +807,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("1", claimGroup.paymentDenialCode);
 		Assert.assertEquals(new BigDecimal("777.75"), claimGroup.paymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.primaryPayerPaidAmount);
-		Assert.assertEquals(new Character('A'), claimGroup.providerAssignmentIndicator.get());
+		Assert.assertEquals(new Character('A'), claimGroup.providerAssignmentIndicator);
 		Assert.assertEquals(new BigDecimal("666.75"), claimGroup.providerPaymentAmount);
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.beneficiaryPaymentAmount);
 		Assert.assertEquals(new BigDecimal("1752.75"), claimGroup.submittedChargeAmount);

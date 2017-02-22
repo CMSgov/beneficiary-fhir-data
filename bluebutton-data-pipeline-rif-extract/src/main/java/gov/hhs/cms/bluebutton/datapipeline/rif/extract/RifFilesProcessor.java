@@ -1352,7 +1352,7 @@ public final class RifFilesProcessor {
 		claimGroup.paymentAmount = parseDecimal(firstClaimLine.get(DMEClaimGroup.Column.CLM_PMT_AMT));
 		claimGroup.primaryPayerPaidAmount = parseDecimal(
 				firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_PRMRY_PYR_PD_AMT));
-		claimGroup.providerAssignmentIndicator = parseOptCharacter(
+		claimGroup.providerAssignmentIndicator = parseCharacter(
 				firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_PRVDR_ASGNMT_IND_SW));
 		claimGroup.providerPaymentAmount = parseDecimal(firstClaimLine.get(DMEClaimGroup.Column.NCH_CLM_PRVDR_PMT_AMT));
 		claimGroup.beneficiaryPaymentAmount = parseDecimal(

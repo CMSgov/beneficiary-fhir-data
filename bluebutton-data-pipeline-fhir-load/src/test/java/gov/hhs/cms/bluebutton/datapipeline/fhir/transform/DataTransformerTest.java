@@ -23,17 +23,23 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
@@ -466,10 +472,6 @@ public final class DataTransformerTest {
 								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE))
 						.findFirst().get().getBenefitMoney().getValue());
 
-		Assert.assertEquals(String.valueOf(record.hcpcsYearCode.get()), eob.getInformation().stream()
-				.filter(bb -> bb.getCategory().getSystem().equalsIgnoreCase(DataTransformer.CODING_SYSTEM_HCPCS_YR))
-				.findFirst().get().getCategory().getCode());
-
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		Assert.assertEquals(record.clinicalTrialNumber.get(),
@@ -482,8 +484,17 @@ public final class DataTransformerTest {
 				((StringType) eobItem0.getDetail().get(0)
 				.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).get(0).getValue()).getValue());
 
-		Assert.assertEquals(recordLine1.performingPhysicianNpi.get(),
-				eobItem0.getCareTeam().get(0).getProviderIdentifier().getValue());
+		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(
+				recordLine1.performingPhysicianNpi.get(), eobItem0.getCareTeam());
+		Assert.assertNotNull(performingCareTeamEntry);
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
+		assertExtensionCodingEquals(performingCareTeamEntry, DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD, "" + recordLine1.providerTypeCode);
+		assertExtensionCodingEquals(performingCareTeamEntry,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				"" + recordLine1.providerParticipatingIndCode.get());
 		Assert.assertEquals(recordLine1.organizationNpi.get(),
 				eobItem0.getCareTeam().get(1).getProviderIdentifier().getValue());
 
@@ -495,12 +506,7 @@ public final class DataTransformerTest {
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_ZIP_CD).get(0)
 						.getValue()).getValue());
 
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
-				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD, recordLine1.providerSpecialityCode.get());
-
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-				String.valueOf(recordLine1.providerParticipatingIndCode.get()));
+		Assert.assertEquals(recordLine1.serviceCount, eobItem0.getQuantity().getValue());
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, recordLine1.cmsServiceTypeCode,
 				eobItem0.getCategory());
@@ -513,16 +519,30 @@ public final class DataTransformerTest {
 		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
 
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
-		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
-
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
+				recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
+		Assert.assertEquals(1, eobItem0.getModifier().size());
+		assertCodingEquals(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, "" + record.hcpcsYearCode.get(),
+				recordLine1.hcpcsInitialModifierCode.get(),
+				eobItem0.getModifier().get(0));
+
 		Assert.assertEquals(recordLine1.betosCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_BETOS).get(0).getValue())
 						.getValue());
+
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH, "" + recordLine1.serviceDeductibleCode.get());
+
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT, recordLine1.paymentAmount,
 				eobItem0.getAdjudication());
+		AdjudicationComponent adjudicationForPayment = eobItem0.getAdjudication().stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> DataTransformer.CODED_ADJUDICATION_PAYMENT.equals(a.getCategory().getCode())).findAny()
+				.get();
+		assertExtensionCodingEquals(adjudicationForPayment,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH, "" + recordLine1.paymentCode.get());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
 				recordLine1.beneficiaryPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT_B, recordLine1.providerPaymentAmount,
@@ -538,26 +558,36 @@ public final class DataTransformerTest {
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE, recordLine1.allowedChargeAmount,
 				eobItem0.getAdjudication());
 
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD,
-				DataTransformer.CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD, recordLine1.processingIndicatorCode.get());
-
 		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_MTUS_CD,
 				DataTransformer.CODING_SYSTEM_MTUS_CD, String.valueOf(recordLine1.mtusCode.get()));
 
 		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_MTUS_COUNT,
 				DataTransformer.CODING_SYSTEM_MTUS_COUNT, String.valueOf(recordLine1.mtusCount));
 
+		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_PHYSICIAN_ASSISTANT,
+				DataTransformer.CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION,
+				"" + recordLine1.reducedPaymentPhysicianAsstCode,
+				eobItem0.getAdjudication());
+		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR, recordLine1.processingIndicatorCode.get(),
+				eobItem0.getAdjudication());
+
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
-
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_RESULTS,
-				DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_RESULTS, String.valueOf(recordLine1.hctHgbTestResult));
-
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD,
-				DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD, recordLine1.hctHgbTestTypeCode.get());
 
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_NDC).get(0).getValue())
 						.getValue());
+
+		List<Extension> hctHgbObservationExtension = eobItem0
+				.getExtensionsByUrl(DataTransformer.EXTENSION_CMS_HCT_OR_HGB_RESULTS);
+		Assert.assertEquals(1, hctHgbObservationExtension.size());
+		Assert.assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
+		Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
+		Assert.assertTrue(hctHgbReference.getResource() instanceof Observation);
+		Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE, recordLine1.hctHgbTestTypeCode.get(),
+				hctHgbObservation.getCode().getCodingFirstRep());
+		Assert.assertEquals(recordLine1.hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
 	}
 
 	/**
@@ -1588,21 +1618,20 @@ public final class DataTransformerTest {
 								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE))
 						.findFirst().get().getBenefitMoney().getValue());
 
-		Assert.assertEquals(String.valueOf(record.hcpcsYearCode.get()), eob.getInformation().stream()
-				.filter(bb -> bb.getCategory().getSystem().equalsIgnoreCase(DataTransformer.CODING_SYSTEM_HCPCS_YR))
-				.findFirst().get().getCategory().getCode());
-
 		Assert.assertEquals(3, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 		
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
-				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD, recordLine1.providerSpecialityCode.get());
-
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-				String.valueOf(recordLine1.providerParticipatingIndCode.get()));
+		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI,
+				eobItem0.getCareTeam());
+		Assert.assertNotNull(performingCareTeamEntry);
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
+		assertExtensionCodingEquals(performingCareTeamEntry,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				"" + recordLine1.providerParticipatingIndCode.get());
 
 		Assert.assertEquals(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS,
 				((StringType) eobItem0.getDetail().get(0)
@@ -1626,7 +1655,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
+				recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 		Assert.assertEquals(recordLine1.betosCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_BETOS).get(0).getValue())
@@ -1671,12 +1701,6 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_MTUS_COUNT,
 				DataTransformer.CODING_SYSTEM_MTUS_COUNT, String.valueOf(recordLine1.mtusCount));
 
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_RESULTS,
-				DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_RESULTS, String.valueOf(recordLine1.hctHgbTestResult));
-
-		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD,
-				DataTransformer.CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD, recordLine1.hctHgbTestTypeCode.get());
-
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_NDC).get(0).getValue())
 						.getValue());
@@ -1704,6 +1728,32 @@ public final class DataTransformerTest {
 	}
 
 	/**
+	 * @param expectedProviderNpi
+	 *            the {@link Identifier#getValue()} of the provider to find a
+	 *            matching {@link CareTeamComponent} for
+	 * @param careTeam
+	 *            the {@link List} of {@link CareTeamComponent}s to search
+	 * @return the {@link CareTeamComponent} whose
+	 *         {@link CareTeamComponent#getProvider()} is an {@link Identifier}
+	 *         with the specified provider NPI, or else <code>null</code> if no
+	 *         such {@link CareTeamComponent} was found
+	 */
+	private static CareTeamComponent findCareTeamEntryForProviderIdentifier(String expectedProviderNpi,
+			List<CareTeamComponent> careTeam) {
+		Optional<CareTeamComponent> careTeamEntry = careTeam.stream()
+				.filter(ctc -> ctc.getProvider() instanceof Identifier).filter(ctc -> {
+					try {
+						return DataTransformer.CODING_SYSTEM_NPI_US.equals(ctc.getProviderIdentifier().getSystem())
+								&& expectedProviderNpi.equals(ctc.getProviderIdentifier().getValue());
+					} catch (FHIRException e) {
+						// Won't happen, due to preceding filter.
+						throw new BadCodeMonkeyException(e);
+					}
+				}).findFirst();
+		return careTeamEntry.orElse(null);
+	}
+
+	/**
 	 * @param expected
 	 *            the expected {@link LocalDate}
 	 * @param actual
@@ -1723,7 +1773,23 @@ public final class DataTransformerTest {
 	 *            the actual {@link Coding} to verify
 	 */
 	private static void assertCodingEquals(String expectedSystem, String expectedCode, Coding actual) {
+		assertCodingEquals(expectedSystem, null, expectedCode, actual);
+	}
+
+	/**
+	 * @param expectedSystem
+	 *            the expected {@link Coding#getSystem()} value
+	 * @param expectedVersion
+	 *            the expected {@link Coding#getVersion()} value
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()} value
+	 * @param actual
+	 *            the actual {@link Coding} to verify
+	 */
+	private static void assertCodingEquals(String expectedSystem, String expectedVersion, String expectedCode,
+			Coding actual) {
 		Assert.assertEquals(expectedSystem, actual.getSystem());
+		Assert.assertEquals(expectedVersion, actual.getVersion());
 		Assert.assertEquals(expectedCode, actual.getCode());
 	}
 
@@ -1761,6 +1827,29 @@ public final class DataTransformerTest {
 				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		Assert.assertEquals(expectedAmount, adjudication.get().getAmount().getValue());
+	}
+
+	/**
+	 * @param expectedCategoryCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link AdjudicationComponent#getCategory()} to find and verify
+	 * @param expectedReasonSystem
+	 *            the expected {@link Coding#getSystem()} of the
+	 *            {@link AdjudicationComponent#getReason()} to find and verify
+	 * @param expectedReasonCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link AdjudicationComponent#getReason()} to find and verify
+	 * @param actuals
+	 *            the actual {@link AdjudicationComponent}s to verify
+	 */
+	private static void assertAdjudicationReasonEquals(String expectedCategoryCode, String expectedReasonSystem,
+			String expectedReasonCode, List<AdjudicationComponent> actuals) {
+		Optional<AdjudicationComponent> adjudication = actuals.stream()
+				.filter(a -> DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS.equals(a.getCategory().getSystem()))
+				.filter(a -> expectedCategoryCode.equals(a.getCategory().getCode())).findAny();
+		Assert.assertTrue(adjudication.isPresent());
+		Assert.assertEquals(expectedReasonSystem, adjudication.get().getReason().getSystem());
+		Assert.assertEquals(expectedReasonCode, adjudication.get().getReason().getCode());
 	}
 
 	/**

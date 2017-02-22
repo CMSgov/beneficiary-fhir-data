@@ -25,6 +25,7 @@ import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DetailComponent;
@@ -37,6 +38,8 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
@@ -96,6 +99,8 @@ public final class DataTransformer {
 	static final String EXTENSION_CMS_ATTENDING_PHYSICIAN = "http://bluebutton.cms.hhs.gov/extensions#attendingPhysician";
 
 	static final String EXTENSION_CMS_DIAGNOSIS_LINK_ID = "http://bluebutton.cms.hhs.gov/extensions#diagnosisLinkId";
+
+	static final String EXTENSION_CMS_HCT_OR_HGB_RESULTS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbrs.txt";
 
 	static final BigDecimal ZERO = new BigDecimal(0);
 
@@ -169,6 +174,10 @@ public final class DataTransformer {
 	 * {@link Adjudication}s.
 	 */
 	static final String CODING_SYSTEM_ADJUDICATION_CMS = "CMS Adjudications";
+
+	static final String CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/astnt_cd.txt";
+
+	static final String CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt";
 
 	static final String CODING_REVENUE_CENTER_RENDER_PHY_NPI = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rndrng_physn_npi.txt";
 
@@ -303,9 +312,9 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prv_type.txt";
 
-	static final String CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt";
+	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt";
 
-	static final String CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
+	static final String CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
 
 	static final String CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt";
 
@@ -353,6 +362,12 @@ public final class DataTransformer {
 
 	static final String CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
+	static final String CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt";
+
+	static final String CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
+
+	static final String CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt";
+
 	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
 	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Beneficiary Primary Payer Paid Amount";
@@ -375,7 +390,9 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Allowed Charge Amount";
 
-	static final String CODED_ADJUDICATION_PASS_THRU_PER_DIEM_AMOUNT = "Allowed Charge Amount";
+	static final String CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR = "Line Processing Indicator Code";
+
+	static final String CODED_ADJUDICATION_PASS_THRU_PER_DIEM_AMOUNT = "Line Allowed Charge Amount";
 
 	static final String CODED_ADJUDICATION_BLOOD_DEDUCTIBLE = "Blood Deductible Amount";
 
@@ -395,7 +412,9 @@ public final class DataTransformer {
 
 	static final String CODED_ADJUDICATION_TOTAL_DEDUCTION_AMOUNT = "Total Deduction Amount";
 
-	static final String CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT = "Total Charge Amount";
+	static final String CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT = "Line Total Charge Amount";
+
+	static final String CODED_ADJUDICATION_PHYSICIAN_ASSISTANT = "Carrier Line Reduced Payment Physician Assistant Code";
 
 	static final String CODED_ADJUDICATION_PAYMENT_B = "Provider Payment Amount";
 
@@ -909,6 +928,11 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
 				.setSystem(CODING_SYSTEM_RX_DAW_PRODUCT_CD).setCode(record.dispenseAsWrittenProductSelectionCode)));
 
+		if (record.dispensingStatusCode.isPresent())
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					new Coding().setSystem(CODING_SYSTEM_RX_DISPENSE_STATUS_CD)
+							.setCode(String.valueOf(record.dispensingStatusCode.get()))));
+
 		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
 				new Coding().setSystem(CODING_SYSTEM_RX_COVERAGE_STATUS_CD)
 						.setCode(String.valueOf(record.drugCoverageStatusCode))));
@@ -1063,11 +1087,6 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
 		}
 
-		if (claimGroup.hcpcsYearCode.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-					.setSystem(CODING_SYSTEM_HCPCS_YR).setCode(String.valueOf(claimGroup.hcpcsYearCode.get()))));
-		}
-
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
@@ -1088,11 +1107,48 @@ public final class DataTransformer {
 			item.addDetail(detail);
 
 			if (claimLine.performingPhysicianNpi.isPresent()) {
-				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
-						.setProvider(new Identifier().setValue(claimLine.performingPhysicianNpi.get())));
+				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = new ExplanationOfBenefit.CareTeamComponent();
+				performingCareTeamMember.setProvider(new Identifier().setSystem(CODING_SYSTEM_NPI_US)
+						.setValue(claimLine.performingPhysicianNpi.get()));
+				performingCareTeamMember.setResponsible(true);
+
+				/*
+				 * The provider's "specialty" and "type" code are equivalent.
+				 * However, the "specialty" codes are more granular, and seem to
+				 * better match the example FHIR
+				 * `http://hl7.org/fhir/ex-providerqualification` code set.
+				 * Accordingly, we map the "specialty" codes to the
+				 * `qualification` field here, and stick the "type" code into an
+				 * extension. TODO: suggest that the spec allows more than one
+				 * `qualification` entry.
+				 */
+				performingCareTeamMember
+						.setQualification(new Coding().setSystem(CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD)
+								.setCode("" + claimLine.providerSpecialityCode.get()));
+				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD,
+						CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD, "" + claimLine.providerTypeCode);
+
+				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+						CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+						"" + claimLine.providerParticipatingIndCode.get());
+
+				item.addCareTeam(performingCareTeamMember);
+			} else {
+				/*
+				 * Per Michelle at GDIT, and also Tony Dean at OEDA, the
+				 * performing provider should always be present. I think the
+				 * field is only optional because it wasn't used until the
+				 * switch to NPIs in 2007.
+				 */
+				throw new BadCodeMonkeyException(String
+						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
 			}
 
 			if (claimLine.organizationNpi.isPresent()) {
+				/*
+				 * FIXME This is mis-mapped: it's really an attribute of the
+				 * performing provider.
+				 */
 				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
 						.setProvider(new Identifier().setValue(claimLine.organizationNpi.get())));
 			}
@@ -1107,25 +1163,23 @@ public final class DataTransformer {
 						.setValue(new StringType(claimLine.providerZipCode.get()));
 			}
 
-			if (claimLine.providerSpecialityCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
-						CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD, claimLine.providerSpecialityCode.get());
-			}
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_PHYSICIAN_ASSISTANT))
+					.setReason(new Coding().setSystem(CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION)
+							.setCode("" + claimLine.reducedPaymentPhysicianAsstCode));
 
-			if (claimLine.providerParticipatingIndCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-						CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-						String.valueOf(claimLine.providerParticipatingIndCode.get()));
-			}
+			SimpleQuantity serviceCount = new SimpleQuantity();
+			serviceCount.setValue(claimLine.serviceCount);
+			item.setQuantity(serviceCount);
 
 			item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
 					.setCode(claimLine.cmsServiceTypeCode));
 
 			item.setLocation(
 					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
-			addExtensionCoding(item.getLocation(),
-					CODING_SYSTEM_CCW_PRICING_LOCALITY, CODING_SYSTEM_CCW_PRICING_LOCALITY,
-					claimLine.linePricingLocalityCode);
+			addExtensionCoding(item.getLocation(), CODING_SYSTEM_CCW_PRICING_LOCALITY,
+					CODING_SYSTEM_CCW_PRICING_LOCALITY, claimLine.linePricingLocalityCode);
 
 			item.setServiced(new Period()
 					.setStart(convertToDate((claimLine.firstExpenseDate)),
@@ -1134,25 +1188,36 @@ public final class DataTransformer {
 							TemporalPrecisionEnum.DAY));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.setService(
+						new Coding().setSystem(CODING_SYSTEM_HCPCS).setVersion("" + claimGroup.hcpcsYearCode.get())
+						.setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
+				item.addModifier(
+						new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
+								.setVersion("" + claimGroup.hcpcsYearCode.get())
 						.setCode(claimLine.hcpcsInitialModifierCode.get()));
 			}
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
+						.setVersion("" + claimGroup.hcpcsYearCode.get())
 						.setCode(claimLine.hcpcsSecondModifierCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
 			}
 
-			item.addAdjudication()
+			addExtensionCoding(item, CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH, CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH,
+					"" + claimLine.serviceDeductibleCode.get());
+
+			AdjudicationComponent adjudicationForPayment = item.addAdjudication();
+			adjudicationForPayment
 					.setCategory(
 							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.paymentAmount);
+			addExtensionCoding(adjudicationForPayment, CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH,
+					CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH, "" + claimLine.paymentCode.get());
 
 			item.addAdjudication()
 					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
@@ -1201,22 +1266,6 @@ public final class DataTransformer {
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.allowedChargeAmount);
 
-			if (claimLine.processingIndicatorCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD,
-						CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD, claimLine.processingIndicatorCode.get());
-			}
-
-			if (claimLine.paymentCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD,
-						CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD, String.valueOf(claimLine.paymentCode.get()));
-			}
-
-			if (claimLine.serviceDeductibleCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
-						CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
-						String.valueOf(claimLine.serviceDeductibleCode.get()));
-			}
-
 			if (claimLine.mtusCode.isPresent()) {
 				addExtensionCoding(item, CODING_SYSTEM_MTUS_CD, CODING_SYSTEM_MTUS_CD,
 						String.valueOf(claimLine.mtusCode.get()));
@@ -1227,23 +1276,39 @@ public final class DataTransformer {
 						String.valueOf(claimLine.mtusCount));
 			}
 
+			item.addAdjudication()
+					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+							.setCode(CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR))
+					.setReason(new Coding().setSystem(CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR)
+							.setCode(claimLine.processingIndicatorCode.get()));
+
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
-
-			if (!claimLine.hctHgbTestResult.equals(ZERO)) {
-				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_RESULTS, CODING_SYSTEM_HCT_HGB_TEST_RESULTS,
-						String.valueOf(claimLine.hctHgbTestResult));
-			}
-
-			if (claimLine.hctHgbTestTypeCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD,
-						claimLine.hctHgbTestTypeCode.get());
-			}
 
 			if (claimLine.nationalDrugCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_NDC)
 						.setValue(new StringType(claimLine.nationalDrugCode.get()));
 			}
 
+			if (claimLine.hctHgbTestTypeCode.isPresent()
+					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) != 0) {
+				Observation hctHgbObservation = new Observation();
+				hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
+				CodeableConcept hctHgbTestType = new CodeableConcept();
+				hctHgbTestType.addCoding().setSystem(CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE)
+						.setCode(claimLine.hctHgbTestTypeCode.get());
+				hctHgbObservation.setCode(hctHgbTestType);
+				hctHgbObservation.setValue(new Quantity().setValue(claimLine.hctHgbTestResult));
+				item.addExtension()
+						.setUrl(EXTENSION_CMS_HCT_OR_HGB_RESULTS)
+						.setValue(new Reference(hctHgbObservation));
+			} else if (!claimLine.hctHgbTestTypeCode.isPresent()
+					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
+				// Nothing to do here; don't map a non-existent Observation.
+			} else {
+				throw new BadCodeMonkeyException(String.format(
+						"Inconsistent hctHgbTestTypeCode and hctHgbTestResult" + " values for claim '%s'.",
+						claimGroup.claimId));
+			}
 		}
 
 		insert(bundle, eob);
@@ -2814,10 +2879,8 @@ public final class DataTransformer {
 			eob.setReferral(new Reference(referral));
 		}
 
-		if (claimGroup.providerAssignmentIndicator.isPresent()) {
-			addExtensionCoding(eob, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
-					String.valueOf(claimGroup.providerAssignmentIndicator.get()));
-		}
+		addExtensionCoding(eob, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+					String.valueOf(claimGroup.providerAssignmentIndicator));
 
 		if (!claimGroup.providerPaymentAmount.equals(ZERO)) {
 			BenefitComponent providerPaymentAmount = new BenefitComponent(
@@ -2859,10 +2922,6 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
 		}
 
-		if (claimGroup.hcpcsYearCode.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-					.setSystem(CODING_SYSTEM_HCPCS_YR).setCode(String.valueOf(claimGroup.hcpcsYearCode.get()))));
-		}
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
@@ -2875,16 +2934,40 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
-			if (claimLine.providerSpecialityCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
-						CODING_SYSTEM_CCW_PROVIDER_SPECIALTY_CD,
-						claimLine.providerSpecialityCode.get());
-			}
+			if (!claimLine.providerNPI.isEmpty()) {
+				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = new ExplanationOfBenefit.CareTeamComponent();
+				performingCareTeamMember
+						.setProvider(new Identifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimLine.providerNPI));
+				performingCareTeamMember.setResponsible(true);
 
-			if (claimLine.providerParticipatingIndCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-						CODING_SYSTEM_CCW_PROVIDER_PARTICIPATING_CD,
-						String.valueOf(claimLine.providerParticipatingIndCode.get()));
+				/*
+				 * The provider's "specialty" and "type" code are equivalent.
+				 * However, the "specialty" codes are more granular, and seem to
+				 * better match the example FHIR
+				 * `http://hl7.org/fhir/ex-providerqualification` code set.
+				 * Accordingly, we map the "specialty" codes to the
+				 * `qualification` field here, and stick the "type" code into an
+				 * extension. TODO: suggest that the spec allows more than one
+				 * `qualification` entry.
+				 */
+				performingCareTeamMember
+						.setQualification(new Coding().setSystem(CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD)
+								.setCode("" + claimLine.providerSpecialityCode.get()));
+
+				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+						CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+						"" + claimLine.providerParticipatingIndCode.get());
+
+				item.addCareTeam(performingCareTeamMember);
+			} else {
+				/*
+				 * Per Michelle at GDIT, and also Tony Dean at OEDA, the
+				 * performing provider should always be present. I think the
+				 * field is only optional because it wasn't used until the
+				 * switch to NPIs in 2007.
+				 */
+				throw new BadCodeMonkeyException(String
+						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
 			}
 
 			DetailComponent detail = new DetailComponent();
@@ -2910,24 +2993,24 @@ public final class DataTransformer {
 							TemporalPrecisionEnum.DAY));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.setService(
+						new Coding().setSystem(CODING_SYSTEM_HCPCS).setVersion("" + claimGroup.hcpcsYearCode.get())
+						.setCode(claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
+				item.addModifier(
+						new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
+								.setVersion("" + claimGroup.hcpcsYearCode.get())
 						.setCode(claimLine.hcpcsInitialModifierCode.get()));
 			}
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
+						.setVersion("" + claimGroup.hcpcsYearCode.get())
 						.setCode(claimLine.hcpcsSecondModifierCode.get()));
 			}
 
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
-			}
-
-			if (!claimLine.providerNPI.isEmpty()) {
-				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
-						.setProvider(new Identifier().setValue(claimLine.providerNPI)));
 			}
 
 			item.addAdjudication()
@@ -3026,10 +3109,12 @@ public final class DataTransformer {
 
 			if (claimLine.hcpcsThirdModifierCode.isPresent()) {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE3)
+						.setVersion("" + claimGroup.hcpcsYearCode.get())
 						.setCode(claimLine.hcpcsThirdModifierCode.get()));
 			}
 			if (claimLine.hcpcsFourthModifierCode.isPresent()) {
 				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE4)
+						.setVersion("" + claimGroup.hcpcsYearCode.get())
 						.setCode(claimLine.hcpcsFourthModifierCode.get()));
 			}
 
@@ -3048,14 +3133,23 @@ public final class DataTransformer {
 						String.valueOf(claimLine.mtusCount));
 			}
 
-			if (!claimLine.hctHgbTestResult.equals(ZERO)) {
-				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_RESULTS, CODING_SYSTEM_HCT_HGB_TEST_RESULTS,
-						String.valueOf(claimLine.hctHgbTestResult));
-			}
-
-			if (claimLine.hctHgbTestTypeCode.isPresent()) {
-				addExtensionCoding(item, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD, CODING_SYSTEM_HCT_HGB_TEST_TYPE_CD,
-						claimLine.hctHgbTestTypeCode.get());
+			if (claimLine.hctHgbTestTypeCode.isPresent()
+					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) != 0) {
+				Observation hctHgbObservation = new Observation();
+				hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
+				CodeableConcept hctHgbTestType = new CodeableConcept();
+				hctHgbTestType.addCoding().setSystem(CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE)
+						.setCode(claimLine.hctHgbTestTypeCode.get());
+				hctHgbObservation.setCode(hctHgbTestType);
+				hctHgbObservation.setValue(new Quantity().setValue(claimLine.hctHgbTestResult));
+				item.addExtension().setUrl(EXTENSION_CMS_HCT_OR_HGB_RESULTS).setValue(new Reference(hctHgbObservation));
+			} else if (!claimLine.hctHgbTestTypeCode.isPresent()
+					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
+				// Nothing to do here; don't map a non-existent Observation.
+			} else {
+				throw new BadCodeMonkeyException(String.format(
+						"Inconsistent hctHgbTestTypeCode and hctHgbTestResult" + " values for claim '%s'.",
+						claimGroup.claimId));
 			}
 
 			if (claimLine.nationalDrugCode.isPresent()) {

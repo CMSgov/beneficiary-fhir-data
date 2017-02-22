@@ -109,7 +109,7 @@ public final class DMEClaimGroup {
 	/**
 	 * @see Column#CARR_CLM_PRVDR_ASGNMT_IND_SW
 	 */
-	public Optional<Character> providerAssignmentIndicator;
+	public Character providerAssignmentIndicator;
 
 	/**
 	 * @see Column#NCH_CLM_PRVDR_PMT_AMT
