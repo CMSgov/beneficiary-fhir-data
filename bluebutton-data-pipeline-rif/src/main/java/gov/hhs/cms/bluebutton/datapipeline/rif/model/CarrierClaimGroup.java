@@ -119,7 +119,7 @@ public final class CarrierClaimGroup {
 	/**
 	 * @see Column#CARR_CLM_PRVDR_ASGNMT_IND_SW
 	 */
-	public Character providerAssignmentIndicator;
+	public Optional<Character> providerAssignmentIndicator;
 
 	/**
 	 * @see Column#NCH_CLM_PRVDR_PMT_AMT
@@ -149,7 +149,7 @@ public final class CarrierClaimGroup {
 	/**
 	 * @see Column#CARR_CLM_HCPCS_YR_CD
 	 */
-	public Character hcpcsYearCode;
+	public Optional<Character> hcpcsYearCode;
 
 	/**
 	 * @see Column#CARR_CLM_RFRNG_PIN_NUM
@@ -308,12 +308,12 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#PRVDR_SPCLTY
 		 */
-		public String providerSpecialityCode;
+		public Optional<String> providerSpecialityCode;
 
 		/**
 		 * @see Column#PRTCPTNG_IND_CD
 		 */
-		public Character providerParticipatingIndCode;
+		public Optional<Character> providerParticipatingIndCode;
 
 		/**
 		 * @see Column#CARR_LINE_RDCD_PMT_PHYS_ASTN_C
@@ -418,17 +418,17 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#LINE_PRCSG_IND_CD
 		 */
-		public String processingIndicatorCode;
+		public Optional<String> processingIndicatorCode;
 
 		/**
 		 * @see Column#LINE_PMT_80_100_CD
 		 */
-		public Character paymentCode;
+		public Optional<Character> paymentCode;
 
 		/**
 		 * @see Column#LINE_SERVICE_DEDUCTIBLE
 		 */
-		public Character serviceDeductibleCode;
+		public Optional<Character> serviceDeductibleCode;
 
 		/**
 		 * @see Column#CARR_LINE_MTUS_CNT
@@ -438,7 +438,7 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#CARR_LINE_MTUS_CD
 		 */
-		public Character mtusCode;
+		public Optional<Character> mtusCode;
 
 		/**
 		 * @see Column#LINE_ICD_DGNS_CD
@@ -706,7 +706,8 @@ public final class CarrierClaimGroup {
 		RFR_PHYSN_NPI,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt">
 		 * CCW Data Dictionary: ASGMNTCD</a>.
 		 */
@@ -748,7 +749,8 @@ public final class CarrierClaimGroup {
 		CARR_CLM_CASH_DDCTBL_APLD_AMT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcpcs_yr.txt">
 		 * CCW Data Dictionary: HCPCS_YR</a>.
 		 */
@@ -1019,14 +1021,16 @@ public final class CarrierClaimGroup {
 		PRVDR_ZIP,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 3. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 3 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt">
 		 * CCW Data Dictionary: HCFASPCL</a>.
 		 */
 		PRVDR_SPCLTY,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt">
 		 * CCW Data Dictionary: PRTCPTG</a>.
 		 */
@@ -1178,21 +1182,24 @@ public final class CarrierClaimGroup {
 		LINE_ALOWD_CHRG_AMT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 2. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 2 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt">
 		 * CCW Data Dictionary: PRCNGIND</a>.
 		 */
 		LINE_PRCSG_IND_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt">
 		 * CCW Data Dictionary: PMTINDSW</a>.
 		 */
 		LINE_PMT_80_100_CD,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt">
 		 * CCW Data Dictionary: DED_SW</a>.
 		 */
@@ -1206,7 +1213,8 @@ public final class CarrierClaimGroup {
 		CARR_LINE_MTUS_CNT,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_ind.txt">
 		 * CCW Data Dictionary: MTUS_IND</a>.
 		 */

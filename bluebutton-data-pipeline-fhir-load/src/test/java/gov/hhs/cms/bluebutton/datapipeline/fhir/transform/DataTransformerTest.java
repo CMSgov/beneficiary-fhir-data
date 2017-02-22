@@ -454,6 +454,24 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
 				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
 
+		Assert.assertEquals(record.providerPaymentAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.submittedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.allowedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE))
+						.findFirst().get().getBenefitMoney().getValue());
+
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		Assert.assertEquals(record.clinicalTrialNumber.get(),
@@ -470,13 +488,13 @@ public final class DataTransformerTest {
 				recordLine1.performingPhysicianNpi.get(), eobItem0.getCareTeam());
 		Assert.assertNotNull(performingCareTeamEntry);
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
-				recordLine1.providerSpecialityCode, performingCareTeamEntry.getQualification());
+				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
 		assertExtensionCodingEquals(performingCareTeamEntry, DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD, "" + recordLine1.providerTypeCode);
 		assertExtensionCodingEquals(performingCareTeamEntry,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
-				"" + recordLine1.providerParticipatingIndCode);
+				"" + recordLine1.providerParticipatingIndCode.get());
 		Assert.assertEquals(recordLine1.organizationNpi.get(),
 				eobItem0.getCareTeam().get(1).getProviderIdentifier().getValue());
 
@@ -501,10 +519,11 @@ public final class DataTransformerTest {
 		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode, recordLine1.hcpcsCode.get(),
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
+				recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 		Assert.assertEquals(1, eobItem0.getModifier().size());
-		assertCodingEquals(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, "" + record.hcpcsYearCode,
+		assertCodingEquals(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, "" + record.hcpcsYearCode.get(),
 				recordLine1.hcpcsInitialModifierCode.get(),
 				eobItem0.getModifier().get(0));
 
@@ -513,7 +532,7 @@ public final class DataTransformerTest {
 						.getValue());
 
 		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH,
-				DataTransformer.CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH, "" + recordLine1.serviceDeductibleCode);
+				DataTransformer.CODING_SYSTEM_CMS_LINE_DEDUCTIBLE_SWITCH, "" + recordLine1.serviceDeductibleCode.get());
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT, recordLine1.paymentAmount,
 				eobItem0.getAdjudication());
@@ -523,7 +542,7 @@ public final class DataTransformerTest {
 				.get();
 		assertExtensionCodingEquals(adjudicationForPayment,
 				DataTransformer.CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH,
-				DataTransformer.CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH, "" + recordLine1.paymentCode);
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH, "" + recordLine1.paymentCode.get());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
 				recordLine1.beneficiaryPaymentAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_PAYMENT_B, recordLine1.providerPaymentAmount,
@@ -538,13 +557,21 @@ public final class DataTransformerTest {
 				recordLine1.submittedChargeAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE, recordLine1.allowedChargeAmount,
 				eobItem0.getAdjudication());
+
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_MTUS_CD,
+				DataTransformer.CODING_SYSTEM_MTUS_CD, String.valueOf(recordLine1.mtusCode.get()));
+
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_MTUS_COUNT,
+				DataTransformer.CODING_SYSTEM_MTUS_COUNT, String.valueOf(recordLine1.mtusCount));
+
 		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_PHYSICIAN_ASSISTANT,
 				DataTransformer.CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION,
 				"" + recordLine1.reducedPaymentPhysicianAsstCode,
 				eobItem0.getAdjudication());
 		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR,
-				DataTransformer.CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR, recordLine1.processingIndicatorCode,
+				DataTransformer.CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR, recordLine1.processingIndicatorCode.get(),
 				eobItem0.getAdjudication());
+
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
 
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),
@@ -1570,11 +1597,42 @@ public final class DataTransformerTest {
 				DataTransformer.referencePractitioner(record.referringPhysicianNpi.get()).getReference(),
 				referrerEntry.getRequest().getUrl());
 
+		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
+
+		Assert.assertEquals(record.providerPaymentAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.submittedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
+						.findFirst().get().getBenefitMoney().getValue());
+
+		Assert.assertEquals(record.allowedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial().stream()
+						.filter(bb -> bb.getType().getCode()
+								.equalsIgnoreCase(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE))
+						.findFirst().get().getBenefitMoney().getValue());
+
 		Assert.assertEquals(3, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 		
+		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI,
+				eobItem0.getCareTeam());
+		Assert.assertNotNull(performingCareTeamEntry);
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
+		assertExtensionCodingEquals(performingCareTeamEntry,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+				"" + recordLine1.providerParticipatingIndCode.get());
+
 		Assert.assertEquals(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS,
 				((StringType) eobItem0.getDetail().get(0)
 						.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).get(0).getValue())
@@ -1582,9 +1640,8 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(recordLine1.providerNPI, eobItem0.getCareTeam().get(0).getProviderIdentifier().getValue());
 
-		Assert.assertEquals(recordLine1.providerStateCode,
-				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD)
-						.get(0).getValue()).getValue());
+		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
+				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, recordLine1.providerStateCode);
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, recordLine1.cmsServiceTypeCode,
 				eobItem0.getCategory());
@@ -1598,7 +1655,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
+				recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 		Assert.assertEquals(recordLine1.betosCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_BETOS).get(0).getValue())
@@ -1622,10 +1680,26 @@ public final class DataTransformerTest {
 				recordLine1.submittedChargeAmount, eobItem0.getAdjudication());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE, recordLine1.allowedChargeAmount,
 				eobItem0.getAdjudication());
+
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD,
+				DataTransformer.CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD, recordLine1.processingIndicatorCode.get());
+
 		assertDiagnosisLinkPresent(recordLine1.diagnosis, eob, eobItem0);
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT,
 				recordLine1.purchasePriceAmount, eobItem0.getAdjudication());
+
+		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_PRICING_STATE_CD,
+				DataTransformer.CODING_SYSTEM_PRICING_STATE_CD, recordLine1.pricingStateCode.get());
+
+		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_SUPPLIER_TYPE_CD,
+				DataTransformer.CODING_SYSTEM_SUPPLIER_TYPE_CD, String.valueOf(recordLine1.supplierTypeCode.get()));
+
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_MTUS_CD,
+				DataTransformer.CODING_SYSTEM_MTUS_CD, String.valueOf(recordLine1.mtusCode.get()));
+
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_MTUS_COUNT,
+				DataTransformer.CODING_SYSTEM_MTUS_COUNT, String.valueOf(recordLine1.mtusCount));
 
 		Assert.assertEquals(recordLine1.nationalDrugCode.get(),
 				((StringType) eobItem0.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_NDC).get(0).getValue())
