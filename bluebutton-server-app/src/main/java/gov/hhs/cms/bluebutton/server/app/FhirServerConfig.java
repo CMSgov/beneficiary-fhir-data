@@ -75,6 +75,16 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
+	// /**
+	// * @see ca.uhn.fhir.jpa.config.BaseConfig#scheduledExecutorService()
+	// */
+	// @Override
+	// public ScheduledExecutorFactoryBean scheduledExecutorService() {
+	// ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
+	// b.setPoolSize(1);
+	// return b;
+	// }
+
 	/**
 	 * @see ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3#resourceDaosDstu3()
 	 */
