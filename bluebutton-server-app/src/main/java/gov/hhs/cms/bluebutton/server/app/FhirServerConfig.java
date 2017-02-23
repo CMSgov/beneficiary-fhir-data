@@ -7,7 +7,6 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -27,7 +26,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -108,9 +106,10 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
-		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(5000);
-		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
+		retVal.setSchedulingDisabled(true);
+		retVal.setSubscriptionEnabled(false);
+		// retVal.setSubscriptionPollDelay(5000);
+		// retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
 		return retVal;
 	}
@@ -235,12 +234,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IServerInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
-		return retVal;
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor subscriptionSecurityInterceptor() {
-		SubscriptionsRequireManualActivationInterceptorDstu3 retVal = new SubscriptionsRequireManualActivationInterceptorDstu3();
 		return retVal;
 	}
 
