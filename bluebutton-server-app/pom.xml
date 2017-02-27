@@ -114,7 +114,7 @@
 			<!-- The Blue Button API runs against PostgreSQL in production. -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4-1206-jdbc42</version>
+			<version>42.0.0</version>
 		</dependency>
 
 		<dependency>
