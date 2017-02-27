@@ -157,7 +157,17 @@ waitForServerReady
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
 echo "Configuring server (everything else)..."
 cat <<EOF |
+# Set applications to use SLF4J for the logging, rather than JBoss' builtin 
+# logger. See jboss-deployment-structure.xml for details.
+if (outcome == success) of /system-property=org.jboss.logging.provider:read-resource
+	/system-property=org.jboss.logging.provider:remove
+end-if
+/system-property=org.jboss.logging.provider:add(value="slf4j")
+
 # Set the Java system properties that are required to configure the FHIR server.
+if (outcome == success) of /system-property=bbfhir.logs.dir:read-resource
+	/system-property=bbfhir.logs.dir:remove
+end-if
 if (outcome == success) of /system-property=bbfhir.db.url:read-resource
 	/system-property=bbfhir.db.url:remove
 end-if
@@ -167,6 +177,7 @@ end-if
 if (outcome == success) of /system-property=bbfhir.db.password:read-resource
 	/system-property=bbfhir.db.password:remove
 end-if
+/system-property=bbfhir.logs.dir:add(value=".")
 /system-property=bbfhir.db.url:add(value="${dbUrl}")
 /system-property=bbfhir.db.username:add(value="${dbUsername}")
 /system-property=bbfhir.db.password:add(value="${dbPassword}")

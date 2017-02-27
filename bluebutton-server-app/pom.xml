@@ -44,15 +44,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- HAPI-FHIR uses Logback for logging support. The logback library is 
-				included automatically by Maven as a part of the hapi-fhir-base dependency, 
-				but you also need to include a logging library. Logback is used here, but 
-				log4j would also be fine. -->
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Needed for JEE/Servlet support -->
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -89,11 +80,34 @@
 		</dependency>
 
 		<dependency>
-			<!-- You may not need this if you are deploying to an application server 
-				which provides database connection pools itself. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-dbcp2</artifactId>
-			<version>2.1.1</version>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
+				for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>2.5.1</version>
+		</dependency>
+
+		<dependency>
+			<!-- Logging backend for WAR/application. Note: due to an incompatibility 
+				between Hibernate 5 and Wildfly 8, this application can't use Wildfly's logging 
+				and instead has to handle its own logging separately. See `jboss-deployment-structure.xml` 
+				for more details. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+				at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides a Servlet filter which has meters for status codes, a counter 
+				for the number of active requests, and a timer for request duration. Enabled 
+				via `web.xml`. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-servlet</artifactId>
 		</dependency>
 
 		<dependency>

@@ -7,8 +7,12 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.hl7.fhir.dstu3.model.Meta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.codahale.metrics.MetricRegistry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -41,6 +45,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  */
 public class BlueButtonServer extends RestfulServer {
 	private static final long serialVersionUID = 1L;
+
+	static final Logger LOGGER = LoggerFactory.getLogger(BlueButtonServer.class);
 
 	private WebApplicationContext myAppCtx;
 
@@ -168,5 +174,12 @@ public class BlueButtonServer extends RestfulServer {
 		for (IServerInterceptor interceptor : interceptorBeans) {
 			this.registerInterceptor(interceptor);
 		}
+
+		/*
+		 * Bind the MetricRegistry, so that `InstrumentedFilter` (configured in
+		 * web.xml) can work.
+		 */
+		this.getServletContext().setAttribute("com.codahale.metrics.servlet.InstrumentedFilter.registry",
+				myAppCtx.getBean(MetricRegistry.class));
 	}
 }
