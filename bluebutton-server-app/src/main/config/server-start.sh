@@ -12,6 +12,12 @@ configArtifact='bluebutton-server-app-server-config.sh'
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Check to see if we are running in Cygwin.
+case "$( uname )" in
+	CYGWIN*) cygwin=true ;;
+	*) cygwin=false ;;
+esac
+
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
 	-o j:m:v:d:k:t:u:n:p: \
@@ -57,6 +63,8 @@ while true; do
 	esac
 done
 
+#echo "javaHome: '${javaHome}', maxHeapArg: '${maxHeapArg}', visualVm: '${visualVm}', directory: '${directory}', keyStore: '${keyStore}', trustStore: '${trustStore}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
+
 # Verify that all required options were specified.
 if [[ -z "${directory}" ]]; then >&2 echo 'The --directory option is required.'; exit 1; fi
 if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; exit 1; fi
@@ -66,8 +74,12 @@ if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.
 if [[ -z "${javaHome}" ]]; then
 	command -v java >/dev/null 2>&1 || { echo >&2 "Java not found. Specify --javahome option."; exit 1; }
 else
+	if [[ "${cygwin}" = true ]]; then javaHome=$(cygpath --unix "${javaHome}"); fi
 	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in --javahome: '${javaHome}'"; exit 1; }
 fi
+
+# Munge paths for Cygwin.
+if [[ "${cygwin}" = true ]]; then directory=$(cygpath --unix "${directory}"); fi
 
 # Exit immediately if something fails.
 error() {
