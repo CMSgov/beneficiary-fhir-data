@@ -764,26 +764,26 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(new BigDecimal(record.coinsuranceDayCount),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(new BigDecimal(record.nonUtilizationDayCount),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(new BigDecimal(record.bloodPintsFurnishedQty),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(record.nchDrugOutlierApprovedPaymentAmount.get(),
@@ -817,11 +817,12 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI).get(0)
 						.getValue()).getValue());
 
-		Assert.assertEquals(String.valueOf(record.diagnosisRelatedGroupCd.get()),
+		assertHasCoding(DataTransformer.CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD,
+				String.valueOf(record.diagnosisRelatedGroupCd.get()),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD))
-						.findFirst().get().getCategory().getCode());
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD))
+						.findFirst().get().getCategory());
 
 		Assert.assertEquals(9, eob.getDiagnosis().size());
 
@@ -1219,66 +1220,67 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(new BigDecimal(record.coinsuranceDayCount),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(new BigDecimal(record.nonUtilizationDayCount),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(new BigDecimal(record.bloodPintsFurnishedQty),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
 						.findFirst().get().getValueQuantity().getValue());
 
 		assertDateEquals(record.qualifiedStayFromDate.get(),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
 						.findFirst().get().getTimingPeriod().getStartElement());
 
 		assertDateEquals(record.qualifiedStayThroughDate.get(),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
 						.findFirst().get().getTimingPeriod().getEndElement());
 
 		assertDateEquals(record.noncoveredStayFromDate.get(),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
 						.findFirst().get().getTimingPeriod().getStartElement());
 
 		assertDateEquals(record.noncoveredStayThroughDate.get(),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
 						.findFirst().get().getTimingPeriod().getEndElement());
 
 		Assert.assertEquals(record.medicareBenefitsExhaustedDate.get().toString(),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
 						.findFirst().get().getTiming().primitiveValue());
 
 		assertDateEquals(record.claimAdmissionDate.get(), eob.getHospitalization().getStartElement());
 		assertDateEquals(record.beneficiaryDischargeDate.get(), eob.getHospitalization().getEndElement());
 
-		Assert.assertEquals(String.valueOf(record.diagnosisRelatedGroupCd.get()),
+		assertHasCoding(DataTransformer.CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD,
+				String.valueOf(record.diagnosisRelatedGroupCd.get()),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD))
-						.findFirst().get().getCategory().getCode());
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD))
+						.findFirst().get().getCategory());
 
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(record.procedureCodes.get(0).getCode(),
@@ -1375,16 +1377,16 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 		
-		Assert.assertEquals(String.valueOf(record.patientStatusCd.get()),
+		assertHasCoding(DataTransformer.CODING_SYSTEM_PATIENT_STATUS_CD, String.valueOf(record.patientStatusCd.get()),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_PATIENT_STATUS_CD))
-						.findFirst().get().getCategory().getCode());
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_PATIENT_STATUS_CD))
+						.findFirst().get().getCategory());
 
 		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
 				eob.getInformation().stream()
-						.filter(bb -> bb.getCategory().getSystem()
-								.equalsIgnoreCase(DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
+								DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 						.findFirst().get().getValueQuantity().getValue());
 
 		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
