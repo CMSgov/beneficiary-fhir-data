@@ -1022,9 +1022,11 @@ public final class DataTransformerTest {
 		assertHasCoding(DataTransformer.CODING_SYSTEM_NDC, recordLine1.nationalDrugCode.get(),
 				eobItem0.getService());
 
-		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
+		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD,
+				DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS, recordLine1.revCntr1stAnsiCd.get(),
 				eobItem0.getAdjudication());
-		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_2ND_ANSI_CD, recordLine1.revCntr2ndAnsiCd.get(),
+		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_2ND_ANSI_CD,
+				DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS, recordLine1.revCntr2ndAnsiCd.get(),
 				eobItem0.getAdjudication());
 		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_3RD_ANSI_CD, eobItem0.getAdjudication());
 		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_4TH_ANSI_CD, eobItem0.getAdjudication());
@@ -1564,7 +1566,8 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
+		assertAdjudicationReasonEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD,
+				DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS, recordLine1.revCntr1stAnsiCd.get(),
 				eobItem0.getAdjudication());
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
@@ -1727,7 +1730,8 @@ public final class DataTransformerTest {
 						.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).get(0).getValue())
 								.getValue());
 
-		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI, eob.getCareTeam()));
+		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
+				recordLine1.providerNPI, eob.getCareTeam()));
 
 		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, recordLine1.providerStateCode);
