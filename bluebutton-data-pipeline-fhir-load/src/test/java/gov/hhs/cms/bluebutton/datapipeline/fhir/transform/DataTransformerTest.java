@@ -853,7 +853,7 @@ public final class DataTransformerTest {
 		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
 				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
 
-		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_REVENUE_CENTER, recordLine1.revenueCenter, eobItem0.getRevenue());
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
@@ -1031,9 +1031,11 @@ public final class DataTransformerTest {
 		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_3RD_ANSI_CD, eobItem0.getAdjudication());
 		assertAdjudicationNotPresent(DataTransformer.CODED_ADJUDICATION_4TH_ANSI_CD, eobItem0.getAdjudication());
 
-		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
-		Assert.assertEquals(recordLine1.hcpcsCode.get(), eobItem0.getModifier().get(0).getCode());
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(1).getCode());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_REVENUE_CENTER, recordLine1.revenueCenter, eobItem0.getRevenue());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+				eobItem0.getModifier().get(0));
+		assertHasCoding(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, recordLine1.hcpcsInitialModifierCode.get(),
+				eobItem0.getModifier().get(1));
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
@@ -1309,7 +1311,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_REVENUE_CENTER, recordLine1.revenueCenter, eobItem0.getRevenue());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
@@ -1441,10 +1443,11 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_REVENUE_CENTER, recordLine1.revenueCenter, eobItem0.getRevenue());
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
+		assertHasCoding(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, recordLine1.hcpcsInitialModifierCode.get(),
+				eobItem0.getModifier().get(0));
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
 
@@ -1745,7 +1748,8 @@ public final class DataTransformerTest {
 		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
 
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
+		assertHasCoding(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, recordLine1.hcpcsInitialModifierCode.get(),
+				eobItem0.getModifier().get(0));
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
