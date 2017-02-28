@@ -153,49 +153,49 @@ public final class FhirLoaderIT {
 						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
 						.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						carrierRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						inpatientRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						outpatientRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
 						pdeRecordEvent.getRecord().partDEventId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						hhaRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						hospiceRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						snfRecordEvent.getRecord().claimId))
 				.returnBundle(Bundle.class).execute().getTotal());
 		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENTREFERENCE
+				.where(ExplanationOfBenefit.PATIENT
 						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
 				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
 						dmeRecordEvent.getRecord().claimId))
