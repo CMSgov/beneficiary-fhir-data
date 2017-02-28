@@ -2238,7 +2238,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.medicareBenefitsExhaustedDate.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
+			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.medicareBenefitsExhaustedDate.get())));
 		}
 
@@ -2395,7 +2395,9 @@ public final class DataTransformer {
 							String.valueOf(claimGroup.patientStatusCd.get())));
 		}
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+		// FIXME this should be benefit balance, not info
+		// FIXME fix the Coding system used
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.utilizationDayCount));
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
