@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.hl7.fhir.dstu3.exceptions.FHIRException;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -28,11 +27,13 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DetailComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -52,6 +53,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
@@ -512,10 +514,10 @@ public final class DataTransformer {
 
 	/**
 	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rptd_gap_dscnt_num.txt">
-	 * CCW Data Dictionary: RPTD_GAP_DSCNT_NUM</a>.
+	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id.txt">
+	 * CCW Data Dictionary: PRSCRBR_ID</a>.
 	 */
-	static final String CODED_PRESCRIPTION_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id.txt";
+	static final String CODED_PRESCRIBER_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prscrbr_id.txt";
 
 	static final String CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT = "Medicare Coverage Gap Discount Amount";
 
@@ -664,7 +666,7 @@ public final class DataTransformer {
 		 * Has been decided that HICN will not be included in FHIR resources
 		 */
 		beneficiary.addName().addGiven(record.nameGiven).addGiven((String.valueOf(record.nameMiddleInitial.get())))
-				.addFamily(record.nameSurname).setUse(HumanName.NameUse.USUAL);
+				.setFamily(record.nameSurname).setUse(HumanName.NameUse.USUAL);
 		insert(bundle, beneficiary);
 
 		/*
@@ -673,10 +675,8 @@ public final class DataTransformer {
 		 */
 
 		Coverage partA = new Coverage();
-		partA.setPlan(COVERAGE_PLAN);
-		partA.setSubPlan(COVERAGE_PLAN_PART_A);
-		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
-		// partA.setIssuer(SharedDataManager.createReferenceToCms());
+		partA.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_A);
+		partA.addPayor(SharedDataManager.createReferenceToCms());
 		partA.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -701,10 +701,8 @@ public final class DataTransformer {
 		insert(bundle, partA);
 
 		Coverage partB = new Coverage();
-		partB.setPlan(COVERAGE_PLAN);
-		partB.setSubPlan(COVERAGE_PLAN_PART_B);
-		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
-		// partB.setIssuer(SharedDataManager.createReferenceToCms());
+		partB.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_B);
+		partB.addPayor(SharedDataManager.createReferenceToCms());
 		partB.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -717,10 +715,8 @@ public final class DataTransformer {
 		insert(bundle, partB);
 
 		Coverage partD = new Coverage();
-		partD.setPlan(COVERAGE_PLAN);
-		partD.setSubPlan(COVERAGE_PLAN_PART_D);
-		// FIXME "fluent refs" work in the latest HAPI version, but not 1.4
-		// partD.setIssuer(SharedDataManager.createReferenceToCms());
+		partD.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_D);
+		partD.addPayor(SharedDataManager.createReferenceToCms());
 		partD.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -755,7 +751,7 @@ public final class DataTransformer {
 		eob.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
 				.setValue(String.valueOf(record.prescriptionReferenceNumber));
 
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_CLAIM_TYPE).setCode("pharmacy"));
+		eob.getType().addCoding(new Coding().setSystem(CODING_SYSTEM_FHIR_CLAIM_TYPE).setCode("pharmacy"));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		Reference patientRef = referencePatient(record.beneficiaryId);
@@ -771,13 +767,13 @@ public final class DataTransformer {
 		switch (record.compoundCode) {
 		case COMPOUNDED:
 			/* Pharmacy dispense invoice for a compound */
-			detail.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
+			detail.getType().addCoding(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
 			break;
 		case NOT_COMPOUNDED:
 			/*
 			 * Pharmacy dispense invoice not involving a compound
 			 */
-			detail.setType(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+			detail.getType().addCoding(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
 			break;
 		default:
 			/*
@@ -791,16 +787,16 @@ public final class DataTransformer {
 
 		rxItem.setServiced(new DateType().setValue(convertToDate(record.prescriptionFillDate)));
 
+		Coding rxCategoryCoding;
+		BigDecimal rxPaidAmountValue;
 		switch (record.drugCoverageStatusCode) {
 		/*
 		 * If covered by Part D, use value from partDPlanCoveredPaidAmount
 		 */
 		case COVERED:
-			rxItem.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PART_D_COVERED))
-					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-					.setValue(record.partDPlanCoveredPaidAmount);
+			rxCategoryCoding = new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+					.setCode(CODED_ADJUDICATION_PART_D_COVERED);
+			rxPaidAmountValue = record.partDPlanCoveredPaidAmount;
 			break;
 		/*
 		 * If not covered by Part D, use value from
@@ -810,18 +806,14 @@ public final class DataTransformer {
 		 * circumstances.
 		 */
 		case SUPPLEMENTAL:
-			rxItem.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT))
-					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-					.setValue(record.partDPlanNonCoveredPaidAmount);
+			rxCategoryCoding = new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+					.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT);
+			rxPaidAmountValue = record.partDPlanNonCoveredPaidAmount;
 			break;
 		case OVER_THE_COUNTER:
-			rxItem.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_OTC))
-					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
-					.setValue(record.partDPlanNonCoveredPaidAmount);
+			rxCategoryCoding = new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
+					.setCode(CODED_ADJUDICATION_PART_D_NONCOVERED_OTC);
+			rxPaidAmountValue = record.partDPlanNonCoveredPaidAmount;
 			break;
 		default:
 			/*
@@ -830,50 +822,52 @@ public final class DataTransformer {
 			 */
 			throw new BadCodeMonkeyException();
 		}
+		CodeableConcept rxCategory = new CodeableConcept();
+		rxCategory.addCoding(rxCategoryCoding);
+		rxItem.addAdjudication().setCategory(rxCategory).getAmount().setSystem(CODING_SYSTEM_MONEY)
+				.setCode(CODING_SYSTEM_MONEY_US).setValue(rxPaidAmountValue);
 
 		rxItem.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_GDCB))
+				.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_GDCB))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.grossCostBelowOutOfPocketThreshold);
 
 		rxItem.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_GDCA))
+				.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_GDCA))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.grossCostAboveOutOfPocketThreshold);
 
 		rxItem.addAdjudication()
-				.setCategory(
-						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PATIENT_PAY))
+				.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PATIENT_PAY))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.patientPaidAmount);
 
 		rxItem.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_OTHER_TROOP_AMOUNT))
+				.setCategory(
+						createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_OTHER_TROOP_AMOUNT))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.otherTrueOutOfPocketPaidAmount);
 
 		rxItem.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT))
+				.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+						CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.lowIncomeSubsidyPaidAmount);
 
 		rxItem.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT))
+				.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+						CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.patientLiabilityReductionOtherPaidAmount);
 
 		rxItem.addAdjudication()
-				.setCategory(
-						new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_TOTAL_COST))
+				.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_TOTAL_COST))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.totalPrescriptionCost);
 
 		rxItem.addAdjudication()
-				.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-						.setCode(CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT))
+				.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+						CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT))
 				.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 				.setValue(record.gapDiscountAmount);
 
@@ -882,18 +876,16 @@ public final class DataTransformer {
 					"Prescriber ID Qualifier Code is invalid: " + record.prescriberIdQualifierCode);
 
 		if (record.prescriberId != null) {
-			rxItem.addCareTeam().setProvider(
-					new Practitioner().addIdentifier().setSystem(CODED_PRESCRIPTION_ID).setValue(record.prescriberId));
+			addCareTeamPractitioner(eob, rxItem, CODED_PRESCRIBER_ID, record.prescriberId);
 		}
 
-		rxItem.setService(new Coding().setSystem(CODING_SYSTEM_NDC).setCode(record.nationalDrugCode));
+		rxItem.setService(createCodeableConcept(CODING_SYSTEM_NDC, record.nationalDrugCode));
 
 		SimpleQuantity quantityDispensed = new SimpleQuantity();
 		quantityDispensed.setValue(record.quantityDispensed);
 		rxItem.setQuantity(quantityDispensed);
 
-		rxItem.addModifier(
-				new Coding().setSystem(CODING_SYSTEM_PDE_DAYS_SUPPLY).setCode(String.valueOf(record.daysSupply)));
+		rxItem.addModifier(createCodeableConcept(CODING_SYSTEM_PDE_DAYS_SUPPLY, String.valueOf(record.daysSupply)));
 
 		if (record.serviceProviderIdQualiferCode == null
 				|| !record.serviceProviderIdQualiferCode.equalsIgnoreCase("01"))
@@ -901,80 +893,75 @@ public final class DataTransformer {
 					"Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
 
 		if (!record.serviceProviderId.isEmpty()) {
-			eob.setOrganization(new Identifier().setValue(record.serviceProviderId).setSystem(ORGANIZATION_NPI));
-			eob.setFacility(new Identifier().setSystem(ORGANIZATION_NPI).setValue(record.serviceProviderId));
+			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, record.serviceProviderId));
+			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, record.serviceProviderId));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD,
 					CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, record.pharmacyTypeCode);
 		}
 
 		Coverage coverage = new Coverage();
-		Reference coverageRef = new Reference(
-				String.format("Coverage?identifier=%s|%s", CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, record.planContractId));
 		coverage.addIdentifier().setSystem(CODING_SYSTEM_PDE_PLAN_CONTRACT_ID).setValue(record.planContractId);
 		coverage.addIdentifier().setSystem(CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID)
 				.setValue(record.planBenefitPackageId);
-		coverage.setPlan(COVERAGE_PLAN);
-		coverage.setSubPlan(COVERAGE_PLAN_PART_D);
-		coverage.setIssuer(SharedDataManager.createReferenceToCms());
-		coverage.setBeneficiary(new Identifier().setValue(record.beneficiaryId));
-		coverage.setPlanholder(new Identifier().setValue(record.beneficiaryId));
-		coverage.setRelationship(new Coding().setCode("self"));
-		eob.getCoverage().setCoverage(new Reference(coverage));
+		coverage.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_D);
+		coverage.addPayor(SharedDataManager.createReferenceToCms());
+		coverage.setBeneficiary(referencePatient(record.beneficiaryId));
+		coverage.setSubscriber(referencePatient(record.beneficiaryId));
+		coverage.setRelationship(createCodeableConcept("", "self"));
+		eob.getInsurance().setCoverage(new Reference(coverage));
 
 		/*
 		 * Storing code values in EOB.information below
 		 */
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_RX_DAW_PRODUCT_CD).setCode(record.dispenseAsWrittenProductSelectionCode)));
+		eob.addInformation(new SupportingInformationComponent(
+				createCodeableConcept(CODING_SYSTEM_RX_DAW_PRODUCT_CD, record.dispenseAsWrittenProductSelectionCode)));
 
 		if (record.dispensingStatusCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_DISPENSE_STATUS_CD)
-							.setCode(String.valueOf(record.dispensingStatusCode.get()))));
+			eob.addInformation(new SupportingInformationComponent(createCodeableConcept(
+					CODING_SYSTEM_RX_DISPENSE_STATUS_CD, String.valueOf(record.dispensingStatusCode.get()))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-				new Coding().setSystem(CODING_SYSTEM_RX_COVERAGE_STATUS_CD)
-						.setCode(String.valueOf(record.drugCoverageStatusCode))));
+		eob.addInformation(new SupportingInformationComponent(
+				createCodeableConcept(CODING_SYSTEM_RX_COVERAGE_STATUS_CD,
+						String.valueOf(record.drugCoverageStatusCode))));
 
 		if (record.adjustmentDeletionCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_ADJUSTMENT_DEL_CD)
-							.setCode(String.valueOf(record.adjustmentDeletionCode.get()))));
+			eob.addInformation(new SupportingInformationComponent(createCodeableConcept(
+					CODING_SYSTEM_RX_ADJUSTMENT_DEL_CD, String.valueOf(record.adjustmentDeletionCode.get()))));
 
 		if (record.nonstandardFormatCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_NON_STD_FORMAT_CD)
-							.setCode(String.valueOf(record.nonstandardFormatCode.get()))));
+			eob.addInformation(new SupportingInformationComponent(
+					createCodeableConcept(CODING_SYSTEM_RX_NON_STD_FORMAT_CD,
+							String.valueOf(record.nonstandardFormatCode.get()))));
 
 		if (record.pricingExceptionCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_PRICING_EXCEPTION_CD)
-							.setCode(String.valueOf(record.pricingExceptionCode.get()))));
+			eob.addInformation(new SupportingInformationComponent(
+					createCodeableConcept(CODING_SYSTEM_RX_PRICING_EXCEPTION_CD,
+							String.valueOf(record.pricingExceptionCode.get()))));
 
 		if (record.catastrophicCoverageCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_CATASTROPHIC_COV_CD)
-							.setCode(String.valueOf(record.catastrophicCoverageCode.get()))));
+			eob.addInformation(new SupportingInformationComponent(
+					createCodeableConcept(CODING_SYSTEM_RX_CATASTROPHIC_COV_CD,
+							String.valueOf(record.catastrophicCoverageCode.get()))));
 
 		if (record.prescriptionOriginationCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_PRESCRIPTION_ORIGIN_CD)
-							.setCode(String.valueOf(record.prescriptionOriginationCode.get()))));
+			eob.addInformation(new SupportingInformationComponent(
+					createCodeableConcept(CODING_SYSTEM_RX_PRESCRIPTION_ORIGIN_CD,
+							String.valueOf(record.prescriptionOriginationCode.get()))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_RX_BRAND_GENERIC_CD).setCode(String.valueOf(record.brandGenericCode))));
+		eob.addInformation(new SupportingInformationComponent(
+				createCodeableConcept(CODING_SYSTEM_RX_BRAND_GENERIC_CD, String.valueOf(record.brandGenericCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-				new Coding().setSystem(CODING_SYSTEM_RX_PHARMACY_SVC_TYPE_CD).setCode(record.pharmacyTypeCode)));
+		eob.addInformation(new SupportingInformationComponent(
+				createCodeableConcept(CODING_SYSTEM_RX_PHARMACY_SVC_TYPE_CD, record.pharmacyTypeCode)));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-				new Coding().setSystem(CODING_SYSTEM_RX_PATIENT_RESIDENCE_CD).setCode(record.patientResidenceCode)));
+		eob.addInformation(new SupportingInformationComponent(
+				createCodeableConcept(CODING_SYSTEM_RX_PATIENT_RESIDENCE_CD, record.patientResidenceCode)));
 
 		if (record.submissionClarificationCode.isPresent())
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD)
-							.setCode(record.submissionClarificationCode.get())));
+			eob.addInformation(new SupportingInformationComponent(
+					createCodeableConcept(CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD,
+							record.submissionClarificationCode.get())));
 
 		insert(bundle, eob);
 		return new TransformedBundle(rifRecordEvent, bundle);
@@ -1001,13 +988,13 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getCoverage().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -1044,20 +1031,20 @@ public final class DataTransformer {
 		}
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (!claimGroup.providerPaymentAmount.equals(ZERO)) {
 			BenefitComponent providerPaymentAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_PAYMENT_B));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PAYMENT_B));
 			providerPaymentAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.providerPaymentAmount));
 			benefitBalances.getFinancial().add(providerPaymentAmount);
 		}
 
 		if (!claimGroup.beneficiaryPaymentAmount.equals(ZERO)) {
-			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
+			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
 			beneficiaryPaymentAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPaymentAmount));
 			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
@@ -1065,7 +1052,7 @@ public final class DataTransformer {
 
 		if (!claimGroup.submittedChargeAmount.equals(ZERO)) {
 			BenefitComponent submittedChargeAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
 			submittedChargeAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.submittedChargeAmount));
 			benefitBalances.getFinancial().add(submittedChargeAmount);
@@ -1073,15 +1060,15 @@ public final class DataTransformer {
 
 		if (!claimGroup.allowedChargeAmount.equals(ZERO)) {
 			BenefitComponent allowedChargeAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_ALLOWED_CHARGE));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_ALLOWED_CHARGE));
 			allowedChargeAmount
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.allowedChargeAmount));
 			benefitBalances.getFinancial().add(allowedChargeAmount);
 		}
 
 		if (!claimGroup.beneficiaryPartBDeductAmount.equals(ZERO)) {
-			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
+			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
 			beneficiaryPartBDeductAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPartBDeductAmount));
 			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
@@ -1107,9 +1094,8 @@ public final class DataTransformer {
 			item.addDetail(detail);
 
 			if (claimLine.performingPhysicianNpi.isPresent()) {
-				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = new ExplanationOfBenefit.CareTeamComponent();
-				performingCareTeamMember.setProvider(new Identifier().setSystem(CODING_SYSTEM_NPI_US)
-						.setValue(claimLine.performingPhysicianNpi.get()));
+				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = addCareTeamPractitioner(eob, item,
+						CODING_SYSTEM_NPI_US, claimLine.performingPhysicianNpi.get());
 				performingCareTeamMember.setResponsible(true);
 
 				/*
@@ -1123,16 +1109,14 @@ public final class DataTransformer {
 				 * `qualification` entry.
 				 */
 				performingCareTeamMember
-						.setQualification(new Coding().setSystem(CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD)
-								.setCode("" + claimLine.providerSpecialityCode.get()));
+						.setQualification(createCodeableConcept(CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+								"" + claimLine.providerSpecialityCode.get()));
 				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD,
 						CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD, "" + claimLine.providerTypeCode);
 
 				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 						CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 						"" + claimLine.providerParticipatingIndCode.get());
-
-				item.addCareTeam(performingCareTeamMember);
 			} else {
 				/*
 				 * Per Michelle at GDIT, and also Tony Dean at OEDA, the
@@ -1149,8 +1133,7 @@ public final class DataTransformer {
 				 * FIXME This is mis-mapped: it's really an attribute of the
 				 * performing provider.
 				 */
-				item.addCareTeam(new ExplanationOfBenefit.CareTeamComponent()
-						.setProvider(new Identifier().setValue(claimLine.organizationNpi.get())));
+				addCareTeamPractitioner(eob, item, CODING_SYSTEM_NPI_US, claimLine.organizationNpi.get());
 			}
 
 			if (claimLine.providerStateCode.isPresent()) {
@@ -1164,20 +1147,19 @@ public final class DataTransformer {
 			}
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PHYSICIAN_ASSISTANT))
-					.setReason(new Coding().setSystem(CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION)
-							.setCode("" + claimLine.reducedPaymentPhysicianAsstCode));
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_PHYSICIAN_ASSISTANT))
+					.setReason(createCodeableConcept(CODING_SYSTEM_PHYSICIAN_ASSISTANT_ADJUDICATION,
+							"" + claimLine.reducedPaymentPhysicianAsstCode));
 
 			SimpleQuantity serviceCount = new SimpleQuantity();
 			serviceCount.setValue(claimLine.serviceCount);
 			item.setQuantity(serviceCount);
 
-			item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
-					.setCode(claimLine.cmsServiceTypeCode));
+			item.setCategory(
+					createCodeableConcept(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, claimLine.cmsServiceTypeCode));
 
-			item.setLocation(
-					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
+			item.setLocation(createCodeableConcept(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, claimLine.placeOfServiceCode));
 			addExtensionCoding(item.getLocation(), CODING_SYSTEM_CCW_PRICING_LOCALITY,
 					CODING_SYSTEM_CCW_PRICING_LOCALITY, claimLine.linePricingLocalityCode);
 
@@ -1188,20 +1170,16 @@ public final class DataTransformer {
 							TemporalPrecisionEnum.DAY));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(
-						new Coding().setSystem(CODING_SYSTEM_HCPCS).setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsCode.get()));
+				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, "" + claimGroup.hcpcsYearCode.get(),
+						claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(
-						new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
-								.setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsInitialModifierCode.get()));
+				item.addModifier(createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE1,
+						"" + claimGroup.hcpcsYearCode.get(), claimLine.hcpcsInitialModifierCode.get()));
 			}
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
-						.setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsSecondModifierCode.get()));
+				item.addModifier(createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE2,
+						"" + claimGroup.hcpcsYearCode.get(), claimLine.hcpcsSecondModifierCode.get()));
 			}
 			if (claimLine.betosCode.isPresent()) {
 				item.addExtension().setUrl(CODING_SYSTEM_BETOS).setValue(new StringType(claimLine.betosCode.get()));
@@ -1212,28 +1190,25 @@ public final class DataTransformer {
 
 			AdjudicationComponent adjudicationForPayment = item.addAdjudication();
 			adjudicationForPayment
-					.setCategory(
-							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PAYMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.paymentAmount);
 			addExtensionCoding(adjudicationForPayment, CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH,
 					CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH, "" + claimLine.paymentCode.get());
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.beneficiaryPaymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PAYMENT_B))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PAYMENT_B))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.providerPaymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_DEDUCTIBLE))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_DEDUCTIBLE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.beneficiaryPartBDeductAmount);
 
@@ -1243,26 +1218,26 @@ public final class DataTransformer {
 			}
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.primaryPayerPaidAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.coinsuranceAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.submittedChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_ALLOWED_CHARGE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_ALLOWED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.allowedChargeAmount);
 
@@ -1277,10 +1252,10 @@ public final class DataTransformer {
 			}
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR))
-					.setReason(new Coding().setSystem(CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR)
-							.setCode(claimLine.processingIndicatorCode.get()));
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR))
+					.setReason(createCodeableConcept(CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR,
+							claimLine.processingIndicatorCode.get()));
 
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
 
@@ -3411,17 +3386,18 @@ public final class DataTransformer {
 	 */
 	private static int addDiagnosisCode(ExplanationOfBenefit eob, IcdCode diagnosis) {
 		Optional<DiagnosisComponent> existingDiagnosis = eob.getDiagnosis().stream()
-				.filter(d -> d.getDiagnosis().getSystem().equals(diagnosis.getVersion().getFhirSystem()))
-				.filter(d -> d.getDiagnosis().getCode().equals(diagnosis.getCode())).findAny();
+				.filter(d -> d.getDiagnosis() instanceof CodeableConcept)
+				.filter(d -> isCodeInConcept((CodeableConcept) d.getDiagnosis(), diagnosis.getVersion().getFhirSystem(), diagnosis.getCode()))
+				.findAny();
 		if (existingDiagnosis.isPresent())
 			return existingDiagnosis.get().getSequenceElement().getValue();
 
 		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
-		diagnosisComponent.getDiagnosis().setSystem(diagnosis.getVersion().getFhirSystem())
-				.setCode(diagnosis.getCode());
+		diagnosisComponent
+				.setDiagnosis(createCodeableConcept(diagnosis.getVersion().getFhirSystem(), diagnosis.getCode()));
 		if (!diagnosis.getPresentOnAdmission().isEmpty()) {
-			diagnosisComponent.addType(
-					new Coding().setSystem(CODING_SYSTEM_CCW_INP_POA_CD).setCode(diagnosis.getPresentOnAdmission()));
+			diagnosisComponent
+					.addType(createCodeableConcept(CODING_SYSTEM_CCW_INP_POA_CD, diagnosis.getPresentOnAdmission()));
 		}
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequenceElement().getValue();
@@ -3443,6 +3419,51 @@ public final class DataTransformer {
 	}
 
 	/**
+	 * Ensures that the specified {@link ExplanationOfBenefit} has the specified
+	 * {@link CareTeamComponent}, and links the specified {@link ItemComponent}
+	 * to that {@link CareTeamComponent} (via
+	 * {@link ItemComponent#addCareTeamLinkId(int)}).
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that the
+	 *            {@link CareTeamComponent} should be part of
+	 * @param eobItem
+	 *            the {@link ItemComponent} that should be linked to the
+	 *            {@link CareTeamComponent}
+	 * @param practitionerIdSystem
+	 *            the {@link Identifier#getSystem()} of the practitioner to
+	 *            reference in {@link CareTeamComponent#getProvider()}
+	 * @param practitionerIdValue
+	 *            the {@link Identifier#getValue()} of the practitioner to
+	 *            reference in {@link CareTeamComponent#getProvider()}
+	 * @return the {@link CareTeamComponent} that was created/linked
+	 */
+	private static CareTeamComponent addCareTeamPractitioner(ExplanationOfBenefit eob, ItemComponent eobItem,
+			String practitionerIdSystem, String practitionerIdValue) {
+		// Try to find a matching pre-existing entry.
+		CareTeamComponent careTeamEntry = eob.getCareTeam().stream()
+				.filter(ctc -> ctc.getProvider().hasIdentifier())
+				.filter(ctc -> practitionerIdSystem.equals(ctc.getProvider().getIdentifier().getSystem())
+						&& practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
+				.findAny().orElse(null);
+
+		// If no match was found, add one to the EOB.
+		if (careTeamEntry == null) {
+			careTeamEntry = eob.addCareTeam();
+		careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
+		careTeamEntry.setProvider(new Reference()
+					.setIdentifier(new Identifier().setSystem(practitionerIdSystem).setValue(practitionerIdValue)));
+		}
+
+		// Link the EOB.item to the care team entry (if it isn't already).
+		if (!eobItem.getCareTeamLinkId().contains(careTeamEntry.getSequence())) {
+			eobItem.addCareTeamLinkId(careTeamEntry.getSequence());
+		}
+
+		return careTeamEntry;
+	}
+
+	/**
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to (possibly) modify
 	 * @param diagnosis
@@ -3451,20 +3472,11 @@ public final class DataTransformer {
 	 *         newly-added entry
 	 */
 	private static int addProcedureCode(ExplanationOfBenefit eob, IcdCode procedure) {
-		Optional<ProcedureComponent> existingProcedure = eob.getProcedure().stream().filter(d -> {
-			try {
-				return d.getProcedureCoding().getSystem().equals(procedure.getVersion().getFhirSystem());
-			} catch (FHIRException e) {
-				return false;
-			}
-		}).filter(d -> {
-			try {
-				return d.getProcedureCoding().getCode().equals(procedure.getCode());
-			} catch (FHIRException e) {
-				return false;
-			}
-
-		}).findAny();
+		Optional<ProcedureComponent> existingProcedure = eob.getProcedure().stream()
+				.filter(pc -> pc.getProcedure() instanceof CodeableConcept)
+				.filter(pc -> isCodeInConcept((CodeableConcept) pc.getProcedure(),
+						procedure.getVersion().getFhirSystem(), procedure.getCode()))
+				.findAny();
 		if (existingProcedure.isPresent())
 			return existingProcedure.get().getSequenceElement().getValue();
 
@@ -3479,6 +3491,48 @@ public final class DataTransformer {
 	}
 
 	/**
+	 * @param concept
+	 *            the {@link CodeableConcept} to check
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to match
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to match
+	 * @return <code>true</code> if the specified {@link CodeableConcept}
+	 *         contains the specified {@link Coding}, <code>false</code> if it
+	 *         does not
+	 */
+	static boolean isCodeInConcept(CodeableConcept concept, String codingSystem, String codingCode) {
+		return isCodeInConcept(concept, codingSystem, null, codingCode);
+	}
+
+	/**
+	 * @param concept
+	 *            the {@link CodeableConcept} to check
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to match
+	 * @param codingSystem
+	 *            the {@link Coding#getVersion()} to match
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to match
+	 * @return <code>true</code> if the specified {@link CodeableConcept}
+	 *         contains the specified {@link Coding}, <code>false</code> if it
+	 *         does not
+	 */
+	static boolean isCodeInConcept(CodeableConcept concept, String codingSystem, String codingVersion,
+			String codingCode) {
+		return concept.getCoding().stream().anyMatch(c -> {
+			if (!codingSystem.equals(c.getSystem()))
+				return false;
+			if (codingVersion != null && !codingVersion.equals(c.getVersion()))
+				return false;
+			if (!codingCode.equals(c.getCode()))
+				return false;
+
+			return true;
+		});
+	}
+
+	/**
 	 * @param localDate
 	 *            the {@link LocalDate} to convert
 	 * @return a {@link Date} version of the specified {@link LocalDate}
@@ -3490,5 +3544,46 @@ public final class DataTransformer {
 		 * not, it's almost certainly using the same TZ as this system).
 		 */
 		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
+
+	/**
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to use
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to use
+	 * @return a {@link CodeableConcept} with the specified {@link Coding}
+	 */
+	private static CodeableConcept createCodeableConcept(String codingSystem, String codingCode) {
+		return createCodeableConcept(codingSystem, null, codingCode);
+	}
+
+	/**
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to use
+	 * @param codingVersion
+	 *            the {@link Coding#getVersion()} to use
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to use
+	 * @return a {@link CodeableConcept} with the specified {@link Coding}
+	 */
+	private static CodeableConcept createCodeableConcept(String codingSystem, String codingVersion, String codingCode) {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = codeableConcept.addCoding().setSystem(codingSystem).setCode(codingCode);
+		if (codingVersion != null)
+			coding.setVersion(codingVersion);
+		return codeableConcept;
+	}
+
+	/**
+	 * @param identifierSystem
+	 *            the {@link Identifier#getSystem()} to use in
+	 *            {@link Reference#getIdentifier()}
+	 * @param identifierValue
+	 *            the {@link Identifier#getValue()} to use in
+	 *            {@link Reference#getIdentifier()}
+	 * @return a {@link Reference} with the specified {@link Identifier}
+	 */
+	private static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
+		return new Reference().setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue));
 	}
 }
