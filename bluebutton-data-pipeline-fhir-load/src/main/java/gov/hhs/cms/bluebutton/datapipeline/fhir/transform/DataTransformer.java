@@ -1698,7 +1698,7 @@ public final class DataTransformer {
 		addExtensionCoding(eob.getBillablePeriod(), CODING_SYSTEM_QUERY_CD, CODING_SYSTEM_QUERY_CD,
 				String.valueOf(claimGroup.claimQueryCode));
 
-		eob.setProvider(new Identifier().setSystem(CODING_SYSTEM_PROVIDER_NUMBER).setValue(claimGroup.providerNumber));
+		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
@@ -2028,7 +2028,7 @@ public final class DataTransformer {
 		addExtensionCoding(eob.getBillablePeriod(), CODING_SYSTEM_QUERY_CD, CODING_SYSTEM_QUERY_CD,
 				String.valueOf(claimGroup.claimQueryCode));
 
-		eob.setProvider(new Identifier().setSystem(CODING_SYSTEM_PROVIDER_NUMBER).setValue(claimGroup.providerNumber));
+		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
@@ -2375,7 +2375,7 @@ public final class DataTransformer {
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
-		eob.setProvider(new Identifier().setSystem(CODING_SYSTEM_PROVIDER_NUMBER).setValue(claimGroup.providerNumber));
+		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
@@ -2590,7 +2590,7 @@ public final class DataTransformer {
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
-		eob.setProvider(new Identifier().setSystem(CODING_SYSTEM_PROVIDER_NUMBER).setValue(claimGroup.providerNumber));
+		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension().setUrl(CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD)
@@ -2905,7 +2905,7 @@ public final class DataTransformer {
 			if (!claimLine.providerNPI.isEmpty()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = new ExplanationOfBenefit.CareTeamComponent();
 				performingCareTeamMember
-						.setProvider(new Identifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimLine.providerNPI));
+						.setProvider(createIdentifierReference(CODING_SYSTEM_NPI_US, claimLine.providerNPI));
 				performingCareTeamMember.setResponsible(true);
 
 				/*
