@@ -828,13 +828,14 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(9, eob.getDiagnosis().size());
 
-		Assert.assertEquals(record.procedureCodes.get(0).getCode(),
-				eob.getProcedure().get(0).getProcedureCoding().getCode());
+		assertHasCoding(record.procedureCodes.get(0).getVersion().getFhirSystem(),
+				record.procedureCodes.get(0).getCode(),
+				eob.getProcedure().get(0).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(0).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(0).getDate());
-		Assert.assertEquals(record.procedureCodes.get(1).getCode(),
-				eob.getProcedure().get(1).getProcedureCoding().getCode());
+		assertHasCoding(record.procedureCodes.get(1).getVersion().getFhirSystem(),
+				record.procedureCodes.get(1).getCode(), eob.getProcedure().get(1).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(1).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(1).getDate());
@@ -1000,8 +1001,8 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getProcedure().size());
-		Assert.assertEquals(record.procedureCodes.get(0).getCode(),
-				eob.getProcedure().get(0).getProcedureCoding().getCode());
+		assertHasCoding(record.procedureCodes.get(0).getVersion().getFhirSystem(),
+				record.procedureCodes.get(0).getCode(), eob.getProcedure().get(0).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(0).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(0).getDate());
@@ -1289,8 +1290,8 @@ public final class DataTransformerTest {
 						.findFirst().get().getCategory());
 
 		Assert.assertEquals(5, eob.getDiagnosis().size());
-		Assert.assertEquals(record.procedureCodes.get(0).getCode(),
-				eob.getProcedure().get(0).getProcedureCoding().getCode());
+		assertHasCoding(record.procedureCodes.get(0).getVersion().getFhirSystem(),
+				record.procedureCodes.get(0).getCode(), eob.getProcedure().get(0).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(0).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(0).getDate());
