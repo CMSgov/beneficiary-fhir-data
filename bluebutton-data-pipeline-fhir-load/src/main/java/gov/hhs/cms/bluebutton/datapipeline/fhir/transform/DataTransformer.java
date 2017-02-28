@@ -1488,20 +1488,22 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
 		}
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+		// FIXME almost all of these should be benefit balances, not info
+		// FIXME fix the Coding systems used
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.utilizationDayCount));
-		
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_COINSURANCE_DAY_COUNT))
+
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COINSURANCE_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.coinsuranceDayCount));
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.nonUtilizationDayCount));
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
 				.setValue(new Quantity(claimGroup.bloodPintsFurnishedQty));
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_NONCOVERED_STAY_DATE))
+			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
 							.setStart(convertToDate((claimGroup.noncoveredStayFromDate.get())),
 									TemporalPrecisionEnum.DAY)
@@ -1510,12 +1512,12 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.coveredCareThoughDate.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_COVERED_CARE_DATE))
+			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COVERED_CARE_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.coveredCareThoughDate.get())));
 		}
 
 		if (claimGroup.medicareBenefitsExhaustedDate.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
+			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.medicareBenefitsExhaustedDate.get())));
 		}
 
@@ -1851,29 +1853,29 @@ public final class DataTransformer {
 				item.addAdjudication()
 						.setCategory(
 								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_1ST_ANSI_CD))
-						.setReason(new Coding().setCode(claimLine.revCntr1stAnsiCd.get())
-								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
+						.setReason(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+								claimLine.revCntr1stAnsiCd.get()));
 			}
 			if (claimLine.revCntr2ndAnsiCd.isPresent()) {
 				item.addAdjudication()
 						.setCategory(
 								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_2ND_ANSI_CD))
-						.setReason(new Coding().setCode(claimLine.revCntr2ndAnsiCd.get())
-								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
+						.setReason(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+								claimLine.revCntr2ndAnsiCd.get()));
 			}
 			if (claimLine.revCntr3rdAnsiCd.isPresent()) {
 				item.addAdjudication()
 						.setCategory(
 								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_3RD_ANSI_CD))
-						.setReason(new Coding().setCode(claimLine.revCntr3rdAnsiCd.get())
-								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
+						.setReason(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+								claimLine.revCntr3rdAnsiCd.get()));
 			}
 			if (claimLine.revCntr4thAnsiCd.isPresent()) {
 				item.addAdjudication()
 						.setCategory(
 								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_4TH_ANSI_CD))
-						.setReason(new Coding().setCode(claimLine.revCntr4thAnsiCd.get())
-								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
+						.setReason(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+								claimLine.revCntr4thAnsiCd.get()));
 			}
 
 			item.addAdjudication()
@@ -2204,20 +2206,22 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
 		}
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_UTILIZATION_DAY_COUNT))
+		// FIXME almost all of these should be benefit balances, not info
+		// FIXME fix the Coding systems used
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.utilizationDayCount));
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_COINSURANCE_DAY_COUNT))
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COINSURANCE_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.coinsuranceDayCount));
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.nonUtilizationDayCount));
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
 				.setValue(new Quantity(claimGroup.bloodPintsFurnishedQty));
 
 		if (claimGroup.qualifiedStayFromDate.isPresent() && claimGroup.qualifiedStayThroughDate.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_QUALIFIED_STAY_DATE))
+			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_QUALIFIED_STAY_DATE))
 					.setTiming(new Period()
 							.setStart(convertToDate((claimGroup.qualifiedStayFromDate.get())),
 									TemporalPrecisionEnum.DAY)
@@ -2226,7 +2230,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_NONCOVERED_STAY_DATE))
+			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
 							.setStart(convertToDate((claimGroup.noncoveredStayFromDate.get())),
 									TemporalPrecisionEnum.DAY)
@@ -2235,7 +2239,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.coveredCareThoughDate.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_COVERED_CARE_DATE))
+			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COVERED_CARE_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.coveredCareThoughDate.get())));
 		}
 
@@ -2666,7 +2670,9 @@ public final class DataTransformer {
 					CODING_SYSTEM_HHA_REFERRAL_CD, String.valueOf(claimGroup.claimReferralCode.get()))));
 		}
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_HHA_VISIT_COUNT))
+		// FIXME this should be benefit balance, not info
+		// FIXME fix the Coding system used
+		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_HHA_VISIT_COUNT))
 				.setValue(new Quantity(claimGroup.totalVisitCount));
 
 		if (claimGroup.careStartDate.isPresent()){
@@ -2697,8 +2703,8 @@ public final class DataTransformer {
 				item.addAdjudication()
 						.setCategory(
 								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_1ST_ANSI_CD))
-						.setReason(new Coding().setCode(claimLine.revCntr1stAnsiCd.get())
-								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
+						.setReason(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+								claimLine.revCntr1stAnsiCd.get()));
 			}
 
 			if (claimLine.hcpcsCode.isPresent()) {
@@ -2961,20 +2967,16 @@ public final class DataTransformer {
 							TemporalPrecisionEnum.DAY));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(
-						new Coding().setSystem(CODING_SYSTEM_HCPCS).setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsCode.get()));
+				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, "" + claimGroup.hcpcsYearCode.get(),
+						claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(
-						new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
-								.setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsInitialModifierCode.get()));
+				item.addModifier(createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE1,
+						"" + claimGroup.hcpcsYearCode.get(), claimLine.hcpcsInitialModifierCode.get()));
 			}
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
-						.setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsSecondModifierCode.get()));
+				item.addModifier(createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE2,
+						"" + claimGroup.hcpcsYearCode.get(), claimLine.hcpcsSecondModifierCode.get()));
 			}
 
 			if (claimLine.betosCode.isPresent()) {
@@ -3074,14 +3076,12 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.hcpcsThirdModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE3)
-						.setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsThirdModifierCode.get()));
+				item.addModifier(createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE3,
+						"" + claimGroup.hcpcsYearCode.get(), claimLine.hcpcsThirdModifierCode.get()));
 			}
 			if (claimLine.hcpcsFourthModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE4)
-						.setVersion("" + claimGroup.hcpcsYearCode.get())
-						.setCode(claimLine.hcpcsFourthModifierCode.get()));
+				item.addModifier(createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE4,
+						"" + claimGroup.hcpcsYearCode.get(), claimLine.hcpcsFourthModifierCode.get()));
 			}
 
 			if (!claimLine.screenSavingsAmount.equals(ZERO)) {
