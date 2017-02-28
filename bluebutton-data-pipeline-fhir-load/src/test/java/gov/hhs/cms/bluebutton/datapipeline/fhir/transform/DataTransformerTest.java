@@ -795,8 +795,10 @@ public final class DataTransformerTest {
 						.findFirst().get().getBenefitMoney().getValue()
 				);
 
-		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
-		Assert.assertEquals(record.organizationNpi.get(), eob.getFacilityIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getOrganization());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
@@ -974,8 +976,10 @@ public final class DataTransformerTest {
 				.findFirst().get().getBenefitMoney().getValue()
 				);
 
-		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
-		Assert.assertEquals(record.organizationNpi.get(), eob.getFacilityIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getOrganization());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
@@ -1114,7 +1118,7 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_QUERY_CD,
 				DataTransformer.CODING_SYSTEM_QUERY_CD, String.valueOf(record.claimQueryCode));
 
-		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.providerNumber, eob.getProvider());
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
@@ -1126,8 +1130,10 @@ public final class DataTransformerTest {
 						DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
 				.findFirst().get().getBenefitMoney().getValue());
 
-		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
-		Assert.assertEquals(record.organizationNpi.get(), eob.getFacilityIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getOrganization());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
@@ -1369,7 +1375,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
-		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.providerNumber, eob.getProvider());
 
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
@@ -1403,8 +1409,10 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
 						.getValue()).getValue());
 		
-		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
-		Assert.assertEquals(record.organizationNpi.get(), eob.getFacilityIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getOrganization());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
@@ -1508,7 +1516,7 @@ public final class DataTransformerTest {
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 
-		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.providerNumber, eob.getProvider());
 
 		Assert.assertEquals(record.claimNonPaymentReasonCode.get(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD).get(0)
@@ -1527,8 +1535,10 @@ public final class DataTransformerTest {
 						DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
 				.findFirst().get().getBenefitMoney().getValue());
 
-		Assert.assertEquals(record.organizationNpi.get(), eob.getOrganizationIdentifier().getValue());
-		Assert.assertEquals(record.organizationNpi.get(), eob.getFacilityIdentifier().getValue());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getOrganization());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
+				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
@@ -2032,6 +2042,21 @@ public final class DataTransformerTest {
 	private static void assertIdentifierExists(String expectedSystem, String expectedId, List<Identifier> actuals) {
 		Assert.assertTrue(actuals.stream().filter(i -> expectedSystem.equals(i.getSystem()))
 				.anyMatch(i -> expectedId.equals(i.getValue())));
+	}
+
+	/**
+	 * @param expectedIdentifierSystem
+	 *            the expected {@link Identifier#getSystem()} value
+	 * @param expectedIdentifierValue
+	 *            the expected {@link Identifier#getValue()} value
+	 * @param reference
+	 *            the actual {@link Reference} to verify
+	 */
+	private static void assertReferenceIdentifierEquals(String expectedIdentifierSystem, String expectedIdentifierValue,
+			Reference reference) {
+		Assert.assertTrue("Bad reference: " + reference, reference.hasIdentifier());
+		Assert.assertEquals(expectedIdentifierSystem, reference.getIdentifier().getSystem());
+		Assert.assertEquals(expectedIdentifierValue, reference.getIdentifier().getValue());
 	}
 
 	/**
