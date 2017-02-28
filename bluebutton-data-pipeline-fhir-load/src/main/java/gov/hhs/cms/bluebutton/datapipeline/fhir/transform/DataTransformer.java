@@ -1535,9 +1535,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(
-					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
-			eob.setFacility(new Identifier().setSystem(ORGANIZATION_NPI).setValue(claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -1770,9 +1769,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(
-					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
-			eob.setFacility(new Identifier().setSystem(ORGANIZATION_NPI).setValue(claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -2076,10 +2074,8 @@ public final class DataTransformer {
 				.setValue(new StringType(claimGroup.claimServiceClassificationTypeCode.toString()));
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(
-					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
-			eob.setFacility(
-					new Identifier().setSystem(ORGANIZATION_NPI).setValue(claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -2432,9 +2428,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(
-					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
-			eob.setFacility(new Identifier().setSystem(ORGANIZATION_NPI).setValue(claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -2625,9 +2620,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(
-					new Identifier().setValue(claimGroup.organizationNpi.get()).setSystem(ORGANIZATION_NPI));
-			eob.setFacility(new Identifier().setSystem(ORGANIZATION_NPI).setValue(claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
