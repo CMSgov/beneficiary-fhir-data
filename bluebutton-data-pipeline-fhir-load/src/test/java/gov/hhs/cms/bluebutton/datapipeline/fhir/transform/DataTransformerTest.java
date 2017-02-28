@@ -850,7 +850,8 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
+		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
+				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
 
 		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
 
@@ -1060,8 +1061,8 @@ public final class DataTransformerTest {
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount, eobItem0.getAdjudication());
 
-		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
-
+		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
+				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
 	}
 
 	/**
@@ -1321,8 +1322,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_DEDUCTIBLE_COINSURANCE_CD,
 				String.valueOf(recordLine1.deductibleCoinsuranceCd.get()));
 
-		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
-
+		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
+				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
 	}
 
 	/**
@@ -1462,8 +1463,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_DEDUCTIBLE_COINSURANCE_CD,
 				String.valueOf(recordLine1.deductibleCoinsuranceCd.get()));
 
-		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
-
+		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
+				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
 	}
 
 	/**
@@ -1712,7 +1713,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 		
 		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI,
-				eobItem0.getCareTeam());
+				eob.getCareTeam());
 		Assert.assertNotNull(performingCareTeamEntry);
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
 				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
@@ -1726,7 +1727,7 @@ public final class DataTransformerTest {
 						.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE).get(0).getValue())
 								.getValue());
 
-		Assert.assertEquals(recordLine1.providerNPI, eobItem0.getCareTeam().get(0).getProviderIdentifier().getValue());
+		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI, eob.getCareTeam()));
 
 		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, recordLine1.providerStateCode);
