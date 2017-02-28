@@ -638,7 +638,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_QUERY_CD,
@@ -806,7 +806,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
@@ -873,7 +873,7 @@ public final class DataTransformerTest {
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
@@ -951,7 +951,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_NDC, recordLine1.nationalDrugCode.get(),
+		assertHasCoding(DataTransformer.CODING_SYSTEM_NDC, recordLine1.nationalDrugCode.get(),
 				eobItem0.getService());
 
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
@@ -1044,7 +1044,7 @@ public final class DataTransformerTest {
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
@@ -1227,7 +1227,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
 		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
+		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
 				eobItem0.getAdjudication());
@@ -1320,7 +1320,7 @@ public final class DataTransformerTest {
 				.filter(bb -> bb.getType().getCode().equalsIgnoreCase(DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
 				.findFirst().get().getBenefitMoney().getValue());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		
 		assertDateEquals(record.claimHospiceStartDate.get(), eob.getHospitalization().getStartElement());
 		assertDateEquals(record.beneficiaryDischargeDate.get(), eob.getHospitalization().getEndElement());
@@ -1357,7 +1357,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(recordLine1.revenueCenter, eobItem0.getRevenue().getCode());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
@@ -1441,7 +1441,7 @@ public final class DataTransformerTest {
 						.getValue()).getValue());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		
 		Assert.assertEquals(record.claimServiceClassificationTypeCode.toString(),
@@ -1480,7 +1480,7 @@ public final class DataTransformerTest {
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_1ST_ANSI_CD, recordLine1.revCntr1stAnsiCd.get(),
 				eobItem0.getAdjudication());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 			
@@ -1564,7 +1564,7 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD).get(0)
 						.getValue()).getValue());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		
 		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
@@ -1624,7 +1624,7 @@ public final class DataTransformerTest {
 		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI,
 				eobItem0.getCareTeam());
 		Assert.assertNotNull(performingCareTeamEntry);
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
 				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
 		assertExtensionCodingEquals(performingCareTeamEntry,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
@@ -1641,7 +1641,7 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, recordLine1.providerStateCode);
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, recordLine1.cmsServiceTypeCode,
+		assertHasCoding(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, recordLine1.cmsServiceTypeCode,
 				eobItem0.getCategory());
 
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, recordLine1.placeOfServiceCode,
@@ -1653,7 +1653,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
+		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
 				recordLine1.hcpcsCode.get(),
 				eobItem0.getService());
 		Assert.assertEquals(recordLine1.betosCode.get(),
