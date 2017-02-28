@@ -1574,7 +1574,8 @@ public final class DataTransformerTest {
 				eobItem0.getAdjudication());
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, recordLine1.hcpcsCode.get(), eobItem0.getService());
-		Assert.assertEquals(recordLine1.hcpcsInitialModifierCode.get(), eobItem0.getModifier().get(0).getCode());
+		assertHasCoding(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, recordLine1.hcpcsInitialModifierCode.get(),
+				eobItem0.getModifier().get(0));
 		Assert.assertFalse(recordLine1.hcpcsSecondModifierCode.isPresent());
 			
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_RATE_AMOUNT, recordLine1.rateAmount,
@@ -1590,8 +1591,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_DEDUCTIBLE_COINSURANCE_CD,
 				String.valueOf(recordLine1.deductibleCoinsuranceCd.get()));
 		
-		Assert.assertEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(), eobItem0.getCareTeamFirstRep().getProviderIdentifier().getValue());
-
+		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
+				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
 	}
 
 	/**
@@ -1669,7 +1670,7 @@ public final class DataTransformerTest {
 				(eob.getExtensionsByUrl(DataTransformer.CLAIM_CLINICAL_TRIAL_NUMBER).get(0).getValue()
 						.toString()));
 		
-		ReferralRequest referral = (ReferralRequest) eob.getReferralReference().getResource();
+		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
 		Assert.assertEquals(1, referral.getRecipient().size());
 		Assert.assertEquals(claimBundle.getEntry().stream()
@@ -1742,8 +1743,8 @@ public final class DataTransformerTest {
 		assertHasCoding(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, recordLine1.cmsServiceTypeCode,
 				eobItem0.getCategory());
 
-		assertCodingEquals(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, recordLine1.placeOfServiceCode,
-				eobItem0.getLocationCoding());
+		assertHasCoding(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, recordLine1.placeOfServiceCode,
+				eobItem0.getLocationCodeableConcept());
 
 		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
 		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
