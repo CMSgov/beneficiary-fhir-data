@@ -1331,7 +1331,7 @@ public final class DataTransformer {
 		}
 
 		if (!claimGroup.patientDischargeStatusCode.isEmpty()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD,
 							claimGroup.patientDischargeStatusCode)));
 		}
@@ -1360,7 +1360,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.patientStatusCd.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 					CODING_SYSTEM_PATIENT_STATUS_CD, String.valueOf(claimGroup.patientStatusCd.get()))));
 		}
 
@@ -1545,10 +1545,10 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.claimServiceClassificationTypeCode)));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
@@ -1569,7 +1569,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
@@ -1780,10 +1780,10 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.claimServiceClassificationTypeCode)));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
@@ -1804,7 +1804,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
@@ -2084,10 +2084,10 @@ public final class DataTransformer {
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
@@ -2108,12 +2108,12 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
 		if (claimGroup.patientStatusCd.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_PATIENT_STATUS_CD,
 							String.valueOf(claimGroup.patientStatusCd.get()))));
 		}
@@ -2387,7 +2387,7 @@ public final class DataTransformer {
 		}
 
 		if (!claimGroup.patientDischargeStatusCode.isEmpty()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD,
 							claimGroup.patientDischargeStatusCode)));
 		}
@@ -2439,10 +2439,10 @@ public final class DataTransformer {
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
@@ -2603,7 +2603,7 @@ public final class DataTransformer {
 		}
 
 		if (!claimGroup.patientDischargeStatusCode.isEmpty()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD,
 							claimGroup.patientDischargeStatusCode)));
 		}
@@ -2632,10 +2632,10 @@ public final class DataTransformer {
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
@@ -2662,11 +2662,11 @@ public final class DataTransformer {
 			}
 
 		if (claimGroup.claimLUPACode.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 					createCodeableConcept(CODING_SYSTEM_HHA_LUPA_CD, String.valueOf(claimGroup.claimLUPACode.get()))));
 		}
 		if (claimGroup.claimReferralCode.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 					CODING_SYSTEM_HHA_REFERRAL_CD, String.valueOf(claimGroup.claimReferralCode.get()))));
 		}
 
