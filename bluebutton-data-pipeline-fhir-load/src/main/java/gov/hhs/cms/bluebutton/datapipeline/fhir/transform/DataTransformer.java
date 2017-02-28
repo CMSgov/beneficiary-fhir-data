@@ -3460,8 +3460,8 @@ public final class DataTransformer {
 			return existingProcedure.get().getSequenceElement().getValue();
 
 		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size() + 1);
-		procedureComponent.setProcedure(
-				new Coding().setSystem(procedure.getVersion().getFhirSystem()).setCode(procedure.getCode()));
+		procedureComponent
+				.setProcedure(createCodeableConcept(procedure.getVersion().getFhirSystem(), procedure.getCode()));
 		procedureComponent
 				.setDate(convertToDate(procedure.getProcedureDate()));
 
