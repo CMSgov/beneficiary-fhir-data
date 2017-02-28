@@ -637,7 +637,7 @@ public final class DataTransformerTest {
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
@@ -875,7 +875,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_QUERY_CD,
@@ -1046,7 +1046,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_QUERY_CD,
@@ -1293,7 +1293,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (institutional).
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(record.providerNumber, eob.getProviderIdentifier().getValue());
@@ -1430,7 +1430,7 @@ public final class DataTransformerTest {
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 
@@ -1549,7 +1549,7 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		// TODO Verify eob.type once STU3 is available (professional)
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatientReference().getReference());
+		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		Assert.assertEquals(record.nearLineRecordIdCode.toString(),
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD).get(0).getValue())
 						.getValue());
