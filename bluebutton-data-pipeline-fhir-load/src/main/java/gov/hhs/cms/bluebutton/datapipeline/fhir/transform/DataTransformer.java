@@ -1316,7 +1316,7 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
 
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
@@ -1332,8 +1332,8 @@ public final class DataTransformer {
 
 		if (!claimGroup.patientDischargeStatusCode.isEmpty()) {
 			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD)
-							.setCode(claimGroup.patientDischargeStatusCode)));
+					createCodeableConcept(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD,
+							claimGroup.patientDischargeStatusCode)));
 		}
 
 		eob.getPayment()
@@ -1351,27 +1351,26 @@ public final class DataTransformer {
 			eob.setHospitalization(period);
 		}
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_ADMISSION_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.admissionTypeCd)));
+		eob.addInformation().setCategory(
+				createCodeableConcept(CODING_SYSTEM_ADMISSION_TYPE_CD, String.valueOf(claimGroup.admissionTypeCd)));
 
 		if (claimGroup.sourceAdmissionCd.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_SOURCE_ADMISSION_CD)
-					.setCode(String.valueOf(claimGroup.sourceAdmissionCd.get())));
+			eob.addInformation().setCategory(createCodeableConcept(CODING_SYSTEM_SOURCE_ADMISSION_CD,
+					String.valueOf(claimGroup.sourceAdmissionCd.get())));
 		}
 
 		if (claimGroup.patientStatusCd.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_PATIENT_STATUS_CD)
-							.setCode(String.valueOf(claimGroup.patientStatusCd.get()))));
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+					CODING_SYSTEM_PATIENT_STATUS_CD, String.valueOf(claimGroup.patientStatusCd.get()))));
 		}
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.passThruPerDiemAmount != null) {
 			BenefitComponent benefitPerDiem = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PASS_THRU_PER_DIEM_AMT));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PASS_THRU_PER_DIEM_AMT));
 			benefitPerDiem.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.passThruPerDiemAmount));
 			benefitBalances.getFinancial().add(benefitPerDiem);
@@ -1379,7 +1378,7 @@ public final class DataTransformer {
 
 		if (claimGroup.deductibleAmount != null) {
 			BenefitComponent benefitInpatientDeductible = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_BENEFIT_DEDUCTIBLE_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_BENEFIT_DEDUCTIBLE_AMT_URL));
 			benefitInpatientDeductible
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.deductibleAmount));
 			benefitBalances.getFinancial().add(benefitInpatientDeductible);
@@ -1387,7 +1386,7 @@ public final class DataTransformer {
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
 			benefitInpatientNchPrimaryPayerAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(benefitInpatientNchPrimaryPayerAmt);
@@ -1395,7 +1394,7 @@ public final class DataTransformer {
 
 		if (claimGroup.partACoinsuranceLiabilityAmount != null) {
 			BenefitComponent benefitPartACoinsuranceLiabilityAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_COIN_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_BENEFIT_COIN_AMT_URL));
 			benefitPartACoinsuranceLiabilityAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.partACoinsuranceLiabilityAmount));
 			benefitBalances.getFinancial().add(benefitPartACoinsuranceLiabilityAmt);
@@ -1403,7 +1402,7 @@ public final class DataTransformer {
 
 		if (claimGroup.bloodDeductibleLiabilityAmount != null) {
 			BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
 			benefitInpatientNchPrimaryPayerAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.bloodDeductibleLiabilityAmount));
 			benefitBalances.getFinancial().add(benefitInpatientNchPrimaryPayerAmt);
@@ -1411,7 +1410,7 @@ public final class DataTransformer {
 
 		if (claimGroup.professionalComponentCharge != null) {
 			BenefitComponent benefitProfessionComponentAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PROFFESIONAL_CHARGE_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PROFFESIONAL_CHARGE_URL));
 			benefitProfessionComponentAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.professionalComponentCharge));
 			benefitBalances.getFinancial().add(benefitProfessionComponentAmt);
@@ -1419,7 +1418,7 @@ public final class DataTransformer {
 
 		if (claimGroup.noncoveredCharge != null) {
 			BenefitComponent benefitNonCoveredChangeAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL));
 			benefitNonCoveredChangeAmt
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.noncoveredCharge));
 			benefitBalances.getFinancial().add(benefitNonCoveredChangeAmt);
@@ -1427,7 +1426,7 @@ public final class DataTransformer {
 
 		if (claimGroup.totalDeductionAmount != null) {
 			BenefitComponent benefitTotalChangeAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_INPATIENT_TOTAL_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_INPATIENT_TOTAL_AMT_URL));
 			benefitTotalChangeAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalDeductionAmount));
 			benefitBalances.getFinancial().add(benefitTotalChangeAmt);
@@ -1435,15 +1434,15 @@ public final class DataTransformer {
 
 		if (claimGroup.claimTotalPPSCapitalAmount != null) {
 			BenefitComponent claimTotalPPSAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL));
 			claimTotalPPSAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimTotalPPSCapitalAmount.get()));
 			benefitBalances.getFinancial().add(claimTotalPPSAmt);
 		}
 
 		if (claimGroup.claimPPSCapitalFSPAmount != null) {
-			BenefitComponent claimPPSCapitalFSPAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE)
-					.setCode(CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL));
+			BenefitComponent claimPPSCapitalFSPAmt = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL));
 			claimPPSCapitalFSPAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalFSPAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalFSPAmt);
@@ -1451,23 +1450,23 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPPSCapitalOutlierAmount != null) {
 			BenefitComponent claimPPSCapitalOutlierAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL));
 			claimPPSCapitalOutlierAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSCapitalOutlierAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalOutlierAmount);
 		}
 
 		if (claimGroup.claimPPSCapitalDisproportionateShareAmt != null) {
-			BenefitComponent claimPPSCapitalDisproportionateShareAmt = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL));
+			BenefitComponent claimPPSCapitalDisproportionateShareAmt = new BenefitComponent(createCodeableConcept(
+					BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL));
 			claimPPSCapitalDisproportionateShareAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSCapitalDisproportionateShareAmt.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalDisproportionateShareAmt);
 		}
 
 		if (claimGroup.claimPPSCapitalIMEAmount != null) {
-			BenefitComponent claimPPSCapitalIMEAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL));
+			BenefitComponent claimPPSCapitalIMEAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL));
 			claimPPSCapitalIMEAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalIMEAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalIMEAmount);
@@ -1475,15 +1474,15 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPPSCapitalExceptionAmount != null) {
 			BenefitComponent claimPPSCapitalExceptionAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL));
 			claimPPSCapitalExceptionAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSCapitalExceptionAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalExceptionAmount);
 		}
 
 		if (claimGroup.claimPPSOldCapitalHoldHarmlessAmount != null) {
-			BenefitComponent claimPPSOldCapitalHoldHarmlessAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL));
+			BenefitComponent claimPPSOldCapitalHoldHarmlessAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL));
 			claimPPSOldCapitalHoldHarmlessAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSOldCapitalHoldHarmlessAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
@@ -1521,13 +1520,13 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.diagnosisRelatedGroupCd.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD)
-					.setCode(claimGroup.diagnosisRelatedGroupCd.get()));
+			eob.addInformation().setCategory(createCodeableConcept(CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD,
+					claimGroup.diagnosisRelatedGroupCd.get()));
 		}
 
 		if (claimGroup.nchDrugOutlierApprovedPaymentAmount != null) {
-			BenefitComponent nchDrugOutlierApprovedPaymentAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL));
+			BenefitComponent nchDrugOutlierApprovedPaymentAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL));
 			nchDrugOutlierApprovedPaymentAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.nchDrugOutlierApprovedPaymentAmount.get()));
 			benefitBalances.getFinancial().add(nchDrugOutlierApprovedPaymentAmount);
@@ -1544,11 +1543,11 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.claimServiceClassificationTypeCode)));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_FREQUENCY_CD).setCode(String.valueOf(claimGroup.claimFrequencyCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_PRIMARY_PAYER_CD).setCode(String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
 
@@ -1568,8 +1567,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-					.setSystem(CODING_SYSTEM_MCO_PAID_CD).setCode(String.valueOf(claimGroup.mcoPaidSw.get()))));
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
 		addDiagnosisCode(eob, claimGroup.diagnosisAdmitting);
@@ -1601,29 +1600,28 @@ public final class DataTransformer {
 
 			item.addDetail(detail);
 
-			item.setRevenue(new Coding().setSystem(CODING_SYSTEM_REVENUE_CENTER).setCode(claimLine.revenueCenter));
+			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, claimLine.hcpcsCode.get()));
 			}
 
 			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_RATE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_RATE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.rateAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.totalChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
@@ -1648,8 +1646,8 @@ public final class DataTransformer {
 			item.setQuantity(qty);
 
 			if (claimLine.nationalDrugCodeQualifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(CODING_SYSTEM_NDC_QLFR_CD)
-						.setCode(claimLine.nationalDrugCodeQualifierCode.get()));
+				item.addModifier(createCodeableConcept(CODING_SYSTEM_NDC_QLFR_CD,
+						claimLine.nationalDrugCodeQualifierCode.get()));
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
@@ -1690,7 +1688,7 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
 
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
@@ -1710,12 +1708,12 @@ public final class DataTransformer {
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -1723,7 +1721,7 @@ public final class DataTransformer {
 
 		if (claimGroup.bloodDeductibleLiabilityAmount != null) {
 			BenefitComponent bloodDeductibleLiabilityAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
 			bloodDeductibleLiabilityAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.bloodDeductibleLiabilityAmount));
 			benefitBalances.getFinancial().add(bloodDeductibleLiabilityAmount);
@@ -1731,7 +1729,7 @@ public final class DataTransformer {
 
 		if (claimGroup.professionalComponentCharge != null) {
 			BenefitComponent benefitProfessionComponentAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PROFFESIONAL_CHARGE_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PROFFESIONAL_CHARGE_URL));
 			benefitProfessionComponentAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.professionalComponentCharge));
 			benefitBalances.getFinancial().add(benefitProfessionComponentAmt);
@@ -1739,7 +1737,7 @@ public final class DataTransformer {
 
 		if (claimGroup.deductibleAmount != null) {
 			BenefitComponent deductibleAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BEN_PART_B_DED_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_BEN_PART_B_DED_AMT_URL));
 			deductibleAmount
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.deductibleAmount));
 			benefitBalances.getFinancial().add(deductibleAmount);
@@ -1747,7 +1745,7 @@ public final class DataTransformer {
 
 		if (claimGroup.coninsuranceAmount != null) {
 			BenefitComponent coninsuranceAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BEN_PART_B_COINSUR_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_BEN_PART_B_COINSUR_AMT_URL));
 			coninsuranceAmount
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.coninsuranceAmount));
 			benefitBalances.getFinancial().add(coninsuranceAmount);
@@ -1755,7 +1753,7 @@ public final class DataTransformer {
 
 		if (claimGroup.providerPaymentAmount != null) {
 			BenefitComponent providerPaymentAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_OUTPAT_PROVIDER_PAYMENT_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_OUTPAT_PROVIDER_PAYMENT_AMT_URL));
 			providerPaymentAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.providerPaymentAmount));
 			benefitBalances.getFinancial().add(providerPaymentAmount);
@@ -1763,7 +1761,7 @@ public final class DataTransformer {
 
 		if (claimGroup.beneficiaryPaymentAmount != null) {
 			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL));
 			beneficiaryPaymentAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPaymentAmount));
 			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
@@ -1780,11 +1778,11 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.claimServiceClassificationTypeCode)));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_FREQUENCY_CD).setCode(String.valueOf(claimGroup.claimFrequencyCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_PRIMARY_PAYER_CD).setCode(String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
 
@@ -1804,8 +1802,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-					.setSystem(CODING_SYSTEM_MCO_PAID_CD).setCode(String.valueOf(claimGroup.mcoPaidSw.get()))));
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
@@ -1841,130 +1839,129 @@ public final class DataTransformer {
 
 			item.addDetail(detail);
 
-			item.setRevenue(new Coding().setSystem(CODING_SYSTEM_REVENUE_CENTER).setCode(claimLine.revenueCenter));
+			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
 			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
 
 			if (claimLine.nationalDrugCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_NDC).setCode(claimLine.nationalDrugCode.get()));
+				item.setService(createCodeableConcept(CODING_SYSTEM_NDC, claimLine.nationalDrugCode.get()));
 			}
 
 			if (claimLine.revCntr1stAnsiCd.isPresent()) {
 				item.addAdjudication()
-						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-								.setCode(CODED_ADJUDICATION_1ST_ANSI_CD))
+						.setCategory(
+								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_1ST_ANSI_CD))
 						.setReason(new Coding().setCode(claimLine.revCntr1stAnsiCd.get())
 								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
 			}
 			if (claimLine.revCntr2ndAnsiCd.isPresent()) {
 				item.addAdjudication()
-						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-								.setCode(CODED_ADJUDICATION_2ND_ANSI_CD))
+						.setCategory(
+								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_2ND_ANSI_CD))
 						.setReason(new Coding().setCode(claimLine.revCntr2ndAnsiCd.get())
 								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
 			}
 			if (claimLine.revCntr3rdAnsiCd.isPresent()) {
 				item.addAdjudication()
-						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-								.setCode(CODED_ADJUDICATION_3RD_ANSI_CD))
+						.setCategory(
+								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_3RD_ANSI_CD))
 						.setReason(new Coding().setCode(claimLine.revCntr3rdAnsiCd.get())
 								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
 			}
 			if (claimLine.revCntr4thAnsiCd.isPresent()) {
 				item.addAdjudication()
-						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-								.setCode(CODED_ADJUDICATION_4TH_ANSI_CD))
+						.setCategory(
+								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_4TH_ANSI_CD))
 						.setReason(new Coding().setCode(claimLine.revCntr4thAnsiCd.get())
 								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
 			}
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_RATE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_RATE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.rateAmount);
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.addModifier(createCodeableConcept(CODING_SYSTEM_HCPCS, claimLine.hcpcsCode.get()));
 			}
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
-						.setCode(claimLine.hcpcsInitialModifierCode.get()));
+				item.addModifier(
+						createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE1, claimLine.hcpcsInitialModifierCode.get()));
 			}
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
-						.setCode(claimLine.hcpcsSecondModifierCode.get()));
+				item.addModifier(
+						createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE2, claimLine.hcpcsSecondModifierCode.get()));
 			}
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_BLOOD_DEDUCTIBLE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_BLOOD_DEDUCTIBLE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.bloodDeductibleAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_CASH_DEDUCTIBLE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_CASH_DEDUCTIBLE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.cashDeductibleAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_WAGE_ADJ_COINSURANCE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_WAGE_ADJ_COINSURANCE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.wageAdjustedCoinsuranceAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.reducedCoinsuranceAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_1ST_MSP_AMOUNT))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_1ST_MSP_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.firstMspPaidAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_2ND_MSP_AMOUNT))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_2ND_MSP_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.secondMspPaidAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.providerPaymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.benficiaryPaymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.patientResponsibilityAmount);
 
 			item.addAdjudication()
 					.setCategory(
-							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PAYMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.paymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.totalChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
@@ -1983,8 +1980,8 @@ public final class DataTransformer {
 			item.setQuantity(qty);
 
 			if (claimLine.nationalDrugCodeQualifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(CODING_SYSTEM_NDC_QLFR_CD)
-						.setCode(claimLine.nationalDrugCodeQualifierCode.get()));
+				item.addModifier(createCodeableConcept(CODING_SYSTEM_NDC_QLFR_CD,
+						claimLine.nationalDrugCodeQualifierCode.get()));
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
@@ -2024,7 +2021,7 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -2053,21 +2050,21 @@ public final class DataTransformer {
 			eob.setHospitalization(period);
 		}
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_ADMISSION_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.admissionTypeCd)));
+		eob.addInformation().setCategory(
+				createCodeableConcept(CODING_SYSTEM_ADMISSION_TYPE_CD, String.valueOf(claimGroup.admissionTypeCd)));
 
 		if (claimGroup.sourceAdmissionCd.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_SOURCE_ADMISSION_CD)
-					.setCode(String.valueOf(claimGroup.sourceAdmissionCd.get())));
+			eob.addInformation().setCategory(createCodeableConcept(CODING_SYSTEM_SOURCE_ADMISSION_CD,
+					String.valueOf(claimGroup.sourceAdmissionCd.get())));
 		}
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -2085,11 +2082,11 @@ public final class DataTransformer {
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_FREQUENCY_CD).setCode(String.valueOf(claimGroup.claimFrequencyCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_PRIMARY_PAYER_CD).setCode(String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
 
@@ -2109,19 +2106,19 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-					.setSystem(CODING_SYSTEM_MCO_PAID_CD).setCode(String.valueOf(claimGroup.mcoPaidSw.get()))));
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
 		if (claimGroup.patientStatusCd.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_PATIENT_STATUS_CD)
-							.setCode(String.valueOf(claimGroup.patientStatusCd.get()))));
+					createCodeableConcept(CODING_SYSTEM_PATIENT_STATUS_CD,
+							String.valueOf(claimGroup.patientStatusCd.get()))));
 		}
 
 		if (claimGroup.deductibleAmount != null) {
 			BenefitComponent benefitInpatientDeductible = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_BENEFIT_DEDUCTIBLE_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_BENEFIT_DEDUCTIBLE_AMT_URL));
 			benefitInpatientDeductible
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.deductibleAmount));
 			benefitBalances.getFinancial().add(benefitInpatientDeductible);
@@ -2129,7 +2126,7 @@ public final class DataTransformer {
 
 		if (claimGroup.partACoinsuranceLiabilityAmount != null) {
 			BenefitComponent benefitPartACoinsuranceLiabilityAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_COIN_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_BENEFIT_COIN_AMT_URL));
 			benefitPartACoinsuranceLiabilityAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.partACoinsuranceLiabilityAmount));
 			benefitBalances.getFinancial().add(benefitPartACoinsuranceLiabilityAmt);
@@ -2137,7 +2134,7 @@ public final class DataTransformer {
 
 		if (claimGroup.bloodDeductibleLiabilityAmount != null) {
 			BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL));
 			benefitInpatientNchPrimaryPayerAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.bloodDeductibleLiabilityAmount));
 			benefitBalances.getFinancial().add(benefitInpatientNchPrimaryPayerAmt);
@@ -2145,7 +2142,7 @@ public final class DataTransformer {
 
 		if (claimGroup.noncoveredCharge != null) {
 			BenefitComponent benefitNonCoveredChangeAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL));
 			benefitNonCoveredChangeAmt
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.noncoveredCharge));
 			benefitBalances.getFinancial().add(benefitNonCoveredChangeAmt);
@@ -2153,15 +2150,15 @@ public final class DataTransformer {
 
 		if (claimGroup.totalDeductionAmount != null) {
 			BenefitComponent benefitTotalChangeAmt = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_INPATIENT_TOTAL_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_INPATIENT_TOTAL_AMT_URL));
 			benefitTotalChangeAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalDeductionAmount));
 			benefitBalances.getFinancial().add(benefitTotalChangeAmt);
 		}
 
 		if (claimGroup.claimPPSCapitalFSPAmount != null) {
-			BenefitComponent claimPPSCapitalFSPAmt = new BenefitComponent(new Coding().setSystem(BENEFIT_BALANCE_TYPE)
-					.setCode(CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL));
+			BenefitComponent claimPPSCapitalFSPAmt = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL));
 			claimPPSCapitalFSPAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalFSPAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalFSPAmt);
@@ -2169,23 +2166,23 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPPSCapitalOutlierAmount != null) {
 			BenefitComponent claimPPSCapitalOutlierAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL));
 			claimPPSCapitalOutlierAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSCapitalOutlierAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalOutlierAmount);
 		}
 
 		if (claimGroup.claimPPSCapitalDisproportionateShareAmt != null) {
-			BenefitComponent claimPPSCapitalDisproportionateShareAmt = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL));
+			BenefitComponent claimPPSCapitalDisproportionateShareAmt = new BenefitComponent(createCodeableConcept(
+					BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL));
 			claimPPSCapitalDisproportionateShareAmt.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSCapitalDisproportionateShareAmt.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalDisproportionateShareAmt);
 		}
 
 		if (claimGroup.claimPPSCapitalIMEAmount != null) {
-			BenefitComponent claimPPSCapitalIMEAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL));
+			BenefitComponent claimPPSCapitalIMEAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL));
 			claimPPSCapitalIMEAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.claimPPSCapitalIMEAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalIMEAmount);
@@ -2193,15 +2190,15 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPPSCapitalExceptionAmount != null) {
 			BenefitComponent claimPPSCapitalExceptionAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL));
 			claimPPSCapitalExceptionAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSCapitalExceptionAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSCapitalExceptionAmount);
 		}
 
 		if (claimGroup.claimPPSOldCapitalHoldHarmlessAmount != null) {
-			BenefitComponent claimPPSOldCapitalHoldHarmlessAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL));
+			BenefitComponent claimPPSOldCapitalHoldHarmlessAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL));
 			claimPPSOldCapitalHoldHarmlessAmount.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US)
 					.setValue(claimGroup.claimPPSOldCapitalHoldHarmlessAmount.get()));
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
@@ -2248,12 +2245,12 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.diagnosisRelatedGroupCd.isPresent()) {
-			eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD)
-					.setCode(claimGroup.diagnosisRelatedGroupCd.get()));
+			eob.addInformation().setCategory(createCodeableConcept(CODING_SYSTEM_DIAGNOSIS_RELATED_GROUP_CD,
+					claimGroup.diagnosisRelatedGroupCd.get()));
 		}
 
-		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_ADMISSION_TYPE_CD)
-				.setCode(String.valueOf(claimGroup.admissionTypeCd)));
+		eob.addInformation().setCategory(
+				createCodeableConcept(CODING_SYSTEM_ADMISSION_TYPE_CD, String.valueOf(claimGroup.admissionTypeCd)));
 
 		addDiagnosisCode(eob, claimGroup.diagnosisAdmitting);
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
@@ -2284,29 +2281,28 @@ public final class DataTransformer {
 
 			item.addDetail(detail);
 
-			item.setRevenue(new Coding().setSystem(CODING_SYSTEM_REVENUE_CENTER).setCode(claimLine.revenueCenter));
+			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
 			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, claimLine.hcpcsCode.get()));
 			}
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_RATE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_RATE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.rateAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.totalChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
@@ -2331,8 +2327,8 @@ public final class DataTransformer {
 			item.setQuantity(qty);
 
 			if (claimLine.nationalDrugCodeQualifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(CODING_SYSTEM_NDC_QLFR_CD)
-						.setCode(claimLine.nationalDrugCodeQualifierCode.get()));
+				item.addModifier(createCodeableConcept(CODING_SYSTEM_NDC_QLFR_CD,
+						claimLine.nationalDrugCodeQualifierCode.get()));
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
@@ -2374,7 +2370,7 @@ public final class DataTransformer {
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
@@ -2388,8 +2384,8 @@ public final class DataTransformer {
 
 		if (!claimGroup.patientDischargeStatusCode.isEmpty()) {
 			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD)
-							.setCode(claimGroup.patientDischargeStatusCode)));
+					createCodeableConcept(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD,
+							claimGroup.patientDischargeStatusCode)));
 		}
 
 		eob.getPayment()
@@ -2398,20 +2394,20 @@ public final class DataTransformer {
 
 		if (claimGroup.patientStatusCd.isPresent()) {
 			eob.addInformation().setCategory(
-					new Coding().setSystem(CODING_SYSTEM_PATIENT_STATUS_CD)
-							.setCode(String.valueOf(claimGroup.patientStatusCd.get())));
+					createCodeableConcept(CODING_SYSTEM_PATIENT_STATUS_CD,
+							String.valueOf(claimGroup.patientStatusCd.get())));
 		}
 
 		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_UTILIZATION_DAY_COUNT))
 				.setValue(new Quantity(claimGroup.utilizationDayCount));
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -2439,11 +2435,11 @@ public final class DataTransformer {
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_FREQUENCY_CD).setCode(String.valueOf(claimGroup.claimFrequencyCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_PRIMARY_PAYER_CD).setCode(String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
 
@@ -2469,27 +2465,26 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.setRevenue(new Coding().setSystem(CODING_SYSTEM_REVENUE_CENTER).setCode(claimLine.revenueCenter));
+			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, claimLine.hcpcsCode.get()));
 			}
 
 			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_RATE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_RATE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.rateAmount);
 
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
-						.setCode(claimLine.hcpcsInitialModifierCode.get()));
+				item.addModifier(
+						createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE1, claimLine.hcpcsInitialModifierCode.get()));
 			}
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
-						.setCode(claimLine.hcpcsSecondModifierCode.get()));
+				item.addModifier(
+						createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE2, claimLine.hcpcsSecondModifierCode.get()));
 			}
 
 			DetailComponent detail = new DetailComponent();
@@ -2499,32 +2494,32 @@ public final class DataTransformer {
 			item.addDetail(detail);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.providerPaymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.benficiaryPaymentAmount);
 
 			item.addAdjudication()
 					.setCategory(
-							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PAYMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.paymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.totalChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
@@ -2549,8 +2544,8 @@ public final class DataTransformer {
 			item.setQuantity(qty);
 
 			if (claimLine.nationalDrugCodeQualifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(CODING_SYSTEM_NDC_QLFR_CD)
-						.setCode(claimLine.nationalDrugCodeQualifierCode.get()));
+				item.addModifier(createCodeableConcept(CODING_SYSTEM_NDC_QLFR_CD,
+						claimLine.nationalDrugCodeQualifierCode.get()));
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
@@ -2591,7 +2586,7 @@ public final class DataTransformer {
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
@@ -2605,8 +2600,8 @@ public final class DataTransformer {
 
 		if (!claimGroup.patientDischargeStatusCode.isEmpty()) {
 			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
-					new Coding().setSystem(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD)
-							.setCode(claimGroup.patientDischargeStatusCode)));
+					createCodeableConcept(CODING_SYSTEM_PATIENT_DISCHARGE_STATUS_CD,
+							claimGroup.patientDischargeStatusCode)));
 		}
 
 		eob.getPayment()
@@ -2614,12 +2609,12 @@ public final class DataTransformer {
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -2633,11 +2628,11 @@ public final class DataTransformer {
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_FREQUENCY_CD).setCode(String.valueOf(claimGroup.claimFrequencyCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-				.setSystem(CODING_SYSTEM_PRIMARY_PAYER_CD).setCode(String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
 		// FIXME Map following physicianNPI's to eob.careTeam when available
 
@@ -2663,13 +2658,12 @@ public final class DataTransformer {
 			}
 
 		if (claimGroup.claimLUPACode.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-					.setSystem(CODING_SYSTEM_HHA_LUPA_CD).setCode(String.valueOf(claimGroup.claimLUPACode.get()))));
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(
+					createCodeableConcept(CODING_SYSTEM_HHA_LUPA_CD, String.valueOf(claimGroup.claimLUPACode.get()))));
 		}
 		if (claimGroup.claimReferralCode.isPresent()) {
-			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(new Coding()
-					.setSystem(CODING_SYSTEM_HHA_REFERRAL_CD)
-					.setCode(String.valueOf(claimGroup.claimReferralCode.get()))));
+			eob.addInformation(new ExplanationOfBenefit.SpecialConditionComponent(createCodeableConcept(
+					CODING_SYSTEM_HHA_REFERRAL_CD, String.valueOf(claimGroup.claimReferralCode.get()))));
 		}
 
 		eob.addInformation().setCategory(new Coding().setSystem(CODING_SYSTEM_HHA_VISIT_COUNT))
@@ -2684,7 +2678,7 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			item.setRevenue(new Coding().setSystem(CODING_SYSTEM_REVENUE_CENTER).setCode(claimLine.revenueCenter));
+			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
 			DetailComponent detail = new DetailComponent();
 			detail.addExtension().setUrl(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE)
@@ -2695,38 +2689,37 @@ public final class DataTransformer {
 			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_RATE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_RATE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.rateAmount);
 
 			if (claimLine.revCntr1stAnsiCd.isPresent()) {
 				item.addAdjudication()
-						.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-								.setCode(CODED_ADJUDICATION_1ST_ANSI_CD))
+						.setCategory(
+								createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_1ST_ANSI_CD))
 						.setReason(new Coding().setCode(claimLine.revCntr1stAnsiCd.get())
 								.setSystem(CODING_SYSTEM_ADJUDICATION_CMS));
 			}
 
 			if (claimLine.hcpcsCode.isPresent()) {
-				item.setService(new Coding().setSystem(CODING_SYSTEM_HCPCS).setCode(claimLine.hcpcsCode.get()));
+				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, claimLine.hcpcsCode.get()));
 			}
 
 			item.addAdjudication()
 					.setCategory(
-							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PAYMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.paymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.totalChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_NONCOVERED_CHARGE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_NONCOVERED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.nonCoveredChargeAmount);
 
@@ -2737,13 +2730,13 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE1)
-						.setCode(claimLine.hcpcsInitialModifierCode.get()));
+				item.addModifier(
+						createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE1, claimLine.hcpcsInitialModifierCode.get()));
 			}
 
 			if (claimLine.hcpcsSecondModifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(HCPCS_INITIAL_MODIFIER_CODE2)
-						.setCode(claimLine.hcpcsSecondModifierCode.get()));
+				item.addModifier(
+						createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE2, claimLine.hcpcsSecondModifierCode.get()));
 			}
 
 			/*
@@ -2761,8 +2754,8 @@ public final class DataTransformer {
 			item.setQuantity(qty);
 
 			if (claimLine.nationalDrugCodeQualifierCode.isPresent()) {
-				item.addModifier(new Coding().setSystem(CODING_SYSTEM_NDC_QLFR_CD)
-						.setCode(claimLine.nationalDrugCodeQualifierCode.get()));
+				item.addModifier(createCodeableConcept(CODING_SYSTEM_NDC_QLFR_CD,
+						claimLine.nationalDrugCodeQualifierCode.get()));
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
@@ -2810,7 +2803,7 @@ public final class DataTransformer {
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
 
-		eob.setType(new Coding().setSystem(CODING_SYSTEM_CCW_CLAIM_TYPE).setCode(claimGroup.claimTypeCode));
+		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -2823,12 +2816,12 @@ public final class DataTransformer {
 				.setAmount((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.paymentAmount));
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				new Coding().setSystem(CODING_BENEFIT_BALANCE_URL).setCode("Medical"));
+				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -2859,15 +2852,15 @@ public final class DataTransformer {
 
 		if (!claimGroup.providerPaymentAmount.equals(ZERO)) {
 			BenefitComponent providerPaymentAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_PAYMENT_B));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PAYMENT_B));
 			providerPaymentAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.providerPaymentAmount));
 			benefitBalances.getFinancial().add(providerPaymentAmount);
 		}
 
 		if (!claimGroup.beneficiaryPaymentAmount.equals(ZERO)) {
-			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
+			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
 			beneficiaryPaymentAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPaymentAmount));
 			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
@@ -2875,7 +2868,7 @@ public final class DataTransformer {
 
 		if (!claimGroup.submittedChargeAmount.equals(ZERO)) {
 			BenefitComponent submittedChargeAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
 			submittedChargeAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.submittedChargeAmount));
 			benefitBalances.getFinancial().add(submittedChargeAmount);
@@ -2883,15 +2876,15 @@ public final class DataTransformer {
 
 		if (!claimGroup.allowedChargeAmount.equals(ZERO)) {
 			BenefitComponent allowedChargeAmount = new BenefitComponent(
-					new Coding().setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_ALLOWED_CHARGE));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_ALLOWED_CHARGE));
 			allowedChargeAmount
 					.setBenefit(new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.allowedChargeAmount));
 			benefitBalances.getFinancial().add(allowedChargeAmount);
 		}
 
 		if (!claimGroup.beneficiaryPartBDeductAmount.equals(ZERO)) {
-			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(new Coding()
-					.setSystem(BENEFIT_BALANCE_TYPE).setCode(CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
+			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
 			beneficiaryPartBDeductAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.beneficiaryPartBDeductAmount));
 			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
@@ -2926,8 +2919,8 @@ public final class DataTransformer {
 				 * `qualification` entry.
 				 */
 				performingCareTeamMember
-						.setQualification(new Coding().setSystem(CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD)
-								.setCode("" + claimLine.providerSpecialityCode.get()));
+						.setQualification(createCodeableConcept(CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+								"" + claimLine.providerSpecialityCode.get()));
 
 				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 						CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
@@ -2951,11 +2944,11 @@ public final class DataTransformer {
 
 			item.addDetail(detail);
 
-			item.setCategory(new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE)
-					.setCode(claimLine.cmsServiceTypeCode));
+			item.setCategory(
+					createCodeableConcept(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, claimLine.cmsServiceTypeCode));
 
 			item.setLocation(
-					new Coding().setSystem(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION).setCode(claimLine.placeOfServiceCode));
+					createCodeableConcept(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, claimLine.placeOfServiceCode));
 			if (!claimLine.providerStateCode.isEmpty()) {
 				addExtensionCoding(item.getLocation(), CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
 						CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, claimLine.providerStateCode);
@@ -2990,25 +2983,23 @@ public final class DataTransformer {
 
 			item.addAdjudication()
 					.setCategory(
-							new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS).setCode(CODED_ADJUDICATION_PAYMENT))
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PAYMENT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.paymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.beneficiaryPaymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PAYMENT_B))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_PAYMENT_B))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.providerPaymentAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_DEDUCTIBLE))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_DEDUCTIBLE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.beneficiaryPartBDeductAmount);
 
@@ -3019,32 +3010,32 @@ public final class DataTransformer {
 			}
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.primaryPayerPaidAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.coinsuranceAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.primaryPayerAllowedChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.submittedChargeAmount);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_ALLOWED_CHARGE))
+					.setCategory(
+							createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS, CODED_ADJUDICATION_ALLOWED_CHARGE))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.allowedChargeAmount);
 
@@ -3067,8 +3058,8 @@ public final class DataTransformer {
 			addDiagnosisLink(eob, item, claimLine.diagnosis);
 
 			item.addAdjudication()
-					.setCategory(new Coding().setSystem(CODING_SYSTEM_ADJUDICATION_CMS)
-							.setCode(CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT))
+					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
+							CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT))
 					.getAmount().setSystem(CODING_SYSTEM_MONEY).setCode(CODING_SYSTEM_MONEY_US)
 					.setValue(claimLine.purchasePriceAmount);
 
