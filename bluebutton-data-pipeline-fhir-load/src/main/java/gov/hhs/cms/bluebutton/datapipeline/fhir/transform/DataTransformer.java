@@ -1652,9 +1652,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				item.addCareTeam()
-						.setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI)
-								.setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
+						claimLine.revenueCenterRenderingPhysicianNPI.get());
 			}
 
 		}
@@ -1985,9 +1984,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				item.addCareTeam()
-						.setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI)
-								.setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
+						claimLine.revenueCenterRenderingPhysicianNPI.get());
 			}
 		}
 
@@ -2332,9 +2330,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				item.addCareTeam()
-						.setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI)
-								.setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
+						claimLine.revenueCenterRenderingPhysicianNPI.get());
 			}
 
 		}
@@ -2548,9 +2545,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				item.addCareTeam()
-						.setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI)
-								.setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
+						claimLine.revenueCenterRenderingPhysicianNPI.get());
 			}
 		}
 
@@ -2759,9 +2755,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				item.addCareTeam()
-						.setProvider(new Practitioner().addIdentifier().setSystem(CODING_REVENUE_CENTER_RENDER_PHY_NPI)
-								.setValue(claimLine.revenueCenterRenderingPhysicianNPI.get()));
+				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
+						claimLine.revenueCenterRenderingPhysicianNPI.get());
 			}
 
 		}
@@ -2903,9 +2898,8 @@ public final class DataTransformer {
 			item.setSequence(claimLine.number);
 
 			if (!claimLine.providerNPI.isEmpty()) {
-				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = new ExplanationOfBenefit.CareTeamComponent();
-				performingCareTeamMember
-						.setProvider(createIdentifierReference(CODING_SYSTEM_NPI_US, claimLine.providerNPI));
+				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = addCareTeamPractitioner(eob, item,
+						CODING_SYSTEM_NPI_US, claimLine.providerNPI);
 				performingCareTeamMember.setResponsible(true);
 
 				/*
@@ -2925,8 +2919,6 @@ public final class DataTransformer {
 				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 						CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 						"" + claimLine.providerParticipatingIndCode.get());
-
-				item.addCareTeam(performingCareTeamMember);
 			} else {
 				/*
 				 * Per Michelle at GDIT, and also Tony Dean at OEDA, the
