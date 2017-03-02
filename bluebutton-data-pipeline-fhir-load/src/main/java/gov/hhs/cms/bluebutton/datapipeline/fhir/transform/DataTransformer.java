@@ -1012,15 +1012,11 @@ public final class DataTransformer {
 		 * think of an intelligent client-specified ID for them).
 		 */
 		if (claimGroup.referringPhysicianNpi.isPresent()) {
-			Practitioner referrer = new Practitioner();
-			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.referringPhysicianNpi.get());
-			Reference referrerReference = upsert(bundle, referrer,
-					referencePractitioner(claimGroup.referringPhysicianNpi.get()).getReference());
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
 			referral.setRequester(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
-			referral.addRecipient(referrerReference);
+			referral.addRecipient(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
 		}
@@ -2829,17 +2825,12 @@ public final class DataTransformer {
 		 * updating them would require an extra roundtrip to the server (can't
 		 * think of an intelligent client-specified ID for them).
 		 */
-		Practitioner referrer = null;
 		if (claimGroup.referringPhysicianNpi.isPresent()) {
-			referrer = new Practitioner();
-			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.referringPhysicianNpi.get());
-			Reference referrerReference = upsert(bundle, referrer,
-					referencePractitioner(claimGroup.referringPhysicianNpi.get()).getReference());
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
 			referral.setRequester(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
-			referral.addRecipient(referrerReference);
+			referral.addRecipient(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
 		}
@@ -3288,8 +3279,7 @@ public final class DataTransformer {
 	 *         matches the specified parameters
 	 */
 	static Reference referencePractitioner(String practitionerNpi) {
-		return new Reference(String.format("Practitioner?identifier=%s|%s", urlEncode(CODING_SYSTEM_NPI_US),
-				urlEncode(practitionerNpi)));
+		return createIdentifierReference(CODING_SYSTEM_NPI_US, practitionerNpi);
 	}
 
 	/**
