@@ -39,11 +39,11 @@ public class BlueButtonServerIT {
 		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
+		pt.addName().setFamily(methodName);
 		IIdType id = ourClient.create().resource(pt).execute().getId();
 
 		Patient pt2 = ourClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(methodName, pt2.getName().get(0).getFamily().get(0).getValue());
+		assertEquals(methodName, pt2.getName().get(0).getFamily());
 	}
 
 	/**

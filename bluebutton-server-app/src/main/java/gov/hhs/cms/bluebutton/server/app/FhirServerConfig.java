@@ -63,15 +63,12 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();
 		retVal.add(rpBundleDstu3());
-		retVal.add(rpConformanceDstu3());
+		retVal.add(rpCapabilityStatementDstu3());
 		retVal.add(rpCoverageDstu3());
 		retVal.add(rpExplanationOfBenefitDstu3());
-		retVal.add(rpMedicationDstu3());
-		retVal.add(rpMedicationOrderDstu3());
 		retVal.add(rpOrganizationDstu3());
 		retVal.add(rpPatientDstu3());
 		retVal.add(rpPractitionerDstu3());
-		retVal.add(rpReferralRequestDstu3());
 		return retVal;
 	}
 
@@ -98,15 +95,12 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 		List<IFhirResourceDao<?>> retVal = new ArrayList<IFhirResourceDao<?>>();
 		retVal.add(daoBundleDstu3());
-		retVal.add(daoConformanceDstu3());
+		retVal.add(daoCapabilityStatementDstu3());
 		retVal.add(daoCoverageDstu3());
 		retVal.add(daoExplanationOfBenefitDstu3());
-		retVal.add(daoMedicationDstu3());
-		retVal.add(daoMedicationOrderDstu3());
 		retVal.add(daoOrganizationDstu3());
 		retVal.add(daoPatientDstu3());
 		retVal.add(daoPractitionerDstu3());
-		retVal.add(daoReferralRequestDstu3());
 		return retVal;
 	}
 
