@@ -22,9 +22,11 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -38,6 +40,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
@@ -451,26 +455,14 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
 				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
 
-		Assert.assertEquals(record.providerPaymentAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODED_ADJUDICATION_PAYMENT_B))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.submittedChargeAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.allowedChargeAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE))
-						.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE, DataTransformer.CODED_ADJUDICATION_PAYMENT_B,
+				record.providerPaymentAmount, eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, record.submittedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE, record.allowedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
@@ -651,149 +643,69 @@ public final class DataTransformerTest {
 		assertDateEquals(record.claimAdmissionDate.get(), eob.getHospitalization().getStartElement());
 		assertDateEquals(record.beneficiaryDischargeDate.get(), eob.getHospitalization().getEndElement());
 
-		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_BENEFIT_DEDUCTIBLE_AMT_URL, record.deductibleAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PASS_THRU_PER_DIEM_AMT, record.passThruPerDiemAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_BENEFIT_COIN_AMT_URL, record.partACoinsuranceLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL, record.bloodDeductibleLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_PROFFESIONAL_CHARGE_URL, record.professionalComponentCharge,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL, record.noncoveredCharge,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_INPATIENT_TOTAL_AMT_URL, record.totalDeductionAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL, record.claimTotalPPSCapitalAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL, record.claimPPSCapitalFSPAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL, record.claimPPSCapitalOutlierAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL,
+				record.claimPPSCapitalDisproportionateShareAmt.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL,
+				record.claimPPSCapitalIMEAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL, record.claimPPSCapitalExceptionAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL,
+				record.claimPPSOldCapitalHoldHarmlessAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
-		Assert.assertEquals(record.deductibleAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_BENEFIT_DEDUCTIBLE_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT, record.utilizationDayCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT, record.coinsuranceDayCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT, record.nonUtilizationDayCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY, record.bloodPintsFurnishedQty,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
-		Assert.assertEquals(record.passThruPerDiemAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PASS_THRU_PER_DIEM_AMT))
-						.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.partACoinsuranceLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_BENEFIT_COIN_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.bloodDeductibleLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.professionalComponentCharge, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_PROFFESIONAL_CHARGE_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.noncoveredCharge, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.totalDeductionAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_INPATIENT_TOTAL_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.claimTotalPPSCapitalAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_TOTAL_PPS_CAPITAL_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-		
-		Assert.assertEquals(record.claimPPSCapitalFSPAmount.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.claimPPSCapitalOutlierAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.claimPPSCapitalDisproportionateShareAmt.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial()
-						.stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.claimPPSCapitalIMEAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.claimPPSCapitalExceptionAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.claimPPSOldCapitalHoldHarmlessAmount.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial()
-						.stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
-						.findFirst().get().getValueQuantity().getValue());
-
-		Assert.assertEquals(new BigDecimal(record.coinsuranceDayCount),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
-						.findFirst().get().getValueQuantity().getValue());
-
-		Assert.assertEquals(new BigDecimal(record.nonUtilizationDayCount),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
-						.findFirst().get().getValueQuantity().getValue());
-
-		Assert.assertEquals(new BigDecimal(record.bloodPintsFurnishedQty),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
-						.findFirst().get().getValueQuantity().getValue());
-
-		Assert.assertEquals(record.nchDrugOutlierApprovedPaymentAmount.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial()
-						.stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue()
-				);
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL,
+				record.nchDrugOutlierApprovedPaymentAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
 
 		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
 				eob.getOrganization());
@@ -936,46 +848,27 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
-		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream().filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-						DataTransformer.BENEFIT_BALANCE_TYPE, DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.bloodDeductibleLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.deductibleAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_BEN_PART_B_DED_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.coninsuranceAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_BEN_PART_B_COINSUR_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.providerPaymentAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_OUTPAT_PROVIDER_PAYMENT_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
-
-		Assert.assertEquals(record.beneficiaryPaymentAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue()
-				);
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_BEN_PART_B_DED_AMT_URL, record.deductibleAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL, record.bloodDeductibleLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_PROFFESIONAL_CHARGE_URL, record.professionalComponentCharge,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_BEN_PART_B_COINSUR_AMT_URL, record.coninsuranceAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PAYMENT_B, record.providerPaymentAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL, record.beneficiaryPaymentAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
 		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
 				eob.getOrganization());
@@ -1132,10 +1025,9 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
 
-		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
-				.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
 
 		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
 				eob.getOrganization());
@@ -1157,133 +1049,67 @@ public final class DataTransformerTest {
 				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI).get(0)
 						.getValue()).getValue());
 
-		Assert.assertEquals(record.deductibleAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_BENEFIT_DEDUCTIBLE_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_BENEFIT_DEDUCTIBLE_AMT_URL, record.deductibleAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_BENEFIT_COIN_AMT_URL, record.partACoinsuranceLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL, record.bloodDeductibleLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL, record.noncoveredCharge,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_NCH_INPATIENT_TOTAL_AMT_URL, record.totalDeductionAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL, record.claimPPSCapitalFSPAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL, record.claimPPSCapitalOutlierAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL,
+				record.claimPPSCapitalDisproportionateShareAmt.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL,
+				record.claimPPSCapitalIMEAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL, record.claimPPSCapitalExceptionAmount.get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL,
+				record.claimPPSOldCapitalHoldHarmlessAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
 
-		Assert.assertEquals(record.partACoinsuranceLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_BENEFIT_COIN_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT, record.utilizationDayCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT, record.coinsuranceDayCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT, record.nonUtilizationDayCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY, record.bloodPintsFurnishedQty,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
-		Assert.assertEquals(record.bloodDeductibleLiabilityAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue());
+		assertInformationPeriodEquals(DataTransformer.BENEFIT_COVERAGE_DATE,
+				DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE,
+				record.qualifiedStayFromDate.get(), record.qualifiedStayThroughDate.get(), eob.getInformation());
 
-		Assert.assertEquals(record.noncoveredCharge,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_NCH_INPATIENT_NONCOVERED_CHARGE_URL))
-						.findFirst().get().getBenefitMoney().getValue());
+		assertInformationPeriodEquals(DataTransformer.BENEFIT_COVERAGE_DATE,
+				DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE,
+				record.noncoveredStayFromDate.get(), record.noncoveredStayThroughDate.get(), eob.getInformation());
 
-		Assert.assertEquals(record.totalDeductionAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_NCH_INPATIENT_TOTAL_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.claimPPSCapitalFSPAmount.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PPS_CAPITAL_FEDERAL_PORTION_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.claimPPSCapitalOutlierAmount.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PPS_CAPITAL_OUTLIER_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.claimPPSCapitalDisproportionateShareAmt.get(), eob.getBenefitBalanceFirstRep()
-				.getFinancial().stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_PPS_CAPITAL_DISPROPORTIONAL_SHARE_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.claimPPSCapitalIMEAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial()
-				.stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_CLAIM_PPS_CAPITAL_INDIRECT_MEDICAL_EDU_AMT_URL))
-				.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.claimPPSCapitalExceptionAmount.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PPS_CAPITAL_EXCEPTION_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.claimPPSOldCapitalHoldHarmlessAmount.get(),
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
-						.findFirst().get().getValueQuantity().getValue());
-
-		Assert.assertEquals(new BigDecimal(record.coinsuranceDayCount),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_COINSURANCE_DAY_COUNT))
-						.findFirst().get().getValueQuantity().getValue());
-
-		Assert.assertEquals(new BigDecimal(record.nonUtilizationDayCount),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
-						.findFirst().get().getValueQuantity().getValue());
-
-		Assert.assertEquals(new BigDecimal(record.bloodPintsFurnishedQty),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
-						.findFirst().get().getValueQuantity().getValue());
-
-		assertDateEquals(record.qualifiedStayFromDate.get(),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
-						.findFirst().get().getTimingPeriod().getStartElement());
-
-		assertDateEquals(record.qualifiedStayThroughDate.get(),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_QUALIFIED_STAY_DATE))
-						.findFirst().get().getTimingPeriod().getEndElement());
-
-		assertDateEquals(record.noncoveredStayFromDate.get(),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
-						.findFirst().get().getTimingPeriod().getStartElement());
-
-		assertDateEquals(record.noncoveredStayThroughDate.get(),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_NONCOVERED_STAY_DATE))
-						.findFirst().get().getTimingPeriod().getEndElement());
-
-		Assert.assertEquals(record.medicareBenefitsExhaustedDate.get().toString(),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
-						.findFirst().get().getTiming().primitiveValue());
+		assertInformationDateEquals(DataTransformer.BENEFIT_COVERAGE_DATE,
+				DataTransformer.CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE,
+				record.medicareBenefitsExhaustedDate.get(), eob.getInformation());
 
 		assertDateEquals(record.claimAdmissionDate.get(), eob.getHospitalization().getStartElement());
 		assertDateEquals(record.beneficiaryDischargeDate.get(), eob.getHospitalization().getEndElement());
@@ -1395,16 +1221,13 @@ public final class DataTransformerTest {
 						DataTransformer.CODING_SYSTEM_PATIENT_STATUS_CD,
 						String.valueOf(record.patientStatusCd.get()))));
 
-		Assert.assertEquals(new BigDecimal(record.utilizationDayCount),
-				eob.getInformation().stream()
-						.filter(i -> DataTransformer.isCodeInConcept(i.getCategory(), "FIXME",
-								DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT))
-						.findFirst().get().getValueQuantity().getValue());
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_UTILIZATION_DAY_COUNT, record.utilizationDayCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
-		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
-				.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		
@@ -1539,10 +1362,9 @@ public final class DataTransformerTest {
 				(eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD).get(0).getValue()
 						.toString()));
 		
-		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
-				.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
 
 		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
 				eob.getOrganization());
@@ -1557,6 +1379,10 @@ public final class DataTransformerTest {
 						.getValue()).getValue());
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
+
+		assertBenefitBalanceUsedEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODING_SYSTEM_HHA_VISIT_COUNT, record.totalVisitCount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
 		assertDateEquals(record.careStartDate.get(), eob.getHospitalization().getStartElement());
 
@@ -1664,10 +1490,9 @@ public final class DataTransformerTest {
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		
-		Assert.assertEquals(record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial().stream()
-				.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(), DataTransformer.BENEFIT_BALANCE_TYPE,
-						DataTransformer.CODING_NCH_PRIMARY_PAYER_URL))
-				.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
 
 		Assert.assertEquals(record.clinicalTrialNumber.get(),
 				(eob.getExtensionsByUrl(DataTransformer.CLAIM_CLINICAL_TRIAL_NUMBER).get(0).getValue()
@@ -1696,26 +1521,14 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
 				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
 
-		Assert.assertEquals(record.providerPaymentAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.submittedChargeAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
-						.findFirst().get().getBenefitMoney().getValue());
-
-		Assert.assertEquals(record.allowedChargeAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial().stream()
-						.filter(bb -> DataTransformer.isCodeInConcept(bb.getType(),
-								DataTransformer.BENEFIT_BALANCE_TYPE,
-								DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE))
-						.findFirst().get().getBenefitMoney().getValue());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE, DataTransformer.CODED_ADJUDICATION_PAYMENT_B,
+				record.providerPaymentAmount, eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, record.submittedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
+				DataTransformer.CODED_ADJUDICATION_ALLOWED_CHARGE, record.allowedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
 		Assert.assertEquals(3, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
@@ -2042,6 +1855,142 @@ public final class DataTransformerTest {
 						DataTransformer.CODING_SYSTEM_ADJUDICATION_CMS, expectedCategoryCode))
 				.findAny();
 		Assert.assertFalse(adjudication.isPresent());
+	}
+
+	/**
+	 * @param expectedFinancialTypeSystem
+	 *            the expected {@link Coding#getSystem()} of the
+	 *            {@link BenefitComponent#getCode)} to find and verify
+	 * @param expectedFinancialTypeCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link BenefitComponent#getCode)} to find and verify
+	 * @param expectedAmount
+	 *            the expected {@link BenefitComponent#getBenefitMoney}
+	 * @param actuals
+	 *            the actual {@link BenefitComponent}s to verify
+	 */
+
+	private static void assertBenefitBalanceEquals(String expectedFinancialTypeSystem, String expectedFinancialTypeCode,
+			BigDecimal expectedAmount, List<BenefitComponent> actuals) {
+		Optional<BenefitComponent> benefitComponent = actuals.stream()
+				.filter(a -> DataTransformer.isCodeInConcept(a.getType(), expectedFinancialTypeSystem,
+						expectedFinancialTypeCode))
+				.findFirst();
+		Assert.assertTrue(benefitComponent.isPresent());
+		try {
+			Assert.assertEquals(expectedAmount, benefitComponent.get().getBenefitMoney().getValue());
+		} catch (FHIRException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+	}
+
+	/**
+	 * @param expectedFinancialTypeSystem
+	 *            the expected {@link Coding#getSystem()} of the
+	 *            {@link BenefitComponent#getCode)} to find and verify
+	 * @param expectedFinancialTypeCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link BenefitComponent#getCode)} to find and verify
+	 * @param expectedAmount
+	 *            the expected
+	 *            {@link BenefitComponent#getBenefitUnsignedIntType()}
+	 * @param actuals
+	 *            the actual {@link BenefitComponent}s to verify
+	 */
+
+	private static void assertBenefitBalanceEquals(String expectedFinancialTypeSystem, String expectedFinancialTypeCode,
+			Integer expectedAmount, List<BenefitComponent> actuals) {
+		Optional<BenefitComponent> benefitComponent = actuals.stream().filter(a -> DataTransformer
+				.isCodeInConcept(a.getType(), expectedFinancialTypeSystem, expectedFinancialTypeCode)).findFirst();
+		Assert.assertTrue(benefitComponent.isPresent());
+		try {
+			Assert.assertEquals(expectedAmount, benefitComponent.get().getBenefitUnsignedIntType().getValue());
+		} catch (FHIRException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+	}
+
+	/**
+	 * @param expectedFinancialTypeSystem
+	 *            the expected {@link Coding#getSystem()} of the
+	 *            {@link BenefitComponent#getCode)} to find and verify
+	 * @param expectedFinancialTypeCode
+	 *            the expected {@link Coding#getCode()} of the
+	 *            {@link BenefitComponent#getCode)} to find and verify
+	 * @param expectedAmount
+	 *            the expected
+	 *            {@link BenefitComponent#getBenefitUsedUnsignedIntType}
+	 * @param actuals
+	 *            the actual {@link BenefitComponent}s to verify
+	 */
+
+	private static void assertBenefitBalanceUsedEquals(String expectedFinancialTypeSystem,
+			String expectedFinancialTypeCode, Integer expectedAmount, List<BenefitComponent> actuals) {
+		Optional<BenefitComponent> benefitComponent = actuals.stream().filter(a -> DataTransformer
+				.isCodeInConcept(a.getType(), expectedFinancialTypeSystem, expectedFinancialTypeCode)).findFirst();
+		Assert.assertTrue(benefitComponent.isPresent());
+		try {
+			Assert.assertEquals(expectedAmount, benefitComponent.get().getBenefitUsedUnsignedIntType().getValue());
+		} catch (FHIRException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+	}
+
+
+	/**
+	 * @param expectedSystem
+	 *            the expected {@link Coding#getSystem()} of the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 *            and verify
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCoding()} of the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 *            and verify
+	 * @param expectedFromDate
+	 *            the expected
+	 *            {@link SupportingInformationComponent#getTimingPeriod().getStartElement()}
+	 * @param expectedThruDate
+	 *            the expected
+	 *            {@link SupportingInformationComponent#getTimingPeriod().getEndElement()}
+	 * @param actuals
+	 *            the actual {@link SupportingInformationComponent}s to verify
+	 */
+	private static void assertInformationPeriodEquals(String expectedSystem, String expectedCode,
+			LocalDate expectedFromDate,
+			LocalDate expectedThruDate, List<SupportingInformationComponent> actuals) {
+		Optional<SupportingInformationComponent> supportingInformationComponent = actuals.stream()
+				.filter(a -> DataTransformer.isCodeInConcept(a.getCategory(), expectedSystem, expectedCode)).findAny();
+		Assert.assertTrue(supportingInformationComponent.isPresent());
+		try {
+			assertDateEquals(expectedFromDate,
+					supportingInformationComponent.get().getTimingPeriod().getStartElement());
+			assertDateEquals(expectedThruDate, supportingInformationComponent.get().getTimingPeriod().getEndElement());
+		} catch (FHIRException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+	}
+
+	/**
+	 * @param expectedSystem
+	 *            the expected {@link Coding#getSystem()} of the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 *            and verify
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCoding()} of the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 *            and verify
+	 * @param expectedDate
+	 *            the expected
+	 *            {@link SupportingInformationComponent#getTiming().primitiveValue()}
+	 * @param actuals
+	 *            the actual {@link SupportingInformationComponent}s to verify
+	 */
+	private static void assertInformationDateEquals(String expectedSystem, String expectedCode, LocalDate expectedDate,
+			List<SupportingInformationComponent> actuals) {
+		Optional<SupportingInformationComponent> supportingInformationComponent = actuals.stream()
+				.filter(a -> DataTransformer.isCodeInConcept(a.getCategory(), expectedSystem, expectedCode)).findAny();
+		Assert.assertTrue(supportingInformationComponent.isPresent());
+		Assert.assertEquals(expectedDate.toString(), supportingInformationComponent.get().getTiming().primitiveValue());
 	}
 
 	/**
