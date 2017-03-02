@@ -676,7 +676,8 @@ public final class DataTransformer {
 
 		Coverage partA = new Coverage();
 		partA.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_A);
-		partA.addPayor(SharedDataManager.createReferenceToCms());
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// partA.addPayor(SharedDataManager.createReferenceToCms());
 		partA.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -702,7 +703,8 @@ public final class DataTransformer {
 
 		Coverage partB = new Coverage();
 		partB.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_B);
-		partB.addPayor(SharedDataManager.createReferenceToCms());
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// partB.addPayor(SharedDataManager.createReferenceToCms());
 		partB.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -716,7 +718,8 @@ public final class DataTransformer {
 
 		Coverage partD = new Coverage();
 		partD.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_D);
-		partD.addPayor(SharedDataManager.createReferenceToCms());
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// partD.addPayor(SharedDataManager.createReferenceToCms());
 		partD.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -988,7 +991,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
@@ -1307,7 +1312,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -1679,7 +1686,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -2010,7 +2019,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -2357,7 +2368,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -2573,7 +2586,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
@@ -2784,7 +2799,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
