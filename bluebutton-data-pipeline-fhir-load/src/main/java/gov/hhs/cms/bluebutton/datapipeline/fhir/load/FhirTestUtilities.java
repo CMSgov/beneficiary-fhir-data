@@ -145,13 +145,6 @@ public final class FhirTestUtilities {
 	 */
 	public static IGenericClient createFhirClient() {
 		IGenericClient client = FhirLoader.createFhirClient(getLoadOptions());
-
-		// Client logging can be enabled here, when needed.
-		// LoggingInterceptor clientLogger = new LoggingInterceptor();
-		// clientLogger.setLogRequestBody(false);
-		// clientLogger.setLogResponseBody(false);
-		// client.registerInterceptor(clientLogger);
-
 		return client;
 	}
 }
