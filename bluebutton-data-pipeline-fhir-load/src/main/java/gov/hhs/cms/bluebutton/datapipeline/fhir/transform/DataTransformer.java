@@ -3248,16 +3248,16 @@ public final class DataTransformer {
 	/**
 	 * @param subPlan
 	 *            the {@link Coverage#getSubPlan()} value to match
-	 * @param subscriberPatientId
+	 * @param beneficiaryPatientId
 	 *            the {@link Patient#getId()} for the
 	 *            {@link Coverage#getSubscriber()} value to match
 	 * @return a {@link Reference} to the {@link Coverage} resource where
 	 *         {@link Coverage#getPlan()} matches {@link #COVERAGE_PLAN} and the
 	 *         other parameters specified also match
 	 */
-	static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
-		return new Reference(String.format("Coverage?subscriber=Patient/bene-%s&plan=%s&subplan=%s",
-				urlEncode(subscriberPatientId), urlEncode(COVERAGE_PLAN), urlEncode(subPlan)));
+	static Reference referenceCoverage(String beneficiaryPatientId, String subPlan) {
+		return new Reference(String.format("Coverage?beneficiary=%s&group.plan=%s&group.subplan=%s",
+				urlEncode("Patient/bene-" + beneficiaryPatientId), urlEncode(COVERAGE_PLAN), urlEncode(subPlan)));
 	}
 
 	/**
