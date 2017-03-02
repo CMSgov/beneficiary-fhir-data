@@ -181,6 +181,8 @@ EOF
 # process. I think this is all just buggy in Wildfly 8.1. The only thing that
 # mitigates the mess is that the script process does exit once the java process
 # does.
+# Debugging: Add `--debug 8787` to the command here to enable normal Java 
+# remote debugging of the apps running in Wildfly on port 8787.
 serverLog="${directory}/${serverInstall}/server-console.log"
 "${directory}/${serverInstall}/bin/standalone.sh" \
 	&> "${serverLog}" \
