@@ -209,6 +209,7 @@ public final class FhirLoaderIT {
 	 * {@link StaticRifResourceGroup#SAMPLE_B}.
 	 */
 	@Test
+	@Ignore("Skipped until we have enough data in SAMPLE_B again")
 	public void loadRifDataSampleB() {
 		// Generate the sample RIF data to feed through the pipeline.
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), StaticRifResourceGroup.SAMPLE_B.toRifFiles());
