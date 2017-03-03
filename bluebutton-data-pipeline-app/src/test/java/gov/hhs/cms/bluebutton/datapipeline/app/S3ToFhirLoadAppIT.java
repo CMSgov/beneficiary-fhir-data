@@ -28,6 +28,7 @@ import com.amazonaws.services.s3.model.Bucket;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
@@ -262,7 +263,7 @@ public final class S3ToFhirLoadAppIT {
 	 *         not
 	 */
 	private static boolean hasAScanFoundNothing(ProcessOutputConsumer appRunConsumer) {
-		return appRunConsumer.getStdoutContents().toString().contains("No data sets to process found");
+		return appRunConsumer.getStdoutContents().toString().contains(DataSetMonitorWorker.LOG_MESSAGE_NO_DATA_SETS);
 	}
 
 	/**
@@ -274,7 +275,7 @@ public final class S3ToFhirLoadAppIT {
 	 */
 	private static boolean hasADataSetBeenProcessed(ProcessOutputConsumer appRunConsumer) {
 		return appRunConsumer.getStdoutContents().toString()
-				.contains("Data set deleted, now that processing is complete");
+				.contains(DataSetMonitorWorker.LOG_MESSAGE_DATA_SET_COMPLETE);
 	}
 
 	/**
