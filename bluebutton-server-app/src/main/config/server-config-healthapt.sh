@@ -208,6 +208,7 @@ end-if
 /subsystem=remoting/http-connector=http-remoting-connector:write-attribute(name=connector-ref,value=https)
 
 # These data sources were initially configured on the servers, but the app doesn't use them.
+/subsystem=ee/service=default-bindings:undefine-attribute(name=datasource)
 if (outcome == success) of /subsystem=datasources/data-source=fhirds:read-resource
 	/subsystem=datasources/data-source=fhirds:remove
 end-if
