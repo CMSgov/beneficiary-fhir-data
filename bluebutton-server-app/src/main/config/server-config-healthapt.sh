@@ -18,8 +18,8 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o h:as:k:t:w:u:n:p: \
-	--long serverhome:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
+	-o h:m:as:k:t:w:u:n:p: \
+	--long serverhome:,managementport:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
 	-n 'bluebutton-server-app-server-config-healthapt.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -28,6 +28,7 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 serverHome=
+managementPort=9090
 auth=false
 httpsPort=
 keyStore=
@@ -40,6 +41,8 @@ while true; do
 	case "$1" in
 		-h | --serverhome )
 			serverHome="$2"; shift 2 ;;
+		-m | --managementport )
+			managementPort="$2"; shift 2 ;;
 		-a | --auth )
 			auth=true; shift 1 ;;
 		-s | --httpsport )
@@ -114,7 +117,7 @@ waitForServerReady() {
 	startSeconds=$SECONDS
 	endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 	while true; do
-		if "${serverHome}/bin/jboss-cli.sh" --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
+		if "${serverHome}/bin/jboss-cli.sh" --controller=localhost:${managementPort} --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
 			echo "Server ready after $(($SECONDS - $startSeconds)) seconds."
 			break
 		fi
@@ -144,6 +147,7 @@ if (outcome != success) of /core-service=management/security-realm=ApplicationRe
 end-if
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
+	--controller=localhost:${managementPort} \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
@@ -215,6 +219,7 @@ end-if
 :reload
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
+	--controller=localhost:${managementPort} \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
@@ -227,6 +232,7 @@ waitForServerReady
 # Deploy the application to the now-configured server.
 echo "Deploying application: '${war}'..."
 "${serverHome}/bin/jboss-cli.sh" \
+	--controller=localhost:${managementPort} \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
