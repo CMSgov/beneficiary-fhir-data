@@ -207,9 +207,15 @@ if (outcome == success) of /subsystem=undertow/server=default-server/http-listen
 end-if
 /subsystem=remoting/http-connector=http-remoting-connector:write-attribute(name=connector-ref,value=https)
 
-# This data source was initially configured on the servers, but the app doesn't use it.
+# These data sources were initially configured on the servers, but the app doesn't use them.
 if (outcome == success) of /subsystem=datasources/data-source=fhirds:read-resource
 	/subsystem=datasources/data-source=fhirds:remove
+end-if
+if (outcome == success) of /subsystem=datasources/data-source=ExampleDS:read-resource
+	/subsystem=datasources/data-source=ExampleDS:remove
+end-if
+if (outcome == success) of /subsystem=datasources/data-source=TestProdFHIR:read-resource
+	/subsystem=datasources/data-source=TestProdFHIR:remove
 end-if
 
 # Configure the server to listen on all configured IPs.
