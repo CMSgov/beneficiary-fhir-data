@@ -51,7 +51,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
  * processing of the data set, and block until that processing has completed.
  * </p>
  */
-final class DataSetMonitorWorker implements Runnable {
+public final class DataSetMonitorWorker implements Runnable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
 
 	/**
@@ -65,6 +65,19 @@ final class DataSetMonitorWorker implements Runnable {
 	 * S3.
 	 */
 	public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
+
+	/**
+	 * The {@link Logger} message that will be recorded if/when the
+	 * {@link DataSetMonitorWorker} goes and looks, but doesn't find any data
+	 * sets waiting to be processed.
+	 */
+	public static final String LOG_MESSAGE_NO_DATA_SETS = "No data sets to process found.";
+
+	/**
+	 * The {@link Logger} message that will be recorded if/when the
+	 * {@link DataSetMonitorWorker} completes the processing of a data set.
+	 */
+	public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set renamed in S3, now that processing is complete.";
 
 	private static final Pattern REGEX_PENDING_MANIFEST = Pattern
 			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
@@ -150,7 +163,7 @@ final class DataSetMonitorWorker implements Runnable {
 
 		// If no manifest was found, we're done (until next time).
 		if (manifestToProcessKey == null) {
-			LOGGER.info("No data sets to process found.");
+			LOGGER.info(LOG_MESSAGE_NO_DATA_SETS);
 			listener.noDataAvailable();
 			return;
 		}
@@ -374,6 +387,6 @@ final class DataSetMonitorWorker implements Runnable {
 		s3Client.deleteObjects(deleteObjectsRequest);
 		LOGGER.debug("Data set deleted in S3 (step 2 of move).");
 
-		LOGGER.info("Data set renamed in S3, now that processing is complete.");
+		LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 	}
 }
