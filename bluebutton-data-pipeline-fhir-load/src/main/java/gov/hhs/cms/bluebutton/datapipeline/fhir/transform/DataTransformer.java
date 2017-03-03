@@ -676,7 +676,8 @@ public final class DataTransformer {
 
 		Coverage partA = new Coverage();
 		partA.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_A);
-		partA.addPayor(SharedDataManager.createReferenceToCms());
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// partA.addPayor(SharedDataManager.createReferenceToCms());
 		partA.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partA.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -702,7 +703,8 @@ public final class DataTransformer {
 
 		Coverage partB = new Coverage();
 		partB.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_B);
-		partB.addPayor(SharedDataManager.createReferenceToCms());
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// partB.addPayor(SharedDataManager.createReferenceToCms());
 		partB.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partB.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -716,7 +718,8 @@ public final class DataTransformer {
 
 		Coverage partD = new Coverage();
 		partD.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_D);
-		partD.addPayor(SharedDataManager.createReferenceToCms());
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// partD.addPayor(SharedDataManager.createReferenceToCms());
 		partD.setBeneficiary(referencePatient(record.beneficiaryId));
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			partD.addExtension().setUrl(CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD)
@@ -988,7 +991,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
@@ -1012,15 +1017,11 @@ public final class DataTransformer {
 		 * think of an intelligent client-specified ID for them).
 		 */
 		if (claimGroup.referringPhysicianNpi.isPresent()) {
-			Practitioner referrer = new Practitioner();
-			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.referringPhysicianNpi.get());
-			Reference referrerReference = upsert(bundle, referrer,
-					referencePractitioner(claimGroup.referringPhysicianNpi.get()).getReference());
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
 			referral.setRequester(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
-			referral.addRecipient(referrerReference);
+			referral.addRecipient(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
 		}
@@ -1311,7 +1312,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -1683,7 +1686,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -2014,7 +2019,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -2361,7 +2368,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(String.valueOf(claimGroup.nearLineRecordIdCode)));
@@ -2577,7 +2586,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.addExtension().setUrl(CODING_SYSTEM_CCW_RECORD_ID_CD)
 				.setValue(new StringType(claimGroup.nearLineRecordIdCode.toString()));
@@ -2788,7 +2799,9 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
+		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
+		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
+		// COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
@@ -2829,17 +2842,12 @@ public final class DataTransformer {
 		 * updating them would require an extra roundtrip to the server (can't
 		 * think of an intelligent client-specified ID for them).
 		 */
-		Practitioner referrer = null;
 		if (claimGroup.referringPhysicianNpi.isPresent()) {
-			referrer = new Practitioner();
-			referrer.addIdentifier().setSystem(CODING_SYSTEM_NPI_US).setValue(claimGroup.referringPhysicianNpi.get());
-			Reference referrerReference = upsert(bundle, referrer,
-					referencePractitioner(claimGroup.referringPhysicianNpi.get()).getReference());
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralStatus.COMPLETED);
 			referral.setPatient(referencePatient(claimGroup.beneficiaryId));
 			referral.setRequester(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
-			referral.addRecipient(referrerReference);
+			referral.addRecipient(referencePractitioner(claimGroup.referringPhysicianNpi.get()));
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
 		}
@@ -3257,16 +3265,16 @@ public final class DataTransformer {
 	/**
 	 * @param subPlan
 	 *            the {@link Coverage#getSubPlan()} value to match
-	 * @param subscriberPatientId
+	 * @param beneficiaryPatientId
 	 *            the {@link Patient#getId()} for the
 	 *            {@link Coverage#getSubscriber()} value to match
 	 * @return a {@link Reference} to the {@link Coverage} resource where
 	 *         {@link Coverage#getPlan()} matches {@link #COVERAGE_PLAN} and the
 	 *         other parameters specified also match
 	 */
-	static Reference referenceCoverage(String subscriberPatientId, String subPlan) {
-		return new Reference(String.format("Coverage?subscriber=Patient/bene-%s&plan=%s&subplan=%s",
-				urlEncode(subscriberPatientId), urlEncode(COVERAGE_PLAN), urlEncode(subPlan)));
+	static Reference referenceCoverage(String beneficiaryPatientId, String subPlan) {
+		return new Reference(String.format("Coverage?beneficiary=%s&group.plan=%s&group.subplan=%s",
+				urlEncode("Patient/bene-" + beneficiaryPatientId), urlEncode(COVERAGE_PLAN), urlEncode(subPlan)));
 	}
 
 	/**
@@ -3288,8 +3296,7 @@ public final class DataTransformer {
 	 *         matches the specified parameters
 	 */
 	static Reference referencePractitioner(String practitionerNpi) {
-		return new Reference(String.format("Practitioner?identifier=%s|%s", urlEncode(CODING_SYSTEM_NPI_US),
-				urlEncode(practitionerNpi)));
+		return createIdentifierReference(CODING_SYSTEM_NPI_US, practitionerNpi);
 	}
 
 	/**

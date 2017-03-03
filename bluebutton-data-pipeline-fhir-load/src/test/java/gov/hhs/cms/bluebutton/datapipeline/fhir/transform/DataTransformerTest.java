@@ -401,9 +401,9 @@ public final class DataTransformerTest {
 
 		Bundle claimBundle = carrierBundleWrapper.getResult();
 		/*
-		 * Bundle should have: 1) EOB, 2) Practitioner (referrer)
+		 * Bundle should have: 1) EOB
 		 */
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
@@ -430,23 +430,11 @@ public final class DataTransformerTest {
 
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
+				referral.getRequester());
 		Assert.assertEquals(1, referral.getRecipient().size());
-		Assert.assertEquals(claimBundle.getEntry().stream()
-				.filter(entryIsPractitionerWithNpi(record.referringPhysicianNpi.get())).findAny().get()
-				.getFullUrl(),
-				referral.getRecipient().get(0).getReference());
-		BundleEntryComponent referrerEntry = claimBundle.getEntry().stream().filter(r -> {
-			if (!(r.getResource() instanceof Practitioner))
-				return false;
-			Practitioner referrer = (Practitioner) r.getResource();
-			return referrer.getIdentifier().stream()
-					.filter(i -> DataTransformer.CODING_SYSTEM_NPI_US.equals(i.getSystem()))
-					.filter(i -> record.referringPhysicianNpi.get().equals(i.getValue())).findAny().isPresent();
-		}).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, referrerEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				DataTransformer.referencePractitioner(record.referringPhysicianNpi.get()).getReference(),
-				referrerEntry.getRequest().getUrl());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
+				referral.getRecipientFirstRep());
 
 		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
 				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
@@ -1633,9 +1621,9 @@ public final class DataTransformerTest {
 
 		Bundle claimBundle = dmeBundleWrapper.getResult();
 		/*
-		 * Bundle should have: 1) EOB, 2) Practitioner (referrer)
+		 * Bundle should have: 1) EOB
 		 */
-		Assert.assertEquals(2, claimBundle.getEntry().size());
+		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
@@ -1675,23 +1663,11 @@ public final class DataTransformerTest {
 		
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
+				referral.getRequester());
 		Assert.assertEquals(1, referral.getRecipient().size());
-		Assert.assertEquals(claimBundle.getEntry().stream()
-				.filter(entryIsPractitionerWithNpi(record.referringPhysicianNpi.get())).findAny().get()
-				.getFullUrl(),
-				referral.getRecipient().get(0).getReference());
-		BundleEntryComponent referrerEntry = claimBundle.getEntry().stream().filter(r -> {
-			if (!(r.getResource() instanceof Practitioner))
-				return false;
-			Practitioner referrer = (Practitioner) r.getResource();
-			return referrer.getIdentifier().stream()
-					.filter(i -> DataTransformer.CODING_SYSTEM_NPI_US.equals(i.getSystem()))
-					.filter(i -> record.referringPhysicianNpi.get().equals(i.getValue())).findAny().isPresent();
-		}).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, referrerEntry.getRequest().getMethod());
-		Assert.assertEquals(
-				DataTransformer.referencePractitioner(record.referringPhysicianNpi.get()).getReference(),
-				referrerEntry.getRequest().getUrl());
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
+				referral.getRecipientFirstRep());
 
 		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
 				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
