@@ -668,8 +668,10 @@ public final class DataTransformer {
 		/*
 		 * Has been decided that HICN will not be included in FHIR resources
 		 */
-		beneficiary.addName().addGiven(record.nameGiven).addGiven((String.valueOf(record.nameMiddleInitial.get())))
+		HumanName name = beneficiary.addName().addGiven(record.nameGiven)
 				.setFamily(record.nameSurname).setUse(HumanName.NameUse.USUAL);
+		if (record.nameMiddleInitial.isPresent())
+			name.addGiven(String.valueOf(record.nameMiddleInitial.get()));
 		insert(bundle, beneficiary);
 
 		/*

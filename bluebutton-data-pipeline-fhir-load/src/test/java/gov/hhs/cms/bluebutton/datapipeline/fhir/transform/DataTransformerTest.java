@@ -1,5 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
@@ -76,7 +78,7 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 public final class DataTransformerTest {
 
 	/**
-	 * Verifies that {@link DataTransformer} works correctly when when passed an
+	 * Verifies that {@link DataTransformer} works correctly when passed an
 	 * empty {@link RifRecordEvent} stream.
 	 */
 	@Test
@@ -184,6 +186,28 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.medicareEnrollmentStatusCode.get(),
 				((StringType) partD.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD).get(0)
 						.getValue()).getValue());
+	}
+
+	/**
+	 * Verifies that {@link DataTransformer} works correctly when passed a
+	 * single {@link BeneficiaryRow} {@link RecordAction#INSERT}
+	 * {@link RifRecordEvent}, where all {@link Optional} fields are missing
+	 * values.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void transformInsertBeneficiaryEventWithOptionalsMissing() {
+		// Read sample data from text file and strip Optionals.
+		RifRecordEvent rifRecordEvent = getSampleATestData(StaticRifResource.SAMPLE_A_BENES);
+		rifRecordEvent = copyWithoutOptionalValues(rifRecordEvent);
+
+		// Just ensure that the transform succeeds without errors.
+		Stream source = Arrays.asList(rifRecordEvent).stream();
+		DataTransformer transformer = new DataTransformer();
+		Stream<TransformedBundle> resultStream = transformer.transform(source);
+		Assert.assertNotNull(resultStream);
+		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
+		Assert.assertEquals(1, resultList.size());
 	}
 
 	/**
@@ -2068,5 +2092,32 @@ public final class DataTransformerTest {
 		Assert.assertNotNull(rifRecordEvent.getRecord());
 
 		return rifRecordEvent;
+	}
+
+	/**
+	 * @param rifRecordEvent
+	 *            the {@link RifRecordEvent} to create an altered copy of
+	 * @return a copy of the specified {@link RifRecordEvent}, but with all
+	 *         {@link Optional} fields in {@link RifRecordEvent#getRecord()}
+	 *         adjusted to have missing values
+	 */
+	@SuppressWarnings("unchecked")
+	private static <R> RifRecordEvent<R> copyWithoutOptionalValues(RifRecordEvent<R> rifRecordEvent) {
+		R record = rifRecordEvent.getRecord();
+		try {
+			R recordCopy = (R) record.getClass().getConstructor().newInstance();
+
+			for (Field field : recordCopy.getClass().getFields()) {
+				if (!Optional.class.isAssignableFrom(field.getType()))
+					field.set(recordCopy, field.get(record));
+				else
+					field.set(recordCopy, Optional.empty());
+			}
+
+			return new RifRecordEvent<R>(rifRecordEvent.getFilesEvent(), rifRecordEvent.getFile(), recordCopy);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new BadCodeMonkeyException(e);
+		}
 	}
 }
