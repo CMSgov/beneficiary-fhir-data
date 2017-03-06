@@ -79,6 +79,30 @@ public final class DataSetManifestTest {
 	}
 
 	/**
+	 * Verifies that {@link DataSetManifest} can be unmarshalled, as expected,
+	 * even when the <code>timestamp</code> attribute has unexpected leading
+	 * whitespace. This is a regression test case for
+	 * <a href="http://issues.hhsdevcloud.us/browse/CBBD-207">CBBD-207: Invalid
+	 * manifest timestamp causes ETL service to fail</a>.
+	 * 
+	 * @throws JAXBException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void jaxbUnmarshallingForTimestampsWithLeadingWhitespace() throws JAXBException {
+		InputStream manifestStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("manifest-sample-c.xml");
+
+		JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
+		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+		DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
+
+		Assert.assertNotNull(manifest);
+		Assert.assertNotNull(manifest.getTimestamp());
+	}
+
+	/**
 	 * Just a simple little app that will use JAXB to marshall a sample
 	 * {@link DataSetManifest} to XML. This was used as the basis for the test
 	 * resources used in these tests.

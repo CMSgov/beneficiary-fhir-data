@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.migesok.jaxb.adapter.javatime.InstantXmlAdapter;
@@ -26,7 +27,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 public final class DataSetManifest {
 	@XmlAttribute
 	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(InstantXmlAdapter.class)
+	@XmlJavaTypeAdapter(TweakedInstantXmlAdapter.class)
 	private final Instant timestamp;
 
 	@XmlElement(name = "entry")
@@ -163,6 +164,33 @@ public final class DataSetManifest {
 			builder.append(type);
 			builder.append("]");
 			return builder.toString();
+		}
+	}
+
+	/**
+	 * This is a slightly tweaked version of {@link InstantXmlAdapter}. The
+	 * specific tweak here allows leading whitespace in unmarshalled values, to
+	 * workaround the issue encountered in
+	 * <a href="http://issues.hhsdevcloud.us/browse/CBBD-207">CBBD-207: Invalid
+	 * manifest timestamp causes ETL service to fail</a>.
+	 */
+	private static final class TweakedInstantXmlAdapter extends XmlAdapter<String, Instant> {
+		private static final XmlAdapter<String, Instant> WRAPPED_ADAPTER = new InstantXmlAdapter();
+
+		/**
+		 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+		 */
+		@Override
+		public Instant unmarshal(String v) throws Exception {
+			return WRAPPED_ADAPTER.unmarshal(v != null ? v.trim() : null);
+		}
+
+		/**
+		 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+		 */
+		@Override
+		public String marshal(Instant v) throws Exception {
+			return WRAPPED_ADAPTER.marshal(v);
 		}
 	}
 }
