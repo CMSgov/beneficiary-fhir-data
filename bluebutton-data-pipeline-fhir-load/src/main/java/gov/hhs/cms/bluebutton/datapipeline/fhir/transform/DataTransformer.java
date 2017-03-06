@@ -53,6 +53,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -469,6 +470,8 @@ public final class DataTransformer {
 	static final String CODING_BENEFIT_DEDUCTIBLE_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_amt.txt";
 
 	static final String BENEFIT_BALANCE_TYPE = "http://bluebutton.cms.hhs.gov/coding#benefitBalanceType";
+
+	static final String BENEFIT_COVERAGE_DATE = "Benefit Coverage Date";
 
 	/**
 	 * See <a href=
@@ -1389,7 +1392,7 @@ public final class DataTransformer {
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(
-					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
 			benefitInpatientNchPrimaryPayerAmt.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(benefitInpatientNchPrimaryPayerAmt);
@@ -1491,22 +1494,29 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
 		}
 
-		// FIXME almost all of these should be benefit balances, not info
-		// FIXME fix the Coding systems used
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_UTILIZATION_DAY_COUNT))
-				.setValue(new Quantity(claimGroup.utilizationDayCount));
+		BenefitComponent utilizationDayCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_UTILIZATION_DAY_COUNT));
+		utilizationDayCount.setBenefitUsed(new UnsignedIntType(claimGroup.utilizationDayCount));
+		benefitBalances.getFinancial().add(utilizationDayCount);
 
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COINSURANCE_DAY_COUNT))
-				.setValue(new Quantity(claimGroup.coinsuranceDayCount));
+		BenefitComponent coinsuranceDayCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_COINSURANCE_DAY_COUNT));
+		coinsuranceDayCount.setBenefitUsed(new UnsignedIntType(claimGroup.coinsuranceDayCount));
+		benefitBalances.getFinancial().add(coinsuranceDayCount);
 
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
-				.setValue(new Quantity(claimGroup.nonUtilizationDayCount));
+		BenefitComponent nonUtilizationDayCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT));
+		nonUtilizationDayCount.setBenefit(new UnsignedIntType(claimGroup.nonUtilizationDayCount));
+		benefitBalances.getFinancial().add(nonUtilizationDayCount);
 
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
-				.setValue(new Quantity(claimGroup.bloodPintsFurnishedQty));
+		BenefitComponent bloodPintsFurnishedQty = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY));
+		bloodPintsFurnishedQty.setBenefitUsed(new UnsignedIntType(claimGroup.bloodPintsFurnishedQty));
+		benefitBalances.getFinancial().add(bloodPintsFurnishedQty);
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
-			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NONCOVERED_STAY_DATE))
+			eob.addInformation()
+					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
 							.setStart(convertToDate((claimGroup.noncoveredStayFromDate.get())),
 									TemporalPrecisionEnum.DAY)
@@ -1515,12 +1525,14 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.coveredCareThoughDate.isPresent()) {
-			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COVERED_CARE_DATE))
+			eob.addInformation()
+					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_COVERED_CARE_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.coveredCareThoughDate.get())));
 		}
 
 		if (claimGroup.medicareBenefitsExhaustedDate.isPresent()) {
-			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
+			eob.addInformation()
+					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.medicareBenefitsExhaustedDate.get())));
 		}
 
@@ -1718,7 +1730,7 @@ public final class DataTransformer {
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -1758,7 +1770,7 @@ public final class DataTransformer {
 
 		if (claimGroup.providerPaymentAmount != null) {
 			BenefitComponent providerPaymentAmount = new BenefitComponent(
-					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_CLAIM_OUTPAT_PROVIDER_PAYMENT_AMT_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PAYMENT_B));
 			providerPaymentAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.providerPaymentAmount));
 			benefitBalances.getFinancial().add(providerPaymentAmount);
@@ -2069,7 +2081,7 @@ public final class DataTransformer {
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -2207,22 +2219,29 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(claimPPSOldCapitalHoldHarmlessAmount);
 		}
 
-		// FIXME almost all of these should be benefit balances, not info
-		// FIXME fix the Coding systems used
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_UTILIZATION_DAY_COUNT))
-				.setValue(new Quantity(claimGroup.utilizationDayCount));
+		BenefitComponent utilizationDayCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_UTILIZATION_DAY_COUNT));
+		utilizationDayCount.setBenefitUsed(new UnsignedIntType(claimGroup.utilizationDayCount));
+		benefitBalances.getFinancial().add(utilizationDayCount);
 
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COINSURANCE_DAY_COUNT))
-				.setValue(new Quantity(claimGroup.coinsuranceDayCount));
+		BenefitComponent coinsuranceDayCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_COINSURANCE_DAY_COUNT));
+		coinsuranceDayCount.setBenefitUsed(new UnsignedIntType(claimGroup.coinsuranceDayCount));
+		benefitBalances.getFinancial().add(coinsuranceDayCount);
 
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT))
-				.setValue(new Quantity(claimGroup.nonUtilizationDayCount));
+		BenefitComponent nonUtilizationDayCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_NON_UTILIZATION_DAY_COUNT));
+		nonUtilizationDayCount.setBenefit(new UnsignedIntType(claimGroup.nonUtilizationDayCount));
+		benefitBalances.getFinancial().add(nonUtilizationDayCount);
 
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY))
-				.setValue(new Quantity(claimGroup.bloodPintsFurnishedQty));
+		BenefitComponent bloodPintsFurnishedQty = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_BLOOD_PINTS_FURNISHED_QTY));
+		bloodPintsFurnishedQty.setBenefitUsed(new UnsignedIntType(claimGroup.bloodPintsFurnishedQty));
+		benefitBalances.getFinancial().add(bloodPintsFurnishedQty);
 
 		if (claimGroup.qualifiedStayFromDate.isPresent() && claimGroup.qualifiedStayThroughDate.isPresent()) {
-			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_QUALIFIED_STAY_DATE))
+			eob.addInformation()
+					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_QUALIFIED_STAY_DATE))
 					.setTiming(new Period()
 							.setStart(convertToDate((claimGroup.qualifiedStayFromDate.get())),
 									TemporalPrecisionEnum.DAY)
@@ -2231,7 +2250,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
-			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_NONCOVERED_STAY_DATE))
+			eob.addInformation()
+					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
 							.setStart(convertToDate((claimGroup.noncoveredStayFromDate.get())),
 									TemporalPrecisionEnum.DAY)
@@ -2240,12 +2260,14 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.coveredCareThoughDate.isPresent()) {
-			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_COVERED_CARE_DATE))
+			eob.addInformation()
+					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_COVERED_CARE_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.coveredCareThoughDate.get())));
 		}
 
 		if (claimGroup.medicareBenefitsExhaustedDate.isPresent()) {
-			eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
+			eob.addInformation()
+					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_BENEFITS_EXHAUSTED_DATE))
 					.setTiming(new DateType(convertToDate(claimGroup.medicareBenefitsExhaustedDate.get())));
 		}
 
@@ -2404,18 +2426,18 @@ public final class DataTransformer {
 							String.valueOf(claimGroup.patientStatusCd.get())));
 		}
 
-		// FIXME this should be benefit balance, not info
-		// FIXME fix the Coding system used
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_UTILIZATION_DAY_COUNT))
-				.setValue(new Quantity(claimGroup.utilizationDayCount));
-
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
 				createCodeableConcept(CODING_BENEFIT_BALANCE_URL, "Medical"));
 		eob.getBenefitBalance().add(benefitBalances);
 
+		BenefitComponent utilizationDayCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_UTILIZATION_DAY_COUNT));
+		utilizationDayCount.setBenefitUsed(new UnsignedIntType(claimGroup.utilizationDayCount));
+		benefitBalances.getFinancial().add(utilizationDayCount);
+
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -2622,7 +2644,7 @@ public final class DataTransformer {
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
@@ -2673,10 +2695,10 @@ public final class DataTransformer {
 					CODING_SYSTEM_HHA_REFERRAL_CD, String.valueOf(claimGroup.claimReferralCode.get()))));
 		}
 
-		// FIXME this should be benefit balance, not info
-		// FIXME fix the Coding system used
-		eob.addInformation().setCategory(createCodeableConcept("FIXME", CODING_SYSTEM_HHA_VISIT_COUNT))
-				.setValue(new Quantity(claimGroup.totalVisitCount));
+		BenefitComponent totalVisitCount = new BenefitComponent(
+				createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_SYSTEM_HHA_VISIT_COUNT));
+		totalVisitCount.setBenefitUsed(new UnsignedIntType(claimGroup.totalVisitCount));
+		benefitBalances.getFinancial().add(totalVisitCount);
 
 		if (claimGroup.careStartDate.isPresent()){
 			eob.setHospitalization(
@@ -2831,7 +2853,7 @@ public final class DataTransformer {
 
 		if (claimGroup.primaryPayerPaidAmount != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODING_NCH_PRIMARY_PAYER_URL));
+					createCodeableConcept(BENEFIT_BALANCE_TYPE, CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
 			primaryPayerPaidAmount.setBenefit(
 					new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.primaryPayerPaidAmount));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
