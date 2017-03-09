@@ -51,7 +51,6 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralStatus;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
@@ -161,6 +160,14 @@ public final class DataTransformer {
 	 * .
 	 */
 	static final String CODING_SYSTEM_NPI_US = "http://hl7.org/fhir/sid/us-npi";
+
+	static final String CODING_SYSTEM_CARE_TEAM_ROLE = "http://build.fhir.org/valueset-claim-careteamrole.html";
+
+	static final String CARE_TEAM_ROLE_PRIMARY = "Primary";
+
+	static final String CARE_TEAM_ROLE_ASSISTING = "Assist";
+
+	static final String CARE_TEAM_ROLE_OTHER = "Other";
 
 	static final String CODING_SYSTEM_ADJUDICATION_FHIR = "http://hl7.org/fhir/adjudication";
 
@@ -370,8 +377,6 @@ public final class DataTransformer {
 	static final String CODING_SYSTEM_CMS_LINE_PAYMENT_INDICATOR_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
 
 	static final String CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt";
-
-	static final String CODED_CMS_CLAIM_TYPE_RX_DRUG = "FIXME3"; // FIXME
 
 	static final String CODED_ADJUDICATION_BENEFICIARY_PRIMARY_PAYER_PAID = "Beneficiary Primary Payer Paid Amount";
 
@@ -885,7 +890,7 @@ public final class DataTransformer {
 					"Prescriber ID Qualifier Code is invalid: " + record.prescriberIdQualifierCode);
 
 		if (record.prescriberId != null) {
-			addCareTeamPractitioner(eob, rxItem, CODED_PRESCRIBER_ID, record.prescriberId);
+			addCareTeamPractitioner(eob, rxItem, CODING_SYSTEM_NPI_US, record.prescriberId, CARE_TEAM_ROLE_PRIMARY);
 		}
 
 		rxItem.setService(createCodeableConcept(CODING_SYSTEM_NDC, record.nationalDrugCode));
@@ -902,8 +907,8 @@ public final class DataTransformer {
 					"Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
 
 		if (!record.serviceProviderId.isEmpty()) {
-			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, record.serviceProviderId));
-			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, record.serviceProviderId));
+			eob.setOrganization(createIdentifierReference(CODING_SYSTEM_NPI_US, record.serviceProviderId));
+			eob.setFacility(createIdentifierReference(CODING_SYSTEM_NPI_US, record.serviceProviderId));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD,
 					CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, record.pharmacyTypeCode);
 		}
@@ -1103,7 +1108,7 @@ public final class DataTransformer {
 
 			if (claimLine.performingPhysicianNpi.isPresent()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = addCareTeamPractitioner(eob, item,
-						CODING_SYSTEM_NPI_US, claimLine.performingPhysicianNpi.get());
+						CODING_SYSTEM_NPI_US, claimLine.performingPhysicianNpi.get(), CARE_TEAM_ROLE_PRIMARY);
 				performingCareTeamMember.setResponsible(true);
 
 				/*
@@ -1125,6 +1130,10 @@ public final class DataTransformer {
 				addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 						CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 						"" + claimLine.providerParticipatingIndCode.get());
+				if (claimLine.organizationNpi.isPresent()) {
+					addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_NPI_US, CODING_SYSTEM_NPI_US,
+							"" + claimLine.organizationNpi.get());
+				}
 			} else {
 				/*
 				 * Per Michelle at GDIT, and also Tony Dean at OEDA, the
@@ -1136,13 +1145,7 @@ public final class DataTransformer {
 						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
 			}
 
-			if (claimLine.organizationNpi.isPresent()) {
-				/*
-				 * FIXME This is mis-mapped: it's really an attribute of the
-				 * performing provider.
-				 */
-				addCareTeamPractitioner(eob, item, CODING_SYSTEM_NPI_US, claimLine.organizationNpi.get());
-			}
+
 
 			item.setLocation(createCodeableConcept(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, claimLine.placeOfServiceCode));
 
@@ -1291,6 +1294,11 @@ public final class DataTransformer {
 				throw new BadCodeMonkeyException(String.format(
 						"Inconsistent hctHgbTestTypeCode and hctHgbTestResult" + " values for claim '%s'.",
 						claimGroup.claimId));
+			}
+
+			if (claimLine.cliaLabNumber.isPresent()) {
+				addExtensionCoding(item.getLocation(), CODING_SYSTEM_NPI_US, CODING_SYSTEM_NPI_US,
+						claimLine.cliaLabNumber.get());
 			}
 		}
 
@@ -1554,8 +1562,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
-			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -1570,21 +1578,19 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
-		// FIXME Map following physicianNPI's to eob.careTeam when available
-
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_PRIMARY);
 		}
 
 		if (claimGroup.operatingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.operatingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.operatingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_ASSISTING);
 		}
 
 		if (claimGroup.otherPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.otherPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.otherPhysicianNpi.get(),
+					CARE_TEAM_ROLE_OTHER);
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
@@ -1672,8 +1678,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-						claimLine.revenueCenterRenderingPhysicianNPI.get());
+				addCareTeamPractitioner(eob, item, CODING_SYSTEM_NPI_US,
+						claimLine.revenueCenterRenderingPhysicianNPI.get(), CARE_TEAM_ROLE_PRIMARY);
 			}
 
 		}
@@ -1789,8 +1795,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
-			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -1805,21 +1811,19 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
-		// FIXME Map following physicianNPI's to eob.careTeam when available
-
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_PRIMARY);
 		}
 
 		if (claimGroup.operatingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.operatingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.operatingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_ASSISTING);
 		}
 
 		if (claimGroup.otherPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.otherPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.otherPhysicianNpi.get(),
+					CARE_TEAM_ROLE_OTHER);
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
@@ -2006,8 +2010,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-						claimLine.revenueCenterRenderingPhysicianNPI.get());
+				addCareTeamPractitioner(eob, item, CODING_SYSTEM_NPI_US,
+						claimLine.revenueCenterRenderingPhysicianNPI.get(), CARE_TEAM_ROLE_PRIMARY);
 			}
 		}
 
@@ -2097,8 +2101,8 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.claimServiceClassificationTypeCode));
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
-			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -2109,21 +2113,19 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
-		// FIXME Map following physicianNPI's to eob.careTeam when available
-
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_PRIMARY);
 		}
 
 		if (claimGroup.operatingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.operatingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.operatingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_ASSISTING);
 		}
 
 		if (claimGroup.otherPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.otherPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.otherPhysicianNpi.get(),
+					CARE_TEAM_ROLE_OTHER);
 		}
 
 		if (claimGroup.mcoPaidSw.isPresent()) {
@@ -2365,8 +2367,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-						claimLine.revenueCenterRenderingPhysicianNPI.get());
+				addCareTeamPractitioner(eob, item, CODING_SYSTEM_NPI_US,
+						claimLine.revenueCenterRenderingPhysicianNPI.get(), CARE_TEAM_ROLE_PRIMARY);
 			}
 
 		}
@@ -2464,8 +2466,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
-			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -2476,11 +2478,9 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
-		// FIXME Map following physicianNPI's to eob.careTeam when available
-
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_PRIMARY);
 		}
 
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
@@ -2584,8 +2584,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-						claimLine.revenueCenterRenderingPhysicianNPI.get());
+				addCareTeamPractitioner(eob, item, CODING_SYSTEM_NPI_US,
+						claimLine.revenueCenterRenderingPhysicianNPI.get(), CARE_TEAM_ROLE_PRIMARY);
 			}
 		}
 
@@ -2656,8 +2656,8 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.organizationNpi.isPresent()) {
-			eob.setOrganization(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
-			eob.setFacility(createIdentifierReference(ORGANIZATION_NPI, claimGroup.organizationNpi.get()));
+			eob.setOrganization(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
+			eob.setFacility(createIdentifierReference(CODING_SYSTEM_NPI_US, claimGroup.organizationNpi.get()));
 			addExtensionCoding(eob.getFacility(), CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 					CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(claimGroup.claimFacilityTypeCode));
 		}
@@ -2668,11 +2668,9 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
 				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
 
-		// FIXME Map following physicianNPI's to eob.careTeam when available
-
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
-			eob.addExtension().setUrl(CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI)
-					.setValue(new StringType(claimGroup.attendingPhysicianNpi.get()));
+			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
+					CARE_TEAM_ROLE_PRIMARY);
 		}
 
 		addExtensionCoding(eob.getType(), CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD,
@@ -2796,8 +2794,8 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.revenueCenterRenderingPhysicianNPI.isPresent()) {
-				addCareTeamPractitioner(eob, item, CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-						claimLine.revenueCenterRenderingPhysicianNPI.get());
+				addCareTeamPractitioner(eob, item, CODING_SYSTEM_NPI_US,
+						claimLine.revenueCenterRenderingPhysicianNPI.get(), CARE_TEAM_ROLE_PRIMARY);
 			}
 
 		}
@@ -2936,7 +2934,7 @@ public final class DataTransformer {
 
 			if (!claimLine.providerNPI.isEmpty()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = addCareTeamPractitioner(eob, item,
-						CODING_SYSTEM_NPI_US, claimLine.providerNPI);
+						CODING_SYSTEM_NPI_US, claimLine.providerNPI, CARE_TEAM_ROLE_PRIMARY);
 				performingCareTeamMember.setResponsible(true);
 
 				/*
@@ -3451,7 +3449,7 @@ public final class DataTransformer {
 	 * @return the {@link CareTeamComponent} that was created/linked
 	 */
 	private static CareTeamComponent addCareTeamPractitioner(ExplanationOfBenefit eob, ItemComponent eobItem,
-			String practitionerIdSystem, String practitionerIdValue) {
+			String practitionerIdSystem, String practitionerIdValue, String practitionerRole) {
 		// Try to find a matching pre-existing entry.
 		CareTeamComponent careTeamEntry = eob.getCareTeam().stream()
 				.filter(ctc -> ctc.getProvider().hasIdentifier())
@@ -3465,6 +3463,12 @@ public final class DataTransformer {
 		careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
 		careTeamEntry.setProvider(new Reference()
 					.setIdentifier(new Identifier().setSystem(practitionerIdSystem).setValue(practitionerIdValue)));
+			careTeamEntry.setRole(createCodeableConcept(CODING_SYSTEM_CARE_TEAM_ROLE, practitionerRole));
+		}
+
+		// care team entry is at eob level so no need to create item link id
+		if (eobItem == null) {
+			return careTeamEntry;
 		}
 
 		// Link the EOB.item to the care team entry (if it isn't already).
