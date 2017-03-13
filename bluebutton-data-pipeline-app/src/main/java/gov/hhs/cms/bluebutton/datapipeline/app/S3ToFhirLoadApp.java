@@ -109,10 +109,8 @@ public final class S3ToFhirLoadApp {
 					 * failure, but we probably want to be more discriminating
 					 * than that.
 					 */
-					LOGGER.warn("Bundle failed to load.", error);
-					// throw new IllegalStateException(
-					// "Bundle failed to load, and we have no error
-					// recovery strategy yet.", error);
+					 throw new IllegalStateException(
+							"Bundle failed to load, and we have no error recovery strategy yet.", error);
 				};
 
 				Consumer<FhirBundleResult> resultHandler = result -> {
