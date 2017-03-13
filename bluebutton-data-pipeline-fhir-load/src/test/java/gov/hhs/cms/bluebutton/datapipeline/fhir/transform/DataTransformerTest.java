@@ -36,7 +36,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -253,8 +252,8 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(Date.valueOf(pdeRecord.prescriptionFillDate), rxItem.getServicedDateType().getValue());
 
-		assertReferenceEquals(DataTransformer.ORGANIZATION_NPI, pdeRecord.serviceProviderId, eob.getOrganization());
-		assertReferenceEquals(DataTransformer.ORGANIZATION_NPI, pdeRecord.serviceProviderId, eob.getFacility());
+		assertReferenceEquals(DataTransformer.CODING_SYSTEM_NPI_US, pdeRecord.serviceProviderId, eob.getOrganization());
+		assertReferenceEquals(DataTransformer.CODING_SYSTEM_NPI_US, pdeRecord.serviceProviderId, eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, pdeRecord.pharmacyTypeCode);
@@ -480,13 +479,13 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 
-		assertExtensionCodingEquals(eobItem0.getDetailFirstRep(), DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
+		assertCareTeamEquals(recordLine1.performingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(
 				recordLine1.performingPhysicianNpi.get(), eob.getCareTeam());
-		Assert.assertNotNull(performingCareTeamEntry);
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
 				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
 		assertExtensionCodingEquals(performingCareTeamEntry, DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_TYPE_CD,
@@ -495,7 +494,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 				"" + recordLine1.providerParticipatingIndCode.get());
-		Assert.assertNotNull(recordLine1.organizationNpi.get(), eob.getCareTeam());
+		assertExtensionCodingEquals(performingCareTeamEntry, DataTransformer.CODING_SYSTEM_NPI_US,
+				DataTransformer.CODING_SYSTEM_NPI_US, "" + recordLine1.organizationNpi.get());
 
 		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, recordLine1.providerStateCode.get());
@@ -581,6 +581,9 @@ public final class DataTransformerTest {
 		assertCodingEquals(DataTransformer.CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE, recordLine1.hctHgbTestTypeCode.get(),
 				hctHgbObservation.getCode().getCodingFirstRep());
 		Assert.assertEquals(recordLine1.hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
+
+		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CLIA_LAB_NUM,
+				DataTransformer.CODING_SYSTEM_CLIA_LAB_NUM, recordLine1.cliaLabNumber.get());
 	}
 
 	/**
@@ -709,9 +712,9 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL,
 				record.nchDrugOutlierApprovedPaymentAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
 
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getOrganization());
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
@@ -722,17 +725,9 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD,
 				String.valueOf(record.claimServiceClassificationTypeCode));
 
-		Assert.assertEquals(record.attendingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
-
-		Assert.assertEquals(record.operatingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
-
-		Assert.assertEquals(record.otherPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
+		assertCareTeamEquals(record.attendingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
+		assertCareTeamEquals(record.operatingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_ASSISTING, eob);
+		assertCareTeamEquals(record.otherPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_OTHER, eob);
 
 		Assert.assertTrue(eob.getInformation().stream()
 				.anyMatch(i -> DataTransformer.isCodeInConcept(i.getCategory(),
@@ -757,15 +752,14 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
 
-		assertExtensionCodingEquals(eobItem0.getDetailFirstRep(), DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
 		Assert.assertEquals(record.providerStateCode, eobItem0.getLocationAddress().getState());
 
-		Assert.assertNotNull(
-				findCareTeamEntryForProviderIdentifier(DataTransformer.CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
+		assertCareTeamEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(),
+				DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_REVENUE_CENTER, recordLine1.revenueCenter, eobItem0.getRevenue());
 
@@ -843,7 +837,7 @@ public final class DataTransformerTest {
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_QUERY_CD,
 				DataTransformer.CODING_SYSTEM_QUERY_CD, String.valueOf(record.claimQueryCode));
-		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 				DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, record.claimNonPaymentReasonCode.get());
 
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
@@ -872,9 +866,9 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL, record.beneficiaryPaymentAmount,
 				eob.getBenefitBalanceFirstRep().getFinancial());
 
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getOrganization());
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
@@ -885,14 +879,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD,
 				String.valueOf(record.claimServiceClassificationTypeCode));
 
-		Assert.assertEquals(record.attendingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
-
-		Assert.assertEquals(record.operatingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
-		Assert.assertFalse(record.otherPhysicianNpi.isPresent());
+		assertCareTeamEquals(record.attendingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
+		assertCareTeamEquals(record.operatingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_ASSISTING, eob);
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getProcedure().size());
@@ -906,7 +894,7 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
 
-		assertExtensionCodingEquals(eobItem0.getDetailFirstRep(), DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
@@ -958,9 +946,8 @@ public final class DataTransformerTest {
 		assertAdjudicationEquals(DataTransformer.CODED_ADJUDICATION_NONCOVERED_CHARGE,
 				recordLine1.nonCoveredChargeAmount, eobItem0.getAdjudication());
 
-		Assert.assertNotNull(
-				findCareTeamEntryForProviderIdentifier(DataTransformer.CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
+		assertCareTeamEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(),
+				DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 	}
 
 	/**
@@ -1020,7 +1007,7 @@ public final class DataTransformerTest {
 
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_PROVIDER_NUMBER, record.providerNumber,
 				eob.getProvider());
-		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 				DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, record.claimNonPaymentReasonCode.get());
 
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
@@ -1030,25 +1017,17 @@ public final class DataTransformerTest {
 				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
 				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
 
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getOrganization());
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
 
-		Assert.assertEquals(record.attendingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
-
-		Assert.assertEquals(record.operatingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OPERATING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
-
-		Assert.assertEquals(record.otherPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_OTHER_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
+		assertCareTeamEquals(record.attendingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
+		assertCareTeamEquals(record.operatingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_ASSISTING, eob);
+		assertCareTeamEquals(record.otherPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_OTHER, eob);
 
 		assertBenefitBalanceEquals(DataTransformer.BENEFIT_BALANCE_TYPE,
 				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
@@ -1130,7 +1109,7 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
 
-		assertExtensionCodingEquals(eobItem0.getDetailFirstRep(), DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
@@ -1151,9 +1130,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_DEDUCTIBLE_COINSURANCE_CD,
 				String.valueOf(recordLine1.deductibleCoinsuranceCd.get()));
 
-		Assert.assertNotNull(
-				findCareTeamEntryForProviderIdentifier(DataTransformer.CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
+		assertCareTeamEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(),
+				DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 	}
 
 	/**
@@ -1210,7 +1188,7 @@ public final class DataTransformerTest {
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_PROVIDER_NUMBER, record.providerNumber,
 				eob.getProvider());
 
-		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 				DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, record.claimNonPaymentReasonCode.get());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
@@ -1233,21 +1211,15 @@ public final class DataTransformerTest {
 		assertDateEquals(record.claimHospiceStartDate.get(), eob.getHospitalization().getStartElement());
 		assertDateEquals(record.beneficiaryDischargeDate.get(), eob.getHospitalization().getEndElement());
 				
-		Assert.assertEquals(record.attendingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
+		assertCareTeamEquals(record.attendingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 		
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getOrganization());
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
-
-		Assert.assertEquals(record.attendingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
 
 		assertExtensionCodingEquals(eob.getType(),
 				DataTransformer.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD,
@@ -1259,7 +1231,7 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
 
-		assertExtensionCodingEquals(eobItem0.getDetailFirstRep(), DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
@@ -1290,9 +1262,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_DEDUCTIBLE_COINSURANCE_CD,
 				String.valueOf(recordLine1.deductibleCoinsuranceCd.get()));
 
-		Assert.assertNotNull(
-				findCareTeamEntryForProviderIdentifier(DataTransformer.CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
+		assertCareTeamEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(),
+				DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 	}
 
 	/**
@@ -1349,7 +1320,7 @@ public final class DataTransformerTest {
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_PROVIDER_NUMBER, record.providerNumber,
 				eob.getProvider());
 
-		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 				DataTransformer.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, record.claimNonPaymentReasonCode.get());
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(record.totalChargeAmount, eob.getTotalCost().getValue());
@@ -1365,17 +1336,15 @@ public final class DataTransformerTest {
 				DataTransformer.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
 				record.primaryPayerPaidAmount, eob.getBenefitBalanceFirstRep().getFinancial());
 
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getOrganization());
-		assertReferenceIdentifierEquals(DataTransformer.ORGANIZATION_NPI, record.organizationNpi.get(),
+		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.organizationNpi.get(),
 				eob.getFacility());
 
 		assertExtensionCodingEquals(eob.getFacility(), DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_FACILITY_TYPE_CD, String.valueOf(record.claimFacilityTypeCode));
 
-		Assert.assertEquals(record.attendingPhysicianNpi.get(),
-				((StringType) eob.getExtensionsByUrl(DataTransformer.CODING_SYSTEM_CCW_ATTENDING_PHYSICIAN_NPI).get(0)
-						.getValue()).getValue());
+		assertCareTeamEquals(record.attendingPhysicianNpi.get(), DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 
@@ -1389,7 +1358,7 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.lineNumber), new Integer(eobItem0.getSequence()));
 
-		assertExtensionCodingEquals(eobItem0.getDetailFirstRep(), DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
 
@@ -1417,9 +1386,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_DEDUCTIBLE_COINSURANCE_CD,
 				String.valueOf(recordLine1.deductibleCoinsuranceCd.get()));
 		
-		Assert.assertNotNull(
-				findCareTeamEntryForProviderIdentifier(DataTransformer.CODING_REVENUE_CENTER_RENDER_PHY_NPI,
-				recordLine1.revenueCenterRenderingPhysicianNPI.get(), eob.getCareTeam()));
+		assertCareTeamEquals(recordLine1.revenueCenterRenderingPhysicianNPI.get(),
+				DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 	}
 
 	/**
@@ -1517,9 +1485,9 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 		
+		assertCareTeamEquals(recordLine1.providerNPI, DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
 		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI,
 				eob.getCareTeam());
-		Assert.assertNotNull(performingCareTeamEntry);
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
 				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());
 		assertExtensionCodingEquals(performingCareTeamEntry,
@@ -1527,12 +1495,9 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
 				"" + recordLine1.providerParticipatingIndCode.get());
 
-		assertExtensionCodingEquals(eobItem0.getDetailFirstRep(), DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 				(DataTransformer.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
-
-		Assert.assertNotNull(findCareTeamEntryForProviderIdentifier(
-				recordLine1.providerNPI, eob.getCareTeam()));
 
 		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
 				DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, recordLine1.providerStateCode);
@@ -1915,6 +1880,24 @@ public final class DataTransformerTest {
 		}
 	}
 
+	/**
+	 * @param expectedPractitioner
+	 *            {@link CareTeamComponent#getProviderIdentifier)} to find and
+	 *            verify
+	 * @param expectedPractitionerRole
+	 *            {@link CareTeamComponent#getRole)} to find and verify
+	 * @param eob
+	 *            the actual {@link ExplanationOfBenefit}s to verify
+	 */
+
+	private static void assertCareTeamEquals(String expectedPractitioner, String expectedPractitionerRole,
+			ExplanationOfBenefit eob) {
+		CareTeamComponent careTeamEntry = findCareTeamEntryForProviderIdentifier(
+				DataTransformer.CODING_SYSTEM_NPI_US, expectedPractitioner, eob.getCareTeam());
+		Assert.assertNotNull(careTeamEntry);
+		assertCodingEquals(DataTransformer.CODING_SYSTEM_CARE_TEAM_ROLE, expectedPractitionerRole,
+				careTeamEntry.getRole().getCodingFirstRep());
+	}
 
 	/**
 	 * @param expectedSystem
