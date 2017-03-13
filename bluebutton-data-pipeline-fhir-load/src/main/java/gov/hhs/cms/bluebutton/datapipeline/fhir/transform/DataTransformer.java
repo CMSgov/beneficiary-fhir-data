@@ -161,6 +161,8 @@ public final class DataTransformer {
 	 */
 	static final String CODING_SYSTEM_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
+	static final String CODING_SYSTEM_CLIA_LAB_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt";
+
 	static final String CODING_SYSTEM_CARE_TEAM_ROLE = "http://build.fhir.org/valueset-claim-careteamrole.html";
 
 	static final String CARE_TEAM_ROLE_PRIMARY = "Primary";
@@ -1099,12 +1101,8 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.number);
 
-			DetailComponent detail = new DetailComponent();
-
-			addExtensionCoding(detail, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.addDetail(detail);
 
 			if (claimLine.performingPhysicianNpi.isPresent()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = addCareTeamPractitioner(eob, item,
@@ -1297,7 +1295,7 @@ public final class DataTransformer {
 			}
 
 			if (claimLine.cliaLabNumber.isPresent()) {
-				addExtensionCoding(item.getLocation(), CODING_SYSTEM_NPI_US, CODING_SYSTEM_NPI_US,
+				addExtensionCoding(item.getLocation(), CODING_SYSTEM_CLIA_LAB_NUM, CODING_SYSTEM_CLIA_LAB_NUM,
 						claimLine.cliaLabNumber.get());
 			}
 		}
@@ -1344,7 +1342,7 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.claimQueryCode));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
-			addExtensionCoding(eob.getBillablePeriod(), CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+			addExtensionCoding(eob, CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 					CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, claimGroup.claimNonPaymentReasonCode.get());
 		}
 
@@ -1621,11 +1619,8 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			DetailComponent detail = new DetailComponent();
-			addExtensionCoding(detail, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.addDetail(detail);
 
 			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
@@ -1727,7 +1722,7 @@ public final class DataTransformer {
 		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
-			addExtensionCoding(eob.getBillablePeriod(), CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+			addExtensionCoding(eob, CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 					CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, claimGroup.claimNonPaymentReasonCode.get());
 		}
 		eob.getPayment()
@@ -1858,11 +1853,8 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			DetailComponent detail = new DetailComponent();
-			addExtensionCoding(detail, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.addDetail(detail);
 
 			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
@@ -2057,7 +2049,7 @@ public final class DataTransformer {
 		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
-			addExtensionCoding(eob.getBillablePeriod(), CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+			addExtensionCoding(eob, CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 					CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, claimGroup.claimNonPaymentReasonCode.get());
 		}
 
@@ -2310,11 +2302,8 @@ public final class DataTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.lineNumber);
 
-			DetailComponent detail = new DetailComponent();
-			addExtensionCoding(detail, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.addDetail(detail);
 
 			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
@@ -2413,7 +2402,7 @@ public final class DataTransformer {
 		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
-			addExtensionCoding(eob.getBillablePeriod(), CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+			addExtensionCoding(eob, CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 					CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, claimGroup.claimNonPaymentReasonCode.get());
 		}
 
@@ -2522,11 +2511,8 @@ public final class DataTransformer {
 						createCodeableConcept(HCPCS_INITIAL_MODIFIER_CODE2, claimLine.hcpcsSecondModifierCode.get()));
 			}
 
-			DetailComponent detail = new DetailComponent();
-			addExtensionCoding(detail, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.addDetail(detail);
 
 			item.addAdjudication()
 					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,
@@ -2629,7 +2615,7 @@ public final class DataTransformer {
 		eob.setProvider(createIdentifierReference(CODING_SYSTEM_PROVIDER_NUMBER, claimGroup.providerNumber));
 
 		if (claimGroup.claimNonPaymentReasonCode.isPresent()) {
-			addExtensionCoding(eob.getBillablePeriod(), CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+			addExtensionCoding(eob, CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 					CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, claimGroup.claimNonPaymentReasonCode.get());
 		}
 
@@ -2715,11 +2701,8 @@ public final class DataTransformer {
 
 			item.setRevenue(createCodeableConcept(CODING_SYSTEM_REVENUE_CENTER, claimLine.revenueCenter));
 
-			DetailComponent detail = new DetailComponent();
-			addExtensionCoding(detail, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.addDetail(detail);
 
 			item.setLocation(new Address().setState((claimGroup.providerStateCode)));
 
@@ -2965,11 +2948,8 @@ public final class DataTransformer {
 						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
 			}
 
-			DetailComponent detail = new DetailComponent();
-			addExtensionCoding(detail, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
+			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.addDetail(detail);
 
 			item.setCategory(
 					createCodeableConcept(CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE, claimLine.cmsServiceTypeCode));
