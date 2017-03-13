@@ -9,7 +9,9 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitor;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
  * <p>
@@ -28,9 +30,23 @@ public final class AppConfiguration implements Serializable {
 
 	/**
 	 * The name of the environment variable that should be used to provide the
-	 * {@link #getS3BucketName()} value.
+	 * {@link ExtractionOptions#getS3BucketName()} value.
 	 */
 	public static final String ENV_VAR_KEY_BUCKET = "S3_BUCKET_NAME";
+
+	/**
+	 * <p>
+	 * The name of the environment variable that should be used to provide the
+	 * {@link ExtractionOptions#getDataSetFilter()} value: This environment
+	 * variable specifies the {@link RifFileType} that will be processed. Any
+	 * {@link DataSetManifest}s that contain other {@link RifFileType}s will be
+	 * skipped entirely (even if they <em>also</em> contain the allowed
+	 * {@link RifFileType}. For example, specifying "BENEFICIARY" will configure
+	 * the application to only process data sets that <strong>only</strong>
+	 * contain {@link RifFileType#BENEFICIARY}s.
+	 * </p>
+	 */
+	public static final String ENV_VAR_KEY_ALLOWED_RIF_TYPE = "DATA_SET_TYPE_ALLOWED";
 
 	/**
 	 * The name of the environment variable that should be used to provide the
@@ -65,29 +81,27 @@ public final class AppConfiguration implements Serializable {
 	 */
 	public static final String ENV_VAR_KEY_TRUST_STORE_PASSWORD = "TRUST_STORE_PASSWORD";
 
-	private final String s3BucketName;
+	private final ExtractionOptions extractionOptions;
 	private final LoadAppOptions loadOptions;
 
 	/**
 	 * Constructs a new {@link AppConfiguration} instance.
 	 * 
-	 * @param s3BucketName
-	 *            the value to use for {@link #getS3BucketName()}
+	 * @param extractionOptions
+	 *            the value to use for {@link #getExtractionOptions()}
 	 * @param loadOptions
 	 *            the value to use for {@link #getLoadOptions()}
 	 */
-	public AppConfiguration(String s3BucketName, LoadAppOptions loadOptions) {
-		this.s3BucketName = s3BucketName;
+	public AppConfiguration(ExtractionOptions extractionOptions, LoadAppOptions loadOptions) {
+		this.extractionOptions = extractionOptions;
 		this.loadOptions = loadOptions;
 	}
 
 	/**
-	 * @return the name of the S3 bucket that the application's
-	 *         {@link DataSetMonitor} will be configured to pull CCW RIF data
-	 *         from
+	 * @return the {@link ExtractionOptions} that the application will use
 	 */
-	public String getS3BucketName() {
-		return s3BucketName;
+	public ExtractionOptions getExtractionOptions() {
+		return extractionOptions;
 	}
 
 	/**
@@ -123,6 +137,21 @@ public final class AppConfiguration implements Serializable {
 			throw new AppConfigurationException(
 					String.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_BUCKET));
 
+		String rifFilterText = System.getenv(ENV_VAR_KEY_ALLOWED_RIF_TYPE);
+		RifFileType allowedRifFileType;
+		if (rifFilterText != null && !rifFilterText.isEmpty()) {
+			try {
+				allowedRifFileType = RifFileType.valueOf(rifFilterText);
+			} catch (IllegalArgumentException e) {
+				throw new AppConfigurationException(
+						String.format("Invalid value for configuration environment variable '%s': '%s'",
+								ENV_VAR_KEY_ALLOWED_RIF_TYPE, rifFilterText),
+						e);
+			}
+		} else {
+			allowedRifFileType = null;
+		}
+
 		String fhirServerUrlText = System.getenv(ENV_VAR_KEY_FHIR);
 		if (fhirServerUrlText == null || fhirServerUrlText.isEmpty())
 			throw new AppConfigurationException(
@@ -132,7 +161,8 @@ public final class AppConfiguration implements Serializable {
 			fhirServerUri = new URI(fhirServerUrlText);
 		} catch (URISyntaxException e) {
 			throw new AppConfigurationException(
-					String.format("Invalid value for configuration environment variable '%s': '%s'", fhirServerUrlText),
+					String.format("Invalid value for configuration environment variable '%s': '%s'", ENV_VAR_KEY_FHIR,
+							fhirServerUrlText),
 					e);
 		}
 
@@ -172,7 +202,8 @@ public final class AppConfiguration implements Serializable {
 					DefaultAWSCredentialsProviderChain.class.getName()), e);
 		}
 
-		return new AppConfiguration(s3BucketName, new LoadAppOptions(fhirServerUri, Paths.get(keyStorePath),
+		return new AppConfiguration(new ExtractionOptions(s3BucketName, allowedRifFileType),
+				new LoadAppOptions(fhirServerUri, Paths.get(keyStorePath),
 				keyStorePassword.toCharArray(), Paths.get(trustStorePath), trustStorePassword.toCharArray()));
 	}
 }

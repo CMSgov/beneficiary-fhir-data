@@ -33,6 +33,7 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 
@@ -52,6 +53,13 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
  * </p>
  */
 public final class DataSetMonitorWorker implements Runnable {
+	/**
+	 * The maximum number of data sets that might be pending at any one time.
+	 * (This is only used to avoid memory leaks, so it should err on the high
+	 * side.)
+	 */
+	private static final int MAX_EXPECTED_DATA_SETS_PENDING = 10000;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
 
 	/**
@@ -82,7 +90,7 @@ public final class DataSetMonitorWorker implements Runnable {
 	private static final Pattern REGEX_PENDING_MANIFEST = Pattern
 			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
 
-	private final String bucketName;
+	private final ExtractionOptions options;
 	private final DataSetMonitorListener listener;
 	private final AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
 
@@ -95,17 +103,27 @@ public final class DataSetMonitorWorker implements Runnable {
 	private CircularFifoQueue<Instant> recentlyProcessedManifests;
 
 	/**
+	 * Tracks the {@link DataSetManifest#getTimestamp()} values of data sets
+	 * that have been skipped (per {@link #shouldSkipDataSet(RifFilesEvent)}),
+	 * to ensure that the processing doesn't get stuck in a loop, always
+	 * skipping the same data set. It's constrained to a fixed number of items,
+	 * to keep it from becoming a memory leak.
+	 */
+	private CircularFifoQueue<Instant> skippedDataSets;
+
+	/**
 	 * Constructs a new {@link DataSetMonitorWorker} instance.
 	 * 
-	 * @param bucketName
-	 *            the name of the AWS S3 bucket to monitor
+	 * @param options
+	 *            the {@link ExtractionOptions} to use
 	 * @param listener
 	 *            the {@link DataSetMonitorListener} to send events to
 	 */
-	public DataSetMonitorWorker(String bucketName, DataSetMonitorListener listener) {
-		this.bucketName = bucketName;
+	public DataSetMonitorWorker(ExtractionOptions options, DataSetMonitorListener listener) {
+		this.options = options;
 		this.listener = listener;
-		this.recentlyProcessedManifests = new CircularFifoQueue<>(10);
+		this.recentlyProcessedManifests = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
+		this.skippedDataSets = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
 	}
 
 	/**
@@ -121,7 +139,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * any.)
 		 */
 		ListObjectsRequest bucketListRequest = new ListObjectsRequest();
-		bucketListRequest.setBucketName(bucketName);
+		bucketListRequest.setBucketName(options.getS3BucketName());
 
 		/*
 		 * S3 will return results in separate pages. Loop through all of the
@@ -150,6 +168,10 @@ public final class DataSetMonitorWorker implements Runnable {
 						LOGGER.debug("Skipping already-processed data set: {}", dataSetTimestamp);
 						continue;
 					}
+					if (skippedDataSets.contains(dataSetTimestamp)) {
+						LOGGER.trace("Skipping already-skipped data set: {}", dataSetTimestamp);
+						continue;
+					}
 
 					if (manifestToProcessKey == null)
 						manifestToProcessKey = key;
@@ -170,7 +192,7 @@ public final class DataSetMonitorWorker implements Runnable {
 
 		// We've found the oldest manifest. Now go download and parse it.
 		DataSetManifest dataSetManifest = readManifest(manifestToProcessKey);
-		LOGGER.info("Found data set to process at '{}': '{}'. Waiting for it to finish uploading...",
+		LOGGER.info("Found data set to process at '{}': '{}'.",
 				manifestToProcessKey, dataSetManifest.toString());
 
 		/*
@@ -179,6 +201,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * processing it.
 		 */
 		boolean dataSetComplete = false;
+		boolean alreadyLoggedWaitingEvent = false;
 		do {
 			if (dataSetIsAvailable(dataSetManifest))
 				dataSetComplete = true;
@@ -189,6 +212,10 @@ public final class DataSetMonitorWorker implements Runnable {
 			 * once we know how long transfers might take
 			 */
 			try {
+				if(!alreadyLoggedWaitingEvent){
+					LOGGER.info("Data set not ready: '{}'. Waiting for it to finish uploading...", manifestToProcessKey);
+					alreadyLoggedWaitingEvent = true;
+				}
 				Thread.sleep(1000 * 1);
 			} catch (InterruptedException e) {
 				/*
@@ -201,22 +228,25 @@ public final class DataSetMonitorWorker implements Runnable {
 			}
 		} while (!dataSetComplete);
 
-		/*
-		 * Huzzah! We've got a data set to process and we've verified it's all
-		 * there and ready to go. Now we can hand that off to the
-		 * DataSetMonitorListener, to do the *real* work of actually processing
-		 * that data set. It's important that we block until it's completed, in
-		 * order to ensure that we don't end up processing multiple data sets in
-		 * parallel (which would lead to data consistency problems).
-		 */
-		LOGGER.info("Data set finished uploading and ready to process.");
 		Set<S3RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
 			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
 					DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName());
-			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(bucketName, key));
+			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(options.getS3BucketName(), key));
 		}).collect(Collectors.toSet());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), new HashSet<>(rifFiles));
-		listener.dataAvailable(rifFilesEvent);
+
+		if (options.getDataSetFilter().test(rifFilesEvent)) {
+			/*
+			 * Huzzah! We've got a data set to process and we've verified it's
+			 * all there and ready to go. Now we can hand that off to the
+			 * DataSetMonitorListener, to do the *real* work of actually
+			 * processing that data set. It's important that we block until it's
+			 * completed, in order to ensure that we don't end up processing
+			 * multiple data sets in parallel (which would lead to data
+			 * consistency problems).
+			 */
+			LOGGER.info("Data set finished uploading. Processing it...");
+			listener.dataAvailable(rifFilesEvent);
 
 		/*
 		 * Now that the data set has been processed, we need to ensure that we
@@ -228,7 +258,11 @@ public final class DataSetMonitorWorker implements Runnable {
 		 */
 		rifFiles.stream().forEach(f -> f.cleanupTempFile());
 		recentlyProcessedManifests.add(dataSetManifest.getTimestamp());
-		markDataSetCompleteInS3(dataSetManifest);
+			markDataSetCompleteInS3(dataSetManifest);
+		} else {
+			skippedDataSets.add(dataSetManifest.getTimestamp());
+			LOGGER.debug("Data set skipped: {}", dataSetManifest.toString());
+		}
 	}
 
 	/**
@@ -259,7 +293,7 @@ public final class DataSetMonitorWorker implements Runnable {
 	 *         S3 object
 	 */
 	private DataSetManifest readManifest(String manifestToProcessKey) {
-		try (S3Object manifestObject = s3Client.getObject(bucketName, manifestToProcessKey)) {
+		try (S3Object manifestObject = s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
@@ -311,7 +345,7 @@ public final class DataSetMonitorWorker implements Runnable {
 				DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()));
 
 		ListObjectsRequest bucketListRequest = new ListObjectsRequest();
-		bucketListRequest.setBucketName(bucketName);
+		bucketListRequest.setBucketName(options.getS3BucketName());
 		bucketListRequest.setPrefix(dataSetKeyPrefix);
 
 		Set<String> dataSetObjectNames = new HashSet<>();
@@ -376,11 +410,11 @@ public final class DataSetMonitorWorker implements Runnable {
 			 * The S3 API will automatically ensure that the copied object is
 			 * encrypted with the same key (if any) as the source object.
 			 */
-			s3Client.copyObject(bucketName, sourceKey, bucketName, targetKey);
+			s3Client.copyObject(options.getS3BucketName(), sourceKey, options.getS3BucketName(), targetKey);
 		}
 		LOGGER.debug("Data set copied in S3 (step 1 of move).");
 
-		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
+		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(options.getS3BucketName());
 		deleteObjectsRequest
 				.setKeys(s3KeySuffixesToMove.stream().map(k -> String.format("%s/%s", S3_PREFIX_PENDING_DATA_SETS, k))
 						.map(k -> new KeyVersion(k)).collect(Collectors.toList()));
