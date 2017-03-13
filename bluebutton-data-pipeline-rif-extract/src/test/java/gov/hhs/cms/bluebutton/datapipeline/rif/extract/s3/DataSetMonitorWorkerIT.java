@@ -14,6 +14,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
@@ -38,7 +39,8 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(bucket.getName(), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new ExtractionOptions(bucket.getName()),
+					listener);
 			monitorWorker.run();
 
 			// Verify that no data sets were generated.
@@ -77,7 +79,8 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(bucket.getName(), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new ExtractionOptions(bucket.getName()),
+					listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -126,7 +129,8 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(bucket.getName(), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new ExtractionOptions(bucket.getName()),
+					listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -145,6 +149,55 @@ public final class DataSetMonitorWorkerIT {
 					java.time.Duration.ofSeconds(10));
 			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
 					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, 1 + manifestA.getEntries().size(),
+					java.time.Duration.ofSeconds(10));
+		} finally {
+			if (bucket != null)
+				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+		}
+	}
+
+	/**
+	 * Tests {@link DataSetMonitorWorker} when run against a bucket with a
+	 * single data set that should be skipped (per
+	 * {@link ExtractionOptions#getDataSetFilter()}).
+	 */
+	@Test
+	public void skipDataSetTest() {
+		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		Bucket bucket = null;
+		try {
+			/*
+			 * Create the (empty) bucket to run against, and populate it with a
+			 * data set.
+			 */
+			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
+			DataSetManifest manifest = new DataSetManifest(Instant.now(),
+					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(0),
+					StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(1),
+					StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+
+			// Run the worker.
+			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(
+					new ExtractionOptions(bucket.getName(), RifFileType.PDE), listener);
+			monitorWorker.run();
+
+			// Verify what was handed off to the DataSetMonitorListener.
+			Assert.assertEquals(0, listener.getNoDataAvailableEvents());
+			Assert.assertEquals(0, listener.getDataEvents().size());
+			Assert.assertEquals(0, listener.getErrorEvents().size());
+
+			// Verify that the data set was not renamed.
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, 1 + manifest.getEntries().size(),
+					java.time.Duration.ofSeconds(10));
+			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
+					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, 0,
 					java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)

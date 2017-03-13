@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+
 /**
  * <p>
  * Unit(ish) tests for {@link AppConfiguration}.
@@ -43,6 +45,7 @@ public final class AppConfigurationTest {
 	public void normalUsage() throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException {
 		ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE, RifFileType.BENEFICIARY.name());
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, "http://example.com/bar");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH, "../../fizz");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD, "buzz");
@@ -64,7 +67,9 @@ public final class AppConfigurationTest {
 		AppConfiguration testAppConfig = (AppConfiguration) testAppOutput.readObject();
 		Assert.assertNotNull(testAppConfig);
 		Assert.assertEquals(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_BUCKET),
-				testAppConfig.getS3BucketName());
+				testAppConfig.getExtractionOptions().getS3BucketName());
+		Assert.assertEquals(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE),
+				testAppConfig.getExtractionOptions().getAllowedRifFileType().name());
 		Assert.assertEquals(new URI(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_FHIR)),
 				testAppConfig.getLoadOptions().getFhirServer());
 		Assert.assertEquals(Paths.get(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH)),

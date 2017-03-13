@@ -11,6 +11,8 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
+
 /**
  * <p>
  * This ETL pipeline is fed by data pushed from CMS' Chronic Conditions Data
@@ -58,7 +60,7 @@ public final class DataSetMonitor {
 	 */
 	public static final int EXIT_CODE_MONITOR_ERROR = 2;
 
-	private final String bucketName;
+	private final ExtractionOptions options;
 	private final int scanRepeatDelay;
 	private final DataSetMonitorListener listener;
 
@@ -70,8 +72,8 @@ public final class DataSetMonitor {
 	 * used as a singleton service in the application: only one instance running
 	 * at a time is supported.
 	 * 
-	 * @param bucketName
-	 *            the name of the AWS S3 bucket to monitor
+	 * @param options
+	 *            the {@link ExtractionOptions} to use
 	 * @param scanRepeatDelay
 	 *            the number of milliseconds to wait after completing one
 	 *            poll/process operation and starting another
@@ -79,8 +81,8 @@ public final class DataSetMonitor {
 	 *            the {@link DataSetMonitorListener} that will be notified when
 	 *            events occur
 	 */
-	public DataSetMonitor(String bucketName, int scanRepeatDelay, DataSetMonitorListener listener) {
-		this.bucketName = bucketName;
+	public DataSetMonitor(ExtractionOptions options, int scanRepeatDelay, DataSetMonitorListener listener) {
+		this.options = options;
 		this.scanRepeatDelay = scanRepeatDelay;
 		this.listener = listener;
 
@@ -100,7 +102,7 @@ public final class DataSetMonitor {
 			throw new IllegalStateException();
 
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
-		Runnable dataSetWatcher = new DataSetMonitorWorker(bucketName, listener);
+		Runnable dataSetWatcher = new DataSetMonitorWorker(options, listener);
 		Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
 		/*

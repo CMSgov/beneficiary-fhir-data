@@ -16,6 +16,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
@@ -39,7 +40,7 @@ public final class DataSetMonitorIT {
 	public void missingBucket() throws InterruptedException {
 		// Start the monitor against a bucket that doesn't exist.
 		MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-		DataSetMonitor monitor = new DataSetMonitor("foo", 1, listener);
+		DataSetMonitor monitor = new DataSetMonitor(new ExtractionOptions("foo"), 1, listener);
 		monitor.start();
 
 		// Wait for the monitor to error out.
@@ -64,7 +65,7 @@ public final class DataSetMonitorIT {
 
 			// Start the monitor and then stop it.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitor monitor = new DataSetMonitor(bucket.getName(), 1, listener);
+			DataSetMonitor monitor = new DataSetMonitor(new ExtractionOptions(bucket.getName()), 1, listener);
 			monitor.start();
 			Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> listener.getNoDataAvailableEvents() > 0);
 			monitor.stop();
@@ -110,7 +111,7 @@ public final class DataSetMonitorIT {
 
 			// Start the monitor up.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitor monitor = new DataSetMonitor(bucket.getName(), 1, listener);
+			DataSetMonitor monitor = new DataSetMonitor(new ExtractionOptions(bucket.getName()), 1, listener);
 			monitor.start();
 
 			// Wait for the monitor to generate events for the two data sets.

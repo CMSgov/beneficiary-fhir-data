@@ -169,7 +169,8 @@ public final class S3ToFhirLoadApp {
 		 * they're pushed into S3. As each data set is found, it will be handed
 		 * off to the DataSetMonitorListener to be run through the ETL pipeline.
 		 */
-		DataSetMonitor s3Monitor = new DataSetMonitor(appConfig.getS3BucketName(), (int) S3_SCAN_INTERVAL.toMillis(),
+		DataSetMonitor s3Monitor = new DataSetMonitor(appConfig.getExtractionOptions(),
+				(int) S3_SCAN_INTERVAL.toMillis(),
 				dataSetMonitorListener);
 		registerShutdownHook(metrics, s3Monitor);
 		s3Monitor.start();
