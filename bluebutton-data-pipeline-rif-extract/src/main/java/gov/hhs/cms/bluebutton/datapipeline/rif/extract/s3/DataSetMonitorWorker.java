@@ -417,8 +417,12 @@ public final class DataSetMonitorWorker implements Runnable {
 			ObjectMetadata objectMetadata = s3Client.getObjectMetadata(options.getS3BucketName(), sourceKey);
 			CopyObjectRequest copyRequest = new CopyObjectRequest(options.getS3BucketName(), sourceKey,
 					options.getS3BucketName(), targetKey);
-			copyRequest
-					.setSSEAwsKeyManagementParams(new SSEAwsKeyManagementParams(objectMetadata.getSSEAwsKmsKeyId()));
+			if (objectMetadata.getSSEAwsKmsKeyId() != null)
+			{
+				copyRequest.setSSEAwsKeyManagementParams(
+						new SSEAwsKeyManagementParams(objectMetadata.getSSEAwsKmsKeyId()));
+			}
+
 			s3Client.copyObject(copyRequest);
 		}
 		LOGGER.debug("Data set copied in S3 (step 1 of move).");
