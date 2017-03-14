@@ -22,9 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -92,7 +90,7 @@ public final class DataSetMonitorWorker implements Runnable {
 
 	private final ExtractionOptions options;
 	private final DataSetMonitorListener listener;
-	private final AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+	private final AmazonS3 s3Client;
 
 	/**
 	 * Tracks the {@link DataSetManifest#getTimestamp()} values of the most
@@ -122,6 +120,7 @@ public final class DataSetMonitorWorker implements Runnable {
 	public DataSetMonitorWorker(ExtractionOptions options, DataSetMonitorListener listener) {
 		this.options = options;
 		this.listener = listener;
+		this.s3Client = S3Utilities.createS3Client(options);
 		this.recentlyProcessedManifests = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
 		this.skippedDataSets = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
 	}

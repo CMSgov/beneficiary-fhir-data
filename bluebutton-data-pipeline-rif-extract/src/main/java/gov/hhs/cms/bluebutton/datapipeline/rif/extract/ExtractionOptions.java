@@ -3,6 +3,9 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 import java.io.Serializable;
 import java.util.function.Predicate;
 
+import com.amazonaws.regions.Region;
+
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 
@@ -37,6 +40,20 @@ public final class ExtractionOptions implements Serializable {
 	 */
 	public ExtractionOptions(String s3BucketName) {
 		this(s3BucketName, null);
+	}
+
+	/**
+	 * @return the AWS {@link Region} that should be used when interacting with
+	 *         S3
+	 */
+	public Region getS3Region() {
+		/*
+		 * NOTE: This is hardcoded for now, unless/until we have a need to
+		 * support other regions. If that happens, just make the region a field
+		 * and add a new constructor param here for it.
+		 */
+
+		return S3Utilities.REGION_DEFAULT;
 	}
 
 	/**
