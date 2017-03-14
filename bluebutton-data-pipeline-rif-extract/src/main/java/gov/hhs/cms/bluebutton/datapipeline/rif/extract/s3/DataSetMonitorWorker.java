@@ -23,13 +23,16 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -406,10 +409,17 @@ public final class DataSetMonitorWorker implements Runnable {
 			String targetKey = String.format("%s/%s", S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
 
 			/*
-			 * The S3 API will automatically ensure that the copied object is
-			 * encrypted with the same key (if any) as the source object.
+			 * Before copying, grab the metadata of the source object to ensure
+			 * that we maintain its encryption settings (by default, the copy
+			 * will maintain all metadata EXCEPT: server-side-encryption,
+			 * storage-class, and website-redirect-location).
 			 */
-			s3Client.copyObject(options.getS3BucketName(), sourceKey, options.getS3BucketName(), targetKey);
+			ObjectMetadata objectMetadata = s3Client.getObjectMetadata(options.getS3BucketName(), sourceKey);
+			CopyObjectRequest copyRequest = new CopyObjectRequest(options.getS3BucketName(), sourceKey,
+					options.getS3BucketName(), targetKey);
+			copyRequest
+					.setSSEAwsKeyManagementParams(new SSEAwsKeyManagementParams(objectMetadata.getSSEAwsKmsKeyId()));
+			s3Client.copyObject(copyRequest);
 		}
 		LOGGER.debug("Data set copied in S3 (step 1 of move).");
 
