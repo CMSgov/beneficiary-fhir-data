@@ -9,9 +9,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
@@ -30,17 +28,17 @@ public final class DataSetMonitorWorkerIT {
 	 */
 	@Test
 	public void emptyBucketTest() {
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
+		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		Bucket bucket = null;
 		try {
 			// Create the (empty) bucket to run against.
-			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new ExtractionOptions(bucket.getName()),
-					listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
 			monitorWorker.run();
 
 			// Verify that no data sets were generated.
@@ -59,14 +57,15 @@ public final class DataSetMonitorWorkerIT {
 	 */
 	@Test
 	public void singleDataSetTest() {
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
+		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		Bucket bucket = null;
 		try {
 			/*
 			 * Create the (empty) bucket to run against, and populate it with a
 			 * data set.
 			 */
-			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
 			DataSetManifest manifest = new DataSetManifest(Instant.now(),
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
@@ -79,8 +78,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new ExtractionOptions(bucket.getName()),
-					listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -107,14 +105,15 @@ public final class DataSetMonitorWorkerIT {
 	 */
 	@Test
 	public void multipleDataSetsTest() {
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
+		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		Bucket bucket = null;
 		try {
 			/*
 			 * Create the (empty) bucket to run against, and populate it with
 			 * two data sets.
 			 */
-			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
 			DataSetManifest manifestA = new DataSetManifest(Instant.now().minus(1L, ChronoUnit.HOURS),
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
@@ -129,8 +128,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new ExtractionOptions(bucket.getName()),
-					listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -163,14 +161,16 @@ public final class DataSetMonitorWorkerIT {
 	 */
 	@Test
 	public void skipDataSetTest() {
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)),
+				RifFileType.PDE);
+		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		Bucket bucket = null;
 		try {
 			/*
 			 * Create the (empty) bucket to run against, and populate it with a
 			 * data set.
 			 */
-			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
 			DataSetManifest manifest = new DataSetManifest(Instant.now(),
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
@@ -183,8 +183,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(
-					new ExtractionOptions(bucket.getName(), RifFileType.PDE), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.

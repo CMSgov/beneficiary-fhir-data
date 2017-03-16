@@ -11,9 +11,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
@@ -56,16 +54,17 @@ public final class DataSetMonitorIT {
 	 */
 	@Test
 	public void emptyBucketTest() {
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
+		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		Bucket bucket = null;
 		try {
 			// Create the (empty) bucket to run against.
-			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
 
 			// Start the monitor and then stop it.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitor monitor = new DataSetMonitor(new ExtractionOptions(bucket.getName()), 1, listener);
+			DataSetMonitor monitor = new DataSetMonitor(options, 1, listener);
 			monitor.start();
 			Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> listener.getNoDataAvailableEvents() > 0);
 			monitor.stop();
@@ -89,14 +88,15 @@ public final class DataSetMonitorIT {
 	 */
 	@Test
 	public void multipleDataSetsTest() throws InterruptedException {
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
+		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		Bucket bucket = null;
 		try {
 			/*
 			 * Create the (empty) bucket to run against, and populate it with
 			 * two data sets.
 			 */
-			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
 			DataSetManifest manifestA = new DataSetManifest(Instant.now().minus(1L, ChronoUnit.HOURS),
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
@@ -111,7 +111,7 @@ public final class DataSetMonitorIT {
 
 			// Start the monitor up.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitor monitor = new DataSetMonitor(new ExtractionOptions(bucket.getName()), 1, listener);
+			DataSetMonitor monitor = new DataSetMonitor(options, 1, listener);
 			monitor.start();
 
 			// Wait for the monitor to generate events for the two data sets.

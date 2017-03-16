@@ -20,9 +20,7 @@ import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
@@ -30,6 +28,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
@@ -145,7 +144,7 @@ public final class S3ToFhirLoadAppIT {
 	public void noRifData() throws IOException, InterruptedException {
 		skipOnUnsupportedOs();
 
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
 		Bucket bucket = null;
 		Process appProcess = null;
 		try {
@@ -190,7 +189,7 @@ public final class S3ToFhirLoadAppIT {
 	public void smallAmountOfRifData() throws IOException, InterruptedException {
 		skipOnUnsupportedOs();
 
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
 		Bucket bucket = null;
 		Process appProcess = null;
 		try {

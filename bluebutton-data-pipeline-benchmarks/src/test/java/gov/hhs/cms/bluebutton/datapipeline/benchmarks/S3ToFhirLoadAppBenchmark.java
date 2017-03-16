@@ -38,9 +38,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -56,6 +54,7 @@ import gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResourceGroup;
@@ -177,7 +176,7 @@ public final class S3ToFhirLoadAppBenchmark {
 					String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
 
 		// Upload the benchmark file resources to S3.
-		AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+		AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
 		Bucket resourcesBucket = null;
 		Bucket dataSetBucket = null;
 		List<BenchmarkResult> benchmarkResults;
@@ -605,7 +604,7 @@ public final class S3ToFhirLoadAppBenchmark {
 		 * {@link BenchmarkError} if any of that fails.
 		 */
 		private void runBenchmark() {
-			AmazonS3 s3Client = new AmazonS3Client(new DefaultAWSCredentialsProviderChain());
+			AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
 			Bucket bucket = null;
 			try {
 				bucket = s3Client.createBucket(
