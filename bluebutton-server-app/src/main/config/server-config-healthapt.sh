@@ -177,7 +177,7 @@ end-if
 if (outcome == success) of /system-property=bbfhir.db.password:read-resource
 	/system-property=bbfhir.db.password:remove
 end-if
-/system-property=bbfhir.logs.dir:add(value=".")
+/system-property=bbfhir.logs.dir:add(value="./")
 /system-property=bbfhir.db.url:add(value="${dbUrl}")
 /system-property=bbfhir.db.username:add(value="${dbUsername}")
 /system-property=bbfhir.db.password:add(value="${dbPassword}")
