@@ -687,7 +687,11 @@ public final class DataTransformer {
 		 */
 
 		Coverage partA = new Coverage();
+		partA.setId("Coverage/partA-" + record.beneficiaryId);
+		// FIXME change plan and subplan to type
 		partA.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_A);
+		// partA.setType(createCodeableConcept(COVERAGE_PLAN,
+		// COVERAGE_PLAN_PART_A));
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// partA.addPayor(SharedDataManager.createReferenceToCms());
 		partA.setBeneficiary(referencePatient(record.beneficiaryId));
@@ -714,6 +718,7 @@ public final class DataTransformer {
 		insert(bundle, partA);
 
 		Coverage partB = new Coverage();
+		partB.setId("Coverage/partB-" + record.beneficiaryId);
 		partB.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_B);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// partB.addPayor(SharedDataManager.createReferenceToCms());
@@ -730,6 +735,7 @@ public final class DataTransformer {
 		insert(bundle, partB);
 
 		Coverage partD = new Coverage();
+		partD.setId("Coverage/partD-" + record.beneficiaryId);
 		partD.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_D);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// partD.addPayor(SharedDataManager.createReferenceToCms());
@@ -763,6 +769,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/claimid-" + record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
 				.setValue(String.valueOf(record.prescriptionReferenceNumber));
@@ -1004,6 +1011,7 @@ public final class DataTransformer {
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
 		// COVERAGE_PLAN_PART_B));
@@ -1324,6 +1332,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -1703,6 +1712,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2031,6 +2041,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2386,6 +2397,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2599,6 +2611,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2807,6 +2820,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
