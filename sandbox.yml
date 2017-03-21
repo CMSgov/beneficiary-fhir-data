@@ -45,10 +45,11 @@
 # rolling it out and tearing down any old AMIs.)
 - include: fhir_servers_elb.yml
 
-# Ensure that the S3 bucket that the ETL service will pull from exists.
-# TODO
+# Gracefully terminate the old ETL server (if any), setup the S3 bucket that 
+# ETL will pull from, and provision & configure the new ETL server.
+- include: etl_server_redeploy.yml
 
-# Gracefully stop the old ETL service (if any).
+# Ensure that the S3 bucket that the ETL service will pull from exists.
 # TODO
 
 # Provision the new ETL server.

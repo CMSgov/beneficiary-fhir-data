@@ -1,0 +1,85 @@
+---
+
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    # Needed to supply `keytool` and also to run the ETL service.
+    - java-1.8.0-openjdk-devel
+    # Needed to use the s3_object module in these tasks.
+    - python-boto
+  become: true
+
+- name: Create ETL Service User
+  user:
+    name: bb-etl
+    shell: /bin/false
+  become: true
+
+- name: Set Variable for ETL Service Directory
+  set_fact:
+    etl_dir: '/usr/local/bluebutton-data-pipeline-app'
+
+- name: Create ETL Service Directory
+  file:
+    path: "{{ etl_dir }}"
+    state: directory
+    owner: bb-etl
+    group: bb-etl
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+# FIXME: Replace this with download via URL, so that file ownership and mode can be set correctly.
+# This keystore and cert were generated during the FHIR server AMI setup.
+- name: Download Application and Other Resources
+  s3:
+    bucket: "{{ s3_bucket_deployment }}"
+    object: "{{ item }}"
+    dest: "{{ etl_dir }}/{{ item }}"
+    mode: get
+  with_items:
+    - bluebutton-data-pipeline-app-capsule-fat.x
+    - bluebutton-backend-etl-client-keystore.jks
+    - bluebutton-backend-fhir-servers.cer
+  become: true
+
+- name: Create ETL Client Truststore
+  command: "{{ item }}"
+  with_items:
+    - "keytool -importcert -noprompt -alias client-etl -file {{ etl_dir }}/bluebutton-backend-fhir-servers.cer -keypass changeit -keystore {{ etl_dir }}/bluebutton-backend-etl-client-truststore.jks -storepass changeit"
+  become: true
+
+- file:
+    path: "{{ etl_dir }}/bluebutton-data-pipeline-app-capsule-fat.x"
+    mode: 'u=rwx,g=rwx,o=rwx'
+  become: true
+
+- name: Create ETL Service Wrapper Script
+  template:
+    src: bluebutton-data-pipeline-app.sh.j2
+    dest: "{{ etl_dir }}/bluebutton-data-pipeline-app.sh"
+    owner: bb-etl
+    group: bb-etl
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create ETL Service Definition
+  template:
+    src: bluebutton-data-pipeline-app.service.j2
+    dest: /etc/systemd/system/bluebutton-data-pipeline-app.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+
+- name: Load ETL Service Definition
+  command: /usr/bin/systemctl daemon-reload
+  become: true
+
+- name: Start ETL Service
+  service:
+    name: bluebutton-data-pipeline-app
+    state: started
+  become: true
+
