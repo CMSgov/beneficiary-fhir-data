@@ -91,6 +91,9 @@ public final class DataSetMonitorWorker implements Runnable {
 	private static final Pattern REGEX_PENDING_MANIFEST = Pattern
 			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
 
+	private static final Pattern REGEX_COMPLETED_MANIFEST = Pattern
+			.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
+
 	private final ExtractionOptions options;
 	private final DataSetMonitorListener listener;
 	private final AmazonS3 s3Client;
@@ -148,6 +151,8 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * pages, looking for the oldest manifest file that is available.
 		 */
 		String manifestToProcessKey = null;
+		int pendingManifests = 0;
+		int completedManifests = 0;
 		ObjectListing objectListing = s3Client.listObjects(bucketListRequest);
 		do {
 			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
@@ -165,6 +170,8 @@ public final class DataSetMonitorWorker implements Runnable {
 					if (dataSetTimestamp == null)
 						continue;
 
+					pendingManifests++;
+
 					// Don't process the same data set more than once.
 					if (recentlyProcessedManifests.contains(dataSetTimestamp)) {
 						LOGGER.debug("Skipping already-processed data set: {}", dataSetTimestamp);
@@ -179,6 +186,13 @@ public final class DataSetMonitorWorker implements Runnable {
 						manifestToProcessKey = key;
 					else if (dataSetTimestamp.compareTo(parseDataSetTimestamp(manifestToProcessKey)) < 0)
 						manifestToProcessKey = key;
+				} else if (REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
+					// Just verify that the timestamp is valid here, too.
+					Instant dataSetTimestamp = parseDataSetTimestamp(key);
+					if (dataSetTimestamp == null)
+						continue;
+
+					completedManifests++;
 				}
 			}
 
@@ -194,8 +208,10 @@ public final class DataSetMonitorWorker implements Runnable {
 
 		// We've found the oldest manifest. Now go download and parse it.
 		DataSetManifest dataSetManifest = readManifest(manifestToProcessKey);
-		LOGGER.info("Found data set to process at '{}': '{}'.",
-				manifestToProcessKey, dataSetManifest.toString());
+		LOGGER.info(
+				"Found data set to process at '{}': '{}'."
+						+ " There were '{}' total pending data sets and '{}' completed ones.",
+				manifestToProcessKey, dataSetManifest.toString(), pendingManifests, completedManifests);
 
 		/*
 		 * We've got a dataset to process. However, it might still be uploading
