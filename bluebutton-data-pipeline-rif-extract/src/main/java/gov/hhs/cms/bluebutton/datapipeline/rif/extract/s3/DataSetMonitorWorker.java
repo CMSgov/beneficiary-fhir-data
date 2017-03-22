@@ -230,14 +230,7 @@ public final class DataSetMonitorWorker implements Runnable {
 			}
 		} while (!dataSetComplete);
 
-		Set<S3RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
-			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
-					DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName());
-			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(options.getS3BucketName(), key));
-		}).collect(Collectors.toSet());
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), new HashSet<>(rifFiles));
-
-		if (options.getDataSetFilter().test(rifFilesEvent)) {
+		if (options.getDataSetFilter().test(dataSetManifest)) {
 			/*
 			 * Huzzah! We've got a data set to process and we've verified it's
 			 * all there and ready to go. Now we can hand that off to the
@@ -248,6 +241,13 @@ public final class DataSetMonitorWorker implements Runnable {
 			 * consistency problems).
 			 */
 			LOGGER.info("Data set finished uploading. Processing it...");
+			Set<S3RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
+				String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
+						DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName());
+				return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(options.getS3BucketName(), key));
+			}).collect(Collectors.toSet());
+			RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), new HashSet<>(rifFiles));
+
 			listener.dataAvailable(rifFilesEvent);
 
 		/*
