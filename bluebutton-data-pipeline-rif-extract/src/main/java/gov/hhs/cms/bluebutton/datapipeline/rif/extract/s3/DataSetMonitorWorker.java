@@ -187,11 +187,6 @@ public final class DataSetMonitorWorker implements Runnable {
 					else if (dataSetTimestamp.compareTo(parseDataSetTimestamp(manifestToProcessKey)) < 0)
 						manifestToProcessKey = key;
 				} else if (REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
-					// Just verify that the timestamp is valid here, too.
-					Instant dataSetTimestamp = parseDataSetTimestamp(key);
-					if (dataSetTimestamp == null)
-						continue;
-
 					completedManifests++;
 				}
 			}
