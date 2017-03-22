@@ -202,12 +202,8 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * to S3, so we need to wait for that to complete before we start
 		 * processing it.
 		 */
-		boolean dataSetComplete = false;
 		boolean alreadyLoggedWaitingEvent = false;
-		do {
-			if (dataSetIsAvailable(dataSetManifest))
-				dataSetComplete = true;
-
+		while (!dataSetIsAvailable(dataSetManifest)) {
 			/*
 			 * We're very patient here, so we keep looping, but it's prudent to
 			 * pause between each iteration. TODO should eventually time out,
@@ -228,7 +224,7 @@ public final class DataSetMonitorWorker implements Runnable {
 				 */
 				throw new RuntimeException(e);
 			}
-		} while (!dataSetComplete);
+		}
 
 		Set<S3RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
 			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
