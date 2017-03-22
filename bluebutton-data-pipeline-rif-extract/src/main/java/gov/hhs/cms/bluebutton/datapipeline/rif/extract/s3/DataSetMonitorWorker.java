@@ -243,7 +243,7 @@ public final class DataSetMonitorWorker implements Runnable {
 			 * multiple data sets in parallel (which would lead to data
 			 * consistency problems).
 			 */
-			LOGGER.info("Data set finished uploading. Processing it...");
+			LOGGER.info("Data set ready. Processing it...");
 			listener.dataAvailable(rifFilesEvent);
 
 		/*
