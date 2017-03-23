@@ -5,9 +5,9 @@ import java.util.function.Predicate;
 
 import com.amazonaws.regions.Region;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 
 /**
  * Models the user-configurable options for extraction of RIF data from S3.
@@ -77,13 +77,13 @@ public final class ExtractionOptions implements Serializable {
 	/**
 	 * @return a {@link Predicate} that returns <code>true</code> for
 	 *         {@link Predicate#test(Object)} if the specified
-	 *         {@link RifFilesEvent} matches the
+	 *         {@link DataSetManifest} matches the
 	 *         {@link #getAllowedRifFileType()} value, and <code>false</code> if
 	 *         it does not (and thus should be skipped)
 	 */
-	public Predicate<RifFilesEvent> getDataSetFilter() {
+	public Predicate<DataSetManifest> getDataSetFilter() {
 		if (allowedRifFileType != null)
-			return e -> e.getFiles().stream().map(f -> f.getFileType()).allMatch(t -> allowedRifFileType == t);
+			return d -> d.getEntries().stream().map(e -> e.getType()).allMatch(t -> allowedRifFileType == t);
 		else
 			return e -> true;
 	}
