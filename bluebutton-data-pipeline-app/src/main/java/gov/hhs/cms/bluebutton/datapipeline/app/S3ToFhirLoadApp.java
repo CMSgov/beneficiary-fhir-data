@@ -61,11 +61,13 @@ public final class S3ToFhirLoadApp {
 	 *            via environment variables)
 	 */
 	public static void main(String[] args) {
+		LOGGER.info("Application starting up!");
 		configureUnexpectedExceptionHandlers();
 
 		AppConfiguration appConfig = null;
 		try {
 			appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
+			LOGGER.info("Application configured: '{}'", appConfig);
 		} catch (AppConfigurationException e) {
 			System.err.println(e.getMessage());
 			LOGGER.warn("Invalid app configuration.", e);
