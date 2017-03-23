@@ -214,7 +214,7 @@ public final class DataSetMonitorWorker implements Runnable {
 			 */
 			try {
 				if(!alreadyLoggedWaitingEvent){
-					LOGGER.info("Data set not ready: '{}'. Waiting for it to finish uploading...", manifestToProcess);
+					LOGGER.info("Data set not ready. Waiting for it to finish uploading...");
 					alreadyLoggedWaitingEvent = true;
 				}
 				Thread.sleep(1000 * 1);
