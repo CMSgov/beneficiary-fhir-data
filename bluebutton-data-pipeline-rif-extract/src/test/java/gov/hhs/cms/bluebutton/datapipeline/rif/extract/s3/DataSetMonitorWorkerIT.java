@@ -187,7 +187,7 @@ public final class DataSetMonitorWorkerIT {
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
-			Assert.assertEquals(0, listener.getNoDataAvailableEvents());
+			Assert.assertEquals(1, listener.getNoDataAvailableEvents());
 			Assert.assertEquals(0, listener.getDataEvents().size());
 			Assert.assertEquals(0, listener.getErrorEvents().size());
 
