@@ -158,6 +158,8 @@ public final class DataSetMonitorWorker implements Runnable {
 			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
 				String key = objectSummary.getKey();
 				if (REGEX_PENDING_MANIFEST.matcher(key).matches()) {
+					pendingManifests++;
+
 					/*
 					 * We've got an object that *looks like* it might be a
 					 * manifest file. But we also need to ensure that it starts
@@ -169,8 +171,6 @@ public final class DataSetMonitorWorker implements Runnable {
 					Instant dataSetTimestamp = parseDataSetTimestamp(key);
 					if (dataSetTimestamp == null)
 						continue;
-
-					pendingManifests++;
 
 					// Don't process the same data set more than once.
 					if (recentlyProcessedManifests.contains(dataSetTimestamp)) {
