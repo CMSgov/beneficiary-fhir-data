@@ -107,15 +107,6 @@ public final class DataSetMonitorWorker implements Runnable {
 	private CircularFifoQueue<Instant> recentlyProcessedManifests;
 
 	/**
-	 * Tracks the {@link DataSetManifest#getTimestamp()} values of data sets
-	 * that have been skipped (per {@link #shouldSkipDataSet(RifFilesEvent)}),
-	 * to ensure that the processing doesn't get stuck in a loop, always
-	 * skipping the same data set. It's constrained to a fixed number of items,
-	 * to keep it from becoming a memory leak.
-	 */
-	private CircularFifoQueue<Instant> skippedDataSets;
-
-	/**
 	 * Constructs a new {@link DataSetMonitorWorker} instance.
 	 * 
 	 * @param options
@@ -128,7 +119,6 @@ public final class DataSetMonitorWorker implements Runnable {
 		this.listener = listener;
 		this.s3Client = S3Utilities.createS3Client(options);
 		this.recentlyProcessedManifests = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
-		this.skippedDataSets = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
 	}
 
 	/**
@@ -150,7 +140,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * S3 will return results in separate pages. Loop through all of the
 		 * pages, looking for the oldest manifest file that is available.
 		 */
-		String manifestToProcessKey = null;
+		DataSetManifest manifestToProcess = null;
 		int pendingManifests = 0;
 		int completedManifests = 0;
 		ObjectListing objectListing = s3Client.listObjects(bucketListRequest);
@@ -163,29 +153,32 @@ public final class DataSetMonitorWorker implements Runnable {
 					/*
 					 * We've got an object that *looks like* it might be a
 					 * manifest file. But we also need to ensure that it starts
-					 * with a valid timestamp, and if so, check to see if that
-					 * timestamp is the oldest one we've encountered so far. If
+					 * with a valid timestamp.
+					 */
+					Instant timestamp = parseDataSetTimestamp(key);
+					if (timestamp == null)
+						continue;
+
+					/*
+					 * Check to see if this data set should be skipped, and if
+					 * not, it it is the oldest one we've encountered so far. If
 					 * so, we mark it as the "current oldest" and continue
 					 * looking through the other keys.
 					 */
-					Instant dataSetTimestamp = parseDataSetTimestamp(key);
-					if (dataSetTimestamp == null)
-						continue;
-
-					// Don't process the same data set more than once.
-					if (recentlyProcessedManifests.contains(dataSetTimestamp)) {
-						LOGGER.debug("Skipping already-processed data set: {}", dataSetTimestamp);
+					DataSetManifest manifest = readManifest(key);
+					if (recentlyProcessedManifests.contains(timestamp)) {
+						LOGGER.debug("Skipping data set that was already processed: {}", timestamp);
 						continue;
 					}
-					if (skippedDataSets.contains(dataSetTimestamp)) {
-						LOGGER.trace("Skipping already-skipped data set: {}", dataSetTimestamp);
+					if (!options.getDataSetFilter().test(manifest)) {
+						LOGGER.debug("Skipping data set that doesn't pass filter: {}", manifest.toString());
 						continue;
 					}
 
-					if (manifestToProcessKey == null)
-						manifestToProcessKey = key;
-					else if (dataSetTimestamp.compareTo(parseDataSetTimestamp(manifestToProcessKey)) < 0)
-						manifestToProcessKey = key;
+					if (manifestToProcess == null)
+						manifestToProcess = manifest;
+					else if (timestamp.compareTo(manifestToProcess.getTimestamp()) < 0)
+						manifestToProcess = manifest;
 				} else if (REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
 					completedManifests++;
 				}
@@ -195,26 +188,25 @@ public final class DataSetMonitorWorker implements Runnable {
 		} while (objectListing.isTruncated());
 
 		// If no manifest was found, we're done (until next time).
-		if (manifestToProcessKey == null) {
+		if (manifestToProcess == null) {
 			LOGGER.info(LOG_MESSAGE_NO_DATA_SETS);
 			listener.noDataAvailable();
 			return;
 		}
 
-		// We've found the oldest manifest. Now go download and parse it.
-		DataSetManifest dataSetManifest = readManifest(manifestToProcessKey);
+		// We've found the oldest manifest.
 		LOGGER.info(
-				"Found data set to process at '{}': '{}'."
+				"Found data set to process: '{}'."
 						+ " There were '{}' total pending data sets and '{}' completed ones.",
-				manifestToProcessKey, dataSetManifest.toString(), pendingManifests, completedManifests);
+				manifestToProcess.toString(), pendingManifests, completedManifests);
 
 		/*
-		 * We've got a dataset to process. However, it might still be uploading
+		 * We've got a data set to process. However, it might still be uploading
 		 * to S3, so we need to wait for that to complete before we start
 		 * processing it.
 		 */
 		boolean alreadyLoggedWaitingEvent = false;
-		while (!dataSetIsAvailable(dataSetManifest)) {
+		while (!dataSetIsAvailable(manifestToProcess)) {
 			/*
 			 * We're very patient here, so we keep looping, but it's prudent to
 			 * pause between each iteration. TODO should eventually time out,
@@ -222,7 +214,7 @@ public final class DataSetMonitorWorker implements Runnable {
 			 */
 			try {
 				if(!alreadyLoggedWaitingEvent){
-					LOGGER.info("Data set not ready: '{}'. Waiting for it to finish uploading...", manifestToProcessKey);
+					LOGGER.info("Data set not ready: '{}'. Waiting for it to finish uploading...", manifestToProcess);
 					alreadyLoggedWaitingEvent = true;
 				}
 				Thread.sleep(1000 * 1);
@@ -237,25 +229,27 @@ public final class DataSetMonitorWorker implements Runnable {
 			}
 		}
 
-		if (options.getDataSetFilter().test(dataSetManifest)) {
-			/*
-			 * Huzzah! We've got a data set to process and we've verified it's
-			 * all there and ready to go. Now we can hand that off to the
-			 * DataSetMonitorListener, to do the *real* work of actually
-			 * processing that data set. It's important that we block until it's
-			 * completed, in order to ensure that we don't end up processing
-			 * multiple data sets in parallel (which would lead to data
-			 * consistency problems).
-			 */
-			LOGGER.info("Data set ready. Processing it...");
-			Set<S3RifFile> rifFiles = dataSetManifest.getEntries().stream().map(e -> {
-				String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
-						DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName());
-				return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(options.getS3BucketName(), key));
-			}).collect(Collectors.toSet());
-			RifFilesEvent rifFilesEvent = new RifFilesEvent(dataSetManifest.getTimestamp(), new HashSet<>(rifFiles));
+		/*
+		 * Huzzah! We've got a data set to process and we've verified it's all
+		 * there and ready to go.
+		 */
+		LOGGER.info("Data set ready. Processing it...");
+		Instant dataSetManifestTimestamp = manifestToProcess.getTimestamp();
+		Set<S3RifFile> rifFiles = manifestToProcess.getEntries().stream().map(e -> {
+			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
+					DateTimeFormatter.ISO_INSTANT.format(dataSetManifestTimestamp), e.getName());
+			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(options.getS3BucketName(), key));
+		}).collect(Collectors.toSet());
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(), new HashSet<>(rifFiles));
 
-			listener.dataAvailable(rifFilesEvent);
+		/*
+		 * Now we hand that off to the DataSetMonitorListener, to do the *real*
+		 * work of actually processing that data set. It's important that we
+		 * block until it's completed, in order to ensure that we don't end up
+		 * processing multiple data sets in parallel (which would lead to data
+		 * consistency problems).
+		 */
+		listener.dataAvailable(rifFilesEvent);
 
 		/*
 		 * Now that the data set has been processed, we need to ensure that we
@@ -266,12 +260,8 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * effect right away.)
 		 */
 		rifFiles.stream().forEach(f -> f.cleanupTempFile());
-		recentlyProcessedManifests.add(dataSetManifest.getTimestamp());
-			markDataSetCompleteInS3(dataSetManifest);
-		} else {
-			skippedDataSets.add(dataSetManifest.getTimestamp());
-			LOGGER.debug("Data set skipped: {}", dataSetManifest.toString());
-		}
+		recentlyProcessedManifests.add(manifestToProcess.getTimestamp());
+			markDataSetCompleteInS3(manifestToProcess);
 	}
 
 	/**
