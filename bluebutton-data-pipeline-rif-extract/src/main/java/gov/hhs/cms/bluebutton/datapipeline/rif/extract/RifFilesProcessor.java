@@ -28,9 +28,10 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
-
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifVersionException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
@@ -209,9 +210,9 @@ public final class RifFilesProcessor {
 				@Override
 				public int compare(CSVRecord o1, CSVRecord o2) {
 					if (o1 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Carrier o1 record is null");
 					if (o2 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Carrier o2 record is null");
 
 					String claimId1 = o1.get(CarrierClaimGroup.Column.CLM_ID);
 					String claimId2 = o2.get(CarrierClaimGroup.Column.CLM_ID);
@@ -236,9 +237,9 @@ public final class RifFilesProcessor {
 				@Override
 				public int compare(CSVRecord o1, CSVRecord o2) {
 					if (o1 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Inpatient o1 record is null");
 					if (o2 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Inpatient o2 record is null");
 
 					String claimId1 = o1.get(InpatientClaimGroup.Column.CLM_ID);
 					String claimId2 = o2.get(InpatientClaimGroup.Column.CLM_ID);
@@ -263,9 +264,9 @@ public final class RifFilesProcessor {
 				@Override
 				public int compare(CSVRecord o1, CSVRecord o2) {
 					if (o1 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Outpatient o1 record is null");
 					if (o2 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Outpatient o2 record is null");
 
 					String claimId1 = o1.get(OutpatientClaimGroup.Column.CLM_ID);
 					String claimId2 = o2.get(OutpatientClaimGroup.Column.CLM_ID);
@@ -290,9 +291,9 @@ public final class RifFilesProcessor {
 				@Override
 				public int compare(CSVRecord o1, CSVRecord o2) {
 					if (o1 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("SNF o1 record is null");
 					if (o2 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("SNF o2 record is null");
 
 					String claimId1 = o1.get(SNFClaimGroup.Column.CLM_ID);
 					String claimId2 = o2.get(SNFClaimGroup.Column.CLM_ID);
@@ -317,9 +318,9 @@ public final class RifFilesProcessor {
 				@Override
 				public int compare(CSVRecord o1, CSVRecord o2) {
 					if (o1 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Hospice o1 record is null");
 					if (o2 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("Hospice o2 record is null");
 
 					String claimId1 = o1.get(HospiceClaimGroup.Column.CLM_ID);
 					String claimId2 = o2.get(HospiceClaimGroup.Column.CLM_ID);
@@ -344,9 +345,9 @@ public final class RifFilesProcessor {
 				@Override
 				public int compare(CSVRecord o1, CSVRecord o2) {
 					if (o1 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("HHA o1 record is null");
 					if (o2 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("HHA o2 record is null");
 
 					String claimId1 = o1.get(HHAClaimGroup.Column.CLM_ID);
 					String claimId2 = o2.get(HHAClaimGroup.Column.CLM_ID);
@@ -371,9 +372,9 @@ public final class RifFilesProcessor {
 				@Override
 				public int compare(CSVRecord o1, CSVRecord o2) {
 					if (o1 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("DME o1 record is null");
 					if (o2 == null)
-						throw new IllegalArgumentException();
+						throw new InvalidRifFileFormatException("DME o2 record is null");
 
 					String claimId1 = o1.get(DMEClaimGroup.Column.CLM_ID);
 					String claimId2 = o2.get(DMEClaimGroup.Column.CLM_ID);
@@ -395,7 +396,7 @@ public final class RifFilesProcessor {
 			});
 
 		} else {
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifFileTypeException("Unsupported file type:" + file.getFileType());
 		}
 
 		return rifRecordStream;
@@ -422,7 +423,7 @@ public final class RifFilesProcessor {
 			 * the header record. We don't use header records, so this shouldn't
 			 * ever occur.
 			 */
-			throw new BadCodeMonkeyException(e);
+			throw new InvalidRifFileFormatException("Invalid Rif header record", e);
 		}
 	}
 
@@ -489,7 +490,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != beneficiaryRow.version)
-			throw new IllegalArgumentException("Unsupported record version: " + beneficiaryRow);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + beneficiaryRow);
 
 		return beneficiaryRow;
 	}
@@ -509,7 +510,7 @@ public final class RifFilesProcessor {
 		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION));
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != pdeRow.version)
-			throw new IllegalArgumentException("Unsupported record version: " + pdeRow.version);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + pdeRow.version);
 
 		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND));
 		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID);
@@ -711,7 +712,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
 
 		return claimGroup;
 	}
@@ -851,7 +852,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
 
 		return claimGroup;
 	}
@@ -994,7 +995,7 @@ public final class RifFilesProcessor {
 	
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
 	
 		return claimGroup;
 	}
@@ -1124,7 +1125,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
 
 		return claimGroup;
 	}
@@ -1222,7 +1223,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
 
 		return claimGroup;
 	}
@@ -1311,7 +1312,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
 
 		return claimGroup;
 	}
@@ -1441,7 +1442,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
 
 		return claimGroup;
 	}
@@ -1637,9 +1638,14 @@ public final class RifFilesProcessor {
 	 */
 	private static List<IcdCode> parseIcdCodes(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
 		if ((icdColumnLast - icdColumnFirst) < 1)
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifFileFormatException(
+					String.format("ICD column last value ( '%s' )  is before first ICD column id ( '%s' )",
+							icdColumnLast,
+							icdColumnFirst));
 		if ((icdColumnLast - icdColumnFirst + 1) % 2 != 0)
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifFileFormatException(String.format(
+					"ICD column last value ( '%s' ) and first ICD column id ( '%s' ) are not divisible by 2",
+					icdColumnLast, icdColumnFirst));
 
 		List<IcdCode> icdCodes = new LinkedList<>();
 		for (int i = icdColumnFirst; i < icdColumnLast; i += 2) {
@@ -1651,7 +1657,7 @@ public final class RifFilesProcessor {
 			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty())
 				icdCodes.add(parseIcdCode(icdCodeText, icdVersionText));
 			else
-				throw new IllegalArgumentException(
+				throw new InvalidRifFileFormatException(
 						String.format("Unexpected ICD code pair: '%s' and '%s'.", icdCodeText, icdVersionText));
 		}
 
@@ -1679,9 +1685,13 @@ public final class RifFilesProcessor {
 	 */
 	private static List<IcdCode> parseIcdCodesWithPOA(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
 		if ((icdColumnLast - icdColumnFirst) < 1)
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifFileFormatException(
+					String.format("ICD column last value ( '%s' )  is before first ICD column id ( '%s' )",
+							icdColumnLast, icdColumnFirst));
 		if ((icdColumnLast - icdColumnFirst + 2) % 3 != 0)
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifFileFormatException(String.format(
+					"ICD column last value ( '%s' ) and first ICD column id ( '%s' ) are not divisible by 3",
+					icdColumnLast, icdColumnFirst));
 
 		List<IcdCode> icdCodes = new LinkedList<>();
 		for (int i = icdColumnFirst; i < icdColumnLast; i += 3) {
@@ -1694,7 +1704,7 @@ public final class RifFilesProcessor {
 					&& !icdPresentOnAdmissionCode.toString().isEmpty())
 				icdCodes.add(parseIcdCode(icdCodeText, icdVersionText, icdPresentOnAdmissionCode));
 			else
-				throw new IllegalArgumentException(
+				throw new InvalidRifFileFormatException(
 						String.format("Unexpected ICD code/ver/poa : '%s' and '%s' and '%s'.", icdCodeText,
 								icdVersionText, icdPresentOnAdmissionCode));
 		}
@@ -1723,9 +1733,13 @@ public final class RifFilesProcessor {
 	 */
 	private static List<IcdCode> parseIcdCodesProcedure(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
 		if ((icdColumnLast - icdColumnFirst) < 1)
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifFileFormatException(
+					String.format("Procedure ICD column last value ( '%s' )  is before first ICD column id ( '%s' )",
+							icdColumnLast, icdColumnFirst));
 		if ((icdColumnLast - icdColumnFirst + 2) % 3 != 0)
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifFileFormatException(String.format(
+					"Procedure ICD column last value ( '%s' ) and first ICD column id ( '%s' ) are not divisible by 3",
+					icdColumnLast, icdColumnFirst));
 
 		List<IcdCode> icdCodes = new LinkedList<>();
 		for (int i = icdColumnFirst; i < icdColumnLast; i += 3) {
@@ -1740,8 +1754,8 @@ public final class RifFilesProcessor {
 			else if (!icdCodeText.isEmpty() && !icdVersionText.isEmpty() && !icdProcedureDate.toString().isEmpty())
 				icdCodes.add(parseIcdCode(icdCodeText, icdVersionText, icdProcedureDate));
 			else
-				throw new IllegalArgumentException(
-						String.format("Unexpected ICD code/ver/date : '%s' and '%s' and '%s'.", icdCodeText,
+				throw new InvalidRifFileFormatException(
+						String.format("Unexpected Procedure ICD code/ver/date : '%s' and '%s' and '%s'.", icdCodeText,
 								icdVersionText, icdProcedureDate));
 		}
 
