@@ -91,6 +91,9 @@ public final class DataSetMonitorWorker implements Runnable {
 	private static final Pattern REGEX_PENDING_MANIFEST = Pattern
 			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
 
+	private static final Pattern REGEX_COMPLETED_MANIFEST = Pattern
+			.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
+
 	private final ExtractionOptions options;
 	private final DataSetMonitorListener listener;
 	private final AmazonS3 s3Client;
@@ -138,11 +141,15 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * pages, looking for the oldest manifest file that is available.
 		 */
 		DataSetManifest manifestToProcess = null;
+		int pendingManifests = 0;
+		int completedManifests = 0;
 		ObjectListing objectListing = s3Client.listObjects(bucketListRequest);
 		do {
 			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
 				String key = objectSummary.getKey();
 				if (REGEX_PENDING_MANIFEST.matcher(key).matches()) {
+					pendingManifests++;
+
 					/*
 					 * We've got an object that *looks like* it might be a
 					 * manifest file. But we also need to ensure that it starts
@@ -172,6 +179,8 @@ public final class DataSetMonitorWorker implements Runnable {
 						manifestToProcess = manifest;
 					else if (timestamp.compareTo(manifestToProcess.getTimestamp()) < 0)
 						manifestToProcess = manifest;
+				} else if (REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
+					completedManifests++;
 				}
 			}
 
@@ -186,19 +195,18 @@ public final class DataSetMonitorWorker implements Runnable {
 		}
 
 		// We've found the oldest manifest.
-		LOGGER.info("Found data set to process: '{}'.", manifestToProcess.toString());
+		LOGGER.info(
+				"Found data set to process: '{}'."
+						+ " There were '{}' total pending data sets and '{}' completed ones.",
+				manifestToProcess.toString(), pendingManifests, completedManifests);
 
 		/*
 		 * We've got a data set to process. However, it might still be uploading
 		 * to S3, so we need to wait for that to complete before we start
 		 * processing it.
 		 */
-		boolean dataSetComplete = false;
 		boolean alreadyLoggedWaitingEvent = false;
-		do {
-			if (dataSetIsAvailable(manifestToProcess))
-				dataSetComplete = true;
-
+		while (!dataSetIsAvailable(manifestToProcess)) {
 			/*
 			 * We're very patient here, so we keep looping, but it's prudent to
 			 * pause between each iteration. TODO should eventually time out,
@@ -206,7 +214,7 @@ public final class DataSetMonitorWorker implements Runnable {
 			 */
 			try {
 				if(!alreadyLoggedWaitingEvent){
-					LOGGER.info("Data set not ready: '{}'. Waiting for it to finish uploading...", manifestToProcess);
+					LOGGER.info("Data set not ready. Waiting for it to finish uploading...");
 					alreadyLoggedWaitingEvent = true;
 				}
 				Thread.sleep(1000 * 1);
@@ -219,13 +227,13 @@ public final class DataSetMonitorWorker implements Runnable {
 				 */
 				throw new RuntimeException(e);
 			}
-		} while (!dataSetComplete);
+		}
 
 		/*
 		 * Huzzah! We've got a data set to process and we've verified it's all
 		 * there and ready to go.
 		 */
-		LOGGER.info("Data set finished uploading. Processing it...");
+		LOGGER.info("Data set ready. Processing it...");
 		Instant dataSetManifestTimestamp = manifestToProcess.getTimestamp();
 		Set<S3RifFile> rifFiles = manifestToProcess.getEntries().stream().map(e -> {
 			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,

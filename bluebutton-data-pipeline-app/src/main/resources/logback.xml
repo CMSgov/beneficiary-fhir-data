@@ -19,6 +19,11 @@
 	<logger name="ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor"
 		level="all" />
 
+	<!-- Eliminate some logging noise from the HAPI FHIR client. -->
+	<logger name="ca.uhn.fhir.util.VersionUtil" level="warn" />
+	<logger name="ca.uhn.fhir.context.FhirContext" level="warn" />
+	<logger name="ca.uhn.fhir.util.XmlUtil" level="warn" />
+
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
 	<root level="info">

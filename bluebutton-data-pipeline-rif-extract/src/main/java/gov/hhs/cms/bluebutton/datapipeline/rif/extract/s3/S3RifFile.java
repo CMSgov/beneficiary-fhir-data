@@ -103,4 +103,20 @@ public final class S3RifFile implements RifFile {
 			throw new UncheckedIOException(e);
 		}
 	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("S3RifFile [fileType=");
+		builder.append(fileType);
+		builder.append(", displayName=");
+		builder.append(displayName);
+		builder.append(", localTempFile=");
+		builder.append(localTempFile);
+		builder.append("]");
+		return builder.toString();
+	}
 }

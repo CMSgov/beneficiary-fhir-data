@@ -112,6 +112,20 @@ public final class AppConfiguration implements Serializable {
 	}
 
 	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("AppConfiguration [extractionOptions=");
+		builder.append(extractionOptions);
+		builder.append(", loadOptions=");
+		builder.append(loadOptions);
+		builder.append("]");
+		return builder.toString();
+	}
+
+	/**
 	 * <p>
 	 * Per <code>/dev/design-decisions-readme.md</code>, this application
 	 * accepts its configuration via environment variables. Read those in, and

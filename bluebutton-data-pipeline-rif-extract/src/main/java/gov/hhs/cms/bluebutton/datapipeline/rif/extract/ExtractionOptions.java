@@ -87,4 +87,18 @@ public final class ExtractionOptions implements Serializable {
 		else
 			return e -> true;
 	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("ExtractionOptions [s3BucketName=");
+		builder.append(s3BucketName);
+		builder.append(", allowedRifFileType=");
+		builder.append(allowedRifFileType);
+		builder.append("]");
+		return builder.toString();
+	}
 }

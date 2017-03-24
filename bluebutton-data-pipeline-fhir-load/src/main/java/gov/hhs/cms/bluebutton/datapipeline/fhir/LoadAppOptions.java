@@ -84,4 +84,24 @@ public final class LoadAppOptions implements Serializable {
 	public char[] getTrustStorePassword() {
 		return trustStorePassword;
 	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("LoadAppOptions [fhirServer=");
+		builder.append(fhirServer);
+		builder.append(", keyStorePath=");
+		builder.append(keyStorePath);
+		builder.append(", keyStorePassword=");
+		builder.append("***");
+		builder.append(", trustStorePath=");
+		builder.append(trustStorePath);
+		builder.append(", trustStorePassword=");
+		builder.append("***");
+		builder.append("]");
+		return builder.toString();
+	}
 }
