@@ -103,6 +103,8 @@ public final class DataSetMonitorWorker implements Runnable {
 	 */
 	private CircularFifoQueue<Instant> recentlyProcessedManifests;
 
+	private CircularFifoQueue<Instant> knownInvalidManifests;
+
 	/**
 	 * Constructs a new {@link DataSetMonitorWorker} instance.
 	 * 
@@ -116,6 +118,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		this.listener = listener;
 		this.s3Client = S3Utilities.createS3Client(options);
 		this.recentlyProcessedManifests = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
+		this.knownInvalidManifests = new CircularFifoQueue<>(MAX_EXPECTED_DATA_SETS_PENDING);
 	}
 
 	/**
@@ -151,6 +154,12 @@ public final class DataSetMonitorWorker implements Runnable {
 					Instant timestamp = parseDataSetTimestamp(key);
 					if (timestamp == null)
 						continue;
+					if (knownInvalidManifests.contains(timestamp))
+						continue;
+					if (recentlyProcessedManifests.contains(timestamp)) {
+						LOGGER.debug("Skipping data set that was already processed: {}", timestamp);
+						continue;
+					}
 
 					/*
 					 * Check to see if this data set should be skipped, and if
@@ -158,9 +167,15 @@ public final class DataSetMonitorWorker implements Runnable {
 					 * so, we mark it as the "current oldest" and continue
 					 * looking through the other keys.
 					 */
-					DataSetManifest manifest = readManifest(key);
-					if (recentlyProcessedManifests.contains(timestamp)) {
-						LOGGER.debug("Skipping data set that was already processed: {}", timestamp);
+					DataSetManifest manifest = null;
+					try {
+						manifest = readManifest(key);
+					} catch (JAXBException e) {
+						// Note: We intentionally don't log the full stack trace
+						// here, as it would add a lot of unneeded noise.
+						LOGGER.warn("Found data set with invalid manifest at '{}'. It will be skipped. Error: {}", key,
+								e.toString());
+						knownInvalidManifests.add(timestamp);
 						continue;
 					}
 					if (!options.getDataSetFilter().test(manifest)) {
@@ -282,8 +297,15 @@ public final class DataSetMonitorWorker implements Runnable {
 	 *            manifest to be read
 	 * @return the {@link DataSetManifest} that was contained in the specified
 	 *         S3 object
+	 * @throws JAXBException
+	 *             Any {@link JAXBException}s that are encountered will be
+	 *             bubbled up. These generally indicate that the
+	 *             {@link DataSetManifest} could not be parsed because its
+	 *             content was invalid in some way. Note: As of 2017-03-24, this
+	 *             has been observed multiple times in production, and care
+	 *             should be taken to account for its possibility.
 	 */
-	private DataSetManifest readManifest(String manifestToProcessKey) {
+	private DataSetManifest readManifest(String manifestToProcessKey) throws JAXBException {
 		try (S3Object manifestObject = s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
@@ -291,9 +313,6 @@ public final class DataSetMonitorWorker implements Runnable {
 			DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestObject.getObjectContent());
 
 			return manifest;
-		} catch (JAXBException e) {
-			// This is not a recoverable error. Stop the world.
-			throw new RuntimeException(e);
 		} catch (AmazonServiceException e) {
 			/*
 			 * This could likely be retried, but we don't currently support
