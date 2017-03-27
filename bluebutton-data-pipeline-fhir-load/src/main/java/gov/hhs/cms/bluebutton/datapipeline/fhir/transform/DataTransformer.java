@@ -1597,8 +1597,10 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
@@ -1829,8 +1831,10 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
@@ -2132,8 +2136,10 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
@@ -2499,8 +2505,10 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
@@ -2688,8 +2696,10 @@ public final class DataTransformer {
 		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(
 				createCodeableConcept(CODING_SYSTEM_FREQUENCY_CD, String.valueOf(claimGroup.claimFrequencyCode))));
 
-		eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-				CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
+			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
 			addCareTeamPractitioner(eob, null, CODING_SYSTEM_NPI_US, claimGroup.attendingPhysicianNpi.get(),
