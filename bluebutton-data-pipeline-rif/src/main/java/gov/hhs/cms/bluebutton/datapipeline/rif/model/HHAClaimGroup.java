@@ -114,7 +114,7 @@ public final class HHAClaimGroup {
 	/**
 	 * @see Column#NCH_PRMRY_PYR_CD
 	 */
-	public Character claimPrimaryPayerCode;
+	public Optional<Character> claimPrimaryPayerCode;
 
 	/**
 	 * @see Column#PRVDR_STATE_CD
