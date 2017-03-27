@@ -28,6 +28,8 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
@@ -423,7 +425,7 @@ public final class RifFilesProcessor {
 			 * the header record. We don't use header records, so this shouldn't
 			 * ever occur.
 			 */
-			throw new InvalidRifFileFormatException("Invalid Rif header record", e);
+			throw new InvalidRifFileFormatException("Invalid RIF header record", e);
 		}
 	}
 
@@ -490,7 +492,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != beneficiaryRow.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + beneficiaryRow);
+			throw new UnsupportedRifVersionException(beneficiaryRow.version);
 
 		return beneficiaryRow;
 	}
@@ -510,7 +512,7 @@ public final class RifFilesProcessor {
 		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION));
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != pdeRow.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + pdeRow.version);
+			throw new UnsupportedRifVersionException(pdeRow.version);
 
 		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND));
 		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID);
@@ -712,7 +714,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 
 		return claimGroup;
 	}
@@ -852,7 +854,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 
 		return claimGroup;
 	}
@@ -995,7 +997,7 @@ public final class RifFilesProcessor {
 	
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 	
 		return claimGroup;
 	}
@@ -1125,7 +1127,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 
 		return claimGroup;
 	}
@@ -1223,7 +1225,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 
 		return claimGroup;
 	}
@@ -1312,7 +1314,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 
 		return claimGroup;
 	}
@@ -1442,7 +1444,7 @@ public final class RifFilesProcessor {
 
 		// Sanity check:
 		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 
 		return claimGroup;
 	}
@@ -1638,12 +1640,12 @@ public final class RifFilesProcessor {
 	 */
 	private static List<IcdCode> parseIcdCodes(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
 		if ((icdColumnLast - icdColumnFirst) < 1)
-			throw new InvalidRifFileFormatException(
+			throw new BadCodeMonkeyException(
 					String.format("ICD column last value ( '%s' )  is before first ICD column id ( '%s' )",
 							icdColumnLast,
 							icdColumnFirst));
 		if ((icdColumnLast - icdColumnFirst + 1) % 2 != 0)
-			throw new InvalidRifFileFormatException(String.format(
+			throw new BadCodeMonkeyException(String.format(
 					"ICD column last value ( '%s' ) and first ICD column id ( '%s' ) are not divisible by 2",
 					icdColumnLast, icdColumnFirst));
 
@@ -1685,11 +1687,11 @@ public final class RifFilesProcessor {
 	 */
 	private static List<IcdCode> parseIcdCodesWithPOA(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
 		if ((icdColumnLast - icdColumnFirst) < 1)
-			throw new InvalidRifFileFormatException(
+			throw new BadCodeMonkeyException(
 					String.format("ICD column last value ( '%s' )  is before first ICD column id ( '%s' )",
 							icdColumnLast, icdColumnFirst));
 		if ((icdColumnLast - icdColumnFirst + 2) % 3 != 0)
-			throw new InvalidRifFileFormatException(String.format(
+			throw new BadCodeMonkeyException(String.format(
 					"ICD column last value ( '%s' ) and first ICD column id ( '%s' ) are not divisible by 3",
 					icdColumnLast, icdColumnFirst));
 
@@ -1733,11 +1735,11 @@ public final class RifFilesProcessor {
 	 */
 	private static List<IcdCode> parseIcdCodesProcedure(CSVRecord csvRecord, int icdColumnFirst, int icdColumnLast) {
 		if ((icdColumnLast - icdColumnFirst) < 1)
-			throw new InvalidRifFileFormatException(
+			throw new BadCodeMonkeyException(
 					String.format("Procedure ICD column last value ( '%s' )  is before first ICD column id ( '%s' )",
 							icdColumnLast, icdColumnFirst));
 		if ((icdColumnLast - icdColumnFirst + 2) % 3 != 0)
-			throw new InvalidRifFileFormatException(String.format(
+			throw new BadCodeMonkeyException(String.format(
 					"Procedure ICD column last value ( '%s' ) and first ICD column id ( '%s' ) are not divisible by 3",
 					icdColumnLast, icdColumnFirst));
 

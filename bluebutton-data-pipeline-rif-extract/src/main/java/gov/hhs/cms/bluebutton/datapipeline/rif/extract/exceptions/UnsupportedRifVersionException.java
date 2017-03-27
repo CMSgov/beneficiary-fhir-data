@@ -10,8 +10,8 @@ public final class UnsupportedRifVersionException extends RuntimeException {
 		super(message, cause);
 	}
 
-	public UnsupportedRifVersionException(String message) {
-		super(message);
+	public UnsupportedRifVersionException(int version) {
+		super("Unsupported record version: " + version);
 	}
 
 	public UnsupportedRifVersionException(Throwable cause) {

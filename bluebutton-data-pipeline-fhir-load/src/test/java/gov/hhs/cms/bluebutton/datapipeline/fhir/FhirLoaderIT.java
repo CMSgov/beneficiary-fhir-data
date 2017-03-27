@@ -88,8 +88,6 @@ public final class FhirLoaderIT {
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
-		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
-		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Create the processors that will handle each stage of the pipeline.
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -125,8 +123,6 @@ public final class FhirLoaderIT {
 				.filter(e -> e.getRecord() instanceof DMEClaimGroup).findAny().get();
 
 		loadData(rifFilesEvent, loader, processor);
-
-		fhirMetricsReporter.report();
 
 		/*
 		 * Run some spot-checks against the server, to verify that things look
@@ -289,8 +285,6 @@ public final class FhirLoaderIT {
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
-		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
-		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Create the processors that will handle each stage of the pipeline.
 		RifFilesProcessor processor = new RifFilesProcessor();
@@ -472,7 +466,7 @@ public final class FhirLoaderIT {
 	 * Verifies that only one EOB resource exists for each claim type
 	 * 
 	 * @param client
-	 *            {@link IGenericClient)}
+	 *            {@link IGenericClient}
 	 * @param beneficiaryId
 	 * 
 	 * @param claimType

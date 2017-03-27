@@ -636,14 +636,13 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformBeneficiary(RifRecordEvent<BeneficiaryRow> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("Beneficiary Rif record is null");
+			throw new InvalidRifFileFormatException("Beneficiary RIF record is null");
 		BeneficiaryRow record = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != record.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + record.version);
+			throw new UnsupportedRifVersionException(record.version);
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + record.recordAction);
+			throw new UnsupportedRifRecordActionException(record.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -763,20 +762,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformPartDEvent(RifRecordEvent<PartDEventRow> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("PDE Rif record is null");
+			throw new InvalidRifFileFormatException("PDE RIF record is null");
 		PartDEventRow record = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != record.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + record.version);
+			throw new UnsupportedRifVersionException(record.version);
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + record.recordAction);
+			throw new UnsupportedRifRecordActionException(record.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/claimid-" + record.partDEventId);
+		eob.setId("ExplanationOfBenefit/partD-claimid-" + record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
 				.setValue(String.valueOf(record.prescriptionReferenceNumber));
@@ -1008,21 +1006,20 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformCarrierClaim(RifRecordEvent<CarrierClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("Carrier Rif record is null");
+			throw new InvalidRifFileFormatException("Carrier RIF record is null");
 		CarrierClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + claimGroup.recordAction);
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/carrier-claimid-" + claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
 		// COVERAGE_PLAN_PART_B));
@@ -1335,20 +1332,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformInpatientClaim(RifRecordEvent<InpatientClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("Inpatient Rif record is null");
+			throw new InvalidRifFileFormatException("Inpatient RIF record is null");
 		InpatientClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + claimGroup.recordAction);
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/inpatient-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -1719,20 +1715,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformOutpatientClaim(RifRecordEvent<OutpatientClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("Outpatient Rif record is null");
+			throw new InvalidRifFileFormatException("Outpatient RIF record is null");
 		OutpatientClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + claimGroup.recordAction);
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/outpatient-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2050,20 +2045,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformSNFClaim(RifRecordEvent<SNFClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("SNF Rif record is null");
+			throw new InvalidRifFileFormatException("SNF RIF record is null");
 		SNFClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + claimGroup.recordAction);
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/snf-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2412,20 +2406,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformHospiceClaim(RifRecordEvent<HospiceClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("Hospice Rif record is null");
+			throw new InvalidRifFileFormatException("Hospice RIF record is null");
 		HospiceClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + claimGroup.recordAction);
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/hospice-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2629,20 +2622,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformHHAClaim(RifRecordEvent<HHAClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("HHA Rif record is null");
+			throw new InvalidRifFileFormatException("HHA RIF record is null");
 		HHAClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + claimGroup.recordAction);
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/hha-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2840,20 +2832,20 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformDMEClaim(RifRecordEvent<DMEClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new InvalidRifFileFormatException("DME Rif record is null");
+			throw new InvalidRifFileFormatException("DME RIF record is null");
 		DMEClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
 			throw new UnsupportedRifRecordActionException(
-					"Invalid Rif record action code for inserts: " + claimGroup.recordAction);
+					claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/claimid-" + claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/dme-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
