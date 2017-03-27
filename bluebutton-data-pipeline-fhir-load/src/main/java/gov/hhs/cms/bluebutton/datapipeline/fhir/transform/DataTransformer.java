@@ -61,6 +61,11 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SharedDataManager;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifValueException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifRecordActionException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifVersionException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
@@ -619,7 +624,7 @@ public final class DataTransformer {
 			else if (rifRecordEvent.getRecord() instanceof DMEClaimGroup)
 				return transformDMEClaim((RifRecordEvent<DMEClaimGroup>) rifRecordEvent);
 
-			throw new BadCodeMonkeyException("Unhandled record type: " + rifRecordEvent.getRecord());
+			throw new UnsupportedRifFileTypeException("Unhandled record type: " + rifRecordEvent.getRecord());
 		});
 	}
 
@@ -631,13 +636,13 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformBeneficiary(RifRecordEvent<BeneficiaryRow> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("Beneficiary RIF record is null");
 		BeneficiaryRow record = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != record.version)
-			throw new IllegalArgumentException("Unsupported record version: " + record.version);
+			throw new UnsupportedRifVersionException(record.version);
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(record.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
@@ -687,7 +692,11 @@ public final class DataTransformer {
 		 */
 
 		Coverage partA = new Coverage();
+		partA.setId("Coverage/partA-" + record.beneficiaryId);
+		// FIXME change plan and subplan to type
 		partA.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_A);
+		// partA.setType(createCodeableConcept(COVERAGE_PLAN,
+		// COVERAGE_PLAN_PART_A));
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// partA.addPayor(SharedDataManager.createReferenceToCms());
 		partA.setBeneficiary(referencePatient(record.beneficiaryId));
@@ -714,6 +723,7 @@ public final class DataTransformer {
 		insert(bundle, partA);
 
 		Coverage partB = new Coverage();
+		partB.setId("Coverage/partB-" + record.beneficiaryId);
 		partB.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_B);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// partB.addPayor(SharedDataManager.createReferenceToCms());
@@ -730,6 +740,7 @@ public final class DataTransformer {
 		insert(bundle, partB);
 
 		Coverage partD = new Coverage();
+		partD.setId("Coverage/partD-" + record.beneficiaryId);
 		partD.getGroup().setPlan(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_D);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// partD.addPayor(SharedDataManager.createReferenceToCms());
@@ -751,18 +762,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformPartDEvent(RifRecordEvent<PartDEventRow> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("PDE RIF record is null");
 		PartDEventRow record = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != record.version)
-			throw new IllegalArgumentException("Unsupported record version: " + record.version);
+			throw new UnsupportedRifVersionException(record.version);
 		if (record.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(record.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/partD-claimid-" + record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
 				.setValue(String.valueOf(record.prescriptionReferenceNumber));
@@ -796,7 +808,9 @@ public final class DataTransformer {
 			 * Unexpected value encountered - compound code should be either
 			 * compounded or not compounded.
 			 */
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifValueException(
+					"Unexpected value encountered - compound code should be either compounded or not compounded: "
+							+ record.compoundCode);
 		}
 
 		rxItem.addDetail(detail);
@@ -836,7 +850,8 @@ public final class DataTransformer {
 			 * Unexpected value encountered - drug coverage status code should
 			 * be one of the three above.
 			 */
-			throw new BadCodeMonkeyException();
+			throw new InvalidRifValueException("Unexpected value encountered - drug coverage status code is invalid: "
+					+ record.drugCoverageStatusCode);
 		}
 		CodeableConcept rxCategory = new CodeableConcept();
 		rxCategory.addCoding(rxCategoryCoding);
@@ -888,7 +903,7 @@ public final class DataTransformer {
 				.setValue(record.gapDiscountAmount);
 
 		if (record.prescriberIdQualifierCode == null || !record.prescriberIdQualifierCode.equalsIgnoreCase("01"))
-			throw new IllegalArgumentException(
+			throw new InvalidRifValueException(
 					"Prescriber ID Qualifier Code is invalid: " + record.prescriberIdQualifierCode);
 
 		if (record.prescriberId != null) {
@@ -905,7 +920,7 @@ public final class DataTransformer {
 
 		if (record.serviceProviderIdQualiferCode == null
 				|| !record.serviceProviderIdQualiferCode.equalsIgnoreCase("01"))
-			throw new IllegalArgumentException(
+			throw new InvalidRifValueException(
 					"Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
 
 		if (!record.serviceProviderId.isEmpty()) {
@@ -991,19 +1006,20 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformCarrierClaim(RifRecordEvent<CarrierClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("Carrier RIF record is null");
 		CarrierClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		eob.setId("ExplanationOfBenefit/carrier-claimid-" + claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
 		// COVERAGE_PLAN_PART_B));
@@ -1013,6 +1029,8 @@ public final class DataTransformer {
 		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 		addExtensionCoding(eob.getType(), CODING_SYSTEM_CCW_RECORD_ID_CD, CODING_SYSTEM_CCW_RECORD_ID_CD,
 				String.valueOf(claimGroup.nearLineRecordIdCode));
+
+		validatePeriodDates(claimGroup.dateFrom, claimGroup.dateThrough);
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -1139,8 +1157,9 @@ public final class DataTransformer {
 				 * field is only optional because it wasn't used until the
 				 * switch to NPIs in 2007.
 				 */
-				throw new BadCodeMonkeyException(String
+				throw new InvalidRifValueException(String
 						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
+
 			}
 
 
@@ -1173,6 +1192,7 @@ public final class DataTransformer {
 			addExtensionCoding(item.getLocation(), CODING_SYSTEM_CCW_PRICING_LOCALITY,
 					CODING_SYSTEM_CCW_PRICING_LOCALITY, claimLine.linePricingLocalityCode);
 
+			validatePeriodDates(claimLine.firstExpenseDate, claimLine.lastExpenseDate);
 			item.setServiced(new Period()
 					.setStart(convertToDate((claimLine.firstExpenseDate)),
 							TemporalPrecisionEnum.DAY)
@@ -1289,7 +1309,7 @@ public final class DataTransformer {
 					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
 				// Nothing to do here; don't map a non-existent Observation.
 			} else {
-				throw new BadCodeMonkeyException(String.format(
+				throw new InvalidRifValueException(String.format(
 						"Inconsistent hctHgbTestTypeCode and hctHgbTestResult" + " values for claim '%s'.",
 						claimGroup.claimId));
 			}
@@ -1312,18 +1332,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformInpatientClaim(RifRecordEvent<InpatientClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("Inpatient RIF record is null");
 		InpatientClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/inpatient-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -1335,6 +1356,7 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.nearLineRecordIdCode));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
+		validatePeriodDates(claimGroup.dateFrom, claimGroup.dateThrough);
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -1357,6 +1379,7 @@ public final class DataTransformer {
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.claimAdmissionDate.isPresent() || claimGroup.beneficiaryDischargeDate.isPresent()){
+			validatePeriodDates(claimGroup.claimAdmissionDate.get(), claimGroup.beneficiaryDischargeDate.get());
 			Period period = new Period();
 			if (claimGroup.claimAdmissionDate.isPresent()) {
 				period.setStart(convertToDate(claimGroup.claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
@@ -1525,6 +1548,7 @@ public final class DataTransformer {
 		benefitBalances.getFinancial().add(bloodPintsFurnishedQty);
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
+			validatePeriodDates(claimGroup.noncoveredStayFromDate.get(), claimGroup.noncoveredStayThroughDate.get());
 			eob.addInformation()
 					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
@@ -1691,18 +1715,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformOutpatientClaim(RifRecordEvent<OutpatientClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("Outpatient RIF record is null");
 		OutpatientClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/outpatient-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -1713,6 +1738,7 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.nearLineRecordIdCode));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
+		validatePeriodDates(claimGroup.dateFrom, claimGroup.dateThrough);
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -2019,18 +2045,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformSNFClaim(RifRecordEvent<SNFClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("SNF RIF record is null");
 		SNFClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/snf-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2040,6 +2067,8 @@ public final class DataTransformer {
 		addExtensionCoding(eob.getType(), CODING_SYSTEM_CCW_RECORD_ID_CD, CODING_SYSTEM_CCW_RECORD_ID_CD,
 				String.valueOf(claimGroup.nearLineRecordIdCode));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+
+		validatePeriodDates(claimGroup.dateFrom, claimGroup.dateThrough);
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -2058,6 +2087,7 @@ public final class DataTransformer {
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.claimAdmissionDate.isPresent() || claimGroup.beneficiaryDischargeDate.isPresent()) {
+			validatePeriodDates(claimGroup.claimAdmissionDate.get(), claimGroup.beneficiaryDischargeDate.get());
 			Period period = new Period();
 			if (claimGroup.claimAdmissionDate.isPresent()) {
 				period.setStart(convertToDate(claimGroup.claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
@@ -2240,6 +2270,7 @@ public final class DataTransformer {
 		benefitBalances.getFinancial().add(bloodPintsFurnishedQty);
 
 		if (claimGroup.qualifiedStayFromDate.isPresent() && claimGroup.qualifiedStayThroughDate.isPresent()) {
+			validatePeriodDates(claimGroup.qualifiedStayFromDate.get(), claimGroup.qualifiedStayThroughDate.get());
 			eob.addInformation()
 					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_QUALIFIED_STAY_DATE))
 					.setTiming(new Period()
@@ -2250,6 +2281,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
+			validatePeriodDates(claimGroup.noncoveredStayFromDate.get(), claimGroup.noncoveredStayThroughDate.get());
 			eob.addInformation()
 					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
@@ -2374,18 +2406,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformHospiceClaim(RifRecordEvent<HospiceClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("Hospice RIF record is null");
 		HospiceClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/hospice-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2396,6 +2429,7 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.nearLineRecordIdCode));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
+		validatePeriodDates(claimGroup.dateFrom, claimGroup.dateThrough);
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -2444,6 +2478,7 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.claimServiceClassificationTypeCode));
 
 		if (claimGroup.claimHospiceStartDate.isPresent() || claimGroup.beneficiaryDischargeDate.isPresent()) {
+			validatePeriodDates(claimGroup.claimHospiceStartDate.get(), claimGroup.beneficiaryDischargeDate.get());
 			Period period = new Period();
 			if (claimGroup.claimHospiceStartDate.isPresent()) {
 				period.setStart(convertToDate(claimGroup.claimHospiceStartDate.get()), TemporalPrecisionEnum.DAY);
@@ -2587,18 +2622,19 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformHHAClaim(RifRecordEvent<HHAClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("HHA RIF record is null");
 		HHAClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/hha-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2609,6 +2645,7 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.nearLineRecordIdCode));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
+		validatePeriodDates(claimGroup.dateFrom, claimGroup.dateThrough);
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -2795,18 +2832,20 @@ public final class DataTransformer {
 	 */
 	private TransformedBundle transformDMEClaim(RifRecordEvent<DMEClaimGroup> rifRecordEvent) {
 		if (rifRecordEvent == null)
-			throw new IllegalArgumentException();
+			throw new InvalidRifFileFormatException("DME RIF record is null");
 		DMEClaimGroup claimGroup = rifRecordEvent.getRecord();
 		if (RifFilesProcessor.RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new IllegalArgumentException("Unsupported record version: " + claimGroup.version);
+			throw new UnsupportedRifVersionException(claimGroup.version);
 		if (claimGroup.recordAction != RecordAction.INSERT)
 			// Will need refactoring to support other ops.
-			throw new BadCodeMonkeyException();
+			throw new UnsupportedRifRecordActionException(
+					claimGroup.recordAction);
 
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
+		eob.setId("ExplanationOfBenefit/dme-claimid-" + claimGroup.claimId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		// FIXME see CBBD-206 & 2017-03-02 hapi-fhir 'search references' entry
 		// eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId,
@@ -2822,6 +2861,8 @@ public final class DataTransformer {
 		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
 		addExtensionCoding(eob.getType(), CODING_SYSTEM_CCW_RECORD_ID_CD, CODING_SYSTEM_CCW_RECORD_ID_CD,
 				String.valueOf(claimGroup.nearLineRecordIdCode));
+
+		validatePeriodDates(claimGroup.dateFrom, claimGroup.dateThrough);
 		setPeriodStart(eob.getBillablePeriod(), claimGroup.dateFrom);
 		setPeriodEnd(eob.getBillablePeriod(), claimGroup.dateThrough);
 
@@ -2944,7 +2985,7 @@ public final class DataTransformer {
 				 * field is only optional because it wasn't used until the
 				 * switch to NPIs in 2007.
 				 */
-				throw new BadCodeMonkeyException(String
+				throw new InvalidRifValueException(String
 						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
 			}
 
@@ -2961,6 +3002,7 @@ public final class DataTransformer {
 						CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, claimLine.providerStateCode);
 			}
 
+			validatePeriodDates(claimLine.firstExpenseDate, claimLine.lastExpenseDate);
 			item.setServiced(new Period()
 					.setStart((convertToDate(claimLine.firstExpenseDate)),
 							TemporalPrecisionEnum.DAY)
@@ -3114,7 +3156,7 @@ public final class DataTransformer {
 					&& claimLine.hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
 				// Nothing to do here; don't map a non-existent Observation.
 			} else {
-				throw new BadCodeMonkeyException(String.format(
+				throw new InvalidRifValueException(String.format(
 						"Inconsistent hctHgbTestTypeCode and hctHgbTestResult" + " values for claim '%s'.",
 						claimGroup.claimId));
 			}
@@ -3159,9 +3201,9 @@ public final class DataTransformer {
 	 */
 	private static Reference insert(Bundle bundle, Resource resource) {
 		if (bundle == null)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Bundle is null");
 		if (resource == null)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Resource is null");
 
 		BundleEntryComponent bundleEntry = bundle.addEntry();
 		if (resource.getId() == null)
@@ -3197,9 +3239,9 @@ public final class DataTransformer {
 	 */
 	public static Reference upsert(Bundle bundle, Resource resource, String resourceUrl) {
 		if (bundle == null)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Bundle is null");
 		if (resource == null)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Resource is null");
 
 		if (resource.getId() != null)
 			throw new IllegalArgumentException("FHIR conditional updates don't allow IDs to be specified client-side");
@@ -3240,7 +3282,7 @@ public final class DataTransformer {
 		 * only once per bundle entry.
 		 */
 		if (bundleEntry.getFullUrl() != null)
-			throw new BadCodeMonkeyException();
+			throw new BadCodeMonkeyException("BundleEntry URL is null");
 
 		/*
 		 * The logic here is super simple. ... So why is this a method, you
@@ -3581,5 +3623,24 @@ public final class DataTransformer {
 	 */
 	private static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
 		return new Reference().setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue));
+	}
+
+	/**
+	 * validate the from/thru dates to ensure the from date is before or the
+	 * same as the thru date
+	 * 
+	 * @param dateFrom
+	 *            start date {@link LocalDate}
+	 * @param dateThrough
+	 *            through date {@link LocalDate} to verify
+	 */
+	private static void validatePeriodDates(LocalDate dateFrom, LocalDate dateThrough) {
+		if (dateFrom == null)
+			return;
+		if (dateThrough == null)
+			return;
+		if (dateFrom.isAfter(dateThrough))
+			throw new InvalidRifValueException(
+					String.format("Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
 	}
 }

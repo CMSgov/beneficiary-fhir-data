@@ -234,7 +234,7 @@ public final class DataTransformerTest {
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 
 		assertOptionalNotPresent(eob);
 
@@ -432,7 +432,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -628,7 +628,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -823,7 +823,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -990,7 +990,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -1174,7 +1174,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -1306,7 +1306,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -1430,7 +1430,7 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.POST, eobEntry.getRequest().getMethod());
+		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);

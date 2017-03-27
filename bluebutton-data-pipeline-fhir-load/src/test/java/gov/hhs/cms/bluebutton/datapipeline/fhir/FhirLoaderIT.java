@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
@@ -87,12 +88,9 @@ public final class FhirLoaderIT {
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry fhirMetrics = new MetricRegistry();
-		Slf4jReporter fhirMetricsReporter = Slf4jReporter.forRegistry(fhirMetrics).outputTo(LOGGER).build();
-		fhirMetricsReporter.start(300, TimeUnit.SECONDS);
 
 		// Create the processors that will handle each stage of the pipeline.
 		RifFilesProcessor processor = new RifFilesProcessor();
-		DataTransformer transformer = new DataTransformer();
 		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
 
 		// Create/update the shared data that FhirLoader will require.
@@ -124,24 +122,7 @@ public final class FhirLoaderIT {
 		RifRecordEvent<DMEClaimGroup> dmeRecordEvent = (RifRecordEvent<DMEClaimGroup>) rifRecordEventsCopyFlat.stream()
 				.filter(e -> e.getRecord() instanceof DMEClaimGroup).findAny().get();
 
-		// Link up the pipeline and run it.
-		List<FhirBundleResult> resultsList = new ArrayList<>();
-		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
-			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
-			loader.process(fhirInputBundles, error -> {
-				throw new RuntimeException(error);
-			}, result -> {
-				resultsList.add(result);
-			});
-		}
-
-		LOGGER.info("FHIR resources loaded.");
-		fhirMetricsReporter.report();
-
-		// Verify the results.
-		Assert.assertNotNull(resultsList);
-		Assert.assertEquals(rifFilesEvent.getFiles().size(), resultsList.size());
-		assertResultIsLegit(resultsList);
+		loadData(rifFilesEvent, loader, processor);
 
 		/*
 		 * Run some spot-checks against the server, to verify that things look
@@ -152,54 +133,22 @@ public final class FhirLoaderIT {
 				client.search().forResource(Patient.class)
 						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
 						.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
-						carrierRecordEvent.getRecord().claimId))
-				.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
-						inpatientRecordEvent.getRecord().claimId))
-				.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
-						outpatientRecordEvent.getRecord().claimId))
-				.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
-						pdeRecordEvent.getRecord().partDEventId))
-				.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
-						hhaRecordEvent.getRecord().claimId))
-				.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
-						hospiceRecordEvent.getRecord().claimId))
-				.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
-						snfRecordEvent.getRecord().claimId))
-				.returnBundle(Bundle.class).execute().getTotal());
-		Assert.assertEquals(1, client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT
-						.hasId("Patient/bene-" + beneRecordEvent.getRecord().beneficiaryId))
-				.and(ExplanationOfBenefit.IDENTIFIER.exactly().systemAndCode(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
-						dmeRecordEvent.getRecord().claimId))
-				.returnBundle(Bundle.class).execute().getTotal());
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
+				pdeRecordEvent.getRecord().partDEventId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				carrierRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				inpatientRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				outpatientRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				hospiceRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				hhaRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				snfRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				dmeRecordEvent.getRecord().claimId);
 	}
 
 	/**
@@ -328,6 +277,155 @@ public final class FhirLoaderIT {
 		 */
 	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	public void idempotentLoadRifSampleA() {
+		// Generate the sample RIF data to feed through the pipeline.
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(), StaticRifResourceGroup.SAMPLE_A.toRifFiles());
+
+		// Setup the metrics that we'll log to.
+		MetricRegistry fhirMetrics = new MetricRegistry();
+
+		// Create the processors that will handle each stage of the pipeline.
+		RifFilesProcessor processor = new RifFilesProcessor();
+		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
+
+		// Create/update the shared data that FhirLoader will require.
+		new SharedDataManager(loader).upsertSharedData();
+
+		/*
+		 * Run the extraction an extra time upfront to grab some data for the
+		 * assertions below.
+		 */
+		List<Stream<RifRecordEvent<?>>> rifRecordEventsCopy = processor.process(rifFilesEvent);
+		List<RifRecordEvent<?>> rifRecordEventsCopyFlat = rifRecordEventsCopy.stream()
+				.flatMap(s -> s.collect(Collectors.toList()).stream()).collect(Collectors.toList());
+		RifRecordEvent<BeneficiaryRow> beneRecordEvent = (RifRecordEvent<BeneficiaryRow>) rifRecordEventsCopyFlat
+				.stream().filter(e -> e.getRecord() instanceof BeneficiaryRow).findAny().get();
+		RifRecordEvent<CarrierClaimGroup> carrierRecordEvent = (RifRecordEvent<CarrierClaimGroup>) rifRecordEventsCopyFlat
+				.stream().filter(e -> e.getRecord() instanceof CarrierClaimGroup).findAny().get();
+		RifRecordEvent<InpatientClaimGroup> inpatientRecordEvent = (RifRecordEvent<InpatientClaimGroup>) rifRecordEventsCopyFlat
+				.stream().filter(e -> e.getRecord() instanceof InpatientClaimGroup).findAny().get();
+		RifRecordEvent<OutpatientClaimGroup> outpatientRecordEvent = (RifRecordEvent<OutpatientClaimGroup>) rifRecordEventsCopyFlat
+				.stream().filter(e -> e.getRecord() instanceof OutpatientClaimGroup).findAny().get();
+		RifRecordEvent<PartDEventRow> pdeRecordEvent = (RifRecordEvent<PartDEventRow>) rifRecordEventsCopyFlat.stream()
+				.filter(e -> e.getRecord() instanceof PartDEventRow).findAny().get();
+		RifRecordEvent<HHAClaimGroup> hhaRecordEvent = (RifRecordEvent<HHAClaimGroup>) rifRecordEventsCopyFlat.stream()
+				.filter(e -> e.getRecord() instanceof HHAClaimGroup).findAny().get();
+		RifRecordEvent<HospiceClaimGroup> hospiceRecordEvent = (RifRecordEvent<HospiceClaimGroup>) rifRecordEventsCopyFlat
+				.stream().filter(e -> e.getRecord() instanceof HospiceClaimGroup).findAny().get();
+		RifRecordEvent<SNFClaimGroup> snfRecordEvent = (RifRecordEvent<SNFClaimGroup>) rifRecordEventsCopyFlat.stream()
+				.filter(e -> e.getRecord() instanceof SNFClaimGroup).findAny().get();
+		RifRecordEvent<DMEClaimGroup> dmeRecordEvent = (RifRecordEvent<DMEClaimGroup>) rifRecordEventsCopyFlat.stream()
+				.filter(e -> e.getRecord() instanceof DMEClaimGroup).findAny().get();
+
+		// load all claim types to FHIR database
+		loadData(rifFilesEvent, loader, processor);
+
+		IGenericClient client = FhirTestUtilities.createFhirClient();
+		Assert.assertEquals(1,
+				client.search().forResource(Patient.class)
+						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
+						.returnBundle(Bundle.class).execute().getTotal());
+
+		// check version number on Patient resource
+		Bundle patientBundle = client.search().forResource(Patient.class)
+				.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
+				.returnBundle(Bundle.class).execute();
+		BundleEntryComponent beneEntry = patientBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Patient).findAny().get();
+		Patient beneA = (Patient) beneEntry.getResource();
+		LOGGER.info("Patient1 version #- " + beneA.getMeta().getVersionId());
+
+		// load same claim types to FHIR database again
+		loadData(rifFilesEvent, loader, processor);
+
+		// Ensure only one Patient resource with the given beneficiaryId is
+		// present in database
+		Assert.assertEquals(1,
+				client.search().forResource(Patient.class)
+						.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
+						.returnBundle(Bundle.class).execute().getTotal());
+
+		patientBundle = client.search().forResource(Patient.class)
+				.where(Patient.RES_ID.matches().value("bene-" + beneRecordEvent.getRecord().beneficiaryId))
+				.returnBundle(Bundle.class).execute();
+		beneEntry = patientBundle.getEntry().stream()
+				.filter(r -> r.getResource() instanceof Patient).findAny().get();
+
+		Patient beneB = (Patient) beneEntry.getResource();
+		LOGGER.info("Patient2 version #- " + beneB.getMeta().getVersionId());
+
+		Assert.assertNotEquals(beneA.getMeta().getVersionId(), beneB.getMeta().getVersionId());
+
+		// Ensure only one Coverage resource for each coverage type (i.e. Part
+		// A, B, D) with the
+		// given beneficiaryId is present in database
+		Assert.assertEquals(1,
+				client.search().forResource(Coverage.class)
+						.where(Coverage.RES_ID.matches().value("partA-" + beneRecordEvent.getRecord().beneficiaryId))
+						.returnBundle(Bundle.class).execute().getTotal());
+		Assert.assertEquals(1,
+				client.search().forResource(Coverage.class)
+						.where(Coverage.RES_ID.matches().value("partB-" + beneRecordEvent.getRecord().beneficiaryId))
+						.returnBundle(Bundle.class).execute().getTotal());
+		Assert.assertEquals(1,
+				client.search().forResource(Coverage.class)
+						.where(Coverage.RES_ID.matches().value("partD-" + beneRecordEvent.getRecord().beneficiaryId))
+						.returnBundle(Bundle.class).execute().getTotal());
+
+		// Ensure only one ExplanationOfBenefit resource with the given
+		// beneficiaryId and claimId is present in database for each claim type
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_PDE_ID,
+				pdeRecordEvent.getRecord().partDEventId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				carrierRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				inpatientRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				outpatientRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				hospiceRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				hhaRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				snfRecordEvent.getRecord().claimId);
+		assertEOBEquals(client, beneRecordEvent.getRecord().beneficiaryId, DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID,
+				dmeRecordEvent.getRecord().claimId);
+	}
+
+	/**
+	 * Load data files to FHIR database *
+	 * 
+	 * @param rifFilesEvent
+	 *            {@link RifFilesEvent)}
+	 * @param loader
+	 *            {@link FhirLoader)}
+	 * 
+	 * @param processor
+	 *            * {@link RifFilesProcessor)}
+	 * 
+	 */
+	public void loadData(RifFilesEvent rifFilesEvent, FhirLoader loader, RifFilesProcessor processor) {
+		DataTransformer transformer = new DataTransformer();
+		List<FhirBundleResult> resultsList = new ArrayList<>();
+		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
+			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);
+			loader.process(fhirInputBundles, error -> {
+				throw new RuntimeException(error);
+			}, result -> {
+				resultsList.add(result);
+			});
+		}
+
+		LOGGER.info("FHIR resources loaded.");
+		// Verify the results.
+		Assert.assertNotNull(resultsList);
+		Assert.assertEquals(rifFilesEvent.getFiles().size(), resultsList.size());
+		assertResultIsLegit(resultsList);
+
+	}
+
 	/**
 	 * Ensures that {@link FhirTestUtilities#cleanFhirServer()} is called after
 	 * each test case.
@@ -362,5 +460,27 @@ public final class FhirLoaderIT {
 						resultEntry.getResponse().getStatus().matches("^2\\d\\d .*$"));
 			}
 		}
+	}
+
+	/**
+	 * Verifies that only one EOB resource exists for each claim type
+	 * 
+	 * @param client
+	 *            {@link IGenericClient}
+	 * @param beneficiaryId
+	 * 
+	 * @param claimType
+	 * 
+	 * @param claimId
+	 *
+	 */
+
+	private static void assertEOBEquals(IGenericClient client, String beneficiaryId, String claimType, String claimId) {
+		Assert.assertEquals(1,
+				client.search().forResource(ExplanationOfBenefit.class)
+						.where(ExplanationOfBenefit.PATIENT.hasId("Patient/bene-" + beneficiaryId))
+						.and(ExplanationOfBenefit.IDENTIFIER.exactly()
+								.systemAndCode(claimType, claimId))
+						.returnBundle(Bundle.class).execute().getTotal());
 	}
 }
