@@ -702,7 +702,7 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
-			claimLine.nationalDrugCodeQuantity = parseOptInteger(
+			claimLine.nationalDrugCodeQuantity = parseOptDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
 			claimLine.nationalDrugCodeQualifierCode = parseOptString(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NDC_QTY_QLFR_CD));
@@ -842,7 +842,7 @@ public final class RifFilesProcessor {
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 
-			claimLine.nationalDrugCodeQuantity = parseOptInteger(
+			claimLine.nationalDrugCodeQuantity = parseOptDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
 			claimLine.nationalDrugCodeQualifierCode = parseOptString(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY_QLFR_CD));
@@ -1115,7 +1115,7 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
 					claimLineRecord.get(SNFClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
-			claimLine.nationalDrugCodeQuantity = parseOptInteger(
+			claimLine.nationalDrugCodeQuantity = parseOptDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
 			claimLine.nationalDrugCodeQualifierCode = parseOptString(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY_QLFR_CD));
@@ -1213,7 +1213,7 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(HospiceClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
-			claimLine.nationalDrugCodeQuantity = parseOptInteger(
+			claimLine.nationalDrugCodeQuantity = parseOptDecimal(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
 			claimLine.nationalDrugCodeQualifierCode = parseOptString(
 					claimLineRecord.get(OutpatientClaimGroup.Column.REV_CNTR_NDC_QTY_QLFR_CD));
@@ -1502,6 +1502,20 @@ public final class RifFilesProcessor {
 			return new BigDecimal(0);
 		} else {
 			return new BigDecimal(decimalText);
+		}
+	}
+
+	/**
+	 * @param decimalText
+	 *            the decimal string to parse
+	 * @return the result of {@link #parseDecimal(String)} if the specified text
+	 *         isn't empty, or an empty Optional if it is empty
+	 */
+	private static Optional<BigDecimal> parseOptDecimal(String decimalText) {
+		if (decimalText.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return Optional.of(parseDecimal(decimalText));
 		}
 	}
 

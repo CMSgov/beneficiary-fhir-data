@@ -540,7 +540,7 @@ public final class InpatientClaimGroup {
 		/**
 		 * @see Column#REV_CNTR_NDC_QTY
 		 */
-		public Optional<Integer> nationalDrugCodeQuantity;
+		public Optional<BigDecimal> nationalDrugCodeQuantity;
 
 		/**
 		 * @see Column#REV_CNTR_NDC_QTY_QLFR_CD
