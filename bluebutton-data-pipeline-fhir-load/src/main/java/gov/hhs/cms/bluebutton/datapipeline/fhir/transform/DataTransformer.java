@@ -1106,7 +1106,9 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
 		}
 
-		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
+		if (claimGroup.diagnosisPrincipal.isPresent())
+			addDiagnosisCode(eob, claimGroup.diagnosisPrincipal.get());
+
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
 
@@ -1287,7 +1289,8 @@ public final class DataTransformer {
 					.setReason(createCodeableConcept(CODING_SYSTEM_CMS_LINE_PROCESSING_INDICATOR,
 							claimLine.processingIndicatorCode.get()));
 
-			addDiagnosisLink(eob, item, claimLine.diagnosis);
+			if (claimLine.diagnosis.isPresent())
+				addDiagnosisLink(eob, item, claimLine.diagnosis.get());
 
 			if (claimLine.nationalDrugCode.isPresent()) {
 				addExtensionCoding(item, CODING_SYSTEM_NDC, CODING_SYSTEM_NDC, claimLine.nationalDrugCode.get());
@@ -1622,8 +1625,10 @@ public final class DataTransformer {
 					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
-		addDiagnosisCode(eob, claimGroup.diagnosisAdmitting);
-		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
+		if (claimGroup.diagnosisAdmitting.isPresent())
+			addDiagnosisCode(eob, claimGroup.diagnosisAdmitting.get());
+		if (claimGroup.diagnosisPrincipal.isPresent())
+			addDiagnosisCode(eob, claimGroup.diagnosisPrincipal.get());
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
 
@@ -1856,7 +1861,8 @@ public final class DataTransformer {
 					createCodeableConcept(CODING_SYSTEM_MCO_PAID_CD, String.valueOf(claimGroup.mcoPaidSw.get()))));
 		}
 
-		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
+		if (claimGroup.diagnosisPrincipal.isPresent())
+			addDiagnosisCode(eob, claimGroup.diagnosisPrincipal.get());
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
 
@@ -2317,7 +2323,8 @@ public final class DataTransformer {
 		eob.addInformation().setCategory(
 				createCodeableConcept(CODING_SYSTEM_ADMISSION_TYPE_CD, String.valueOf(claimGroup.admissionTypeCd)));
 
-		addDiagnosisCode(eob, claimGroup.diagnosisAdmitting);
+		if (claimGroup.diagnosisAdmitting.isPresent())
+			addDiagnosisCode(eob, claimGroup.diagnosisAdmitting.get());
 		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
@@ -2515,7 +2522,8 @@ public final class DataTransformer {
 					CARE_TEAM_ROLE_PRIMARY);
 		}
 
-		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
+		if (claimGroup.diagnosisPrincipal.isPresent())
+			addDiagnosisCode(eob, claimGroup.diagnosisPrincipal.get());
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
 
@@ -2954,8 +2962,8 @@ public final class DataTransformer {
 			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
 		}
 
-
-		addDiagnosisCode(eob, claimGroup.diagnosisPrincipal);
+		if (claimGroup.diagnosisPrincipal.isPresent())
+			addDiagnosisCode(eob, claimGroup.diagnosisPrincipal.get());
 		for (IcdCode diagnosis : claimGroup.diagnosesAdditional)
 			addDiagnosisCode(eob, diagnosis);
 
@@ -3110,7 +3118,8 @@ public final class DataTransformer {
 						String.valueOf(claimLine.serviceDeductibleCode.get()));
 			}
 
-			addDiagnosisLink(eob, item, claimLine.diagnosis);
+			if (claimLine.diagnosis.isPresent())
+				addDiagnosisLink(eob, item, claimLine.diagnosis.get());
 
 			item.addAdjudication()
 					.setCategory(createCodeableConcept(CODING_SYSTEM_ADJUDICATION_CMS,

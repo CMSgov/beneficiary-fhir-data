@@ -1977,6 +1977,21 @@ public final class DataTransformerTest {
 	}
 
 	/**
+	 * @param expectedDiagnosis
+	 *            the expected {@link IcdCode} to verify the presence of in the
+	 *            {@link ItemComponent}
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to verify
+	 * @param eobItem
+	 *            the {@link ItemComponent} to verify
+	 */
+	private static void assertDiagnosisLinkPresent(Optional<IcdCode> expectedDiagnosis, ExplanationOfBenefit eob,
+			ItemComponent eobItem) {
+		if (expectedDiagnosis.isPresent())
+			assertDiagnosisLinkPresent(expectedDiagnosis.get(), eob, eobItem);
+	}
+
+	/**
 	 * @param expectedSystem
 	 *            the expected {@link Identifier#getSystem()} value
 	 * @param expectedId

@@ -668,9 +668,9 @@ public final class RifFilesProcessor {
 
 		claimGroup.diagnosisRelatedGroupCd = parseOptString(firstClaimLine.get(InpatientClaimGroup.Column.CLM_DRG_CD));
 
-		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_CD),
+		claimGroup.diagnosisAdmitting = parseOptIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_CD),
 				firstClaimLine.get(InpatientClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
-		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
+		claimGroup.diagnosisPrincipal = parseOptIcdCode(firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(InpatientClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodesWithPOA(firstClaimLine,
 				InpatientClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
@@ -767,7 +767,7 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM));
 		claimGroup.professionalComponentCharge = parseDecimal(
 				firstClaimLine.get(OutpatientClaimGroup.Column.NCH_PROFNL_CMPNT_CHRG_AMT));
-		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(OutpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
+		claimGroup.diagnosisPrincipal = parseOptIcdCode(firstClaimLine.get(OutpatientClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(OutpatientClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine,
 				OutpatientClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
@@ -911,7 +911,7 @@ public final class RifFilesProcessor {
 				firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_CASH_DDCTBL_APLD_AMT));
 		claimGroup.hcpcsYearCode = parseOptCharacter(firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
 		claimGroup.referringProviderIdNumber = firstClaimLine.get(CarrierClaimGroup.Column.CARR_CLM_RFRNG_PIN_NUM);
-		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD),
+		claimGroup.diagnosisPrincipal = parseOptIcdCode(firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(CarrierClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, CarrierClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				CarrierClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
@@ -978,7 +978,7 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(CarrierClaimGroup.Column.LINE_SERVICE_DEDUCTIBLE));
 			claimLine.mtusCount = parseDecimal(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_MTUS_CNT));
 			claimLine.mtusCode = parseOptCharacter(claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_MTUS_CD));
-			claimLine.diagnosis = parseIcdCode(claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_CD),
+			claimLine.diagnosis = parseOptIcdCode(claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_CD),
 					claimLineRecord.get(CarrierClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD));
 			claimLine.hpsaScarcityCode = parseOptCharacter(
 					claimLineRecord.get(CarrierClaimGroup.Column.HPSA_SCRCTY_IND_CD));
@@ -1088,7 +1088,7 @@ public final class RifFilesProcessor {
 
 		claimGroup.diagnosisRelatedGroupCd = parseOptString(firstClaimLine.get(SNFClaimGroup.Column.CLM_DRG_CD));
 
-		claimGroup.diagnosisAdmitting = parseIcdCode(firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_CD),
+		claimGroup.diagnosisAdmitting = parseOptIcdCode(firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_CD),
 				firstClaimLine.get(SNFClaimGroup.Column.ADMTG_DGNS_VRSN_CD));
 		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(SNFClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(SNFClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
@@ -1175,7 +1175,7 @@ public final class RifFilesProcessor {
 		claimGroup.utilizationDayCount = parseInt(firstClaimLine.get(HospiceClaimGroup.Column.CLM_UTLZTN_DAY_CNT));
 		claimGroup.beneficiaryDischargeDate = parseOptDate(
 				firstClaimLine.get(HospiceClaimGroup.Column.NCH_BENE_DSCHRG_DT));
-		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(HospiceClaimGroup.Column.PRNCPAL_DGNS_CD),
+		claimGroup.diagnosisPrincipal = parseOptIcdCode(firstClaimLine.get(HospiceClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(HospiceClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, HospiceClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				HospiceClaimGroup.Column.ICD_DGNS_VRSN_CD25.ordinal());
@@ -1366,7 +1366,7 @@ public final class RifFilesProcessor {
 		claimGroup.beneficiaryPartBDeductAmount = parseDecimal(
 				firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_CASH_DDCTBL_APLD_AMT));
 		claimGroup.hcpcsYearCode = parseOptCharacter(firstClaimLine.get(DMEClaimGroup.Column.CARR_CLM_HCPCS_YR_CD));
-		claimGroup.diagnosisPrincipal = parseIcdCode(firstClaimLine.get(DMEClaimGroup.Column.PRNCPAL_DGNS_CD),
+		claimGroup.diagnosisPrincipal = parseOptIcdCode(firstClaimLine.get(DMEClaimGroup.Column.PRNCPAL_DGNS_CD),
 				firstClaimLine.get(DMEClaimGroup.Column.PRNCPAL_DGNS_VRSN_CD));
 		claimGroup.diagnosesAdditional = parseIcdCodes(firstClaimLine, DMEClaimGroup.Column.ICD_DGNS_CD1.ordinal(),
 				DMEClaimGroup.Column.ICD_DGNS_VRSN_CD12.ordinal());
@@ -1420,7 +1420,7 @@ public final class RifFilesProcessor {
 			claimLine.paymentCode = parseOptCharacter(claimLineRecord.get(DMEClaimGroup.Column.LINE_PMT_80_100_CD));
 			claimLine.serviceDeductibleCode = parseOptCharacter(
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_SERVICE_DEDUCTIBLE));
-			claimLine.diagnosis = parseIcdCode(claimLineRecord.get(DMEClaimGroup.Column.LINE_ICD_DGNS_CD),
+			claimLine.diagnosis = parseOptIcdCode(claimLineRecord.get(DMEClaimGroup.Column.LINE_ICD_DGNS_CD),
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD));
 			claimLine.purchasePriceAmount = parseDecimal(
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_DME_PRCHS_PRICE_AMT));
