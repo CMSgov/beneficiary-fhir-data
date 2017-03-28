@@ -1575,7 +1575,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -1807,7 +1807,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -2108,7 +2108,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -2472,7 +2472,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -2661,7 +2661,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
