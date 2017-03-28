@@ -1477,8 +1477,8 @@ public final class RifFilesProcessor {
 	/**
 	 * @param intText
 	 *            the number string to parse
-	 * @return an {@link Optional} populated with a {@link Integer} if the input
-	 *         has data, or an empty Optional if not
+	 * @return an {@link Optional} populated with an {@link Integer} if the
+	 *         input has data, or an empty Optional if not
 	 */
 	private static Optional<Integer> parseOptInteger(String intText) {
 		if (intText.isEmpty()) {

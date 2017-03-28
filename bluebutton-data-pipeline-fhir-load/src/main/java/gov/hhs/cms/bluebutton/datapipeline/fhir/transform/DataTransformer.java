@@ -2996,7 +2996,7 @@ public final class DataTransformer {
 				 * switch to NPIs in 2007.
 				 */
 				throw new InvalidRifValueException(String
-						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
+						.format("DME claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
 			}
 
 			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
