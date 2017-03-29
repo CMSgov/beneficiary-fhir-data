@@ -165,7 +165,7 @@ public final class HospiceClaimGroup {
 	 * @see Column#PRNCPAL_DGNS_CD
 	 * @see Column#PRNCPAL_DGNS_VRSN_CD
 	 */
-	public IcdCode diagnosisPrincipal;
+	public Optional<IcdCode> diagnosisPrincipal;
 
 	/**
 	 * See {@link Column#ICD_DGNS_CD1} through {@link Column#ICD_DGNS_CD25} and

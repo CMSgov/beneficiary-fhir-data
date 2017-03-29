@@ -300,7 +300,7 @@ public final class SNFClaimGroup {
 	 * @see Column#ADMTG_DGNS_CD
 	 * @see Column#ADMTG_DGNS_VRSN_CD
 	 */
-	public IcdCode diagnosisAdmitting;
+	public Optional<IcdCode> diagnosisAdmitting;
 
 	/**
 	 * @see Column#PRNCPAL_DGNS_CD

@@ -160,7 +160,7 @@ public final class CarrierClaimGroup {
 	 * @see Column#PRNCPAL_DGNS_CD
 	 * @see Column#PRNCPAL_DGNS_VRSN_CD
 	 */
-	public IcdCode diagnosisPrincipal;
+	public Optional<IcdCode> diagnosisPrincipal;
 
 	/**
 	 * See {@link Column#ICD_DGNS_CD1} through {@link Column#ICD_DGNS_CD12} and
@@ -444,7 +444,7 @@ public final class CarrierClaimGroup {
 		 * @see Column#LINE_ICD_DGNS_CD
 		 * @see Column#LINE_ICD_DGNS_VRSN_CD
 		 */
-		public IcdCode diagnosis;
+		public Optional<IcdCode> diagnosis;
 
 		/**
 		 * @see Column#HPSA_SCRCTY_IND_CD
