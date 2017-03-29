@@ -528,7 +528,7 @@ public final class RifFilesProcessor {
 		pdeRow.planContractId = csvRecord.get(PartDEventRow.Column.PLAN_CNTRCT_REC_ID);
 		pdeRow.planBenefitPackageId = csvRecord.get(PartDEventRow.Column.PLAN_PBP_REC_NUM);
 		pdeRow.compoundCode = CompoundCode
-				.parseRifValue(Integer.parseInt(csvRecord.get(PartDEventRow.Column.CMPND_CD)));
+				.parseRifValue(parseOptInteger(csvRecord.get(PartDEventRow.Column.CMPND_CD)));
 		pdeRow.dispenseAsWrittenProductSelectionCode = csvRecord.get(PartDEventRow.Column.DAW_PROD_SLCTN_CD);
 		pdeRow.quantityDispensed = new BigDecimal(csvRecord.get(PartDEventRow.Column.QTY_DSPNSD_NUM));
 		pdeRow.daysSupply = Integer.parseInt(csvRecord.get(PartDEventRow.Column.DAYS_SUPLY_NUM));
