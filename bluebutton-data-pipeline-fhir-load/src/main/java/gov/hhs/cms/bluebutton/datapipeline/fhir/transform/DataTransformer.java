@@ -3668,8 +3668,6 @@ public final class DataTransformer {
 			return;
 		if (!dateThrough.isPresent())
 			return;
-		if (dateFrom.get().isAfter(dateThrough.get()))
-			throw new InvalidRifValueException(
-					String.format("Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
+		validatePeriodDates(dateFrom.get(), dateThrough.get());
 	}
 }
