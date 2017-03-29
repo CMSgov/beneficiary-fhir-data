@@ -1379,7 +1379,7 @@ public final class DataTransformer {
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.claimAdmissionDate.isPresent() || claimGroup.beneficiaryDischargeDate.isPresent()){
-			validatePeriodDates(claimGroup.claimAdmissionDate.get(), claimGroup.beneficiaryDischargeDate.get());
+			validatePeriodDates(claimGroup.claimAdmissionDate, claimGroup.beneficiaryDischargeDate);
 			Period period = new Period();
 			if (claimGroup.claimAdmissionDate.isPresent()) {
 				period.setStart(convertToDate(claimGroup.claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
@@ -1548,7 +1548,7 @@ public final class DataTransformer {
 		benefitBalances.getFinancial().add(bloodPintsFurnishedQty);
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
-			validatePeriodDates(claimGroup.noncoveredStayFromDate.get(), claimGroup.noncoveredStayThroughDate.get());
+			validatePeriodDates(claimGroup.noncoveredStayFromDate, claimGroup.noncoveredStayThroughDate);
 			eob.addInformation()
 					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
@@ -1599,7 +1599,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -1833,7 +1833,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -2091,7 +2091,7 @@ public final class DataTransformer {
 		eob.setTotalCost((Money) new Money().setSystem(CODING_SYSTEM_MONEY_US).setValue(claimGroup.totalChargeAmount));
 
 		if (claimGroup.claimAdmissionDate.isPresent() || claimGroup.beneficiaryDischargeDate.isPresent()) {
-			validatePeriodDates(claimGroup.claimAdmissionDate.get(), claimGroup.beneficiaryDischargeDate.get());
+			validatePeriodDates(claimGroup.claimAdmissionDate, claimGroup.beneficiaryDischargeDate);
 			Period period = new Period();
 			if (claimGroup.claimAdmissionDate.isPresent()) {
 				period.setStart(convertToDate(claimGroup.claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
@@ -2138,7 +2138,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -2276,7 +2276,7 @@ public final class DataTransformer {
 		benefitBalances.getFinancial().add(bloodPintsFurnishedQty);
 
 		if (claimGroup.qualifiedStayFromDate.isPresent() && claimGroup.qualifiedStayThroughDate.isPresent()) {
-			validatePeriodDates(claimGroup.qualifiedStayFromDate.get(), claimGroup.qualifiedStayThroughDate.get());
+			validatePeriodDates(claimGroup.qualifiedStayFromDate, claimGroup.qualifiedStayThroughDate);
 			eob.addInformation()
 					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_QUALIFIED_STAY_DATE))
 					.setTiming(new Period()
@@ -2287,7 +2287,7 @@ public final class DataTransformer {
 		}
 
 		if (claimGroup.noncoveredStayFromDate.isPresent() && claimGroup.noncoveredStayThroughDate.isPresent()) {
-			validatePeriodDates(claimGroup.noncoveredStayFromDate.get(), claimGroup.noncoveredStayThroughDate.get());
+			validatePeriodDates(claimGroup.noncoveredStayFromDate, claimGroup.noncoveredStayThroughDate);
 			eob.addInformation()
 					.setCategory(createCodeableConcept(BENEFIT_COVERAGE_DATE, CODING_SYSTEM_NONCOVERED_STAY_DATE))
 					.setTiming(new Period()
@@ -2484,7 +2484,7 @@ public final class DataTransformer {
 				String.valueOf(claimGroup.claimServiceClassificationTypeCode));
 
 		if (claimGroup.claimHospiceStartDate.isPresent() || claimGroup.beneficiaryDischargeDate.isPresent()) {
-			validatePeriodDates(claimGroup.claimHospiceStartDate.get(), claimGroup.beneficiaryDischargeDate.get());
+			validatePeriodDates(claimGroup.claimHospiceStartDate, claimGroup.beneficiaryDischargeDate);
 			Period period = new Period();
 			if (claimGroup.claimHospiceStartDate.isPresent()) {
 				period.setStart(convertToDate(claimGroup.claimHospiceStartDate.get()), TemporalPrecisionEnum.DAY);
@@ -2507,7 +2507,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -2698,7 +2698,7 @@ public final class DataTransformer {
 
 		if (claimGroup.claimPrimaryPayerCode.isPresent()) {
 			eob.addInformation(new ExplanationOfBenefit.SupportingInformationComponent(createCodeableConcept(
-					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode))));
+					CODING_SYSTEM_PRIMARY_PAYER_CD, String.valueOf(claimGroup.claimPrimaryPayerCode.get()))));
 		}
 
 		if (claimGroup.attendingPhysicianNpi.isPresent()) {
@@ -3652,5 +3652,22 @@ public final class DataTransformer {
 		if (dateFrom.isAfter(dateThrough))
 			throw new InvalidRifValueException(
 					String.format("Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
+	}
+
+	/**
+	 * validate the <Optional>from/<Optional>thru dates to ensure the from date
+	 * is before or the same as the thru date
+	 * 
+	 * @param <Optional>dateFrom
+	 *            start date {@link <Optional>LocalDate}
+	 * @param <Optional>dateThrough
+	 *            through date {@link <Optional>LocalDate} to verify
+	 */
+	private static void validatePeriodDates(Optional<LocalDate> dateFrom, Optional<LocalDate> dateThrough) {
+		if (!dateFrom.isPresent())
+			return;
+		if (!dateThrough.isPresent())
+			return;
+		validatePeriodDates(dateFrom.get(), dateThrough.get());
 	}
 }
