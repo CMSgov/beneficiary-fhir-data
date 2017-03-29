@@ -1124,6 +1124,15 @@ public final class DataTransformer {
 			addExtensionCoding(item, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE, CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
 					CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
 
+			/*
+			 * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing
+			 * provider _should_ always be present. However, we've found some
+			 * examples in production where it's not for some claim lines. (This
+			 * is annoying, as it's present on other lines in the same claim,
+			 * and the data indicates that the same NPI probably applies to the
+			 * lines where it's not specified. Still, it's not safe to guess at
+			 * this, so we'll leave it blank.)
+			 */
 			if (claimLine.performingPhysicianNpi.isPresent()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = addCareTeamPractitioner(eob, item,
 						CODING_SYSTEM_NPI_US, claimLine.performingPhysicianNpi.get(), CARE_TEAM_ROLE_PRIMARY);
@@ -1152,19 +1161,7 @@ public final class DataTransformer {
 					addExtensionCoding(performingCareTeamMember, CODING_SYSTEM_NPI_US, CODING_SYSTEM_NPI_US,
 							"" + claimLine.organizationNpi.get());
 				}
-			} else {
-				/*
-				 * Per Michelle at GDIT, and also Tony Dean at OEDA, the
-				 * performing provider should always be present. I think the
-				 * field is only optional because it wasn't used until the
-				 * switch to NPIs in 2007.
-				 */
-				throw new InvalidRifValueException(String
-						.format("Carrier claim line with no performing provider, for claim '%s'.", claimGroup.claimId));
-
 			}
-
-
 
 			item.setLocation(createCodeableConcept(CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, claimLine.placeOfServiceCode));
 
