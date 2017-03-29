@@ -1,9 +1,13 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
+import java.util.Optional;
+
 /**
  * Enumerate the possibly values for Compound Code for Part D
  */
 public enum CompoundCode {
+	NOT_SPECIFIED(0),
+
 	NOT_COMPOUNDED(1),
 
 	COMPOUNDED(2);
@@ -28,17 +32,20 @@ public enum CompoundCode {
 	}
 
 	/**
-	 * @param rifValue
+	 * @param valueToParse
 	 *            the {@link CompoundCode#getCode()} to find a match for
 	 * @return the {@link CompoundCode} that matches the specified
 	 *         {@link CompoundCode#getCode()}
 	 */
-	public static CompoundCode parseRifValue(Integer rifValue) {
+	public static CompoundCode parseRifValue(Optional<Integer> valueToParse) {
+		if (!valueToParse.isPresent())
+			return CompoundCode.NOT_SPECIFIED;
+
 		for (CompoundCode compoundCode : CompoundCode.values()) {
-			if (compoundCode.getCode().equals(rifValue)) {
+			if (compoundCode.getCode().equals(valueToParse.get())) {
 				return compoundCode;
 			}
 		}
-		throw new IllegalArgumentException("Unknown code: " + rifValue);
+		throw new IllegalArgumentException("Unknown code: " + valueToParse.get());
 	}
 }
