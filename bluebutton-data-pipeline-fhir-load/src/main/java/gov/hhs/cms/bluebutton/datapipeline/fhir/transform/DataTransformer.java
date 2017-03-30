@@ -56,6 +56,8 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -595,6 +597,8 @@ public final class DataTransformer {
 	static final String CODING_CLAIM_PPS_OLD_CAPITAL_HOLD_HARMLESS_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hldhrmls.txt";
 
 	static final String CODING_NCH_DRUG_OUTLIER_APPROVED_PAYMENT_AMT_URL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/outlrpmt.txt";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataTransformer.class);
 
 	/**
 	 * @param rifStream
@@ -3655,9 +3659,12 @@ public final class DataTransformer {
 			return;
 		if (dateThrough == null)
 			return;
+		// FIXME see CBBD-236 (ETL service fails on some Hospice claims "From
+		// date is after the Through Date")
+		// We are seeing this scenario in production where the from date is
+		// after the through date so we are just logging the error for now.
 		if (dateFrom.isAfter(dateThrough))
-			throw new InvalidRifValueException(
-					String.format("Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
+			LOGGER.debug(String.format("Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
 	}
 
 	/**
