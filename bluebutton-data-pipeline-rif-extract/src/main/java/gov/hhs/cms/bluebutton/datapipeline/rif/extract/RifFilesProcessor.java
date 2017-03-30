@@ -1323,7 +1323,7 @@ public final class RifFilesProcessor {
 		try {
 			return Integer.parseInt(intText);
 		} catch (NumberFormatException e) {
-			throw new InvalidRifValueException("Unable to parse integer value: " + intText, e);
+			throw new InvalidRifValueException(String.format("Unable to parse integer value: '%s'.", intText), e);
 		}
 	}
 
@@ -1357,7 +1357,8 @@ public final class RifFilesProcessor {
 			try {
 				return new BigDecimal(decimalText);
 			} catch (NumberFormatException e) {
-				throw new InvalidRifValueException("Unable to parse decimal value: " + decimalText, e);
+				throw new InvalidRifValueException(String.format("Unable to parse decimal value: '%s'.", decimalText),
+						e);
 			}
 		}
 	}
@@ -1392,7 +1393,7 @@ public final class RifFilesProcessor {
 			LocalDate dateFrom = LocalDate.parse(dateText, RIF_DATE_FORMATTER);
 			return dateFrom;
 		} catch (DateTimeParseException e) {
-			throw new InvalidRifValueException("Unable to parse date value: " + dateText, e);
+			throw new InvalidRifValueException(String.format("Unable to parse date value: '%s'.", dateText), e);
 		}
 	}
 
@@ -1423,7 +1424,7 @@ public final class RifFilesProcessor {
 		 */
 
 		if (charText.length() != 1)
-			throw new InvalidRifValueException("Unable to parse character value: " + charText);
+			throw new InvalidRifValueException(String.format("Unable to parse character value: '%s'.", charText));
 
 		return charText.charAt(0);
 	}
