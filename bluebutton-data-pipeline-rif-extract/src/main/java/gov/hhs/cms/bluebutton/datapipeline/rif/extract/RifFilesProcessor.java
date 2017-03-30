@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -30,8 +32,10 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.ColumnValueCsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifVersionException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
@@ -180,226 +184,63 @@ public final class RifFilesProcessor {
 		 * processing (the CSVParser would be closed before it's even used).
 		 */
 
+		LOGGER.info("Processing RIF file: " + file);
 		CSVParser parser = createCsvParser(file);
 
 		Stream<RifRecordEvent<?>> rifRecordStream;
+
+		Enum<?> groupingColumn;
+		Function<List<CSVRecord>, ?> recordParser;
 		if (file.getFileType() == RifFileType.BENEFICIARY) {
-			Iterator<CSVRecord> csvIterator = parser.iterator();
-			Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<CSVRecord> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecord -> {
-				RifRecordEvent<BeneficiaryRow> recordEvent = new RifRecordEvent<BeneficiaryRow>(rifFilesEvent, file,
-						buildBeneficiaryEvent(csvRecord));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = null;
+			recordParser = RifFilesProcessor::buildBeneficiaryEvent;
 		} else if (file.getFileType() == RifFileType.PDE) {
-			Iterator<CSVRecord> csvIterator = parser.iterator();
-			Spliterator<CSVRecord> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<CSVRecord> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecord -> {
-				RifRecordEvent<PartDEventRow> recordEvent = new RifRecordEvent<>(rifFilesEvent, file,
-						buildPartDEvent(csvRecord));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = null;
+			recordParser = RifFilesProcessor::buildPartDEvent;
 		} else if (file.getFileType() == RifFileType.CARRIER) {
-			CsvRecordGrouper grouper = new CsvRecordGrouper() {
-				@Override
-				public int compare(CSVRecord o1, CSVRecord o2) {
-					if (o1 == null)
-						throw new InvalidRifFileFormatException("Carrier o1 record is null");
-					if (o2 == null)
-						throw new InvalidRifFileFormatException("Carrier o2 record is null");
-
-					String claimId1 = o1.get(CarrierClaimGroup.Column.CLM_ID);
-					String claimId2 = o2.get(CarrierClaimGroup.Column.CLM_ID);
-
-					return claimId1.compareTo(claimId2);
-				}
-			};
-
-			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-				RifRecordEvent<CarrierClaimGroup> recordEvent = new RifRecordEvent<CarrierClaimGroup>(rifFilesEvent,
-						file, buildCarrierClaimEvent(csvRecordGroup));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = CarrierClaimGroup.Column.CLM_ID;
+			recordParser = RifFilesProcessor::buildCarrierClaimEvent;
 		} else if (file.getFileType() == RifFileType.INPATIENT) {
-			CsvRecordGrouper grouper = new CsvRecordGrouper() {
-				@Override
-				public int compare(CSVRecord o1, CSVRecord o2) {
-					if (o1 == null)
-						throw new InvalidRifFileFormatException("Inpatient o1 record is null");
-					if (o2 == null)
-						throw new InvalidRifFileFormatException("Inpatient o2 record is null");
-
-					String claimId1 = o1.get(InpatientClaimGroup.Column.CLM_ID);
-					String claimId2 = o2.get(InpatientClaimGroup.Column.CLM_ID);
-
-					return claimId1.compareTo(claimId2);
-				}
-			};
-
-			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-				RifRecordEvent<InpatientClaimGroup> recordEvent = new RifRecordEvent<InpatientClaimGroup>(rifFilesEvent,
-						file, buildInpatientClaimEvent(csvRecordGroup));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = InpatientClaimGroup.Column.CLM_ID;
+			recordParser = RifFilesProcessor::buildInpatientClaimEvent;
 		} else if (file.getFileType() == RifFileType.OUTPATIENT) {
-			CsvRecordGrouper grouper = new CsvRecordGrouper() {
-				@Override
-				public int compare(CSVRecord o1, CSVRecord o2) {
-					if (o1 == null)
-						throw new InvalidRifFileFormatException("Outpatient o1 record is null");
-					if (o2 == null)
-						throw new InvalidRifFileFormatException("Outpatient o2 record is null");
-
-					String claimId1 = o1.get(OutpatientClaimGroup.Column.CLM_ID);
-					String claimId2 = o2.get(OutpatientClaimGroup.Column.CLM_ID);
-
-					return claimId1.compareTo(claimId2);
-				}
-			};
-
-			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-				RifRecordEvent<OutpatientClaimGroup> recordEvent = new RifRecordEvent<OutpatientClaimGroup>(
-						rifFilesEvent, file, buildOutpatientClaimEvent(csvRecordGroup));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = OutpatientClaimGroup.Column.CLM_ID;
+			recordParser = RifFilesProcessor::buildOutpatientClaimEvent;
 		} else if (file.getFileType() == RifFileType.SNF) {
-			CsvRecordGrouper grouper = new CsvRecordGrouper() {
-				@Override
-				public int compare(CSVRecord o1, CSVRecord o2) {
-					if (o1 == null)
-						throw new InvalidRifFileFormatException("SNF o1 record is null");
-					if (o2 == null)
-						throw new InvalidRifFileFormatException("SNF o2 record is null");
-
-					String claimId1 = o1.get(SNFClaimGroup.Column.CLM_ID);
-					String claimId2 = o2.get(SNFClaimGroup.Column.CLM_ID);
-
-					return claimId1.compareTo(claimId2);
-				}
-			};
-
-			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-				RifRecordEvent<SNFClaimGroup> recordEvent = new RifRecordEvent<SNFClaimGroup>(rifFilesEvent, file,
-						buildSNFClaimEvent(csvRecordGroup));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = SNFClaimGroup.Column.CLM_ID;
+			recordParser = RifFilesProcessor::buildSNFClaimEvent;
 		} else if (file.getFileType() == RifFileType.HOSPICE) {
-			CsvRecordGrouper grouper = new CsvRecordGrouper() {
-				@Override
-				public int compare(CSVRecord o1, CSVRecord o2) {
-					if (o1 == null)
-						throw new InvalidRifFileFormatException("Hospice o1 record is null");
-					if (o2 == null)
-						throw new InvalidRifFileFormatException("Hospice o2 record is null");
-
-					String claimId1 = o1.get(HospiceClaimGroup.Column.CLM_ID);
-					String claimId2 = o2.get(HospiceClaimGroup.Column.CLM_ID);
-
-					return claimId1.compareTo(claimId2);
-				}
-			};
-
-			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-				RifRecordEvent<HospiceClaimGroup> recordEvent = new RifRecordEvent<HospiceClaimGroup>(rifFilesEvent,
-						file, buildHospiceClaimEvent(csvRecordGroup));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = HospiceClaimGroup.Column.CLM_ID;
+			recordParser = RifFilesProcessor::buildHospiceClaimEvent;
 		} else if (file.getFileType() == RifFileType.HHA) {
-			CsvRecordGrouper grouper = new CsvRecordGrouper() {
-				@Override
-				public int compare(CSVRecord o1, CSVRecord o2) {
-					if (o1 == null)
-						throw new InvalidRifFileFormatException("HHA o1 record is null");
-					if (o2 == null)
-						throw new InvalidRifFileFormatException("HHA o2 record is null");
-
-					String claimId1 = o1.get(HHAClaimGroup.Column.CLM_ID);
-					String claimId2 = o2.get(HHAClaimGroup.Column.CLM_ID);
-
-					return claimId1.compareTo(claimId2);
-				}
-			};
-
-			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-				RifRecordEvent<HHAClaimGroup> recordEvent = new RifRecordEvent<HHAClaimGroup>(rifFilesEvent, file,
-						buildHHAClaimEvent(csvRecordGroup));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
+			groupingColumn = HHAClaimGroup.Column.CLM_ID;
+			recordParser = RifFilesProcessor::buildHHAClaimEvent;
 		} else if (file.getFileType() == RifFileType.DME) {
-			CsvRecordGrouper grouper = new CsvRecordGrouper() {
-				@Override
-				public int compare(CSVRecord o1, CSVRecord o2) {
-					if (o1 == null)
-						throw new InvalidRifFileFormatException("DME o1 record is null");
-					if (o2 == null)
-						throw new InvalidRifFileFormatException("DME o2 record is null");
-
-					String claimId1 = o1.get(DMEClaimGroup.Column.CLM_ID);
-					String claimId2 = o2.get(DMEClaimGroup.Column.CLM_ID);
-
-					return claimId1.compareTo(claimId2);
-				}
-			};
-
-			Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
-			Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-					Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-			Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-			rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-				RifRecordEvent<DMEClaimGroup> recordEvent = new RifRecordEvent<DMEClaimGroup>(rifFilesEvent, file,
-						buildDMEClaimEvent(csvRecordGroup));
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			});
-
+			groupingColumn = DMEClaimGroup.Column.CLM_ID;
+			recordParser = RifFilesProcessor::buildDMEClaimEvent;
 		} else {
 			throw new UnsupportedRifFileTypeException("Unsupported file type:" + file.getFileType());
 		}
+
+		CsvRecordGrouper grouper = new ColumnValueCsvRecordGrouper(groupingColumn);
+		Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
+		Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
+				Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
+		Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
+
+		rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
+			try {
+				@SuppressWarnings({ "rawtypes", "unchecked" })
+				RifRecordEvent<?> recordEvent = new RifRecordEvent(rifFilesEvent, file,
+						recordParser.apply(csvRecordGroup));
+				closeParserIfDone(parser, csvIterator);
+				return recordEvent;
+			} catch (InvalidRifValueException e) {
+				LOGGER.warn("Parse error encountered near record number '{}'.",
+						csvRecordGroup.get(0).getRecordNumber());
+				throw new InvalidRifValueException(e);
+			}
+		});
 
 		return rifRecordStream;
 	}
@@ -454,13 +295,17 @@ public final class RifFilesProcessor {
 	}
 
 	/**
-	 * @param csvRecord
-	 *            the {@link CSVRecord} to be mapped, which must be from a
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#BENEFICIARY} {@link RifFile}
 	 * @return a {@link BeneficiaryRow} built from the specified
 	 *         {@link CSVRecord}
 	 */
-	private static BeneficiaryRow buildBeneficiaryEvent(CSVRecord csvRecord) {
+	private static BeneficiaryRow buildBeneficiaryEvent(List<CSVRecord> csvRecords) {
+		if (csvRecords.size() != 1)
+			throw new BadCodeMonkeyException();
+		CSVRecord csvRecord = csvRecords.get(0);
+
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecord.toString());
 
@@ -498,13 +343,17 @@ public final class RifFilesProcessor {
 	}
 
 	/**
-	 * @param csvRecord
-	 *            the {@link CSVRecord} to be mapped, which must be from a
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#PDE} {@link RifFile}
 	 * @return a {@link PartDEventRow} built from the specified
 	 *         {@link CSVRecord}
 	 */
-	private static PartDEventRow buildPartDEvent(CSVRecord csvRecord) {
+	private static PartDEventRow buildPartDEvent(List<CSVRecord> csvRecords) {
+		if (csvRecords.size() != 1)
+			throw new BadCodeMonkeyException();
+		CSVRecord csvRecord = csvRecords.get(0);
+
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecord.toString());
 
@@ -1471,7 +1320,11 @@ public final class RifFilesProcessor {
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
 		 */
-		return Integer.parseInt(intText);
+		try {
+			return Integer.parseInt(intText);
+		} catch (NumberFormatException e) {
+			throw new InvalidRifValueException(String.format("Unable to parse integer value: '%s'.", intText), e);
+		}
 	}
 
 	/**
@@ -1501,7 +1354,12 @@ public final class RifFilesProcessor {
 		if (decimalText.isEmpty()) {
 			return new BigDecimal(0);
 		} else {
-			return new BigDecimal(decimalText);
+			try {
+				return new BigDecimal(decimalText);
+			} catch (NumberFormatException e) {
+				throw new InvalidRifValueException(String.format("Unable to parse decimal value: '%s'.", decimalText),
+						e);
+			}
 		}
 	}
 
@@ -1531,8 +1389,12 @@ public final class RifFilesProcessor {
 		 * to read, and ensures that this parsing is standardized.
 		 */
 
-		LocalDate dateFrom = LocalDate.parse(dateText, RIF_DATE_FORMATTER);
-		return dateFrom;
+		try {
+			LocalDate dateFrom = LocalDate.parse(dateText, RIF_DATE_FORMATTER);
+			return dateFrom;
+		} catch (DateTimeParseException e) {
+			throw new InvalidRifValueException(String.format("Unable to parse date value: '%s'.", dateText), e);
+		}
 	}
 
 	/**
@@ -1560,6 +1422,9 @@ public final class RifFilesProcessor {
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
 		 */
+
+		if (charText.length() != 1)
+			throw new InvalidRifValueException(String.format("Unable to parse character value: '%s'.", charText));
 
 		return charText.charAt(0);
 	}
