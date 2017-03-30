@@ -1,7 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +10,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
 
 /**
  * <p>
@@ -104,7 +105,7 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 	 * sequential fashion: {@link CSVRecord}s that should be grouped together
 	 * must be adjacent to each other.
 	 */
-	public interface CsvRecordGrouper extends Comparator<CSVRecord> {
+	public interface CsvRecordGrouper {
 		/**
 		 * @param record1
 		 *            the first {@link CSVRecord} to compare
@@ -114,8 +115,45 @@ public final class CsvRecordGroupingIterator implements Iterator<List<CSVRecord>
 		 *         be part of the same group, <code>false</code> if they should
 		 *         not
 		 */
-		default boolean areSameGroup(CSVRecord record1, CSVRecord record2) {
-			return compare(record1, record2) == 0;
+		boolean areSameGroup(CSVRecord record1, CSVRecord record2);
+	}
+
+	/**
+	 * The "standard" {@link CsvRecordGrouper} implementation, that simply
+	 * groups rows by the value of a single shared column (typically the claim
+	 * ID).
+	 */
+	public static final class ColumnValueCsvRecordGrouper implements CsvRecordGrouper {
+		private final Enum<?> groupingColumn;
+
+		/**
+		 * Constructs a new {@link ColumnValueCsvRecordGrouper} instance.
+		 * 
+		 * @param groupingColumn
+		 *            the name of the column to group by, or <code>null</code>
+		 *            if no rows should be grouped
+		 */
+		public ColumnValueCsvRecordGrouper(Enum<?> groupingColumn) {
+			this.groupingColumn = groupingColumn;
+		}
+
+		/**
+		 * @see gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper#areSameGroup(org.apache.commons.csv.CSVRecord,
+		 *      org.apache.commons.csv.CSVRecord)
+		 */
+		@Override
+		public boolean areSameGroup(CSVRecord record1, CSVRecord record2) {
+			if (record1 == null)
+				throw new InvalidRifFileFormatException("Carrier record 1 is null");
+			if (record2 == null)
+				throw new InvalidRifFileFormatException("Carrier record 2 is null");
+
+			if (groupingColumn == null)
+				return false;
+
+			String record1ComparisonValue = record1.get(groupingColumn);
+			String record2ComparisonValue = record2.get(groupingColumn);
+			return record1ComparisonValue.equals(record2ComparisonValue);
 		}
 	}
 }
