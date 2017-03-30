@@ -3659,8 +3659,12 @@ public final class DataTransformer {
 			return;
 		if (dateThrough == null)
 			return;
+		// FIXME see CBBD-236 (ETL service fails on some Hospice claims "From
+		// date is after the Through Date")
+		// We are seeing this scenario in production where the from date is
+		// after the through date so we are just logging the error for now.
 		if (dateFrom.isAfter(dateThrough))
-			LOGGER.warn(String.format("Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
+			LOGGER.debug(String.format("Error - From Date '%s' is after the Through Date '%s'", dateFrom, dateThrough));
 	}
 
 	/**
