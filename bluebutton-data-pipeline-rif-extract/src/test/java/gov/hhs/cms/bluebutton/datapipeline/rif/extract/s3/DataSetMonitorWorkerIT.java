@@ -129,6 +129,7 @@ public final class DataSetMonitorWorkerIT {
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
 			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
+			monitorWorker.setS3MaxKeys(1);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
