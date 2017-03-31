@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
@@ -28,6 +29,8 @@ import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -108,6 +111,8 @@ public final class DataSetMonitorWorker implements Runnable {
 
 	private CircularFifoQueue<Instant> knownInvalidManifests;
 
+	private Optional<Integer> s3MaxKeys = Optional.empty();
+
 	/**
 	 * Constructs a new {@link DataSetMonitorWorker} instance.
 	 * 
@@ -136,8 +141,10 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * (In the results, we'll be looking for the oldest manifest file, if
 		 * any.)
 		 */
-		ListObjectsRequest bucketListRequest = new ListObjectsRequest();
-		bucketListRequest.setBucketName(options.getS3BucketName());
+		ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
+		s3BucketListRequest.setBucketName(options.getS3BucketName());
+		if (s3MaxKeys.isPresent())
+			s3BucketListRequest.setMaxKeys(s3MaxKeys.get());
 
 		/*
 		 * S3 will return results in separate pages. Loop through all of the
@@ -146,9 +153,11 @@ public final class DataSetMonitorWorker implements Runnable {
 		DataSetManifest manifestToProcess = null;
 		int pendingManifests = 0;
 		int completedManifests = 0;
-		ObjectListing objectListing = s3Client.listObjects(bucketListRequest);
+		ListObjectsV2Result s3ObjectListing;
 		do {
-			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+			s3ObjectListing = s3Client.listObjectsV2(s3BucketListRequest);
+
+			for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
 				String key = objectSummary.getKey();
 				if (REGEX_PENDING_MANIFEST.matcher(key).matches()) {
 					pendingManifests++;
@@ -199,8 +208,8 @@ public final class DataSetMonitorWorker implements Runnable {
 				}
 			}
 
-			objectListing = s3Client.listNextBatchOfObjects(objectListing);
-		} while (objectListing.isTruncated());
+			s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
+		} while (s3ObjectListing.isTruncated());
 
 		// If no manifest was found, we're done (until next time).
 		if (manifestToProcess == null) {
@@ -451,5 +460,18 @@ public final class DataSetMonitorWorker implements Runnable {
 		LOGGER.debug("Data set deleted in S3 (step 2 of move).");
 
 		LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
+	}
+
+	/**
+	 * Note: This method is intended for test purposes: setting this value to
+	 * <code>1</code> in tests can help to verify the S3 paging logic.
+	 * 
+	 * @param s3MaxKeys
+	 *            the value to use for
+	 *            {@link ListObjectsV2Request#setMaxKeys(Integer)} in all S3
+	 *            list operations
+	 */
+	void setS3MaxKeys(int s3MaxKeys) {
+		this.s3MaxKeys = Optional.of(s3MaxKeys);
 	}
 }
