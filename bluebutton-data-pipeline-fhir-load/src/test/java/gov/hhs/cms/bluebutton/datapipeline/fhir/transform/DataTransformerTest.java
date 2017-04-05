@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +32,6 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
@@ -216,7 +214,7 @@ public final class DataTransformerTest {
 	 * @throws FHIRException
 	 *             indicates test failure
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
 	@Test
 	public void transformInsertPartDEvent() throws FHIRException {
 		// Read sample data from text file
@@ -296,7 +294,7 @@ public final class DataTransformerTest {
 	 * @throws FHIRException
 	 *             indicates test failure
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
 	@Test
 	public void transformInsertPartDEventCompound() throws FHIRException {
 		// Read sample data from text file
@@ -325,7 +323,7 @@ public final class DataTransformerTest {
 	 * 
 	 * @throws FHIRException
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
 	@Test
 	public void transformInsertPartDEventNonCoveredSupplement() throws FHIRException {
 		// Read sample data from text file
@@ -362,7 +360,7 @@ public final class DataTransformerTest {
 	 * 
 	 * @throws FHIRException
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
 	@Test
 	public void transformInsertPartDEventNonCoveredOTC() throws FHIRException {
 		// Read sample data from text file
@@ -1562,27 +1560,6 @@ public final class DataTransformerTest {
 
 		assertExtensionCodingEquals(eobItem0, DataTransformer.CODING_SYSTEM_NDC, DataTransformer.CODING_SYSTEM_NDC,
 				recordLine1.nationalDrugCode.get());
-	}
-
-	/**
-	 * @param npi
-	 *            the NPI to verify that the {@link Practitioner} resource in
-	 *            the specified {@link BundleEntryComponent} has
-	 * @return a {@link Predicate} that will match if the specified
-	 *         {@link BundleEntryComponent} has a {@link Practitioner} resource
-	 *         with the specified NPI
-	 */
-	private Predicate<? super BundleEntryComponent> entryIsPractitionerWithNpi(String npi) {
-		return e -> {
-			// First, check the resource type.
-			if (!(e.getResource() instanceof Practitioner))
-				return false;
-			Practitioner p = (Practitioner) e.getResource();
-
-			// Then, verify that the Practitioner has the expected NPI.
-			return p.getIdentifier().stream().filter(i -> DataTransformer.CODING_SYSTEM_NPI_US.equals(i.getSystem()))
-					.filter(i -> npi.equals(i.getValue())).findAny().isPresent();
-		};
 	}
 
 	/**

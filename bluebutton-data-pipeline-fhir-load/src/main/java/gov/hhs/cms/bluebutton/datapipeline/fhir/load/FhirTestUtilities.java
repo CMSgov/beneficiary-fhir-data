@@ -57,6 +57,9 @@ public final class FhirTestUtilities {
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
 
 		IGenericClient fhirClient = createFhirClient();
+
+		// FIXME see CBBD-239 (Change deprecated Conformance to
+		// CapabilityStatement)
 		Conformance conformance = fhirClient.fetchConformance().ofType(Conformance.class).execute();
 
 		/*
