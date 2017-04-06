@@ -19,7 +19,6 @@ import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
-import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -3374,12 +3373,6 @@ public final class DataTransformer {
 	 */
 	private static void setPeriodStart(Period period, LocalDate date) {
 		period.setStart(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY);
-	}
-
-	private static void setDateInExtension(Extension ext, String systemUrl, LocalDate date) {
-		ext.setUrl(systemUrl);
-		ext.setValue(new DateTimeType(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-				TemporalPrecisionEnum.DAY));
 	}
 
 	/**
