@@ -806,6 +806,11 @@ public final class DataTransformer {
 			 */
 			detail.getType().addCoding(new Coding().setSystem(CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
 			break;
+		case NOT_SPECIFIED:
+			/*
+			 * Pharmacy dispense invoice not specified - do not set a value
+			 */
+			break;
 		default:
 			/*
 			 * Unexpected value encountered - compound code should be either
