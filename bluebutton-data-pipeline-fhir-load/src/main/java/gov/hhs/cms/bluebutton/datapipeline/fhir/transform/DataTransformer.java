@@ -926,10 +926,18 @@ public final class DataTransformer {
 
 		rxItem.addModifier(createCodeableConcept(CODING_SYSTEM_PDE_DAYS_SUPPLY, String.valueOf(record.daysSupply)));
 
-		if (record.serviceProviderIdQualiferCode == null
-				|| !record.serviceProviderIdQualiferCode.equalsIgnoreCase("01"))
-			throw new InvalidRifValueException(
-					"Service Provider ID Qualifier Code is invalid: " + record.serviceProviderIdQualiferCode);
+		// CBBD-241 - This code was commented out because values other than "01"
+		// were coming thru
+		// such as "07". Need to discuss with Karl if this check needs to be
+		// here - DEH
+
+		/*
+		 * if (record.serviceProviderIdQualiferCode == null ||
+		 * !record.serviceProviderIdQualiferCode.equalsIgnoreCase("01")) throw
+		 * new InvalidRifValueException(
+		 * "Service Provider ID Qualifier Code is invalid: " +
+		 * record.serviceProviderIdQualiferCode);
+		 */
 
 		if (!record.serviceProviderId.isEmpty()) {
 			eob.setOrganization(createIdentifierReference(CODING_SYSTEM_NPI_US, record.serviceProviderId));
