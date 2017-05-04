@@ -33,6 +33,9 @@ public final class DataSetManifest {
 	@XmlElement(name = "entry")
 	private final List<DataSetManifestEntry> entries;
 
+	@XmlElement(name = "sequenceId")
+	private int sequenceId;
+
 	/**
 	 * Constructs a new {@link DataSetManifest} instance.
 	 * 
@@ -43,6 +46,7 @@ public final class DataSetManifest {
 	 */
 	public DataSetManifest(Instant timestamp, List<DataSetManifestEntry> entries) {
 		this.timestamp = timestamp;
+		this.sequenceId = 0;
 		this.entries = entries;
 	}
 
@@ -56,6 +60,7 @@ public final class DataSetManifest {
 	 */
 	public DataSetManifest(Instant timestamp, DataSetManifestEntry... entries) {
 		this.timestamp = timestamp;
+		this.sequenceId = 0;
 		this.entries = Arrays.asList(entries);
 	}
 
@@ -67,6 +72,7 @@ public final class DataSetManifest {
 	private DataSetManifest() {
 		this.timestamp = null;
 		this.entries = null;
+		this.sequenceId = 0;
 	}
 
 	/**
@@ -75,6 +81,24 @@ public final class DataSetManifest {
 	 */
 	public Instant getTimestamp() {
 		return timestamp;
+	}
+
+
+	/**
+	 * @return the {@link int} sequence number of the file represented by this
+	 *         {@link DataSetManifest}
+	 */
+	public int getSequenceId() {
+		return sequenceId;
+	}
+
+	/**
+	 * TODO: Will only need this method in the short term..can remove once
+	 * sequenceId is actually in the manifest xml file
+	 * 
+	 */
+	public int setSequenceId(int sequenceId) {
+		return this.sequenceId = sequenceId;
 	}
 
 	/**
@@ -93,6 +117,8 @@ public final class DataSetManifest {
 		StringBuilder builder = new StringBuilder();
 		builder.append("DataSetManifest [timestamp=");
 		builder.append(timestamp);
+		builder.append(", sequenceId=");
+		builder.append(sequenceId);
 		builder.append(", entries=");
 		builder.append(entries);
 		builder.append("]");
@@ -111,6 +137,7 @@ public final class DataSetManifest {
 		@XmlAttribute
 		private final RifFileType type;
 
+
 		/**
 		 * Constructs a new {@link DataSetManifestEntry} instance.
 		 * 
@@ -122,6 +149,7 @@ public final class DataSetManifest {
 		public DataSetManifestEntry(String name, RifFileType type) {
 			this.name = name;
 			this.type = type;
+
 		}
 
 		/**

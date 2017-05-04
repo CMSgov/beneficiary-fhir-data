@@ -92,10 +92,10 @@ public final class DataSetMonitorWorker implements Runnable {
 	public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set renamed in S3, now that processing is complete.";
 
 	private static final Pattern REGEX_PENDING_MANIFEST = Pattern
-			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
+			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
 	private static final Pattern REGEX_COMPLETED_MANIFEST = Pattern
-			.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/manifest\\.xml$");
+			.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
 	private final ExtractionOptions options;
 	private final DataSetMonitorListener listener;
@@ -177,6 +177,8 @@ public final class DataSetMonitorWorker implements Runnable {
 						continue;
 					}
 
+					int sequenceId = parseDataSetSequenceId(key);
+
 					/*
 					 * Check to see if this data set should be skipped, and if
 					 * not, it it is the oldest one we've encountered so far. If
@@ -184,8 +186,14 @@ public final class DataSetMonitorWorker implements Runnable {
 					 * looking through the other keys.
 					 */
 					DataSetManifest manifest = null;
+
 					try {
 						manifest = readManifest(key);
+						/*
+						 * TODO Following line can be removed once sequenceId is
+						 * actually in the manifest xml file
+						 */
+						manifest.setSequenceId(sequenceId);
 					} catch (JAXBException e) {
 						// Note: We intentionally don't log the full stack trace
 						// here, as it would add a lot of unneeded noise.
@@ -202,6 +210,9 @@ public final class DataSetMonitorWorker implements Runnable {
 					if (manifestToProcess == null)
 						manifestToProcess = manifest;
 					else if (timestamp.compareTo(manifestToProcess.getTimestamp()) < 0)
+						manifestToProcess = manifest;
+					else if ((timestamp.compareTo(manifestToProcess.getTimestamp()) == 0)
+							&& (sequenceId < manifestToProcess.getSequenceId()))
 						manifestToProcess = manifest;
 				} else if (REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
 					completedManifests++;
@@ -309,6 +320,20 @@ public final class DataSetMonitorWorker implements Runnable {
 	}
 
 	/**
+	 * @param key
+	 *            the S3 object key of a manifest file
+	 * @return the sequence id of the data set represented by the specified
+	 *         manifest object key
+	 */
+	private static int parseDataSetSequenceId(String key) {
+		Matcher manifestKeyMatcher = REGEX_PENDING_MANIFEST.matcher(key);
+		manifestKeyMatcher.matches();
+
+		int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(2));
+		return dataSetSequenceId;
+	}
+
+	/**
 	 * @param manifestToProcessKey
 	 *            the {@link S3Object#getKey()} of the S3 object for the
 	 *            manifest to be read
@@ -328,6 +353,7 @@ public final class DataSetMonitorWorker implements Runnable {
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
 			DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestObject.getObjectContent());
+
 
 			return manifest;
 		} catch (AmazonServiceException e) {
