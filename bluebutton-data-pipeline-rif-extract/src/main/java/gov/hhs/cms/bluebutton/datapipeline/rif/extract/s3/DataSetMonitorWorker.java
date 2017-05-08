@@ -3,13 +3,11 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -39,6 +37,7 @@ import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 
 /**
@@ -91,7 +90,11 @@ public final class DataSetMonitorWorker implements Runnable {
 	 */
 	public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set renamed in S3, now that processing is complete.";
 
-	private static final Pattern REGEX_PENDING_MANIFEST = Pattern
+	/**
+	 * A regex for {@link DataSetManifest} keys in S3. Provides capturing groups
+	 * for the {@link DataSetManifestId} fields.
+	 */
+	public static final Pattern REGEX_PENDING_MANIFEST = Pattern
 			.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
 	private static final Pattern REGEX_COMPLETED_MANIFEST = Pattern
@@ -107,9 +110,9 @@ public final class DataSetMonitorWorker implements Runnable {
 	 * processed more than once. It's constrained to a fixed number of items, to
 	 * keep it from becoming a memory leak.
 	 */
-	private CircularFifoQueue<Instant> recentlyProcessedManifests;
+	private CircularFifoQueue<DataSetManifestId> recentlyProcessedManifests;
 
-	private CircularFifoQueue<Instant> knownInvalidManifests;
+	private CircularFifoQueue<DataSetManifestId> knownInvalidManifests;
 
 	private Optional<Integer> s3MaxKeys = Optional.empty();
 
@@ -164,20 +167,23 @@ public final class DataSetMonitorWorker implements Runnable {
 
 					/*
 					 * We've got an object that *looks like* it might be a
-					 * manifest file. But we also need to ensure that it starts
-					 * with a valid timestamp.
+					 * manifest file. But we need to parse the key to ensure
+					 * that it starts with a valid timestamp.
 					 */
-					Instant timestamp = parseDataSetTimestamp(key);
-					if (timestamp == null)
+					DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(key);
+					if (manifestId == null)
 						continue;
-					if (knownInvalidManifests.contains(timestamp))
+
+					/*
+					 * Skip things that we already know are invalid or have
+					 * already been processed.
+					 */
+					if (knownInvalidManifests.contains(manifestId))
 						continue;
-					if (recentlyProcessedManifests.contains(timestamp)) {
-						LOGGER.debug("Skipping data set that was already processed: {}", timestamp);
+					if (recentlyProcessedManifests.contains(manifestId)) {
+						LOGGER.debug("Skipping data set that was already processed: {}", manifestId);
 						continue;
 					}
-
-					int sequenceId = parseDataSetSequenceId(key);
 
 					/*
 					 * Check to see if this data set should be skipped, and if
@@ -193,13 +199,13 @@ public final class DataSetMonitorWorker implements Runnable {
 						 * TODO Following line can be removed once sequenceId is
 						 * actually in the manifest xml file
 						 */
-						manifest.setSequenceId(sequenceId);
+						manifest.setSequenceId(manifestId.getSequenceId());
 					} catch (JAXBException e) {
 						// Note: We intentionally don't log the full stack trace
 						// here, as it would add a lot of unneeded noise.
 						LOGGER.warn("Found data set with invalid manifest at '{}'. It will be skipped. Error: {}", key,
 								e.toString());
-						knownInvalidManifests.add(timestamp);
+						knownInvalidManifests.add(manifestId);
 						continue;
 					}
 					if (!options.getDataSetFilter().test(manifest)) {
@@ -209,10 +215,7 @@ public final class DataSetMonitorWorker implements Runnable {
 
 					if (manifestToProcess == null)
 						manifestToProcess = manifest;
-					else if (timestamp.compareTo(manifestToProcess.getTimestamp()) < 0)
-						manifestToProcess = manifest;
-					else if ((timestamp.compareTo(manifestToProcess.getTimestamp()) == 0)
-							&& (sequenceId < manifestToProcess.getSequenceId()))
+					else if (manifestId.compareTo(manifestToProcess.getId()) < 0)
 						manifestToProcess = manifest;
 				} else if (REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
 					completedManifests++;
@@ -295,42 +298,8 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * effect right away.)
 		 */
 		rifFiles.stream().forEach(f -> f.cleanupTempFile());
-		recentlyProcessedManifests.add(manifestToProcess.getTimestamp());
+		recentlyProcessedManifests.add(manifestToProcess.getId());
 			markDataSetCompleteInS3(manifestToProcess);
-	}
-
-	/**
-	 * @param key
-	 *            the S3 object key of a manifest file
-	 * @return the timestamp of the data set represented by the specified
-	 *         manifest object key
-	 */
-	private static Instant parseDataSetTimestamp(String key) {
-		Matcher manifestKeyMatcher = REGEX_PENDING_MANIFEST.matcher(key);
-		manifestKeyMatcher.matches();
-
-		String dataSetId = manifestKeyMatcher.group(1);
-
-		try {
-			Instant dataSetTimestamp = Instant.parse(dataSetId);
-			return dataSetTimestamp;
-		} catch (DateTimeParseException e) {
-			return null;
-		}
-	}
-
-	/**
-	 * @param key
-	 *            the S3 object key of a manifest file
-	 * @return the sequence id of the data set represented by the specified
-	 *         manifest object key
-	 */
-	private static int parseDataSetSequenceId(String key) {
-		Matcher manifestKeyMatcher = REGEX_PENDING_MANIFEST.matcher(key);
-		manifestKeyMatcher.matches();
-
-		int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(2));
-		return dataSetSequenceId;
 	}
 
 	/**
@@ -449,7 +418,9 @@ public final class DataSetMonitorWorker implements Runnable {
 						DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName()))
 				.collect(Collectors.toList());
 		s3KeySuffixesToMove.add(
-				String.format("%s/manifest.xml", DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp())));
+				String.format("%s/%d_manifest.xml",
+						DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()),
+						dataSetManifest.getSequenceId()));
 
 		/*
 		 * Then, loop through each of those objects and copy them (S3 has no

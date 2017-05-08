@@ -70,8 +70,9 @@ public class DataSetTestUtilities {
 			ByteArrayOutputStream manifestOutputStream = new ByteArrayOutputStream();
 			marshaller.marshal(manifest, manifestOutputStream);
 
-			String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
-					DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()), "manifest.xml");
+			String objectKey = String.format("%s/%s/%d_%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+					DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()), manifest.getSequenceId(),
+					"manifest.xml");
 			byte[] manifestByteArray = manifestOutputStream.toByteArray();
 			InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
 

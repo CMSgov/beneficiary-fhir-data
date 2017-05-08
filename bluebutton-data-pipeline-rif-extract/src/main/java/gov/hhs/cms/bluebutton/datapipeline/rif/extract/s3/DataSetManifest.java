@@ -1,8 +1,10 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -41,12 +43,14 @@ public final class DataSetManifest {
 	 * 
 	 * @param timestamp
 	 *            the value to use for {@link #getTimestamp()}
+	 * @param sequenceId
+	 *            the value to use for {@link #getSequenceId()}
 	 * @param entries
 	 *            the value to use for {@link #getEntries()}
 	 */
-	public DataSetManifest(Instant timestamp, List<DataSetManifestEntry> entries) {
+	public DataSetManifest(Instant timestamp, int sequenceId, List<DataSetManifestEntry> entries) {
 		this.timestamp = timestamp;
-		this.sequenceId = 0;
+		this.sequenceId = sequenceId;
 		this.entries = entries;
 	}
 
@@ -55,12 +59,14 @@ public final class DataSetManifest {
 	 * 
 	 * @param timestamp
 	 *            the value to use for {@link #getTimestamp()}
+	 * @param sequenceId
+	 *            the value to use for {@link #getSequenceId()}
 	 * @param entries
 	 *            the value to use for {@link #getEntries()}
 	 */
-	public DataSetManifest(Instant timestamp, DataSetManifestEntry... entries) {
+	public DataSetManifest(Instant timestamp, int sequenceId, DataSetManifestEntry... entries) {
 		this.timestamp = timestamp;
-		this.sequenceId = 0;
+		this.sequenceId = sequenceId;
 		this.entries = Arrays.asList(entries);
 	}
 
@@ -83,7 +89,6 @@ public final class DataSetManifest {
 		return timestamp;
 	}
 
-
 	/**
 	 * @return the {@link int} sequence number of the file represented by this
 	 *         {@link DataSetManifest}
@@ -99,6 +104,14 @@ public final class DataSetManifest {
 	 */
 	public int setSequenceId(int sequenceId) {
 		return this.sequenceId = sequenceId;
+	}
+
+	/**
+	 * @return a {@link DataSetManifestId} that models this
+	 *         {@link DataSetManifest}'s identity and ordering
+	 */
+	public DataSetManifestId getId() {
+		return new DataSetManifestId(this);
 	}
 
 	/**
@@ -136,7 +149,6 @@ public final class DataSetManifest {
 
 		@XmlAttribute
 		private final RifFileType type;
-
 
 		/**
 		 * Constructs a new {@link DataSetManifestEntry} instance.
@@ -190,6 +202,150 @@ public final class DataSetManifest {
 			builder.append(name);
 			builder.append(", type=");
 			builder.append(type);
+			builder.append("]");
+			return builder.toString();
+		}
+	}
+
+	/**
+	 * Represents the unique identity of a {@link DataSetManifest}, allowing for
+	 * equality comparisons. Also implements {@link Comparable} such that the
+	 * processing order of {@link DataSetManifest}s can be determined.
+	 */
+	public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
+		private final Instant timestamp;
+		private final int sequenceId;
+
+		/**
+		 * Constructs a new {@link DataSetManifestId}.
+		 * 
+		 * @param timestamp
+		 *            the {@link DataSetManifest#getTimestamp()} value
+		 * @param sequenceId
+		 *            the {@link DataSetManifest#getSequenceId()} value
+		 */
+		private DataSetManifestId(Instant timestamp, int sequenceId) {
+			this.timestamp = timestamp;
+			this.sequenceId = sequenceId;
+		}
+
+		/**
+		 * Constructs a new {@link DataSetManifestId}.
+		 * 
+		 * @param manifest
+		 *            the {@link DataSetManifest} to extract the
+		 *            {@link DataSetManifestId} from
+		 */
+		public DataSetManifestId(DataSetManifest manifest) {
+			this(manifest.getTimestamp(), manifest.getSequenceId());
+		}
+
+		/**
+		 * Parses a {@link DataSetManifestId} from the S3 key of a
+		 * {@link DataSetManifest}.
+		 * 
+		 * @param s3ManifestKey
+		 *            the S3 key of the {@link DataSetManifest} to extract a
+		 *            {@link DataSetManifestId} from
+		 * @return the {@link DataSetManifestId} represented by the specified S3
+		 *         key, or <code>null</code> if the key doesn't seem to point to
+		 *         a {@link DataSetManifest} ready for processing
+		 */
+		public static DataSetManifestId parseManifestIdFromS3Key(String s3ManifestKey) {
+			Matcher manifestKeyMatcher = DataSetMonitorWorker.REGEX_PENDING_MANIFEST.matcher(s3ManifestKey);
+			boolean keyMatchesRegex = manifestKeyMatcher.matches();
+
+			if (!keyMatchesRegex)
+				return null;
+
+			String dataSetId = manifestKeyMatcher.group(1);
+			Instant dataSetTimestamp;
+			try {
+				dataSetTimestamp = Instant.parse(dataSetId);
+			} catch (DateTimeParseException e) {
+				return null;
+			}
+
+			int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(2));
+
+			return new DataSetManifestId(dataSetTimestamp, dataSetSequenceId);
+		}
+
+		/**
+		 * @return the {@link DataSetManifest#getSequenceId()} value
+		 */
+		public int getSequenceId() {
+			/*
+			 * TODO remove this method once the sequence ID is contained in the
+			 * manifest XML
+			 */
+			return sequenceId;
+		}
+
+		/**
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
+		@Override
+		public int compareTo(DataSetManifestId o) {
+			if (o == null)
+				throw new IllegalArgumentException();
+
+			/*
+			 * This is a two-level sort: always sort first by timestamp. Within
+			 * equal timestamps, sort by sequenceId. This ensures that data sets
+			 * are processed in the correct order.
+			 */
+
+			int timestampComparison = timestamp.compareTo(o.timestamp);
+			if (timestampComparison != 0)
+				return timestampComparison;
+			return Integer.compare(sequenceId, o.sequenceId);
+		}
+
+		/**
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + sequenceId;
+			result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+			return result;
+		}
+
+		/**
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DataSetManifestId other = (DataSetManifestId) obj;
+			if (sequenceId != other.sequenceId)
+				return false;
+			if (timestamp == null) {
+				if (other.timestamp != null)
+					return false;
+			} else if (!timestamp.equals(other.timestamp))
+				return false;
+			return true;
+		}
+
+		/**
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("DataSetManifestId [timestamp=");
+			builder.append(timestamp);
+			builder.append(", sequenceId=");
+			builder.append(sequenceId);
 			builder.append("]");
 			return builder.toString();
 		}

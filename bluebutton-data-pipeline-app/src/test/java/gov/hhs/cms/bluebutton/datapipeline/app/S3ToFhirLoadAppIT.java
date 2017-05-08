@@ -198,7 +198,7 @@ public final class S3ToFhirLoadAppIT {
 			 * data set.
 			 */
 			bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
-			DataSetManifest manifest = new DataSetManifest(Instant.now(),
+			DataSetManifest manifest = new DataSetManifest(Instant.now(), 0,
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
 					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));

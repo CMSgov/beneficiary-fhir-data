@@ -67,7 +67,7 @@ public final class DataSetMonitorWorkerIT {
 			 */
 			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
-			DataSetManifest manifest = new DataSetManifest(Instant.now(),
+			DataSetManifest manifest = new DataSetManifest(Instant.now(), 0,
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
 					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
@@ -115,15 +115,20 @@ public final class DataSetMonitorWorkerIT {
 			 */
 			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
-			DataSetManifest manifestA = new DataSetManifest(Instant.now().minus(1L, ChronoUnit.HOURS),
+			DataSetManifest manifestA = new DataSetManifest(Instant.now().minus(1L, ChronoUnit.HOURS), 0,
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA, manifestA.getEntries().get(0),
 					StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
-			DataSetManifest manifestB = new DataSetManifest(Instant.now(),
-					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+			DataSetManifest manifestB = new DataSetManifest(manifestA.getTimestamp(), 1,
+					new DataSetManifestEntry("pde.rif", RifFileType.PDE));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB, manifestB.getEntries().get(0),
+					StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
+			DataSetManifest manifestC = new DataSetManifest(Instant.now(), 0,
+					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestC));
+			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestC, manifestC.getEntries().get(0),
 					StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
 			// Run the worker.
@@ -144,7 +149,8 @@ public final class DataSetMonitorWorkerIT {
 			 * still there.
 			 */
 			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
-					DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, 1 + manifestB.getEntries().size(),
+					DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+					1 + manifestB.getEntries().size() + 1 + manifestC.getEntries().size(),
 					java.time.Duration.ofSeconds(10));
 			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
 					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, 1 + manifestA.getEntries().size(),
@@ -173,7 +179,7 @@ public final class DataSetMonitorWorkerIT {
 			 */
 			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
-			DataSetManifest manifest = new DataSetManifest(Instant.now(),
+			DataSetManifest manifest = new DataSetManifest(Instant.now(), 0,
 					new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
 					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
