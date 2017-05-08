@@ -376,7 +376,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	private static void pushDataSetToS3(AmazonS3 s3Client, Bucket bucket, StaticRifResourceGroup dataResources) {
 		List<DataSetManifestEntry> manifestEntries = Arrays.stream(dataResources.getResources())
 				.map(r -> new DataSetManifestEntry(r.name(), r.getRifFileType())).collect(Collectors.toList());
-		DataSetManifest manifest = new DataSetManifest(Instant.now(), manifestEntries);
+		DataSetManifest manifest = new DataSetManifest(Instant.now(), 0, manifestEntries);
 		s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
 		for (int i = 0; i < dataResources.getResources().length; i++) {
 			StaticRifResource dataResource = dataResources.getResources()[i];

@@ -113,7 +113,7 @@ public final class DataSetManifestTest {
 	 *             (programmer error)
 	 */
 	public static void main(String[] args) throws JAXBException {
-		DataSetManifest manifest = new DataSetManifest(Instant.now(),
+		DataSetManifest manifest = new DataSetManifest(Instant.now(), 0,
 				new DataSetManifestEntry("foo.xml", RifFileType.BENEFICIARY),
 				new DataSetManifestEntry("bar.xml", RifFileType.PDE));
 
