@@ -41,6 +41,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	public static final String PROP_DB_URL = "bbfhir.db.url";
 	public static final String PROP_DB_USERNAME = "bbfhir.db.username";
 	public static final String PROP_DB_PASSWORD = "bbfhir.db.password";
+	public static final String PROP_DB_CONNECTIONS_MAX = "bbfhir.db.connections.max";
 
 	/**
 	 * Set this to <code>true</code> to have Hibernate log a ton of info on the
@@ -146,14 +147,27 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource(@Value("${" + PROP_DB_URL + "}") String url,
 			@Value("${" + PROP_DB_USERNAME + "}") String username,
-			@Value("${" + PROP_DB_PASSWORD + "}") String password, MetricRegistry metricRegistry) {
+			@Value("${" + PROP_DB_PASSWORD + "}") String password,
+			@Value("${" + PROP_DB_CONNECTIONS_MAX + "}") String connectionsMaxText, MetricRegistry metricRegistry) {
 		HikariDataSource poolingDataSource = new HikariDataSource();
 
 		poolingDataSource.setJdbcUrl(url);
 		poolingDataSource.setUsername(username);
 		poolingDataSource.setPassword(password);
 
-		poolingDataSource.setMaximumPoolSize(Runtime.getRuntime().availableProcessors() * 5);
+		int connectionsMax;
+		try {
+			connectionsMax = Integer.parseInt(connectionsMaxText);
+		} catch (NumberFormatException e) {
+			connectionsMax = -1;
+		}
+		if (connectionsMax < 1) {
+			// Assign a reasonable default value, if none was specified.
+			connectionsMax = Runtime.getRuntime().availableProcessors() * 5;
+		}
+
+		poolingDataSource.setMaximumPoolSize(connectionsMax);
+
 		poolingDataSource.setRegisterMbeans(true);
 		poolingDataSource.setMetricRegistry(metricRegistry);
 

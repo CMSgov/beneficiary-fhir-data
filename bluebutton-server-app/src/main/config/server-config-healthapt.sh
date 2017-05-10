@@ -6,7 +6,7 @@
 #
 # Usage:
 # 
-# $ bluebutton-server-app-server-config-healthapt.sh --serverhome /path-to-jboss --auth --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --war /path-to-war --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password"
+# $ bluebutton-server-app-server-config-healthapt.sh --serverhome /path-to-jboss --auth --managementport 9090 --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --war /path-to-war --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password" --dbconnectionsmax 42
 ##
 
 # Constants.
@@ -18,8 +18,8 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o h:m:as:k:t:w:u:n:p: \
-	--long serverhome:,managementport:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
+	-o h:m:as:k:t:w:u:n:p:c: \
+	--long serverhome:,managementport:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword:,:dbconnectionsmax \
 	-n 'bluebutton-server-app-server-config-healthapt.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -37,6 +37,7 @@ war=
 dbUrl=
 dbUsername=""
 dbPassword=""
+dbConnectionsMax=
 while true; do
 	case "$1" in
 		-h | --serverhome )
@@ -59,6 +60,8 @@ while true; do
 			dbUsername="$2"; shift 2 ;;
 		-p | --dbpassword )
 			dbPassword="$2"; shift 2 ;;
+		-c | --dbconnectionsmax )
+			dbConnectionsMax="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -71,6 +74,7 @@ if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; e
 if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
 if [[ -z "${war}" ]]; then >&2 echo 'The --war option is required.'; exit 1; fi
 if [[ -z "${dbUrl}" ]]; then >&2 echo 'The --dburl option is required.'; exit 1; fi
+if [[ -z "${dbConnectionsMax}" ]]; then >&2 echo 'The --dbconnectionsmax option is required.'; exit 1; fi
 
 # Exit immediately if something fails.
 error() {
@@ -181,10 +185,15 @@ end-if
 if (outcome == success) of /system-property=bbfhir.db.password:read-resource
 	/system-property=bbfhir.db.password:remove
 end-if
+if (outcome == success) of /system-property=bbfhir.db.connections.max:read-resource
+	/system-property=bbfhir.db.connections.max:remove
+end-if
+
 /system-property=bbfhir.logs.dir:add(value="./")
 /system-property=bbfhir.db.url:add(value="${dbUrl}")
 /system-property=bbfhir.db.username:add(value="${dbUsername}")
 /system-property=bbfhir.db.password:add(value="${dbPassword}")
+/system-property=bbfhir.db.connections.max:add(value="${dbConnectionsMax}")
 
 # Configure HTTPS.
 /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:remove
