@@ -148,7 +148,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	public DataSource dataSource(@Value("${" + PROP_DB_URL + "}") String url,
 			@Value("${" + PROP_DB_USERNAME + "}") String username,
 			@Value("${" + PROP_DB_PASSWORD + "}") String password,
-			@Value("${" + PROP_DB_CONNECTIONS_MAX + "}") String connectionsMaxText, MetricRegistry metricRegistry) {
+			@Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText, MetricRegistry metricRegistry) {
 		HikariDataSource poolingDataSource = new HikariDataSource();
 
 		poolingDataSource.setJdbcUrl(url);
