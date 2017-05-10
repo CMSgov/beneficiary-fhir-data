@@ -19,7 +19,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
 	-o h:m:as:k:t:w:u:n:p:c: \
-	--long serverhome:,managementport:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword:,:dbconnectionsmax \
+	--long serverhome:,managementport:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword:,dbconnectionsmax: \
 	-n 'bluebutton-server-app-server-config-healthapt.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
