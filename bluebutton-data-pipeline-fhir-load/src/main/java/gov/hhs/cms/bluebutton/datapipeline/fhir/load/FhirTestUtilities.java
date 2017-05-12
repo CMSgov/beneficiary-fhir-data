@@ -136,7 +136,7 @@ public final class FhirTestUtilities {
 	public static LoadAppOptions getLoadOptions() {
 		try {
 			return new LoadAppOptions(new URI(FHIR_API), getClientKeyStorePath(), CLIENT_KEY_STORE_PASSWORD,
-					getClientTrustStorePath(), CLIENT_TRUST_STORE_PASSWORD);
+					getClientTrustStorePath(), CLIENT_TRUST_STORE_PASSWORD, LoadAppOptions.DEFAULT_LOADER_THREADS);
 		} catch (URISyntaxException e) {
 			throw new UncheckedUriSyntaxException(e);
 		}

@@ -37,3 +37,9 @@ s3_benchmark_resources_bucket: gov.hhs.cms.bluebutton.datapipeline.benchmark.res
 # flame graphs can be collected. This will incur a performance penalty of 1%-
 # 3%, and so should be left disabled unless specifically needed.
 java_flame_graphs: false
+
+# The number of DB connections to use on the FHIR server and the number of
+# loader threads to use in the ETL service. These should be adjusted based on
+# the EC2 instance types being used.
+fhir_db_connections: 400
+etl_loader_threads: 390

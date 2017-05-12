@@ -6,6 +6,7 @@ export KEY_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-keysto
 export KEY_STORE_PASSWORD='changeit'
 export TRUST_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-truststore.jks'
 export TRUST_STORE_PASSWORD='changeit'
+export LOADER_THREADS={{ etl_loader_threads }}
 
 {# The 'env' lookup plugin retries values from the management machine. #}
 {# This test will fail if both variables aren't defined and non-empty. #}

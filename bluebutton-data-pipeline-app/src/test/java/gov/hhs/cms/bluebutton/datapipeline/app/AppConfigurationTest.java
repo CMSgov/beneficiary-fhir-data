@@ -51,6 +51,7 @@ public final class AppConfigurationTest {
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD, "buzz");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PATH, "../../tom");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD, "george");
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
 		Process testApp = testAppBuilder.start();
 
 		int testAppExitCode = testApp.waitFor();
@@ -82,6 +83,9 @@ public final class AppConfigurationTest {
 		Assert.assertArrayEquals(
 				testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD).toCharArray(),
 				testAppConfig.getLoadOptions().getTrustStorePassword());
+		Assert.assertEquals(
+				Integer.parseInt(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
+				testAppConfig.getLoadOptions().getLoaderThreads());
 	}
 
 	/**

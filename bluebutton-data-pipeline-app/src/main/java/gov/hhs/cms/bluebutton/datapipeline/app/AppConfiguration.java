@@ -81,6 +81,13 @@ public final class AppConfiguration implements Serializable {
 	 */
 	public static final String ENV_VAR_KEY_TRUST_STORE_PASSWORD = "TRUST_STORE_PASSWORD";
 
+	/**
+	 * The name of the environment variable that should be used to provide the
+	 * {@link #getLoadOptions()} {@link LoadAppOptions#getLoaderThreads()}
+	 * value.
+	 */
+	public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
+
 	private final ExtractionOptions extractionOptions;
 	private final LoadAppOptions loadOptions;
 
@@ -200,6 +207,20 @@ public final class AppConfiguration implements Serializable {
 			throw new AppConfigurationException(String.format(
 					"Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_TRUST_STORE_PASSWORD));
 
+		String loaderThreadsText = System.getenv(ENV_VAR_KEY_LOADER_THREADS);
+		if (loaderThreadsText == null || loaderThreadsText.isEmpty())
+			throw new AppConfigurationException(String
+					.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_LOADER_THREADS));
+		int loaderThreads;
+		try {
+			loaderThreads = Integer.parseInt(loaderThreadsText);
+		} catch (NumberFormatException e) {
+			throw new AppConfigurationException(
+					String.format("Invalid value for configuration environment variable '%s': '%s'",
+							ENV_VAR_KEY_LOADER_THREADS, loaderThreadsText),
+					e);
+		}
+
 		/*
 		 * Just for convenience: make sure DefaultAWSCredentialsProviderChain
 		 * has whatever it needs.
@@ -218,6 +239,7 @@ public final class AppConfiguration implements Serializable {
 
 		return new AppConfiguration(new ExtractionOptions(s3BucketName, allowedRifFileType),
 				new LoadAppOptions(fhirServerUri, Paths.get(keyStorePath),
-				keyStorePassword.toCharArray(), Paths.get(trustStorePath), trustStorePassword.toCharArray()));
+						keyStorePassword.toCharArray(), Paths.get(trustStorePath), trustStorePassword.toCharArray(),
+						loaderThreads));
 	}
 }
