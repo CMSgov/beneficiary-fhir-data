@@ -772,6 +772,7 @@ public final class RifFilesProcessor {
 		for (CSVRecord claimLineRecord : csvRecords) {
 			CarrierClaimLine claimLine = new CarrierClaimLine();
 	
+			// FIXME why is this field here, too?
 			claimLine.clinicalTrialNumber = claimLineRecord.get(CarrierClaimGroup.Column.CLM_CLNCL_TRIL_NUM);
 			claimLine.number = parseInt(claimLineRecord.get(CarrierClaimGroup.Column.LINE_NUM));
 			claimLine.performingProviderIdNumber = claimLineRecord.get(CarrierClaimGroup.Column.CARR_PRFRNG_PIN_NUM);
