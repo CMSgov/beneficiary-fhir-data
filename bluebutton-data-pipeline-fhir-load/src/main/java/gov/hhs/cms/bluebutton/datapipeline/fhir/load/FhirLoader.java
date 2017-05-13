@@ -59,29 +59,13 @@ public final class FhirLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirLoader.class);
 
 	/**
-	 * <p>
-	 * The number of threads that will be used to simultaneously process
-	 * {@link #processAsync(LoadableFhirBundle)} operations.
-	 * </p>
-	 * <p>
-	 * Design note: right now, this is set to be tied to the number of CPUs
-	 * available to the system running this ETL process. That isn't
-	 * <em>quite</em> correct: what we really want if for it to be tied to the
-	 * number of CPUs that the <em>FHIR server</em> has. This is good enough for
-	 * the time being, as we're currently using the same EC2 instance types for
-	 * both systems. If this becomes a problem, though, this value should be
-	 * moved into {@link LoadAppOptions} and made configurable.
-	 * </p>
-	 */
-	public static final int PARALLELISM = Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
-
-	/**
 	 * The maximum number of FHIR transactions that will be collected before
 	 * waiting for all submitted transactions to complete. This number is used
 	 * to prevent memory overruns, but can (and should) be quite high: anything
 	 * less than <code>1000</code> would be silly. (Setting it to <code>1</code>
 	 * would effectively make processing serial, and anything less than
-	 * {@link #PARALLELISM} would act as an unintended floor on concurrency.)
+	 * {@link LoadAppOptions#getLoaderThreads()} would act as an unintended
+	 * floor on concurrency.)
 	 */
 	private static final int WINDOW_SIZE = 10000;
 
@@ -124,8 +108,8 @@ public final class FhirLoader {
 							.register("http", PlainConnectionSocketFactory.getSocketFactory())
 							.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
 					null, null, null, 5000, TimeUnit.MILLISECONDS);
-			connectionManager.setDefaultMaxPerRoute(PARALLELISM * 2);
-			connectionManager.setMaxTotal(PARALLELISM * 2);
+			connectionManager.setDefaultMaxPerRoute(options.getLoaderThreads() * 2);
+			connectionManager.setMaxTotal(options.getLoaderThreads() * 2);
 			@SuppressWarnings("deprecation")
 			RequestConfig defaultRequestConfig = RequestConfig.custom()
 					.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
@@ -167,8 +151,9 @@ public final class FhirLoader {
 
 		IGenericClient client = createFhirClient(options);
 		this.client = client;
-		this.loadExecutorService = Executors.newFixedThreadPool(PARALLELISM);
-		LOGGER.info("Configured to load in windows of '{}', with '{}' threads.", WINDOW_SIZE, PARALLELISM);
+		this.loadExecutorService = Executors.newFixedThreadPool(options.getLoaderThreads());
+		LOGGER.info("Configured to load in windows of '{}', with '{}' threads.", WINDOW_SIZE,
+				options.getLoaderThreads());
 	}
 
 	/**

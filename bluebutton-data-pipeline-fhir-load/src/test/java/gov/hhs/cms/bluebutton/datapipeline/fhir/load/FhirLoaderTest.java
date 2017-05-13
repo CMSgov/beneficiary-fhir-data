@@ -28,7 +28,7 @@ public final class FhirLoaderTest {
 		URI fhirServer = new URI("https://example.com/foo");
 		LoadAppOptions options = new LoadAppOptions(fhirServer, FhirTestUtilities.getClientKeyStorePath(),
 				FhirTestUtilities.CLIENT_KEY_STORE_PASSWORD, FhirTestUtilities.getClientTrustStorePath(),
-				FhirTestUtilities.CLIENT_TRUST_STORE_PASSWORD);
+				FhirTestUtilities.CLIENT_TRUST_STORE_PASSWORD, 1);
 		FhirLoader loader = new FhirLoader(new MetricRegistry(), options);
 
 		Stream<TransformedBundle> fhirStream = new ArrayList<TransformedBundle>().stream();

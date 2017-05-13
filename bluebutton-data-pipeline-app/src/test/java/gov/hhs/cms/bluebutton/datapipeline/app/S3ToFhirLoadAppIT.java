@@ -23,6 +23,7 @@ import org.junit.Test;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -341,6 +342,8 @@ public final class S3ToFhirLoadAppIT {
 				FhirTestUtilities.getClientTrustStorePath().toString());
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD,
 				String.valueOf(FhirTestUtilities.CLIENT_TRUST_STORE_PASSWORD));
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS,
+				String.valueOf(LoadAppOptions.DEFAULT_LOADER_THREADS));
 		/*
 		 * Note: Not explicitly providing AWS credentials here, as the child
 		 * process will inherit any that are present in this build/test process.

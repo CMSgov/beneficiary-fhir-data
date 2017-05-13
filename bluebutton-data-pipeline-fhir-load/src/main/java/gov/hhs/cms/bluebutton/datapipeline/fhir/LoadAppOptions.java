@@ -5,6 +5,8 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
+
 /**
  * Models the user-configurable application options.
  */
@@ -17,11 +19,18 @@ public final class LoadAppOptions implements Serializable {
 
 	private static final long serialVersionUID = 8178859162754788432L;
 
+	/**
+	 * A reasonable (though not terribly performant) suggested default value for
+	 * {@link #getLoaderThreads()}.
+	 */
+	public static final int DEFAULT_LOADER_THREADS = Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
+
 	private final URI fhirServer;
 	private final String keyStorePath;
 	private final char[] keyStorePassword;
 	private final String trustStorePath;
 	private final char[] trustStorePassword;
+	private final int loaderThreads;
 
 	/**
 	 * Constructs a new {@link LoadAppOptions} instance.
@@ -36,14 +45,20 @@ public final class LoadAppOptions implements Serializable {
 	 *            the value to use for {@link #getTrustStorePath()}
 	 * @param trustStorePassword
 	 *            the value to use for {@link #getTrustStorePassword()}
+	 * @param loaderThreads
+	 *            the value to use for {@link #getLoaderThreads()}
 	 */
 	public LoadAppOptions(URI fhirServer, Path keyStorePath, char[] keyStorePassword, Path trustStorePath,
-			char[] trustStorePassword) {
+			char[] trustStorePassword, int loaderThreads) {
+		if (loaderThreads < 1)
+			throw new IllegalArgumentException();
+
 		this.fhirServer = fhirServer;
 		this.keyStorePath = keyStorePath.toString();
 		this.keyStorePassword = keyStorePassword;
 		this.trustStorePath = trustStorePath.toString();
 		this.trustStorePassword = trustStorePassword;
+		this.loaderThreads = loaderThreads;
 	}
 
 	/**
@@ -86,6 +101,14 @@ public final class LoadAppOptions implements Serializable {
 	}
 
 	/**
+	 * @return the number of threads that will be used to simultaneously process
+	 *         {@link FhirLoader} operations
+	 */
+	public int getLoaderThreads() {
+		return loaderThreads;
+	}
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -101,6 +124,8 @@ public final class LoadAppOptions implements Serializable {
 		builder.append(trustStorePath);
 		builder.append(", trustStorePassword=");
 		builder.append("***");
+		builder.append(", loaderThreads=");
+		builder.append(loaderThreads);
 		builder.append("]");
 		return builder.toString();
 	}
