@@ -734,13 +734,13 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(9, eob.getDiagnosis().size());
 
-		assertHasCoding(record.procedureCodes.get(0).getVersion().getFhirSystem(),
+		assertHasCoding(DataTransformer.computeFhirSystem(record.procedureCodes.get(0)),
 				record.procedureCodes.get(0).getCode(),
 				eob.getProcedure().get(0).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(0).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(0).getDate());
-		assertHasCoding(record.procedureCodes.get(1).getVersion().getFhirSystem(),
+		assertHasCoding(DataTransformer.computeFhirSystem(record.procedureCodes.get(1)),
 				record.procedureCodes.get(1).getCode(), eob.getProcedure().get(1).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(1).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
@@ -882,7 +882,7 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getProcedure().size());
-		assertHasCoding(record.procedureCodes.get(0).getVersion().getFhirSystem(),
+		assertHasCoding(DataTransformer.computeFhirSystem(record.procedureCodes.get(0)),
 				record.procedureCodes.get(0).getCode(), eob.getProcedure().get(0).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(0).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
@@ -1098,7 +1098,7 @@ public final class DataTransformerTest {
 						String.valueOf(record.diagnosisRelatedGroupCd.get()))));
 
 		Assert.assertEquals(5, eob.getDiagnosis().size());
-		assertHasCoding(record.procedureCodes.get(0).getVersion().getFhirSystem(),
+		assertHasCoding(DataTransformer.computeFhirSystem(record.procedureCodes.get(0)),
 				record.procedureCodes.get(0).getCode(), eob.getProcedure().get(0).getProcedureCodeableConcept());
 		Assert.assertEquals(Date
 				.from(record.procedureCodes.get(0).getProcedureDate().atStartOfDay(ZoneId.systemDefault()).toInstant()),
@@ -1946,7 +1946,7 @@ public final class DataTransformerTest {
 		Optional<DiagnosisComponent> eobDiagnosis = eob.getDiagnosis().stream()
 				.filter(d -> d.getDiagnosis() instanceof CodeableConcept)
 				.filter(d -> DataTransformer.isCodeInConcept((CodeableConcept) d.getDiagnosis(),
-						expectedDiagnosis.getVersion().getFhirSystem(), expectedDiagnosis.getCode()))
+						DataTransformer.computeFhirSystem(expectedDiagnosis), expectedDiagnosis.getCode()))
 				.findAny();
 		Assert.assertTrue(eobDiagnosis.isPresent());
 		Assert.assertTrue(eobItem.getDiagnosisLinkId().stream()

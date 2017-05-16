@@ -77,6 +77,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup.HHAClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
+import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.InpatientClaimLine;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup;
@@ -3445,20 +3446,39 @@ public final class DataTransformer {
 	private static int addDiagnosisCode(ExplanationOfBenefit eob, IcdCode diagnosis) {
 		Optional<DiagnosisComponent> existingDiagnosis = eob.getDiagnosis().stream()
 				.filter(d -> d.getDiagnosis() instanceof CodeableConcept)
-				.filter(d -> isCodeInConcept((CodeableConcept) d.getDiagnosis(), diagnosis.getVersion().getFhirSystem(), diagnosis.getCode()))
+				.filter(d -> isCodeInConcept((CodeableConcept) d.getDiagnosis(), computeFhirSystem(diagnosis),
+						diagnosis.getCode()))
 				.findAny();
 		if (existingDiagnosis.isPresent())
 			return existingDiagnosis.get().getSequenceElement().getValue();
 
 		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
 		diagnosisComponent
-				.setDiagnosis(createCodeableConcept(diagnosis.getVersion().getFhirSystem(), diagnosis.getCode()));
+				.setDiagnosis(createCodeableConcept(computeFhirSystem(diagnosis), diagnosis.getCode()));
 		if (!diagnosis.getPresentOnAdmission().isEmpty()) {
 			diagnosisComponent
 					.addType(createCodeableConcept(CODING_SYSTEM_CCW_INP_POA_CD, diagnosis.getPresentOnAdmission()));
 		}
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequenceElement().getValue();
+	}
+
+	/**
+	 * This method computes {@link IcdVersion#getFhirSystem()} values for
+	 * {@link IcdCode}s in a way that reasonably handles unparseable RIF values
+	 * (as we may see in the dummy data).
+	 * 
+	 * @param icdCode
+	 *            the {@link IcdCode} to compute an
+	 *            {@link IcdVersion#getFhirSystem()} value for
+	 * @return an {@link IcdVersion#getFhirSystem()} value for the specified
+	 *         IcdCode
+	 */
+	static String computeFhirSystem(IcdCode icdCode) {
+		if (icdCode.getVersion().getDecodedValue().isPresent())
+			return icdCode.getVersion().getDecodedValue().get().getFhirSystem();
+		else
+			return String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", icdCode.getVersion().getRawValue());
 	}
 
 	/**
@@ -3539,14 +3559,14 @@ public final class DataTransformer {
 		Optional<ProcedureComponent> existingProcedure = eob.getProcedure().stream()
 				.filter(pc -> pc.getProcedure() instanceof CodeableConcept)
 				.filter(pc -> isCodeInConcept((CodeableConcept) pc.getProcedure(),
-						procedure.getVersion().getFhirSystem(), procedure.getCode()))
+						computeFhirSystem(procedure), procedure.getCode()))
 				.findAny();
 		if (existingProcedure.isPresent())
 			return existingProcedure.get().getSequenceElement().getValue();
 
 		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size() + 1);
 		procedureComponent
-				.setProcedure(createCodeableConcept(procedure.getVersion().getFhirSystem(), procedure.getCode()));
+				.setProcedure(createCodeableConcept(computeFhirSystem(procedure), procedure.getCode()));
 		procedureComponent
 				.setDate(convertToDate(procedure.getProcedureDate()));
 
