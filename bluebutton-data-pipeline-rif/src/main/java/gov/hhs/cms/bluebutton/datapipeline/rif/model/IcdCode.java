@@ -1,12 +1,13 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 /**
  * A simple struct for modeling ICD codes, as stored in the CCW.
  */
 public final class IcdCode {
-	private final IcdVersion version;
+	private final CodedValue<String, IcdVersion> version;
 	private final String code;
 	private final String presentOnAdmission;
 	private final LocalDate procedureDate;
@@ -18,26 +19,68 @@ public final class IcdCode {
 	 *            the value to use for {@link #getVersion()}
 	 * @param code
 	 *            the value to use for {@link #getCode()}
-	 * @param code
-	 *            the value to use for {@link #getPresentOnAdmission()}
-	 * @param code
-	 *            the value to use for {@link #getProcedureDate()}
 	 */
-	public IcdCode(IcdVersion version, String code) {
+	public IcdCode(CodedValue<String, IcdVersion> version, String code) {
 		this.version = version;
 		this.code = code;
 		this.presentOnAdmission = "";
 		this.procedureDate = null;
 	}
 
-	public IcdCode(IcdVersion version, String code, String presentOnAdmission) {
+	/**
+	 * Constructs a new {@link IcdCode} instance.
+	 * 
+	 * @param version
+	 *            the value to use for {@link #getVersion()}
+	 * @param code
+	 *            the value to use for {@link #getCode()}
+	 */
+	public IcdCode(IcdVersion version, String code) {
+		this(version.toCodedValue(), code);
+	}
+
+	/**
+	 * Constructs a new {@link IcdCode} instance.
+	 * 
+	 * @param version
+	 *            the value to use for {@link #getVersion()}
+	 * @param code
+	 *            the value to use for {@link #getCode()}
+	 * @param presentOnAdmission
+	 *            the value to use for {@link #getPresentOnAdmission()}
+	 */
+	public IcdCode(CodedValue<String, IcdVersion> version, String code, String presentOnAdmission) {
 		this.version = version;
 		this.code = code;
 		this.presentOnAdmission = presentOnAdmission;
 		this.procedureDate = null;
 	}
 
-	public IcdCode(IcdVersion version, String code, LocalDate procedureDate) {
+	/**
+	 * Constructs a new {@link IcdCode} instance.
+	 * 
+	 * @param version
+	 *            the value to use for {@link #getVersion()}
+	 * @param code
+	 *            the value to use for {@link #getCode()}
+	 * @param presentOnAdmission
+	 *            the value to use for {@link #getPresentOnAdmission()}
+	 */
+	public IcdCode(IcdVersion version, String code, String presentOnAdmission) {
+		this(version.toCodedValue(), code, presentOnAdmission);
+	}
+
+	/**
+	 * Constructs a new {@link IcdCode} instance.
+	 * 
+	 * @param version
+	 *            the value to use for {@link #getVersion()}
+	 * @param code
+	 *            the value to use for {@link #getCode()}
+	 * @param procedureDate
+	 *            the value to use for {@link #getProcedureDate()}
+	 */
+	public IcdCode(CodedValue<String, IcdVersion> version, String code, LocalDate procedureDate) {
 		this.version = version;
 		this.code = code;
 		this.procedureDate = procedureDate;
@@ -45,9 +88,23 @@ public final class IcdCode {
 	}
 
 	/**
+	 * Constructs a new {@link IcdCode} instance.
+	 * 
+	 * @param version
+	 *            the value to use for {@link #getVersion()}
+	 * @param code
+	 *            the value to use for {@link #getCode()}
+	 * @param procedureDate
+	 *            the value to use for {@link #getProcedureDate()}
+	 */
+	public IcdCode(IcdVersion version, String code, LocalDate procedureDate) {
+		this(version.toCodedValue(), code, procedureDate);
+	}
+
+	/**
 	 * @return the {@link IcdVersion} of this {@link IcdCode}
 	 */
-	public IcdVersion getVersion() {
+	public CodedValue<String, IcdVersion> getVersion() {
 		return version;
 	}
 
@@ -62,7 +119,7 @@ public final class IcdCode {
 	 * @return the ICD present on admission value
 	 */
 	public String getPresentOnAdmission() {
-			return presentOnAdmission;
+		return presentOnAdmission;
 	}
 
 	/**
@@ -101,7 +158,7 @@ public final class IcdCode {
 				return false;
 		} else if (!code.equals(other.code))
 			return false;
-		if (version != other.version)
+		if (!version.equals(other.version))
 			return false;
 		return true;
 	}
@@ -145,10 +202,12 @@ public final class IcdCode {
 		 *            "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
 		 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other
 		 *            similar fields
-		 * @param fhirCodingSystem the value to use for {@link #getFhirSystem()}
+		 * @param fhirCodingSystem
+		 *            the value to use for {@link #getFhirSystem()}
 		 */
 		private IcdVersion(String ccwCoding, String fhirCodingSystem) {
-			this.ccwCoding = ccwCoding;this.fhirCodingSystem = fhirCodingSystem;
+			this.ccwCoding = ccwCoding;
+			this.fhirCodingSystem = fhirCodingSystem;
 		}
 
 		/**
@@ -161,6 +220,28 @@ public final class IcdCode {
 		}
 
 		/**
+		 * @return test helper that converts a fixed {@link IcdVersion} into a
+		 *         {@link CodedValue}
+		 */
+		public CodedValue<String, IcdVersion> toCodedValue() {
+			return parse(ccwCoding);
+		}
+
+		/**
+		 * @param ccwCoding
+		 *            the CCW ICD version coding value to be parsed, which must
+		 *            conform to the coding used in <a href=
+		 *            "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
+		 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other
+		 *            similar fields
+		 * @return the parsed {@link CodedValue} represented by the specified
+		 *         value
+		 */
+		public static CodedValue<String, IcdVersion> parse(String ccwCoding) {
+			return new CodedValue<String, IcdVersion>(ccwCoding, IcdVersion::parseRaw);
+		}
+
+		/**
 		 * @param ccwCoding
 		 *            the CCW ICD version coding value to be parsed, which must
 		 *            conform to the coding used in <a href=
@@ -170,12 +251,16 @@ public final class IcdCode {
 		 * @return the parsed {@link IcdVersion} represented by the specified
 		 *         value
 		 */
-		public static IcdVersion parse(String ccwCoding) {
+		private static Optional<IcdVersion> parseRaw(String ccwCoding) {
 			for (IcdVersion icdVersion : IcdVersion.values())
 				if (icdVersion.ccwCoding.equals(ccwCoding))
-					return icdVersion;
+					return Optional.of(icdVersion);
 
-			throw new IllegalArgumentException("Unknown value: " + ccwCoding);
+			/*
+			 * I haven't seen this in the production data, but our dummy data
+			 * doesn't have proper ICD version values -- just random ones.
+			 */
+			return Optional.empty();
 		}
 	}
 }
