@@ -355,12 +355,15 @@ public final class S3ToFhirLoadAppIT {
 	 */
 	private static String[] createCommandForCapsule() {
 		try {
-			Path buildTargetDir = Paths.get(".", "target");
-			Path appExe = Files.list(buildTargetDir)
-					.filter(f -> f.getFileName().toString().startsWith("bluebutton-data-pipeline-app-"))
-					.filter(f -> f.getFileName().toString().endsWith("-capsule-fat.x")).findFirst().get();
+			Path javaBinDir = Paths.get(System.getProperty("java.home")).resolve("bin");
+			Path javaBin = javaBinDir.resolve("java");
 
-			return new String[] { appExe.toAbsolutePath().toString() };
+			Path buildTargetDir = Paths.get(".", "target");
+			Path appJar = Files.list(buildTargetDir)
+					.filter(f -> f.getFileName().toString().startsWith("bluebutton-data-pipeline-app-"))
+					.filter(f -> f.getFileName().toString().endsWith("-capsule-fat.jar")).findFirst().get();
+
+			return new String[] { javaBin.toString(), "-jar", appJar.toAbsolutePath().toString() };
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
