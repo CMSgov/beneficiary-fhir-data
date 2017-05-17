@@ -113,6 +113,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSchedulingDisabled(true);
 		retVal.setSubscriptionEnabled(false);
+		retVal.setAllowInlineMatchUrlReferences(true);
 		// retVal.setSubscriptionPollDelay(5000);
 		// retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
