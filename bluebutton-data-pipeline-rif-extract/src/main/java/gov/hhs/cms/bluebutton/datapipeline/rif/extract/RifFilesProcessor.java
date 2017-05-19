@@ -75,6 +75,11 @@ public final class RifFilesProcessor {
 	 */
 	public static final int RECORD_FORMAT_VERSION = 5;
 
+	/**
+	 * The {@link CSVFormat} for RIF file parsing/writing.
+	 */
+	public static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
+
 	private static DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive()
 			.appendPattern("dd-MMM-yyyy").toFormatter();
 
@@ -251,15 +256,13 @@ public final class RifFilesProcessor {
 	 *            the {@link RifFile} to parse
 	 * @return a {@link CSVParser} for the specified {@link RifFile}
 	 */
-	private static CSVParser createCsvParser(RifFile file) {
-		CSVFormat csvFormat = CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
-
+	public static CSVParser createCsvParser(RifFile file) {
 		InputStream fileStream = file.open();
 		BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
 		InputStreamReader reader = new InputStreamReader(fileStreamWithoutBom, file.getCharset());
 
 		try {
-			CSVParser parser = new CSVParser(reader, csvFormat);
+			CSVParser parser = new CSVParser(reader, CSV_FORMAT);
 			return parser;
 		} catch (IOException e) {
 			/*

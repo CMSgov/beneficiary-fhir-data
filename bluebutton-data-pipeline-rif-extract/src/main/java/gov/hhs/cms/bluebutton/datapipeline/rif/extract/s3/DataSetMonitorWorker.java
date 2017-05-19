@@ -194,7 +194,7 @@ public final class DataSetMonitorWorker implements Runnable {
 					DataSetManifest manifest = null;
 
 					try {
-						manifest = readManifest(key);
+						manifest = readManifest(s3Client, options, key);
 						/*
 						 * TODO Following line can be removed once sequenceId is
 						 * actually in the manifest xml file
@@ -303,6 +303,10 @@ public final class DataSetMonitorWorker implements Runnable {
 	}
 
 	/**
+	 * @param s3Client
+	 *            the {@link AmazonS3} client to use
+	 * @param options
+	 *            the {@link ExtractionOptions} to use
 	 * @param manifestToProcessKey
 	 *            the {@link S3Object#getKey()} of the S3 object for the
 	 *            manifest to be read
@@ -316,13 +320,13 @@ public final class DataSetMonitorWorker implements Runnable {
 	 *             has been observed multiple times in production, and care
 	 *             should be taken to account for its possibility.
 	 */
-	private DataSetManifest readManifest(String manifestToProcessKey) throws JAXBException {
+	public static DataSetManifest readManifest(AmazonS3 s3Client, ExtractionOptions options,
+			String manifestToProcessKey) throws JAXBException {
 		try (S3Object manifestObject = s3Client.getObject(options.getS3BucketName(), manifestToProcessKey)) {
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
 			DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestObject.getObjectContent());
-
 
 			return manifest;
 		} catch (AmazonServiceException e) {

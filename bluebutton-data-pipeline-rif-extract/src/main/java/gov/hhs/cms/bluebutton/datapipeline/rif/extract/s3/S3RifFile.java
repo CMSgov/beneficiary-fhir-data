@@ -96,7 +96,7 @@ public final class S3RifFile implements RifFile {
 	 * Removes the local temporary file that was used to cache this
 	 * {@link S3RifFile}'s corresponding S3 object data locally.
 	 */
-	void cleanupTempFile() {
+	public void cleanupTempFile() {
 		try {
 			Files.delete(localTempFile);
 		} catch (IOException e) {
