@@ -1,8 +1,18 @@
 package gov.hhs.cms.bluebutton.datapipeline.sampledata;
 
-
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Supplier;
+
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
@@ -74,28 +84,32 @@ public enum StaticRifResource {
 	 */
 	SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
-	SAMPLE_B_BENES(resourceUrl("rif-static-samples/sample-b-beneficiaries.txt"), RifFileType.BENEFICIARY, 1000),
+	SAMPLE_B_BENES(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
+			RifFileType.BENEFICIARY, 100),
 
 	/**
 	 * The record count here was verified with the following shell command:
 	 * <code>$ awk -F '|' '{print $4}' bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-b-bcarrier-1440.txt | tail -n +2 | sort | uniq -c | wc -l</code>
 	 * .
 	 */
-	SAMPLE_B_CARRIER(resourceUrl("rif-static-samples/sample-b-bcarrier.txt"), RifFileType.CARRIER, 1477),
+	SAMPLE_B_CARRIER(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"), RifFileType.CARRIER, 3215),
 
-	SAMPLE_B_INPATIENT(resourceUrl("rif-static-samples/sample-b-inpatient.txt"), RifFileType.INPATIENT, 27),
+	SAMPLE_B_INPATIENT(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "inpatient_test.rif"),
+			RifFileType.INPATIENT, 41),
 
-	SAMPLE_B_OUTPATIENT(resourceUrl("rif-static-samples/sample-b-outpatient.txt"), RifFileType.OUTPATIENT, 340),
+	SAMPLE_B_OUTPATIENT(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "outpatient_test.rif"),
+			RifFileType.OUTPATIENT, 516),
 
-	SAMPLE_B_SNF(resourceUrl("rif-static-samples/sample-b-snf.txt"), RifFileType.SNF, 78),
+	SAMPLE_B_SNF(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"), RifFileType.SNF, 23),
 
-	SAMPLE_B_HOSPICE(resourceUrl("rif-static-samples/sample-b-hospice.txt"), RifFileType.HOSPICE, 9),
+	SAMPLE_B_HOSPICE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hospice_test.rif"), RifFileType.HOSPICE,
+			5),
 
-	SAMPLE_B_HHA(resourceUrl("rif-static-samples/sample-b-hha.txt"), RifFileType.HHA, 22),
+	SAMPLE_B_HHA(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"), RifFileType.HHA, 32),
 
-	SAMPLE_B_DME(resourceUrl("rif-static-samples/sample-b-dme.txt"), RifFileType.DME, 82),
+	SAMPLE_B_DME(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"), RifFileType.DME, 244),
 
-	SAMPLE_B_PDE(resourceUrl("rif-static-samples/sample-b-pde.txt"), RifFileType.PDE, 1195),
+	SAMPLE_B_PDE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"), RifFileType.PDE, 4793),
 
 	/**
 	 * The record count here was verified with the following shell command:
@@ -224,7 +238,13 @@ public enum StaticRifResource {
 	 * @return a {@link Supplier} for the {@link URL} to the resource's contents
 	 */
 	private static Supplier<URL> resourceUrl(String resourceName) {
-		return () -> Thread.currentThread().getContextClassLoader().getResource(resourceName);
+		return () -> {
+			URL resource = Thread.currentThread().getContextClassLoader().getResource(resourceName);
+			if (resource == null)
+				throw new IllegalArgumentException("Unable to find resource: " + resourceName);
+
+			return resource;
+		};
 	}
 
 	/**
@@ -290,5 +310,100 @@ public enum StaticRifResource {
 //			throw new BadCodeMonkeyException(
 //					String.format("Didn't find resource '{}' in archive '{}'.", resourceFile, archiveName));
 //		return resourceUrlSupplier;
+	}
+
+	/**
+	 * @param dataSetLocation
+	 *            the {@link TestDataSetLocation} of the file to get a local
+	 *            copy of
+	 * @param fileName
+	 *            the name of the specific file in the specified
+	 *            {@link TestDataSetLocation} to get a local copy of, e.g.
+	 *            "beneficiaries.rif"
+	 * @return a {@link URL} to a local copy of the specified test data file
+	 *         from S3
+	 */
+	private static Supplier<URL> localCopyOfS3Data(TestDataSetLocation dataSetLocation, String fileName) {
+		return () -> {
+			// Find the build output `target` directory.
+			Path targetDir = Paths.get(".", "bluebutton-data-pipeline-sampledata", "target");
+			if (!Files.exists(targetDir))
+				targetDir = Paths.get("..", "bluebutton-data-pipeline-sampledata", "target");
+			if (!Files.exists(targetDir))
+				throw new IllegalStateException();
+
+			// Build the path that the resources will be downloaded to.
+			Path resourceDir = targetDir.resolve("test-data-from-s3").resolve(dataSetLocation.getS3BucketName())
+					.resolve(dataSetLocation.getS3KeyPrefix());
+			Path resourceLocalCopy = resourceDir.resolve(fileName);
+
+			/*
+			 * Implementation note: we have to carefully leverage
+			 * synchronization to ensure that we don't end up with multiple
+			 * copies of the same file. To avoid pegging dev systems, it's also
+			 * best to ensure that we're only grabbing one file at a time.
+			 * Locking on the static class object accomplishes these goals.
+			 */
+			synchronized (StaticRifResource.class) {
+				// Ensure the directory exists.
+				if (!Files.exists(resourceDir)) {
+					try {
+						Files.createDirectories(resourceDir);
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+				}
+
+				// Download the file, if needed.
+				if (!Files.exists(resourceLocalCopy)) {
+					downloadFromS3(dataSetLocation, fileName, resourceLocalCopy);
+				}
+			}
+
+			// We now know the file exists, so return it.
+			try {
+				return resourceLocalCopy.toUri().toURL();
+			} catch (MalformedURLException e) {
+				throw new BadCodeMonkeyException(e);
+			}
+		};
+	}
+
+	/**
+	 * Downloads the specified S3 object to the specified local path.
+	 * 
+	 * @param dataSetLocation
+	 *            the {@link TestDataSetLocation} of the S3 object to download
+	 * @param fileName
+	 *            the name of the specific object/file to be downloaded
+	 * @param downloadPath
+	 *            the {@link Path} to download the S3 object to
+	 */
+	private static final void downloadFromS3(TestDataSetLocation dataSetLocation, String fileName, Path downloadPath) {
+		/*
+		 * To avoid dragging in the S3 client libraries, we require here that
+		 * the test data files be available publicly via HTTP.
+		 */
+
+		FileOutputStream outputStream = null;
+		try {
+			URL s3DownloadUrl = new URL(String.format("http://%s.s3.amazonaws.com/%s/%s",
+					dataSetLocation.getS3BucketName(), dataSetLocation.getS3KeyPrefix(), fileName));
+			ReadableByteChannel channel = Channels.newChannel(s3DownloadUrl.openStream());
+			outputStream = new FileOutputStream(downloadPath.toFile());
+			outputStream.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
+		} catch (MalformedURLException e) {
+			throw new BadCodeMonkeyException(e);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			}
+		}
 	}
 }
