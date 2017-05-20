@@ -229,10 +229,8 @@ if (outcome == success) of /subsystem=datasources/data-source=TestProdFHIR:read-
 end-if
 
 # Configure the server to listen on all configured IPs.
-if (result != undefined) of /interface=public:read-attribute(name=inet-address)
-	/interface=public:undefine-attribute(name=inet-address)
-	/interface=public:write-attribute(name=any-address,value=true)
-end-if
+/interface=public:undefine-attribute(name=inet-address)
+/interface=public:write-attribute(name=any-address,value=true)
 
 # Reload the server to apply those changes.
 :reload
