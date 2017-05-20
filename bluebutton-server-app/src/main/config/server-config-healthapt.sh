@@ -28,7 +28,7 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 serverHome=
-managementPort=9090
+managementPort=9990
 auth=false
 httpsPort=
 keyStore=
