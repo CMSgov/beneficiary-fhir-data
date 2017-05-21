@@ -25,6 +25,12 @@ enum TestDataSetLocation {
 	static final TestDataSetLocation SAMPLE_B_LOCATION = TestDataSetLocation.DUMMY_DATA_100_BENES;
 
 	/**
+	 * The {@link TestDataSetLocation} used by all of the "SAMPLE_C"
+	 * {@link StaticRifResource}s.
+	 */
+	static final TestDataSetLocation SAMPLE_C_LOCATION = TestDataSetLocation.DUMMY_DATA_1000000_BENES;
+
+	/**
 	 * The S3 bucket that the project's ETL test data is stored in.
 	 */
 	private static final String S3_BUCKET_TEST_DATA = "gov-hhs-cms-bluebutton-sandbox-etl-test-data";

@@ -20,7 +20,9 @@ public enum StaticRifResourceGroup {
 			StaticRifResource.SAMPLE_B_OUTPATIENT, StaticRifResource.SAMPLE_B_SNF, StaticRifResource.SAMPLE_B_HOSPICE,
 			StaticRifResource.SAMPLE_B_HHA, StaticRifResource.SAMPLE_B_DME, StaticRifResource.SAMPLE_B_PDE),
 
-	SAMPLE_C(StaticRifResource.SAMPLE_C_BENES, StaticRifResource.SAMPLE_C_CARRIER, StaticRifResource.SAMPLE_C_PDE);
+	SAMPLE_C(StaticRifResource.SAMPLE_C_BENES, StaticRifResource.SAMPLE_C_CARRIER, StaticRifResource.SAMPLE_C_INPATIENT,
+			StaticRifResource.SAMPLE_C_OUTPATIENT, StaticRifResource.SAMPLE_C_SNF, StaticRifResource.SAMPLE_C_HOSPICE,
+			StaticRifResource.SAMPLE_C_HHA, StaticRifResource.SAMPLE_C_DME, StaticRifResource.SAMPLE_C_PDE);
 
 	private final StaticRifResource[] resources;
 

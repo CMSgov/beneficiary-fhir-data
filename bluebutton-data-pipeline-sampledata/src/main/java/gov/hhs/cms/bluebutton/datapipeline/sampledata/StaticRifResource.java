@@ -111,72 +111,28 @@ public enum StaticRifResource {
 
 	SAMPLE_B_PDE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"), RifFileType.PDE, 4793),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 bcarrier_sample.txt | awk -F '|' '{print $3}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_BENES(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "bene_sample.txt"), RifFileType.BENEFICIARY, 999999),
+	SAMPLE_C_BENES(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "beneficiary_test.rif"), RifFileType.BENEFICIARY,
+			-1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 bene_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_CARRIER(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "bcarrier_sample.txt"),
-			RifFileType.CARRIER, 423999),
+	SAMPLE_C_CARRIER(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "carrier_test.rif"),
+			RifFileType.CARRIER, -1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 dme_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_DME(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "dme_sample.txt"), RifFileType.DME, 103404),
+	SAMPLE_C_DME(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "dme_test.rif"), RifFileType.DME, -1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 hha_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_HHA(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "hha_sample.txt"), RifFileType.HHA, 27800),
+	SAMPLE_C_HHA(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hha_test.rif"), RifFileType.HHA, -1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 hospice_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_HOSPICE(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "hospice_sample.txt"),
-			RifFileType.HOSPICE, 9205),
+	SAMPLE_C_HOSPICE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hospice_test.rif"),
+			RifFileType.HOSPICE, -1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 inpatient_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_INPATIENT(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "inpatient_sample.txt"),
-			RifFileType.INPATIENT, 28226),
+	SAMPLE_C_INPATIENT(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "inpatient_test.rif"),
+			RifFileType.INPATIENT, -1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 outpatient_sample.txt | awk -F '|' '{print $4}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_OUTPATIENT(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "outpatient_sample.txt"),
-			RifFileType.OUTPATIENT, 278036),
+	SAMPLE_C_OUTPATIENT(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "outpatient_test.rif"),
+			RifFileType.OUTPATIENT, -1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 pde_sample.txt | awk -F '|' '{print $3}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_PDE(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "pde_sample.txt"), RifFileType.PDE, 1195),
+	SAMPLE_C_PDE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"), RifFileType.PDE, -1),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ tar --bzip2 --extract --to-stdout --file bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-c.tar.bz2 snf_sample.txt | awk -F '|' '{print $7}' | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
-	SAMPLE_C_SNF(zippedResourceUrl("rif-static-samples/sample-c.tar.bz2", "snf_sample.txt"), RifFileType.SNF, 596);
+	SAMPLE_C_SNF(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, -1);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
@@ -248,71 +204,6 @@ public enum StaticRifResource {
 	}
 
 	/**
-	 * @param archiveName
-	 *            the classpath/resource name of the archive file that the
-	 *            desired resource is contained in (as might be passed to
-	 *            {@link ClassLoader#getResource(String)})
-	 * @param resourceFile
-	 *            the path of the desired resource file within the specified
-	 *            archive
-	 * @return a {@link Supplier} for the {@link URL} to the resource's contents
-	 */
-	private synchronized static Supplier<URL> zippedResourceUrl(String archiveName, String resourceFile) {
-		
-		/*
-		 * Temporarily turning this into a no-op, to prevent test and compile errors. Should be un-commented-out once sample data is available again.
-		 */
-		return null;
-		
-//		// Find the build output directory to decompress to.
-//		Path targetDir = Paths.get(".", "bluebutton-data-pipeline-sampledata", "target");
-//		if (!Files.exists(targetDir))
-//			targetDir = Paths.get("..", "bluebutton-data-pipeline-sampledata", "target");
-//		if (!Files.exists(targetDir))
-//			throw new IllegalStateException();
-//
-//		// Check to see if it's already decompressed, and return it if so.
-//		Path decompressDir = targetDir.resolve(archiveName);
-//		Path resourcePath = decompressDir.resolve(resourceFile);
-//		Supplier<URL> resourceUrlSupplier = () -> {
-//			try {
-//				return resourcePath.toUri().toURL();
-//			} catch (MalformedURLException e) {
-//				throw new BadCodeMonkeyException();
-//			}
-//		};
-//		if (Files.isReadable(resourcePath))
-//			return resourceUrlSupplier;
-//
-//		// Decompress the entire archive.
-//		try (InputStream archiveStream = Thread.currentThread().getContextClassLoader()
-//				.getResourceAsStream(archiveName);
-//				BufferedInputStream bufferedStream = new BufferedInputStream(archiveStream);
-//				BZip2CompressorInputStream bzip2Stream = new BZip2CompressorInputStream(bufferedStream);
-//				TarArchiveInputStream tarStream = new TarArchiveInputStream(bzip2Stream);) {
-//			TarArchiveEntry entry = null;
-//			while ((entry = tarStream.getNextTarEntry()) != null) {
-//				if (!entry.isFile())
-//					throw new IllegalArgumentException(
-//							String.format("Unexpected entry '{}' in archive '{}'.", entry.getName(), archiveName));
-//				File entryFile = decompressDir.resolve(entry.getName()).toFile();
-//				Files.createDirectories(entryFile.toPath().getParent());
-//				try (FileOutputStream entryStream = new FileOutputStream(entryFile)) {
-//					IOUtils.copy(tarStream, entryStream);
-//				}
-//			}
-//		} catch (IOException e) {
-//			throw new UncheckedIOException(e);
-//		}
-//
-//		// Verify that the expected file/entry was decompressed and return it.
-//		if (!Files.isReadable(resourcePath))
-//			throw new BadCodeMonkeyException(
-//					String.format("Didn't find resource '{}' in archive '{}'.", resourceFile, archiveName));
-//		return resourceUrlSupplier;
-	}
-
-	/**
 	 * @param dataSetLocation
 	 *            the {@link TestDataSetLocation} of the file to get a local
 	 *            copy of
@@ -379,7 +270,7 @@ public enum StaticRifResource {
 	 * @param downloadPath
 	 *            the {@link Path} to download the S3 object to
 	 */
-	private static final void downloadFromS3(TestDataSetLocation dataSetLocation, String fileName, Path downloadPath) {
+	private static void downloadFromS3(TestDataSetLocation dataSetLocation, String fileName, Path downloadPath) {
 		/*
 		 * To avoid dragging in the S3 client libraries, we require here that
 		 * the test data files be available publicly via HTTP.
@@ -387,8 +278,7 @@ public enum StaticRifResource {
 
 		FileOutputStream outputStream = null;
 		try {
-			URL s3DownloadUrl = new URL(String.format("http://%s.s3.amazonaws.com/%s/%s",
-					dataSetLocation.getS3BucketName(), dataSetLocation.getS3KeyPrefix(), fileName));
+			URL s3DownloadUrl = remoteS3Data(dataSetLocation, fileName).get();
 			ReadableByteChannel channel = Channels.newChannel(s3DownloadUrl.openStream());
 			outputStream = new FileOutputStream(downloadPath.toFile());
 			outputStream.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
@@ -405,5 +295,27 @@ public enum StaticRifResource {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param dataSetLocation
+	 *            the {@link TestDataSetLocation} of the file to get a local
+	 *            copy of
+	 * @param fileName
+	 *            the name of the specific file in the specified
+	 *            {@link TestDataSetLocation} to get a local copy of, e.g.
+	 *            "beneficiaries.rif"
+	 * @return a {@link URL} that can be used to download/stream the specified
+	 *         test data file from S3
+	 */
+	private static Supplier<URL> remoteS3Data(TestDataSetLocation dataSetLocation, String fileName) {
+		return () -> {
+			try {
+				return new URL(String.format("http://%s.s3.amazonaws.com/%s/%s", dataSetLocation.getS3BucketName(),
+						dataSetLocation.getS3KeyPrefix(), fileName));
+			} catch (MalformedURLException e) {
+				throw new BadCodeMonkeyException(e);
+			}
+		};
 	}
 }
