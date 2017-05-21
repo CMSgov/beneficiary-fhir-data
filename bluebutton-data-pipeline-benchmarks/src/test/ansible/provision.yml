@@ -49,6 +49,7 @@
         zone: "{{ zone }}"
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
         db_engine: postgres
+        engine_version: 9.4.9
         size: 1000
         iops: 10000
         backup_retention: 0

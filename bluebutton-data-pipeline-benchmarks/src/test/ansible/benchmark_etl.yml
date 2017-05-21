@@ -44,7 +44,7 @@
     - name: Wait for ETL to Start Processing Data Set
       wait_for:
         path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log'
-        search_regex: 'Data set finished uploading and ready to process'
+        search_regex: 'Data set ready. Processing it...'
         timeout: 60
 
     # This will take ages, so we watch it asynchronously, to ensure that SSH 
@@ -52,7 +52,7 @@
     - name: Wait for ETL to Finish Processing Data Set
       wait_for:
         path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log'
-        search_regex: 'Data set deleted, now that processing is complete'
+        search_regex: 'Data set renamed in S3, now that processing is complete.'
         timeout: 28800
       # Let it run for 8h, checking it every 30s to see if it's done.
       async: 28800

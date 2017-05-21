@@ -24,6 +24,9 @@
         fail_on_missing: false
       with_items:
         - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/log/server.log'
+        - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/server-config.log'
+        - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/server-console.log'
+        - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/server-stop.log'
         - '/usr/local/bluebutton-server-app/bluebutton-server-app.log'
 
 - name: Collect ETL Log

@@ -15,6 +15,7 @@ export AWS_ACCESS_KEY_ID='{{ lookup('env','AWS_ACCESS_KEY_ID') }}'
 export AWS_SECRET_ACCESS_KEY='{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}'
 {% endif %}
 
-"/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.x" \
+java \
 	-Xmx40g \
-	&> "/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log"
+	-jar "/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.jar" \
+	&>> "/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log"

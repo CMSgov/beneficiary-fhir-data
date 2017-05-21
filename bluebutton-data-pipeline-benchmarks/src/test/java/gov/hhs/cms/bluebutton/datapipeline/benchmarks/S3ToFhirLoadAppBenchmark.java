@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.benchmarks;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -482,9 +484,9 @@ public final class S3ToFhirLoadAppBenchmark {
 	 */
 	private static final class BenchmarkTask implements Callable<BenchmarkResult> {
 		private static final Pattern PATTERN_DATA_SET_START = Pattern
-				.compile("^(\\S* \\S*) .* Data set finished uploading and ready to process.$");
+				.compile("^(\\S* \\S*) .* Data set ready. Processing it...$");
 		private static final Pattern PATTERN_DATA_SET_COMPLETE = Pattern
-				.compile("^(\\S* \\S*) .* Data set deleted, now that processing is complete.$");
+				.compile("^(\\S* \\S*) .* Data set renamed in S3, now that processing is complete.$");
 		private static final DateTimeFormatter ETL_LOG_DATE_TIME_FORMATTER = DateTimeFormatter
 				.ofPattern("yyyy-MM-dd HH:mm:ss,SSS");
 
@@ -514,6 +516,13 @@ public final class S3ToFhirLoadAppBenchmark {
 			this.benchmarkIterationDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations")
 					.resolve("" + iterationIndex);
 			try {
+				/*
+				 * Ensure that any previous iteration's results are cleaned up
+				 * first, to avoid confusion.
+				 */
+				if (Files.exists(benchmarkIterationDir))
+					Files.walk(benchmarkIterationDir).sorted(Comparator.reverseOrder()).map(Path::toFile)
+							.forEach(File::delete);
 				Files.createDirectories(benchmarkIterationDir);
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
