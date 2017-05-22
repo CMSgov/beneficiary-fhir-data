@@ -60,7 +60,7 @@
 			be adjusted via profiles. This is required because the CI server doesn't 
 			have enough RAM to run with an in-mem DB, and so requires a different configuration. -->
 		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
-		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
+		<its.bbfhir.db.url>jdbc:hsqldb:mem:test;hsqldb.tx=mvcc</its.bbfhir.db.url>
 		<its.bbfhir.db.username></its.bbfhir.db.username>
 		<its.bbfhir.db.password></its.bbfhir.db.password>
 	</properties>
