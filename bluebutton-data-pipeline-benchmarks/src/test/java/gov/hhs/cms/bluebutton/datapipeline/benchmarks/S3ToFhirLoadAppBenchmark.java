@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,10 +44,14 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.transfer.Copy;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
@@ -55,6 +61,7 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
@@ -380,12 +387,44 @@ public final class S3ToFhirLoadAppBenchmark {
 				.map(r -> new DataSetManifestEntry(r.name(), r.getRifFileType())).collect(Collectors.toList());
 		DataSetManifest manifest = new DataSetManifest(Instant.now(), 0, manifestEntries);
 		s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
+
+		TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 		for (int i = 0; i < dataResources.getResources().length; i++) {
 			StaticRifResource dataResource = dataResources.getResources()[i];
-			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(i),
-					dataResource.getResourceUrl()));
+			URL dataResourceUrl = dataResource.getResourceUrl();
+
+			/*
+			 * This is a bit hacky, but we're coping with the S3 API's
+			 * non-support for PUTing from a remote URL. Attempting a normal PUT
+			 * request for the S3 HTTP URLs used in the SAMPLE_C resources will
+			 * result in an error. In addition, some of the SAMPLE_C files are
+			 * larger than 5GB and thus can't be copied using a non-multipart
+			 * request. So instead, we pull those URLs apart and copy them using
+			 * multipart requests via TransferManager, instead.
+			 */
+			Pattern s3HttpObjectRegex = Pattern.compile("http://(.+)\\.s3\\.amazonaws\\.com/(.+)");
+			Matcher s3HttpObjectMatcher = s3HttpObjectRegex.matcher(dataResourceUrl.toString());
+			if (s3HttpObjectMatcher.matches()) {
+				String sourceBucketName = s3HttpObjectMatcher.group(1);
+				String sourceKey = s3HttpObjectMatcher.group(2);
+				String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+						DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()),
+						manifest.getEntries().get(i).getName());
+
+				Copy s3CopyOperation = transferManager
+						.copy(new CopyObjectRequest(sourceBucketName, sourceKey, bucket.getName(), objectKey));
+				try {
+					s3CopyOperation.waitForCopyResult();
+				} catch (InterruptedException e) {
+					throw new BadCodeMonkeyException(e);
+				}
+			} else {
+				s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(i),
+						dataResourceUrl));
+			}
 		}
 
+		transferManager.shutdownNow(false);
 		LOGGER.info("Data set uploaded to S3.");
 	}
 
@@ -649,19 +688,32 @@ public final class S3ToFhirLoadAppBenchmark {
 		 *            the S3 {@link Bucket} to copy the data set to
 		 */
 		private static void copyDataSetInS3(AmazonS3 s3Client, Bucket bucket) {
-			final ListObjectsRequest bucketListRequest = new ListObjectsRequest()
-					.withBucketName(BUCKET_DATA_SET_MASTER);
-			ObjectListing objectListing;
-			do {
-				objectListing = s3Client.listObjects(bucketListRequest);
+			TransferManager transferManager = null;
+			try {
+				transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-				for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-					s3Client.copyObject(BUCKET_DATA_SET_MASTER, objectSummary.getKey(), bucket.getName(),
-							objectSummary.getKey());
-				}
+				final ListObjectsRequest bucketListRequest = new ListObjectsRequest()
+						.withBucketName(BUCKET_DATA_SET_MASTER);
+				ObjectListing objectListing;
+				do {
+					objectListing = s3Client.listObjects(bucketListRequest);
 
-				objectListing = s3Client.listNextBatchOfObjects(objectListing);
-			} while (objectListing.isTruncated());
+					for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+						Copy copyOperation = transferManager.copy(BUCKET_DATA_SET_MASTER, objectSummary.getKey(),
+								bucket.getName(), objectSummary.getKey());
+						try {
+							copyOperation.waitForCopyResult();
+						} catch (InterruptedException e) {
+							throw new BadCodeMonkeyException(e);
+						}
+					}
+
+					objectListing = s3Client.listNextBatchOfObjects(objectListing);
+				} while (objectListing.isTruncated());
+			} finally {
+				if (transferManager != null)
+					transferManager.shutdownNow(false);
+			}
 		}
 	}
 
