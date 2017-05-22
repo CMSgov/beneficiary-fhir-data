@@ -44,20 +44,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to parse and read the RIF data files. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
-		</dependency>
-
-		<dependency>
-			<!-- Used to decompress ZIP2 data files. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.12</version>
-		</dependency>
-
-		<dependency>
 			<!-- Used to collect statistics about the sample data being generated. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>

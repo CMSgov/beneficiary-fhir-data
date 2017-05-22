@@ -1,64 +1,45 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
-import java.util.regex.Pattern;
-
 /**
  * Enumerates the various types of RIF files.
  */
 public enum RifFileType {
-	BENEFICIARY(Pattern.compile(".*beneficiar(y|ies).*")),
+	BENEFICIARY(BeneficiaryRow.Column.BENE_ID),
 
-	CARRIER(Pattern.compile(".*bcarrier.*")),
+	CARRIER(CarrierClaimGroup.Column.CLM_ID),
 
-	DME(Pattern.compile(".*dme.*")),
+	DME(DMEClaimGroup.Column.CLM_ID),
 
-	HHA(Pattern.compile(".*hha.*")),
+	HHA(HHAClaimGroup.Column.CLM_ID),
 
-	HOSPICE(Pattern.compile(".*hospice.*")),
+	HOSPICE(HospiceClaimGroup.Column.CLM_ID),
 
-	INPATIENT(Pattern.compile(".*inpatient.*")),
+	INPATIENT(InpatientClaimGroup.Column.CLM_ID),
 
-	OUTPATIENT(Pattern.compile(".*outpatient.*")),
+	OUTPATIENT(OutpatientClaimGroup.Column.CLM_ID),
 
-	PDE(Pattern.compile(".*pde.*")),
+	PDE(PartDEventRow.Column.PDE_ID),
 
-	SNF(Pattern.compile(".*snf.*"));
+	SNF(SNFClaimGroup.Column.CLM_ID);
 
-	private final Pattern filenameRegex;
+	private final Enum<?> idColumn;
 
 	/**
 	 * Enum constant constructor.
 	 * 
-	 * @param filenameRegex
-	 *            the {@link Pattern} that {@link #filenameMatches(String)}
-	 *            should use
+	 * @param idColumn
+	 *            the value to use for {@link #getIdColumn()}
 	 */
-	private RifFileType(Pattern filenameRegex) {
-		this.filenameRegex = filenameRegex;
+	private RifFileType(Enum<?> idColumn) {
+		this.idColumn = idColumn;
 	}
 
 	/**
-	 * @param filename
-	 *            the filename (or S3 object key) to check
-	 * @return <code>true</code> if the specified value matches the pattern
-	 *         expected for this {@link RifFileType}, <code>false</code> if not
+	 * @return the <code>Column</code> enum constant for this
+	 *         {@link RifFileType} ID/grouping column, e.g.
+	 *         {@link BeneficiaryRow.Column#BENE_ID}
 	 */
-	private boolean filenameMatches(String filename) {
-		return filenameRegex.matcher(filename).matches();
-	}
-
-	/**
-	 * @param filename
-	 *            the filename (or S3 object key) to find a matching
-	 *            {@link RifFileType} for
-	 * @return the {@link RifFileType} that the specified value matches the
-	 *         expected pattern for
-	 */
-	public static RifFileType selectTypeForFilename(String filename) {
-		for (RifFileType rifFileType : RifFileType.values())
-			if (rifFileType.filenameMatches(filename))
-				return rifFileType;
-
-		throw new IllegalArgumentException("Unable to match filename: " + filename);
+	public Enum<?> getIdColumn() {
+		return idColumn;
 	}
 }

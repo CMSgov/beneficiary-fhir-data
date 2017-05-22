@@ -37,7 +37,6 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3RifFile;
@@ -53,6 +52,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
+import gov.hhs.cms.bluebutton.datapipeline.rif.parse.RifParsingUtils;
 
 /**
  * <p>
@@ -98,7 +98,7 @@ public final class DataSetSubsetter {
 				.collect(Collectors.toList());
 		List<String> beneficiaryIds = new ArrayList<>();
 		for (RifFile beneficiaryFile : beneficiaryFiles) {
-			CSVParser parser = RifFilesProcessor.createCsvParser(beneficiaryFile);
+			CSVParser parser = RifParsingUtils.createCsvParser(beneficiaryFile);
 			parser.forEach(r -> {
 				String beneficiaryId = r.get(BeneficiaryRow.Column.BENE_ID);
 				if (beneficiaryIds.contains(beneficiaryId))
@@ -129,7 +129,7 @@ public final class DataSetSubsetter {
 		for (RifFile rifFile : rifFiles) {
 			LOGGER.info("Subsetting RIF file: '{}'...", rifFile.getDisplayName());
 			CSVPrinter rifFilePrinter = output.getPrinter(rifFile.getFileType());
-			CSVParser parser = RifFilesProcessor.createCsvParser(rifFile);
+			CSVParser parser = RifParsingUtils.createCsvParser(rifFile);
 			parser.forEach(r -> {
 				String beneficiaryId = r.get(beneficiaryColumnByFileType.get(rifFile.getFileType()));
 				if (selectedBeneficiaryIds.contains(beneficiaryId))
@@ -187,7 +187,7 @@ public final class DataSetSubsetter {
 		public CSVPrinter getPrinter(RifFileType fileType) throws IOException {
 			if (!printers.containsKey(fileType)) {
 				FileWriter writer = new FileWriter(outputDirectory.resolve(computeRifFileName(fileType)).toFile());
-				CSVFormat csvFormat = RifFilesProcessor.CSV_FORMAT.withHeader(computeColumnNames(fileType));
+				CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader(computeColumnNames(fileType));
 				CSVPrinter printer = new CSVPrinter(writer, csvFormat);
 				printers.put(fileType, printer);
 			}

@@ -1,97 +1,56 @@
 package gov.hhs.cms.bluebutton.datapipeline.sampledata;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
+
+import org.apache.commons.csv.CSVParser;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.datapipeline.rif.parse.RifParsingUtils;
 
 /**
  * Enumerates the sample RIF resources available on the classpath.
  */
 public enum StaticRifResource {
-	/**
-	 * This file was manually created by copying a single beneficiary from
-	 * {@link #SAMPLE_B_BENES}.
-	 */
 	SAMPLE_A_BENES(resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_A_CARRIER}, and adjusting its beneficiary
-	 * to match {@link #SAMPLE_A_BENES}.
-	 */
 	SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_A_INPATIENT}, and adjusting its
-	 * beneficiary to match {@link #SAMPLE_A_INPATIENT}.
-	 */
 	SAMPLE_A_INPATIENT(resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_A_OUTPATIENT}, and adjusting its
-	 * beneficiary to match {@link #SAMPLE_A_OUTPATIENT}.
-	 */
 	SAMPLE_A_OUTPATIENT(resourceUrl("rif-static-samples/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_A_SNF}, and adjusting its beneficiary to
-	 * match {@link #SAMPLE_A_SNF}.
-	 */
 	SAMPLE_A_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_A_HOSPICE}, and adjusting its beneficiary
-	 * to match {@link #SAMPLE_A_HOSPICE}.
-	 */
 	SAMPLE_A_HOSPICE(resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_A_HHA}, and adjusting its beneficiary to
-	 * match {@link #SAMPLE_A_HHA}.
-	 */
 	SAMPLE_A_HHA(resourceUrl("rif-static-samples/sample-a-hha.txt"), RifFileType.HHA, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_B_DME}, and adjusting its beneficiary to
-	 * match {@link #SAMPLE_A_BENES}.
-	 */
 	SAMPLE_A_DME(resourceUrl("rif-static-samples/sample-a-dme.txt"), RifFileType.DME, 1),
 
-	/**
-	 * This file was manually created by copying a single claim from
-	 * {@link StaticRifResource#SAMPLE_B_CARRIER}, adjusting its beneficiary to
-	 * match {@link #SAMPLE_A_BENES}, and editing some of the values to be
-	 * better suited for testing against.
-	 */
 	SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
 	SAMPLE_B_BENES(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
 			RifFileType.BENEFICIARY, 100),
 
-	/**
-	 * The record count here was verified with the following shell command:
-	 * <code>$ awk -F '|' '{print $4}' bluebutton-data-pipeline-sampledata/src/main/resources/rif-static-samples/sample-b-bcarrier-1440.txt | tail -n +2 | sort | uniq -c | wc -l</code>
-	 * .
-	 */
 	SAMPLE_B_CARRIER(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"), RifFileType.CARRIER, 3215),
 
 	SAMPLE_B_INPATIENT(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "inpatient_test.rif"),
@@ -112,27 +71,27 @@ public enum StaticRifResource {
 	SAMPLE_B_PDE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"), RifFileType.PDE, 4793),
 
 	SAMPLE_C_BENES(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "beneficiary_test.rif"), RifFileType.BENEFICIARY,
-			-1),
+			1000000),
 
-	SAMPLE_C_CARRIER(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "carrier_test.rif"),
-			RifFileType.CARRIER, -1),
+	SAMPLE_C_CARRIER(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "carrier_test.rif"), RifFileType.CARRIER,
+			32943217),
 
-	SAMPLE_C_DME(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "dme_test.rif"), RifFileType.DME, -1),
+	SAMPLE_C_DME(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "dme_test.rif"), RifFileType.DME, 2320363),
 
-	SAMPLE_C_HHA(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hha_test.rif"), RifFileType.HHA, -1),
+	SAMPLE_C_HHA(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hha_test.rif"), RifFileType.HHA, 228623),
 
-	SAMPLE_C_HOSPICE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hospice_test.rif"),
-			RifFileType.HOSPICE, -1),
+	SAMPLE_C_HOSPICE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hospice_test.rif"), RifFileType.HOSPICE,
+			106462),
 
-	SAMPLE_C_INPATIENT(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "inpatient_test.rif"),
-			RifFileType.INPATIENT, -1),
+	SAMPLE_C_INPATIENT(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "inpatient_test.rif"), RifFileType.INPATIENT,
+			384616),
 
 	SAMPLE_C_OUTPATIENT(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "outpatient_test.rif"),
-			RifFileType.OUTPATIENT, -1),
+			RifFileType.OUTPATIENT, 6195549),
 
-	SAMPLE_C_PDE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"), RifFileType.PDE, -1),
+	SAMPLE_C_PDE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"), RifFileType.PDE, 8774963),
 
-	SAMPLE_C_SNF(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, -1);
+	SAMPLE_C_SNF(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
@@ -276,14 +235,25 @@ public enum StaticRifResource {
 		 * the test data files be available publicly via HTTP.
 		 */
 
+		URL s3DownloadUrl = remoteS3Data(dataSetLocation, fileName).get();
+		download(s3DownloadUrl, downloadPath);
+	}
+
+	/**
+	 * Copies the contents of the specified {@link URL} to the specified local
+	 * {@link Path}.
+	 * 
+	 * @param url
+	 *            the {@link URL} to download the contents of
+	 * @param localPath
+	 *            the local {@link Path} to write to
+	 */
+	private static void download(URL url, Path localPath) {
 		FileOutputStream outputStream = null;
 		try {
-			URL s3DownloadUrl = remoteS3Data(dataSetLocation, fileName).get();
-			ReadableByteChannel channel = Channels.newChannel(s3DownloadUrl.openStream());
-			outputStream = new FileOutputStream(downloadPath.toFile());
+			ReadableByteChannel channel = Channels.newChannel(url.openStream());
+			outputStream = new FileOutputStream(localPath.toFile());
 			outputStream.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
-		} catch (MalformedURLException e) {
-			throw new BadCodeMonkeyException(e);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} finally {
@@ -317,5 +287,42 @@ public enum StaticRifResource {
 				throw new BadCodeMonkeyException(e);
 			}
 		};
+	}
+
+	/**
+	 * A simple app driver that can be run to verify the record counts for each
+	 * {@link StaticRifResource}.
+	 * 
+	 * @param args
+	 *            (not used)
+	 * @throws Exception
+	 *             Any {@link Exception}s encountered will cause this mini-app
+	 *             to terminate.
+	 */
+	public static void main(String[] args) throws Exception {
+		/*
+		 * Note: Because of the SAMPLE_C files' large size, this will take HOURS
+		 * to run.
+		 */
+
+		for (StaticRifResource resource : StaticRifResource.values()) {
+			Set<String> uniqueIds = new HashSet<>();
+			Path tempDownloadPath = null;
+			InputStream tempDownloadStream = null;
+			try {
+				tempDownloadPath = Files.createTempFile("bluebutton-test-data-", ".rif");
+				download(resource.getResourceUrl(), tempDownloadPath);
+
+				tempDownloadStream = new BufferedInputStream(new FileInputStream(tempDownloadPath.toFile()));
+				CSVParser parser = RifParsingUtils.createCsvParser(tempDownloadStream, StandardCharsets.UTF_8);
+				parser.forEach(r -> uniqueIds.add(r.get(resource.getRifFileType().getIdColumn())));
+			} finally {
+				if (tempDownloadPath != null)
+					Files.deleteIfExists(tempDownloadPath);
+				if (tempDownloadStream != null)
+					tempDownloadStream.close();
+			}
+			System.out.println(String.format("%s: %d", resource.name(), uniqueIds.size()));
+		}
 	}
 }

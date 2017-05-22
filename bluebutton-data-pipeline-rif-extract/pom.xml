@@ -44,18 +44,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
-		</dependency>
-		<dependency>
-			<!-- Used to parse and read the RIF data files. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
 			<!-- Provides some extra collections, e.g. the CircularFifoQueue being 
 				used in DataSetMonitorWorker. -->
 			<groupId>org.apache.commons</groupId>
