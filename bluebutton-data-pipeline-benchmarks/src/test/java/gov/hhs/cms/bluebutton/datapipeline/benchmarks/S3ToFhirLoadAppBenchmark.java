@@ -93,7 +93,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	/**
 	 * The number of iterations that will be performed for each benchmark.
 	 */
-	private static final int NUMBER_OF_ITERATIONS = 30;
+	private static final int NUMBER_OF_ITERATIONS = 10;
 
 	/**
 	 * <p>
