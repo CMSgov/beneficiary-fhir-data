@@ -32,11 +32,11 @@ public final class DataSetManifest {
 	@XmlJavaTypeAdapter(TweakedInstantXmlAdapter.class)
 	private final Instant timestamp;
 
+	@XmlAttribute
+	private int sequenceId;
+
 	@XmlElement(name = "entry")
 	private final List<DataSetManifestEntry> entries;
-
-	@XmlElement(name = "sequenceId")
-	private int sequenceId;
 
 	/**
 	 * Constructs a new {@link DataSetManifest} instance.
@@ -98,15 +98,6 @@ public final class DataSetManifest {
 	}
 
 	/**
-	 * TODO: Will only need this method in the short term..can remove once
-	 * sequenceId is actually in the manifest xml file
-	 * 
-	 */
-	public int setSequenceId(int sequenceId) {
-		return this.sequenceId = sequenceId;
-	}
-
-	/**
 	 * @return a {@link DataSetManifestId} that models this
 	 *         {@link DataSetManifest}'s identity and ordering
 	 */
@@ -161,7 +152,6 @@ public final class DataSetManifest {
 		public DataSetManifestEntry(String name, RifFileType type) {
 			this.name = name;
 			this.type = type;
-
 		}
 
 		/**
@@ -269,17 +259,6 @@ public final class DataSetManifest {
 			int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(2));
 
 			return new DataSetManifestId(dataSetTimestamp, dataSetSequenceId);
-		}
-
-		/**
-		 * @return the {@link DataSetManifest#getSequenceId()} value
-		 */
-		public int getSequenceId() {
-			/*
-			 * TODO remove this method once the sequence ID is contained in the
-			 * manifest XML
-			 */
-			return sequenceId;
 		}
 
 		/**
