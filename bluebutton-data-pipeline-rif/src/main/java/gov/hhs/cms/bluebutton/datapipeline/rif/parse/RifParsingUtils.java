@@ -30,8 +30,10 @@ public final class RifParsingUtils {
 	}
 
 	/**
-	 * @param file
-	 *            the {@link RifFile} to parse
+	 * @param fileStream
+	 *            the {@link InputStream} to build a {@link CSVParser} for
+	 * @param charset
+	 *            the {@link Charset} of the {@link InputStream} to be parsed
 	 * @return a {@link CSVParser} for the specified {@link RifFile}
 	 */
 	public static CSVParser createCsvParser(InputStream fileStream, Charset charset) {
