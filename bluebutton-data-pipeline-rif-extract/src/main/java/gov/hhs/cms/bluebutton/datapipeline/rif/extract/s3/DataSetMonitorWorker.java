@@ -34,6 +34,10 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
+import com.amazonaws.services.s3.transfer.Copy;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -426,6 +430,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * Then, loop through each of those objects and copy them (S3 has no
 		 * bulk copy operation).
 		 */
+		TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 		for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
 			String sourceKey = String.format("%s/%s", S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
 			String targetKey = String.format("%s/%s", S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
@@ -445,8 +450,14 @@ public final class DataSetMonitorWorker implements Runnable {
 						new SSEAwsKeyManagementParams(objectMetadata.getSSEAwsKmsKeyId()));
 			}
 
-			s3Client.copyObject(copyRequest);
+			Copy copyOperation = transferManager.copy(copyRequest);
+			try {
+				copyOperation.waitForCopyResult();
+			} catch (InterruptedException e) {
+				throw new BadCodeMonkeyException(e);
+			}
 		}
+		transferManager.shutdownNow(false);
 		LOGGER.debug("Data set copied in S3 (step 1 of move).");
 
 		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(options.getS3BucketName());
