@@ -40,6 +40,7 @@ public final class DataSetManifestTest {
 		Assert.assertNotNull(manifest);
 		Assert.assertEquals(1994,
 				LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault()).get(ChronoField.YEAR));
+		Assert.assertEquals(1, manifest.getSequenceId());
 		Assert.assertEquals(2, manifest.getEntries().size());
 		Assert.assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
 		Assert.assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
@@ -67,6 +68,7 @@ public final class DataSetManifestTest {
 		Assert.assertNotNull(manifest.getTimestamp());
 		Assert.assertEquals(2016,
 				LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault()).get(ChronoField.YEAR));
+		Assert.assertEquals(1, manifest.getSequenceId());
 		Assert.assertEquals(9, manifest.getEntries().size());
 		Assert.assertEquals("bene.txt", manifest.getEntries().get(0).getName());
 		for (int i = 0; i < manifest.getEntries().size(); i++) {

@@ -195,11 +195,6 @@ public final class DataSetMonitorWorker implements Runnable {
 
 					try {
 						manifest = readManifest(key);
-						/*
-						 * TODO Following line can be removed once sequenceId is
-						 * actually in the manifest xml file
-						 */
-						manifest.setSequenceId(manifestId.getSequenceId());
 					} catch (JAXBException e) {
 						// Note: We intentionally don't log the full stack trace
 						// here, as it would add a lot of unneeded noise.
