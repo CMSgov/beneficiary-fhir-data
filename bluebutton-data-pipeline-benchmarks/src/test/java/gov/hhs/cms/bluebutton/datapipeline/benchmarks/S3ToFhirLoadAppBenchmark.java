@@ -83,13 +83,6 @@ public final class S3ToFhirLoadAppBenchmark {
 	private static final String SYS_PROP_EC2_KEY_NAME = "ec2KeyName";
 
 	/**
-	 * The name of the {@link System#getProperty(String)} value that must be
-	 * specified, which will provide the path to the AWS EC2 key PEM file to use
-	 * when connecting to benchmark systems.
-	 */
-	private static final String SYS_PROP_EC2_KEY_FILE = "ec2KeyFile";
-
-	/**
 	 * The name of the optional {@link System#getProperty(String)} value that
 	 * can be specified, which will provide the path that the benchmarks will
 	 * write their results out to. If not specified, this will default to
@@ -162,16 +155,9 @@ public final class S3ToFhirLoadAppBenchmark {
 		if (ec2KeyName == null)
 			throw new IllegalArgumentException(
 					String.format("The '%s' Java system property must be specified.", SYS_PROP_EC2_KEY_NAME));
-		String ec2KeyFile = System.getProperty(SYS_PROP_EC2_KEY_FILE, null);
-		if (ec2KeyFile == null)
-			throw new IllegalArgumentException(
-					String.format("The '%s' Java system property must be specified.", SYS_PROP_EC2_KEY_FILE));
-		Path ec2KeyFilePath = Paths.get(ec2KeyFile);
-		if (!Files.isReadable(ec2KeyFilePath))
-			throw new IllegalArgumentException(String
-					.format("The '%s' Java system property must specify a valid key file.", SYS_PROP_EC2_KEY_FILE));
+		Path ec2KeyFilePath = BenchmarkUtilities.findEc2KeyFile();
 
-		Path benchmarksDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations");
+		Path benchmarksDir = BenchmarkUtilities.findBenchmarksWorkDir();
 		Files.createDirectories(benchmarksDir);
 
 		// Prepare the Python/Ansible virtualenv needed for the iterations.
@@ -179,7 +165,7 @@ public final class S3ToFhirLoadAppBenchmark {
 		Path ansibleInitScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src").resolve("test")
 				.resolve("ansible").resolve("ansible_init.sh");
 		ProcessBuilder ansibleProcessBuilder = new ProcessBuilder(ansibleInitScript.toString());
-		int ansibleInitExitCode = runProcessAndLogOutput(ansibleProcessBuilder, ansibleInitLog);
+		int ansibleInitExitCode = BenchmarkUtilities.runProcessAndLogOutput(ansibleProcessBuilder, ansibleInitLog);
 		if (ansibleInitExitCode != 0)
 			throw new BenchmarkError(
 					String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
@@ -472,32 +458,6 @@ public final class S3ToFhirLoadAppBenchmark {
 	}
 
 	/**
-	 * @param processBuilder
-	 *            the process to run
-	 * @param logFile
-	 *            the {@link Path} to write the process' output to
-	 * @return the process' exit code
-	 */
-	private static int runProcessAndLogOutput(ProcessBuilder processBuilder, Path logFile) {
-		Process process = null;
-		try {
-			processBuilder.redirectErrorStream(true);
-			processBuilder.redirectOutput(logFile.toFile());
-
-			process = processBuilder.start();
-			int exitCode = process.waitFor();
-			return exitCode;
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		} catch (InterruptedException e) {
-			throw new BadCodeMonkeyException(e);
-		} finally {
-			if (process != null)
-				process.destroyForcibly();
-		}
-	}
-
-	/**
 	 * Throws an {@link AssumptionViolatedException} if the OS doesn't support
 	 * <strong>graceful</strong> shutdowns via {@link Process#destroy()}.
 	 */
@@ -552,8 +512,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			this.ec2KeyName = ec2KeyName;
 			this.ec2KeyFile = ec2KeyFile;
 
-			this.benchmarkIterationDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations")
-					.resolve("" + iterationIndex);
+			this.benchmarkIterationDir = BenchmarkUtilities.findBenchmarksWorkDir().resolve("" + iterationIndex);
 			try {
 				/*
 				 * Ensure that any previous iteration's results are cleaned up
@@ -601,7 +560,8 @@ public final class S3ToFhirLoadAppBenchmark {
 
 			try {
 				// Run Ansible to create the benchmark systems in AWS.
-				int provisionExitCode = runProcessAndLogOutput(provisionProcessBuilder, provisionLog);
+				int provisionExitCode = BenchmarkUtilities.runProcessAndLogOutput(provisionProcessBuilder,
+						provisionLog);
 				if (provisionExitCode != 0)
 					throw new BenchmarkError(String.format(
 							"Ansible provisioning failed with exit code '%d' for benchmark iteration '%d'.",
@@ -614,12 +574,8 @@ public final class S3ToFhirLoadAppBenchmark {
 				 * to: 1) Collect the ETL and FHIR logs, and 2) destroy the
 				 * benchmark systems in AWS.
 				 */
-				Path teardownLog = benchmarkIterationDir.resolve(String.format("ansible_teardown.log", iterationIndex));
-				Path teardownScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
-						.resolve("test").resolve("ansible").resolve("teardown.sh");
-				ProcessBuilder teardownProcessBuilder = new ProcessBuilder(teardownScript.toString(), "--iteration",
-						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
-				int teardownExitCode = runProcessAndLogOutput(teardownProcessBuilder, teardownLog);
+				int teardownExitCode = BenchmarkUtilities.runBenchmarkTeardown(iterationIndex, benchmarkIterationDir,
+						ec2KeyFile);
 				if (teardownExitCode != 0)
 					throw new BenchmarkError(
 							String.format("Ansible failed with exit code '%d' for benchmark teardown iteration '%d'.",
@@ -655,8 +611,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
 			Bucket bucket = null;
 			try {
-				bucket = s3Client.createBucket(
-						String.format("gov.hhs.cms.bluebutton.datapipeline.benchmark.iteration%d", iterationIndex));
+				bucket = s3Client.createBucket(BenchmarkUtilities.computeBenchmarkDataBucketName(iterationIndex));
 				copyDataSetInS3(s3Client, bucket);
 
 				/*
@@ -669,7 +624,8 @@ public final class S3ToFhirLoadAppBenchmark {
 						.resolve("test").resolve("ansible").resolve("benchmark_etl.sh");
 				ProcessBuilder benchmarkProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
 						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
-				int benchmarkExitCode = runProcessAndLogOutput(benchmarkProcessBuilder, benchmarkLog);
+				int benchmarkExitCode = BenchmarkUtilities.runProcessAndLogOutput(benchmarkProcessBuilder,
+						benchmarkLog);
 
 				if (benchmarkExitCode != 0)
 					throw new BenchmarkError(

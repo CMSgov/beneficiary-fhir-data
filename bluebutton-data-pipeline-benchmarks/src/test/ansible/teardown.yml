@@ -22,6 +22,7 @@
         dest: "../../../target/benchmark-iterations/{{ iteration_index }}/"
         flat: true
         fail_on_missing: false
+      ignore_errors: true
       with_items:
         - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/standalone/log/server.log'
         - '/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/server-config.log'
@@ -51,6 +52,7 @@
         dest: "../../../target/benchmark-iterations/{{ iteration_index }}/"
         flat: true
         fail_on_missing: false
+      ignore_errors: true
 
 - name: EC2 - Terminate Servers
   hosts: localhost
