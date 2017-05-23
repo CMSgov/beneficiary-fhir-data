@@ -5,7 +5,10 @@
     name: "{{ item }}"
     state: latest
   with_items:
+    # Needed to supply `keytool` and also to run the ETL service.
     - java-1.8.0-openjdk-devel
+    # Needed to use the `s3_object` module.
+    - python-boto
   become: true
 
 - name: Create ETL Service User
