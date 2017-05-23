@@ -85,12 +85,20 @@ public final class FhirLoader {
 		FhirContext ctx = FhirContext.forDstu3();
 
 		/*
-		 * The default timeout is 10s, which was failing for batches of 100. A
-		 * 300s timeout was failing for batches of 100 once Part B claims were
-		 * mostly mapped, so batches were cut to 10, which ran at 12s or so,
-		 * each.
+		 * The default socket timeout is 10s, which was failing for batches of
+		 * 100. A 300s timeout was failing for batches of 100 once Part B claims
+		 * were mostly mapped, so batches were cut to 10, which ran at 12s or
+		 * so, each.
 		 */
 		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
+
+		/*
+		 * In running the benchmarks on SAMPLE_C with about 400 worker threads,
+		 * connect timeouts have been observed when using the default connect
+		 * timeout of 10s.
+		 */
+		ctx.getRestfulClientFactory().setConnectTimeout(300 * 1000);
+		ctx.getRestfulClientFactory().setConnectionRequestTimeout(300 * 1000);
 
 		/*
 		 * We need to override the FHIR client's SSLContext. Unfortunately, that
