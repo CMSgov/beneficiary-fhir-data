@@ -89,6 +89,7 @@ public final class FhirTestUtilities {
 		 */
 		// for (String resourceTypeName : resourcesToDelete)
 		// fhirClient.delete().resourceConditionalByUrl(resourceTypeName).execute();
+
 		for (String resourceTypeName : resourcesToDelete) {
 			if (resourceTypeName.contentEquals("Coverage"))
 				continue;
@@ -96,23 +97,19 @@ public final class FhirTestUtilities {
 				continue;
 			if (resourceTypeName.contentEquals("Patient"))
 				continue;
-			deleteFhirResource(fhirClient, resourceTypeName);
+			deleteAllResources(fhirClient, resourceTypeName);
 		}
 
-		// Delete Coverage resources
-		deleteFhirResource(fhirClient, "Coverage");
-		// Delete Organization resources
-		deleteFhirResource(fhirClient, "Organization");
-		// Delete Patient resources
-		deleteFhirResource(fhirClient, "Patient");
-
+		deleteAllResources(fhirClient, "Coverage");
+		deleteAllResources(fhirClient, "Organization");
+		deleteAllResources(fhirClient, "Patient");
 	}
 
 	/**
 	 * use {@link IGenericClient} and resourceTypeName to delete the FHIR
 	 * resources from the database
 	 */
-	public static void deleteFhirResource(IGenericClient fhirClient, String resourceTypeName) {
+	public static void deleteAllResources(IGenericClient fhirClient, String resourceTypeName) {
 		Bundle results = fhirClient.search().forResource(resourceTypeName).returnBundle(Bundle.class).execute();
 		while (true) {
 			for (BundleEntryComponent resourceEntry : results.getEntry())

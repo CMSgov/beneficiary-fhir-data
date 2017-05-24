@@ -129,7 +129,7 @@ public final class DataTransformerTest {
 
 		FhirContext ctx = FhirContext.forDstu3();
 		String encoded = ctx.newXmlParser().encodeResourceToString(bene);
-		System.out.println(encoded);
+		// System.out.println(encoded);
 
 		Assert.assertEquals(false, encoded.contains("Optional"));
 
@@ -167,7 +167,7 @@ public final class DataTransformerTest {
 
 		FhirContext ctxPartA = FhirContext.forDstu3();
 		String encodedPartA = ctxPartA.newXmlParser().encodeResourceToString(partA);
-		System.out.println(encodedPartA);
+		// System.out.println(encodedPartA);
 
 		Coverage partB = (Coverage) coverageEntry[1].getResource();
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN,
