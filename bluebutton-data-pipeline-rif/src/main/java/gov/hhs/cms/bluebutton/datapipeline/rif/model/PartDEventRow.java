@@ -210,9 +210,8 @@ public class PartDEventRow {
 	/**
 	 * @see Column#BRND_GNRC_CD
 	 */
-	// TODO should this be Optional? At least a couple rows in sample data that
-	// are blank.
-	public Character brandGenericCode;
+
+	public Optional<Character> brandGenericCode;
 
 	/**
 	 * @see Column#PHRMCY_SRVC_TYPE_CD
@@ -583,7 +582,8 @@ public class PartDEventRow {
 		RPTD_GAP_DSCNT_NUM,
 
 		/**
-		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
+		 * Type: <code>CHAR</code>, max chars: 1, <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt">
 		 * CCW Data Dictionary: BRND_GNRC_CD</a>.
 		 */

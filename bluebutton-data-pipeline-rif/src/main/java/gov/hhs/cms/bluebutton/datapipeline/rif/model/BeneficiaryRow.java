@@ -18,9 +18,6 @@ import java.util.stream.Collectors;
  */
 public final class BeneficiaryRow {
 	/**
-	 * FIXME is this the schema version or the record version?
-	 */
-	/**
 	 * @see Column#VERSION
 	 */
 	public int version;

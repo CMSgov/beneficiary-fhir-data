@@ -58,7 +58,7 @@ public final class FhirTestUtilities {
 
 		IGenericClient fhirClient = createFhirClient();
 
-		// FIXME see CBBD-239 (Change deprecated Conformance to
+		// TODO see CBBD-239 (Change deprecated Conformance to
 		// CapabilityStatement)
 		Conformance conformance = fhirClient.fetchConformance().ofType(Conformance.class).execute();
 
@@ -79,23 +79,49 @@ public final class FhirTestUtilities {
 		 * TODO This commented-out version should work, given HAPI 1.4's
 		 * conformance statement, but doesn't. Try again in a later version? The
 		 * not-commented-out version below does work, but is slower.
+		 * 
+		 * TODO Following resource delete code is kind of crude. Was running
+		 * into a referential integrity error after some additional references
+		 * were put in for some resources. The referential integrity error was
+		 * happening with the three resources below (Coverage, Organization,
+		 * Patient); thus the reason why these resources need to be deleted in
+		 * the following order.
 		 */
 		// for (String resourceTypeName : resourcesToDelete)
 		// fhirClient.delete().resourceConditionalByUrl(resourceTypeName).execute();
-		for (String resourceTypeName : resourcesToDelete) {
-			Bundle results = fhirClient.search().forResource(resourceTypeName).returnBundle(Bundle.class).execute();
-			while (true) {
-				for (BundleEntryComponent resourceEntry : results.getEntry())
-					fhirClient.delete()
-							.resourceById(resourceTypeName, resourceEntry.getResource().getIdElement().getIdPart())
-							.execute();
 
-				// Get next page of results (if there is one), or exit loop.
-				if (results.getLink(Bundle.LINK_NEXT) != null)
-					results = fhirClient.loadPage().next(results).execute();
-				else
-					break;
-			}
+		for (String resourceTypeName : resourcesToDelete) {
+			if (resourceTypeName.contentEquals("Coverage"))
+				continue;
+			if (resourceTypeName.contentEquals("Organization"))
+				continue;
+			if (resourceTypeName.contentEquals("Patient"))
+				continue;
+			deleteAllResources(fhirClient, resourceTypeName);
+		}
+
+		deleteAllResources(fhirClient, "Coverage");
+		deleteAllResources(fhirClient, "Organization");
+		deleteAllResources(fhirClient, "Patient");
+	}
+
+	/**
+	 * use {@link IGenericClient} and resourceTypeName to delete the FHIR
+	 * resources from the database
+	 */
+	public static void deleteAllResources(IGenericClient fhirClient, String resourceTypeName) {
+		Bundle results = fhirClient.search().forResource(resourceTypeName).returnBundle(Bundle.class).execute();
+		while (true) {
+			for (BundleEntryComponent resourceEntry : results.getEntry())
+				fhirClient.delete()
+						.resourceById(resourceTypeName, resourceEntry.getResource().getIdElement().getIdPart())
+						.execute();
+
+			// Get next page of results (if there is one), or exit loop.
+			if (results.getLink(Bundle.LINK_NEXT) != null)
+				results = fhirClient.loadPage().next(results).execute();
+			else
+				break;
 		}
 	}
 

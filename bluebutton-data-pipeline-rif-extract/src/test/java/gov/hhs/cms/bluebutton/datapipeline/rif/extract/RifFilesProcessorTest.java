@@ -164,11 +164,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new BigDecimal("550.00"), pdeRow.totalPrescriptionCost);
 		Assert.assertEquals(new Character('3'), pdeRow.prescriptionOriginationCode.get());
 		Assert.assertEquals(new BigDecimal("317.22"), pdeRow.gapDiscountAmount);
-		/*
-		 * TODO Re-enable this test case once it is determined if this field is
-		 * optional or not.
-		 */
-		// Assert.assertEquals(new Character('G'), pdeRow.brandGenericCode);
+		Assert.assertEquals(new Character('G'), pdeRow.brandGenericCode.get());
 		Assert.assertEquals("01", pdeRow.pharmacyTypeCode);
 		Assert.assertEquals("02", pdeRow.patientResidenceCode);
 		Assert.assertEquals("08", pdeRow.submissionClarificationCode.get());

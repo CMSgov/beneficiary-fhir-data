@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
@@ -128,6 +129,8 @@ public final class DataTransformerTest {
 
 		FhirContext ctx = FhirContext.forDstu3();
 		String encoded = ctx.newXmlParser().encodeResourceToString(bene);
+		// System.out.println(encoded);
+
 		Assert.assertEquals(false, encoded.contains("Optional"));
 
 		Assert.assertEquals(bene.getId(), "Patient/bene-" + record.beneficiaryId);
@@ -139,26 +142,17 @@ public final class DataTransformerTest {
 		Assert.assertEquals("MALE", bene.getGender().toString().trim());
 		assertExtensionCodingEquals(bene, DataTransformer.EXTENSION_US_CORE_RACE,
 				DataTransformer.CODING_SYSTEM_RACE, "1");
-		/*
-		 * TODO Further research needs to be done so these unmapped fields are
-		 * documented in a JIRA ticket "Finalize fields for Beneficiary"
-		 * BENE_ENTLMT_RSN_ORIG, BENE_ENTLMT_RSN_CURR, BENE_ESRD_IND
-		 */
-
 		Assert.assertEquals(record.nameGiven, bene.getName().get(0).getGiven().get(0).toString());
 		Assert.assertEquals(record.nameMiddleInitial.get().toString(),
 				bene.getName().get(0).getGiven().get(1).toString());
 		Assert.assertEquals(record.nameSurname, bene.getName().get(0).getFamily());
 
-		// TODO Need to check the status code for partA
-		// and partB (BENE_PTA_TRMNTN_CD & BENE_PTB_TRMNTN_CD) once STU3 is
-		// available
-
 		BundleEntryComponent[] coverageEntry = beneBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof Coverage).toArray(BundleEntryComponent[]::new);
 
 		Coverage partA = (Coverage) coverageEntry[0].getResource();
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partA.getGroup().getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partA.getGroup().getSubGroup());
+		Assert.assertEquals(CoverageStatus.ACTIVE, partA.getStatus());
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_A, partA.getGroup().getSubPlan());
 
 		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
@@ -171,14 +165,20 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR,
 				DataTransformer.CODING_SYSTEM_CCW_ESRD_INDICATOR, "N");
 
+		FhirContext ctxPartA = FhirContext.forDstu3();
+		String encodedPartA = ctxPartA.newXmlParser().encodeResourceToString(partA);
+		// System.out.println(encodedPartA);
+
 		Coverage partB = (Coverage) coverageEntry[1].getResource();
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partB.getGroup().getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN,
+				partB.getGroup().getSubGroup());
+		Assert.assertEquals(CoverageStatus.ACTIVE, partB.getStatus());
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_B, partB.getGroup().getSubPlan());
 		assertExtensionCodingEquals(partB, DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 				DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, record.medicareEnrollmentStatusCode.get());
 
 		Coverage partD = (Coverage) coverageEntry[2].getResource();
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partD.getGroup().getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partD.getGroup().getSubGroup());
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, partD.getGroup().getSubPlan());
 		assertExtensionCodingEquals(partB, DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 				DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, record.medicareEnrollmentStatusCode.get());
@@ -1178,7 +1178,7 @@ public final class DataTransformerTest {
 		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
-		// TODO Verify eob.type once STU3 is available (institutional).
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
@@ -1434,7 +1434,7 @@ public final class DataTransformerTest {
 		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
-		// TODO Verify eob.type once STU3 is available (professional)
+		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
 		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
 		assertExtensionCodingEquals(eob.getType(), DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD,
