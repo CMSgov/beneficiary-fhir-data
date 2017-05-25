@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.parse.InvalidRifFileFormatException;
 
 /**
  * <p>

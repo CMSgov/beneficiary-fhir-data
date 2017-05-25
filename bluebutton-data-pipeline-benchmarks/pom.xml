@@ -150,9 +150,9 @@
 									<artifactId>bluebutton-data-pipeline-app</artifactId>
 									<version>${project.version}</version>
 									<classifier>capsule-fat</classifier>
-									<type>x</type>
+									<type>jar</type>
 									<outputDirectory>${project.build.directory}/pipeline-app</outputDirectory>
-									<destFileName>bluebutton-data-pipeline-app-capsule-fat.x</destFileName>
+									<destFileName>bluebutton-data-pipeline-app-capsule-fat.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

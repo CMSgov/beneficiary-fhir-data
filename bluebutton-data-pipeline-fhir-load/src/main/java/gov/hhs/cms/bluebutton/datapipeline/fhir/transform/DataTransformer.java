@@ -63,7 +63,6 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SharedDataManager;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifRecordActionException;
@@ -88,6 +87,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.parse.InvalidRifFileFormatException;
 
 /**
  * Handles the translation from source/CCW {@link RifRecordEvent}s data into

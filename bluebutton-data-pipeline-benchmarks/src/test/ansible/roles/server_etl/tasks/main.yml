@@ -5,7 +5,10 @@
     name: "{{ item }}"
     state: latest
   with_items:
+    # Needed to supply `keytool` and also to run the ETL service.
     - java-1.8.0-openjdk-devel
+    # Needed to use the `s3_object` module.
+    - python-boto
   become: true
 
 - name: Create ETL Service User
@@ -42,14 +45,14 @@
     object: "{{ item }}"
     dest: "/usr/local/bluebutton-data-pipeline-app/{{ item }}"
   with_items:
-    - bluebutton-data-pipeline-app-capsule-fat.x
+    - bluebutton-data-pipeline-app-capsule-fat.jar
   environment:
     AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
   become: true
 
 - file:
-    path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.x'
+    path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app-capsule-fat.jar'
     mode: 'u=rwx,g=rwx,o=rwx'
   become: true
 

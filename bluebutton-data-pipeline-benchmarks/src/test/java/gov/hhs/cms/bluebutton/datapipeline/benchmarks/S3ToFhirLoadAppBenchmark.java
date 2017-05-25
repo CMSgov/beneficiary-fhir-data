@@ -1,11 +1,13 @@
 package gov.hhs.cms.bluebutton.datapipeline.benchmarks;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,10 +44,14 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.transfer.Copy;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
@@ -53,6 +61,7 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.hhs.cms.bluebutton.datapipeline.app.S3ToFhirLoadApp;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
@@ -74,13 +83,6 @@ public final class S3ToFhirLoadAppBenchmark {
 	private static final String SYS_PROP_EC2_KEY_NAME = "ec2KeyName";
 
 	/**
-	 * The name of the {@link System#getProperty(String)} value that must be
-	 * specified, which will provide the path to the AWS EC2 key PEM file to use
-	 * when connecting to benchmark systems.
-	 */
-	private static final String SYS_PROP_EC2_KEY_FILE = "ec2KeyFile";
-
-	/**
 	 * The name of the optional {@link System#getProperty(String)} value that
 	 * can be specified, which will provide the path that the benchmarks will
 	 * write their results out to. If not specified, this will default to
@@ -91,7 +93,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	/**
 	 * The number of iterations that will be performed for each benchmark.
 	 */
-	private static final int NUMBER_OF_ITERATIONS = 30;
+	private static final int NUMBER_OF_ITERATIONS = 10;
 
 	/**
 	 * <p>
@@ -153,16 +155,9 @@ public final class S3ToFhirLoadAppBenchmark {
 		if (ec2KeyName == null)
 			throw new IllegalArgumentException(
 					String.format("The '%s' Java system property must be specified.", SYS_PROP_EC2_KEY_NAME));
-		String ec2KeyFile = System.getProperty(SYS_PROP_EC2_KEY_FILE, null);
-		if (ec2KeyFile == null)
-			throw new IllegalArgumentException(
-					String.format("The '%s' Java system property must be specified.", SYS_PROP_EC2_KEY_FILE));
-		Path ec2KeyFilePath = Paths.get(ec2KeyFile);
-		if (!Files.isReadable(ec2KeyFilePath))
-			throw new IllegalArgumentException(String
-					.format("The '%s' Java system property must specify a valid key file.", SYS_PROP_EC2_KEY_FILE));
+		Path ec2KeyFilePath = BenchmarkUtilities.findEc2KeyFile();
 
-		Path benchmarksDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations");
+		Path benchmarksDir = BenchmarkUtilities.findBenchmarksWorkDir();
 		Files.createDirectories(benchmarksDir);
 
 		// Prepare the Python/Ansible virtualenv needed for the iterations.
@@ -170,7 +165,7 @@ public final class S3ToFhirLoadAppBenchmark {
 		Path ansibleInitScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src").resolve("test")
 				.resolve("ansible").resolve("ansible_init.sh");
 		ProcessBuilder ansibleProcessBuilder = new ProcessBuilder(ansibleInitScript.toString());
-		int ansibleInitExitCode = runProcessAndLogOutput(ansibleProcessBuilder, ansibleInitLog);
+		int ansibleInitExitCode = BenchmarkUtilities.runProcessAndLogOutput(ansibleProcessBuilder, ansibleInitLog);
 		if (ansibleInitExitCode != 0)
 			throw new BenchmarkError(
 					String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
@@ -378,12 +373,44 @@ public final class S3ToFhirLoadAppBenchmark {
 				.map(r -> new DataSetManifestEntry(r.name(), r.getRifFileType())).collect(Collectors.toList());
 		DataSetManifest manifest = new DataSetManifest(Instant.now(), 0, manifestEntries);
 		s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
+
+		TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 		for (int i = 0; i < dataResources.getResources().length; i++) {
 			StaticRifResource dataResource = dataResources.getResources()[i];
-			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(i),
-					dataResource.getResourceUrl()));
+			URL dataResourceUrl = dataResource.getResourceUrl();
+
+			/*
+			 * This is a bit hacky, but we're coping with the S3 API's
+			 * non-support for PUTing from a remote URL. Attempting a normal PUT
+			 * request for the S3 HTTP URLs used in the SAMPLE_C resources will
+			 * result in an error. In addition, some of the SAMPLE_C files are
+			 * larger than 5GB and thus can't be copied using a non-multipart
+			 * request. So instead, we pull those URLs apart and copy them using
+			 * multipart requests via TransferManager, instead.
+			 */
+			Pattern s3HttpObjectRegex = Pattern.compile("http://(.+)\\.s3\\.amazonaws\\.com/(.+)");
+			Matcher s3HttpObjectMatcher = s3HttpObjectRegex.matcher(dataResourceUrl.toString());
+			if (s3HttpObjectMatcher.matches()) {
+				String sourceBucketName = s3HttpObjectMatcher.group(1);
+				String sourceKey = s3HttpObjectMatcher.group(2);
+				String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+						DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()),
+						manifest.getEntries().get(i).getName());
+
+				Copy s3CopyOperation = transferManager
+						.copy(new CopyObjectRequest(sourceBucketName, sourceKey, bucket.getName(), objectKey));
+				try {
+					s3CopyOperation.waitForCopyResult();
+				} catch (InterruptedException e) {
+					throw new BadCodeMonkeyException(e);
+				}
+			} else {
+				s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest, manifest.getEntries().get(i),
+						dataResourceUrl));
+			}
 		}
 
+		transferManager.shutdownNow(false);
 		LOGGER.info("Data set uploaded to S3.");
 	}
 
@@ -431,32 +458,6 @@ public final class S3ToFhirLoadAppBenchmark {
 	}
 
 	/**
-	 * @param processBuilder
-	 *            the process to run
-	 * @param logFile
-	 *            the {@link Path} to write the process' output to
-	 * @return the process' exit code
-	 */
-	private static int runProcessAndLogOutput(ProcessBuilder processBuilder, Path logFile) {
-		Process process = null;
-		try {
-			processBuilder.redirectErrorStream(true);
-			processBuilder.redirectOutput(logFile.toFile());
-
-			process = processBuilder.start();
-			int exitCode = process.waitFor();
-			return exitCode;
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		} catch (InterruptedException e) {
-			throw new BadCodeMonkeyException(e);
-		} finally {
-			if (process != null)
-				process.destroyForcibly();
-		}
-	}
-
-	/**
 	 * Throws an {@link AssumptionViolatedException} if the OS doesn't support
 	 * <strong>graceful</strong> shutdowns via {@link Process#destroy()}.
 	 */
@@ -482,9 +483,9 @@ public final class S3ToFhirLoadAppBenchmark {
 	 */
 	private static final class BenchmarkTask implements Callable<BenchmarkResult> {
 		private static final Pattern PATTERN_DATA_SET_START = Pattern
-				.compile("^(\\S* \\S*) .* Data set finished uploading and ready to process.$");
+				.compile("^(\\S* \\S*) .* Data set ready. Processing it...$");
 		private static final Pattern PATTERN_DATA_SET_COMPLETE = Pattern
-				.compile("^(\\S* \\S*) .* Data set deleted, now that processing is complete.$");
+				.compile("^(\\S* \\S*) .* Data set renamed in S3, now that processing is complete.$");
 		private static final DateTimeFormatter ETL_LOG_DATE_TIME_FORMATTER = DateTimeFormatter
 				.ofPattern("yyyy-MM-dd HH:mm:ss,SSS");
 
@@ -511,9 +512,15 @@ public final class S3ToFhirLoadAppBenchmark {
 			this.ec2KeyName = ec2KeyName;
 			this.ec2KeyFile = ec2KeyFile;
 
-			this.benchmarkIterationDir = BenchmarkUtilities.findProjectTargetDir().resolve("benchmark-iterations")
-					.resolve("" + iterationIndex);
+			this.benchmarkIterationDir = BenchmarkUtilities.findBenchmarksWorkDir().resolve("" + iterationIndex);
 			try {
+				/*
+				 * Ensure that any previous iteration's results are cleaned up
+				 * first, to avoid confusion.
+				 */
+				if (Files.exists(benchmarkIterationDir))
+					Files.walk(benchmarkIterationDir).sorted(Comparator.reverseOrder()).map(Path::toFile)
+							.forEach(File::delete);
 				Files.createDirectories(benchmarkIterationDir);
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
@@ -553,7 +560,8 @@ public final class S3ToFhirLoadAppBenchmark {
 
 			try {
 				// Run Ansible to create the benchmark systems in AWS.
-				int provisionExitCode = runProcessAndLogOutput(provisionProcessBuilder, provisionLog);
+				int provisionExitCode = BenchmarkUtilities.runProcessAndLogOutput(provisionProcessBuilder,
+						provisionLog);
 				if (provisionExitCode != 0)
 					throw new BenchmarkError(String.format(
 							"Ansible provisioning failed with exit code '%d' for benchmark iteration '%d'.",
@@ -566,12 +574,8 @@ public final class S3ToFhirLoadAppBenchmark {
 				 * to: 1) Collect the ETL and FHIR logs, and 2) destroy the
 				 * benchmark systems in AWS.
 				 */
-				Path teardownLog = benchmarkIterationDir.resolve(String.format("ansible_teardown.log", iterationIndex));
-				Path teardownScript = BenchmarkUtilities.findProjectTargetDir().resolve("..").resolve("src")
-						.resolve("test").resolve("ansible").resolve("teardown.sh");
-				ProcessBuilder teardownProcessBuilder = new ProcessBuilder(teardownScript.toString(), "--iteration",
-						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
-				int teardownExitCode = runProcessAndLogOutput(teardownProcessBuilder, teardownLog);
+				int teardownExitCode = BenchmarkUtilities.runBenchmarkTeardown(iterationIndex, benchmarkIterationDir,
+						ec2KeyFile);
 				if (teardownExitCode != 0)
 					throw new BenchmarkError(
 							String.format("Ansible failed with exit code '%d' for benchmark teardown iteration '%d'.",
@@ -607,8 +611,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
 			Bucket bucket = null;
 			try {
-				bucket = s3Client.createBucket(
-						String.format("gov.hhs.cms.bluebutton.datapipeline.benchmark.iteration%d", iterationIndex));
+				bucket = s3Client.createBucket(BenchmarkUtilities.computeBenchmarkDataBucketName(iterationIndex));
 				copyDataSetInS3(s3Client, bucket);
 
 				/*
@@ -621,7 +624,8 @@ public final class S3ToFhirLoadAppBenchmark {
 						.resolve("test").resolve("ansible").resolve("benchmark_etl.sh");
 				ProcessBuilder benchmarkProcessBuilder = new ProcessBuilder(benchmarkScript.toString(), "--iteration",
 						("" + iterationIndex), "--ec2keyfile", ec2KeyFile.toString());
-				int benchmarkExitCode = runProcessAndLogOutput(benchmarkProcessBuilder, benchmarkLog);
+				int benchmarkExitCode = BenchmarkUtilities.runProcessAndLogOutput(benchmarkProcessBuilder,
+						benchmarkLog);
 
 				if (benchmarkExitCode != 0)
 					throw new BenchmarkError(
@@ -640,19 +644,32 @@ public final class S3ToFhirLoadAppBenchmark {
 		 *            the S3 {@link Bucket} to copy the data set to
 		 */
 		private static void copyDataSetInS3(AmazonS3 s3Client, Bucket bucket) {
-			final ListObjectsRequest bucketListRequest = new ListObjectsRequest()
-					.withBucketName(BUCKET_DATA_SET_MASTER);
-			ObjectListing objectListing;
-			do {
-				objectListing = s3Client.listObjects(bucketListRequest);
+			TransferManager transferManager = null;
+			try {
+				transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-				for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-					s3Client.copyObject(BUCKET_DATA_SET_MASTER, objectSummary.getKey(), bucket.getName(),
-							objectSummary.getKey());
-				}
+				final ListObjectsRequest bucketListRequest = new ListObjectsRequest()
+						.withBucketName(BUCKET_DATA_SET_MASTER);
+				ObjectListing objectListing;
+				do {
+					objectListing = s3Client.listObjects(bucketListRequest);
 
-				objectListing = s3Client.listNextBatchOfObjects(objectListing);
-			} while (objectListing.isTruncated());
+					for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+						Copy copyOperation = transferManager.copy(BUCKET_DATA_SET_MASTER, objectSummary.getKey(),
+								bucket.getName(), objectSummary.getKey());
+						try {
+							copyOperation.waitForCopyResult();
+						} catch (InterruptedException e) {
+							throw new BadCodeMonkeyException(e);
+						}
+					}
+
+					objectListing = s3Client.listNextBatchOfObjects(objectListing);
+				} while (objectListing.isTruncated());
+			} finally {
+				if (transferManager != null)
+					transferManager.shutdownNow(false);
+			}
 		}
 	}
 

@@ -2,8 +2,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,14 +17,13 @@ import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.input.BOMInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +31,6 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.ColumnValueCsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifFileFormatException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifVersionException;
@@ -63,6 +59,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
+import gov.hhs.cms.bluebutton.datapipeline.rif.parse.InvalidRifFileFormatException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.parse.RifParsingUtils;
 
 /**
  * Contains services responsible for handling new RIF files.
@@ -181,44 +179,44 @@ public final class RifFilesProcessor {
 		 */
 
 		LOGGER.info("Processing RIF file: " + file);
-		CSVParser parser = createCsvParser(file);
+		CSVParser parser = RifParsingUtils.createCsvParser(file);
 
 		Stream<RifRecordEvent<?>> rifRecordStream;
 
-		Enum<?> groupingColumn;
+		boolean isGrouped;
 		Function<List<CSVRecord>, ?> recordParser;
 		if (file.getFileType() == RifFileType.BENEFICIARY) {
-			groupingColumn = null;
+			isGrouped = false;
 			recordParser = RifFilesProcessor::buildBeneficiaryEvent;
 		} else if (file.getFileType() == RifFileType.PDE) {
-			groupingColumn = null;
+			isGrouped = false;
 			recordParser = RifFilesProcessor::buildPartDEvent;
 		} else if (file.getFileType() == RifFileType.CARRIER) {
-			groupingColumn = CarrierClaimGroup.Column.CLM_ID;
+			isGrouped = true;
 			recordParser = RifFilesProcessor::buildCarrierClaimEvent;
 		} else if (file.getFileType() == RifFileType.INPATIENT) {
-			groupingColumn = InpatientClaimGroup.Column.CLM_ID;
+			isGrouped = true;
 			recordParser = RifFilesProcessor::buildInpatientClaimEvent;
 		} else if (file.getFileType() == RifFileType.OUTPATIENT) {
-			groupingColumn = OutpatientClaimGroup.Column.CLM_ID;
+			isGrouped = true;
 			recordParser = RifFilesProcessor::buildOutpatientClaimEvent;
 		} else if (file.getFileType() == RifFileType.SNF) {
-			groupingColumn = SNFClaimGroup.Column.CLM_ID;
+			isGrouped = true;
 			recordParser = RifFilesProcessor::buildSNFClaimEvent;
 		} else if (file.getFileType() == RifFileType.HOSPICE) {
-			groupingColumn = HospiceClaimGroup.Column.CLM_ID;
+			isGrouped = true;
 			recordParser = RifFilesProcessor::buildHospiceClaimEvent;
 		} else if (file.getFileType() == RifFileType.HHA) {
-			groupingColumn = HHAClaimGroup.Column.CLM_ID;
+			isGrouped = true;
 			recordParser = RifFilesProcessor::buildHHAClaimEvent;
 		} else if (file.getFileType() == RifFileType.DME) {
-			groupingColumn = DMEClaimGroup.Column.CLM_ID;
+			isGrouped = true;
 			recordParser = RifFilesProcessor::buildDMEClaimEvent;
 		} else {
 			throw new UnsupportedRifFileTypeException("Unsupported file type:" + file.getFileType());
 		}
 
-		CsvRecordGrouper grouper = new ColumnValueCsvRecordGrouper(groupingColumn);
+		CsvRecordGrouper grouper = new ColumnValueCsvRecordGrouper(isGrouped ? file.getFileType().getIdColumn() : null);
 		Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
 		Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
 				Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
@@ -239,31 +237,6 @@ public final class RifFilesProcessor {
 		});
 
 		return rifRecordStream;
-	}
-
-	/**
-	 * @param file
-	 *            the {@link RifFile} to parse
-	 * @return a {@link CSVParser} for the specified {@link RifFile}
-	 */
-	private static CSVParser createCsvParser(RifFile file) {
-		CSVFormat csvFormat = CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
-
-		InputStream fileStream = file.open();
-		BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
-		InputStreamReader reader = new InputStreamReader(fileStreamWithoutBom, file.getCharset());
-
-		try {
-			CSVParser parser = new CSVParser(reader, csvFormat);
-			return parser;
-		} catch (IOException e) {
-			/*
-			 * Per the docs, this should only be thrown if there's an issue with
-			 * the header record. We don't use header records, so this shouldn't
-			 * ever occur.
-			 */
-			throw new InvalidRifFileFormatException("Invalid RIF header record", e);
-		}
 	}
 
 	/**
@@ -535,13 +508,35 @@ public final class RifFilesProcessor {
 			claimLine.revenueCenter = claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR);
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.HCPCS_CD));
 			claimLine.unitCount = parseDecimal(claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_UNIT_CNT));
-			claimLine.rateAmount = parseDecimal(claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_RATE_AMT));
+
+			/*
+			 * FIXME Workaround for
+			 * http://issues.hhsdevcloud.us/browse/CBBD-255. Random test data
+			 * has values like "B2620".
+			 */
+			String rateAmountText = claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_RATE_AMT);
+			if (Pattern.compile("^\\d*$").matcher(rateAmountText).matches())
+				claimLine.rateAmount = parseDecimal(rateAmountText);
+			else
+				claimLine.rateAmount = BigDecimal.ZERO;
+
 			claimLine.totalChargeAmount = parseDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
-			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
-					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
+
+			/*
+			 * FIXME Workaround for
+			 * http://issues.hhsdevcloud.us/browse/CBBD-255. Random test data
+			 * has values like "5853".
+			 */
+			String deductibleCoinsuranceCdText = claimLineRecord
+					.get(InpatientClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD);
+			if (Pattern.compile("^\\S?$").matcher(deductibleCoinsuranceCdText).matches())
+				claimLine.deductibleCoinsuranceCd = parseOptCharacter(deductibleCoinsuranceCdText);
+			else
+				claimLine.deductibleCoinsuranceCd = Optional.empty();
+
 			claimLine.nationalDrugCodeQuantity = parseOptDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
 			claimLine.nationalDrugCodeQualifierCode = parseOptString(

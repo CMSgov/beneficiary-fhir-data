@@ -49,7 +49,8 @@
         zone: "{{ zone }}"
         instance_name: "bluebutton-etl-benchmark-{{ iteration_index }}-db"
         db_engine: postgres
-        size: 1000
+        engine_version: 9.4.9
+        size: 3000
         iops: 10000
         backup_retention: 0
         instance_type: "{{ rds_instance_type }}"
@@ -121,6 +122,11 @@
         zone: "{{ zone }}"
         # FIXME: Disabled, because I don't have permissions for it.
         #instance_profile_name: 'BlueButtonBenchmarkRunner'
+        volumes:
+          - device_name: /dev/sda1
+            volume_type: gp2
+            # The sample RIF data set is about 92GB total.
+            volume_size: 200
         wait: true
         exact_count: 1
         count_tag:
