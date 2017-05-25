@@ -805,31 +805,31 @@ public final class HospiceClaimGroup {
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_c15.txt">
-		 * CCW Data Dictionary: ICD_DGNS_C15</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd15.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD15</a>.
 		 */
-		ICD_DGNS_C15,
+		ICD_DGNS_CD15,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_c15.txt">
-		 * CCW Data Dictionary: ICD_DGNS_VRSN_C15</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd15.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRNS_CD15</a>.
 		 */
-		ICD_DGNS_VRSN_C15,
+		ICD_DGNS_VRNS_CD15,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 19. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_c16.txt">
-		 * CCW Data Dictionary: ICD_DGNS_C16</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_cd16.txt">
+		 * CCW Data Dictionary: ICD_DGNS_CD16</a>.
 		 */
-		ICD_DGNS_C16,
+		ICD_DGNS_CD16,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 1. See <a href=
-		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_c16.txt">
-		 * CCW Data Dictionary: ICD_DGNS_VRSN_C16</a>.
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/icd_dgns_vrsn_cd16.txt">
+		 * CCW Data Dictionary: ICD_DGNS_VRNS_CD16</a>.
 		 */
-		ICD_DGNS_VRSN_C16,
+		ICD_DGNS_VRNS_CD16,
 
 		/**
 		 * Type: <code>CHAR</code>, max chars: 19. See <a href=

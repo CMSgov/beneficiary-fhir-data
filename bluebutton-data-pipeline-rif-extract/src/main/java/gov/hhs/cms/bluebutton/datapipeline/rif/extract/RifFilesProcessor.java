@@ -77,9 +77,6 @@ public final class RifFilesProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
-	/**
-	 * FIXME The data uses a two-digit year format, which is awful. Just awful.
-	 */
 	private final static DateTimeFormatter RIF_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
 			.appendPattern("dd-MMM-yyyy").toFormatter();
 
@@ -154,8 +151,7 @@ public final class RifFilesProcessor {
 
 		/*
 		 * FIXME I've got a resource ownership problem: no way to tell when the
-		 * stream is fully mapped, such that it's safe to close the parser. I be
-		 * fucked.
+		 * stream is fully mapped, such that it's safe to close the parser.
 		 */
 
 		List<Stream<RifRecordEvent<?>>> recordProducer = filesOrderedSafely.stream()
@@ -375,12 +371,7 @@ public final class RifFilesProcessor {
 		pdeRow.totalPrescriptionCost = new BigDecimal(csvRecord.get(PartDEventRow.Column.TOT_RX_CST_AMT));
 		pdeRow.prescriptionOriginationCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.RX_ORGN_CD));
 		pdeRow.gapDiscountAmount = new BigDecimal(csvRecord.get(PartDEventRow.Column.RPTD_GAP_DSCNT_NUM));
-		/*
-		 * TODO Re-enable this mapping once it is determined for sure if this is
-		 * optional or not.
-		 */
-		// pdeRow.brandGenericCode =
-		// csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD).charAt(0);
+		pdeRow.brandGenericCode = parseOptCharacter(csvRecord.get(PartDEventRow.Column.BRND_GNRC_CD));
 		pdeRow.pharmacyTypeCode = csvRecord.get(PartDEventRow.Column.PHRMCY_SRVC_TYPE_CD);
 		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD);
 		pdeRow.submissionClarificationCode = parseOptString(csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD));

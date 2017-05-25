@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v1" 
-  timestamp="2016-12-19T10:29:51Z">
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v2" 
+  timestamp="2016-12-19T10:29:51Z" sequenceId="1">
 <entry name="bene.txt" type="BENEFICIARY" />
 <entry name="bcarrier.txt" type="CARRIER" />
 <entry name="dme.txt" type="DME" />

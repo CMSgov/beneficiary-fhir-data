@@ -187,7 +187,6 @@ public final class IcdCode {
 	public static enum IcdVersion {
 		ICD_9("9", "http://hl7.org/fhir/sid/icd-9-cm"),
 
-		// TODO confirm that we're using intl ICD-10 codes
 		ICD_10("0", "http://hl7.org/fhir/sid/icd-10");
 
 		private final String ccwCoding;
