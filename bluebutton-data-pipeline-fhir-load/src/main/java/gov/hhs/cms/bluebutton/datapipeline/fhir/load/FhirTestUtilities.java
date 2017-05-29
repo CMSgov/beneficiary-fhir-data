@@ -106,8 +106,13 @@ public final class FhirTestUtilities {
 	}
 
 	/**
-	 * use {@link IGenericClient} and resourceTypeName to delete the FHIR
-	 * resources from the database
+	 * Deletes all instances of the specified FHIR resource type from the
+	 * database.
+	 * 
+	 * @param fhirClient
+	 *            the FHIR {@link IGenericClient} to use
+	 * @param resourceTypeName
+	 *            the FHIR resource type to be wiped
 	 */
 	public static void deleteAllResources(IGenericClient fhirClient, String resourceTypeName) {
 		Bundle results = fhirClient.search().forResource(resourceTypeName).returnBundle(Bundle.class).execute();

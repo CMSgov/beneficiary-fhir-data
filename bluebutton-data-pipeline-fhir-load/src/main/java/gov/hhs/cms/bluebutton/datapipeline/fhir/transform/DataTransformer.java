@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
+import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -117,19 +118,22 @@ public final class DataTransformer {
 	static final String COVERAGE_PLAN = "Medicare";
 
 	/**
-	 * The {@link Coverage#getPlan()} value for Part A.
+	 * The {@link Coverage#getGroup()} {@link GroupComponent#getSubPlan()} value
+	 * for Part A.
 	 */
-	static final String COVERAGE_PLAN_PART_A = "Part A";
+	public static final String COVERAGE_PLAN_PART_A = "Part A";
 
 	/**
-	 * The {@link Coverage#getPlan()} value for Part B.
+	 * The {@link Coverage#getGroup()} {@link GroupComponent#getSubPlan()} value
+	 * for Part B.
 	 */
-	static final String COVERAGE_PLAN_PART_B = "Part B";
+	public static final String COVERAGE_PLAN_PART_B = "Part B";
 
 	/**
-	 * The {@link Coverage#getPlan()} value for Part D.
+	 * The {@link Coverage#getGroup()} {@link GroupComponent#getSubPlan()} value
+	 * for Part D.
 	 */
-	static final String COVERAGE_PLAN_PART_D = "Part D";
+	public static final String COVERAGE_PLAN_PART_D = "Part D";
 
 	static final String CODING_SYSTEM_RACE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
 
