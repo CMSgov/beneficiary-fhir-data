@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -123,8 +122,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(4, beneBundle.getEntry().size());
 		BundleEntryComponent beneEntry = beneBundle.getEntry().stream().filter(r -> r.getResource() instanceof Patient)
 				.findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, beneEntry.getRequest().getMethod());
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, beneEntry.getRequest().getUrl());
 		Patient bene = (Patient) beneEntry.getResource();
 
 		FhirContext ctx = FhirContext.forDstu3();
@@ -133,7 +130,6 @@ public final class DataTransformerTest {
 
 		Assert.assertEquals(false, encoded.contains("Optional"));
 
-		Assert.assertEquals(bene.getId(), "Patient/bene-" + record.beneficiaryId);
 		Assert.assertEquals(1, bene.getAddress().size());
 		Assert.assertEquals(record.stateCode, bene.getAddress().get(0).getState());
 		Assert.assertEquals(record.countyCode, bene.getAddress().get(0).getDistrict());
@@ -232,13 +228,13 @@ public final class DataTransformerTest {
 		BundleEntryComponent eobEntry = pdeBundle.getEntry().stream()
 				.filter(r -> r.getResource() instanceof ExplanationOfBenefit).findAny().get();
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 
 		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_PDE_ID, pdeRecord.partDEventId, eob.getIdentifier());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_FHIR_CLAIM_TYPE, "pharmacy", eob.getType());
-		Assert.assertEquals("Patient/bene-" + pdeRecord.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(pdeRecord.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		Assert.assertEquals(Date.valueOf(pdeRecord.paymentDate.get()), eob.getPayment().getDate());
 
 		Assert.assertEquals("01", pdeRecord.serviceProviderIdQualiferCode);
@@ -430,13 +426,13 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		assertExtensionCodingEquals(eob.getType(), DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD,
 				DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD, record.nearLineRecordIdCode.toString());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
@@ -451,7 +447,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals(record.paymentAmount, eob.getPayment().getAmount().getValue());
 
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				referral.getPatient().getReference());
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
 				referral.getRequester());
 		Assert.assertEquals(1, referral.getRecipient().size());
@@ -626,14 +623,14 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		Assert.assertEquals("active", eob.getStatus().toCode());
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
@@ -821,7 +818,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -830,7 +826,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_QUERY_CD,
@@ -988,7 +985,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -997,7 +993,8 @@ public final class DataTransformerTest {
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		assertExtensionCodingEquals(eob.getBillablePeriod(), DataTransformer.CODING_SYSTEM_QUERY_CD,
@@ -1172,7 +1169,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -1180,7 +1176,8 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_PROVIDER_NUMBER, record.providerNumber,
@@ -1304,14 +1301,14 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
 
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
 		assertDateEquals(record.dateThrough, eob.getBillablePeriod().getEndElement());
 
@@ -1428,7 +1425,6 @@ public final class DataTransformerTest {
 		Assert.assertEquals(1, claimBundle.getEntry().size());
 		BundleEntryComponent eobEntry = claimBundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit).findAny().get();
-		Assert.assertEquals(HTTPVerb.PUT, eobEntry.getRequest().getMethod());
 		ExplanationOfBenefit eob = (ExplanationOfBenefit) eobEntry.getResource();
 
 		assertOptionalNotPresent(eob);
@@ -1436,7 +1432,8 @@ public final class DataTransformerTest {
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_CCW_CLAIM_ID, record.claimId, eob.getIdentifier());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CLAIM_TYPE, record.claimTypeCode, eob.getType());
 
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, eob.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				eob.getPatient().getReference());
 		assertExtensionCodingEquals(eob.getType(), DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD,
 				DataTransformer.CODING_SYSTEM_CCW_RECORD_ID_CD, record.nearLineRecordIdCode.toString());
 		assertDateEquals(record.dateFrom, eob.getBillablePeriod().getStartElement());
@@ -1459,7 +1456,8 @@ public final class DataTransformerTest {
 				DataTransformer.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER, record.clinicalTrialNumber.get());
 		
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-		Assert.assertEquals("Patient/bene-" + record.beneficiaryId, referral.getPatient().getReference());
+		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
+				referral.getPatient().getReference());
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
 				referral.getRequester());
 		Assert.assertEquals(1, referral.getRecipient().size());

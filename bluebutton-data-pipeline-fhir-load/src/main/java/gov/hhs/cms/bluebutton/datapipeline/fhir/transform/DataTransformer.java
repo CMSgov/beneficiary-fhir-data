@@ -210,7 +210,7 @@ public final class DataTransformer {
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
 	 * CCW Data Dictionary: BENE_ID</a>.
 	 */
-	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
+	public static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
 
 	public static final String CODING_SYSTEM_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
 
@@ -657,8 +657,8 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		Patient beneficiary = new Patient();
-		beneficiary.setId("Patient/bene-" + record.beneficiaryId);
-		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID).setValue(record.beneficiaryId);
+		Identifier beneId = beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID)
+				.setValue(record.beneficiaryId);
 		beneficiary.addAddress().setState(record.stateCode).setDistrict(record.countyCode)
 				.setPostalCode(record.postalCode);
 		if (record.birthDate != null) {
@@ -686,7 +686,7 @@ public final class DataTransformer {
 				.setFamily(record.nameSurname).setUse(HumanName.NameUse.USUAL);
 		if (record.nameMiddleInitial.isPresent())
 			name.addGiven(String.valueOf(record.nameMiddleInitial.get()));
-		insert(bundle, beneficiary);
+		Reference beneficiaryBundleReference = conditionalCreate(bundle, beneficiary, beneId);
 
 		/*
 		 * We don't have detailed enough data on this right now, so we'll just
@@ -694,17 +694,14 @@ public final class DataTransformer {
 		 */
 
 		Coverage partA = new Coverage();
-		partA.setId("Coverage/partA-" + record.beneficiaryId);
-
 		if (record.partATerminationCode.isPresent() && record.partATerminationCode.get().equals('0'))
 			partA.setStatus(CoverageStatus.ACTIVE);
 		else
 			partA.setStatus(CoverageStatus.CANCELLED);
-
 		partA.getGroup().setSubGroup(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_A);
 		partA.setType(createCodeableConcept(COVERAGE_PLAN, COVERAGE_PLAN_PART_A));
 		partA.addPayor(SharedDataManager.createReferenceToCms());
-		partA.setBeneficiary(referencePatient(record.beneficiaryId));
+		partA.setBeneficiary(beneficiaryBundleReference);
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			addExtensionCoding(partA, CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 					"" + record.medicareEnrollmentStatusCode.get());
@@ -721,39 +718,33 @@ public final class DataTransformer {
 			addExtensionCoding(partA, CODING_SYSTEM_CCW_ESRD_INDICATOR, CODING_SYSTEM_CCW_ESRD_INDICATOR,
 					"" + record.endStageRenalDiseaseCode.get());
 		}
-
-		insert(bundle, partA);
+		conditionalCreate(bundle, partA, referenceCoverage(record.beneficiaryId, partA.getGroup().getSubPlan()));
 
 		Coverage partB = new Coverage();
-		partB.setId("Coverage/partB-" + record.beneficiaryId);
-
 		if (record.partBTerminationCode.isPresent() && record.partBTerminationCode.get().equals('0'))
 			partB.setStatus(CoverageStatus.ACTIVE);
 		else
 			partB.setStatus(CoverageStatus.CANCELLED);
-
 		partB.getGroup().setSubGroup(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_B);
 		partB.setType(createCodeableConcept(COVERAGE_PLAN, COVERAGE_PLAN_PART_B));
 		partB.addPayor(SharedDataManager.createReferenceToCms());
-		partB.setBeneficiary(referencePatient(record.beneficiaryId));
+		partB.setBeneficiary(beneficiaryBundleReference);
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			addExtensionCoding(partB, CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 					"" + record.medicareEnrollmentStatusCode.get());
 		}
-
-		insert(bundle, partB);
+		conditionalCreate(bundle, partB, referenceCoverage(record.beneficiaryId, partB.getGroup().getSubPlan()));
 
 		Coverage partD = new Coverage();
-		partD.setId("Coverage/partD-" + record.beneficiaryId);
 		partD.getGroup().setSubGroup(COVERAGE_PLAN).setSubPlan(COVERAGE_PLAN_PART_D);
 		partD.setType(createCodeableConcept(COVERAGE_PLAN, COVERAGE_PLAN_PART_D));
 		partD.addPayor(SharedDataManager.createReferenceToCms());
-		partD.setBeneficiary(referencePatient(record.beneficiaryId));
+		partD.setBeneficiary(beneficiaryBundleReference);
 		if (record.medicareEnrollmentStatusCode.isPresent()) {
 			addExtensionCoding(partD, CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 					"" + record.medicareEnrollmentStatusCode.get());
 		}
-		insert(bundle, partD);
+		conditionalCreate(bundle, partD, referenceCoverage(record.beneficiaryId, partD.getGroup().getSubPlan()));
 
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
@@ -778,8 +769,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/partD-claimid-" + record.partDEventId);
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_PDE_ID).setValue(record.partDEventId);
 		eob.addIdentifier().setSystem(CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
 				.setValue(String.valueOf(record.prescriptionReferenceNumber));
 
@@ -1013,7 +1003,7 @@ public final class DataTransformer {
 					createCodeableConcept(CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD,
 							record.submissionClarificationCode.get())));
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -1037,8 +1027,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
-		eob.setId("ExplanationOfBenefit/carrier-claimid-" + claimGroup.claimId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
@@ -1338,7 +1327,7 @@ public final class DataTransformer {
 			}
 		}
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -1362,8 +1351,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/inpatient-claimid-" + claimGroup.claimId);
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 
@@ -1723,7 +1711,7 @@ public final class DataTransformer {
 
 		}
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -1747,8 +1735,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/outpatient-claimid-" + claimGroup.claimId);
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
@@ -2054,7 +2041,7 @@ public final class DataTransformer {
 			}
 		}
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -2078,8 +2065,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/snf-claimid-" + claimGroup.claimId);
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
@@ -2416,7 +2402,7 @@ public final class DataTransformer {
 
 		}
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -2440,8 +2426,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/hospice-claimid-" + claimGroup.claimId);
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
@@ -2633,7 +2618,7 @@ public final class DataTransformer {
 			}
 		}
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -2657,8 +2642,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/hha-claimid-" + claimGroup.claimId);
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_A));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setType(createCodeableConcept(CODING_SYSTEM_CCW_CLAIM_TYPE, claimGroup.claimTypeCode));
@@ -2843,7 +2827,7 @@ public final class DataTransformer {
 
 		}
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -2868,8 +2852,7 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-		eob.setId("ExplanationOfBenefit/dme-claimid-" + claimGroup.claimId);
-		eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
+		Identifier eobId = eob.addIdentifier().setSystem(CODING_SYSTEM_CCW_CLAIM_ID).setValue(claimGroup.claimId);
 		eob.getInsurance().setCoverage(referenceCoverage(claimGroup.beneficiaryId, COVERAGE_PLAN_PART_B));
 		eob.setPatient(referencePatient(claimGroup.beneficiaryId));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
@@ -3189,7 +3172,7 @@ public final class DataTransformer {
 
 		}
 
-		insert(bundle, eob);
+		conditionalCreate(bundle, eob, eobId);
 		return new TransformedBundle(rifRecordEvent, bundle);
 	}
 
@@ -3208,114 +3191,94 @@ public final class DataTransformer {
 
 	/**
 	 * Adds the specified {@link Resource}s to the specified {@link Bundle},
-	 * setting it as a <a href="http://hl7-fhir.github.io/http.html#insert">FHIR
-	 * "insert" operation</a> if {@link Resource#getId()} is <code>null</code>,
-	 * or a <a href="http://hl7-fhir.github.io/http.html#update">FHIR "update"
-	 * operation</a> if it is not.
+	 * setting it as a <a href="https://www.hl7.org/fhir/http.html#ccreate">FHIR
+	 * "conditional create" operation</a>.
 	 * 
 	 * @param bundle
 	 *            the {@link Bundle} to include the resource in
 	 * @param resource
-	 *            the FHIR {@link Resource} to upsert into the specified
-	 *            {@link Bundle}
+	 *            the FHIR {@link Resource} to be created (as part of the
+	 *            specified transaction {@link Bundle})
+	 * @param conditionQuery
+	 *            the value to use for
+	 *            {@link BundleEntryRequestComponent#setIfNoneExist(String)},
+	 *            which must be a search query of the form
+	 *            "<code>fhirType/?field=value</code>"
 	 * @return a {@link Reference} instance, which must be used for any
 	 *         references to the {@link Resource} within the same {@link Bundle}
 	 */
-	private static Reference insert(Bundle bundle, Resource resource) {
+	public static Reference conditionalCreate(Bundle bundle, Resource resource, String conditionQuery) {
 		if (bundle == null)
 			throw new IllegalArgumentException("Bundle is null");
 		if (resource == null)
 			throw new IllegalArgumentException("Resource is null");
+		if (conditionQuery == null)
+			throw new IllegalArgumentException("Condition query is null");
+
+		/*
+		 * See the `dev/design-decisions-readme.md` file for a more complete
+		 * explanation, but due to limitations imposed by the FHIR spec we
+		 * cannot specify resources' logical ID and also create them
+		 * idempotently. Idempotency is more important for our architecture, so
+		 * we disallow setting IDs here (and compliant FHIR servers will ignore
+		 * them, anyways).
+		 */
+		if (resource.getId() != null)
+			throw new IllegalArgumentException();
 
 		BundleEntryComponent bundleEntry = bundle.addEntry();
-		if (resource.getId() == null)
-			bundleEntry.setResource(resource).getRequest().setMethod(HTTPVerb.POST);
-		else
-			bundleEntry.setResource(resource).getRequest().setMethod(HTTPVerb.PUT).setUrl(resource.getId());
+		bundleEntry.setFullUrl(IdType.newRandomUuid().getValue()).setResource(resource).getRequest()
+				.setMethod(HTTPVerb.POST).setIfNoneExist(conditionQuery);
 
-		Reference bundleEntryReference = setFullUrl(bundleEntry);
+		Reference bundleEntryReference = new Reference(bundleEntry.getFullUrl());
 		return bundleEntryReference;
 	}
 
 	/**
 	 * Adds the specified {@link Resource}s to the specified {@link Bundle},
-	 * setting it as a
-	 * <a href="http://hl7-fhir.github.io/http.html#2.1.0.10.2">FHIR
-	 * "conditional update" operation</a>.
+	 * setting it as a <a href="https://www.hl7.org/fhir/http.html#ccreate">FHIR
+	 * "conditional create" operation</a>.
 	 * 
 	 * @param bundle
 	 *            the {@link Bundle} to include the resource in
 	 * @param resource
-	 *            the FHIR {@link Resource} to upsert into the specified
-	 *            {@link Bundle}
-	 * @param resourceUrl
+	 *            the FHIR {@link Resource} to be created (as part of the
+	 *            specified transaction {@link Bundle})
+	 * @param uniqueId
 	 *            the value to use for
-	 *            {@link BundleEntryRequestComponent#setUrl(String)}, which will
-	 *            typically be a search query of the form
-	 *            "<code>Patient/?field=value</code>" (there are good examples
-	 *            of this here: <a href=
-	 *            "http://hl7-fhir.github.io/bundle-transaction.xml.html">
-	 *            Bundle- transaction.xml</a>)
+	 *            {@link BundleEntryRequestComponent#setIfNoneExist(String)},
+	 *            which will be converted to a search query of the form
+	 *            "<code>fhirType/?field=value</code>"
 	 * @return a {@link Reference} instance, which must be used for any
 	 *         references to the {@link Resource} within the same {@link Bundle}
 	 */
-	public static Reference upsert(Bundle bundle, Resource resource, String resourceUrl) {
-		if (bundle == null)
-			throw new IllegalArgumentException("Bundle is null");
-		if (resource == null)
-			throw new IllegalArgumentException("Resource is null");
+	public static Reference conditionalCreate(Bundle bundle, Resource resource, Identifier uniqueId) {
+		if (uniqueId == null)
+			throw new IllegalArgumentException("Unique ID is null");
 
-		if (resource.getId() != null)
-			throw new IllegalArgumentException("FHIR conditional updates don't allow IDs to be specified client-side");
-
-		BundleEntryComponent bundleEntry = bundle.addEntry();
-		bundleEntry.setResource(resource).getRequest().setMethod(HTTPVerb.PUT).setUrl(resourceUrl);
-
-		Reference bundleEntryReference = setFullUrl(bundleEntry);
-		return bundleEntryReference;
+		String conditionQuery = String.format("%s?identifier=%s|%s", resource.fhirType(), uniqueId.getSystem(),
+				uniqueId.getValue());
+		return conditionalCreate(bundle, resource, conditionQuery);
 	}
 
 	/**
-	 * <p>
-	 * Sets the {@link BundleEntryComponent#getFullUrl()} field of the specified
-	 * {@link BundleEntryComponent}. This is a required field, and a bit tricky:
-	 * </p>
-	 * <ol>
-	 * <li>Each entry may use a UUID (i.e. "<code>urn:uuid:...</code>") as its
-	 * URL. If so, other resources within the same {@link Bundle} may reference
-	 * that UUID when defining relationships with that resource.</li>
-	 * <li>Optionally: If the resource is known to <strong>already</strong>
-	 * exist on the server, the entry URL may be set to the absolute URL of that
-	 * resource. Again: this is optional; existing resources included in the
-	 * bundle may also be assigned and referred to via a bundle-specific UUID.
-	 * </li>
-	 * </ol>
+	 * Adds the specified {@link Resource}s to the specified {@link Bundle},
+	 * setting it as a <a href="https://www.hl7.org/fhir/http.html#ccreate">FHIR
+	 * "conditional create" operation</a>.
 	 * 
-	 * 
-	 * @param bundleEntry
-	 *            the {@link BundleEntryComponent} to modify
-	 * @return a {@link Reference} to the {@link Resource} in the specified
-	 *         {@link BundleEntryComponent}'s that can be used by other
-	 *         resources in the same {@link Bundle}
+	 * @param bundle
+	 *            the {@link Bundle} to include the resource in
+	 * @param resource
+	 *            the FHIR {@link Resource} to be created (as part of the
+	 *            specified transaction {@link Bundle})
+	 * @param conditionQuery
+	 *            the {@link Reference} to use for
+	 *            {@link BundleEntryRequestComponent#setIfNoneExist(String)}
+	 * @return a {@link Reference} instance, which must be used for any
+	 *         references to the {@link Resource} within the same {@link Bundle}
 	 */
-	private static Reference setFullUrl(BundleEntryComponent bundleEntry) {
-		/*
-		 * For sanity, only this method should be used to set this field. And
-		 * only once per bundle entry.
-		 */
-		if (bundleEntry.getFullUrl() != null)
-			throw new BadCodeMonkeyException("BundleEntry URL is null");
-
-		/*
-		 * The logic here is super simple. ... So why is this a method, you
-		 * might ask? Mostly just so there's a single place for the explanation
-		 * in this method's JavaDoc, which took quite a while to figure out.
-		 */
-
-		IdType entryId = IdType.newRandomUuid();
-		bundleEntry.setFullUrl(entryId.getValue());
-
-		return new Reference(entryId);
+	public static Reference conditionalCreate(Bundle bundle, Resource resource, Reference conditionQuery) {
+		return conditionalCreate(bundle, resource, conditionQuery.getReference());
 	}
 
 	/**
@@ -3334,25 +3297,27 @@ public final class DataTransformer {
 	 * @param subPlan
 	 *            the {@link Coverage#getSubPlan()} value to match
 	 * @param beneficiaryPatientId
-	 *            the {@link Patient#getId()} for the
-	 *            {@link Coverage#getSubscriber()} value to match
+	 *            the {@link #CODING_SYSTEM_CCW_BENE_ID} ID value for the
+	 *            {@link Coverage#getBeneficiary()} value to match
 	 * @return a {@link Reference} to the {@link Coverage} resource where
 	 *         {@link Coverage#getPlan()} matches {@link #COVERAGE_PLAN} and the
 	 *         other parameters specified also match
 	 */
 	static Reference referenceCoverage(String beneficiaryPatientId, String subPlan) {
-		return new Reference(String.format("Coverage?beneficiary=%s&subgroup=%s&subplan=%s",
-				urlEncode("Patient/bene-" + beneficiaryPatientId), urlEncode(COVERAGE_PLAN), urlEncode(subPlan)));
+		return new Reference(String.format("Coverage?beneficiary.identifier=%s|%s&subplan=%s",
+				CODING_SYSTEM_CCW_BENE_ID, urlEncode(beneficiaryPatientId), urlEncode(subPlan)));
 	}
 
 	/**
 	 * @param patientId
-	 *            the {@link Patient#getId()} value to match
+	 *            the {@link #CODING_SYSTEM_CCW_BENE_ID} ID value for the
+	 *            beneficiary to match
 	 * @return a {@link Reference} to the {@link Patient} resource that matches
 	 *         the specified parameters
 	 */
 	static Reference referencePatient(String patientId) {
-		return new Reference(String.format("Patient/bene-%s", urlEncode(patientId)));
+		return new Reference(
+				String.format("Patient?identifier=%s|%s", CODING_SYSTEM_CCW_BENE_ID, urlEncode(patientId)));
 	}
 
 	/**
