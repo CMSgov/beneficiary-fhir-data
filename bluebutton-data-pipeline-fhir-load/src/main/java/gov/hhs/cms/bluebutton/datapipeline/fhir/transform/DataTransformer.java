@@ -4,12 +4,15 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.commons.codec.binary.Hex;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -211,6 +214,15 @@ public final class DataTransformer {
 	 * CCW Data Dictionary: BENE_ID</a>.
 	 */
 	static final String CODING_SYSTEM_CCW_BENE_ID = "CCW.BENE_ID";
+
+	/**
+	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
+	 * store a one-way cryptographic hash of each Medicare beneficiaries'
+	 * <a href="">HICN</a>. Note that, with the SSNRI initiative, CMS is
+	 * planning to move away from HICNs. However, HICNs are still the
+	 * primary/only Medicare identifier for now.
+	 */
+	public static final String CODING_SYSTEM_CCW_BENE_HICN_HASH = "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
 
 	public static final String CODING_SYSTEM_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
 
@@ -605,6 +617,8 @@ public final class DataTransformer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataTransformer.class);
 
+	private static MessageDigest digestSha256 = null;
+
 	/**
 	 * @param rifStream
 	 *            the stream of source {@link RifRecordEvent}s to be transformed
@@ -659,6 +673,8 @@ public final class DataTransformer {
 		Patient beneficiary = new Patient();
 		beneficiary.setId("Patient/bene-" + record.beneficiaryId);
 		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID).setValue(record.beneficiaryId);
+		String hicnHash = computeHicnHash(record.hicn);
+		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_HICN_HASH).setValue(hicnHash);
 		beneficiary.addAddress().setState(record.stateCode).setDistrict(record.countyCode)
 				.setPostalCode(record.postalCode);
 		if (record.birthDate != null) {
@@ -756,6 +772,32 @@ public final class DataTransformer {
 		insert(bundle, partD);
 
 		return new TransformedBundle(rifRecordEvent, bundle);
+	}
+
+	/**
+	 * Computes a one-way cryptographic hash of the specified HICN value. This
+	 * is used as a secure means of identifying Medicare beneficiaries between
+	 * the Blue Button API frontend and backend systems: the HICN is the only
+	 * unique beneficiary identifier shared between those two systems.
+	 * 
+	 * @param hicn
+	 *            the Medicare beneficiary HICN to be hashed
+	 * @return a one-way cryptographic hash of the specified HICN value
+	 */
+	static String computeHicnHash(String hicn) {
+		try {
+			if (digestSha256 == null)
+				digestSha256 = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException(e);
+		}
+
+		// FIXME use a shared salt here to make table attacks harder
+		// FIXME use scrypt or bcrypt or something like that here
+		byte[] hash = digestSha256.digest(hicn.getBytes(StandardCharsets.UTF_8));
+		String hexEncodedHash = Hex.encodeHexString(hash);
+
+		return hexEncodedHash;
 	}
 
 	/**

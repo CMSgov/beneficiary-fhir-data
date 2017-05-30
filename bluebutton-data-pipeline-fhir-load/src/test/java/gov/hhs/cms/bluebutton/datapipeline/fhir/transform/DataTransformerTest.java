@@ -9,8 +9,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,7 +42,10 @@ import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -74,6 +80,7 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
  * Unit tests for {@link DataTransformer}.
  */
 public final class DataTransformerTest {
+	public static final Logger LOGGER = LoggerFactory.getLogger(DataTransformerTest.class);
 
 	/**
 	 * Verifies that {@link DataTransformer} works correctly when passed an
@@ -204,6 +211,48 @@ public final class DataTransformerTest {
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
 		Assert.assertEquals(1, resultList.size());
+	}
+
+	/**
+	 * Verify that the {@link DataTransformer#computeHicnHash(String)} algorithm
+	 * doesn't produce any collisions. Such collisions would result in
+	 * beneficiaries being able to see other beneficiaries' data. That'd be bad.
+	 */
+	@Test
+	@Ignore("Won't ever complete. Needs too much RAM.")
+	public void checkForHicnHashCollisions() {
+		/*
+		 * Actual HICNs follow a format, but it's poorly documented so for our
+		 * purposes here we'll simplify it to the following: "123456789X". The
+		 * first nine digits are social security numbers, which are followed by
+		 * a one-character suffix of 'A, 'B', 'C', 'D', or 'E'.
+		 */
+
+		/*
+		 * If we don't limit the SSN search space, this test will run more-or
+		 * less forever. So instead, we limit our search to a random 60M SSNs,
+		 * which has the added benefit of allowing this test to estimate the
+		 * time that HICN hashing will add to an initial load.
+		 */
+		// FIXME we can get through 7M with a 12GB heap before mem pressure
+		int maxValidSsn = 899999999;
+		int startSsn = new Random().nextInt(maxValidSsn - 6000000 + 1);
+
+		Map<String, String> knownHashes = new HashMap<>();
+		for (int ssn = startSsn; ssn <= maxValidSsn; ssn++) {
+			for (char suffix = 'A'; suffix <= 'E'; suffix++) {
+				// (This will left-pad the SSNs with zeroes.)
+				String hicn = String.format("%09d%c", ssn, suffix);
+
+				String hash = DataTransformer.computeHicnHash(hicn);
+				Assert.assertFalse(String.format("Hash collision for HICN hash of '%s': '%s and '%s'.", hash, hicn,
+						knownHashes.get(hash)), knownHashes.containsKey(hash));
+				knownHashes.put(hash, hicn);
+			}
+
+			if ((ssn - startSsn) % 1000000 == 0)
+				LOGGER.info("Completed SSN {}", (ssn - startSsn));
+		}
 	}
 
 	/**
