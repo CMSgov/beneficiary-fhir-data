@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.Conformance;
 import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu3.model.Conformance.RestfulConformanceMode;
 
+import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedUriSyntaxException;
 
@@ -178,7 +179,7 @@ public final class FhirTestUtilities {
 	 *         server used in tests
 	 */
 	public static IGenericClient createFhirClient() {
-		IGenericClient client = FhirLoader.createFhirClient(getLoadOptions());
+		IGenericClient client = FhirLoader.createFhirClient(getLoadOptions(), new MetricRegistry());
 		return client;
 	}
 }
