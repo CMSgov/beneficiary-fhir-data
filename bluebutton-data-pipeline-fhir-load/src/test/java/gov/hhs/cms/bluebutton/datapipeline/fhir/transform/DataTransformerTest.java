@@ -250,7 +250,7 @@ public final class DataTransformerTest {
 				knownHashes.put(hash, hicn);
 			}
 
-			if ((ssn - startSsn) % 1000000 == 0)
+			if ((ssn - startSsn) % 10000 == 0)
 				LOGGER.info("Completed SSN {}", (ssn - startSsn));
 		}
 	}

@@ -4,15 +4,20 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -617,7 +622,7 @@ public final class DataTransformer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataTransformer.class);
 
-	private static MessageDigest digestSha256 = null;
+	private static SecretKeyFactory secretKeyFactory = null;
 
 	/**
 	 * @param rifStream
@@ -786,18 +791,26 @@ public final class DataTransformer {
 	 */
 	static String computeHicnHash(String hicn) {
 		try {
-			if (digestSha256 == null)
-				digestSha256 = MessageDigest.getInstance("SHA-256");
+			if (secretKeyFactory == null)
+				secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException(e);
 		}
 
-		// FIXME use a shared salt here to make table attacks harder
+		// FIXME use a shared pepper here to make table attacks harder
 		// FIXME use scrypt or bcrypt or something like that here
-		byte[] hash = digestSha256.digest(hicn.getBytes(StandardCharsets.UTF_8));
-		String hexEncodedHash = Hex.encodeHexString(hash);
+		try {
+			byte[] salt = new byte[] {};
+			byte[] pepper = "notsecure".getBytes(StandardCharsets.UTF_8);
+			byte[] saltAndPepper = ArrayUtils.addAll(salt, pepper);
+			PBEKeySpec hicnKeySpec = new PBEKeySpec(hicn.toCharArray(), saltAndPepper, 300, 256);
+			SecretKey hicnSecret = secretKeyFactory.generateSecret(hicnKeySpec);
+			String hexEncodedHash = Hex.encodeHexString(hicnSecret.getEncoded());
 
-		return hexEncodedHash;
+			return hexEncodedHash;
+		} catch (InvalidKeySpecException e) {
+			throw new BadCodeMonkeyException(e);
+		}
 	}
 
 	/**
