@@ -38,6 +38,7 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	/**
 	 * The number of iterations that will be performed for each benchmark.
 	 */
-	private static final int NUMBER_OF_ITERATIONS = 10;
+	private static final int NUMBER_OF_ITERATIONS = 2;
 
 	/**
 	 * <p>
@@ -122,6 +123,7 @@ public final class S3ToFhirLoadAppBenchmark {
 	 *             (shouldn't happen)
 	 */
 	@Test
+	@Ignore("Not enough data to be useful most of the time.")
 	public void sampleB() throws IOException {
 		runBenchmark(StaticRifResourceGroup.SAMPLE_B);
 	}
