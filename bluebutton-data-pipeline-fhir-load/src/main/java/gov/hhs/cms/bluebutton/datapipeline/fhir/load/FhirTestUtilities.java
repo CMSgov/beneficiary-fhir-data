@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Conformance;
-import org.hl7.fhir.dstu3.model.Conformance.ConditionalDeleteStatus;
-import org.hl7.fhir.dstu3.model.Conformance.RestfulConformanceMode;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.ConditionalDeleteStatus;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.RestfulCapabilityMode;
 
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -58,19 +58,16 @@ public final class FhirTestUtilities {
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
 
 		IGenericClient fhirClient = createFhirClient();
-
-		// TODO see CBBD-239 (Change deprecated Conformance to
-		// CapabilityStatement)
-		Conformance conformance = fhirClient.fetchConformance().ofType(Conformance.class).execute();
+		CapabilityStatement capabilities = fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
 
 		/*
 		 * This is ugly code, but not worth making more readable. Here's what it
-		 * does: grabs the server's conformance statement, looks at the
-		 * supported resources, and then grabs all of the resource type names
-		 * that support bulk conditional delete operations.
+		 * does: grabs the server's capability statement, looks at the supported
+		 * resources, and then grabs all of the resource type names that support
+		 * bulk conditional delete operations.
 		 */
-		List<String> resourcesToDelete = conformance.getRest().stream()
-				.filter(r -> r.getMode() == RestfulConformanceMode.SERVER).flatMap(r -> r.getResource().stream())
+		List<String> resourcesToDelete = capabilities.getRest().stream()
+				.filter(r -> r.getMode() == RestfulCapabilityMode.SERVER).flatMap(r -> r.getResource().stream())
 				.filter(r -> r.getConditionalDelete() != null)
 				.filter(r -> r.getConditionalDelete() == ConditionalDeleteStatus.MULTIPLE).map(r -> r.getType())
 				.collect(Collectors.toList());
@@ -91,19 +88,13 @@ public final class FhirTestUtilities {
 		// for (String resourceTypeName : resourcesToDelete)
 		// fhirClient.delete().resourceConditionalByUrl(resourceTypeName).execute();
 
-		for (String resourceTypeName : resourcesToDelete) {
-			if (resourceTypeName.contentEquals("Coverage"))
-				continue;
-			if (resourceTypeName.contentEquals("Organization"))
-				continue;
-			if (resourceTypeName.contentEquals("Patient"))
-				continue;
-			deleteAllResources(fhirClient, resourceTypeName);
-		}
-
+		deleteAllResources(fhirClient, "ExplanationOfBenefit");
 		deleteAllResources(fhirClient, "Coverage");
 		deleteAllResources(fhirClient, "Organization");
 		deleteAllResources(fhirClient, "Patient");
+		for (String resourceTypeName : resourcesToDelete) {
+			deleteAllResources(fhirClient, resourceTypeName);
+		}
 	}
 
 	/**

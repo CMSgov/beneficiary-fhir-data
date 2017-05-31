@@ -147,9 +147,9 @@ public final class DataTransformerTest {
 				.filter(r -> r.getResource() instanceof Coverage).toArray(BundleEntryComponent[]::new);
 
 		Coverage partA = (Coverage) coverageEntry[0].getResource();
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partA.getGroup().getSubGroup());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partA.getGrouping().getSubGroup());
 		Assert.assertEquals(CoverageStatus.ACTIVE, partA.getStatus());
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_A, partA.getGroup().getSubPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_A, partA.getGrouping().getSubPlan());
 
 		assertExtensionCodingEquals(partA, DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 				DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, record.medicareEnrollmentStatusCode.get());
@@ -167,15 +167,15 @@ public final class DataTransformerTest {
 
 		Coverage partB = (Coverage) coverageEntry[1].getResource();
 		Assert.assertEquals(DataTransformer.COVERAGE_PLAN,
-				partB.getGroup().getSubGroup());
+				partB.getGrouping().getSubGroup());
 		Assert.assertEquals(CoverageStatus.ACTIVE, partB.getStatus());
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_B, partB.getGroup().getSubPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_B, partB.getGrouping().getSubPlan());
 		assertExtensionCodingEquals(partB, DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 				DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, record.medicareEnrollmentStatusCode.get());
 
 		Coverage partD = (Coverage) coverageEntry[2].getResource();
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partD.getGroup().getSubGroup());
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, partD.getGroup().getSubPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, partD.getGrouping().getSubGroup());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, partD.getGrouping().getSubPlan());
 		assertExtensionCodingEquals(partB, DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD,
 				DataTransformer.CODING_SYSTEM_CCW_BENE_MDCR_STATUS_CD, record.medicareEnrollmentStatusCode.get());
 	}
@@ -278,8 +278,8 @@ public final class DataTransformerTest {
 				coverage.getIdentifier());
 		assertIdentifierExists(DataTransformer.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
 				pdeRecord.planBenefitPackageId, coverage.getIdentifier());
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, coverage.getGroup().getPlan());
-		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, coverage.getGroup().getSubPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN, coverage.getGrouping().getPlan());
+		Assert.assertEquals(DataTransformer.COVERAGE_PLAN_PART_D, coverage.getGrouping().getSubPlan());
 
 	}
 
@@ -448,9 +448,9 @@ public final class DataTransformerTest {
 
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
-				referral.getPatient().getReference());
+				referral.getSubject().getReference());
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
-				referral.getRequester());
+				referral.getRequester().getAgent());
 		Assert.assertEquals(1, referral.getRecipient().size());
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
 				referral.getRecipientFirstRep());
@@ -1457,12 +1457,9 @@ public final class DataTransformerTest {
 		
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals(DataTransformer.referencePatient(record.beneficiaryId).getReference(),
-				referral.getPatient().getReference());
+				referral.getSubject().getReference());
 		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
-				referral.getRequester());
-		Assert.assertEquals(1, referral.getRecipient().size());
-		assertReferenceIdentifierEquals(DataTransformer.CODING_SYSTEM_NPI_US, record.referringPhysicianNpi.get(),
-				referral.getRecipientFirstRep());
+				referral.getRequester().getAgent());
 
 		assertExtensionCodingEquals(eob, DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
 				DataTransformer.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT, "A");
@@ -1797,7 +1794,7 @@ public final class DataTransformerTest {
 				.findFirst();
 		Assert.assertTrue(benefitComponent.isPresent());
 		try {
-			Assert.assertEquals(expectedAmount, benefitComponent.get().getBenefitMoney().getValue());
+			Assert.assertEquals(expectedAmount, benefitComponent.get().getAllowedMoney().getValue());
 		} catch (FHIRException e) {
 			throw new BadCodeMonkeyException(e);
 		}
@@ -1823,7 +1820,7 @@ public final class DataTransformerTest {
 				.isCodeInConcept(a.getType(), expectedFinancialTypeSystem, expectedFinancialTypeCode)).findFirst();
 		Assert.assertTrue(benefitComponent.isPresent());
 		try {
-			Assert.assertEquals(expectedAmount, benefitComponent.get().getBenefitUnsignedIntType().getValue());
+			Assert.assertEquals(expectedAmount, benefitComponent.get().getAllowedUnsignedIntType().getValue());
 		} catch (FHIRException e) {
 			throw new BadCodeMonkeyException(e);
 		}
@@ -1849,7 +1846,7 @@ public final class DataTransformerTest {
 				.isCodeInConcept(a.getType(), expectedFinancialTypeSystem, expectedFinancialTypeCode)).findFirst();
 		Assert.assertTrue(benefitComponent.isPresent());
 		try {
-			Assert.assertEquals(expectedAmount, benefitComponent.get().getBenefitUsedUnsignedIntType().getValue());
+			Assert.assertEquals(expectedAmount, benefitComponent.get().getUsedUnsignedIntType().getValue());
 		} catch (FHIRException e) {
 			throw new BadCodeMonkeyException(e);
 		}
