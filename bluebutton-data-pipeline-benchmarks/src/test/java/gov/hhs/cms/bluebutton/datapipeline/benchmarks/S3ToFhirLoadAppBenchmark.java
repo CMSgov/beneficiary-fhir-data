@@ -615,6 +615,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			try {
 				bucket = s3Client.createBucket(BenchmarkUtilities.computeBenchmarkDataBucketName(iterationIndex));
 				copyDataSetInS3(s3Client, bucket);
+				LOGGER.info("Benchmark iteration '{}': provisioned and data set copied.", iterationIndex);
 
 				/*
 				 * Run the `benchmark_etl.yml` playbook to do everything we need
