@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.model;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -60,5 +61,19 @@ public final class RifFilesEvent {
 	 */
 	public Set<RifFile> getFiles() {
 		return files;
+	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("RifFilesEvent [timestamp=");
+		builder.append(DateTimeFormatter.ISO_INSTANT.format(timestamp));
+		builder.append(", files=");
+		builder.append(files);
+		builder.append("]");
+		return builder.toString();
 	}
 }

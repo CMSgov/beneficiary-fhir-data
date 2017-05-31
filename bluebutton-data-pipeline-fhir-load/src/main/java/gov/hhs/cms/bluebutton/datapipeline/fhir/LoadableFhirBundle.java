@@ -18,6 +18,13 @@ public interface LoadableFhirBundle {
 	String getSourceType();
 
 	/**
+	 * @return a human-readable {@link String} representation of the source data
+	 *         that this {@link LoadableFhirBundle} was created from (if any),
+	 *         suitable for use in debugging and log messages
+	 */
+	String getSourceDataAsText();
+
+	/**
 	 * @return the FHIR transaction {@link Bundle} that can be pushed to a FHIR
 	 *         server via {@link IGenericClient#transaction()}
 	 */
