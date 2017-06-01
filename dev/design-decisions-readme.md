@@ -92,3 +92,66 @@ Here are some miscellaneous facts considered in this decision:
 * In the dev, test, and production HealthAPT environments, our data pipeline application is spread across three separate EC2 instances: an ETL server, a FHIR app server, and a PostgreSQL database server. None of these are dedicated hosts; they're all sharing hardware with other AWS users and applications.
     * Dedicated hosts are cost-prohibitive. Ballpark, they start at $2/hour, rounded up to the nearest hour.
 * Google Sheets have a limit of 400K cells. With our 11 columns, and 30 executions/rows per test case, this would allow us to store over 1200 test case runs.
+
+## Linking Frontend Users to Backend Resources
+
+### Requirements and Goals
+
+There are several requirements to be met:
+
+1. Do not store any operational data in the backend that cannot be discarded.
+    * The disaster recovery plan of record for the backend database is to rebuild it from scratch.
+2. Ensure that the frontend has simple queries that can be run to retrieve the resources for a given beneficiary.
+
+In addition to those requirements, it would be nice to also achieve the following goals:
+
+* Stick with standard FHIR: avoid the use of custom operations or storage mechanisms in the backend FHIR system.
+* Ensure that the backend responses do not return any sensitive information, e.g. the beneficiary's HICN (or hashes of it, even).
+
+There are also these additional "nice to haves" that are known to be impossible due to requirement #1 (the backend DB can't be treated as if it were durable):
+
+* Avoid the need for the frontend to maintain any sort of crosswalk table to keep track of which backend `Patient` resource is associated with each frontend user account.
+* Be able to identify which backend resources are associated with active frontend user accounts.
+
+### Proposed Workflow
+
+The frontend users and backend records will be linked using each Medicare beneficiary's unique HICN. Both systems will create cryptographic hashes of the HICN using a mutually agreed-upon process and will store those hashes in their systems, associated with the records for the beneficiary. This will allow both systems to avoid storing the actual HICN (which is sensitive) while still using it to coordinate.
+
+When registering a new user, the frontend shall issue a "Search `Patient`" request (per below) to the backend to determine whether or not that user's records exist in the backend. Assuming that the request is successful (as defined below), the user's account will be activated and the registration process can complete normally.
+
+After registration, the backend will support queries like the following for that frontend user:
+
+* Request the user's `Patient` resource:
+    
+    ```
+    $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --header "Content-Type: application/x-www-form-urlencoded" --data "identifier=http%3A%2F%2Fbluebutton.cms.hhs.gov%2Fidentifier%23hicnHash%7CA1234567890ABCDEF" --request POST https://backend.example.com:1234/baseDstu3/Patient/_search
+    ```
+    
+    * Before being encoded, the `--data` parameter's value was: "`http://bluebutton.cms.hhs.gov/identifier#hicnHash|A1234567890ABCDEF`".
+        * This sample request assumes that the beneficiary's HICN hashed to a value of "`A1234567890ABCDEF`".
+    * The frontend shall verify that every response from the backend for such a query meets the following conditions:
+        * That the response uses an HTTP `200` code.
+        * That the response's body JSON/XML has a `total` field with a value of exactly `1`.
+            * A value of `0` indicates that no matching `Patient` resource was found for the specified frontend account. Could occur if:
+                * The user isn't actually a Medicare beneficiary.
+                * The user's data isn't yet in the CCW or the backend FHIR system for some reason.
+                * If an incorrect HICN hash was supplied for the beneficiary.
+            * A value greater than `1` indicates that multiple backend `Patient` records were found for the specified HICN hash. Congratulations -- we've had a hash collision! This should trigger an administrative alert to the developers/system operators. The user's account should be disabled.
+* Request the user's `Coverage` resources:
+
+    ```
+    $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --header "Content-Type: application/x-www-form-urlencoded" --data "beneficiary.identifier=http%3A%2F%2Fbluebutton.cms.hhs.gov%2Fidentifier%23hicnHash%7CA1234567890ABCDEF" --request POST https://backend.example.com:1234/baseDstu3/Coverage/_search
+    ```
+    
+* Request the user's `ExplanationOfBenefit` resources:
+    
+    ```
+    $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --header "Content-Type: application/x-www-form-urlencoded" --data "patient.identifier=http%3A%2F%2Fbluebutton.cms.hhs.gov%2Fidentifier%23hicnHash%7CA1234567890ABCDEF" --request POST https://backend.example.com:1234/baseDstu3/ExplanationOfBenefit/_search
+    ```
+    
+Note that all of the above queries are standard FHIR searches, as specified in [FHIR Latest Release: Search](http://hl7.org/fhir/search.html).
+
+### Proposed Backend Design
+
+The above design can actually all be accomplished using only the standard FHIR mechanisms. The backend must simply ensure that each `Patient` resource includes a `http://bluebutton.cms.hhs.gov/identifier#hicnHash` identifier.
+
