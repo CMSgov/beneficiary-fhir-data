@@ -97,19 +97,19 @@ Here are some miscellaneous facts considered in this decision:
 
 **"Idempotent"**: An idempotent operation is one that can be retried/replayed without affecting the outcome; the result will be the same if the operation is applied one time or a hundred times.
 
-The FHIR HTTP ReST API does not guarantee delivery. Additionally, AWS has proven to be a very lossy environment: a non-trivial percentage of HTTP requests from the ETL service to the FHIR server have been observed to fail. This poses an important problem: what should the ETL service do when it submits transactions to the server and fails to receive a response?
+The FHIR HTTP REST API does not guarantee delivery. Additionally, AWS has proven to be a very lossy environment: a non-trivial percentage of HTTP requests from the ETL service to the FHIR server have been observed to fail. This poses an important problem: what should the ETL service do when it submits transactions to the server and fails to receive a response?
 
 The ETL service **must** guarantee that all data is loaded succesfully. Therefore, the ETL service **must** retry submissions that fail for transport-related reasons.
 
-Unfortunately, the semantics of the FHIR API make retrying submissions tricky. Most of the FHIR write operations aren't idempotent. Here's a breakdown of the relevant FHIR operations:
+Unfortunately, the semantics of the FHIR API make retrying submissions tricky. Most of the FHIR write operations aren't idempotent. Here's a breakdown of the relevant FHIR operations (from [FHIR Latest Release: RESTful API](https://www.hl7.org/fhir/http.html)):
 
 * `update`: There are two forms of `update` operations:
-    * `PUT [base]/[type]/[id]` (upsert by ID): Will update the resource specified, resulting in a new version, even if the new content supplied exactly matches the previous version.
+    * `PUT [base]/[type]/[id]` (_upsert by ID_): Will update the resource specified, resulting in a new version, even if the new content supplied exactly matches the previous version.
         * FHIR allows (and HAPI supports) servers to allow this operation to act as an "upsert", creating the specified resource at the specified ID, if it was not already present.
-    * `PUT [base]/[type]?[search parameters]` (conditional update): If the search finds no matches, this will result in a `create` operation. If the search finds exactly one match, this will update that resource. If the search finds more than one match, this will return an error.
+    * `PUT [base]/[type]?[search parameters]` (_conditional update_): If the search finds no matches, this will result in a `create` operation. If the search finds exactly one match, this will update that resource. If the search finds more than one match, this will return an error.
 * `create`: There are two forms of `create` operations:
-    * `POST [base]/[type]` (normal create): Will result in a new resource, with a server-specified ID.
-    * `If-None-Exist: [search parameters]` (conditional create): Will only create the resource if the specified search returns no results.
+    * `POST [base]/[type]` (_normal create_): Will result in a new resource, with a server-specified ID.
+    * `POST [base]/[type]` with `If-None-Exist: [search parameters]` (_conditional create_): Will only create the resource if the specified search returns no results.
 
 Of these four operations/variants, only the last one, _conditional create_, is truly idempotent. It may seem like the first _update by ID_ option is also idempotent, but it's not: it will result in duplicate versions being created. (Indeed, the ETL service was attempting to use this option for quite a while, until this was discovered.)
 
