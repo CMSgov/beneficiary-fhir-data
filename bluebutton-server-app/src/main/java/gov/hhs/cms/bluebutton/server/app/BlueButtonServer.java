@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -147,16 +146,10 @@ public class BlueButtonServer extends RestfulServer {
 		setETagSupport(ETagSupportEnum.ENABLED);
 
 		/*
-		 * This server tries to dynamically generate narratives
-		 */
-		FhirContext ctx = getFhirContext();
-		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-
-		/*
 		 * Default to XML and pretty printing
 		 */
 		setDefaultPrettyPrint(true);
-		setDefaultResponseEncoding(EncodingEnum.JSON);
+		setDefaultResponseEncoding(EncodingEnum.XML);
 
 		/*
 		 * -- New in HAPI FHIR 1.5 -- This configures the server to page search
