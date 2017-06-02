@@ -4,16 +4,15 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
 
 /**
  * Manages the data shared between this application's beneficiary/claim/event
- * records. This is FHIR data with a specific {@link IAnyResource#getId()}
- * value, which must only exist once in the FHIR database, and must be present
- * before any other records are transformed, as those records may reference it.
+ * records. This is FHIR data that must only exist once in the FHIR database,
+ * and must be present before any other records are transformed, as those
+ * records may reference it.
  */
 public final class SharedDataManager {
 	/**
@@ -26,8 +25,7 @@ public final class SharedDataManager {
 	 *         be valid if {@link #upsertSharedData()} has been run
 	 */
 	public static Reference createReferenceToCms() {
-		return new Reference(
-				String.format("Organization?name=" + DataTransformer.urlEncode(SharedDataManager.COVERAGE_ISSUER)));
+		return new Reference("Organization?name=" + DataTransformer.urlEncode(SharedDataManager.COVERAGE_ISSUER));
 	}
 
 	private final FhirLoader fhirLoader;
@@ -51,7 +49,7 @@ public final class SharedDataManager {
 
 		Organization cms = new Organization();
 		cms.setName(SharedDataManager.COVERAGE_ISSUER);
-		DataTransformer.upsert(sharedDataBundle, cms, createReferenceToCms().getReference());
+		DataTransformer.conditionalCreate(sharedDataBundle, cms, createReferenceToCms().getReference());
 
 		fhirLoader.process(new SharedDataFhirBundle(sharedDataBundle));
 	}

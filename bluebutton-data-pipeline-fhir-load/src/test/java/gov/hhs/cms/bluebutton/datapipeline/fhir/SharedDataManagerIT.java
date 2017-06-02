@@ -53,7 +53,7 @@ public class SharedDataManagerIT {
 		new SharedDataManager(fhirLoader).upsertSharedData();
 
 		// Verify the results.
-		IGenericClient fhirClient = FhirLoader.createFhirClient(FhirTestUtilities.getLoadOptions());
+		IGenericClient fhirClient = FhirTestUtilities.createFhirClient();
 		Bundle results = fhirClient.search().forResource(Organization.class)
 				.where(Organization.NAME.matches().value(SharedDataManager.COVERAGE_ISSUER)).returnBundle(Bundle.class)
 				.execute();

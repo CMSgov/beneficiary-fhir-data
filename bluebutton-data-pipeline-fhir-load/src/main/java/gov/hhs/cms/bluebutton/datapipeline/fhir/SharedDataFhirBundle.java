@@ -30,6 +30,14 @@ public final class SharedDataFhirBundle implements LoadableFhirBundle {
 	}
 
 	/**
+	 * @see gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle#getSourceDataAsText()
+	 */
+	@Override
+	public String getSourceDataAsText() {
+		return "";
+	}
+
+	/**
 	 * @see gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle#getResult()
 	 */
 	@Override

@@ -92,3 +92,27 @@ Here are some miscellaneous facts considered in this decision:
 * In the dev, test, and production HealthAPT environments, our data pipeline application is spread across three separate EC2 instances: an ETL server, a FHIR app server, and a PostgreSQL database server. None of these are dedicated hosts; they're all sharing hardware with other AWS users and applications.
     * Dedicated hosts are cost-prohibitive. Ballpark, they start at $2/hour, rounded up to the nearest hour.
 * Google Sheets have a limit of 400K cells. With our 11 columns, and 30 executions/rows per test case, this would allow us to store over 1200 test case runs.
+
+## Idempotency and HTTP Error Handling
+
+**"Idempotent"**: An idempotent operation is one that can be retried/replayed without affecting the outcome; the result will be the same if the operation is applied one time or a hundred times.
+
+The FHIR HTTP REST API does not guarantee delivery. Additionally, AWS has proven to be a very lossy environment: a non-trivial percentage of HTTP requests from the ETL service to the FHIR server have been observed to fail. This poses an important problem: what should the ETL service do when it submits transactions to the server and fails to receive a response?
+
+The ETL service **must** guarantee that all data is loaded succesfully. Therefore, the ETL service **must** retry submissions that fail for transport-related reasons.
+
+Unfortunately, the semantics of the FHIR API make retrying submissions tricky. Most of the FHIR write operations aren't idempotent. Here's a breakdown of the relevant FHIR operations (from [FHIR Latest Release: RESTful API](https://www.hl7.org/fhir/http.html)):
+
+* `update`: There are two forms of `update` operations:
+    * `PUT [base]/[type]/[id]` (_upsert by ID_): Will update the resource specified, resulting in a new version, even if the new content supplied exactly matches the previous version.
+        * FHIR allows (and HAPI supports) servers to allow this operation to act as an "upsert", creating the specified resource at the specified ID, if it was not already present.
+    * `PUT [base]/[type]?[search parameters]` (_conditional update_): If the search finds no matches, this will result in a `create` operation. If the search finds exactly one match, this will update that resource. If the search finds more than one match, this will return an error.
+* `create`: There are two forms of `create` operations:
+    * `POST [base]/[type]` (_normal create_): Will result in a new resource, with a server-specified ID.
+    * `POST [base]/[type]` with `If-None-Exist: [search parameters]` (_conditional create_): Will only create the resource if the specified search returns no results.
+
+Of these four operations/variants, only the last one, _conditional create_, is truly idempotent. It may seem like the first _update by ID_ option is also idempotent, but it's not: it will result in duplicate versions being created. (Indeed, the ETL service was attempting to use this option for quite a while, until this was discovered.)
+
+Unfortunately though, of those four operations/variants, only the first one allows clients to specify the logical ID of the resource being created. For the Blue Button API, having predictable logical IDs is a definite nice-to-have: it makes it immediately obvious what's in a given resource, and also which resource to select.
+
+This presents a choice: achieve idempotency via use of the _conditional create_ operation and lose the ability to specify logical IDs, or specify logical IDs using the _upsert by ID_ operation and lose idempotency. Idempotency is more important, so we've opted to use _conditional create_.

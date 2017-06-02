@@ -2,17 +2,24 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -26,15 +33,20 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 
+import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContexts;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -79,9 +91,11 @@ public final class FhirLoader {
 	 * 
 	 * @param options
 	 *            the {@link LoadAppOptions} to use
+	 * @param metrics
+	 *            the {@link MetricRegistry} to use
 	 * @return a new FHIR {@link IGenericClient} for use
 	 */
-	public static IGenericClient createFhirClient(LoadAppOptions options) {
+	public static IGenericClient createFhirClient(LoadAppOptions options, MetricRegistry metrics) {
 		FhirContext ctx = FhirContext.forDstu3();
 
 		/*
@@ -125,7 +139,8 @@ public final class FhirLoader {
 					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
 					.setStaleConnectionCheckEnabled(true).build();
 			HttpClient httpClient = HttpClients.custom().setConnectionManager(connectionManager)
-					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement().build();
+					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement()
+					.setRetryHandler(new FhirHttpRequestRetryHandler(metrics)).build();
 			ctx.getRestfulClientFactory().setHttpClient(httpClient);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -157,7 +172,7 @@ public final class FhirLoader {
 	public FhirLoader(MetricRegistry metrics, LoadAppOptions options) {
 		this.metrics = metrics;
 
-		IGenericClient client = createFhirClient(options);
+		IGenericClient client = createFhirClient(options, metrics);
 		this.client = client;
 		this.loadExecutorService = Executors.newFixedThreadPool(options.getLoaderThreads());
 		LOGGER.info("Configured to load in windows of '{}', with '{}' threads.", WINDOW_SIZE,
@@ -407,6 +422,82 @@ public final class FhirLoader {
 		 */
 		public Set<Characteristics> characteristics() {
 			return Collections.emptySet();
+		}
+	}
+
+	/**
+	 * <p>
+	 * A custom Apache HTTP Client {@link HttpRequestRetryHandler}. This
+	 * customization enables two things:
+	 * </p>
+	 * <ul>
+	 * <li>Allows us to retry FHIR client errors that the default HTTP client
+	 * wouldn't, e.g. {@link SocketTimeoutException}s. These errors have proven
+	 * to be issues when running in AWS.</li>
+	 * <li>Allows us to track HTTP retries in our metrics.</li>
+	 * </ul>
+	 */
+	private static final class FhirHttpRequestRetryHandler extends DefaultHttpRequestRetryHandler {
+		private final MetricRegistry metrics;
+		private final Map<String, Boolean> idempotentMethods;
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param metrics
+		 *            the {@link MetricRegistry} to use
+		 */
+		public FhirHttpRequestRetryHandler(MetricRegistry metrics) {
+			/*
+			 * Retry up to 3 times, don't retry requests unless
+			 * #retryRequest(...) returns true for them, and customize the
+			 * exceptions that are marked as retryable. The super's defaults
+			 * also exclude InterruptedIOException, which SocketTimeoutException
+			 * is a subclass of.
+			 */
+			super(3, false, Arrays.asList(UnknownHostException.class, ConnectException.class, SSLException.class));
+
+			this.metrics = metrics;
+
+			/*
+			 * The list of safe/idempotent HTTP methods comes from RFC 2616:
+			 * https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html. To that
+			 * list, we've also added POST, as our application takes special
+			 * care to ensure that all FHIR POSTs are also idempotent (mostly
+			 * via use of FHIR's If-None-Exists header).
+			 */
+			this.idempotentMethods = new ConcurrentHashMap<>();
+			this.idempotentMethods.put("GET", Boolean.TRUE);
+			this.idempotentMethods.put("HEAD", Boolean.TRUE);
+			this.idempotentMethods.put("PUT", Boolean.TRUE);
+			this.idempotentMethods.put("DELETE", Boolean.TRUE);
+			this.idempotentMethods.put("OPTIONS", Boolean.TRUE);
+			this.idempotentMethods.put("TRACE", Boolean.TRUE);
+		}
+
+		/**
+		 * @see org.apache.http.impl.client.StandardHttpRequestRetryHandler#handleAsIdempotent(org.apache.http.HttpRequest)
+		 */
+		@Override
+		protected boolean handleAsIdempotent(final HttpRequest request) {
+			final String method = request.getRequestLine().getMethod().toUpperCase(Locale.ROOT);
+			final Boolean b = this.idempotentMethods.get(method);
+			return b != null && b.booleanValue();
+		}
+
+		/**
+		 * @see org.apache.http.impl.client.DefaultHttpRequestRetryHandler#retryRequest(java.io.IOException,
+		 *      int, org.apache.http.protocol.HttpContext)
+		 */
+		@Override
+		public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+			boolean retryRequest = super.retryRequest(exception, executionCount, context);
+			if (retryRequest) {
+				metrics.counter("fhir-http-client.retries.counter").inc();
+				metrics.meter("fhir-http-client.retries.meter").mark();
+			}
+
+			return retryRequest;
 		}
 	}
 }
