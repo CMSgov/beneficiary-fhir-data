@@ -73,16 +73,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
-	// /**
-	// * @see ca.uhn.fhir.jpa.config.BaseConfig#scheduledExecutorService()
-	// */
-	// @Override
-	// public ScheduledExecutorFactoryBean scheduledExecutorService() {
-	// ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
-	// b.setPoolSize(1);
-	// return b;
-	// }
-
 	/**
 	 * @see ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3#resourceDaosDstu3()
 	 */
@@ -106,21 +96,6 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	}
 
 	/**
-	 * Configure FHIR properties around the the JPA server via this bean
-	 */
-	@Bean()
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
-		retVal.setSchedulingDisabled(true);
-		retVal.setSubscriptionEnabled(false);
-		retVal.setAllowInlineMatchUrlReferences(true);
-		// retVal.setSubscriptionPollDelay(5000);
-		// retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
-		retVal.setAllowMultipleDelete(true);
-		return retVal;
-	}
-
-	/**
 	 * @return the {@link MetricRegistry} for the application, which can be used
 	 *         to collect statistics on the application's performance
 	 */
@@ -134,6 +109,21 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		reporter.start();
 
 		return metricRegistry;
+	}
+
+	/**
+	 * Configure FHIR properties around the the JPA server via this bean
+	 */
+	@Bean()
+	public DaoConfig daoConfig() {
+		DaoConfig retVal = new DaoConfig();
+		retVal.setSchedulingDisabled(true);
+		retVal.setSubscriptionEnabled(false);
+		retVal.setAllowInlineMatchUrlReferences(true);
+		// retVal.setSubscriptionPollDelay(5000);
+		// retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
+		retVal.setAllowMultipleDelete(true);
+		return retVal;
 	}
 
 	/**
