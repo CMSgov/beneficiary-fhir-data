@@ -55,7 +55,7 @@
 	</modules>
 
 	<properties>
-		<hapi-fhir.version>2.2</hapi-fhir.version>
+		<hapi-fhir.version>2.4.0-PR660</hapi-fhir.version>
 		<metrics.version>3.1.2</metrics.version>
 
 		<!-- The version of the capsule library for the capsule-maven-plugin to 

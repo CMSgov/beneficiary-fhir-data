@@ -42,8 +42,17 @@ public final class TransformedBundle implements LoadableFhirBundle {
 	}
 
 	/**
+	 * @see gov.hhs.cms.bluebutton.datapipeline.fhir.LoadableFhirBundle#getSourceDataAsText()
+	 */
+	@Override
+	public String getSourceDataAsText() {
+		return source.toString();
+	}
+
+	/**
 	 * @return the FHIR {@link Bundle} that was produced by the transformation
 	 */
+	@Override
 	public Bundle getResult() {
 		return result;
 	}

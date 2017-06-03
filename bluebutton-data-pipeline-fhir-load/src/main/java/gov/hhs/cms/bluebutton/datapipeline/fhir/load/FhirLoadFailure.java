@@ -11,6 +11,8 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 public final class FhirLoadFailure extends RuntimeException {
 	private static final long serialVersionUID = 2180257204126931820L;
 
+	private static final boolean LOG_SOURCE_DATA = false;
+
 	private final LoadableFhirBundle failedBundle;
 
 	/**
@@ -33,8 +35,13 @@ public final class FhirLoadFailure extends RuntimeException {
 	 * @return the value to use for {@link #getMessage()}
 	 */
 	private static String buildMessage(LoadableFhirBundle inputBundle) {
-		return String.format("Failed to load a bundle containing '%d' resources, built from a '%s' record.",
-				inputBundle.getResult().getEntry().size(), inputBundle.getSourceType());
+		if (LOG_SOURCE_DATA)
+			return String.format("Failed to load a bundle containing '%d' resources, built from a '%s' record: '%s'.",
+					inputBundle.getResult().getEntry().size(), inputBundle.getSourceType(),
+					inputBundle.getSourceDataAsText());
+		else
+			return String.format("Failed to load a bundle containing '%d' resources, built from a '%s' record.",
+					inputBundle.getResult().getEntry().size(), inputBundle.getSourceType());
 	}
 
 	/**

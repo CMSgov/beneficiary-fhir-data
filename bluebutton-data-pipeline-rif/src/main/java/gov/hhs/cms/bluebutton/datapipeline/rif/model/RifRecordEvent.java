@@ -57,4 +57,20 @@ public final class RifRecordEvent<R> {
 	public R getRecord() {
 		return record;
 	}
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("RifRecordEvent [filesEvent=");
+		builder.append(filesEvent);
+		builder.append(", file=");
+		builder.append(file);
+		builder.append(", record=");
+		builder.append(record);
+		builder.append("]");
+		return builder.toString();
+	}
 }
