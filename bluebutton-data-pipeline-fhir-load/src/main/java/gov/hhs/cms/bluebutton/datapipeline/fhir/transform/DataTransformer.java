@@ -689,7 +689,6 @@ public final class DataTransformer {
 		bundle.setType(BundleType.TRANSACTION);
 
 		Patient beneficiary = new Patient();
-		beneficiary.setId("Patient/bene-" + record.beneficiaryId);
 		Identifier beneId = beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID)
 				.setValue(record.beneficiaryId);
 		String hicnHash = computeHicnHash(options, record.hicn);
