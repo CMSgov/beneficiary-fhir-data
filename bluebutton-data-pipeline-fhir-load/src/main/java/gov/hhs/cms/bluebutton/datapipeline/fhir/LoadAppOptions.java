@@ -25,6 +25,8 @@ public final class LoadAppOptions implements Serializable {
 	 */
 	public static final int DEFAULT_LOADER_THREADS = Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
+	private final int hicnHashIterations;
+	private final byte[] hicnHashPepper;
 	private final URI fhirServer;
 	private final String keyStorePath;
 	private final char[] keyStorePassword;
@@ -48,17 +50,36 @@ public final class LoadAppOptions implements Serializable {
 	 * @param loaderThreads
 	 *            the value to use for {@link #getLoaderThreads()}
 	 */
-	public LoadAppOptions(URI fhirServer, Path keyStorePath, char[] keyStorePassword, Path trustStorePath,
+	public LoadAppOptions(int hicnHashIterations, byte[] hicnHashPepper, URI fhirServer, Path keyStorePath,
+			char[] keyStorePassword, Path trustStorePath,
 			char[] trustStorePassword, int loaderThreads) {
 		if (loaderThreads < 1)
 			throw new IllegalArgumentException();
 
+		this.hicnHashIterations = hicnHashIterations;
+		this.hicnHashPepper = hicnHashPepper;
 		this.fhirServer = fhirServer;
 		this.keyStorePath = keyStorePath.toString();
 		this.keyStorePassword = keyStorePassword;
 		this.trustStorePath = trustStorePath.toString();
 		this.trustStorePassword = trustStorePassword;
 		this.loaderThreads = loaderThreads;
+	}
+
+	/**
+	 * @return the number of <code>PBKDF2WithHmacSHA256</code> iterations to use
+	 *         when hashing beneficiary HICNs
+	 */
+	public int getHicnHashIterations() {
+		return hicnHashIterations;
+	}
+
+	/**
+	 * @return the shared secret pepper to use (in lieu of a salt) with
+	 *         <code>PBKDF2WithHmacSHA256</code> when hashing beneficiary HICNs
+	 */
+	public byte[] getHicnHashPepper() {
+		return hicnHashPepper;
 	}
 
 	/**
@@ -114,7 +135,11 @@ public final class LoadAppOptions implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("LoadAppOptions [fhirServer=");
+		builder.append("LoadAppOptions [hicnHashIterations=");
+		builder.append(hicnHashIterations);
+		builder.append(", hicnHashPepper=");
+		builder.append("***");
+		builder.append(", fhirServer=");
 		builder.append(fhirServer);
 		builder.append(", keyStorePath=");
 		builder.append(keyStorePath);

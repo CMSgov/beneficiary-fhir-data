@@ -93,6 +93,113 @@ Here are some miscellaneous facts considered in this decision:
     * Dedicated hosts are cost-prohibitive. Ballpark, they start at $2/hour, rounded up to the nearest hour.
 * Google Sheets have a limit of 400K cells. With our 11 columns, and 30 executions/rows per test case, this would allow us to store over 1200 test case runs.
 
+## Linking Frontend Users to Backend Resources
+
+### Requirements and Goals
+
+There are several requirements to be met:
+
+1. Do not store any operational data in the backend that cannot be discarded.
+    * The disaster recovery plan of record for the backend database is to rebuild it from scratch.
+2. Ensure that the frontend has simple queries that can be run to retrieve the resources for a given beneficiary.
+
+In addition to those requirements, it would be nice to also achieve the following goals:
+
+* Stick with standard FHIR: avoid the use of custom operations or storage mechanisms in the backend FHIR system.
+* Ensure that the backend responses do not return any sensitive information, e.g. the beneficiary's HICN (or hashes of it, even).
+
+There are also these additional "nice to haves" that are known to be impossible due to requirement #1 (the backend DB can't be treated as if it were durable):
+
+* Avoid the need for the frontend to maintain any sort of crosswalk table to keep track of which backend `Patient` resource is associated with each frontend user account.
+* Be able to identify which backend resources are associated with active frontend user accounts.
+
+### Proposed Workflow
+
+The frontend users and backend records will be linked using each Medicare beneficiary's unique HICN. Both systems will create cryptographic hashes of the HICN using a mutually agreed-upon process and will store those hashes in their systems, associated with the records for the beneficiary. This will allow both systems to avoid storing the actual HICN (which is sensitive) while still using it to coordinate.
+
+When registering a new user, the frontend shall issue a "Search `Patient`" request (per below) to the backend to determine whether or not that user's records exist in the backend. Assuming that the request is successful (as defined below), the user's account will be activated and the registration process can complete normally.
+
+After registration, the backend will support queries like the following for that frontend user:
+
+* Request the user's `Patient` resource:
+    
+    ```
+    $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --header "Content-Type: application/x-www-form-urlencoded" --data "identifier=http%3A%2F%2Fbluebutton.cms.hhs.gov%2Fidentifier%23hicnHash%7CA1234567890ABCDEF" --request POST https://backend.example.com:1234/baseDstu3/Patient/_search
+    ```
+    
+    * Before being encoded, the `--data` parameter's value was: "`http://bluebutton.cms.hhs.gov/identifier#hicnHash|A1234567890ABCDEF`".
+        * This sample request assumes that the beneficiary's HICN hashed to a value of "`A1234567890ABCDEF`".
+    * The frontend shall verify that every response from the backend for such a query meets the following conditions:
+        * That the response uses an HTTP `200` code.
+        * That the response's body JSON/XML has a `total` field with a value of exactly `1`.
+            * A value of `0` indicates that no matching `Patient` resource was found for the specified frontend account. Could occur if:
+                * The user isn't actually a Medicare beneficiary.
+                * The user's data isn't yet in the CCW or the backend FHIR system for some reason.
+                * If an incorrect HICN hash was supplied for the beneficiary.
+            * A value greater than `1` indicates that multiple backend `Patient` records were found for the specified HICN hash. Congratulations -- we've had a hash collision! This should trigger an administrative alert to the developers/system operators. The user's account should be disabled.
+* Request the user's `Coverage` resources:
+
+    ```
+    $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --header "Content-Type: application/x-www-form-urlencoded" --data "beneficiary.identifier=http%3A%2F%2Fbluebutton.cms.hhs.gov%2Fidentifier%23hicnHash%7CA1234567890ABCDEF" --request POST https://backend.example.com:1234/baseDstu3/Coverage/_search
+    ```
+    
+    * Alternatively, the frontend could search by Patient `id` (as recorded in an earlier search, e.g. at the start of the frontend session):
+        
+        ```
+        $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --request GET https://backend.example.com:1234/baseDstu3/Coverage?beneficiary=Patient/42
+        ```
+        
+* Request the user's `ExplanationOfBenefit` resources:
+    
+    ```
+    $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --header "Content-Type: application/x-www-form-urlencoded" --data "patient.identifier=http%3A%2F%2Fbluebutton.cms.hhs.gov%2Fidentifier%23hicnHash%7CA1234567890ABCDEF" --request POST https://backend.example.com:1234/baseDstu3/ExplanationOfBenefit/_search
+    ```
+    
+    * Alternatively, the frontend could search by Patient `id` (as recorded in an earlier search, e.g. at the start of the frontend session):
+        
+        ```
+        $ curl --cert-type pem --cert /home/dummyuser/client-cert-stacked.pem --request GET https://backend.example.com:1234/baseDstu3/ExplanationOfBenefit?patient=Patient/42
+        ```
+        
+Note that all of the above queries are standard FHIR searches, as specified in [FHIR Latest Release: Search](http://hl7.org/fhir/search.html).
+
+### HICN Hashing
+
+The frontend and the backend must use the exact same method for hashing the HICN, to allow them to coordinate using that value.
+
+Here are the constraints on our hashing approach:
+
+* NIST guidelines (in SP 800-132) call for using the PBKDF2-HMAC algorithm key derivation, with any approved hash function (e.g. SHA256).
+    * This guideline is intended for use in hashing stored passwords.
+    * It calls for a salt of at least 128 bits.
+    * It calls for an iteration count of at least 1,000, though suggests that an iteration count of 10,000,000 may be appropriate in some use cases.
+        * Also: "The  number of iterations should be set as high as can be tolerated for the environment, while maintaining acceptable performance."
+* No salt may be used for our purposes, as these would not be shared between the frontend and backend.
+    * Salts are typically a non-secret value that is randomly generated and prepended/appended to the hash output in plaintext.
+    * Instead, a single shared "pepper" will be used for all HICNs.
+        * Unlike with salts, peppers must **never** be included in plaintext with the hash results.
+        * The pepper is a sensitive secret and must be stored separately from the hashes, e.g. in a file on a different server from the DB that the hashes live in.
+* The Python Django framework being used by the frontend has builtin support for PBKDF2-HMAC-SHA256. The backend Java libraries being used also support this algorithm.
+
+Based on the following constraints, the following system design has been arrived at:
+
+1. The HICNs will be hashed using PBKDF2-HMAC-SHA256.
+    1. No salt will be used.
+    1. Instead of a salt, a secret pepper of at least 128 bits will be generated and shared out-of-band between the frontend and backend environments.
+    1. A number of iterations no less than 1,000 will be used: the highest number possible that will not add more than five days to the overall beneficiary initial load time.
+1. To reduce the danger of these hashes being leaked or broken, future iterations of our design will move them into a separate FHIR resource linked to the `Patient` resources, e.g. `Linkage` or `Basic`.
+
+Here are some sample hashes produced using the above scheme:
+
+* `iterations=1000`, `pepper=nottherealpepper`, `hicn=123456789A`: `d95a418b0942c7910fb1d0e84f900fe12e5a7fd74f312fa10730cc0fda230e9a`
+* `iterations=1000`, `pepper=nottherealpepper`, `hicn=987654321E`: `6357f16ebd305103cf9f2864c56435ad0de5e50f73631159772f4a4fcdfe39a5`
+
+A note on performance: my Intel i7-3740QM Processor (6M Cache, up to 3.70 GHz) development laptop computes hashes using a 128-bit salt and 1000 iterations at a rate of 107 per second _on a single thread_. If we assume that's the performance for the initial load, it would add about 6.5 days to the time required for the initial load of 60M beneficiaries.
+
+### Proposed Backend Design
+
+The above design can actually all be accomplished using only the standard FHIR mechanisms. The backend must simply ensure that each `Patient` resource includes a `http://bluebutton.cms.hhs.gov/identifier#hicnHash` identifier.
+
 ## Idempotency and HTTP Error Handling
 
 **"Idempotent"**: An idempotent operation is one that can be retried/replayed without affecting the outcome; the result will be the same if the operation is applied one time or a hundred times.

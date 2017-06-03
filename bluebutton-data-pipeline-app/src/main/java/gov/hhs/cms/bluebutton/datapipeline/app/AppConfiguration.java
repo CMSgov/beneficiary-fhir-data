@@ -5,6 +5,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 
@@ -47,6 +50,20 @@ public final class AppConfiguration implements Serializable {
 	 * </p>
 	 */
 	public static final String ENV_VAR_KEY_ALLOWED_RIF_TYPE = "DATA_SET_TYPE_ALLOWED";
+
+	/**
+	 * The name of the environment variable that should be used to provide the
+	 * {@link #getLoadOptions()} {@link LoadAppOptions#getHicnHashIterations()}
+	 * value.
+	 */
+	public static final String ENV_VAR_KEY_HICN_HASH_ITERATIONS = "HICN_HASH_ITERATIONS";
+
+	/**
+	 * The name of the environment variable that should be used to provide a hex
+	 * encoded representation of the {@link #getLoadOptions()}
+	 * {@link LoadAppOptions#getHicnHashPepper()} value.
+	 */
+	public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "HICN_HASH_PEPPER";
 
 	/**
 	 * The name of the environment variable that should be used to provide the
@@ -173,6 +190,36 @@ public final class AppConfiguration implements Serializable {
 			allowedRifFileType = null;
 		}
 
+		String hicnHashIterationsText = System.getenv(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
+		if (hicnHashIterationsText == null || hicnHashIterationsText.isEmpty())
+			throw new AppConfigurationException(String.format(
+					"Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_HICN_HASH_ITERATIONS));
+		int hicnHashIterations;
+		try {
+			hicnHashIterations = Integer.parseInt(hicnHashIterationsText);
+		} catch (NumberFormatException e) {
+			hicnHashIterations = -1;
+		}
+		if (hicnHashIterations < 1)
+			throw new AppConfigurationException(
+					String.format("Invalid value for configuration environment variable '%s': '%s'",
+							ENV_VAR_KEY_HICN_HASH_ITERATIONS, hicnHashIterationsText));
+
+		String hicnHashPepperText = System.getenv(ENV_VAR_KEY_HICN_HASH_PEPPER);
+		if (hicnHashPepperText == null || hicnHashPepperText.isEmpty())
+			throw new AppConfigurationException(String.format(
+					"Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_HICN_HASH_PEPPER));
+		byte[] hicnHashPepper;
+		try {
+			hicnHashPepper = Hex.decodeHex(hicnHashPepperText.toCharArray());
+		} catch (DecoderException e) {
+			hicnHashPepper = new byte[] {};
+		}
+		if (hicnHashPepperText.length() < 1)
+			throw new AppConfigurationException(
+					String.format("Invalid value for configuration environment variable '%s': '%s'",
+							ENV_VAR_KEY_HICN_HASH_PEPPER, hicnHashPepperText));
+
 		String fhirServerUrlText = System.getenv(ENV_VAR_KEY_FHIR);
 		if (fhirServerUrlText == null || fhirServerUrlText.isEmpty())
 			throw new AppConfigurationException(
@@ -215,11 +262,12 @@ public final class AppConfiguration implements Serializable {
 		try {
 			loaderThreads = Integer.parseInt(loaderThreadsText);
 		} catch (NumberFormatException e) {
+			loaderThreads = -1;
+		}
+		if (loaderThreads < 1)
 			throw new AppConfigurationException(
 					String.format("Invalid value for configuration environment variable '%s': '%s'",
-							ENV_VAR_KEY_LOADER_THREADS, loaderThreadsText),
-					e);
-		}
+							ENV_VAR_KEY_LOADER_THREADS, loaderThreadsText));
 
 		/*
 		 * Just for convenience: make sure DefaultAWSCredentialsProviderChain
@@ -238,7 +286,7 @@ public final class AppConfiguration implements Serializable {
 		}
 
 		return new AppConfiguration(new ExtractionOptions(s3BucketName, allowedRifFileType),
-				new LoadAppOptions(fhirServerUri, Paths.get(keyStorePath),
+				new LoadAppOptions(hicnHashIterations, hicnHashPepper, fhirServerUri, Paths.get(keyStorePath),
 						keyStorePassword.toCharArray(), Paths.get(trustStorePath), trustStorePassword.toCharArray(),
 						loaderThreads));
 	}

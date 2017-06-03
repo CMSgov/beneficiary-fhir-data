@@ -167,7 +167,7 @@ public final class FhirLoaderIT {
 
 		// Create the processors that will handle each stage of the pipeline.
 		RifFilesProcessor processor = new RifFilesProcessor();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		FhirLoader loader = new FhirLoader(fhirMetrics, FhirTestUtilities.getLoadOptions());
 
 		// Create/update the shared data that FhirLoader will require.
@@ -277,7 +277,7 @@ public final class FhirLoaderIT {
 	 * 
 	 */
 	public void loadData(RifFilesEvent rifFilesEvent, FhirLoader loader, RifFilesProcessor processor) {
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		List<FhirBundleResult> resultsList = new ArrayList<>();
 		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
 			Stream<TransformedBundle> fhirInputBundles = transformer.transform(rifRecordEvents);

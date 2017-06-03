@@ -3,14 +3,19 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.transform;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,11 +43,16 @@ import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
+import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
@@ -73,6 +83,7 @@ import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
  * Unit tests for {@link DataTransformer}.
  */
 public final class DataTransformerTest {
+	public static final Logger LOGGER = LoggerFactory.getLogger(DataTransformerTest.class);
 
 	/**
 	 * Verifies that {@link DataTransformer} works correctly when passed an
@@ -80,7 +91,7 @@ public final class DataTransformerTest {
 	 */
 	@Test
 	public void transformEmptyRifStream() {
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 
 		Stream<RifRecordEvent<?>> source = new ArrayList<RifRecordEvent<?>>().stream();
 		Stream<TransformedBundle> result = transformer.transform(source);
@@ -104,7 +115,7 @@ public final class DataTransformerTest {
 		// Create Mock
 		Stream source = Arrays.asList(rifRecordEvent).stream();
 
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -195,11 +206,83 @@ public final class DataTransformerTest {
 
 		// Just ensure that the transform succeeds without errors.
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
 		Assert.assertEquals(1, resultList.size());
+	}
+
+	/**
+	 * Verify that the {@link DataTransformer#computeHicnHash(String)} algorithm
+	 * doesn't produce any collisions. Such collisions would result in
+	 * beneficiaries being able to see other beneficiaries' data. That'd be bad.
+	 */
+	@Test
+	@Ignore("Won't ever complete. Needs too much RAM.")
+	public void checkForHicnHashCollisions() {
+		/*
+		 * Actual HICNs follow a format, but it's poorly documented so for our
+		 * purposes here we'll simplify it to the following: "123456789X". The
+		 * first nine digits are social security numbers, which are followed by
+		 * a one-character suffix of 'A, 'B', 'C', 'D', or 'E'.
+		 */
+
+		/*
+		 * If we don't limit the SSN search space, this test will run more-or
+		 * less forever. So instead, we limit our search to a random 60M SSNs,
+		 * which has the added benefit of allowing this test to estimate the
+		 * time that HICN hashing will add to an initial load.
+		 */
+		// FIXME we can get through 7M with a 12GB heap before mem pressure
+		int maxValidSsn = 899999999;
+		int startSsn = new Random().nextInt(maxValidSsn - 6000000 + 1);
+
+		LoadAppOptions options = FhirTestUtilities.getLoadOptions();
+		SecureRandom rng = new SecureRandom();
+		byte[] randomPepper = new byte[128 / 8]; // 128 bits
+		rng.nextBytes(randomPepper);
+		options = new LoadAppOptions(1000, randomPepper, options.getFhirServer(), options.getKeyStorePath(),
+				options.getKeyStorePassword(), options.getTrustStorePath(), options.getTrustStorePassword(),
+				options.getLoaderThreads());
+
+		Map<String, String> knownHashes = new HashMap<>();
+		for (int ssn = startSsn; ssn <= maxValidSsn; ssn++) {
+			for (char suffix = 'A'; suffix <= 'E'; suffix++) {
+				// (This will left-pad the SSNs with zeroes.)
+				String hicn = String.format("%09d%c", ssn, suffix);
+
+				String hash = DataTransformer.computeHicnHash(options, hicn);
+				Assert.assertFalse(String.format("Hash collision for HICN hash of '%s': '%s and '%s'.", hash, hicn,
+						knownHashes.get(hash)), knownHashes.containsKey(hash));
+				knownHashes.put(hash, hicn);
+			}
+
+			if ((ssn - startSsn) % 10000 == 0)
+				LOGGER.info("Completed SSN {}", (ssn - startSsn));
+		}
+	}
+
+	/**
+	 * Runs a couple of fake HICNs through
+	 * {@link DataTransformer#computeHicnHash(LoadAppOptions, String)} to verify
+	 * that the expected result is produced.
+	 */
+	@Test
+	public void verifyHicnHashOutput() {
+		LoadAppOptions options = FhirTestUtilities.getLoadOptions();
+		options = new LoadAppOptions(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8), options.getFhirServer(),
+				options.getKeyStorePath(), options.getKeyStorePassword(), options.getTrustStorePath(),
+				options.getTrustStorePassword(), options.getLoaderThreads());
+
+		/*
+		 * These are the two samples from `dev/design-decisions-readme.md` that
+		 * the frontend and backend both have tests to verify the result of.
+		 */
+		Assert.assertEquals("d95a418b0942c7910fb1d0e84f900fe12e5a7fd74f312fa10730cc0fda230e9a",
+				DataTransformer.computeHicnHash(options, "123456789A"));
+		Assert.assertEquals("6357f16ebd305103cf9f2864c56435ad0de5e50f73631159772f4a4fcdfe39a5",
+				DataTransformer.computeHicnHash(options, "987654321E"));
 	}
 
 	/**
@@ -408,7 +491,7 @@ public final class DataTransformerTest {
 		
 		// Creating Mock	
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -604,7 +687,7 @@ public final class DataTransformerTest {
 
 		// Create Mock
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -798,7 +881,7 @@ public final class DataTransformerTest {
 		OutpatientClaimLine recordLine1 = record.lines.get(0);
 
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -967,7 +1050,7 @@ public final class DataTransformerTest {
 		SNFClaimLine recordLine1 = record.lines.get(0);
 
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -1151,7 +1234,7 @@ public final class DataTransformerTest {
 		HospiceClaimLine recordLine1 = record.lines.get(0);
 
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -1283,7 +1366,7 @@ public final class DataTransformerTest {
 		HHAClaimLine recordLine1 = record.lines.get(0);
 
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -1407,7 +1490,7 @@ public final class DataTransformerTest {
 		DMEClaimLine recordLine1 = record.lines.get(0);
 
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		Assert.assertNotNull(resultStream);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
@@ -2012,7 +2095,7 @@ public final class DataTransformerTest {
 		RifRecordEvent rifRecordEvent = new RifRecordEvent(filesEvent, file, record);
 
 		Stream source = Arrays.asList(rifRecordEvent).stream();
-		DataTransformer transformer = new DataTransformer();
+		DataTransformer transformer = new DataTransformer(FhirTestUtilities.getLoadOptions());
 		Stream<TransformedBundle> resultStream = transformer.transform(source);
 		List<TransformedBundle> resultList = resultStream.collect(Collectors.toList());
 

@@ -26,9 +26,10 @@ public final class FhirLoaderTest {
 	@Test
 	public void processEmptyStream() throws URISyntaxException {
 		URI fhirServer = new URI("https://example.com/foo");
-		LoadAppOptions options = new LoadAppOptions(fhirServer, FhirTestUtilities.getClientKeyStorePath(),
-				FhirTestUtilities.CLIENT_KEY_STORE_PASSWORD, FhirTestUtilities.getClientTrustStorePath(),
-				FhirTestUtilities.CLIENT_TRUST_STORE_PASSWORD, 1);
+		LoadAppOptions options = FhirTestUtilities.getLoadOptions();
+		options = new LoadAppOptions(options.getHicnHashIterations(), options.getHicnHashPepper(), fhirServer,
+				options.getKeyStorePath(), options.getKeyStorePassword(), options.getTrustStorePath(),
+				options.getTrustStorePassword(), 1);
 		FhirLoader loader = new FhirLoader(new MetricRegistry(), options);
 
 		Stream<TransformedBundle> fhirStream = new ArrayList<TransformedBundle>().stream();
