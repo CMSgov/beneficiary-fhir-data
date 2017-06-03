@@ -85,7 +85,7 @@ public final class S3ToFhirLoadApp {
 		 * extract, transform, and load process.
 		 */
 		RifFilesProcessor rifProcessor = new RifFilesProcessor();
-		DataTransformer rifToFhirTransformer = new DataTransformer();
+		DataTransformer rifToFhirTransformer = new DataTransformer(appConfig.getLoadOptions());
 		FhirLoader fhirLoader = new FhirLoader(metrics, appConfig.getLoadOptions());
 
 		// Create/update the shared data that FhirLoader will require.

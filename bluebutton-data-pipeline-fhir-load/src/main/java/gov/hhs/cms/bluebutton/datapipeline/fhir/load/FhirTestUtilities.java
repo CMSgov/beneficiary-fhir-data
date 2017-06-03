@@ -2,6 +2,7 @@ package gov.hhs.cms.bluebutton.datapipeline.fhir.load;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,6 +31,17 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
  * </p>
  */
 public final class FhirTestUtilities {
+	/**
+	 * The value to use for {@link LoadAppOptions#getHicnHashIterations()} in
+	 * tests.
+	 */
+	public static final int HICN_HASH_ITERATIONS = 2;
+
+	/**
+	 * The value to use for {@link LoadAppOptions#getHicnHashPepper()} in tests.
+	 */
+	public static final byte[] HICN_HASH_PEPPER = "nottherealpepper".getBytes(StandardCharsets.UTF_8);
+
 	/**
 	 * The address of the FHIR server to run tests against. See the parent
 	 * project's <code>pom.xml</code> for details on how it's stood up.
@@ -166,7 +178,8 @@ public final class FhirTestUtilities {
 	 */
 	public static LoadAppOptions getLoadOptions() {
 		try {
-			return new LoadAppOptions(new URI(FHIR_API), getClientKeyStorePath(), CLIENT_KEY_STORE_PASSWORD,
+			return new LoadAppOptions(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER, new URI(FHIR_API),
+					getClientKeyStorePath(), CLIENT_KEY_STORE_PASSWORD,
 					getClientTrustStorePath(), CLIENT_TRUST_STORE_PASSWORD, LoadAppOptions.DEFAULT_LOADER_THREADS);
 		} catch (URISyntaxException e) {
 			throw new UncheckedUriSyntaxException(e);

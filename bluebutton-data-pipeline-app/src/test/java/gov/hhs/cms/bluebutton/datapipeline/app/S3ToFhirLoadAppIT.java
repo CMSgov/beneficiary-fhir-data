@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.junit.After;
@@ -333,6 +334,10 @@ public final class S3ToFhirLoadAppIT {
 		ProcessBuilder appRunBuilder = new ProcessBuilder(command);
 
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
+				String.valueOf(FhirTestUtilities.HICN_HASH_ITERATIONS));
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
+				Hex.encodeHexString(FhirTestUtilities.HICN_HASH_PEPPER));
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, FhirTestUtilities.FHIR_API);
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH,
 				FhirTestUtilities.getClientKeyStorePath().toString());

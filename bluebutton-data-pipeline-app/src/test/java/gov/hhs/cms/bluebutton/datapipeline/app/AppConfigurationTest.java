@@ -11,9 +11,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
@@ -40,12 +43,19 @@ public final class AppConfigurationTest {
 	 *             (indicates a test error)
 	 * @throws URISyntaxException
 	 *             (indicates a test error)
+	 * @throws DecoderException
+	 *             (indicates a test error)
 	 */
 	@Test
-	public void normalUsage() throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException {
+	public void normalUsage()
+			throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException, DecoderException {
 		ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE, RifFileType.BENEFICIARY.name());
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
+				String.valueOf(FhirTestUtilities.HICN_HASH_ITERATIONS));
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
+				Hex.encodeHexString(FhirTestUtilities.HICN_HASH_PEPPER));
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, "http://example.com/bar");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH, "../../fizz");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD, "buzz");
@@ -71,6 +81,13 @@ public final class AppConfigurationTest {
 				testAppConfig.getExtractionOptions().getS3BucketName());
 		Assert.assertEquals(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE),
 				testAppConfig.getExtractionOptions().getAllowedRifFileType().name());
+		Assert.assertEquals(
+				Integer.parseInt(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS)),
+				testAppConfig.getLoadOptions().getHicnHashIterations());
+		Assert.assertArrayEquals(
+				Hex.decodeHex(
+						testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER).toCharArray()),
+				testAppConfig.getLoadOptions().getHicnHashPepper());
 		Assert.assertEquals(new URI(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_FHIR)),
 				testAppConfig.getLoadOptions().getFhirServer());
 		Assert.assertEquals(Paths.get(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH)),

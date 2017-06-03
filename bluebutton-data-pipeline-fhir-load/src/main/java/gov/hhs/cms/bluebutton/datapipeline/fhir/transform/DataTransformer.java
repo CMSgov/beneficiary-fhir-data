@@ -17,7 +17,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.ArrayUtils;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -70,6 +69,7 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SharedDataManager;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifValueException;
@@ -222,10 +222,10 @@ public final class DataTransformer {
 
 	/**
 	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
-	 * store a one-way cryptographic hash of each Medicare beneficiaries'
-	 * <a href="">HICN</a>. Note that, with the SSNRI initiative, CMS is
-	 * planning to move away from HICNs. However, HICNs are still the
-	 * primary/only Medicare identifier for now.
+	 * store a one-way cryptographic hash of each Medicare beneficiaries' HICN.
+	 * Note that, with the SSNRI initiative, CMS is planning to move away from
+	 * HICNs. However, HICNs are still the primary/only Medicare identifier for
+	 * now.
 	 */
 	public static final String CODING_SYSTEM_CCW_BENE_HICN_HASH = "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
 
@@ -624,6 +624,18 @@ public final class DataTransformer {
 
 	private static SecretKeyFactory secretKeyFactory = null;
 
+	private final LoadAppOptions options;
+
+	/**
+	 * Constructs a new {@link DataTransformer}.
+	 * 
+	 * @param options
+	 *            the {@link LoadAppOptions} to use
+	 */
+	public DataTransformer(LoadAppOptions options) {
+		this.options = options;
+	}
+
 	/**
 	 * @param rifStream
 	 *            the stream of source {@link RifRecordEvent}s to be transformed
@@ -678,7 +690,7 @@ public final class DataTransformer {
 		Patient beneficiary = new Patient();
 		beneficiary.setId("Patient/bene-" + record.beneficiaryId);
 		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID).setValue(record.beneficiaryId);
-		String hicnHash = computeHicnHash(record.hicn);
+		String hicnHash = computeHicnHash(options, record.hicn);
 		beneficiary.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_HICN_HASH).setValue(hicnHash);
 		beneficiary.addAddress().setState(record.stateCode).setDistrict(record.countyCode)
 				.setPostalCode(record.postalCode);
@@ -785,11 +797,13 @@ public final class DataTransformer {
 	 * the Blue Button API frontend and backend systems: the HICN is the only
 	 * unique beneficiary identifier shared between those two systems.
 	 * 
+	 * @param options
+	 *            the {@link LoadAppOptions} to use
 	 * @param hicn
 	 *            the Medicare beneficiary HICN to be hashed
 	 * @return a one-way cryptographic hash of the specified HICN value
 	 */
-	static String computeHicnHash(String hicn) {
+	static String computeHicnHash(LoadAppOptions options, String hicn) {
 		try {
 			if (secretKeyFactory == null)
 				secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -797,13 +811,27 @@ public final class DataTransformer {
 			throw new IllegalStateException(e);
 		}
 
-		// FIXME use a shared pepper here to make table attacks harder
-		// FIXME use scrypt or bcrypt or something like that here
 		try {
-			byte[] salt = new byte[] {};
-			byte[] pepper = "notsecure".getBytes(StandardCharsets.UTF_8);
-			byte[] saltAndPepper = ArrayUtils.addAll(salt, pepper);
-			PBEKeySpec hicnKeySpec = new PBEKeySpec(hicn.toCharArray(), saltAndPepper, 300, 256);
+			/*
+			 * Our approach here is NOT using a salt, as salts must be randomly
+			 * generated for each value to be hashed and then included in
+			 * plaintext with the hash results. Random salts would prevent the
+			 * Blue Button API frontend systems from being able to produce equal
+			 * hashes for the same HICNs. Instead, we use a secret "pepper" that
+			 * is shared out-of-band with the frontend. This value MUST be kept
+			 * secret.
+			 */
+			byte[] salt = options.getHicnHashPepper();
+
+			/*
+			 * Bigger is better here as it reduces chances of collisions, but
+			 * the equivalent Python Django hashing functions used by the
+			 * frontend default to this value, so we'll go with it.
+			 */
+			int derivedKeyLength = 256;
+
+			PBEKeySpec hicnKeySpec = new PBEKeySpec(hicn.toCharArray(), salt, options.getHicnHashIterations(),
+					derivedKeyLength);
 			SecretKey hicnSecret = secretKeyFactory.generateSecret(hicnKeySpec);
 			String hexEncodedHash = Hex.encodeHexString(hicnSecret.getEncoded());
 
