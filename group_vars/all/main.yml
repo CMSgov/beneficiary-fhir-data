@@ -18,7 +18,7 @@ s3_bucket_etl_staging: 'gov-hhs-cms-bluebutton-sandbox-etl-staging'
 #s3_bucket_deployment: 'karl-gov-hhs-cms-bluebutton-sandbox-deployment'
 #s3_bucket_etl_staging: 'karl-gov-hhs-cms-bluebutton-sandbox-etl-staging'
 
-ec2_tag_application: 'Blue Button Sandbox (Backend)'
+ec2_tag_application: 'Blue Button Sandbox - Backend'
 
 # This AMI is "RHEL-7.2_HVM_GA-20151112-x86_64-1-Hourly2-GP2 (ami-2051294a)" in the us-east-1 region.
 # (As of 2017-01-26, the Blue Button backend production systems were on RHEL 7.2, per Mike Dayton.)
