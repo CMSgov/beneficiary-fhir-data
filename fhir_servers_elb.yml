@@ -25,6 +25,7 @@
         security_groups:
           - "{{ ec2_group_default_id }}"
           - "{{ ec2_group_ssh_all_id }}"
+          - "{{ ec2_group_backend_fhir_internal_id }}"
         instance_monitoring: true
 
     - name: 'Create EC2 Load Balancer (ELB) for Backend'
@@ -41,10 +42,20 @@
         cross_az_load_balancing: false
         zones:
           - "{{ aws_zone }}"
+        security_group_ids:
+          - "{{ ec2_group_default_id }}"
+          - "{{ ec2_group_backend_fhir_external_id }}"
         listeners:
           - protocol: 'tcp'
-            load_balancer_port: 443
-            instance_port: "{{ backend_fhir_port }}"
+            load_balancer_port: "{{ backend_fhir_port_external }}"
+            instance_port: "{{ backend_fhir_port_internal }}"
+        health_check:
+          ping_protocol: tcp
+          ping_port: "{{ backend_fhir_port_internal }}"
+          response_timeout: 5
+          interval: 7
+          unhealthy_threshold: 2
+          healthy_threshold: 2
         #access_logs:
         #  interval: 5 # minutes (default is 60)
         #  s3_location: "{{ s3_bucket_deployment }}"

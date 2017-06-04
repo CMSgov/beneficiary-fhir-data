@@ -80,4 +80,32 @@
       register: ec2_group_ssh_all
     - set_fact:
         ec2_group_ssh_all_id: "{{ ec2_group_ssh_all.group_id }}"
+    
+    - name: Provision EC2 Security Group 'bluebutton-backend-fhir-internal'
+      ec2_group:
+        name: bluebutton-backend-fhir-internal
+        description: "Allows incoming traffic on port {{ backend_fhir_port_internal }}  (from subnet IPs)."
+        region: "{{ aws_region }}"
+        rules:
+          - proto: tcp
+            from_port: "{{ backend_fhir_port_internal }}"
+            to_port: "{{ backend_fhir_port_internal }}"
+            group_name: default
+      register: ec2_group_backend_fhir_internal
+    - set_fact:
+        ec2_group_backend_fhir_internal_id: "{{ ec2_group_backend_fhir_internal.group_id }}"
+    
+    - name: Provision EC2 Security Group 'bluebutton-backend-fhir-external'
+      ec2_group:
+        name: bluebutton-backend-fhir-external
+        description: "Allows incoming traffic on port {{ backend_fhir_port_external }}  (from all IPs)."
+        region: "{{ aws_region }}"
+        rules:
+          - proto: tcp
+            from_port: "{{ backend_fhir_port_external }}"
+            to_port: "{{ backend_fhir_port_external }}"
+            cidr_ip: 0.0.0.0/0
+      register: ec2_group_backend_fhir_external
+    - set_fact:
+        ec2_group_backend_fhir_external_id: "{{ ec2_group_backend_fhir_external.group_id }}"
 

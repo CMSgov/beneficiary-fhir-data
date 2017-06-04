@@ -32,7 +32,8 @@ backend_postgres_master_username: "{{ vault_backend_postgres_master_username }}"
 backend_postgres_master_password: "{{ vault_backend_postgres_master_password }}"
 
 # The port that the FHIR server will run on.
-backend_fhir_port: 8443
+backend_fhir_port_internal: 8443
+backend_fhir_port_external: 443
 
 # 8x vCPUs, 32 GB RAM
 rds_backend_db_instance_type: 'db.m4.2xlarge'
