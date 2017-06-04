@@ -72,6 +72,11 @@
         image: "{{ ami_id_rhel_7_encrypted }}"
         region: "{{ aws_region }}"
         zone: "{{ aws_zone }}"
+        volumes:
+          - device_name: /dev/sda1
+            volume_type: gp2
+            # The sample RIF data set is about 92GB total.
+            volume_size: 200
         instance_profile_name: BlueButtonBackend-EC2Services
         wait: true
         exact_count: 1

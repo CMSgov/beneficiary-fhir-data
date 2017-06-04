@@ -34,11 +34,14 @@ backend_postgres_master_password: "{{ vault_backend_postgres_master_password }}"
 # The port that the FHIR server will run on.
 backend_fhir_port: 8443
 
-# Using a "burstable" EC2 instance with 2x vCPUs, 36 CPU credits/hour, 8 GB RAM.
-ec2_backend_fhir_instance_type: 't2.large'
-ec2_backend_etl_instance_type: 't2.large'
-backend_fhir_memory_args: '-Xmx6g -XX:MaxMetaspaceSize=1g'
-backend_etl_memory_args: '-Xmx7g'
+# 8x vCPUs, 32 GB RAM
+rds_backend_db_instance_type: 'db.m4.2xlarge'
+
+# 16x vCPUs, 64 GB RAM.
+ec2_backend_fhir_instance_type: 'm4.4xlarge'
+ec2_backend_etl_instance_type: 'm4.4xlarge'
+backend_fhir_memory_args: '-Xmx58g -XX:MaxMetaspaceSize=4g'
+backend_etl_memory_args: '-Xmx58g'
 
 # When `true`, Ansible will configure the FHIR server to run such that Java
 # flame graphs can be collected. This will incur a performance penalty of 1%-

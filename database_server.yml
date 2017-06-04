@@ -22,10 +22,11 @@
         #engine_version: 9.6.1
         engine_version: 9.4.9
         upgrade: true
-        size: 100
-        iops: 1000
+        # The sample RIF data is 92 GB in size, and FHIR DB usage is about 19x RIF size.
+        size: 2000
+        iops: 6000
         backup_retention: 35
-        instance_type: db.t2.medium
+        instance_type: "{{ rds_backend_db_instance_type }}"
         publicly_accessible: false
         username: "{{ backend_postgres_master_username }}"
         password: "{{ backend_postgres_master_password }}"
