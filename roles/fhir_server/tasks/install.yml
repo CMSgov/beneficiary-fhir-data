@@ -119,6 +119,6 @@
   become: true
 
 - name: Run 'server-config-healthapt.sh' to Configure FHIR Server
-  command: "/usr/local/bluebutton-server-app/bluebutton-server-app-server-config-healthapt.sh --serverhome {{ wildfly_dir }} --httpsport {{ backend_fhir_port_internal }} --keystore {{ wildfly_dir }}/standalone/configuration/bluebutton-backend-fhir-servers-keystore.jks --truststore {{ wildfly_dir }}/standalone/configuration/server-truststore.jks --war /usr/local/bluebutton-server-app/bluebutton-server-app.war --dburl jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/fhirdb --dbusername {{ backend_postgres_master_username }} --dbpassword {{ backend_postgres_master_password }}"
+  command: "/usr/local/bluebutton-server-app/bluebutton-server-app-server-config-healthapt.sh --serverhome {{ wildfly_dir }} --httpsport {{ backend_fhir_port_internal }} --keystore {{ wildfly_dir }}/standalone/configuration/bluebutton-backend-fhir-servers-keystore.jks --truststore {{ wildfly_dir }}/standalone/configuration/server-truststore.jks --war /usr/local/bluebutton-server-app/bluebutton-server-app.war --dburl jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/fhirdb --dbusername {{ backend_postgres_master_username }} --dbpassword {{ backend_postgres_master_password }} --dbconnectionsmax {{ backend_fhir_dbconnectionsmax }}"
   become: true
 

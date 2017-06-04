@@ -1,11 +1,14 @@
 #!/bin/bash
 
 export S3_BUCKET_NAME='{{ s3_bucket_etl_staging }}'
-export FHIR_SERVER_URL='https://fhir.{{ backend_domain }}:{{ backend_fhir_port }}/baseDstu3'
+export HICN_HASH_ITERATIONS='2'
+export HICN_HASH_PEPPER='6E6F747468657265616C706570706572' # Hex-encoded "nottherealpepper"
+export FHIR_SERVER_URL='https://fhir.{{ backend_domain }}:{{ backend_fhir_port_external }}/baseDstu3'
 export KEY_STORE_PATH='{{ etl_dir }}/bluebutton-backend-fhir-clients-etl-keystore.jks'
 export KEY_STORE_PASSWORD='changeit'
 export TRUST_STORE_PATH='{{ etl_dir }}/bluebutton-backend-fhir-clients-etl-truststore.jks'
 export TRUST_STORE_PASSWORD='changeit'
+export LOADER_THREADS='{{ backend_etl_loader_threads }}'
 
 java \
 	{{ backend_etl_memory_args }} \
