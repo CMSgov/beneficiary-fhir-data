@@ -2,9 +2,9 @@
 
 export S3_BUCKET_NAME='{{ s3_bucket_etl_staging }}'
 export FHIR_SERVER_URL='https://fhir.{{ backend_domain }}:{{ backend_fhir_port }}/baseDstu3'
-export KEY_STORE_PATH='{{ etl_dir }}/bluebutton-backend-etl-client-keystore.jks'
+export KEY_STORE_PATH='{{ etl_dir }}/bluebutton-backend-fhir-clients-etl-keystore.jks'
 export KEY_STORE_PASSWORD='changeit'
-export TRUST_STORE_PATH='{{ etl_dir }}/bluebutton-backend-etl-client-truststore.jks'
+export TRUST_STORE_PATH='{{ etl_dir }}/bluebutton-backend-fhir-clients-etl-truststore.jks'
 export TRUST_STORE_PASSWORD='changeit'
 
 java \

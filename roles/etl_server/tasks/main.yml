@@ -40,14 +40,14 @@
     mode: get
   with_items:
     - bluebutton-data-pipeline-app-capsule-fat.jar
-    - bluebutton-backend-etl-client-keystore.jks
+    - bluebutton-backend-fhir-clients-etl-keystore.jks
     - bluebutton-backend-fhir-servers.cer
   become: true
 
 - name: Create ETL Client Truststore
   command: "{{ item }}"
   with_items:
-    - "keytool -importcert -noprompt -alias client-etl -file {{ etl_dir }}/bluebutton-backend-fhir-servers.cer -keypass changeit -keystore {{ etl_dir }}/bluebutton-backend-etl-client-truststore.jks -storepass changeit"
+    - "keytool -importcert -noprompt -alias client-etl -file {{ etl_dir }}/bluebutton-backend-fhir-servers.cer -keypass changeit -keystore {{ etl_dir }}/bluebutton-backend-fhir-clients-etl-truststore.jks -storepass changeit"
   become: true
 
 - file:

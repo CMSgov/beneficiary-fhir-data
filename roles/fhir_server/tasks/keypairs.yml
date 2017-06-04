@@ -49,8 +49,8 @@
     - name: Create ETL Client Keypair
       command: "{{ item }}"
       with_items:
-        - "keytool -genkeypair -alias client-etl -keyalg RSA -keysize 4096 -dname cn=etl.{{ backend_domain }} -validity 3650 -keypass changeit -keystore /tmp/bluebutton-backend-etl-client-keystore.jks -storepass changeit"
-        - "keytool -exportcert -alias client-etl -file /tmp/bluebutton-backend-etl-client.cer -keystore /tmp/bluebutton-backend-etl-client-keystore.jks -storepass changeit"
+        - "keytool -genkeypair -alias client-etl -keyalg RSA -keysize 4096 -dname cn=etl.{{ backend_domain }} -validity 3650 -keypass changeit -keystore /tmp/bluebutton-backend-fhir-clients-etl-keystore.jks -storepass changeit"
+        - "keytool -exportcert -alias client-etl -file /tmp/bluebutton-backend-fhir-clients-etl.cer -keystore /tmp/bluebutton-backend-fhir-clients-etl-keystore.jks -storepass changeit"
       become: true
 
     - name: Upload ETL Client Keypair to S3
@@ -61,8 +61,8 @@
         src: "{{ item }}"
         encrypt: true
       with_items:
-        - /tmp/bluebutton-backend-etl-client-keystore.jks
-        - /tmp/bluebutton-backend-etl-client.cer
+        - /tmp/bluebutton-backend-fhir-clients-etl-keystore.jks
+        - /tmp/bluebutton-backend-fhir-clients-etl.cer
       become: true
 
     - name: Delete ETL Client Keypair from Disk
@@ -70,11 +70,11 @@
         path: "{{ item }}"
         state: absent
       with_items:
-        - /tmp/bluebutton-backend-etl-client-keystore.jks
-        - /tmp/bluebutton-backend-etl-client.cer
+        - /tmp/bluebutton-backend-fhir-clients-etl-keystore.jks
+        - /tmp/bluebutton-backend-fhir-clients-etl.cer
       become: true
 
-  when: "'bluebutton-backend-etl-client-keystore.jks' not in s3_list_keypairs.s3_keys or 'bluebutton-backend-etl-client.cer' not in s3_list_keypairs.s3_keys"
+  when: "'bluebutton-backend-fhir-clients-etl-keystore.jks' not in s3_list_keypairs.s3_keys or 'bluebutton-backend-fhir-clients-etl.cer' not in s3_list_keypairs.s3_keys"
 
 #- name: Create Keystores and Truststores
 #  command: "{{ item }}"

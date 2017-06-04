@@ -97,13 +97,22 @@
     mode: get
   with_items:
     - bluebutton-backend-fhir-servers-keystore.jks
-    - bluebutton-backend-etl-client.cer
+    - bluebutton-backend-fhir-clients-etl.cer
+  become: true
+
+- name: Download FHIR Frontend Client CA Cert
+  copy:
+    src: "files/{{ item }}"
+    dest: "{{ wildfly_dir }}/standalone/configuration/{{ item }}"
+  with_items:
+    - bluebutton-backend-fhir-clients-frontend-ca.cer
   become: true
 
 - name: Create FHIR Server Truststore
   command: "{{ item }}"
   with_items:
-    - "keytool -importcert -noprompt -alias client-etl -file {{ wildfly_dir }}/standalone/configuration/bluebutton-backend-etl-client.cer -keypass changeit -keystore {{ wildfly_dir }}/standalone/configuration/server-truststore.jks -storepass changeit"
+    - "keytool -importcert -noprompt -alias client-etl -file {{ wildfly_dir }}/standalone/configuration/bluebutton-backend-fhir-clients-etl.cer -keypass changeit -keystore {{ wildfly_dir }}/standalone/configuration/server-truststore.jks -storepass changeit"
+    - "keytool -import -trustcacerts -noprompt -alias client-frontend -file {{ wildfly_dir }}/standalone/configuration/bluebutton-backend-fhir-clients-frontend-ca.cer -keypass changeit -keystore {{ wildfly_dir }}/standalone/configuration/server-truststore.jks -storepass changeit"
   become: true
 
 - name: Run 'server-config-healthapt.sh' to Configure FHIR Server
