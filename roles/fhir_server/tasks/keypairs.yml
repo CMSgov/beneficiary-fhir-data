@@ -17,7 +17,7 @@
     - name: Create FHIR Server Keypair
       command: "{{ item }}"
       with_items:
-        - "keytool -genkeypair -alias fhirservers -keyalg RSA -keysize 4096 -dname cn=*.fhir.{{ backend_domain }} -validity 3650 -keypass changeit -keystore /tmp/bluebutton-backend-fhir-servers-keystore.jks -storepass changeit"
+        - "keytool -genkeypair -alias fhirservers -keyalg RSA -keysize 4096 -dname cn=*.fhir.{{ backend_domain }} -ext san=dns:fhir.{{ backend_domain }} -validity 3650 -keypass changeit -keystore /tmp/bluebutton-backend-fhir-servers-keystore.jks -storepass changeit"
         - "keytool -exportcert -alias fhirservers -file /tmp/bluebutton-backend-fhir-servers.cer -keystore /tmp/bluebutton-backend-fhir-servers-keystore.jks -storepass changeit"
       become: true
 
