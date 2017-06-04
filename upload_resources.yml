@@ -32,5 +32,5 @@
         - { src: "{{ maven_repo }}/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ bluebutton_server_version }}/bluebutton-server-app-{{ bluebutton_server_version }}.war", dest_name: 'bluebutton-server-app.war' }
         - { src: "{{ maven_repo }}/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ bluebutton_server_version }}/bluebutton-server-app-{{ bluebutton_server_version }}-server-config-healthapt.sh", dest_name: 'bluebutton-server-app-server-config-healthapt.sh' }
         - { src: "{{ maven_repo }}/org/wildfly/wildfly-dist/{{ wildfly_version }}/wildfly-dist-{{ wildfly_version }}.tar.gz", dest_name: 'wildfly-dist.tar.gz' }
-        - { src: "{{ maven_repo }}/gov/hhs/cms/bluebutton/datapipeline/bluebutton-data-pipeline-app/{{ backend_etl_version }}/bluebutton-data-pipeline-app-{{ backend_etl_version }}-capsule-fat.x", dest_name: 'bluebutton-data-pipeline-app-capsule-fat.x' }
+        - { src: "{{ maven_repo }}/gov/hhs/cms/bluebutton/datapipeline/bluebutton-data-pipeline-app/{{ backend_etl_version }}/bluebutton-data-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar", dest_name: 'bluebutton-data-pipeline-app-capsule-fat.jar' }
 

@@ -39,7 +39,7 @@
     dest: "{{ etl_dir }}/{{ item }}"
     mode: get
   with_items:
-    - bluebutton-data-pipeline-app-capsule-fat.x
+    - bluebutton-data-pipeline-app-capsule-fat.jar
     - bluebutton-backend-etl-client-keystore.jks
     - bluebutton-backend-fhir-servers.cer
   become: true
@@ -51,7 +51,7 @@
   become: true
 
 - file:
-    path: "{{ etl_dir }}/bluebutton-data-pipeline-app-capsule-fat.x"
+    path: "{{ etl_dir }}/bluebutton-data-pipeline-app-capsule-fat.jar"
     mode: 'u=rwx,g=rwx,o=rwx'
   become: true
 

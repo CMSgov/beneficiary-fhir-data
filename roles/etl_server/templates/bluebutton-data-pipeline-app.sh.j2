@@ -7,7 +7,8 @@ export KEY_STORE_PASSWORD='changeit'
 export TRUST_STORE_PATH='{{ etl_dir }}/bluebutton-backend-etl-client-truststore.jks'
 export TRUST_STORE_PASSWORD='changeit'
 
-"{{ etl_dir }}/bluebutton-data-pipeline-app-capsule-fat.x" \
+java \
 	{{ backend_etl_memory_args }} \
-	&> "{{ etl_dir }}/bluebutton-data-pipeline-app.log"
+	-jar "{{ etl_dir }}/bluebutton-data-pipeline-app-capsule-fat.jar" \
+	&>> "{{ etl_dir }}/bluebutton-data-pipeline-app.log"
 
