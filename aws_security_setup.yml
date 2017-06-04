@@ -40,14 +40,14 @@
             Principal:
               Service: ec2.amazonaws.com
 
-    - name: Give bluebutton-backend/ec2-services Access to S3 Deployment Resources
+    - name: Give bluebutton-backend/ec2-services Access to Blue Button S3 Buckets
       iam_policy:
         iam_type: role
         iam_name: BlueButtonBackend-EC2Services
-        policy_name: "BlueButtonBackend-Resources"
+        policy_name: "BlueButtonBackend-S3"
         state: present
         # Note: Watch out for this Ansible bug: https://github.com/ansible/ansible/issues/19310
-        policy_json: "{{ lookup('template','bluebutton_backend_resources_policy.json.j2') | to_json }}"
+        policy_json: "{{ lookup('template','bluebutton_backend_s3_policy.json.j2') | to_json }}"
     
     - name: "Provision EC2 Security Group 'default'"
       ec2_group:
