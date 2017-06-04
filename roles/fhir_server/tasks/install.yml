@@ -69,15 +69,18 @@
     group: root
     mode: u=rw,g=r,o=r
   become: true
+  register: template_bluebutton_app_service
 
 - name: Load FHIR Service Definition
   command: /usr/bin/systemctl daemon-reload
   become: true
+  when: template_bluebutton_app_service.changed
 
 - name: Start FHIR Service
   service:
     name: bluebutton-server-app
     state: started
+    enabled: true
   become: true
 
 - file:
