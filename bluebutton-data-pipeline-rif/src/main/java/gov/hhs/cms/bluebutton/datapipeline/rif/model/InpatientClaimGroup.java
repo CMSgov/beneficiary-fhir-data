@@ -2421,6 +2421,20 @@ public final class InpatientClaimGroup {
 		PRCDR_DT25,
 
 		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ime_op.txt">
+		 * CCW Data Dictionary: IME_OP_CLM_VAL_AMT</a>.
+		 */
+		IME_OP_CLM_VAL_AMT,
+
+		/**
+		 * Type: <code>NUM</code>, max chars: 12. See <a href=
+		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dsh_op.txt">
+		 * CCW Data Dictionary: DSH_OP_CLM_VAL_AMT</a>.
+		 */
+		DSH_OP_CLM_VAL_AMT,
+
+		/**
 		 * Type: <code>NUM</code>, max chars: 13. See <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_ln.txt">
 		 * CCW Data Dictionary: CLM_LN</a>.
