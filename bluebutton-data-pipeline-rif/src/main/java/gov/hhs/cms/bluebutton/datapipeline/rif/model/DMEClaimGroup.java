@@ -17,8 +17,9 @@ import java.util.stream.Collectors;
  * <p>
  * The RIF file layout used here is specific to the Blue Button API's ETL
  * process. The layouts of these files is detailed in the
- * <code>bluebutton-data-pipeline-rif/dev/rif-record-layout.xlsx</code> file.
- * The columns contained in the files are largely similar to those detailed in
+ * <code>bluebutton-data-pipeline-rif/dev/rif-layout-and-fhir-mapping.xlsx</code>
+ * file. The columns contained in the files are largely similar to those
+ * detailed in
  * <a href="https://www.ccwdata.org/web/guest/data-dictionaries">CCW: Data
  * Dictionaries</a>.
  * </p>
