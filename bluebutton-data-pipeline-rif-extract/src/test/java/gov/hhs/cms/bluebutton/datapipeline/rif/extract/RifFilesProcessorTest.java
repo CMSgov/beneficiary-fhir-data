@@ -265,8 +265,8 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("1", claimLine.cmsServiceTypeCode);
 		Assert.assertEquals("11", claimLine.placeOfServiceCode);
 		Assert.assertEquals("15", claimLine.linePricingLocalityCode);
-		Assert.assertEquals(LocalDate.of(1999, 10, 27), claimLine.firstExpenseDate);
-		Assert.assertEquals(LocalDate.of(1999, 10, 27), claimLine.lastExpenseDate);
+		Assert.assertEquals(LocalDate.of(1999, 10, 27), claimLine.firstExpenseDate.get());
+		Assert.assertEquals(LocalDate.of(1999, 10, 27), claimLine.lastExpenseDate.get());
 		Assert.assertEquals("92999", claimLine.hcpcsCode.get());
 		Assert.assertTrue(claimLine.hcpcsInitialModifierCode.isPresent());
 		Assert.assertFalse(claimLine.hcpcsSecondModifierCode.isPresent());
@@ -827,8 +827,8 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new BigDecimal("60"), claimLine.serviceCount);
 		Assert.assertEquals("P", claimLine.cmsServiceTypeCode);
 		Assert.assertEquals("12", claimLine.placeOfServiceCode);
-		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimLine.firstExpenseDate);
-		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimLine.lastExpenseDate);
+		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimLine.firstExpenseDate.get());
+		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimLine.lastExpenseDate.get());
 		Assert.assertEquals("345", claimLine.hcpcsCode.get());
 		Assert.assertFalse(claimLine.hcpcsSecondModifierCode.isPresent());
 		Assert.assertFalse(claimLine.hcpcsThirdModifierCode.isPresent());

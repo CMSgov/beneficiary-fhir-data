@@ -783,8 +783,8 @@ public final class RifFilesProcessor {
 			claimLine.cmsServiceTypeCode = claimLineRecord.get(CarrierClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD);
 			claimLine.placeOfServiceCode = claimLineRecord.get(CarrierClaimGroup.Column.LINE_PLACE_OF_SRVC_CD);
 			claimLine.linePricingLocalityCode = claimLineRecord.get(CarrierClaimGroup.Column.CARR_LINE_PRCNG_LCLTY_CD);
-			claimLine.firstExpenseDate = parseDate(claimLineRecord.get(CarrierClaimGroup.Column.LINE_1ST_EXPNS_DT));
-			claimLine.lastExpenseDate = parseDate(claimLineRecord.get(CarrierClaimGroup.Column.LINE_LAST_EXPNS_DT));
+			claimLine.firstExpenseDate = parseOptDate(claimLineRecord.get(CarrierClaimGroup.Column.LINE_1ST_EXPNS_DT));
+			claimLine.lastExpenseDate = parseOptDate(claimLineRecord.get(CarrierClaimGroup.Column.LINE_LAST_EXPNS_DT));
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(CarrierClaimGroup.Column.HCPCS_CD));
 			claimLine.hcpcsInitialModifierCode = parseOptString(
 					claimLineRecord.get(CarrierClaimGroup.Column.HCPCS_1ST_MDFR_CD));
@@ -1222,8 +1222,8 @@ public final class RifFilesProcessor {
 			claimLine.serviceCount = parseDecimal(claimLineRecord.get(DMEClaimGroup.Column.LINE_SRVC_CNT));
 			claimLine.cmsServiceTypeCode = claimLineRecord.get(DMEClaimGroup.Column.LINE_CMS_TYPE_SRVC_CD);
 			claimLine.placeOfServiceCode = claimLineRecord.get(DMEClaimGroup.Column.LINE_PLACE_OF_SRVC_CD);
-			claimLine.firstExpenseDate = parseDate(claimLineRecord.get(DMEClaimGroup.Column.LINE_1ST_EXPNS_DT));
-			claimLine.lastExpenseDate = parseDate(claimLineRecord.get(DMEClaimGroup.Column.LINE_LAST_EXPNS_DT));
+			claimLine.firstExpenseDate = parseOptDate(claimLineRecord.get(DMEClaimGroup.Column.LINE_1ST_EXPNS_DT));
+			claimLine.lastExpenseDate = parseOptDate(claimLineRecord.get(DMEClaimGroup.Column.LINE_LAST_EXPNS_DT));
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(DMEClaimGroup.Column.HCPCS_CD));
 			claimLine.hcpcsInitialModifierCode = parseOptString(
 					claimLineRecord.get(DMEClaimGroup.Column.HCPCS_1ST_MDFR_CD));

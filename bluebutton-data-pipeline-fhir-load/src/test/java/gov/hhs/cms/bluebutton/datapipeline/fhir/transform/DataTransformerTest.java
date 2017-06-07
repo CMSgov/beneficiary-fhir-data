@@ -590,8 +590,8 @@ public final class DataTransformerTest {
 		assertExtensionCodingEquals(eobItem0.getLocation(), DataTransformer.CODING_SYSTEM_CCW_PRICING_LOCALITY,
 				DataTransformer.CODING_SYSTEM_CCW_PRICING_LOCALITY, "15");
 
-		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
-		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
+		assertDateEquals(recordLine1.firstExpenseDate.get(), eobItem0.getServicedPeriod().getStartElement());
+		assertDateEquals(recordLine1.lastExpenseDate.get(), eobItem0.getServicedPeriod().getEndElement());
 
 		assertHasCoding(DataTransformer.CODING_SYSTEM_HCPCS, "" + record.hcpcsYearCode.get(),
 				recordLine1.hcpcsCode.get(), eobItem0.getService());
@@ -1584,8 +1584,8 @@ public final class DataTransformerTest {
 		assertHasCoding(DataTransformer.CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, recordLine1.placeOfServiceCode,
 				eobItem0.getLocationCodeableConcept());
 
-		assertDateEquals(recordLine1.firstExpenseDate, eobItem0.getServicedPeriod().getStartElement());
-		assertDateEquals(recordLine1.lastExpenseDate, eobItem0.getServicedPeriod().getEndElement());
+		assertDateEquals(recordLine1.firstExpenseDate.get(), eobItem0.getServicedPeriod().getStartElement());
+		assertDateEquals(recordLine1.lastExpenseDate.get(), eobItem0.getServicedPeriod().getEndElement());
 
 		assertHasCoding(DataTransformer.HCPCS_INITIAL_MODIFIER_CODE1, recordLine1.hcpcsInitialModifierCode.get(),
 				eobItem0.getModifier().get(0));

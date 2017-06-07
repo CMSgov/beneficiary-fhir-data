@@ -1274,12 +1274,13 @@ public final class DataTransformer {
 			addExtensionCoding(item.getLocation(), CODING_SYSTEM_CCW_PRICING_LOCALITY,
 					CODING_SYSTEM_CCW_PRICING_LOCALITY, claimLine.linePricingLocalityCode);
 
-			validatePeriodDates(claimLine.firstExpenseDate, claimLine.lastExpenseDate);
-			item.setServiced(new Period()
-					.setStart(convertToDate((claimLine.firstExpenseDate)),
+			if (claimLine.firstExpenseDate.isPresent() && claimLine.lastExpenseDate.isPresent()) {
+				validatePeriodDates(claimLine.firstExpenseDate, claimLine.lastExpenseDate);
+				item.setServiced(new Period().setStart((convertToDate(claimLine.firstExpenseDate.get())),
 							TemporalPrecisionEnum.DAY)
-					.setEnd(convertToDate((claimLine.lastExpenseDate)),
+						.setEnd((convertToDate(claimLine.lastExpenseDate.get())),
 							TemporalPrecisionEnum.DAY));
+			}
 
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, "" + claimGroup.hcpcsYearCode.get(),
@@ -3078,12 +3079,14 @@ public final class DataTransformer {
 						CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD, claimLine.providerStateCode);
 			}
 
-			validatePeriodDates(claimLine.firstExpenseDate, claimLine.lastExpenseDate);
-			item.setServiced(new Period()
-					.setStart((convertToDate(claimLine.firstExpenseDate)),
+			if (claimLine.firstExpenseDate.isPresent() && claimLine.lastExpenseDate.isPresent()) {
+				validatePeriodDates(claimLine.firstExpenseDate, claimLine.lastExpenseDate);
+				item.setServiced(new Period()
+					.setStart((convertToDate(claimLine.firstExpenseDate.get())),
 							TemporalPrecisionEnum.DAY)
-					.setEnd((convertToDate(claimLine.lastExpenseDate)),
+					.setEnd((convertToDate(claimLine.lastExpenseDate.get())),
 							TemporalPrecisionEnum.DAY));
+			}
 
 			if (claimLine.hcpcsCode.isPresent()) {
 				item.setService(createCodeableConcept(CODING_SYSTEM_HCPCS, "" + claimGroup.hcpcsYearCode.get(),
