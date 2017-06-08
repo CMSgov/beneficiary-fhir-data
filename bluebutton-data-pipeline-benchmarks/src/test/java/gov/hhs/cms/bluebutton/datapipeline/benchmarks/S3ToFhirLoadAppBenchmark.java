@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.Copy;
@@ -651,13 +651,13 @@ public final class S3ToFhirLoadAppBenchmark {
 			try {
 				transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-				final ListObjectsRequest bucketListRequest = new ListObjectsRequest()
+				ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request()
 						.withBucketName(BUCKET_DATA_SET_MASTER);
-				ObjectListing objectListing;
+				ListObjectsV2Result s3ObjectListing;
 				do {
-					objectListing = s3Client.listObjects(bucketListRequest);
+					s3ObjectListing = s3Client.listObjectsV2(s3BucketListRequest);
 
-					for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+					for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
 						Copy copyOperation = transferManager.copy(BUCKET_DATA_SET_MASTER, objectSummary.getKey(),
 								bucket.getName(), objectSummary.getKey());
 						try {
@@ -667,8 +667,9 @@ public final class S3ToFhirLoadAppBenchmark {
 						}
 					}
 
-					objectListing = s3Client.listNextBatchOfObjects(objectListing);
-				} while (objectListing.isTruncated());
+					// On to the next page! (If any.)
+					s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
+				} while (s3ObjectListing.isTruncated());
 			} finally {
 				if (transferManager != null)
 					transferManager.shutdownNow(false);

@@ -26,10 +26,8 @@ import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -369,25 +367,29 @@ public final class DataSetMonitorWorker implements Runnable {
 		String dataSetKeyPrefix = String.format("%s/%s/", S3_PREFIX_PENDING_DATA_SETS,
 				DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()));
 
-		ListObjectsRequest bucketListRequest = new ListObjectsRequest();
-		bucketListRequest.setBucketName(options.getS3BucketName());
-		bucketListRequest.setPrefix(dataSetKeyPrefix);
+		ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
+		s3BucketListRequest.setBucketName(options.getS3BucketName());
+		s3BucketListRequest.setPrefix(dataSetKeyPrefix);
+		if (s3MaxKeys.isPresent())
+			s3BucketListRequest.setMaxKeys(s3MaxKeys.get());
 
 		Set<String> dataSetObjectNames = new HashSet<>();
-		ObjectListing objectListing = s3Client.listObjects(bucketListRequest);
+		ListObjectsV2Result s3ObjectListing;
 		do {
+			s3ObjectListing = s3Client.listObjectsV2(s3BucketListRequest);
+
 			/*
 			 * Pull the object names from the keys that were returned, by
 			 * stripping the timestamp prefix and slash from each of them.
 			 */
-			Set<String> namesForObjectsInPage = objectListing.getObjectSummaries().stream().map(s -> s.getKey())
+			Set<String> namesForObjectsInPage = s3ObjectListing.getObjectSummaries().stream().map(s -> s.getKey())
 					.peek(s -> LOGGER.debug("Found object: '{}'", s)).map(k -> k.substring(dataSetKeyPrefix.length()))
 					.collect(Collectors.toSet());
 			dataSetObjectNames.addAll(namesForObjectsInPage);
 
 			// On to the next page! (If any.)
-			objectListing = s3Client.listNextBatchOfObjects(objectListing);
-		} while (objectListing.isTruncated());
+			s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
+		} while (s3ObjectListing.isTruncated());
 
 		for (DataSetManifestEntry manifestEntry : manifest.getEntries()) {
 			if (!dataSetObjectNames.contains(manifestEntry.getName()))
