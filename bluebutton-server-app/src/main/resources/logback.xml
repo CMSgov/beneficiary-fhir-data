@@ -28,6 +28,11 @@
 	<logger name="ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao" level="warn" />
 	<logger name="ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3" level="warn" />
 
+	<!-- Because the ETL service uses the `If-None-Exists` header, every create 
+		operation logs one or more of these events, too. Turning down to avoid those 
+		silly amounts of log spam. -->
+	<logger name="ca.uhn.fhir.jpa.dao.SearchBuilder" level="warn" />
+
 	<root level="info">
 		<appender-ref ref="FILE" />
 	</root>
