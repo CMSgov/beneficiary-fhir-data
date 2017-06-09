@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
@@ -34,6 +35,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
@@ -53,6 +55,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.datapipeline.rif.parse.RifParsingUtils;
+import gov.hhs.cms.bluebutton.datapipeline.sampledata.TestDataSetLocation;
 
 /**
  * <p>
@@ -67,14 +70,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.parse.RifParsingUtils;
  */
 public final class DataSetSubsetter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetSubsetter.class);
-
-	static final String DATA_SET_ID_DUMMY_1000000 = "1000000-beneficiaries-2017-04-18T05:03:30Z";
-	static final String DATA_SET_ID_DUMMY_100000 = "100000-beneficiaries-2017-05-16T19:36:23.445Z";
-	static final String DATA_SET_ID_DUMMY_10000 = "10000-beneficiaries-2017-05-18T17:58:44.370Z";
-	static final String DATA_SET_ID_DUMMY_1000 = "1000-beneficiaries-2017-05-18T18:14:12.019Z";
-	static final String DATA_SET_ID_DUMMY_100 = "100-beneficiaries-2017-05-18T18:23:16.941Z";
-	static final String DATA_SET_ID_DUMMY_10 = "10-beneficiaries-2017-05-18T18:25:12.909Z";
-	static final String DATA_SET_ID_DUMMY_1 = "1-beneficiaries-2017-05-18T18:26:30.504Z";
 
 	/**
 	 * Creates a subset of the specified input {@link RifFile}s, writing out the
@@ -130,6 +125,20 @@ public final class DataSetSubsetter {
 			LOGGER.info("Subsetting RIF file: '{}'...", rifFile.getDisplayName());
 			CSVPrinter rifFilePrinter = output.getPrinter(rifFile.getFileType());
 			CSVParser parser = RifParsingUtils.createCsvParser(rifFile);
+
+			/*
+			 * When we created the CSVPrinter, we told it to skip the header.
+			 * That ensures that we don't write out a header until we've started
+			 * reading the file and know what it is. Here, we print a "fake"
+			 * first record with the header, as read from the input file.
+			 * Previously, we'd been having the CSVPrinter create a header based
+			 * on our RIF column enums, but that leads to us propagating errors
+			 * in those enums to the sample files. It's better to let the files
+			 * tell us what their headers are.
+			 */
+			rifFilePrinter.printRecord(parser.getHeaderMap().entrySet().stream().sorted(Map.Entry.comparingByValue())
+					.map(e -> e.getKey()).toArray());
+
 			parser.forEach(r -> {
 				String beneficiaryId = r.get(beneficiaryColumnByFileType.get(rifFile.getFileType()));
 				if (selectedBeneficiaryIds.contains(beneficiaryId))
@@ -187,42 +196,19 @@ public final class DataSetSubsetter {
 		public CSVPrinter getPrinter(RifFileType fileType) throws IOException {
 			if (!printers.containsKey(fileType)) {
 				FileWriter writer = new FileWriter(outputDirectory.resolve(computeRifFileName(fileType)).toFile());
-				CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader(computeColumnNames(fileType));
+
+				/*
+				 * We tell the CSVPrinter not to include a header here, because
+				 * we will manually add it later, based on what we find in the
+				 * input file.
+				 */
+				CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader((String[]) null);
+
 				CSVPrinter printer = new CSVPrinter(writer, csvFormat);
 				printers.put(fileType, printer);
 			}
 
 			return printers.get(fileType);
-		}
-
-		/**
-		 * @param fileType
-		 *            the {@link RifFileType} to compute the column names for
-		 * @return an array of the column names in the specified
-		 *         {@link RifFileType}
-		 */
-		private String[] computeColumnNames(RifFileType fileType) {
-			if (fileType == RifFileType.BENEFICIARY) {
-				return BeneficiaryRow.Column.getColumnNames();
-			} else if (fileType == RifFileType.CARRIER) {
-				return CarrierClaimGroup.Column.getColumnNames();
-			} else if (fileType == RifFileType.DME) {
-				return DMEClaimGroup.Column.getColumnNames();
-			} else if (fileType == RifFileType.HHA) {
-				return HHAClaimGroup.Column.getColumnNames();
-			} else if (fileType == RifFileType.HOSPICE) {
-				return HospiceClaimGroup.Column.getColumnNames();
-			} else if (fileType == RifFileType.INPATIENT) {
-				return InpatientClaimGroup.Column.getColumnNames();
-			} else if (fileType == RifFileType.OUTPATIENT) {
-				return OutpatientClaimGroup.Column.getColumnNames();
-			} else if (fileType == RifFileType.PDE) {
-				return PartDEventRow.Column.getColumnNames();
-			} else if (fileType == RifFileType.SNF) {
-				return SNFClaimGroup.Column.getColumnNames();
-			}
-
-			throw new IllegalArgumentException();
 		}
 
 		/**
@@ -253,7 +239,7 @@ public final class DataSetSubsetter {
 		 *         {@link RifFileType}
 		 */
 		private static String computeRifFileName(RifFileType fileType) {
-			return String.format("%s.rif", fileType.name().toLowerCase());
+			return String.format("%s_test.rif", fileType.name().toLowerCase());
 		}
 	}
 
@@ -275,15 +261,23 @@ public final class DataSetSubsetter {
 		 * going down in size by powers of ten. This gives test authors lots of
 		 * good options for how much data to test against.
 		 */
-		String originalDataSetId = DATA_SET_ID_DUMMY_10;
+		TestDataSetLocation originalDataSetLocation = TestDataSetLocation.DUMMY_DATA_10_BENES;
 		int targetBeneficiaryCountForSubset = 1;
 
-		Path outputDirectory = Paths.get(".", "DummyData");
+		String originalDataSetId = null;
+		StringTokenizer originalDataSetLocationTokens = new StringTokenizer(originalDataSetLocation.getS3KeyPrefix(),
+				"/");
+		while (originalDataSetLocationTokens.hasMoreTokens())
+			originalDataSetId = originalDataSetLocationTokens.nextToken();
+		if (originalDataSetId == null)
+			throw new BadCodeMonkeyException();
+
+		Path outputDirectory = Paths.get(".", "test-data-random");
 		Files.createDirectories(outputDirectory);
 		Path downloadDirectory = outputDirectory.resolve(originalDataSetId);
 		Files.createDirectories(downloadDirectory);
 
-		ExtractionOptions options = new ExtractionOptions("gov-hhs-cms-bluebutton-sandbox-etl-staging");
+		ExtractionOptions options = new ExtractionOptions("gov-hhs-cms-bluebutton-sandbox-etl-test-data");
 		try (IDataSetWriter output = new LocalDataSetWriter(outputDirectory, Instant.now());) {
 			List<RifFile> rifFiles = downloadDataSet(options, originalDataSetId, downloadDirectory);
 			DataSetSubsetter.createSubset(output, targetBeneficiaryCountForSubset, rifFiles);
@@ -305,7 +299,7 @@ public final class DataSetSubsetter {
 		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-		String dataSetPrefix = "DummyData/" + dataSetS3KeyPrefix;
+		String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
 		String manifestSuffix = "manifest.xml";
 
 		Path manifestDownloadPath = downloadDirectory.resolve(manifestSuffix);
@@ -337,9 +331,9 @@ public final class DataSetSubsetter {
 			Path dataSetFileDownloadPath = downloadDirectory.resolve(manifestEntry.getName());
 
 			if (!Files.exists(dataSetFileDownloadPath)) {
+				LOGGER.info("Downloading RIF file: '{}'...", manifestEntry.getName());
 				Download dataSetFileDownload = transferManager.download(options.getS3BucketName(), dataSetFileKey,
 						dataSetFileDownloadPath.toFile());
-				LOGGER.info("Downloading RIF file: '{}'...", manifestEntry.getName());
 				try {
 					dataSetFileDownload.waitForCompletion();
 				} catch (AmazonClientException | InterruptedException e) {
