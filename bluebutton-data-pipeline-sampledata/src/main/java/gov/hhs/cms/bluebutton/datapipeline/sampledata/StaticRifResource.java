@@ -51,24 +51,25 @@ public enum StaticRifResource {
 	SAMPLE_B_BENES(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
 			RifFileType.BENEFICIARY, 100),
 
-	SAMPLE_B_CARRIER(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"), RifFileType.CARRIER, 3215),
+	SAMPLE_B_CARRIER(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"), RifFileType.CARRIER,
+			2537),
 
 	SAMPLE_B_INPATIENT(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "inpatient_test.rif"),
-			RifFileType.INPATIENT, 41),
+			RifFileType.INPATIENT, 27),
 
 	SAMPLE_B_OUTPATIENT(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "outpatient_test.rif"),
-			RifFileType.OUTPATIENT, 516),
+			RifFileType.OUTPATIENT, 544),
 
-	SAMPLE_B_SNF(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"), RifFileType.SNF, 23),
+	SAMPLE_B_SNF(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"), RifFileType.SNF, 20),
 
 	SAMPLE_B_HOSPICE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hospice_test.rif"), RifFileType.HOSPICE,
-			5),
+			29),
 
-	SAMPLE_B_HHA(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"), RifFileType.HHA, 32),
+	SAMPLE_B_HHA(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"), RifFileType.HHA, 19),
 
-	SAMPLE_B_DME(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"), RifFileType.DME, 244),
+	SAMPLE_B_DME(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"), RifFileType.DME, 137),
 
-	SAMPLE_B_PDE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"), RifFileType.PDE, 4793),
+	SAMPLE_B_PDE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"), RifFileType.PDE, 5916),
 
 	SAMPLE_C_BENES(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "beneficiary_test.rif"), RifFileType.BENEFICIARY,
 			1000000),
@@ -314,7 +315,8 @@ public enum StaticRifResource {
 				download(resource.getResourceUrl(), tempDownloadPath);
 
 				tempDownloadStream = new BufferedInputStream(new FileInputStream(tempDownloadPath.toFile()));
-				CSVParser parser = RifParsingUtils.createCsvParser(tempDownloadStream, StandardCharsets.UTF_8);
+				CSVParser parser = RifParsingUtils.createCsvParser(RifParsingUtils.CSV_FORMAT, tempDownloadStream,
+						StandardCharsets.UTF_8);
 				parser.forEach(r -> uniqueIds.add(r.get(resource.getRifFileType().getIdColumn())));
 			} finally {
 				if (tempDownloadPath != null)

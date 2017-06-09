@@ -26,22 +26,35 @@ public final class RifParsingUtils {
 	 * @return a {@link CSVParser} for the specified {@link RifFile}
 	 */
 	public static CSVParser createCsvParser(RifFile file) {
-		return createCsvParser(file.open(), file.getCharset());
+		return createCsvParser(CSV_FORMAT, file);
 	}
 
 	/**
+	 * @param csvFormat
+	 *            the {@link CSVFormat} to use to parse the file
+	 * @param file
+	 *            the {@link RifFile} to parse
+	 * @return a {@link CSVParser} for the specified {@link RifFile}
+	 */
+	public static CSVParser createCsvParser(CSVFormat csvFormat, RifFile file) {
+		return createCsvParser(csvFormat, file.open(), file.getCharset());
+	}
+
+	/**
+	 * @param csvFormat
+	 *            the {@link CSVFormat} to use to parse the file
 	 * @param fileStream
 	 *            the {@link InputStream} to build a {@link CSVParser} for
 	 * @param charset
 	 *            the {@link Charset} of the {@link InputStream} to be parsed
 	 * @return a {@link CSVParser} for the specified {@link RifFile}
 	 */
-	public static CSVParser createCsvParser(InputStream fileStream, Charset charset) {
+	public static CSVParser createCsvParser(CSVFormat csvFormat, InputStream fileStream, Charset charset) {
 		BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
 		InputStreamReader reader = new InputStreamReader(fileStreamWithoutBom, charset);
 
 		try {
-			CSVParser parser = new CSVParser(reader, CSV_FORMAT);
+			CSVParser parser = new CSVParser(reader, csvFormat);
 			return parser;
 		} catch (IOException e) {
 			/*
