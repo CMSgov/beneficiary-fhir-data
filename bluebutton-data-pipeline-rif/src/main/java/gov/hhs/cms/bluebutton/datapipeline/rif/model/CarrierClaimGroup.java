@@ -344,12 +344,12 @@ public final class CarrierClaimGroup {
 		/**
 		 * @see Column#LINE_1ST_EXPNS_DT
 		 */
-		public LocalDate firstExpenseDate;
+		public Optional<LocalDate> firstExpenseDate;
 
 		/**
 		 * @see Column#LINE_LAST_EXPNS_DT
 		 */
-		public LocalDate lastExpenseDate;
+		public Optional<LocalDate> lastExpenseDate;
 
 		/**
 		 * @see Column#HCPCS_CD
@@ -1073,14 +1073,16 @@ public final class CarrierClaimGroup {
 		CARR_LINE_PRCNG_LCLTY_CD,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/expnsdt1.txt">
 		 * CCW Data Dictionary: EXPNSDT1</a>.
 		 */
 		LINE_1ST_EXPNS_DT,
 
 		/**
-		 * Type: <code>DATE</code>, max chars: 8. See <a href=
+		 * Type: <code>DATE</code>, max chars: 8 <code>Optional</code>. See
+		 * <a href=
 		 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/expnsdt2.txt">
 		 * CCW Data Dictionary: EXPNSDT2</a>.
 		 */
