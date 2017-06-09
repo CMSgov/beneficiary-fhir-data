@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -509,33 +508,14 @@ public final class RifFilesProcessor {
 			claimLine.hcpcsCode = parseOptString(claimLineRecord.get(InpatientClaimGroup.Column.HCPCS_CD));
 			claimLine.unitCount = parseDecimal(claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_UNIT_CNT));
 
-			/*
-			 * FIXME Workaround for
-			 * http://issues.hhsdevcloud.us/browse/CBBD-255. Random test data
-			 * has values like "B2620".
-			 */
-			String rateAmountText = claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_RATE_AMT);
-			if (Pattern.compile("^\\d*$").matcher(rateAmountText).matches())
-				claimLine.rateAmount = parseDecimal(rateAmountText);
-			else
-				claimLine.rateAmount = BigDecimal.ZERO;
-
+			claimLine.rateAmount = parseDecimal(claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_RATE_AMT));
 			claimLine.totalChargeAmount = parseDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_TOT_CHRG_AMT));
 			claimLine.nonCoveredChargeAmount = parseDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NCVRD_CHRG_AMT));
 
-			/*
-			 * FIXME Workaround for
-			 * http://issues.hhsdevcloud.us/browse/CBBD-255. Random test data
-			 * has values like "5853".
-			 */
-			String deductibleCoinsuranceCdText = claimLineRecord
-					.get(InpatientClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD);
-			if (Pattern.compile("^\\S?$").matcher(deductibleCoinsuranceCdText).matches())
-				claimLine.deductibleCoinsuranceCd = parseOptCharacter(deductibleCoinsuranceCdText);
-			else
-				claimLine.deductibleCoinsuranceCd = Optional.empty();
+			claimLine.deductibleCoinsuranceCd = parseOptCharacter(
+					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_DDCTBL_COINSRNC_CD));
 
 			claimLine.nationalDrugCodeQuantity = parseOptDecimal(
 					claimLineRecord.get(InpatientClaimGroup.Column.REV_CNTR_NDC_QTY));
