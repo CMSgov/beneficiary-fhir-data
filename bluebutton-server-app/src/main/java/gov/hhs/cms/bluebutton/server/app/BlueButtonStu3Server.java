@@ -70,12 +70,15 @@ public class BlueButtonStu3Server extends RestfulServer {
 		 */
 		setPlainProviders(webAppContext.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 
+		IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3",
+				IFhirSystemDao.class);
+		JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
+				myAppCtx.getBean(DaoConfig.class));
+		confProvider.setImplementationDescription("Example Server");
+		setServerConformanceProvider(confProvider);
+
 		// Enable ETag Support (this is already the default)
 		setETagSupport(ETagSupportEnum.ENABLED);
-
-		// This server tries to dynamically generate narratives
-		FhirContext ctx = getFhirContext();
-		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		// Default to XML and pretty printing
 		setDefaultPrettyPrint(true);

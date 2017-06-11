@@ -16,8 +16,8 @@
 	</description>
 
 	<properties>
-		<hapi-fhir.version>2.2</hapi-fhir.version>
-		<jersey.version>2.23.1</jersey.version>
+		<hapi-fhir.version>2.4.0-PR660</hapi-fhir.version>
+		<jersey.version>2.25.1</jersey.version>
 	</properties>
 
 	<dependencies>
@@ -44,10 +44,23 @@
 		</dependency>
 
 		<dependency>
+			<!-- Used for CORS support -->
+			<groupId>org.ebaysf.web</groupId>
+			<artifactId>cors-filter</artifactId>
+			<version>1.0.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
 			<!-- Spring Web is used to deploy the server to a web container. -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>4.3.1.RELEASE</version>
+			<version>4.3.7.RELEASE</version>
 		</dependency>
 
 		<dependency>
@@ -79,6 +92,21 @@
 				via `web.xml`. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-servlet</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- The Blue Button API runs against PostgreSQL in production. -->
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.0.0</version>
+		</dependency>
+
+		<dependency>
+			<!-- The builds for this and other Blue Button API projects use HSQL in 
+				tests. -->
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.4.0</version>
 		</dependency>
 
 		<dependency>

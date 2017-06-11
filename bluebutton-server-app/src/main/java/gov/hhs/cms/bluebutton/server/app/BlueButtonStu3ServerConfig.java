@@ -117,4 +117,18 @@ public class BlueButtonStu3ServerConfig extends BaseJavaConfigDstu3 {
 		pagingProvider.setDefaultPageSize(1000);
 		pagingProvider.setMaximumPageSize(1000);
 	}
+
+	/**
+	 * Do some fancy logging to create a nice access log that has details about
+	 * each incoming request.
+	 */
+	public IServerInterceptor loggingInterceptor() {
+		LoggingInterceptor retVal = new LoggingInterceptor();
+		retVal.setLoggerName("hapi.access");
+		retVal.setMessageFormat(
+				"Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${operationName} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] ResponseEncoding[${responseEncodingNoDefault}]");
+		retVal.setLogExceptions(true);
+		retVal.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
+		return retVal;
+	}
 }

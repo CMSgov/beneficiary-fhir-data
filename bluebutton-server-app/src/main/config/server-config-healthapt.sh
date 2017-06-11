@@ -6,7 +6,7 @@
 #
 # Usage:
 # 
-# $ bluebutton-server-app-server-config-healthapt.sh --serverhome /path-to-jboss --auth --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --war /path-to-war --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password"
+# $ bluebutton-server-app-server-config-healthapt.sh --serverhome /path-to-jboss --auth --managementport 9090 --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --war /path-to-war --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password" --dbconnectionsmax 42
 ##
 
 # Constants.
@@ -18,8 +18,8 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o h:as:k:t:w:u:n:p: \
-	--long serverhome:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
+	-o h:m:as:k:t:w:u:n:p:c: \
+	--long serverhome:,managementport:,auth,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword:,dbconnectionsmax: \
 	-n 'bluebutton-server-app-server-config-healthapt.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -28,6 +28,7 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 serverHome=
+managementPort=9990
 auth=false
 httpsPort=
 keyStore=
@@ -36,10 +37,13 @@ war=
 dbUrl=
 dbUsername=""
 dbPassword=""
+dbConnectionsMax=
 while true; do
 	case "$1" in
 		-h | --serverhome )
 			serverHome="$2"; shift 2 ;;
+		-m | --managementport )
+			managementPort="$2"; shift 2 ;;
 		-a | --auth )
 			auth=true; shift 1 ;;
 		-s | --httpsport )
@@ -56,6 +60,8 @@ while true; do
 			dbUsername="$2"; shift 2 ;;
 		-p | --dbpassword )
 			dbPassword="$2"; shift 2 ;;
+		-c | --dbconnectionsmax )
+			dbConnectionsMax="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -68,6 +74,7 @@ if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; e
 if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
 if [[ -z "${war}" ]]; then >&2 echo 'The --war option is required.'; exit 1; fi
 if [[ -z "${dbUrl}" ]]; then >&2 echo 'The --dburl option is required.'; exit 1; fi
+if [[ -z "${dbConnectionsMax}" ]]; then >&2 echo 'The --dbconnectionsmax option is required.'; exit 1; fi
 
 # Exit immediately if something fails.
 error() {
@@ -114,7 +121,7 @@ waitForServerReady() {
 	startSeconds=$SECONDS
 	endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 	while true; do
-		if "${serverHome}/bin/jboss-cli.sh" --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
+		if "${serverHome}/bin/jboss-cli.sh" --controller=localhost:${managementPort} --connect ${cliArgUsername} ${cliArgPassword} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
 			echo "Server ready after $(($SECONDS - $startSeconds)) seconds."
 			break
 		fi
@@ -144,6 +151,7 @@ if (outcome != success) of /core-service=management/security-realm=ApplicationRe
 end-if
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
+	--controller=localhost:${managementPort} \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
@@ -177,10 +185,15 @@ end-if
 if (outcome == success) of /system-property=bbfhir.db.password:read-resource
 	/system-property=bbfhir.db.password:remove
 end-if
-/system-property=bbfhir.logs.dir:add(value=".")
+if (outcome == success) of /system-property=bbfhir.db.connections.max:read-resource
+	/system-property=bbfhir.db.connections.max:remove
+end-if
+
+/system-property=bbfhir.logs.dir:add(value="./")
 /system-property=bbfhir.db.url:add(value="${dbUrl}")
 /system-property=bbfhir.db.username:add(value="${dbUsername}")
 /system-property=bbfhir.db.password:add(value="${dbPassword}")
+/system-property=bbfhir.db.connections.max:add(value="${dbConnectionsMax}")
 
 # Configure HTTPS.
 /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:remove
@@ -203,18 +216,27 @@ if (outcome == success) of /subsystem=undertow/server=default-server/http-listen
 end-if
 /subsystem=remoting/http-connector=http-remoting-connector:write-attribute(name=connector-ref,value=https)
 
-# This data source was initially configured on the servers, but the app doesn't use it.
+# These data sources were initially configured on the servers, but the app doesn't use them.
+/subsystem=ee/service=default-bindings:undefine-attribute(name=datasource)
 if (outcome == success) of /subsystem=datasources/data-source=fhirds:read-resource
 	/subsystem=datasources/data-source=fhirds:remove
 end-if
+if (outcome == success) of /subsystem=datasources/data-source=ExampleDS:read-resource
+	/subsystem=datasources/data-source=ExampleDS:remove
+end-if
+if (outcome == success) of /subsystem=datasources/data-source=TestProdFHIR:read-resource
+	/subsystem=datasources/data-source=TestProdFHIR:remove
+end-if
 
 # Configure the server to listen on all configured IPs.
-/interface=public:write-attribute(name=inet-address,value="0.0.0.0")
+/interface=public:undefine-attribute(name=inet-address)
+/interface=public:write-attribute(name=any-address,value=true)
 
 # Reload the server to apply those changes.
 :reload
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
+	--controller=localhost:${managementPort} \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \
@@ -227,6 +249,7 @@ waitForServerReady
 # Deploy the application to the now-configured server.
 echo "Deploying application: '${war}'..."
 "${serverHome}/bin/jboss-cli.sh" \
+	--controller=localhost:${managementPort} \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgUsername} \

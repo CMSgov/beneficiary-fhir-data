@@ -20,6 +20,18 @@
 	<logger name="org.hibernate.type" level="trace" />
 	<logger name="org.hibernate.stat" level="debug" />
 	 -->
+	
+	<!-- Make the FHIR server's logging during loads less chatty (and less likely 
+		to eat GBs and GBs of disk space unnecessarily). Specifically, this elides 
+		logging events for every ETL transaction's start, operations, and completion. -->
+	<logger name="ca.uhn.fhir.jpa.dao.BaseHapiFhirDao" level="warn" />
+	<logger name="ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao" level="warn" />
+	<logger name="ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3" level="warn" />
+
+	<!-- Because the ETL service uses the `If-None-Exists` header, every create 
+		operation logs one or more of these events, too. Turning down to avoid those 
+		silly amounts of log spam. -->
+	<logger name="ca.uhn.fhir.jpa.dao.SearchBuilder" level="warn" />
 
 	<root level="info">
 		<appender-ref ref="FILE" />
