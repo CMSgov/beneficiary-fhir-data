@@ -10,7 +10,7 @@
 	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>gov.hhs.cms.bluebutton.server.app.FhirServerConfig</param-value>
+		<param-value>gov.hhs.cms.bluebutton.server.app.BlueButtonStu3ServerConfig</param-value>
 	</context-param>
 
 	<!-- Servlets -->
@@ -27,7 +27,7 @@
 
 	<servlet>
 		<servlet-name>fhirServlet</servlet-name>
-		<servlet-class>gov.hhs.cms.bluebutton.server.app.BlueButtonServer</servlet-class>
+		<servlet-class>gov.hhs.cms.bluebutton.server.app.BlueButtonStu3Server</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
 			<param-value>Blue Button API Server</param-value>
