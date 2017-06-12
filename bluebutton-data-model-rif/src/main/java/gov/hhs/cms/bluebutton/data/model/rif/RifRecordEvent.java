@@ -11,6 +11,7 @@ package gov.hhs.cms.bluebutton.data.model.rif;
 public final class RifRecordEvent<R> {
 	private final RifFilesEvent filesEvent;
 	private final RifFile file;
+	private final RecordAction recordAction;
 	private final R record;
 
 	/**
@@ -23,16 +24,19 @@ public final class RifRecordEvent<R> {
 	 * @param record
 	 *            the value to use for {@link #getRecord()}
 	 */
-	public RifRecordEvent(RifFilesEvent filesEvent, RifFile file, R record) {
+	public RifRecordEvent(RifFilesEvent filesEvent, RifFile file, RecordAction recordAction, R record) {
 		if (filesEvent == null)
 			throw new IllegalArgumentException();
 		if (file == null)
+			throw new IllegalArgumentException();
+		if (recordAction == null)
 			throw new IllegalArgumentException();
 		if (record == null)
 			throw new IllegalArgumentException();
 
 		this.filesEvent = filesEvent;
 		this.file = file;
+		this.recordAction = recordAction;
 		this.record = record;
 	}
 
@@ -52,6 +56,14 @@ public final class RifRecordEvent<R> {
 	}
 
 	/**
+	 * @return the RIF {@link RecordAction} indicated for the
+	 *         {@link #getRecord()}
+	 */
+	public RecordAction getRecordAction() {
+		return recordAction;
+	}
+
+	/**
 	 * @return the actual RIF data that the {@link RifRecordEvent} represents
 	 */
 	public R getRecord() {
@@ -68,6 +80,8 @@ public final class RifRecordEvent<R> {
 		builder.append(filesEvent);
 		builder.append(", file=");
 		builder.append(file);
+		builder.append(", recordAction=");
+		builder.append(recordAction);
 		builder.append(", record=");
 		builder.append(record);
 		builder.append("]");

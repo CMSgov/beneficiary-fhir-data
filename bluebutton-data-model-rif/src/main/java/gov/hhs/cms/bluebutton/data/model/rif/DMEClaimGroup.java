@@ -31,17 +31,6 @@ import java.util.stream.Collectors;
  * </p>
  */
 public final class DMEClaimGroup {
-
-	/**
-	 * @see Column#VERSION
-	 */
-	public int version;
-
-	/**
-	 * @see Column#DML_IND
-	 */
-	public RecordAction recordAction;
-
 	/**
 	 * @see Column#BENE_ID
 	 */
@@ -183,11 +172,7 @@ public final class DMEClaimGroup {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DMEClaimGroup [version=");
-		builder.append(version);
-		builder.append(", recordAction=");
-		builder.append(recordAction);
-		builder.append(", beneficiaryId=");
+		builder.append("DMEClaimGroup [beneficiaryId=");
 		builder.append(beneficiaryId);
 		builder.append(", claimId=");
 		builder.append(claimId);

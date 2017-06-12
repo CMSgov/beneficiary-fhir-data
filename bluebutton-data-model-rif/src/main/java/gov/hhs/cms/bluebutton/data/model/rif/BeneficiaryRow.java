@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+
 /**
  * <p>
  * Models rows from {@link RifFileType#BENEFICIARY} RIF files.
@@ -16,101 +21,230 @@ import java.util.stream.Collectors;
  * need to be).
  * </p>
  */
-public final class BeneficiaryRow {
-	/**
-	 * @see Column#VERSION
-	 */
-	public int version;
-
-	/**
-	 * @see Column#DML_IND
-	 */
-	public RecordAction recordAction;
-
+@Entity
+@Table(name = "`Accounts`")
+public class BeneficiaryRow {
 	/**
 	 * @see Column#BENE_ID
 	 */
-	public String beneficiaryId;
+	@Id
+	private String beneficiaryId;
 
 	/**
 	 * @see Column#STATE_CODE
 	 */
-	public String stateCode;
+	private String stateCode;
 
 	/**
 	 * @see Column#BENE_COUNTY_CD
 	 */
-	public String countyCode;
+	private String countyCode;
 
 	/**
 	 * @see Column#BENE_ZIP_CD
 	 */
-	public String postalCode;
+	private String postalCode;
 
 	/**
 	 * @see Column#BENE_BIRTH_DT
 	 */
-	public LocalDate birthDate;
+	private LocalDate birthDate;
 
 	/**
 	 * @see Column#BENE_SEX_IDENT_CD
 	 */
-	public char sex;
+	private char sex;
 
 	/**
 	 * @see Column#BENE_RACE_CD
 	 */
-	public Optional<Character> race;
+	private Character race;
 
 	/**
 	 * @see Column#BENE_ENTLMT_RSN_ORIG
 	 */
-	public Optional<Character> entitlementCodeOriginal;
+	private Character entitlementCodeOriginal;
 
 	/**
 	 * @see Column#BENE_ENTLMT_RSN_CURR
 	 */
-	public Optional<Character> entitlementCodeCurrent;
+	private Character entitlementCodeCurrent;
 
 	/**
 	 * @see Column#BENE_ESRD_IND
 	 */
-	public Optional<Character> endStageRenalDiseaseCode;
+	private Character endStageRenalDiseaseCode;
 
 	/**
 	 * @see Column#BENE_MDCR_STATUS_CD
 	 */
-	public Optional<String> medicareEnrollmentStatusCode;
+	private String medicareEnrollmentStatusCode;
 
 	/**
 	 * @see Column#BENE_PTA_TRMNTN_CD
 	 */
-	public Optional<Character> partATerminationCode;
+	private Character partATerminationCode;
 
 	/**
 	 * @see Column#BENE_PTB_TRMNTN_CD
 	 */
-	public Optional<Character> partBTerminationCode;
+	private Character partBTerminationCode;
 
 	/**
 	 * @see Column#BENE_CRNT_HIC_NUM
 	 */
-	public String hicn;
+	private String hicn;
 
 	/**
 	 * @see Column#BENE_SRNM_NAME
 	 */
-	public String nameSurname;
+	private String nameSurname;
 
 	/**
 	 * @see Column#BENE_GVN_NAME
 	 */
-	public String nameGiven;
+	private String nameGiven;
 
 	/**
 	 * @see Column#BENE_MDL_NAME
 	 */
-	public Optional<Character> nameMiddleInitial;
+	private Character nameMiddleInitial;
+
+	public String getBeneficiaryId() {
+		return beneficiaryId;
+	}
+
+	public void setBeneficiaryId(String beneficiaryId) {
+		this.beneficiaryId = beneficiaryId;
+	}
+
+	public String getStateCode() {
+		return stateCode;
+	}
+
+	public void setStateCode(String stateCode) {
+		this.stateCode = stateCode;
+	}
+
+	public String getCountyCode() {
+		return countyCode;
+	}
+
+	public void setCountyCode(String countyCode) {
+		this.countyCode = countyCode;
+	}
+
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+
+	public LocalDate getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
+	}
+
+	public char getSex() {
+		return sex;
+	}
+
+	public void setSex(char sex) {
+		this.sex = sex;
+	}
+
+	public Optional<Character> getRace() {
+		return Optional.ofNullable(race);
+	}
+
+	public void setRace(Optional<Character> race) {
+		this.race = race.orElse(null);
+	}
+
+	public Optional<Character> getEntitlementCodeOriginal() {
+		return Optional.ofNullable(entitlementCodeOriginal);
+	}
+
+	public void setEntitlementCodeOriginal(Optional<Character> entitlementCodeOriginal) {
+		this.entitlementCodeOriginal = entitlementCodeOriginal.orElse(null);
+	}
+
+	public Optional<Character> getEntitlementCodeCurrent() {
+		return Optional.ofNullable(entitlementCodeCurrent);
+	}
+
+	public void setEntitlementCodeCurrent(Optional<Character> entitlementCodeCurrent) {
+		this.entitlementCodeCurrent = entitlementCodeCurrent.orElse(null);
+	}
+
+	public Optional<Character> getEndStageRenalDiseaseCode() {
+		return Optional.ofNullable(endStageRenalDiseaseCode);
+	}
+
+	public void setEndStageRenalDiseaseCode(Optional<Character> endStageRenalDiseaseCode) {
+		this.endStageRenalDiseaseCode = endStageRenalDiseaseCode.orElse(null);
+	}
+
+	public Optional<String> getMedicareEnrollmentStatusCode() {
+		return Optional.ofNullable(medicareEnrollmentStatusCode);
+	}
+
+	public void setMedicareEnrollmentStatusCode(Optional<String> medicareEnrollmentStatusCode) {
+		this.medicareEnrollmentStatusCode = medicareEnrollmentStatusCode.orElse(null);
+	}
+
+	public Optional<Character> getPartATerminationCode() {
+		return Optional.ofNullable(partATerminationCode);
+	}
+
+	public void setPartATerminationCode(Optional<Character> partATerminationCode) {
+		this.partATerminationCode = partATerminationCode.orElse(null);
+	}
+
+	public Optional<Character> getPartBTerminationCode() {
+		return Optional.ofNullable(partBTerminationCode);
+	}
+
+	public void setPartBTerminationCode(Optional<Character> partBTerminationCode) {
+		this.partBTerminationCode = partBTerminationCode.orElse(null);
+	}
+
+	public String getHicn() {
+		return hicn;
+	}
+
+	public void setHicn(String hicn) {
+		this.hicn = hicn;
+	}
+
+	public String getNameSurname() {
+		return nameSurname;
+	}
+
+	public void setNameSurname(String nameSurname) {
+		this.nameSurname = nameSurname;
+	}
+
+	public String getNameGiven() {
+		return nameGiven;
+	}
+
+	public void setNameGiven(String nameGiven) {
+		this.nameGiven = nameGiven;
+	}
+
+	public Optional<Character> getNameMiddleInitial() {
+		return Optional.ofNullable(nameMiddleInitial);
+	}
+
+	public void setNameMiddleInitial(Optional<Character> nameMiddleInitial) {
+		this.nameMiddleInitial = nameMiddleInitial.orElse(null);
+	}
 
 	/**
 	 * @see java.lang.Object#toString()
@@ -118,11 +252,7 @@ public final class BeneficiaryRow {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("BeneficiaryRow [version=");
-		builder.append(version);
-		builder.append(", recordAction=");
-		builder.append(recordAction);
-		builder.append(", beneficiaryId=");
+		builder.append("BeneficiaryRow [beneficiaryId=");
 		builder.append(beneficiaryId);
 		builder.append(", stateCode=");
 		builder.append(stateCode);

@@ -31,18 +31,6 @@ import java.util.stream.Collectors;
  * </p>
  */
 public final class OutpatientClaimGroup {
-
-
-	/**
-	 * @see Column#VERSION
-	 */
-	public int version;
-
-	/**
-	 * @see Column#DML_IND
-	 */
-	public RecordAction recordAction;
-
 	/**
 	 * @see Column#BENE_ID
 	 */
@@ -240,11 +228,7 @@ public final class OutpatientClaimGroup {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("OutpatientClaimGroup [version=");
-		builder.append(version);
-		builder.append(", recordAction=");
-		builder.append(recordAction);
-		builder.append(", beneficiaryId=");
+		builder.append("OutpatientClaimGroup [beneficiaryId=");
 		builder.append(beneficiaryId);
 		builder.append(", claimId=");
 		builder.append(claimId);
@@ -258,6 +242,8 @@ public final class OutpatientClaimGroup {
 		builder.append(dateThrough);
 		builder.append(", weeklyProcessDate=");
 		builder.append(weeklyProcessDate);
+		builder.append(", claimQueryCode=");
+		builder.append(claimQueryCode);
 		builder.append(", providerNumber=");
 		builder.append(providerNumber);
 		builder.append(", claimFacilityTypeCode=");

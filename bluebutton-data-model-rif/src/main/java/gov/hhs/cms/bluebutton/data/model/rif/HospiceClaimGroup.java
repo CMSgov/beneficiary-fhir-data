@@ -31,17 +31,6 @@ import java.util.stream.Collectors;
  * </p>
  */
 public final class HospiceClaimGroup {
-
-	/**
-	 * @see Column#VERSION
-	 */
-	public int version;
-
-	/**
-	 * @see Column#DML_IND
-	 */
-	public RecordAction recordAction;
-
 	/**
 	 * @see Column#BENE_ID
 	 */
@@ -194,11 +183,7 @@ public final class HospiceClaimGroup {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("HospiceClaimGroup [version=");
-		builder.append(version);
-		builder.append(", recordAction=");
-		builder.append(recordAction);
-		builder.append(", beneficiaryId=");
+		builder.append("HospiceClaimGroup [beneficiaryId=");
 		builder.append(beneficiaryId);
 		builder.append(", claimId=");
 		builder.append(claimId);

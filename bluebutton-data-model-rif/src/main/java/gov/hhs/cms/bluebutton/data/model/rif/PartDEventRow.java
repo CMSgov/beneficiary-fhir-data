@@ -29,16 +29,6 @@ import java.util.stream.Collectors;
  */
 public class PartDEventRow {
 	/**
-	 * @see Column#VERSION
-	 */
-	public int version;
-
-	/**
-	 * @see Column#DML_IND
-	 */
-	public RecordAction recordAction;
-
-	/**
 	 * @see Column#PDE_ID
 	 */
 	public String partDEventId;
@@ -235,11 +225,7 @@ public class PartDEventRow {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("PartDEventRow [version=");
-		builder.append(version);
-		builder.append(", recordAction=");
-		builder.append(recordAction);
-		builder.append(", partDEventId=");
+		builder.append("PartDEventRow [partDEventId=");
 		builder.append(partDEventId);
 		builder.append(", beneficiaryId=");
 		builder.append(beneficiaryId);
@@ -273,7 +259,7 @@ public class PartDEventRow {
 		builder.append(daysSupply);
 		builder.append(", fillNumber=");
 		builder.append(fillNumber);
-		builder.append(", dispensingStatuscode=");
+		builder.append(", dispensingStatusCode=");
 		builder.append(dispensingStatusCode);
 		builder.append(", drugCoverageStatusCode=");
 		builder.append(drugCoverageStatusCode);
