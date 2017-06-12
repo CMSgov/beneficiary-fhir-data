@@ -181,7 +181,9 @@ public enum StaticRifResource {
 			if (!Files.exists(targetDir))
 				targetDir = Paths.get("..", "bluebutton-data-model-rif-samples", "target");
 			if (!Files.exists(targetDir))
-				throw new IllegalStateException();
+				targetDir = Paths.get(".", "target");
+			if (!Files.exists(targetDir))
+				throw new IllegalStateException("Unable to find directory: " + targetDir.toAbsolutePath().toString());
 
 			// Build the path that the resources will be downloaded to.
 			Path resourceDir = targetDir.resolve("test-data-from-s3").resolve(dataSetLocation.getS3BucketName())
