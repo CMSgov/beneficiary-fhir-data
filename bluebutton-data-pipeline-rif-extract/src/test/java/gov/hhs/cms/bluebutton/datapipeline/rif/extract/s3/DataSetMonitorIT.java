@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
  * Integration tests for {@link DataSetMonitor}.

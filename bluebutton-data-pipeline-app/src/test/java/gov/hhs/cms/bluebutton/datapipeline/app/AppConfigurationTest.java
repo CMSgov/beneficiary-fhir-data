@@ -16,8 +16,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
  * <p>

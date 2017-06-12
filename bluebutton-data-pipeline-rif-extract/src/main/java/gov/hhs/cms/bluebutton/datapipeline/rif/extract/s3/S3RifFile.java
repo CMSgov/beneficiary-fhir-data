@@ -16,8 +16,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 
 /**
  * This {@link RifFile} implementation can be used for files that are backed by
@@ -57,7 +57,7 @@ public final class S3RifFile implements RifFile {
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getFileType()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#getFileType()
 	 */
 	@Override
 	public RifFileType getFileType() {
@@ -65,7 +65,7 @@ public final class S3RifFile implements RifFile {
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getDisplayName()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#getDisplayName()
 	 */
 	@Override
 	public String getDisplayName() {
@@ -73,7 +73,7 @@ public final class S3RifFile implements RifFile {
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getCharset()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#getCharset()
 	 */
 	@Override
 	public Charset getCharset() {
@@ -81,7 +81,7 @@ public final class S3RifFile implements RifFile {
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#open()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#open()
 	 */
 	@Override
 	public InputStream open() {

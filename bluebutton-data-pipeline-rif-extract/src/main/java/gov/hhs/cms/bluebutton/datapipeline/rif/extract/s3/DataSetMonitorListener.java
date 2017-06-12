@@ -1,6 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 
 /**
  * Implementations of this event/callback interface can receive the events fired

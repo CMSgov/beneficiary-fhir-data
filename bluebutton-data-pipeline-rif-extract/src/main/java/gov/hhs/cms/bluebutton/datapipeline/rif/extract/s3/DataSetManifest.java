@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.migesok.jaxb.adapter.javatime.InstantXmlAdapter;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 
 /**
  * Represents the <code>manifest.xml</code> files that detail which specific

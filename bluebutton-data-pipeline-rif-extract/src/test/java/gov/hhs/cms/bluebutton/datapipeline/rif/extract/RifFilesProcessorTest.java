@@ -14,30 +14,30 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup.DMEClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup.HHAClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup.HospiceClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.InpatientClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup.OutpatientClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.CompoundCode;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup.DMEClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.DrugCoverageStatus;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup.HHAClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimGroup.HospiceClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.IcdCode;
+import gov.hhs.cms.bluebutton.data.model.rif.IcdCode.IcdVersion;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimGroup.InpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimGroup.OutpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEventRow;
+import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup.SNFClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 
 /**
  * Unit tests for {@link RifFilesProcessor}.
@@ -67,25 +67,24 @@ public final class RifFilesProcessorTest {
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryRow);
 
 		BeneficiaryRow beneRow = (BeneficiaryRow) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, beneRow.version);
-		Assert.assertEquals(RecordAction.INSERT, beneRow.recordAction);
-		Assert.assertEquals("567834", beneRow.beneficiaryId);
-		Assert.assertEquals("MO", beneRow.stateCode);
-		Assert.assertEquals("Transylvania", beneRow.countyCode);
-		Assert.assertEquals("12345", beneRow.postalCode);
-		Assert.assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.birthDate);
-		Assert.assertEquals(('M'), beneRow.sex);
-		Assert.assertEquals(new Character('1'), beneRow.race.get());
-		Assert.assertEquals(new Character('1'), beneRow.entitlementCodeOriginal.get());
-		Assert.assertEquals(new Character('1'), beneRow.entitlementCodeCurrent.get());
-		Assert.assertEquals(new Character('N'), beneRow.endStageRenalDiseaseCode.get());
-		Assert.assertEquals(new String("20"), beneRow.medicareEnrollmentStatusCode.get());
-		Assert.assertEquals(new Character('0'), beneRow.partBTerminationCode.get());
-		Assert.assertEquals(new Character('0'), beneRow.partBTerminationCode.get());
-		Assert.assertEquals("543217066U", beneRow.hicn);
-		Assert.assertEquals("Doe", beneRow.nameSurname);
-		Assert.assertEquals("John", beneRow.nameGiven);
-		Assert.assertEquals(new Character('A'), beneRow.nameMiddleInitial.get());
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
+		Assert.assertEquals("567834", beneRow.getBeneficiaryId());
+		Assert.assertEquals("MO", beneRow.getStateCode());
+		Assert.assertEquals("Transylvania", beneRow.getCountyCode());
+		Assert.assertEquals("12345", beneRow.getPostalCode());
+		Assert.assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBirthDate());
+		Assert.assertEquals(('M'), beneRow.getSex());
+		Assert.assertEquals(new Character('1'), beneRow.getRace().get());
+		Assert.assertEquals(new Character('1'), beneRow.getEntitlementCodeOriginal().get());
+		Assert.assertEquals(new Character('1'), beneRow.getEntitlementCodeCurrent().get());
+		Assert.assertEquals(new Character('N'), beneRow.getEndStageRenalDiseaseCode().get());
+		Assert.assertEquals(new String("20"), beneRow.getMedicareEnrollmentStatusCode().get());
+		Assert.assertEquals(new Character('0'), beneRow.getPartBTerminationCode().get());
+		Assert.assertEquals(new Character('0'), beneRow.getPartBTerminationCode().get());
+		Assert.assertEquals("543217066U", beneRow.getHicn());
+		Assert.assertEquals("Doe", beneRow.getNameSurname());
+		Assert.assertEquals("John", beneRow.getNameGiven());
+		Assert.assertEquals(new Character('A'), beneRow.getNameMiddleInitial().get());
 	}
 
 	/**
@@ -128,8 +127,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertTrue(rifRecordEvent.getRecord() instanceof PartDEventRow);
 
 		PartDEventRow pdeRow = (PartDEventRow) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, pdeRow.version);
-		Assert.assertEquals(RecordAction.INSERT, pdeRow.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("89", pdeRow.partDEventId);
 		Assert.assertEquals("567834", pdeRow.beneficiaryId);
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.prescriptionFillDate);
@@ -212,8 +210,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		CarrierClaimGroup claimGroup = (CarrierClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
-		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("9991831999", claimGroup.claimId);
 		Assert.assertEquals(new Character('O'), claimGroup.nearLineRecordIdCode);
@@ -337,8 +334,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		InpatientClaimGroup claimGroup = (InpatientClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
-		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("333333222222", claimGroup.claimId);
 		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
@@ -441,8 +437,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		OutpatientClaimGroup claimGroup = (OutpatientClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
-		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("1234567890", claimGroup.claimId);
 		Assert.assertEquals(new Character('W'), claimGroup.nearLineRecordIdCode);
@@ -528,8 +523,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		SNFClaimGroup claimGroup = (SNFClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
-		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("777777777", claimGroup.claimId);
 		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
@@ -631,8 +625,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		HospiceClaimGroup claimGroup = (HospiceClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
-		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("9992223422", claimGroup.claimId);
 		Assert.assertEquals(new Character('V'), claimGroup.nearLineRecordIdCode);
@@ -711,8 +704,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		HHAClaimGroup claimGroup = (HHAClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
-		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("2925555555", claimGroup.claimId);
 		Assert.assertEquals(new Character('W'), claimGroup.nearLineRecordIdCode);
@@ -788,8 +780,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify the claim header.
 		DMEClaimGroup claimGroup = (DMEClaimGroup) rifRecordEvent.getRecord();
-		Assert.assertEquals(RifFilesProcessor.RECORD_FORMAT_VERSION, claimGroup.version);
-		Assert.assertEquals(RecordAction.INSERT, claimGroup.recordAction);
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.beneficiaryId);
 		Assert.assertEquals("2188888888", claimGroup.claimId);
 		Assert.assertEquals(new Character('M'), claimGroup.nearLineRecordIdCode);

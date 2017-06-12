@@ -1,6 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
+import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
 
 public final class UnsupportedRifRecordActionException extends RuntimeException {
 	private static final long serialVersionUID = 6764860303725144657L;

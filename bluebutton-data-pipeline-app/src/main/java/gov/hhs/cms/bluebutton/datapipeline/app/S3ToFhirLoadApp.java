@@ -15,6 +15,8 @@ import com.codahale.metrics.Timer;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.SharedDataManager;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
@@ -23,8 +25,6 @@ import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorListener;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
 
 /**
  * The main application/driver/entry point for the ETL system, which will pull

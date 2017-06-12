@@ -12,24 +12,17 @@
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-pipeline-benchmarks</artifactId>
+	<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
-		A set of benchmarks/performance tests for the application.
+		Loads RIF data that's been extracted from S3 into the Blue Button API's database.
 	</description>
-
-	<properties>
-		<!-- Override this in the build command, e.g. `-DskipBenchmarks=false`, 
-			to run this project's benchmarks as part of the build. (See `failsafe` plugin 
-			below for details.) -->
-		<skipBenchmarks>true</skipBenchmarks>
-	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-app</artifactId>
+			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -40,16 +33,16 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to write the benchmark data CSV files. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
+			<!-- Hibernate's JPA implementation is used to load data into the Blue 
+				Button API's database. -->
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Provides the maths necessary to analyze the benchmark results. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
-			<version>3.6.1</version>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
+				for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
 		</dependency>
 
 		<dependency>
@@ -58,18 +51,23 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
-
 		<dependency>
-			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
-				at runtime. -->
+			<!-- Used to monitor performance and other statistics at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-jvm</artifactId>
+			<artifactId>metrics-core</artifactId>
 		</dependency>
 
 		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- The builds for this and other Blue Button API projects use HSQL in 
+				tests. -->
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -80,16 +78,15 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
-				https://github.com/awaitility/awaitility -->
-			<groupId>org.awaitility</groupId>
-			<artifactId>awaitility</artifactId>
-			<version>2.0.0</version>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+				at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -97,25 +94,12 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<!-- Configure failsafe to run the `*Benchmark.java` benchmark JUnit 
-						cases in this project, as part of the build. Disabled by default, unless 
-						`-DskipBenchmarks=false` is specified in the build command line. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<configuration>
-						<skipITs>${skipBenchmarks}</skipITs>
-						<includes>
-							<include>**/*Benchmark.java</include>
-						</includes>
-					</configuration>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<!-- Will run the `*Benchmark.java` integration tests in this project, 
-					as part of the build. -->
+				<!-- Will run the `*IT.java` integration tests in this project, as part 
+					of the build. -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<executions>

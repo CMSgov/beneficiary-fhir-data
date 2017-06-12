@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -28,38 +27,38 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.CompoundCode;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup.DMEClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.DrugCoverageStatus;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup.HHAClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimGroup.HospiceClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.IcdCode;
+import gov.hhs.cms.bluebutton.data.model.rif.IcdCode.IcdVersion;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimGroup.InpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimGroup.OutpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEventRow;
+import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup.SNFClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifFileFormatException;
+import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.ColumnValueCsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifVersionException;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup.CarrierClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CompoundCode;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup.DMEClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DrugCoverageStatus;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup.HHAClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup.HospiceClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.IcdCode.IcdVersion;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup.InpatientClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup.OutpatientClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RecordAction;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifRecordEvent;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup.SNFClaimLine;
-import gov.hhs.cms.bluebutton.datapipeline.rif.parse.InvalidRifFileFormatException;
-import gov.hhs.cms.bluebutton.datapipeline.rif.parse.RifParsingUtils;
 
 /**
  * Contains services responsible for handling new RIF files.
@@ -183,7 +182,7 @@ public final class RifFilesProcessor {
 		Stream<RifRecordEvent<?>> rifRecordStream;
 
 		boolean isGrouped;
-		Function<List<CSVRecord>, ?> recordParser;
+		TriFunction<RifFilesEvent, RifFile, List<CSVRecord>, RifRecordEvent<?>> recordParser;
 		if (file.getFileType() == RifFileType.BENEFICIARY) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildBeneficiaryEvent;
@@ -223,9 +222,7 @@ public final class RifFilesProcessor {
 
 		rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
 			try {
-				@SuppressWarnings({ "rawtypes", "unchecked" })
-				RifRecordEvent<?> recordEvent = new RifRecordEvent(rifFilesEvent, file,
-						recordParser.apply(csvRecordGroup));
+				RifRecordEvent<?> recordEvent = recordParser.apply(rifFilesEvent, file, csvRecordGroup);
 				closeParserIfDone(parser, csvIterator);
 				return recordEvent;
 			} catch (InvalidRifValueException e) {
@@ -263,13 +260,20 @@ public final class RifFilesProcessor {
 	}
 
 	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
 	 * @param csvRecords
-	 *            the {@link CSVRecord}s to be mapped, which must be from a
+	 *            the {@link CSVRecord} to be mapped (in a single-element
+	 *            {@link List}), which must be from a
 	 *            {@link RifFileType#BENEFICIARY} {@link RifFile}
-	 * @return a {@link BeneficiaryRow} built from the specified
-	 *         {@link CSVRecord}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
 	 */
-	private static BeneficiaryRow buildBeneficiaryEvent(List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<BeneficiaryRow> buildBeneficiaryEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (csvRecords.size() != 1)
 			throw new BadCodeMonkeyException();
 		CSVRecord csvRecord = csvRecords.get(0);
@@ -277,47 +281,52 @@ public final class RifFilesProcessor {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecord.toString());
 
+		int schemaVersion = parseInt(csvRecord.get(BeneficiaryRow.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(csvRecord.get(BeneficiaryRow.Column.DML_IND));
+
 		BeneficiaryRow beneficiaryRow = new BeneficiaryRow();
-		beneficiaryRow.version = Integer.parseInt(csvRecord.get(BeneficiaryRow.Column.VERSION));
-		beneficiaryRow.recordAction = RecordAction.match(csvRecord.get(BeneficiaryRow.Column.DML_IND));
-		beneficiaryRow.beneficiaryId = csvRecord.get(BeneficiaryRow.Column.BENE_ID);
-		beneficiaryRow.stateCode = csvRecord.get(BeneficiaryRow.Column.STATE_CODE);
-		beneficiaryRow.countyCode = csvRecord.get(BeneficiaryRow.Column.BENE_COUNTY_CD);
-		beneficiaryRow.postalCode = csvRecord.get(BeneficiaryRow.Column.BENE_ZIP_CD);
-		beneficiaryRow.birthDate = parseDate(csvRecord.get(BeneficiaryRow.Column.BENE_BIRTH_DT));
-		beneficiaryRow.sex = parseCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_SEX_IDENT_CD));
-		beneficiaryRow.race = parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_RACE_CD));
-		beneficiaryRow.entitlementCodeOriginal = parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_ORIG));
-		beneficiaryRow.entitlementCodeCurrent = parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_CURR));
-		beneficiaryRow.endStageRenalDiseaseCode = parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_ESRD_IND));
-		beneficiaryRow.medicareEnrollmentStatusCode = parseOptString(
-				csvRecord.get(BeneficiaryRow.Column.BENE_MDCR_STATUS_CD));
-		beneficiaryRow.partATerminationCode = parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_PTA_TRMNTN_CD));
-		beneficiaryRow.partBTerminationCode = parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_PTB_TRMNTN_CD));
-		beneficiaryRow.hicn = csvRecord.get(BeneficiaryRow.Column.BENE_CRNT_HIC_NUM);
-		beneficiaryRow.nameSurname = csvRecord.get(BeneficiaryRow.Column.BENE_SRNM_NAME);
-		beneficiaryRow.nameGiven = csvRecord.get(BeneficiaryRow.Column.BENE_GVN_NAME);
-		beneficiaryRow.nameMiddleInitial = parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_MDL_NAME));
+		beneficiaryRow.setBeneficiaryId(csvRecord.get(BeneficiaryRow.Column.BENE_ID));
+		beneficiaryRow.setStateCode(csvRecord.get(BeneficiaryRow.Column.STATE_CODE));
+		beneficiaryRow.setCountyCode(csvRecord.get(BeneficiaryRow.Column.BENE_COUNTY_CD));
+		beneficiaryRow.setPostalCode(csvRecord.get(BeneficiaryRow.Column.BENE_ZIP_CD));
+		beneficiaryRow.setBirthDate(parseDate(csvRecord.get(BeneficiaryRow.Column.BENE_BIRTH_DT)));
+		beneficiaryRow.setSex(parseCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_SEX_IDENT_CD)));
+		beneficiaryRow.setRace(parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_RACE_CD)));
+		beneficiaryRow.setEntitlementCodeOriginal(parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_ORIG)));
+		beneficiaryRow.setEntitlementCodeCurrent(parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_CURR)));
+		beneficiaryRow.setEndStageRenalDiseaseCode(parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_ESRD_IND)));
+		beneficiaryRow.setMedicareEnrollmentStatusCode(parseOptString(
+				csvRecord.get(BeneficiaryRow.Column.BENE_MDCR_STATUS_CD)));
+		beneficiaryRow.setPartATerminationCode(parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_PTA_TRMNTN_CD)));
+		beneficiaryRow.setPartBTerminationCode(parseOptCharacter(
+				csvRecord.get(BeneficiaryRow.Column.BENE_PTB_TRMNTN_CD)));
+		beneficiaryRow.setHicn(csvRecord.get(BeneficiaryRow.Column.BENE_CRNT_HIC_NUM));
+		beneficiaryRow.setNameSurname(csvRecord.get(BeneficiaryRow.Column.BENE_SRNM_NAME));
+		beneficiaryRow.setNameGiven(csvRecord.get(BeneficiaryRow.Column.BENE_GVN_NAME));
+		beneficiaryRow.setNameMiddleInitial(parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_MDL_NAME)));
 
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != beneficiaryRow.version)
-			throw new UnsupportedRifVersionException(beneficiaryRow.version);
-
-		return beneficiaryRow;
+		return new RifRecordEvent<BeneficiaryRow>(filesEvent, file, recordAction, beneficiaryRow);
 	}
 
 	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#PDE} {@link RifFile}
-	 * @return a {@link PartDEventRow} built from the specified
-	 *         {@link CSVRecord}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
 	 */
-	private static PartDEventRow buildPartDEvent(List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<PartDEventRow> buildPartDEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (csvRecords.size() != 1)
 			throw new BadCodeMonkeyException();
 		CSVRecord csvRecord = csvRecords.get(0);
@@ -325,13 +334,12 @@ public final class RifFilesProcessor {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecord.toString());
 
-		PartDEventRow pdeRow = new PartDEventRow();
-		pdeRow.version = Integer.parseInt(csvRecord.get(PartDEventRow.Column.VERSION));
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != pdeRow.version)
-			throw new UnsupportedRifVersionException(pdeRow.version);
+		int schemaVersion = parseInt(csvRecord.get(PartDEventRow.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND));
 
-		pdeRow.recordAction = RecordAction.match(csvRecord.get(PartDEventRow.Column.DML_IND));
+		PartDEventRow pdeRow = new PartDEventRow();
 		pdeRow.partDEventId = csvRecord.get(PartDEventRow.Column.PDE_ID);
 		pdeRow.beneficiaryId = csvRecord.get(PartDEventRow.Column.BENE_ID);
 		pdeRow.prescriptionFillDate = LocalDate.parse(csvRecord.get(PartDEventRow.Column.SRVC_DT), RIF_DATE_FORMATTER);
@@ -375,22 +383,38 @@ public final class RifFilesProcessor {
 		pdeRow.patientResidenceCode = csvRecord.get(PartDEventRow.Column.PTNT_RSDNC_CD);
 		pdeRow.submissionClarificationCode = parseOptString(csvRecord.get(PartDEventRow.Column.SUBMSN_CLR_CD));
 
-		return pdeRow;
+		return new RifRecordEvent<PartDEventRow>(filesEvent, file, recordAction, pdeRow);
 	}
 
-	private static InpatientClaimGroup buildInpatientClaimEvent(List<CSVRecord> csvRecords) {
+	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
+	 *            {@link RifFileType#INPATIENT} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
+	 */
+	private static RifRecordEvent<InpatientClaimGroup> buildInpatientClaimEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
 		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		int schemaVersion = parseInt(firstClaimLine.get(InpatientClaimGroup.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(firstClaimLine.get(InpatientClaimGroup.Column.DML_IND));
 
 		InpatientClaimGroup claimGroup = new InpatientClaimGroup();
 
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(InpatientClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(InpatientClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(InpatientClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(InpatientClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -527,26 +551,38 @@ public final class RifFilesProcessor {
 			claimGroup.lines.add(claimLine);
 		}
 
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException(claimGroup.version);
-
-		return claimGroup;
+		return new RifRecordEvent<InpatientClaimGroup>(filesEvent, file, recordAction, claimGroup);
 	}
 
-	private static OutpatientClaimGroup buildOutpatientClaimEvent(List<CSVRecord> csvRecords) {
+	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
+	 *            {@link RifFileType#OUTPATIENT} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
+	 */
+	private static RifRecordEvent<OutpatientClaimGroup> buildOutpatientClaimEvent(RifFilesEvent filesEvent,
+			RifFile file, List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
 		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		int schemaVersion = parseInt(firstClaimLine.get(OutpatientClaimGroup.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(firstClaimLine.get(OutpatientClaimGroup.Column.DML_IND));
 
 		OutpatientClaimGroup claimGroup = new OutpatientClaimGroup();
 
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(OutpatientClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(OutpatientClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(OutpatientClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(OutpatientClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -667,34 +703,38 @@ public final class RifFilesProcessor {
 			claimGroup.lines.add(claimLine);
 		}
 
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException(claimGroup.version);
-
-		return claimGroup;
+		return new RifRecordEvent<OutpatientClaimGroup>(filesEvent, file, recordAction, claimGroup);
 	}
 
 	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
-	 *            {@link RifFileType#CARRIER} {@link RifFile}, and must
-	 *            represent all of the claim lines from a single claim
-	 * @return a {@link BeneficiaryRow} built from the specified
-	 *         {@link CSVRecord}
+	 *            {@link RifFileType#CARRIER} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
 	 */
-	private static CarrierClaimGroup buildCarrierClaimEvent(List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<CarrierClaimGroup> buildCarrierClaimEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 	
 		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		int schemaVersion = parseInt(firstClaimLine.get(CarrierClaimGroup.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(firstClaimLine.get(CarrierClaimGroup.Column.DML_IND));
 	
 		CarrierClaimGroup claimGroup = new CarrierClaimGroup();
 	
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(CarrierClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(CarrierClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(CarrierClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(CarrierClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -811,26 +851,38 @@ public final class RifFilesProcessor {
 			claimGroup.lines.add(claimLine);
 		}
 	
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException(claimGroup.version);
-	
-		return claimGroup;
+		return new RifRecordEvent<CarrierClaimGroup>(filesEvent, file, recordAction, claimGroup);
 	}
 
-	private static SNFClaimGroup buildSNFClaimEvent(List<CSVRecord> csvRecords) {
+	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
+	 *            {@link RifFileType#SNF} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
+	 */
+	private static RifRecordEvent<SNFClaimGroup> buildSNFClaimEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
 		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		int schemaVersion = parseInt(firstClaimLine.get(SNFClaimGroup.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(firstClaimLine.get(SNFClaimGroup.Column.DML_IND));
 
 		SNFClaimGroup claimGroup = new SNFClaimGroup();
 
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(SNFClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(SNFClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(SNFClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(SNFClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -941,26 +993,38 @@ public final class RifFilesProcessor {
 			claimGroup.lines.add(claimLine);
 		}
 
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException(claimGroup.version);
-
-		return claimGroup;
+		return new RifRecordEvent<SNFClaimGroup>(filesEvent, file, recordAction, claimGroup);
 	}
 
-	private static HospiceClaimGroup buildHospiceClaimEvent(List<CSVRecord> csvRecords) {
+	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
+	 *            {@link RifFileType#HOSPICE} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
+	 */
+	private static RifRecordEvent<HospiceClaimGroup> buildHospiceClaimEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
 		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		int schemaVersion = parseInt(firstClaimLine.get(HospiceClaimGroup.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(firstClaimLine.get(HospiceClaimGroup.Column.DML_IND));
 
 		HospiceClaimGroup claimGroup = new HospiceClaimGroup();
 
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(HospiceClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(HospiceClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(HospiceClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(HospiceClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -1039,26 +1103,38 @@ public final class RifFilesProcessor {
 			claimGroup.lines.add(claimLine);
 		}
 
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException(claimGroup.version);
-
-		return claimGroup;
+		return new RifRecordEvent<HospiceClaimGroup>(filesEvent, file, recordAction, claimGroup);
 	}
 
-	private static HHAClaimGroup buildHHAClaimEvent(List<CSVRecord> csvRecords) {
+	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord}s to be mapped, which must be from a
+	 *            {@link RifFileType#HHA} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
+	 */
+	private static RifRecordEvent<HHAClaimGroup> buildHHAClaimEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
 		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		int schemaVersion = parseInt(firstClaimLine.get(HHAClaimGroup.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(firstClaimLine.get(HHAClaimGroup.Column.DML_IND));
 
 		HHAClaimGroup claimGroup = new HHAClaimGroup();
 
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(HHAClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(HHAClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(HHAClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(HHAClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -1128,34 +1204,38 @@ public final class RifFilesProcessor {
 			claimGroup.lines.add(claimLine);
 		}
 
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException(claimGroup.version);
-
-		return claimGroup;
+		return new RifRecordEvent<HHAClaimGroup>(filesEvent, file, recordAction, claimGroup);
 	}
 
 	/**
+	 * @param filesEvent
+	 *            the {@link RifFilesEvent} being processed
+	 * @param file
+	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
+	 *            that is being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
-	 *            {@link RifFileType#DME} {@link RifFile}, and must represent
-	 *            all of the claim lines from a single claim
-	 * @return a {@link BeneficiaryRow} built from the specified
-	 *         {@link CSVRecord}
+	 *            {@link RifFileType#DME} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified
+	 *         {@link CSVRecord}s
 	 */
-	private static DMEClaimGroup buildDMEClaimEvent(List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<DMEClaimGroup> buildDMEClaimEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
 		CSVRecord firstClaimLine = csvRecords.get(0);
+
+		int schemaVersion = parseInt(firstClaimLine.get(DMEClaimGroup.Column.VERSION));
+		if (RECORD_FORMAT_VERSION != schemaVersion)
+			throw new UnsupportedRifVersionException(schemaVersion);
+		RecordAction recordAction = RecordAction.match(firstClaimLine.get(DMEClaimGroup.Column.DML_IND));
 
 		DMEClaimGroup claimGroup = new DMEClaimGroup();
 
 		/*
 		 * Parse the claim header fields.
 		 */
-		claimGroup.version = parseInt(firstClaimLine.get(DMEClaimGroup.Column.VERSION));
-		claimGroup.recordAction = RecordAction.match(firstClaimLine.get(DMEClaimGroup.Column.DML_IND));
 		claimGroup.beneficiaryId = firstClaimLine.get(DMEClaimGroup.Column.BENE_ID);
 		claimGroup.claimId = firstClaimLine.get(DMEClaimGroup.Column.CLM_ID);
 		claimGroup.nearLineRecordIdCode = parseCharacter(
@@ -1258,11 +1338,7 @@ public final class RifFilesProcessor {
 			claimGroup.lines.add(claimLine);
 		}
 
-		// Sanity check:
-		if (RECORD_FORMAT_VERSION != claimGroup.version)
-			throw new UnsupportedRifVersionException(claimGroup.version);
-
-		return claimGroup;
+		return new RifRecordEvent<DMEClaimGroup>(filesEvent, file, recordAction, claimGroup);
 	}
 
 	/**

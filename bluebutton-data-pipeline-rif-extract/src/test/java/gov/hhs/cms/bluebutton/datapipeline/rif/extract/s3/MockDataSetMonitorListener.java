@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFilesEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 
 /**
  * A mock {@link DataSetMonitorListener} that tracks the events it receives.

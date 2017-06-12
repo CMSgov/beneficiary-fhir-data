@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 
 /**
  * A mock {@link RifFile} implementation.

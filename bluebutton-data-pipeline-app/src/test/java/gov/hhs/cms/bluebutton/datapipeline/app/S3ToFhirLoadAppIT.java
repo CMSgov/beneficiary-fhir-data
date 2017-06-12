@@ -24,6 +24,8 @@ import org.junit.Test;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
@@ -31,8 +33,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSe
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.StaticRifResource;
 
 /**
  * <p>

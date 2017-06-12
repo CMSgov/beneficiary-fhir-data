@@ -5,9 +5,9 @@ import java.util.function.Predicate;
 
 import com.amazonaws.regions.Region;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
  * Models the user-configurable options for extraction of RIF data from S3.

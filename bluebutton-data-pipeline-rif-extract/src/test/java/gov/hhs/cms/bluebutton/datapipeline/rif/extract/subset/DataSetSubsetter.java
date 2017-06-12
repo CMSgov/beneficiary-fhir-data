@@ -38,24 +38,24 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEventRow;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
+import gov.hhs.cms.bluebutton.data.model.rif.samples.TestDataSetLocation;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3RifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.BeneficiaryRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.CarrierClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.DMEClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HHAClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.HospiceClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.InpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.OutpatientClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.PartDEventRow;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.SNFClaimGroup;
-import gov.hhs.cms.bluebutton.datapipeline.rif.parse.RifParsingUtils;
-import gov.hhs.cms.bluebutton.datapipeline.sampledata.TestDataSetLocation;
 
 /**
  * <p>

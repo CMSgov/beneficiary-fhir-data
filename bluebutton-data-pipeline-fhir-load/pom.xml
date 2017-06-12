@@ -7,7 +7,7 @@
 	</prerequisites>
 
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+		<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
 		<artifactId>bluebutton-data-pipeline</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
@@ -22,7 +22,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
 			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -71,9 +71,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-sampledata</artifactId>
-			<version>${project.version}</version>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -91,104 +90,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<!-- Use the dependency plugin to copy the Blue Button FHIR Server, for 
-					use in ITs. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>server-copy-artifacts</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Marks the `bluebutton-server-app-server-*.sh` scripts as executable. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>server-fix-artifacts-permissions</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<chmod perm="a+x">
-									<fileset dir="${project.build.directory}/bluebutton-server">
-										<include name="*.sh" />
-									</fileset>
-								</chmod>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Launch a Java web server hosting the Blue Button FHIR server prior 
-					to running this project's integration tests, and stop it after the integration 
-					tests. The server will serve HTTPS on port 9094 (as configured in the script), 
-					and the FHIR server will be hosted at the root ("/") context. Alternatively, 
-					for manual testing, manually run 'mvn dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start' 
-					to start the server. -->
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>server-start</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${project.build.directory}/bluebutton-server/bluebutton-server-app-server-start.sh</executable>
-							<arguments>
-								<argument>--javahome</argument>
-								<argument>${java.home}</argument>
-								<argument>--maxheaparg</argument>
-								<argument>${its.bbfhir.server.jvmargs}</argument>
-								<argument>--directory</argument>
-								<argument>${project.build.directory}/bluebutton-server</argument>
-								<argument>--keystore</argument>
-								<argument>${project.build.directory}/../../dev/ssl-stores/server.keystore</argument>
-								<argument>--truststore</argument>
-								<argument>${project.build.directory}/../../dev/ssl-stores/server.truststore</argument>
-								<argument>--dburl</argument>
-								<argument>${its.bbfhir.db.url}</argument>
-								<argument>--dbusername</argument>
-								<argument>${its.bbfhir.db.username}</argument>
-								<argument>--dbpassword</argument>
-								<argument>${its.bbfhir.db.password}</argument>
-							</arguments>
-
-							<!-- Don't start/stop the server if the ITs are being skipped. -->
-							<skip>${skipITs}</skip>
-						</configuration>
-					</execution>
-					<execution>
-						<id>server-stop</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${project.build.directory}/bluebutton-server/bluebutton-server-app-server-stop.sh</executable>
-							<arguments>
-								<argument>--directory</argument>
-								<argument>${project.build.directory}/bluebutton-server</argument>
-							</arguments>
-
-							<!-- Don't start/stop the server if the ITs are being skipped. -->
-							<skip>${skipITs}</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<!-- Will run the `*IT.java` integration tests in this project, as part 
 					of the build. -->
