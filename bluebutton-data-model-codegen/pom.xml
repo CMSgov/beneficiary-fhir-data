@@ -12,12 +12,12 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-model-rif</artifactId>
+	<artifactId>bluebutton-data-model-codegen</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
-		Provides shared helpers and model classes related to the CCW's 'RIF' 
-		file format.
+		Provides a javac annotation processor that automagically generates RIF model 
+		classes and parsing code based on field layouts defined in Excel.
 	</description>
 
 	<properties>
@@ -25,48 +25,39 @@
 
 	<dependencies>
 		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the 
-				model classes in the gov.hhs.cms.bluebutton.data.model.rif package. -->
+			<!-- The annotations are in a separate project, to avoid forcing all of 
+				this project's dependencies onto codegen users. -->
 			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
 			<artifactId>bluebutton-data-model-codegen-annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the 
-				model classes in the gov.hhs.cms.bluebutton.data.model.rif package. -->
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-codegen</artifactId>
-			<version>${project.version}</version>
 
-			<!-- Marked as provided to keep it (and its dependencies) out of our production 
-				systems. -->
+		<dependency>
+			<!-- Just useful. -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
+		</dependency>
+
+		<dependency>
+			<!-- Automatically generates META-INF/services files for service classes 
+				annotated with `@AutoService`. -->
+			<groupId>com.google.auto.service</groupId>
+			<artifactId>auto-service</artifactId>
+			<version>1.0-rc3</version>
 			<scope>provided</scope>
 		</dependency>
-
 		<dependency>
-			<!-- Provides various generic utilities. -->
-			<groupId>com.justdavis.karl.jessentials</groupId>
-			<artifactId>jessentials-misc</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging 
-				frameworks in Java. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
+			<!-- Used to read the Excel file that provides the RIF column/field definitions. -->
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.15</version>
 		</dependency>
 		<dependency>
-			<!-- Used to parse and read the RIF data files. -->
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-csv</artifactId>
-			<version>1.2</version>
+			<!-- Makes programmatically generating Java sources much simpler. -->
+			<groupId>com.squareup</groupId>
+			<artifactId>javapoet</artifactId>
+			<version>1.9.0</version>
 		</dependency>
 
 		<dependency>
@@ -74,19 +65,6 @@
 				Hibernate is used for that in the Blue Button API projects.) -->
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 			<groupId>org.hibernate.javax.persistence</groupId>
-		</dependency>
-		<dependency>
-			<!-- The Hibernate JPA Model Generator, which will produce MetaModel classes 
-				for JPA entities. This happens happens automagically via javac's annotation 
-				processor. -->
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-jpamodelgen</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jboss.logging</groupId>
-					<artifactId>jboss-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's 
@@ -128,20 +106,6 @@
 					<artifactId>antlr</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<dependency>
-			<!-- Used to run our unit and integration tests. -->
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Logback is used as the logging target/backend for SLF4J during tests: 
-				all logging events will be sent to it. -->
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
