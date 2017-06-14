@@ -455,10 +455,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	private static TypeName selectJavaFieldType(RifField rifField) {
 		if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() == 1
 				&& !rifField.isRifColumnOptional())
-			return TypeName.BOOLEAN;
+			return TypeName.CHAR;
 		else if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() == 1
 				&& rifField.isRifColumnOptional())
-			return ClassName.get(Boolean.class);
+			return ClassName.get(Character.class);
 		else if (rifField.getRifColumnType() == RifColumnType.CHAR)
 			return ClassName.get(String.class);
 		else if (rifField.getRifColumnType() == RifColumnType.DATE && rifField.getRifColumnLength() == 8)
