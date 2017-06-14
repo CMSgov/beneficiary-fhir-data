@@ -220,7 +220,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(LocalDate.of(1999, 11, 6), claimGroup.getWeeklyProcessDate());
 		Assert.assertEquals('1', claimGroup.getClaimEntryCode());
 		Assert.assertEquals("1", claimGroup.getClaimDispositionCode());
-		Assert.assertEquals("61026666", claimGroup.getCarrierNumber());
+		Assert.assertEquals("61026", claimGroup.getCarrierNumber());
 		Assert.assertEquals("1", claimGroup.getPaymentDenialCode());
 		Assert.assertEquals(new BigDecimal("199.99"), claimGroup.getPaymentAmount());
 		Assert.assertEquals(new BigDecimal("0"), claimGroup.getPrimaryPayerPaidAmount());
@@ -251,7 +251,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify one of the claim lines.
 		CarrierClaimLine claimLine = claimGroup.getLines().get(0);
-		Assert.assertEquals(new BigDecimal(6), claimLine.getNumber());
+		Assert.assertEquals(new BigDecimal(1), claimLine.getNumber());
 		Assert.assertEquals("K25555", claimLine.getPerformingProviderIdNumber());
 		Assert.assertFalse(claimLine.getPerformingPhysicianUpin().isPresent());
 		Assert.assertEquals("1923124", claimLine.getPerformingPhysicianNpi().get());

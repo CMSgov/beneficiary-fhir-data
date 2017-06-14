@@ -17,22 +17,19 @@ import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.SharedDataManager;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirBundleResult;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.DataTransformer;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.transform.TransformedBundle;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoader;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifRecordLoadResult;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorListener;
 
 /**
  * The main application/driver/entry point for the ETL system, which will pull
- * any data stored in the specified S3 bucket, transform it, and push it to the
- * specified FHIR server. See {@link #main(String[])}.
+ * any data stored in the specified S3 bucket, parse it, and push it to the
+ * specified database server. See {@link #main(String[])}.
  */
-public final class S3ToFhirLoadApp {
-	private static final Logger LOGGER = LoggerFactory.getLogger(S3ToFhirLoadApp.class);
+public final class S3ToDatabaseLoadApp {
+	private static final Logger LOGGER = LoggerFactory.getLogger(S3ToDatabaseLoadApp.class);
 
 	/**
 	 * How often the {@link DataSetMonitor} will wait between scans for new data
@@ -85,11 +82,7 @@ public final class S3ToFhirLoadApp {
 		 * extract, transform, and load process.
 		 */
 		RifFilesProcessor rifProcessor = new RifFilesProcessor();
-		DataTransformer rifToFhirTransformer = new DataTransformer(appConfig.getLoadOptions());
-		FhirLoader fhirLoader = new FhirLoader(metrics, appConfig.getLoadOptions());
-
-		// Create/update the shared data that FhirLoader will require.
-		new SharedDataManager(fhirLoader).upsertSharedData();
+		RifLoader rifLoader = new RifLoader(appConfig.getLoadOptions(), metrics);
 
 		/*
 		 * Create the DataSetMonitorListener that will glue those stages
@@ -99,12 +92,12 @@ public final class S3ToFhirLoadApp {
 			@Override
 			public void dataAvailable(RifFilesEvent rifFilesEvent) {
 				Timer.Context timerDataSet = metrics
-						.timer(MetricRegistry.name(S3ToFhirLoadApp.class, "dataSet", "processed")).time();
+						.timer(MetricRegistry.name(S3ToDatabaseLoadApp.class, "dataSet", "processed")).time();
 
 				Consumer<Throwable> errorHandler = error -> {
 					/*
 					 * This is not the right place to do any error _recovery_
-					 * (that'd have to be inside FhirLoader itself), but it is
+					 * (that'd have to be inside RifLoader itself), but it is
 					 * likely the right place to decide when/if a failure is
 					 * "bad enough" that the rest of processing should be
 					 * stopped. Right now we don't stop that way for _any_
@@ -112,17 +105,14 @@ public final class S3ToFhirLoadApp {
 					 * than that.
 					 */
 					 throw new IllegalStateException(
-							"Bundle failed to load, and we have no error recovery strategy yet.", error);
+							"Record failed to load, and we have no error recovery strategy yet.", error);
 				};
 
-				Consumer<FhirBundleResult> resultHandler = result -> {
+				Consumer<RifRecordLoadResult> resultHandler = result -> {
 					/*
-					 * Don't really *need* to do anything else here. The
-					 * FhirLoader already records metrics for each data set.
+					 * Don't really *need* to do anything here. The RifLoader
+					 * already records metrics for each data set.
 					 */
-					if (result != null)
-						LOGGER.debug("FHIR bundle load returned %d response entries.",
-								result.getOutputBundle().getTotal());
 				};
 
 				/*
@@ -131,10 +121,9 @@ public final class S3ToFhirLoadApp {
 				 */
 				for (Stream<RifRecordEvent<?>> rifRecordStream : rifProcessor.process(rifFilesEvent)) {
 					Timer.Context timerDataSetFile = metrics
-							.timer(MetricRegistry.name(S3ToFhirLoadApp.class, "dataSet", "file", "processed")).time();
+							.timer(MetricRegistry.name(S3ToDatabaseLoadApp.class, "dataSet", "file", "processed")).time();
 
-					Stream<TransformedBundle> transformedFhirStream = rifToFhirTransformer.transform(rifRecordStream);
-					fhirLoader.process(transformedFhirStream, errorHandler, resultHandler);
+					rifLoader.process(rifRecordStream, errorHandler, resultHandler);
 					timerDataSetFile.stop();
 				}
 				timerDataSet.stop();

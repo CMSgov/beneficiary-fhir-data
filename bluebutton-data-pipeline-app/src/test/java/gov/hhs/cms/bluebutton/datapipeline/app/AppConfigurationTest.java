@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +16,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoaderTestUtils;
 
 /**
  * <p>
@@ -53,14 +52,14 @@ public final class AppConfigurationTest {
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE, RifFileType.BENEFICIARY.name());
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
-				String.valueOf(FhirTestUtilities.HICN_HASH_ITERATIONS));
+				String.valueOf(RifLoaderTestUtils.HICN_HASH_ITERATIONS));
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
-				Hex.encodeHexString(FhirTestUtilities.HICN_HASH_PEPPER));
-		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, "http://example.com/bar");
-		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH, "../../fizz");
-		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD, "buzz");
-		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PATH, "../../tom");
-		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD, "george");
+				Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, RifLoaderTestUtils.DB_URL);
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME,
+				RifLoaderTestUtils.DB_USERNAME);
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD,
+				String.valueOf(RifLoaderTestUtils.DB_PASSWORD));
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
 		Process testApp = testAppBuilder.start();
 
@@ -88,18 +87,13 @@ public final class AppConfigurationTest {
 				Hex.decodeHex(
 						testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER).toCharArray()),
 				testAppConfig.getLoadOptions().getHicnHashPepper());
-		Assert.assertEquals(new URI(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_FHIR)),
-				testAppConfig.getLoadOptions().getFhirServer());
-		Assert.assertEquals(Paths.get(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH)),
-				testAppConfig.getLoadOptions().getKeyStorePath());
+		Assert.assertEquals(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
+				testAppConfig.getLoadOptions().getDatabaseUrl());
+		Assert.assertEquals(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME),
+				testAppConfig.getLoadOptions().getDatabaseUsername());
 		Assert.assertArrayEquals(
-				testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD).toCharArray(),
-				testAppConfig.getLoadOptions().getKeyStorePassword());
-		Assert.assertEquals(Paths.get(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PATH)),
-				testAppConfig.getLoadOptions().getTrustStorePath());
-		Assert.assertArrayEquals(
-				testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD).toCharArray(),
-				testAppConfig.getLoadOptions().getTrustStorePassword());
+				testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD).toCharArray(),
+				testAppConfig.getLoadOptions().getDatabasePassword());
 		Assert.assertEquals(
 				Integer.parseInt(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
 				testAppConfig.getLoadOptions().getLoaderThreads());

@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
@@ -26,8 +25,8 @@ import com.amazonaws.services.s3.model.Bucket;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
-import gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirTestUtilities;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.LoadAppOptions;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoaderTestUtils;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
@@ -36,7 +35,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 
 /**
  * <p>
- * Integration tests for {@link S3ToFhirLoadApp}.
+ * Integration tests for {@link S3ToDatabaseLoadApp}.
  * </p>
  * <p>
  * These tests require the application capsule JAR to be built and available.
@@ -45,37 +44,15 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
  * haven't rebuilt it), it'll run using the old code, which probably isn't what
  * you want.
  * </p>
- * <p>
- * These tests require a local FHIR server to be running. This is handled
- * automatically by the POm when run as part of a Maven build. To run these
- * tests in Eclipse, you can launch the server manually, as follows:
- * </p>
- * <ol>
- * <li>Right-click the <code>bluebutton-data-pipeline-app</code> project, and
- * select <strong>Run As > Maven build...</strong>.</li>
- * <li>Set <strong>goal</strong> to
- * <code>dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start</code>
- * .</li>
- * <li>Click <strong>Run</strong>.</li>
- * </ol>
- * <p>
- * When done with the server, you can stop it by running the
- * <code>org.codehaus.mojo:exec-maven-plugin:exec@server-stop</code> goal in a
- * similar fashion. Once it's been run the first time, the server can be
- * re-launched from Eclipse's <strong>Run</strong> toolbar dropdown button, just
- * like any other Java application, unit test, etc. Logs from the server can be
- * found in the project's <code>target/bluebutton-server/wildfly-*</code>
- * directory.
- * </p>
  */
-public final class S3ToFhirLoadAppIT {
+public final class S3ToDatabaseLoadAppIT {
 	/**
 	 * The POSIX signal number for the <code>SIGTERM</code> signal.
 	 */
 	private static final int SIGTERM = 15;
 
 	/**
-	 * Verifies that {@link S3ToFhirLoadApp} exits as expected when launched
+	 * Verifies that {@link S3ToDatabaseLoadApp} exits as expected when launched
 	 * with no configuration environment variables.
 	 * 
 	 * @throws IOException
@@ -96,11 +73,11 @@ public final class S3ToFhirLoadAppIT {
 		appProcess.waitFor(1, TimeUnit.MINUTES);
 
 		// Verify that the application exited as expected.
-		Assert.assertEquals(S3ToFhirLoadApp.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
+		Assert.assertEquals(S3ToDatabaseLoadApp.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
 	}
 
 	/**
-	 * Verifies that {@link S3ToFhirLoadApp} exits as expected when asked to run
+	 * Verifies that {@link S3ToDatabaseLoadApp} exits as expected when asked to run
 	 * against an S3 bucket that doesn't exist. This test case isn't so much
 	 * needed to test that one specific failure case, but to instead verify that
 	 * the application dies as expected when something goes sideways.
@@ -125,7 +102,7 @@ public final class S3ToFhirLoadAppIT {
 
 			// Verify that the application exited as expected.
 			Assert.assertEquals(String.format("Wrong exit code. Output [\n%s]\n", appRunConsumer.getStdoutContents()),
-					S3ToFhirLoadApp.EXIT_CODE_MONITOR_ERROR, appProcess.exitValue());
+					S3ToDatabaseLoadApp.EXIT_CODE_MONITOR_ERROR, appProcess.exitValue());
 		} finally {
 			if (appProcess != null)
 				appProcess.destroyForcibly();
@@ -133,7 +110,7 @@ public final class S3ToFhirLoadAppIT {
 	}
 
 	/**
-	 * Verifies that {@link S3ToFhirLoadApp} works as expected when no data is
+	 * Verifies that {@link S3ToDatabaseLoadApp} works as expected when no data is
 	 * made available for it to process. Basically, it should just sit there and
 	 * wait for data, doing nothing.
 	 * 
@@ -177,7 +154,7 @@ public final class S3ToFhirLoadAppIT {
 	}
 
 	/**
-	 * Verifies that {@link S3ToFhirLoadApp} works as expected against a small
+	 * Verifies that {@link S3ToDatabaseLoadApp} works as expected against a small
 	 * amount of data. We trust that other tests elsewhere are covering the ETL
 	 * results' correctness; here we're just verifying the overall flow. Does it
 	 * find the data set, process it, and then not find a data set anymore?
@@ -314,15 +291,6 @@ public final class S3ToFhirLoadAppIT {
 	}
 
 	/**
-	 * Ensures that {@link FhirTestUtilities#cleanFhirServer()} is called after
-	 * each test case.
-	 */
-	@After
-	public void cleanFhirServerAfterEachTestCase() {
-		FhirTestUtilities.cleanFhirServer();
-	}
-
-	/**
 	 * @param bucket
 	 *            the S3 {@link Bucket} that the application will be configured
 	 *            to pull RIF data from
@@ -335,18 +303,13 @@ public final class S3ToFhirLoadAppIT {
 
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
-				String.valueOf(FhirTestUtilities.HICN_HASH_ITERATIONS));
+				String.valueOf(RifLoaderTestUtils.HICN_HASH_ITERATIONS));
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
-				Hex.encodeHexString(FhirTestUtilities.HICN_HASH_PEPPER));
-		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_FHIR, FhirTestUtilities.FHIR_API);
-		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PATH,
-				FhirTestUtilities.getClientKeyStorePath().toString());
-		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_KEY_STORE_PASSWORD,
-				String.valueOf(FhirTestUtilities.CLIENT_KEY_STORE_PASSWORD));
-		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PATH,
-				FhirTestUtilities.getClientTrustStorePath().toString());
-		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_TRUST_STORE_PASSWORD,
-				String.valueOf(FhirTestUtilities.CLIENT_TRUST_STORE_PASSWORD));
+				Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, RifLoaderTestUtils.DB_URL);
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, RifLoaderTestUtils.DB_USERNAME);
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD,
+				String.valueOf(RifLoaderTestUtils.DB_PASSWORD));
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS,
 				String.valueOf(LoadAppOptions.DEFAULT_LOADER_THREADS));
 		/*
