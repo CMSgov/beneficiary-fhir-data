@@ -39,7 +39,7 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
-import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimGroup;
@@ -112,7 +112,7 @@ public final class DataSetSubsetter {
 
 		Map<RifFileType, Enum<?>> beneficiaryColumnByFileType = new HashMap<>();
 		beneficiaryColumnByFileType.put(RifFileType.BENEFICIARY, BeneficiaryColumn.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.CARRIER, CarrierClaimGroup.Column.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.CARRIER, CarrierClaimColumn.BENE_ID);
 		beneficiaryColumnByFileType.put(RifFileType.DME, DMEClaimGroup.Column.BENE_ID);
 		beneficiaryColumnByFileType.put(RifFileType.HHA, HHAClaimGroup.Column.BENE_ID);
 		beneficiaryColumnByFileType.put(RifFileType.HOSPICE, HospiceClaimGroup.Column.BENE_ID);

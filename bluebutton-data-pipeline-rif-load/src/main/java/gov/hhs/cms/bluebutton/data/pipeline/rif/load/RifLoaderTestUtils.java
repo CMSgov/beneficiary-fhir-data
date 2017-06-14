@@ -14,6 +14,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 
 /**
  * <p>
@@ -70,7 +72,7 @@ public final class RifLoaderTestUtils {
 
 		// TODO add other entity classes
 		entityManager.getTransaction().begin();
-		for (Class<?> entityClass : new Class[] { Beneficiary.class }) {
+		for (Class<?> entityClass : new Class[] { CarrierClaimLine.class, CarrierClaim.class, Beneficiary.class }) {
 			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 			CriteriaDelete query = builder.createCriteriaDelete(entityClass);
 			query.from(entityClass);

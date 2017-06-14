@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.data.pipeline.rif.load;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -220,8 +221,9 @@ public final class RifLoader {
 			 * is an optimization for a later date.
 			 */
 
-			// FIXME remove this
-			if (rifRecordEvent.getFile().getFileType() != RifFileType.BENEFICIARY)
+			// FIXME remove this once everything is JPAified
+			if (!Arrays.asList(RifFileType.BENEFICIARY, RifFileType.CARRIER)
+					.contains(rifRecordEvent.getFile().getFileType()))
 				return new RifRecordLoadResult(rifRecordEvent, LoadAction.LOADED);
 
 			// Push the input bundle.
