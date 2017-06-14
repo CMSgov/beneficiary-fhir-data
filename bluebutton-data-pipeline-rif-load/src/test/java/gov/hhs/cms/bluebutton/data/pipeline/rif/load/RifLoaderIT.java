@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 
-import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
@@ -70,7 +70,7 @@ public final class RifLoaderIT {
 		for (Stream<RifRecordEvent<?>> rifRecordEventsCopy : processor.process(rifFilesEvent)) {
 			rifRecordEventsCopy.forEach(r -> {
 				if (r.getFile().getFileType() == RifFileType.BENEFICIARY)
-					assertIsInDatabase(entityManagerFactory, (BeneficiaryRow) r.getRecord());
+					assertIsInDatabase(entityManagerFactory, (Beneficiary) r.getRecord());
 				// TODO other record types
 			});
 		}
@@ -93,7 +93,7 @@ public final class RifLoaderIT {
 	 * @param record
 	 *            the RIF record to verify
 	 */
-	private static void assertIsInDatabase(EntityManagerFactory entityManagerFactory, BeneficiaryRow record) {
+	private static void assertIsInDatabase(EntityManagerFactory entityManagerFactory, Beneficiary record) {
 		// TODO Auto-generated method stub
 	}
 }

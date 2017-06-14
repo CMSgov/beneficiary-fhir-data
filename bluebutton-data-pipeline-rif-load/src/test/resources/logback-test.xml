@@ -9,6 +9,12 @@
 		</encoder>
 	</appender>
 
+	<!-- At 'debug', Hibernate will log SQL statements. -->
+	<logger name="org.hibernate.SQL" level="info" />
+
+	<!-- At 'trace', Hibernate will log SQL parameter values. -->
+	<logger name="org.hibernate.type" level="info" />
+
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
 	<root level="info">

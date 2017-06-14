@@ -38,7 +38,7 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
-import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup;
@@ -95,7 +95,7 @@ public final class DataSetSubsetter {
 		for (RifFile beneficiaryFile : beneficiaryFiles) {
 			CSVParser parser = RifParsingUtils.createCsvParser(beneficiaryFile);
 			parser.forEach(r -> {
-				String beneficiaryId = r.get(BeneficiaryRow.Column.BENE_ID);
+				String beneficiaryId = r.get(BeneficiaryColumn.BENE_ID);
 				if (beneficiaryIds.contains(beneficiaryId))
 					throw new IllegalStateException();
 				beneficiaryIds.add(beneficiaryId);
@@ -111,7 +111,7 @@ public final class DataSetSubsetter {
 		LOGGER.info("Selected '{}' random beneficiary IDs.", beneficiaryCount);
 
 		Map<RifFileType, Enum<?>> beneficiaryColumnByFileType = new HashMap<>();
-		beneficiaryColumnByFileType.put(RifFileType.BENEFICIARY, BeneficiaryRow.Column.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.BENEFICIARY, BeneficiaryColumn.BENE_ID);
 		beneficiaryColumnByFileType.put(RifFileType.CARRIER, CarrierClaimGroup.Column.BENE_ID);
 		beneficiaryColumnByFileType.put(RifFileType.DME, DMEClaimGroup.Column.BENE_ID);
 		beneficiaryColumnByFileType.put(RifFileType.HHA, HHAClaimGroup.Column.BENE_ID);

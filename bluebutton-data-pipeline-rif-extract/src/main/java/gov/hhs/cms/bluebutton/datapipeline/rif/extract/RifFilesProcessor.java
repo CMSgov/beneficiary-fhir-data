@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
-import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.CompoundCode;
@@ -65,8 +66,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRif
  */
 public final class RifFilesProcessor {
 	/**
-	 * The {@link BeneficiaryRow#version}, {@link CarrierClaimGroup#version},
-	 * etc. value that is currently supported.
+	 * The RIF schema version that is currently supported.
 	 */
 	public static final int RECORD_FORMAT_VERSION = 5;
 
@@ -272,7 +272,7 @@ public final class RifFilesProcessor {
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<BeneficiaryRow> buildBeneficiaryEvent(RifFilesEvent filesEvent, RifFile file,
+	private static RifRecordEvent<Beneficiary> buildBeneficiaryEvent(RifFilesEvent filesEvent, RifFile file,
 			List<CSVRecord> csvRecords) {
 		if (csvRecords.size() != 1)
 			throw new BadCodeMonkeyException();
@@ -281,36 +281,36 @@ public final class RifFilesProcessor {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecord.toString());
 
-		int schemaVersion = parseInt(csvRecord.get(BeneficiaryRow.Column.VERSION));
+		int schemaVersion = parseInt(csvRecord.get("VERSION"));
 		if (RECORD_FORMAT_VERSION != schemaVersion)
 			throw new UnsupportedRifVersionException(schemaVersion);
-		RecordAction recordAction = RecordAction.match(csvRecord.get(BeneficiaryRow.Column.DML_IND));
+		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
 
-		BeneficiaryRow beneficiaryRow = new BeneficiaryRow();
-		beneficiaryRow.setBeneficiaryId(csvRecord.get(BeneficiaryRow.Column.BENE_ID));
-		beneficiaryRow.setStateCode(csvRecord.get(BeneficiaryRow.Column.STATE_CODE));
-		beneficiaryRow.setCountyCode(csvRecord.get(BeneficiaryRow.Column.BENE_COUNTY_CD));
-		beneficiaryRow.setPostalCode(csvRecord.get(BeneficiaryRow.Column.BENE_ZIP_CD));
-		beneficiaryRow.setBirthDate(parseDate(csvRecord.get(BeneficiaryRow.Column.BENE_BIRTH_DT)));
-		beneficiaryRow.setSex(parseCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_SEX_IDENT_CD)));
-		beneficiaryRow.setRace(parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_RACE_CD)));
+		Beneficiary beneficiaryRow = new Beneficiary();
+		beneficiaryRow.setBeneficiaryId(csvRecord.get(BeneficiaryColumn.BENE_ID));
+		beneficiaryRow.setStateCode(csvRecord.get(BeneficiaryColumn.STATE_CODE));
+		beneficiaryRow.setCountyCode(csvRecord.get(BeneficiaryColumn.BENE_COUNTY_CD));
+		beneficiaryRow.setPostalCode(csvRecord.get(BeneficiaryColumn.BENE_ZIP_CD));
+		beneficiaryRow.setBirthDate(parseDate(csvRecord.get(BeneficiaryColumn.BENE_BIRTH_DT)));
+		beneficiaryRow.setSex(parseCharacter(csvRecord.get(BeneficiaryColumn.BENE_SEX_IDENT_CD)));
+		beneficiaryRow.setRace(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_RACE_CD)));
 		beneficiaryRow.setEntitlementCodeOriginal(parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_ORIG)));
+				csvRecord.get(BeneficiaryColumn.BENE_ENTLMT_RSN_ORIG)));
 		beneficiaryRow.setEntitlementCodeCurrent(parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_ENTLMT_RSN_CURR)));
-		beneficiaryRow.setEndStageRenalDiseaseCode(parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_ESRD_IND)));
+				csvRecord.get(BeneficiaryColumn.BENE_ENTLMT_RSN_CURR)));
+		beneficiaryRow.setEndStageRenalDiseaseCode(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_ESRD_IND)));
 		beneficiaryRow.setMedicareEnrollmentStatusCode(parseOptString(
-				csvRecord.get(BeneficiaryRow.Column.BENE_MDCR_STATUS_CD)));
+				csvRecord.get(BeneficiaryColumn.BENE_MDCR_STATUS_CD)));
 		beneficiaryRow.setPartATerminationCode(parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_PTA_TRMNTN_CD)));
+				csvRecord.get(BeneficiaryColumn.BENE_PTA_TRMNTN_CD)));
 		beneficiaryRow.setPartBTerminationCode(parseOptCharacter(
-				csvRecord.get(BeneficiaryRow.Column.BENE_PTB_TRMNTN_CD)));
-		beneficiaryRow.setHicn(csvRecord.get(BeneficiaryRow.Column.BENE_CRNT_HIC_NUM));
-		beneficiaryRow.setNameSurname(csvRecord.get(BeneficiaryRow.Column.BENE_SRNM_NAME));
-		beneficiaryRow.setNameGiven(csvRecord.get(BeneficiaryRow.Column.BENE_GVN_NAME));
-		beneficiaryRow.setNameMiddleInitial(parseOptCharacter(csvRecord.get(BeneficiaryRow.Column.BENE_MDL_NAME)));
+				csvRecord.get(BeneficiaryColumn.BENE_PTB_TRMNTN_CD)));
+		beneficiaryRow.setHicn(csvRecord.get(BeneficiaryColumn.BENE_CRNT_HIC_NUM));
+		beneficiaryRow.setNameSurname(csvRecord.get(BeneficiaryColumn.BENE_SRNM_NAME));
+		beneficiaryRow.setNameGiven(csvRecord.get(BeneficiaryColumn.BENE_GVN_NAME));
+		beneficiaryRow.setNameMiddleInitial(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_MDL_NAME)));
 
-		return new RifRecordEvent<BeneficiaryRow>(filesEvent, file, recordAction, beneficiaryRow);
+		return new RifRecordEvent<Beneficiary>(filesEvent, file, recordAction, beneficiaryRow);
 	}
 
 	/**

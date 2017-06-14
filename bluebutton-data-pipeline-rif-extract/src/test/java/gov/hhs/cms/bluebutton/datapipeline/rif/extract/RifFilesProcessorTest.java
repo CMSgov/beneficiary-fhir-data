@@ -14,7 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.CompoundCode;
@@ -64,13 +64,13 @@ public final class RifFilesProcessorTest {
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRifFileType(), rifRecordEvent.getFile().getFileType());
 		Assert.assertNotNull(rifRecordEvent.getRecord());
-		Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryRow);
+		Assert.assertTrue(rifRecordEvent.getRecord() instanceof Beneficiary);
 
-		BeneficiaryRow beneRow = (BeneficiaryRow) rifRecordEvent.getRecord();
+		Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", beneRow.getBeneficiaryId());
 		Assert.assertEquals("MO", beneRow.getStateCode());
-		Assert.assertEquals("Transylvania", beneRow.getCountyCode());
+		Assert.assertEquals("123", beneRow.getCountyCode());
 		Assert.assertEquals("12345", beneRow.getPostalCode());
 		Assert.assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBirthDate());
 		Assert.assertEquals(('M'), beneRow.getSex());

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
-import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
 /**
  * <p>
@@ -70,7 +70,7 @@ public final class RifLoaderTestUtils {
 
 		// TODO add other entity classes
 		entityManager.getTransaction().begin();
-		for (Class<?> entityClass : new Class[] { BeneficiaryRow.class }) {
+		for (Class<?> entityClass : new Class[] { Beneficiary.class }) {
 			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 			CriteriaDelete query = builder.createCriteriaDelete(entityClass);
 			query.from(entityClass);
