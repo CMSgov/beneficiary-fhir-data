@@ -4,7 +4,7 @@ package gov.hhs.cms.bluebutton.data.model.rif;
  * Enumerates the various types of RIF files.
  */
 public enum RifFileType {
-	BENEFICIARY(BeneficiaryRow.Column.BENE_ID),
+	BENEFICIARY(BeneficiaryColumn.BENE_ID),
 
 	CARRIER(CarrierClaimGroup.Column.CLM_ID),
 
@@ -37,7 +37,7 @@ public enum RifFileType {
 	/**
 	 * @return the <code>Column</code> enum constant for this
 	 *         {@link RifFileType} ID/grouping column, e.g.
-	 *         {@link BeneficiaryRow.Column#BENE_ID}
+	 *         {@link BeneficiaryColumn#BENE_ID}
 	 */
 	public Enum<?> getIdColumn() {
 		return idColumn;

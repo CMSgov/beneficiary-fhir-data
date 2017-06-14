@@ -3,6 +3,8 @@ package gov.hhs.cms.bluebutton.data.model.rif.samples;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 import org.apache.commons.csv.CSVFormat;
@@ -15,16 +17,14 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
-import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryRow;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
-import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
-import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 
 /**
  * Verifies that the columns in the sample data match the columns in the various
- * RIF column enums in our Java ETL code, e.g. {@link BeneficiaryRow.Column},
+ * RIF column enums in our Java ETL code, e.g. {@link BeneficiaryColumn},
  * {@link CarrierClaimGroup.Column}.
  */
 public final class SampleDataColumnsTest {
@@ -81,11 +81,22 @@ public final class SampleDataColumnsTest {
 				for (int col = 0; col < columnsInSample.length; col++)
 					columnsInSample[col] = sampleHeaderRecord.get(col);
 
+				/*
+				 * Remove from consideration the processing metadata columns
+				 * that intentionally aren't in the enums.
+				 */
+				// TODO remove if-guard once JPA-ification complete
+				if (sampleFile.getRifFileType() == RifFileType.BENEFICIARY) {
+					List<String> metadataColumns = Arrays.asList("VERSION", "DML_IND");
+					columnsInSample = Arrays.stream(columnsInSample).filter(c -> !metadataColumns.contains(c))
+							.toArray(String[]::new);
+				}
+
 				Assert.assertEquals(
 						String.format("Column count mismatch for '%s'.\nSample Columns: %s\nEnum Columns:   %s\n",
 								sampleFile.name(), toHeaderFormat(columnsInSample, c -> c),
 								toHeaderFormat(columnsInEnum, c -> c.name())),
-						columnsInSample.length, columnsInSample.length);
+						columnsInSample.length, columnsInEnum.length);
 
 				/*
 				 * Loop through the columns in the sample data and ensure that
