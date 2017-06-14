@@ -18,14 +18,14 @@ import org.slf4j.LoggerFactory;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
-import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 
 /**
  * Verifies that the columns in the sample data match the columns in the various
  * RIF column enums in our Java ETL code, e.g. {@link BeneficiaryColumn},
- * {@link CarrierClaimGroup.Column}.
+ * {@link CarrierClaimColumn}.
  */
 public final class SampleDataColumnsTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SampleDataColumnsTest.class);
@@ -86,7 +86,8 @@ public final class SampleDataColumnsTest {
 				 * that intentionally aren't in the enums.
 				 */
 				// TODO remove if-guard once JPA-ification complete
-				if (sampleFile.getRifFileType() == RifFileType.BENEFICIARY) {
+				if (sampleFile.getRifFileType() == RifFileType.BENEFICIARY
+						|| sampleFile.getRifFileType() == RifFileType.CARRIER) {
 					List<String> metadataColumns = Arrays.asList("VERSION", "DML_IND");
 					columnsInSample = Arrays.stream(columnsInSample).filter(c -> !metadataColumns.contains(c))
 							.toArray(String[]::new);

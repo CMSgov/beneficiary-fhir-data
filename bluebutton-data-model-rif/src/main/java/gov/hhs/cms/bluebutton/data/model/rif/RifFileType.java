@@ -6,7 +6,7 @@ package gov.hhs.cms.bluebutton.data.model.rif;
 public enum RifFileType {
 	BENEFICIARY(BeneficiaryColumn.BENE_ID),
 
-	CARRIER(CarrierClaimGroup.Column.CLM_ID),
+	CARRIER(CarrierClaimColumn.CLM_ID),
 
 	DME(DMEClaimGroup.Column.CLM_ID),
 

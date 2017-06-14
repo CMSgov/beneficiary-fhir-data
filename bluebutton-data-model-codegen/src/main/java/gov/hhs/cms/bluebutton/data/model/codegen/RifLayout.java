@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -96,7 +97,7 @@ public final class RifLayout {
 
 			RifColumnType rifColumnType = RifColumnType.valueOf(row.getCell(1).getStringCellValue());
 			int rifColumnLength = (int) row.getCell(2).getNumericCellValue();
-			boolean rifColumnOptional = row.getCell(3).getBooleanCellValue();
+			boolean rifColumnOptional = parseBoolean(row.getCell(3));
 			URL dataDictionaryEntry = parseUrl(row.getCell(5));
 			String rifColumnLabel = row.getCell(6).getStringCellValue();
 			String javaFieldName = row.getCell(7).getStringCellValue();
@@ -106,6 +107,25 @@ public final class RifLayout {
 		}
 
 		return new RifLayout(rifFields);
+	}
+
+	/**
+	 * @param cell
+	 *            the {@link Cell} to try and extract a <code>boolean</code>
+	 *            from
+	 * @return the <code>boolean</code> value that was in the specified
+	 *         {@link Cell}
+	 */
+	private static boolean parseBoolean(Cell cell) {
+		if (cell.getCellTypeEnum() == CellType.BOOLEAN)
+			return cell.getBooleanCellValue();
+		else
+			/*
+			 * I had some trouble with actual Boolean values stored in the
+			 * spreadsheet getting corrupted, so we also support String booleans
+			 * here.
+			 */
+			return Boolean.valueOf(cell.getStringCellValue().toLowerCase());
 	}
 
 	/**

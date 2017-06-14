@@ -34,8 +34,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.tools.Diagnostic;
@@ -288,7 +288,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					Modifier.PRIVATE);
 			parentClaimField.addAnnotation(Id.class);
 			parentClaimField
-					.addAnnotation(AnnotationSpec.builder(OneToOne.class).addMember("optional", "$L", false).build());
+					.addAnnotation(AnnotationSpec.builder(ManyToOne.class).build());
 			parentClaimField.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
 					.addMember("name", "$S", "`" + layoutType.entityIdFieldName + "`").build());
 			lineFields.add(parentClaimField.build());
@@ -320,13 +320,21 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			// Create the Entity class.
 			AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
 			AnnotationSpec tableAnnotation = AnnotationSpec.builder(Table.class)
-					.addMember("name", "$S", "`" + layoutType.getLineFieldsTableName() + "`").build();
+					.addMember("name", "$S", "`" + layoutType.getLineFieldsTableName().get() + "`").build();
 			// TODO create rif-to-java parser method
 			TypeSpec.Builder lineFieldsClass = TypeSpec.classBuilder(lineClassName).addAnnotation(entityAnnotation)
 					.addAnnotation(AnnotationSpec.builder(IdClass.class).addMember("value", "$T.class", lineIdClassName)
 							.build())
-					.addAnnotation(tableAnnotation).addModifiers(Modifier.PUBLIC).addFields(lineFields)
-					.addMethods(lineMethods).addType(lineIdClass.build());
+					.addAnnotation(tableAnnotation).addModifiers(Modifier.PUBLIC).addFields(lineFields);
+			lineFieldsClass.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC).build());
+			lineFieldsClass
+					.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC)
+							.addParameter(parentClaimType, FIELD_NAME_PARENT_CLAIM)
+							.addParameter(lineNumberFieldType, FIELD_NAME_CHILD_LINE_NUMBER)
+							.addStatement("this.$1N = $1N", FIELD_NAME_PARENT_CLAIM)
+							.addStatement("this.$1N = $1N", FIELD_NAME_CHILD_LINE_NUMBER).build());
+			lineFieldsClass.addMethods(lineMethods);
+			lineFieldsClass.addType(lineIdClass.build());
 
 			JavaFile lineFieldsClassFile = JavaFile
 					.builder(packageTarget.getQualifiedName().toString(), lineFieldsClass.build()).build();
@@ -364,7 +372,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		if (firstLineField.isPresent()) {
 			ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
 					ClassName.get(packageTarget.getQualifiedName().toString(), layoutType.getEntityName() + "Line"));
-			FieldSpec.Builder childField = FieldSpec.builder(childFieldType, "lines", Modifier.PRIVATE);
+			FieldSpec.Builder childField = FieldSpec.builder(childFieldType, "lines", Modifier.PRIVATE)
+					.initializer("new $T<>()", LinkedList.class);
 			childField.addAnnotation(
 					AnnotationSpec.builder(OneToMany.class).addMember("mappedBy", "$S", FIELD_NAME_PARENT_CLAIM)
 							.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
@@ -463,12 +472,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			return ClassName.get(String.class);
 		else if (rifField.getRifColumnType() == RifColumnType.DATE && rifField.getRifColumnLength() == 8)
 			return ClassName.get(LocalDate.class);
-		else if (rifField.getRifColumnType() == RifColumnType.NUM && rifField.getRifColumnLength() <= 9
-				&& !rifField.isRifColumnOptional())
-			return TypeName.INT;
-		else if (rifField.getRifColumnType() == RifColumnType.NUM && rifField.getRifColumnLength() <= 9
-				&& rifField.isRifColumnOptional())
-			return ClassName.get(Integer.class);
 		else if (rifField.getRifColumnType() == RifColumnType.NUM)
 			return ClassName.get(BigDecimal.class);
 		else
@@ -524,8 +527,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			 * has a scale of 2.
 			 */
 			// TODO verify that this scale works for everything
-			columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength());
-			columnAnnotation.addMember("scale", "$L", 2);
+			int fixedScale = 2;
+			columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength() + fixedScale);
+			columnAnnotation.addMember("scale", "$L", fixedScale);
 		}
 		annotations.add(columnAnnotation.build());
 
