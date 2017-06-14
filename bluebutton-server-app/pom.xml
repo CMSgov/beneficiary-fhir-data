@@ -35,6 +35,15 @@
 			<version>${hapi-fhir.version}</version>
 		</dependency>
 
+		<!-- FIXME: This should be removed eventually, but we're leaving it in 
+			now to ease the transition away from HAPI's JPA layer. Having it in just 
+			makes it easier to look at the "old" HAPI code. -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-base</artifactId>
+			<version>${hapi-fhir.version}</version>
+		</dependency>
+
 		<dependency>
 			<!-- Needed for JEE/Servlet support -->
 			<groupId>javax.servlet</groupId>
@@ -57,10 +66,16 @@
 		</dependency>
 
 		<dependency>
-			<!-- Spring Web is used to deploy the server to a web container. -->
+			<!-- We mostly use Spring to ensure that our JPA EntityManagers are properly 
+				managed. -->
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>4.3.7.RELEASE</version>
+		</dependency>
+		<dependency>
+			<!-- We're really not using much of the Spring Data JPA framework; we 
+				mostly just need its Hibernate JPA glue. -->
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
 		</dependency>
 
 		<dependency>
@@ -68,7 +83,6 @@
 				for details. -->
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
-			<version>2.5.1</version>
 		</dependency>
 
 		<dependency>
@@ -98,15 +112,12 @@
 			<!-- The Blue Button API runs against PostgreSQL in production. -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.0.0</version>
 		</dependency>
-
 		<dependency>
 			<!-- The builds for this and other Blue Button API projects use HSQL in 
 				tests. -->
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.4.0</version>
 		</dependency>
 
 		<dependency>

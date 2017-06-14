@@ -1,110 +1,99 @@
 package gov.hhs.cms.bluebutton.server.app;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.codahale.metrics.MetricRegistry;
+import org.springframework.web.cors.CorsConfiguration;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
+ * <p>
  * The primary {@link Servlet} for this web application. Uses the
  * <a href="http://hapifhir.io/">HAPI FHIR</a> framework to provide a fully
  * functional FHIR API server that queries stored RIF data from the CCW and
  * converts it to the proper FHIR format "on the fly".
- * 
- * @see BlueButtonStu3ServerConfig
+ * </p>
  */
 public class BlueButtonStu3Server extends RestfulServer {
 	private static final long serialVersionUID = 1L;
-
-	static final Logger LOGGER = LoggerFactory.getLogger(BlueButtonStu3Server.class);
 
 	/**
 	 * Constructs a new {@link BlueButtonStu3Server} instance.
 	 */
 	public BlueButtonStu3Server() {
+		super(FhirContext.forDstu3());
 		setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
 	}
 
+	/**
+	 * @see ca.uhn.fhir.rest.server.RestfulServer#initialize()
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void initialize() throws ServletException {
-		super.initialize();
+		/*
+		 * Grab the application's Spring WebApplicationContext from the web
+		 * container. We can use this to retrieve beans (and anything that needs
+		 * Spring injection/autowiring, e.g. anything that accesses the DB, must
+		 * be a bean).
+		 */
+		WebApplicationContext springContext = ContextLoaderListener.getCurrentWebApplicationContext();
 
-		// This servlet provides STU3 resources.
-		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU3;
-		setFhirContext(new FhirContext(fhirVersion));
+		// Each IResourceProvider adds support for a specific FHIR resource.
+		List<IResourceProvider> resourceProviders = springContext
+				.getBean(SpringConfiguration.BLUEBUTTON_STU3_RESOURCE_PROVIDERS, List.class);
+		setResourceProviders(resourceProviders);
 
 		/*
-		 * Get the spring context from the web container (it's declared in
-		 * web.xml).
+		 * Each "plain" provider has one or more annotated methods that provides
+		 * support for non-resource-type methods, such as transaction, and
+		 * global history.
 		 */
-		WebApplicationContext webAppContext = ContextLoaderListener.getCurrentWebApplicationContext();
+		List<Object> plainProviders = new ArrayList<>();
+		setPlainProviders(plainProviders);
 
 		/*
-		 * There should be 1 resource provider per supported FHIR resource type,
-		 * e.g. Patient, ExplanationOfBenefit, etc.
+		 * Register the HAPI server interceptors that have been configured in
+		 * Spring.
 		 */
-		setResourceProviders(webAppContext.getBean("fhirStu3ResourceProviders", List.class));
-
+		Collection<IServerInterceptor> hapiInterceptors = springContext.getBeansOfType(IServerInterceptor.class)
+				.values();
+		for (IServerInterceptor hapiInterceptor : hapiInterceptors) {
+			this.registerInterceptor(hapiInterceptor);
+		}
 		/*
-		 * The system provider implements non-resource-type methods, such as
-		 * transaction, and global history.
+		 * Enable CORS.
 		 */
-		setPlainProviders(webAppContext.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
-
-		IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3",
-				IFhirSystemDao.class);
-		JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-				myAppCtx.getBean(DaoConfig.class));
-		confProvider.setImplementationDescription("Example Server");
-		setServerConformanceProvider(confProvider);
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		registerInterceptor(corsInterceptor);
 
 		// Enable ETag Support (this is already the default)
 		setETagSupport(ETagSupportEnum.ENABLED);
 
-		// Default to XML and pretty printing
-		setDefaultPrettyPrint(true);
+		// Default to XML and pretty printing.
 		setDefaultResponseEncoding(EncodingEnum.XML);
-
-		/*
-		 * Stick with the old FIFO memory-based paging approach, as FHIR server
-		 * RAM is more scalable for us than DB capacity.
-		 */
-		setPagingProvider(webAppContext.getBean(IPagingProvider.class));
-
-		/*
-		 * Load interceptors for the server from Spring (these are defined in
-		 * BlueButtonStu3ServerConfig.java)
-		 */
-		Collection<IServerInterceptor> interceptorBeans = webAppContext.getBeansOfType(IServerInterceptor.class)
-				.values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
-
-		/*
-		 * Bind the MetricRegistry, so that `InstrumentedFilter` (configured in
-		 * web.xml) can work.
-		 */
-		this.getServletContext().setAttribute("com.codahale.metrics.servlet.InstrumentedFilter.registry",
-				webAppContext.getBean(MetricRegistry.class));
+		setDefaultPrettyPrint(true);
 	}
 }
