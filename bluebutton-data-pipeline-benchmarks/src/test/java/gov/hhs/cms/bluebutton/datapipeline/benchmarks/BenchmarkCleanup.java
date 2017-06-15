@@ -14,7 +14,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
 
 /**
  * This is a small utility app designed to clean up after abnormally terminated
- * runs of {@link S3ToFhirLoadAppBenchmark}. It reads the metadata in
+ * runs of {@link S3ToDatabaseLoadAppBenchmark}. It reads the metadata in
  * <code>target/benchmark-iterations</code> and runs the teardown scripts for
  * each iteration.
  */

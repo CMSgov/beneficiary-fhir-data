@@ -19,6 +19,8 @@ public final class S3Utilities {
 	public static final Region REGION_DEFAULT = Region.getRegion(Regions.US_EAST_1);
 
 	/**
+	 * @param options
+	 *            the {@link ExtractionOptions} to use
 	 * @return the {@link AmazonS3} client to use
 	 */
 	public static AmazonS3 createS3Client(ExtractionOptions options) {

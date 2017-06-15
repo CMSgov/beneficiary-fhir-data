@@ -73,8 +73,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
  * Benchmarks for {@link S3ToDatabaseLoadApp} by running it against
  * {@link StaticRifResourceGroup} data sets.
  */
-public final class S3ToFhirLoadAppBenchmark {
-	private static final Logger LOGGER = LoggerFactory.getLogger(S3ToFhirLoadAppBenchmark.class);
+public final class S3ToDatabaseLoadAppBenchmark {
+	private static final Logger LOGGER = LoggerFactory.getLogger(S3ToDatabaseLoadAppBenchmark.class);
 
 	/**
 	 * The name of the {@link System#getProperty(String)} value that must be
@@ -152,6 +152,12 @@ public final class S3ToFhirLoadAppBenchmark {
 	private void runBenchmark(StaticRifResourceGroup sampleData) throws IOException {
 		skipOnUnsupportedOs();
 		Instant startInstant = Instant.now();
+		LOGGER.info("Starting benchmark against sample data: '{}'...", sampleData.name());
+
+		// TODO remove filter one everything is JPAified
+		List<StaticRifResource> sampleResources = Arrays.stream(sampleData.getResources())
+				.filter(r -> Arrays.asList(RifFileType.BENEFICIARY, RifFileType.CARRIER).contains(r.getRifFileType()))
+				.collect(Collectors.toList());
 
 		String ec2KeyName = System.getProperty(SYS_PROP_EC2_KEY_NAME, null);
 		if (ec2KeyName == null)
@@ -181,7 +187,7 @@ public final class S3ToFhirLoadAppBenchmark {
 			resourcesBucket = s3Client.createBucket("gov.hhs.cms.bluebutton.datapipeline.benchmark.resources");
 			pushResourcesToS3(s3Client, resourcesBucket);
 			dataSetBucket = s3Client.createBucket(BUCKET_DATA_SET_MASTER);
-			pushDataSetToS3(s3Client, dataSetBucket, sampleData);
+			pushDataSetToS3(s3Client, dataSetBucket, sampleResources);
 
 			benchmarkResults = runBenchmarkIterations(ec2KeyName, ec2KeyFilePath);
 		} finally {
@@ -221,16 +227,16 @@ public final class S3ToFhirLoadAppBenchmark {
 				Thread.currentThread().getContextClassLoader().getResourceAsStream("project.properties"))).readLine();
 		String gitBranchName = runProcessAndGetOutput("git symbolic-ref --short HEAD");
 		String gitCommitSha = runProcessAndGetOutput("git rev-parse HEAD");
-		int recordCount = Arrays.stream(sampleData.getResources()).mapToInt(r -> r.getRecordCount()).sum();
-		int beneficiaryCount = Arrays.stream(sampleData.getResources())
-				.filter(r -> r.getRifFileType() == RifFileType.BENEFICIARY).mapToInt(r -> r.getRecordCount()).sum();
+		int recordCount = sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum();
+		int beneficiaryCount = sampleResources.stream().filter(r -> r.getRifFileType() == RifFileType.BENEFICIARY)
+				.mapToInt(r -> r.getRecordCount()).sum();
 		for (BenchmarkResult benchmarkResult : benchmarkResults) {
 			String testCaseExecutionData = String.format("{ \"iterationTotalRunTime\": %d }",
 					benchmarkResult.getIterationTotalRunTime().toMillis());
 			Object[] recordFields = new String[] {
 					String.format("%s:%s", this.getClass().getSimpleName(), sampleData.name()), gitBranchName,
 					gitCommitSha, projectVersion,
-					"AWS: DB=db.m4.10xlarge, FHIR=c4.8xlarge, ETL=c4.8xlarge, ETL threads=70",
+					"AWS: DB=db.m4.10xlarge, ETL=c4.8xlarge, ETL threads=400",
 					DateTimeFormatter.ISO_INSTANT.format(startInstant), "" + benchmarkResult.getIterationIndex(),
 					"" + benchmarkResult.getDataSetProcessingTime().toMillis(), "" + recordCount, "" + beneficiaryCount,
 					testCaseExecutionData };
@@ -343,11 +349,10 @@ public final class S3ToFhirLoadAppBenchmark {
 	 */
 	private static void pushResourcesToS3(AmazonS3 s3Client, Bucket bucket) throws IOException {
 		/*
-		 * Upload all of the files in `target/bluebutton-server/` and
-		 * `target/pipeline-app/`.
+		 * Upload all of the files in `target/pipeline-app/`.
 		 */
 		Path targetDir = BenchmarkUtilities.findProjectTargetDir();
-		Path[] directories = new Path[] { targetDir.resolve("bluebutton-server"), targetDir.resolve("pipeline-app") };
+		Path[] directories = new Path[] { targetDir.resolve("pipeline-app") };
 		for (Path directory : directories) {
 			try (Stream<Path> files = Files.find(directory, 1, (f, a) -> Files.isRegularFile(f));) {
 				files.forEach(f -> s3Client
@@ -367,18 +372,17 @@ public final class S3ToFhirLoadAppBenchmark {
 	 * @param bucket
 	 *            the S3 {@link Bucket} to push the data to
 	 * @param dataResources
-	 *            the {@link StaticRifResourceGroup} with the data files to push
-	 *            to S3
+	 *            the {@link StaticRifResource} data files to push to S3
 	 */
-	private static void pushDataSetToS3(AmazonS3 s3Client, Bucket bucket, StaticRifResourceGroup dataResources) {
-		List<DataSetManifestEntry> manifestEntries = Arrays.stream(dataResources.getResources())
+	private static void pushDataSetToS3(AmazonS3 s3Client, Bucket bucket, List<StaticRifResource> dataResources) {
+		List<DataSetManifestEntry> manifestEntries = dataResources.stream()
 				.map(r -> new DataSetManifestEntry(r.name(), r.getRifFileType())).collect(Collectors.toList());
 		DataSetManifest manifest = new DataSetManifest(Instant.now(), 0, manifestEntries);
 		s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
 
 		TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
-		for (int i = 0; i < dataResources.getResources().length; i++) {
-			StaticRifResource dataResource = dataResources.getResources()[i];
+		for (int i = 0; i < dataResources.size(); i++) {
+			StaticRifResource dataResource = dataResources.get(i);
 			URL dataResourceUrl = dataResource.getResourceUrl();
 
 			/*
@@ -576,12 +580,14 @@ public final class S3ToFhirLoadAppBenchmark {
 				 * to: 1) Collect the ETL and FHIR logs, and 2) destroy the
 				 * benchmark systems in AWS.
 				 */
+				LOGGER.info("Running teardown for benchmark iteration '{}'...", iterationIndex);
 				int teardownExitCode = BenchmarkUtilities.runBenchmarkTeardown(iterationIndex, benchmarkIterationDir,
 						ec2KeyFile);
 				if (teardownExitCode != 0)
 					throw new BenchmarkError(
 							String.format("Ansible failed with exit code '%d' for benchmark teardown iteration '%d'.",
 									teardownExitCode, iterationIndex));
+				LOGGER.info("Teardown complete for benchmark iteration '{}'.", iterationIndex);
 			}
 
 			/*

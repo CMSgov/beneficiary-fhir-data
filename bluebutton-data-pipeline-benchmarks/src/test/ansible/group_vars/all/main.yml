@@ -43,4 +43,4 @@ java_flame_graphs: false
 # loader threads to use in the ETL service. These should be adjusted based on
 # the EC2 instance types being used.
 fhir_db_connections: 400
-etl_loader_threads: 390
+etl_loader_threads: 400
