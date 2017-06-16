@@ -1561,8 +1561,9 @@ public final class DataTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(new Integer(recordLine1.number), new Integer(eobItem0.getSequence()));
 		
-		assertCareTeamEquals(recordLine1.providerNPI, DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
-		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(recordLine1.providerNPI,
+		assertCareTeamEquals(recordLine1.providerNPI.get(), DataTransformer.CARE_TEAM_ROLE_PRIMARY, eob);
+		CareTeamComponent performingCareTeamEntry = findCareTeamEntryForProviderIdentifier(
+				recordLine1.providerNPI.get(),
 				eob.getCareTeam());
 		assertHasCoding(DataTransformer.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
 				recordLine1.providerSpecialityCode.get(), performingCareTeamEntry.getQualification());

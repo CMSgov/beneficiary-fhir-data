@@ -1240,7 +1240,7 @@ public final class RifFilesProcessor {
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_ICD_DGNS_VRSN_CD));
 			claimLine.purchasePriceAmount = parseDecimal(
 					claimLineRecord.get(DMEClaimGroup.Column.LINE_DME_PRCHS_PRICE_AMT));
-			claimLine.providerNPI = claimLineRecord.get(DMEClaimGroup.Column.PRVDR_NPI);
+			claimLine.providerNPI = parseOptString(claimLineRecord.get(DMEClaimGroup.Column.PRVDR_NPI));
 			claimLine.pricingStateCode = parseOptString(
 					claimLineRecord.get(DMEClaimGroup.Column.DMERC_LINE_PRCNG_STATE_CD));
 			claimLine.providerStateCode = claimLineRecord.get(DMEClaimGroup.Column.PRVDR_STATE_CD);
