@@ -392,7 +392,7 @@ public final class DMEClaimGroup {
 		/**
 		 * @see Column#PRVDR_NPI
 		 */
-		public String providerNPI;
+		public Optional<String> providerNPI;
 
 		/**
 		 * @see Column#DMERC_LINE_PRCNG_STATE_CD

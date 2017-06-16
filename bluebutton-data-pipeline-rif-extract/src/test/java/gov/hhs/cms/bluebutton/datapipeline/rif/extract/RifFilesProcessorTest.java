@@ -849,7 +849,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new Character('0'), claimLine.serviceDeductibleCode.get());
 		Assert.assertEquals(new IcdCode(IcdVersion.ICD_10, "G6666"), claimLine.diagnosis.get());
 		Assert.assertEquals(new BigDecimal("82.29"), claimLine.purchasePriceAmount);
-		Assert.assertEquals("1244444444", claimLine.providerNPI);
+		Assert.assertEquals("1244444444", claimLine.providerNPI.get());
 		Assert.assertEquals("AL", claimLine.pricingStateCode.get());
 		Assert.assertEquals("MO", claimLine.providerStateCode);
 		Assert.assertEquals(new Character('3'), claimLine.supplierTypeCode.get());
