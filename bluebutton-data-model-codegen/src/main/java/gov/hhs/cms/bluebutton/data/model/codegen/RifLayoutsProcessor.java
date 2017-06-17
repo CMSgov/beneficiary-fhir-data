@@ -9,12 +9,15 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Processor;
@@ -47,6 +50,7 @@ import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -191,21 +195,28 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		/*
 		 * First, create the Java enum for the RIF columns.
 		 */
-		generateColumnEnum(mappingSpec);
+		TypeSpec columnEnum = generateColumnEnum(mappingSpec);
 
 		/*
 		 * Then, create the JPA Entity for the "line" fields, containing: fields
 		 * and accessors.
 		 */
+		Optional<TypeSpec> lineEntity = Optional.empty();
 		if (mappingSpec.getHasLines()) {
-			generateLineEntity(mappingSpec);
+			lineEntity = Optional.of(generateLineEntity(mappingSpec));
 		}
 
 		/*
 		 * Then, create the JPA Entity for the "grouped" fields, containing:
 		 * fields, accessors, and a RIF-to-JPA-Entity parser.
 		 */
-		generateHeaderEntity(mappingSpec);
+		TypeSpec headerEntity = generateHeaderEntity(mappingSpec);
+
+		/*
+		 * Then, create code that can be used to parse incoming RIF rows into
+		 * instances of those entities.
+		 */
+		generateParser(mappingSpec, columnEnum, headerEntity, lineEntity);
 	}
 
 	/**
@@ -406,6 +417,139 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		headerEntityFile.writeTo(processingEnv.getFiler());
 
 		return headerEntityFinal;
+	}
+
+	/**
+	 * Generates a Java {@link Entity} for the header {@link RifField}s in the
+	 * specified {@link MappingSpec}.
+	 * 
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} of the layout to generate code for
+	 * @param columnEnum
+	 *            the RIF column {@link Enum} that was generated for the layout
+	 * @param headerEntity
+	 *            the Java {@link Entity} that was generated for the header
+	 *            fields
+	 * @param lineEntity
+	 *            the Java {@link Entity} that was generated for the line
+	 *            fields, if any
+	 * @return the Java parsing class that was generated
+	 * @throws IOException
+	 *             An {@link IOException} may be thrown if errors are
+	 *             encountered trying to generate source files.
+	 */
+	private TypeSpec generateParser(MappingSpec mappingSpec, TypeSpec columnEnum, TypeSpec headerEntity,
+			Optional<TypeSpec> lineEntity) throws IOException {
+		TypeSpec.Builder parsingClass = TypeSpec.classBuilder(mappingSpec.getParsingClass())
+				.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+		// Grab some common types we'll need.
+		ClassName csvRecordType = ClassName.get("org.apache.commons.csv", "CSVRecord");
+		ClassName parseUtilsType = ClassName.get("gov.hhs.cms.bluebutton.data.model.rif.parse", "RifParsingUtils");
+
+		MethodSpec.Builder parseMethod = MethodSpec.methodBuilder("parseRif")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+				.returns(mappingSpec.getHeaderEntity())
+				.addParameter(ParameterizedTypeName.get(ClassName.get(List.class), csvRecordType), "csvRecords");
+
+		parseMethod.addComment("Verify the inputs.");
+		parseMethod.addStatement("$T.requireNonNull(csvRecords)", Objects.class);
+		parseMethod.beginControlFlow("if (csvRecords.size() < 1)")
+				.addStatement("throw new $T()", IllegalArgumentException.class).endControlFlow();
+
+		parseMethod.addCode("\n$1T header = new $1T();\n", mappingSpec.getHeaderEntity());
+
+		// Loop over each field and generate the code needed to parse it.
+		for (int fieldIndex = 0; fieldIndex < mappingSpec.getRifLayout().getRifFields().size(); fieldIndex++) {
+			RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
+
+			// Find the Entity field for the RifField.
+			Stream<FieldSpec> entitiesFieldsStream = mappingSpec.getHasLines()
+					? Stream.concat(headerEntity.fieldSpecs.stream(), lineEntity.get().fieldSpecs.stream())
+					: headerEntity.fieldSpecs.stream();
+			FieldSpec entityField = entitiesFieldsStream
+					.filter(f -> f.name.equals(rifField.getJavaFieldName())).findAny().get();
+
+			// Are we starting the header parsing?
+			if (fieldIndex == 0) {
+				parseMethod.addCode("\n// Parse the header fields.\n");
+				parseMethod.addCode("$T headerRecord = csvRecords.get(0);\n", csvRecordType);
+			}
+
+			// Are we starting the line parsing?
+			if (mappingSpec.getHasLines() && fieldIndex == mappingSpec.calculateFirstLineFieldIndex()) {
+				parseMethod.addCode("\n// Parse the line fields.\n");
+				parseMethod.beginControlFlow("for (int lineIndex = 0; lineIndex < csvRecords.size(); lineIndex++)");
+				parseMethod.addStatement("$T lineRecord = csvRecords.get(lineIndex)", csvRecordType);
+				parseMethod.addStatement("$1T line = new $1T()", mappingSpec.getLineEntity());
+
+				FieldSpec lineEntityParentField = lineEntity.get().fieldSpecs.stream()
+						.filter(f -> f.name.equals(mappingSpec.getLineEntityParentField())).findAny().get();
+				parseMethod.addCode("line.$L(header);\n\n", calculateSetterName(lineEntityParentField));
+			}
+
+			// Determine which variables to use in assignment statement.
+			String entityName;
+			String recordName;
+			if (mappingSpec.getHasLines() && fieldIndex >= mappingSpec.calculateFirstLineFieldIndex()) {
+				entityName = "line";
+				recordName = "lineRecord";
+			} else {
+				entityName = "header";
+				recordName = "headerRecord";
+			}
+
+			// Determine which parsing utility method to use.
+			String parseUtilsMethodName;
+			if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() > 1) {
+				// Handle a String field.
+				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
+			} else if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() == 1) {
+				// Handle a Character field.
+				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
+			} else if (rifField.getRifColumnType() == RifColumnType.NUM && rifField.getRifColumnScale().get() == 0) {
+				// Handle an Integer field.
+				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
+			} else if (rifField.getRifColumnType() == RifColumnType.NUM && rifField.getRifColumnScale().get() > 0) {
+				// Handle a Decimal field.
+				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
+			} else if (rifField.getRifColumnType() == RifColumnType.DATE) {
+				// Handle a LocalDate field.
+				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDate" : "parseDate";
+			} else {
+				throw new IllegalStateException();
+			}
+
+			Map<String, Object> valueAssignmentArgs = new LinkedHashMap<>();
+			valueAssignmentArgs.put("entity", entityName);
+			valueAssignmentArgs.put("entitySetter", calculateSetterName(entityField));
+			valueAssignmentArgs.put("record", recordName);
+			valueAssignmentArgs.put("parseUtilsType", parseUtilsType);
+			valueAssignmentArgs.put("parseUtilsMethod", parseUtilsMethodName);
+			valueAssignmentArgs.put("columnEnumType", mappingSpec.getColumnEnum());
+			valueAssignmentArgs.put("columnEnumConstant", rifField.getRifColumnName());
+			parseMethod.addCode(CodeBlock
+					.builder().addNamed("$entity:L.$entitySetter:L(" + "$parseUtilsType:T.$parseUtilsMethod:L("
+							+ "$record:L.get(" + "$columnEnumType:T.$columnEnumConstant:L)));\n", valueAssignmentArgs)
+					.build());
+		}
+
+		// Did we just finish line parsing?
+		if (mappingSpec.getHasLines()) {
+			FieldSpec linesField = headerEntity.fieldSpecs.stream()
+					.filter(f -> f.name.equals(mappingSpec.getHeaderEntityLinesField())).findAny().get();
+			parseMethod.addStatement("header.$L().add(line)", calculateGetterName(linesField));
+			parseMethod.endControlFlow();
+		}
+
+		parseMethod.addStatement("return header", Objects.class);
+		parsingClass.addMethod(parseMethod.build());
+
+		TypeSpec parsingClassFinal = parsingClass.build();
+		JavaFile parsingClassFile = JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
+		parsingClassFile.writeTo(processingEnv.getFiler());
+
+		return parsingClassFinal;
 	}
 
 	/**

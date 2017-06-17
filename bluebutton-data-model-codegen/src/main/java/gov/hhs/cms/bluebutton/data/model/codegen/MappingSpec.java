@@ -246,6 +246,14 @@ public final class MappingSpec {
 	}
 
 	/**
+	 * @return the {@link ClassName} for the class to be built that will contain
+	 *         parsing code for the layout
+	 */
+	public ClassName getParsingClass() {
+		return ClassName.get(packageName, headerEntity + "Parser");
+	}
+
+	/**
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
