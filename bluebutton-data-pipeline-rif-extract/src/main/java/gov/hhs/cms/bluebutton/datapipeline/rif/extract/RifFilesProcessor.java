@@ -807,8 +807,10 @@ public final class RifFilesProcessor {
 			 * FIXME Can't use real line numbers because random/dummy test data
 			 * has dupes.
 			 */
-			BigDecimal number = parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_NUM));
-			CarrierClaimLine claimLine = new CarrierClaimLine(claimGroup, new BigDecimal(lineNumber++));
+			CarrierClaimLine claimLine = new CarrierClaimLine();
+			claimLine.setParentClaim(claimGroup);
+			// claimLine.setNumber(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_NUM)));
+			claimLine.setNumber(new BigDecimal(lineNumber++));
 
 			claimLine.setPerformingProviderIdNumber(claimLineRecord.get(CarrierClaimColumn.CARR_PRFRNG_PIN_NUM));
 			claimLine
