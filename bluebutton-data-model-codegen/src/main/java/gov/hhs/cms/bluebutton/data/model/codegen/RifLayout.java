@@ -107,7 +107,6 @@ public final class RifLayout {
 
 			RifColumnType rifColumnType = RifColumnType.valueOf(row.getCell(1).getStringCellValue());
 			int rifColumnLength = (int) row.getCell(2).getNumericCellValue();
-			@SuppressWarnings("deprecation")
 
 			/*
 			 * TODO switch to using rifField.getRifColumnScale(), once it's
