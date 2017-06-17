@@ -9,10 +9,8 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -67,24 +65,6 @@ import gov.hhs.cms.bluebutton.data.model.codegen.annotations.RifLayoutsGenerator
  */
 @AutoService(Processor.class)
 public final class RifLayoutsProcessor extends AbstractProcessor {
-	/**
-	 * The {@link ClassName#simpleName()} for {@link Entity}'s nested
-	 * {@link IdClass}es.
-	 */
-	private static final String CLASS_NAME_CHILD_LINE_ID = "LineId";
-
-	/**
-	 * The {@link FieldSpec#name} for the field that defines the ordering of
-	 * "line" {@link Entity}s.
-	 */
-	private static final String FIELD_NAME_CHILD_LINE_NUMBER = "number";
-
-	/**
-	 * The {@link FieldSpec#name} for the field that references the parent
-	 * "grouped" {@link Entity} in child "line" {@link Entity}s.
-	 */
-	private static final String FIELD_NAME_PARENT_CLAIM = "parentClaim";
-
 	/**
 	 * Both Maven and Eclipse hide compiler messages, so setting this constant
 	 * to <code>true</code> will also log messages out to a new source file.
@@ -156,13 +136,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		RifLayoutsGenerator annotation = annotatedPackage.getAnnotation(RifLayoutsGenerator.class);
 		logNote(annotatedPackage, "Processing package annotated with: '%s'.", annotation);
 
-		/* Define the list of layouts that we expect to parse and generate. */
-		List<LayoutType> layoutTypes = new LinkedList<>();
-		layoutTypes.add(new LayoutType(annotation.beneficiarySheet(), "Beneficiary", "Beneficiaries", "beneficiaryId",
-				Optional.empty()));
-		layoutTypes.add(new LayoutType(annotation.carrierSheet(), "CarrierClaim", "CarrierClaims", "claimId",
-				Optional.of("CarrierClaimLines")));
-
 		/*
 		 * Find the spreadsheet referenced by the annotation. It will define the
 		 * RIF layouts.
@@ -177,226 +150,262 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		}
 		logNote(annotatedPackage, "Found spreadsheet: '%s'.", annotation.spreadsheetResource());
 
-		/* Parse the spreadsheet, extracting the layouts from it. */
-		Map<LayoutType, RifLayout> layouts = new HashMap<>();
+		/*
+		 * Parse the spreadsheet, extracting the layouts from it. Also: define
+		 * the layouts that we expect to parse and generate code for.
+		 */
+		List<MappingSpec> mappingSpecs = new LinkedList<>();
 		Workbook spreadsheetWorkbook = null;
 		try {
 			spreadsheetWorkbook = new XSSFWorkbook(spreadsheetResource.openInputStream());
 
-			for (LayoutType layoutType : layoutTypes)
-				layouts.put(layoutType, RifLayout.parse(spreadsheetWorkbook, layoutType.getSheetName()));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiarySheet()))
+					.setHeaderEntity("Beneficiary").setHeaderTable("Beneficiaries")
+					.setHeaderEntityIdField("beneficiaryId").setHasLines(false));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
+					.setHeaderEntity("CarrierClaim").setHeaderTable("CarrierClaims").setHeaderEntityIdField("claimId")
+					.setHasLines(true).setLineTable("CarrierClaimLines"));
 		} finally {
 			if (spreadsheetWorkbook != null)
 				spreadsheetWorkbook.close();
 		}
-		logNote(annotatedPackage, "Parsed RIF layouts: '%s'.", layouts);
+		logNote(annotatedPackage, "Generated mapping specification: '%s'.", mappingSpecs);
 
 		/* Generate the code for each layout. */
-		for (LayoutType layoutType : layoutTypes)
-			generateCode(annotatedPackage, layoutType, layouts.get(layoutType));
+		for (MappingSpec mappingSpec : mappingSpecs)
+			generateCode(mappingSpec);
 	}
 
 	/**
 	 * Generates the code for the specified {@link RifLayout}.
 	 * 
-	 * @param packageTarget
-	 *            the Java package to generate code into
-	 * @param layoutType
-	 *            the {@link LayoutType} of the layout to generate code for
-	 * @param rifLayout
-	 *            the {@link RifLayout} to generate code for
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} to generate code for
 	 * @throws IOException
 	 *             An {@link IOException} may be thrown if errors are
 	 *             encountered trying to generate source files.
 	 */
-	private void generateCode(PackageElement packageTarget, LayoutType layoutType, RifLayout rifLayout)
-			throws IOException {
-		/*
-		 * Determine if this RifLayout has separate claim lines, and if so where
-		 * the two sections are divided.
-		 */
-		Optional<Integer> firstLineField = findFirstClaimLineField(rifLayout);
-		int lastClaimGroupedField = firstLineField.isPresent() ? (firstLineField.get() - 1)
-				: (rifLayout.getRifFields().size() - 1);
-
+	private void generateCode(MappingSpec mappingSpec) throws IOException {
 		/*
 		 * First, create the Java enum for the RIF columns.
 		 */
-
-		TypeSpec.Builder columnsEnum = TypeSpec.enumBuilder(layoutType.getEntityName() + "Column")
-				.addModifiers(Modifier.PUBLIC);
-		for (int fieldIndex = 0; fieldIndex < rifLayout.getRifFields().size(); fieldIndex++) {
-			RifField rifField = rifLayout.getRifFields().get(fieldIndex);
-			columnsEnum.addEnumConstant(rifField.getRifColumnName());
-		}
-
-		JavaFile columnsEnumFile = JavaFile.builder(packageTarget.getQualifiedName().toString(), columnsEnum.build())
-				.build();
-		columnsEnumFile.writeTo(processingEnv.getFiler());
+		generateColumnEnum(mappingSpec);
 
 		/*
 		 * Then, create the JPA Entity for the "line" fields, containing: fields
 		 * and accessors.
 		 */
-
-		if (firstLineField.isPresent()) {
-			ClassName lineClassName = ClassName.get(packageTarget.getQualifiedName().toString(),
-					layoutType.getEntityName() + "Line");
-			List<FieldSpec> lineFields = new LinkedList<>();
-			List<MethodSpec> lineMethods = new LinkedList<>();
-
-			// Create the @IdClass needed for the composite primary key.
-			TypeSpec.Builder lineIdClass = TypeSpec.classBuilder(CLASS_NAME_CHILD_LINE_ID)
-					.addSuperinterface(Serializable.class).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-			lineIdClass.addField(
-					FieldSpec.builder(long.class, "serialVersionUID", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-							.initializer("$L", 1L).build());
-			ClassName lineIdClassName = lineClassName.nestedClass(CLASS_NAME_CHILD_LINE_ID);
-
-			// Add a field to that PK class for the parent claim's ID.
-			RifField parentClaimRifField = rifLayout.getRifFields().stream()
-					.filter(f -> layoutType.getEntityIdFieldName().equals(f.getJavaFieldName())).findAny().get();
-			TypeName parentClaimIdFieldType = selectJavaFieldType(parentClaimRifField);
-			FieldSpec.Builder parentIdField = FieldSpec.builder(parentClaimIdFieldType, FIELD_NAME_PARENT_CLAIM,
-					Modifier.PRIVATE);
-			lineIdClass.addField(parentIdField.build());
-			MethodSpec.Builder parentGetter = MethodSpec.methodBuilder("getParentClaim")
-					.addStatement("return $N", FIELD_NAME_PARENT_CLAIM).returns(parentClaimIdFieldType);
-			lineIdClass.addMethod(parentGetter.build());
-
-			// Add a field to that class for the line number.
-			RifField rifLineNumberField = rifLayout.getRifFields().stream()
-					.filter(f -> f.getJavaFieldName().equals(FIELD_NAME_CHILD_LINE_NUMBER)).findFirst().get();
-			TypeName lineNumberFieldType = selectJavaFieldType(rifLineNumberField);
-			FieldSpec.Builder lineNumberIdField = FieldSpec.builder(lineNumberFieldType, FIELD_NAME_CHILD_LINE_NUMBER,
-					Modifier.PRIVATE);
-			lineIdClass.addField(lineNumberIdField.build());
-			MethodSpec.Builder lineNumberGetter = MethodSpec
-					.methodBuilder("get" + capitalize(FIELD_NAME_CHILD_LINE_NUMBER))
-					.addStatement("return $N", FIELD_NAME_CHILD_LINE_NUMBER).returns(lineNumberFieldType);
-			lineIdClass.addMethod(lineNumberGetter.build());
-
-			// Add hashCode() and equals(...) to the PK class.
-			lineIdClass.addMethod(generateHashCodeMethod(parentIdField.build(), lineNumberIdField.build()));
-			lineIdClass
-					.addMethod(generateEqualsMethod(lineIdClassName, parentIdField.build(), lineNumberIdField.build()));
-
-			// Add a field and accessor to the "line" Entity for the parent.
-			ClassName parentClaimType = ClassName.get(packageTarget.getQualifiedName().toString(),
-					layoutType.getEntityName());
-			FieldSpec.Builder parentClaimField = FieldSpec.builder(parentClaimType, FIELD_NAME_PARENT_CLAIM,
-					Modifier.PRIVATE);
-			parentClaimField.addAnnotation(Id.class);
-			parentClaimField
-					.addAnnotation(AnnotationSpec.builder(ManyToOne.class).build());
-			parentClaimField.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
-					.addMember("name", "$S", "`" + layoutType.entityIdFieldName + "`").build());
-			lineFields.add(parentClaimField.build());
-			MethodSpec.Builder parentClaimGetter = MethodSpec.methodBuilder("get" + capitalize(FIELD_NAME_PARENT_CLAIM))
-					.addModifiers(Modifier.PUBLIC).addStatement("return $N", FIELD_NAME_PARENT_CLAIM)
-					.returns(parentClaimType);
-			lineMethods.add(parentClaimGetter.build());
-
-			// For each "line" RIF field, create an Entity field with accessors.
-			for (int fieldIndex = firstLineField.get(); fieldIndex < rifLayout.getRifFields().size(); fieldIndex++) {
-				RifField rifField = rifLayout.getRifFields().get(fieldIndex);
-
-				FieldSpec entityField = FieldSpec
-						.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
-						.addAnnotations(createAnnotations(layoutType, rifField)).build();
-				MethodSpec.Builder entityGetter = MethodSpec.methodBuilder(calculateGetterName(entityField))
-						.addModifiers(Modifier.PUBLIC).returns(selectJavaPropertyType(rifField));
-				addGetterStatement(rifField, entityField, entityGetter);
-				MethodSpec.Builder entitySetter = MethodSpec.methodBuilder(calculateSetterName(entityField))
-						.addModifiers(Modifier.PUBLIC).returns(void.class)
-						.addParameter(selectJavaPropertyType(rifField), entityField.name);
-				addSetterStatement(rifField, entityField, entitySetter);
-
-				lineFields.add(entityField);
-				lineMethods.add(entityGetter.build());
-				lineMethods.add(entitySetter.build());
-			}
-
-			// Create the Entity class.
-			AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
-			AnnotationSpec tableAnnotation = AnnotationSpec.builder(Table.class)
-					.addMember("name", "$S", "`" + layoutType.getLineFieldsTableName().get() + "`").build();
-			// TODO create rif-to-java parser method
-			TypeSpec.Builder lineFieldsClass = TypeSpec.classBuilder(lineClassName).addAnnotation(entityAnnotation)
-					.addAnnotation(AnnotationSpec.builder(IdClass.class).addMember("value", "$T.class", lineIdClassName)
-							.build())
-					.addAnnotation(tableAnnotation).addModifiers(Modifier.PUBLIC).addFields(lineFields);
-			lineFieldsClass.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC).build());
-			lineFieldsClass
-					.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC)
-							.addParameter(parentClaimType, FIELD_NAME_PARENT_CLAIM)
-							.addParameter(lineNumberFieldType, FIELD_NAME_CHILD_LINE_NUMBER)
-							.addStatement("this.$1N = $1N", FIELD_NAME_PARENT_CLAIM)
-							.addStatement("this.$1N = $1N", FIELD_NAME_CHILD_LINE_NUMBER).build());
-			lineFieldsClass.addMethods(lineMethods);
-			lineFieldsClass.addType(lineIdClass.build());
-
-			JavaFile lineFieldsClassFile = JavaFile
-					.builder(packageTarget.getQualifiedName().toString(), lineFieldsClass.build()).build();
-			lineFieldsClassFile.writeTo(processingEnv.getFiler());
+		if (mappingSpec.getHasLines()) {
+			generateLineEntity(mappingSpec);
 		}
 
 		/*
 		 * Then, create the JPA Entity for the "grouped" fields, containing:
 		 * fields, accessors, and a RIF-to-JPA-Entity parser.
 		 */
+		generateHeaderEntity(mappingSpec);
+	}
 
-		// Create an Entity field with accessors for each RIF field.
-		List<FieldSpec> groupedFields = new LinkedList<>();
-		List<MethodSpec> groupedMethods = new LinkedList<>();
-		for (int fieldIndex = 0; fieldIndex <= lastClaimGroupedField; fieldIndex++) {
-			RifField rifField = rifLayout.getRifFields().get(fieldIndex);
-
-			FieldSpec entityField = FieldSpec
-					.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
-					.addAnnotations(createAnnotations(layoutType, rifField)).build();
-			MethodSpec.Builder entityGetter = MethodSpec.methodBuilder(calculateGetterName(entityField))
-					.addModifiers(Modifier.PUBLIC).returns(selectJavaPropertyType(rifField));
-			addGetterStatement(rifField, entityField, entityGetter);
-			MethodSpec.Builder entitySetter = MethodSpec.methodBuilder(calculateSetterName(entityField))
-					.addModifiers(Modifier.PUBLIC).returns(void.class)
-					.addParameter(selectJavaPropertyType(rifField), entityField.name);
-			addSetterStatement(rifField, entityField, entitySetter);
-
-			groupedFields.add(entityField);
-			groupedMethods.add(entityGetter.build());
-			groupedMethods.add(entitySetter.build());
+	/**
+	 * Generates a Java {@link Enum} with entries for each {@link RifField} in
+	 * the specified {@link MappingSpec}.
+	 * 
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} of the layout to generate code for
+	 * @return the Java {@link Enum} that was generated
+	 * @throws IOException
+	 *             An {@link IOException} may be thrown if errors are
+	 *             encountered trying to generate source files.
+	 */
+	private TypeSpec generateColumnEnum(MappingSpec mappingSpec) throws IOException {
+		TypeSpec.Builder columnEnum = TypeSpec.enumBuilder(mappingSpec.getColumnEnum()).addModifiers(Modifier.PUBLIC);
+		for (int fieldIndex = 0; fieldIndex < mappingSpec.getRifLayout().getRifFields().size(); fieldIndex++) {
+			RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
+			columnEnum.addEnumConstant(rifField.getRifColumnName());
 		}
 
-		// Add the parent-to-child join field and accessor, if appropriate.
-		if (firstLineField.isPresent()) {
-			ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
-					ClassName.get(packageTarget.getQualifiedName().toString(), layoutType.getEntityName() + "Line"));
-			FieldSpec.Builder childField = FieldSpec.builder(childFieldType, "lines", Modifier.PRIVATE)
-					.initializer("new $T<>()", LinkedList.class);
-			childField.addAnnotation(
-					AnnotationSpec.builder(OneToMany.class).addMember("mappedBy", "$S", FIELD_NAME_PARENT_CLAIM)
-							.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
-							.addMember("cascade", "$T.ALL", CascadeType.class).build());
-			childField.addAnnotation(AnnotationSpec.builder(OrderBy.class)
-					.addMember("value", "$S", FIELD_NAME_CHILD_LINE_NUMBER + " ASC").build());
-			groupedFields.add(childField.build());
-			MethodSpec.Builder childGetter = MethodSpec.methodBuilder("getLines").addModifiers(Modifier.PUBLIC)
-					.addStatement("return $N", "lines").returns(childFieldType);
-			groupedMethods.add(childGetter.build());
-		}
+		TypeSpec columnEnumFinal = columnEnum.build();
+		JavaFile columnsEnumFile = JavaFile.builder(mappingSpec.getPackageName(), columnEnumFinal).build();
+		columnsEnumFile.writeTo(processingEnv.getFiler());
+
+		return columnEnumFinal;
+	}
+
+	/**
+	 * Generates a Java {@link Entity} for the line {@link RifField}s in the
+	 * specified {@link MappingSpec}.
+	 * 
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} of the layout to generate code for
+	 * @return the Java {@link Entity} that was generated
+	 * @throws IOException
+	 *             An {@link IOException} may be thrown if errors are
+	 *             encountered trying to generate source files.
+	 */
+	private TypeSpec generateLineEntity(MappingSpec mappingSpec) throws IOException {
+		RifLayout rifLayout = mappingSpec.getRifLayout();
 
 		// Create the Entity class.
 		AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
 		AnnotationSpec tableAnnotation = AnnotationSpec.builder(Table.class)
-				.addMember("name", "$S", "`" + layoutType.getGroupedFieldsTableName() + "`").build();
-		TypeSpec.Builder groupedFieldsClass = TypeSpec.classBuilder(layoutType.getEntityName())
-				.addAnnotation(entityAnnotation).addAnnotation(tableAnnotation).addModifiers(Modifier.PUBLIC)
-				.addFields(groupedFields).addMethods(groupedMethods);
+				.addMember("name", "$S", "`" + mappingSpec.getLineTable() + "`").build();
+		TypeSpec.Builder lineEntity = TypeSpec.classBuilder(mappingSpec.getLineEntity()).addAnnotation(entityAnnotation)
+				.addAnnotation(AnnotationSpec.builder(IdClass.class)
+						.addMember("value", "$T.class", mappingSpec.getLineEntityIdClass()).build())
+				.addAnnotation(tableAnnotation).addModifiers(Modifier.PUBLIC);
 
-		JavaFile groupedFieldsClassFile = JavaFile
-				.builder(packageTarget.getQualifiedName().toString(), groupedFieldsClass.build()).build();
-		groupedFieldsClassFile.writeTo(processingEnv.getFiler());
+		// Create the @IdClass needed for the composite primary key.
+		TypeSpec.Builder lineIdClass = TypeSpec.classBuilder(mappingSpec.getLineEntityIdClass())
+				.addSuperinterface(Serializable.class).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+		lineIdClass.addField(
+				FieldSpec.builder(long.class, "serialVersionUID", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+						.initializer("$L", 1L).build());
+
+		// Add a field to that @IdClass for the parent claim's ID.
+		RifField parentClaimRifField = rifLayout.getRifFields().stream()
+				.filter(f -> mappingSpec.getHeaderEntityIdField().equals(f.getJavaFieldName())).findAny().get();
+		TypeName parentClaimIdFieldType = selectJavaFieldType(parentClaimRifField);
+		FieldSpec.Builder parentIdField = FieldSpec.builder(parentClaimIdFieldType,
+				mappingSpec.getLineEntityParentField(), Modifier.PRIVATE);
+		lineIdClass.addField(parentIdField.build());
+		MethodSpec.Builder parentGetter = MethodSpec.methodBuilder("getParentClaim")
+				.addStatement("return $N", mappingSpec.getLineEntityParentField()).returns(parentClaimIdFieldType);
+		lineIdClass.addMethod(parentGetter.build());
+
+		// Add a field to that @IdClass class for the line number.
+		RifField rifLineNumberField = rifLayout.getRifFields().stream()
+				.filter(f -> f.getJavaFieldName().equals(mappingSpec.getLineEntityLineNumberField())).findFirst().get();
+		TypeName lineNumberFieldType = selectJavaFieldType(rifLineNumberField);
+		FieldSpec.Builder lineNumberIdField = FieldSpec.builder(lineNumberFieldType,
+				mappingSpec.getLineEntityLineNumberField(), Modifier.PRIVATE);
+		lineIdClass.addField(lineNumberIdField.build());
+		MethodSpec.Builder lineNumberGetter = MethodSpec
+				.methodBuilder("get" + capitalize(mappingSpec.getLineEntityLineNumberField()))
+				.addStatement("return $N", mappingSpec.getLineEntityLineNumberField()).returns(lineNumberFieldType);
+		lineIdClass.addMethod(lineNumberGetter.build());
+
+		// Add hashCode() and equals(...) to that @IdClass.
+		lineIdClass.addMethod(generateHashCodeMethod(parentIdField.build(), lineNumberIdField.build()));
+		lineIdClass.addMethod(
+				generateEqualsMethod(mappingSpec.getLineEntity(), parentIdField.build(), lineNumberIdField.build()));
+
+		// Finalize the @IdClass and nest it inside the Entity class.
+		lineEntity.addType(lineIdClass.build());
+
+		// Add a field and accessor to the "line" Entity for the parent.
+		FieldSpec parentClaimField = FieldSpec
+				.builder(mappingSpec.getHeaderEntity(), mappingSpec.getLineEntityParentField(), Modifier.PRIVATE)
+				.addAnnotation(Id.class).addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
+				.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
+						.addMember("name", "$S", "`" + mappingSpec.getHeaderEntityIdField() + "`").build())
+				.build();
+		lineEntity.addField(parentClaimField);
+		MethodSpec parentClaimGetter = MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
+				.addModifiers(Modifier.PUBLIC).addStatement("return $N", mappingSpec.getLineEntityParentField())
+				.returns(mappingSpec.getHeaderEntity()).build();
+		lineEntity.addMethod(parentClaimGetter);
+		MethodSpec.Builder parentClaimSetter = MethodSpec.methodBuilder(calculateSetterName(parentClaimField))
+				.addModifiers(Modifier.PUBLIC).returns(void.class)
+				.addParameter(mappingSpec.getHeaderEntity(), parentClaimField.name);
+		addSetterStatement(false, parentClaimField, parentClaimSetter);
+		lineEntity.addMethod(parentClaimSetter.build());
+
+		// For each "line" RIF field, create an Entity field with accessors.
+		for (int fieldIndex = mappingSpec.calculateFirstLineFieldIndex(); fieldIndex < rifLayout.getRifFields()
+				.size(); fieldIndex++) {
+			RifField rifField = rifLayout.getRifFields().get(fieldIndex);
+
+			FieldSpec lineField = FieldSpec
+					.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
+					.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
+			lineEntity.addField(lineField);
+
+			MethodSpec.Builder lineFieldGetter = MethodSpec.methodBuilder(calculateGetterName(lineField))
+					.addModifiers(Modifier.PUBLIC).returns(selectJavaPropertyType(rifField));
+			addGetterStatement(rifField, lineField, lineFieldGetter);
+			lineEntity.addMethod(lineFieldGetter.build());
+
+			MethodSpec.Builder lineFieldSetter = MethodSpec.methodBuilder(calculateSetterName(lineField))
+					.addModifiers(Modifier.PUBLIC).returns(void.class)
+					.addParameter(selectJavaPropertyType(rifField), lineField.name);
+			addSetterStatement(rifField, lineField, lineFieldSetter);
+			lineEntity.addMethod(lineFieldSetter.build());
+		}
+
+		TypeSpec lineEntityFinal = lineEntity.build();
+		JavaFile lineEntityClassFile = JavaFile.builder(mappingSpec.getPackageName(), lineEntityFinal).build();
+		lineEntityClassFile.writeTo(processingEnv.getFiler());
+
+		return lineEntityFinal;
+	}
+
+	/**
+	 * Generates a Java {@link Entity} for the header {@link RifField}s in the
+	 * specified {@link MappingSpec}.
+	 * 
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} of the layout to generate code for
+	 * @return the Java {@link Entity} that was generated
+	 * @throws IOException
+	 *             An {@link IOException} may be thrown if errors are
+	 *             encountered trying to generate source files.
+	 */
+	private TypeSpec generateHeaderEntity(MappingSpec mappingSpec) throws IOException {
+		// Create the Entity class.
+		AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
+		AnnotationSpec tableAnnotation = AnnotationSpec.builder(Table.class)
+				.addMember("name", "$S", "`" + mappingSpec.getHeaderTable() + "`").build();
+		TypeSpec.Builder headerEntityClass = TypeSpec.classBuilder(mappingSpec.getHeaderEntity())
+				.addAnnotation(entityAnnotation).addAnnotation(tableAnnotation).addModifiers(Modifier.PUBLIC);
+
+		// Create an Entity field with accessors for each RIF field.
+		for (int fieldIndex = 0; fieldIndex <= mappingSpec.calculateLastHeaderFieldIndex(); fieldIndex++) {
+			RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
+
+			FieldSpec headerField = FieldSpec
+					.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
+					.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
+			headerEntityClass.addField(headerField);
+
+			MethodSpec.Builder headerFieldGetter = MethodSpec.methodBuilder(calculateGetterName(headerField))
+					.addModifiers(Modifier.PUBLIC).returns(selectJavaPropertyType(rifField));
+			addGetterStatement(rifField, headerField, headerFieldGetter);
+			headerEntityClass.addMethod(headerFieldGetter.build());
+
+			MethodSpec.Builder headerFieldSetter = MethodSpec.methodBuilder(calculateSetterName(headerField))
+					.addModifiers(Modifier.PUBLIC).returns(void.class)
+					.addParameter(selectJavaPropertyType(rifField), headerField.name);
+			addSetterStatement(rifField, headerField, headerFieldSetter);
+			headerEntityClass.addMethod(headerFieldSetter.build());
+		}
+
+		// Add the parent-to-child join field and accessor, if appropriate.
+		if (mappingSpec.getHasLines()) {
+			ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
+					mappingSpec.getLineEntity());
+
+			FieldSpec.Builder childField = FieldSpec.builder(childFieldType, "lines", Modifier.PRIVATE)
+					.initializer("new $T<>()", LinkedList.class);
+			childField.addAnnotation(AnnotationSpec.builder(OneToMany.class)
+					.addMember("mappedBy", "$S", mappingSpec.getLineEntityParentField())
+					.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
+					.addMember("cascade", "$T.ALL", CascadeType.class).build());
+			childField.addAnnotation(AnnotationSpec.builder(OrderBy.class)
+					.addMember("value", "$S", mappingSpec.getLineEntityLineNumberField() + " ASC").build());
+			headerEntityClass.addField(childField.build());
+
+			MethodSpec childGetter = MethodSpec.methodBuilder("getLines").addModifiers(Modifier.PUBLIC)
+					.addStatement("return $N", "lines").returns(childFieldType).build();
+			headerEntityClass.addMethod(childGetter);
+		}
+
+		TypeSpec headerEntityFinal = headerEntityClass.build();
+		JavaFile headerEntityFile = JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
+		headerEntityFile.writeTo(processingEnv.getFiler());
+
+		return headerEntityFinal;
 	}
 
 	/**
@@ -439,23 +448,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * @param rifLayout
-	 *            the {@link RifLayout} to inspect
-	 * @return the index of the first claim line {@link RifField} in the
-	 *         specified {@link RifLayout}, or {@link Optional#empty()} if the
-	 *         {@link RifLayout} doesn't have any claim lines
-	 */
-	private static Optional<Integer> findFirstClaimLineField(RifLayout rifLayout) {
-		for (int fieldIndex = 0; fieldIndex < rifLayout.getRifFields().size(); fieldIndex++) {
-			RifField field = rifLayout.getRifFields().get(fieldIndex);
-			if (field.getJavaFieldName().equals(FIELD_NAME_CHILD_LINE_NUMBER))
-				return Optional.of(fieldIndex);
-		}
-
-		return Optional.empty();
-	}
-
-	/**
 	 * @param rifField
 	 *            the {@link RifField} to select the corresponding Java type for
 	 * @return the {@link TypeName} of the Java type that should be used to
@@ -494,8 +486,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * @param layoutType
-	 *            the {@link LayoutType} for the specified {@link RifField}
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} for the specified {@link RifField}
 	 * @param rifField
 	 *            the {@link RifField} to create the corresponding
 	 *            {@link AnnotationSpec}s for
@@ -503,12 +495,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	 *         the JPA, etc. annotations that should be applied to the specified
 	 *         {@link RifField}
 	 */
-	private static List<AnnotationSpec> createAnnotations(LayoutType layoutType, RifField rifField) {
+	private static List<AnnotationSpec> createAnnotations(MappingSpec mappingSpec, RifField rifField) {
 		LinkedList<AnnotationSpec> annotations = new LinkedList<>();
 
 		// Add an @Id annotation, if appropriate.
-		if (rifField.getJavaFieldName().equals(layoutType.getEntityIdFieldName())
-				|| rifField.getJavaFieldName().equals(FIELD_NAME_CHILD_LINE_NUMBER)) {
+		if (rifField.getJavaFieldName().equals(mappingSpec.getHeaderEntityIdField()) || (mappingSpec.getHasLines()
+				&& rifField.getJavaFieldName().equals(mappingSpec.getLineEntityLineNumberField()))) {
 			AnnotationSpec.Builder idAnnotation = AnnotationSpec.builder(Id.class);
 			annotations.add(idAnnotation.build());
 		}
@@ -526,7 +518,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			 * number of digits to the right of the decimal point, e.g. "123.45"
 			 * has a scale of 2.
 			 */
-			// TODO verify that this scale works for everything
+			/*
+			 * TODO switch to using rifField.getRifColumnScale(), once it's
+			 * filled out
+			 */
 			int fixedScale = 2;
 			columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength() + fixedScale);
 			columnAnnotation.addMember("scale", "$L", fixedScale);
@@ -585,7 +580,21 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	 *            the "setter" method to generate the statement in
 	 */
 	private static void addSetterStatement(RifField rifField, FieldSpec entityField, MethodSpec.Builder entitySetter) {
-		if (!rifField.isRifColumnOptional())
+		addSetterStatement(rifField.isRifColumnOptional(), entityField, entitySetter);
+	}
+
+	/**
+	 * @param rifField
+	 *            <code>true</code> if the property is an {@link Optional} one,
+	 *            <code>false</code> otherwise
+	 * @param entityField
+	 *            the {@link FieldSpec} for the field being wrapped by the
+	 *            "setter"
+	 * @param entitySetter
+	 *            the "setter" method to generate the statement in
+	 */
+	private static void addSetterStatement(boolean optional, FieldSpec entityField, MethodSpec.Builder entitySetter) {
+		if (!optional)
 			entitySetter.addStatement("this.$N = $N", entityField, entityField);
 		else
 			entitySetter.addStatement("this.$N = $N.orElse(null)", entityField, entityField);
@@ -690,88 +699,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			logWriter.flush();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
-		}
-	}
-
-	/**
-	 * Models an expected RIF layout type.
-	 */
-	private static final class LayoutType {
-		private final String sheetName;
-		private final String entityName;
-		private final String groupedFieldsTableName;
-		private final String entityIdFieldName;
-		private final String lineFieldsTableName;
-
-		/**
-		 * Constructs a new {@link LayoutType}.
-		 * 
-		 * @param sheetName
-		 *            the value to use for {@link #getSheetName()}
-		 * @param entityName
-		 *            the value to use for {@link #getEntityName()}
-		 * @param groupedFieldsTableName
-		 *            the value to use for {@link #getGroupedFieldsTableName()}
-		 * @param entityIdFieldName
-		 *            the value to use for {@link #getEntityIdFieldName()}
-		 * @param lineFieldsTableName
-		 *            the value to use for {@link #getLineFieldsTableName()}
-		 */
-		public LayoutType(String sheetName, String entityName, String groupedFieldsTableName, String entityIdFieldName,
-				Optional<String> lineFieldsTableName) {
-			this.sheetName = sheetName;
-			this.entityName = entityName;
-			this.groupedFieldsTableName = groupedFieldsTableName;
-			this.entityIdFieldName = entityIdFieldName;
-			this.lineFieldsTableName = lineFieldsTableName.orElse(null);
-		}
-
-		/**
-		 * @return the name of the Excel workbook sheet that the layout will be
-		 *         defined in
-		 */
-		public String getSheetName() {
-			return sheetName;
-		}
-
-		/**
-		 * @return the name of the JPA {@link Entity} class that will be used to
-		 *         store data from this RIF layout
-		 */
-		public String getEntityName() {
-			return entityName;
-		}
-
-		/**
-		 * @return the name of the SQL table that the {@link #getEntityName()}
-		 *         instances will be stored in
-		 */
-		public String getGroupedFieldsTableName() {
-			return groupedFieldsTableName;
-		}
-
-		/**
-		 * @return the name of the JPA {@link Entity}'s field that should be
-		 *         used as the {@link Id}
-		 */
-		public String getEntityIdFieldName() {
-			return entityIdFieldName;
-		}
-
-		/**
-		 * @return the name of the SQL table that the "line" {@link Entity}
-		 *         instances will be stored in, if any
-		 */
-		public Optional<String> getLineFieldsTableName() {
-			return Optional.ofNullable(lineFieldsTableName);
-		}
-
-		/**
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return getSheetName();
 		}
 	}
 }
