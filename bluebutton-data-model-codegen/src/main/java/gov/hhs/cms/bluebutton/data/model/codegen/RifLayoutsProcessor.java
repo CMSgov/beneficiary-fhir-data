@@ -518,13 +518,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			 * number of digits to the right of the decimal point, e.g. "123.45"
 			 * has a scale of 2.
 			 */
-			/*
-			 * TODO switch to using rifField.getRifColumnScale(), once it's
-			 * filled out
-			 */
-			int fixedScale = 2;
-			columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength() + fixedScale);
-			columnAnnotation.addMember("scale", "$L", fixedScale);
+			columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength());
+			columnAnnotation.addMember("scale", "$L", rifField.getRifColumnScale().get());
 		}
 		annotations.add(columnAnnotation.build());
 

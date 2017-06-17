@@ -108,9 +108,22 @@ public final class RifLayout {
 			RifColumnType rifColumnType = RifColumnType.valueOf(row.getCell(1).getStringCellValue());
 			int rifColumnLength = (int) row.getCell(2).getNumericCellValue();
 			@SuppressWarnings("deprecation")
-			boolean rifColumnHasScale = row.getCell(3).getCellTypeEnum() == CellType.NUMERIC ? true : false;
-			Optional<Integer> rifColumnScale = rifColumnHasScale
-					? Optional.of((int) row.getCell(3).getNumericCellValue()) : Optional.empty();
+
+			/*
+			 * TODO switch to using rifField.getRifColumnScale(), once it's
+			 * filled out
+			 */
+			int fixedScale = 2;
+			// boolean rifColumnHasScale = row.getCell(3).getCellTypeEnum() ==
+			// CellType.NUMERIC ? true : false;
+			// Optional<Integer> rifColumnScale = rifColumnHasScale
+			// ? Optional.of((int) row.getCell(3).getNumericCellValue()) :
+			// Optional.empty();
+			Optional<Integer> rifColumnScale = rifColumnType == RifColumnType.NUM ? Optional.of(fixedScale)
+					: Optional.empty();
+			if (rifColumnScale.isPresent())
+				rifColumnLength += fixedScale;
+
 			boolean rifColumnOptional = parseBoolean(row.getCell(4));
 			URL dataDictionaryEntry = parseUrl(row.getCell(6));
 			String rifColumnLabel = row.getCell(7).getStringCellValue();
