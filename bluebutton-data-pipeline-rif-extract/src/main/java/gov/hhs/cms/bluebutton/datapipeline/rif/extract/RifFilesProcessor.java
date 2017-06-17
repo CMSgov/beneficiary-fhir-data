@@ -2,15 +2,12 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -31,10 +28,9 @@ import org.slf4j.LoggerFactory;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
-import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryParser;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
-import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
-import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimParser;
 import gov.hhs.cms.bluebutton.data.model.rif.CompoundCode;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup.DMEClaimLine;
@@ -58,10 +54,10 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup.SNFClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifFileFormatException;
+import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.ColumnValueCsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifVersionException;
 
@@ -290,28 +286,7 @@ public final class RifFilesProcessor {
 			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
 
-		Beneficiary beneficiaryRow = new Beneficiary();
-		beneficiaryRow.setBeneficiaryId(csvRecord.get(BeneficiaryColumn.BENE_ID));
-		beneficiaryRow.setStateCode(csvRecord.get(BeneficiaryColumn.STATE_CODE));
-		beneficiaryRow.setCountyCode(csvRecord.get(BeneficiaryColumn.BENE_COUNTY_CD));
-		beneficiaryRow.setPostalCode(csvRecord.get(BeneficiaryColumn.BENE_ZIP_CD));
-		beneficiaryRow.setBirthDate(parseDate(csvRecord.get(BeneficiaryColumn.BENE_BIRTH_DT)));
-		beneficiaryRow.setSex(parseCharacter(csvRecord.get(BeneficiaryColumn.BENE_SEX_IDENT_CD)));
-		beneficiaryRow.setRace(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_RACE_CD)));
-		beneficiaryRow
-				.setEntitlementCodeOriginal(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_ENTLMT_RSN_ORIG)));
-		beneficiaryRow
-				.setEntitlementCodeCurrent(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_ENTLMT_RSN_CURR)));
-		beneficiaryRow.setEndStageRenalDiseaseCode(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_ESRD_IND)));
-		beneficiaryRow
-				.setMedicareEnrollmentStatusCode(parseOptString(csvRecord.get(BeneficiaryColumn.BENE_MDCR_STATUS_CD)));
-		beneficiaryRow.setPartATerminationCode(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_PTA_TRMNTN_CD)));
-		beneficiaryRow.setPartBTerminationCode(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_PTB_TRMNTN_CD)));
-		beneficiaryRow.setHicn(csvRecord.get(BeneficiaryColumn.BENE_CRNT_HIC_NUM));
-		beneficiaryRow.setNameSurname(csvRecord.get(BeneficiaryColumn.BENE_SRNM_NAME));
-		beneficiaryRow.setNameGiven(csvRecord.get(BeneficiaryColumn.BENE_GVN_NAME));
-		beneficiaryRow.setNameMiddleInitial(parseOptCharacter(csvRecord.get(BeneficiaryColumn.BENE_MDL_NAME)));
-
+		Beneficiary beneficiaryRow = BeneficiaryParser.parseRif(csvRecords);
 		return new RifRecordEvent<Beneficiary>(filesEvent, file, recordAction, beneficiaryRow);
 	}
 
@@ -734,150 +709,13 @@ public final class RifFilesProcessor {
 			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstClaimLine.get("DML_IND"));
 
-		CarrierClaim claimGroup = new CarrierClaim();
-
+		CarrierClaim claimGroup = CarrierClaimParser.parseRif(csvRecords);
 		/*
-		 * Parse the claim header fields.
+		 * FIXME Can't use real line numbers because random/dummy test data has
+		 * dupes.
 		 */
-		claimGroup.setBeneficiaryId(firstClaimLine.get(CarrierClaimColumn.BENE_ID));
-		claimGroup.setClaimId(firstClaimLine.get(CarrierClaimColumn.CLM_ID));
-		claimGroup.setNearLineRecordIdCode(
-				parseCharacter(firstClaimLine.get(CarrierClaimColumn.NCH_NEAR_LINE_REC_IDENT_CD)));
-		claimGroup.setClaimTypeCode(firstClaimLine.get(CarrierClaimColumn.NCH_CLM_TYPE_CD));
-		claimGroup.setDateFrom(parseDate(firstClaimLine.get(CarrierClaimColumn.CLM_FROM_DT)));
-		claimGroup.setDateThrough(parseDate(firstClaimLine.get(CarrierClaimColumn.CLM_THRU_DT)));
-		claimGroup.setWeeklyProcessDate(parseDate(firstClaimLine.get(CarrierClaimColumn.NCH_WKLY_PROC_DT)));
-		claimGroup.setClaimEntryCode(parseCharacter(firstClaimLine.get(CarrierClaimColumn.CARR_CLM_ENTRY_CD)));
-		claimGroup.setClaimDispositionCode(firstClaimLine.get(CarrierClaimColumn.CLM_DISP_CD));
-		claimGroup.setCarrierNumber(firstClaimLine.get(CarrierClaimColumn.CARR_NUM));
-		claimGroup.setPaymentDenialCode(firstClaimLine.get(CarrierClaimColumn.CARR_CLM_PMT_DNL_CD));
-		claimGroup.setPaymentAmount(parseDecimal(firstClaimLine.get(CarrierClaimColumn.CLM_PMT_AMT)));
-		claimGroup.setPrimaryPayerPaidAmount(
-				parseDecimal(firstClaimLine.get(CarrierClaimColumn.CARR_CLM_PRMRY_PYR_PD_AMT)));
-		claimGroup.setReferringPhysicianUpin(firstClaimLine.get(CarrierClaimColumn.RFR_PHYSN_UPIN));
-		claimGroup.setReferringPhysicianNpi(parseOptString(firstClaimLine.get(CarrierClaimColumn.RFR_PHYSN_NPI)));
-		claimGroup.setProviderAssignmentIndicator(
-				parseOptCharacter(firstClaimLine.get(CarrierClaimColumn.CARR_CLM_PRVDR_ASGNMT_IND_SW)));
-		claimGroup.setProviderPaymentAmount(parseDecimal(firstClaimLine.get(CarrierClaimColumn.NCH_CLM_PRVDR_PMT_AMT)));
-		claimGroup
-				.setBeneficiaryPaymentAmount(parseDecimal(firstClaimLine.get(CarrierClaimColumn.NCH_CLM_BENE_PMT_AMT)));
-		claimGroup.setSubmittedChargeAmount(
-				parseDecimal(firstClaimLine.get(CarrierClaimColumn.NCH_CARR_CLM_SBMTD_CHRG_AMT)));
-		claimGroup.setAllowedChargeAmount(parseDecimal(firstClaimLine.get(CarrierClaimColumn.NCH_CARR_CLM_ALOWD_AMT)));
-		claimGroup.setBeneficiaryPartBDeductAmount(
-				parseDecimal(firstClaimLine.get(CarrierClaimColumn.CARR_CLM_CASH_DDCTBL_APLD_AMT)));
-		claimGroup.setHcpcsYearCode(parseOptCharacter(firstClaimLine.get(CarrierClaimColumn.CARR_CLM_HCPCS_YR_CD)));
-		claimGroup.setReferringProviderIdNumber(firstClaimLine.get(CarrierClaimColumn.CARR_CLM_RFRNG_PIN_NUM));
-		claimGroup.setDiagnosisPrincipalCode(parseOptString(firstClaimLine.get(CarrierClaimColumn.PRNCPAL_DGNS_CD)));
-		claimGroup.setDiagnosisPrincipalCodeVersion(
-				parseOptCharacter(firstClaimLine.get(CarrierClaimColumn.PRNCPAL_DGNS_VRSN_CD)));
-
-		CarrierClaimColumn[] diagnosisCodeColumns = Arrays.stream(CarrierClaimColumn.values())
-				.filter(c -> c.name().startsWith("ICD_DGNS_CD")).toArray(CarrierClaimColumn[]::new);
-		CarrierClaimColumn[] diagnosisCodeVersionColumns = Arrays.stream(CarrierClaimColumn.values())
-				.filter(c -> c.name().startsWith("ICD_DGNS_VRSN_CD")).toArray(CarrierClaimColumn[]::new);
-		for (int diagnosisIndex = 0; diagnosisIndex < 12; diagnosisIndex++) {
-			// Parse the diagnosis code & version from the line.
-			Optional<String> diagnosisCode = parseOptString(firstClaimLine.get(diagnosisCodeColumns[diagnosisIndex]));
-			Optional<Character> diagnosisCodeVersion = parseOptCharacter(
-					firstClaimLine.get(diagnosisCodeVersionColumns[diagnosisIndex]));
-
-			// Push those values into the entity via reflection.
-			try {
-				Method diagnosisCodeSetter = CarrierClaim.class
-						.getDeclaredMethod(String.format("setDiagnosis%dCode", diagnosisIndex + 1), Optional.class);
-				diagnosisCodeSetter.invoke(claimGroup, diagnosisCode);
-				Method diagnosisCodeVersionSetter = CarrierClaim.class.getDeclaredMethod(
-						String.format("setDiagnosis%dCodeVersion", diagnosisIndex + 1), Optional.class);
-				diagnosisCodeVersionSetter.invoke(claimGroup, diagnosisCodeVersion);
-			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
-				throw new BadCodeMonkeyException(e);
-			}
-		}
-
-		claimGroup.setClinicalTrialNumber(parseOptString(firstClaimLine.get(CarrierClaimColumn.CLM_CLNCL_TRIL_NUM)));
-
-		/*
-		 * Parse the claim lines.
-		 */
-		int lineNumber = 1;
-		for (CSVRecord claimLineRecord : csvRecords) {
-			/*
-			 * FIXME Can't use real line numbers because random/dummy test data
-			 * has dupes.
-			 */
-			CarrierClaimLine claimLine = new CarrierClaimLine();
-			claimLine.setParentClaim(claimGroup);
-			// claimLine.setNumber(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_NUM)));
-			claimLine.setNumber(new BigDecimal(lineNumber++));
-
-			claimLine.setPerformingProviderIdNumber(claimLineRecord.get(CarrierClaimColumn.CARR_PRFRNG_PIN_NUM));
-			claimLine
-					.setPerformingPhysicianUpin(parseOptString(claimLineRecord.get(CarrierClaimColumn.PRF_PHYSN_UPIN)));
-			claimLine.setPerformingPhysicianNpi(parseOptString(claimLineRecord.get(CarrierClaimColumn.PRF_PHYSN_NPI)));
-			claimLine.setOrganizationNpi(parseOptString(claimLineRecord.get(CarrierClaimColumn.ORG_NPI_NUM)));
-			claimLine.setProviderTypeCode(
-					parseCharacter(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_PRVDR_TYPE_CD)));
-			claimLine.setProviderTaxNumber(claimLineRecord.get(CarrierClaimColumn.TAX_NUM));
-			claimLine.setProviderStateCode(parseOptString(claimLineRecord.get(CarrierClaimColumn.PRVDR_STATE_CD)));
-			claimLine.setProviderZipCode(parseOptString(claimLineRecord.get(CarrierClaimColumn.PRVDR_ZIP)));
-			claimLine.setProviderSpecialityCode(parseOptString(claimLineRecord.get(CarrierClaimColumn.PRVDR_SPCLTY)));
-			claimLine.setProviderParticipatingIndCode(
-					parseOptCharacter(claimLineRecord.get(CarrierClaimColumn.PRTCPTNG_IND_CD)));
-			claimLine.setReducedPaymentPhysicianAsstCode(
-					parseCharacter(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_RDCD_PMT_PHYS_ASTN_C)));
-			claimLine.setServiceCount(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_SRVC_CNT)));
-			claimLine.setCmsServiceTypeCode(
-					parseCharacter(claimLineRecord.get(CarrierClaimColumn.LINE_CMS_TYPE_SRVC_CD)));
-			claimLine.setPlaceOfServiceCode(claimLineRecord.get(CarrierClaimColumn.LINE_PLACE_OF_SRVC_CD));
-			claimLine.setLinePricingLocalityCode(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_PRCNG_LCLTY_CD));
-			claimLine.setFirstExpenseDate(parseOptDate(claimLineRecord.get(CarrierClaimColumn.LINE_1ST_EXPNS_DT)));
-			claimLine.setLastExpenseDate(parseOptDate(claimLineRecord.get(CarrierClaimColumn.LINE_LAST_EXPNS_DT)));
-			claimLine.setHcpcsCode(parseOptString(claimLineRecord.get(CarrierClaimColumn.HCPCS_CD)));
-			claimLine.setHcpcsInitialModifierCode(
-					parseOptString(claimLineRecord.get(CarrierClaimColumn.HCPCS_1ST_MDFR_CD)));
-			claimLine.setHcpcsSecondModifierCode(
-					parseOptString(claimLineRecord.get(CarrierClaimColumn.HCPCS_2ND_MDFR_CD)));
-			claimLine.setBetosCode(parseOptString(claimLineRecord.get(CarrierClaimColumn.BETOS_CD)));
-			claimLine.setPaymentAmount(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_NCH_PMT_AMT)));
-			claimLine.setBeneficiaryPaymentAmount(
-					parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_BENE_PMT_AMT)));
-			claimLine
-					.setProviderPaymentAmount(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_PRVDR_PMT_AMT)));
-			claimLine.setBeneficiaryPartBDeductAmount(
-					parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_BENE_PTB_DDCTBL_AMT)));
-			claimLine.setPrimaryPayerCode(
-					parseOptCharacter(claimLineRecord.get(CarrierClaimColumn.LINE_BENE_PRMRY_PYR_CD)));
-			claimLine.setPrimaryPayerPaidAmount(
-					parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_BENE_PRMRY_PYR_PD_AMT)));
-			claimLine.setCoinsuranceAmount(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_COINSRNC_AMT)));
-			claimLine.setSubmittedChargeAmount(
-					parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_SBMTD_CHRG_AMT)));
-			claimLine.setAllowedChargeAmount(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_ALOWD_CHRG_AMT)));
-			claimLine.setProcessingIndicatorCode(
-					parseOptString(claimLineRecord.get(CarrierClaimColumn.LINE_PRCSG_IND_CD)));
-			claimLine.setPaymentCode(parseOptCharacter(claimLineRecord.get(CarrierClaimColumn.LINE_PMT_80_100_CD)));
-			claimLine.setServiceDeductibleCode(
-					parseOptCharacter(claimLineRecord.get(CarrierClaimColumn.LINE_SERVICE_DEDUCTIBLE)));
-			claimLine.setMtusCount(parseDecimal(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_MTUS_CNT)));
-			claimLine.setMtusCode(parseOptCharacter(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_MTUS_CD)));
-			claimLine.setDiagnosisCode(parseOptString(claimLineRecord.get(CarrierClaimColumn.LINE_ICD_DGNS_CD)));
-			claimLine.setDiagnosisCodeVersion(
-					parseOptCharacter(claimLineRecord.get(CarrierClaimColumn.LINE_ICD_DGNS_VRSN_CD)));
-			claimLine
-					.setHpsaScarcityCode(parseOptCharacter(claimLineRecord.get(CarrierClaimColumn.HPSA_SCRCTY_IND_CD)));
-			claimLine.setRxNumber(parseOptString(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_RX_NUM)));
-			claimLine.setHctHgbTestResult(parseDecimal(claimLineRecord.get(CarrierClaimColumn.LINE_HCT_HGB_RSLT_NUM)));
-			claimLine.setHctHgbTestTypeCode(
-					parseOptString(claimLineRecord.get(CarrierClaimColumn.LINE_HCT_HGB_TYPE_CD)));
-			claimLine.setNationalDrugCode(parseOptString(claimLineRecord.get(CarrierClaimColumn.LINE_NDC_CD)));
-			claimLine.setCliaLabNumber(parseOptString(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_CLIA_LAB_NUM)));
-			claimLine.setAnesthesiaUnitCount(
-					parseDecimal(claimLineRecord.get(CarrierClaimColumn.CARR_LINE_ANSTHSA_UNIT_CNT)));
-			claimGroup.getLines().add(claimLine);
-		}
-
+		for (int fakeLineNumber = 1; fakeLineNumber <= claimGroup.getLines().size(); fakeLineNumber++)
+			claimGroup.getLines().get(fakeLineNumber - 1).setNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<CarrierClaim>(filesEvent, file, recordAction, claimGroup);
 	}
 
