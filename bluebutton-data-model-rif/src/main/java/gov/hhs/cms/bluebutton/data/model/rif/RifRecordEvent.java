@@ -21,6 +21,8 @@ public final class RifRecordEvent<R> {
 	 *            the value to use for {@link #getFilesEvent()}
 	 * @param file
 	 *            the value to use for {@link #getFile()}
+	 * @param recordAction
+	 *            the value to use for {@link #getRecordAction()}
 	 * @param record
 	 *            the value to use for {@link #getRecord()}
 	 */
