@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -217,6 +219,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		 * instances of those entities.
 		 */
 		generateParser(mappingSpec, columnEnum, headerEntity, lineEntity);
+
+		/*
+		 * Then, create code that can be used to write the JPA Entity out to CSV
+		 * files, for use with PostgreSQL's copy APIs.
+		 */
+		generateCsvWriter(mappingSpec, headerEntity, lineEntity);
 	}
 
 	/**
@@ -420,8 +428,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	}
 
 	/**
-	 * Generates a Java {@link Entity} for the header {@link RifField}s in the
-	 * specified {@link MappingSpec}.
+	 * Generates a Java class that can handle RIF-to-Entity parsing.
 	 * 
 	 * @param mappingSpec
 	 *            the {@link MappingSpec} of the layout to generate code for
@@ -440,7 +447,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	 */
 	private TypeSpec generateParser(MappingSpec mappingSpec, TypeSpec columnEnum, TypeSpec headerEntity,
 			Optional<TypeSpec> lineEntity) throws IOException {
-		TypeSpec.Builder parsingClass = TypeSpec.classBuilder(mappingSpec.getParsingClass())
+		TypeSpec.Builder parsingClass = TypeSpec.classBuilder(mappingSpec.getParserClass())
 				.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
 		// Grab some common types we'll need.
@@ -448,8 +455,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		ClassName parseUtilsType = ClassName.get("gov.hhs.cms.bluebutton.data.model.rif.parse", "RifParsingUtils");
 
 		MethodSpec.Builder parseMethod = MethodSpec.methodBuilder("parseRif")
-				.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-				.returns(mappingSpec.getHeaderEntity())
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC).returns(mappingSpec.getHeaderEntity())
 				.addParameter(ParameterizedTypeName.get(ClassName.get(List.class), csvRecordType), "csvRecords");
 
 		parseMethod.addComment("Verify the inputs.");
@@ -467,8 +473,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			Stream<FieldSpec> entitiesFieldsStream = mappingSpec.getHasLines()
 					? Stream.concat(headerEntity.fieldSpecs.stream(), lineEntity.get().fieldSpecs.stream())
 					: headerEntity.fieldSpecs.stream();
-			FieldSpec entityField = entitiesFieldsStream
-					.filter(f -> f.name.equals(rifField.getJavaFieldName())).findAny().get();
+			FieldSpec entityField = entitiesFieldsStream.filter(f -> f.name.equals(rifField.getJavaFieldName()))
+					.findAny().get();
 
 			// Are we starting the header parsing?
 			if (fieldIndex == 0) {
@@ -542,7 +548,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			parseMethod.endControlFlow();
 		}
 
-		parseMethod.addStatement("return header", Objects.class);
+		parseMethod.addStatement("return header");
 		parsingClass.addMethod(parseMethod.build());
 
 		TypeSpec parsingClassFinal = parsingClass.build();
@@ -550,6 +556,148 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		parsingClassFile.writeTo(processingEnv.getFiler());
 
 		return parsingClassFinal;
+	}
+
+	/**
+	 * Generates a Java class that can be used to write the JPA Entity out to
+	 * CSV files, for use with PostgreSQL's copy APIs.
+	 * 
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} of the layout to generate code for
+	 * @param headerEntity
+	 *            the Java {@link Entity} that was generated for the header
+	 *            fields
+	 * @param lineEntity
+	 *            the Java {@link Entity} that was generated for the line
+	 *            fields, if any
+	 * @return the Java CSV writing class that was generated
+	 * @throws IOException
+	 *             An {@link IOException} may be thrown if errors are
+	 *             encountered trying to generate source files.
+	 */
+	private TypeSpec generateCsvWriter(MappingSpec mappingSpec, TypeSpec headerEntity, Optional<TypeSpec> lineEntity)
+			throws IOException {
+		TypeSpec.Builder csvWriterClass = TypeSpec.classBuilder(mappingSpec.getCsvWriterClass())
+				.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+		// Grab some common types we'll need.
+		ArrayTypeName recordType = ArrayTypeName.of(Object.class);
+		ArrayTypeName recordsListType = ArrayTypeName.of(recordType);
+		ParameterizedTypeName returnType = ParameterizedTypeName.get(ClassName.get(Map.class),
+				ClassName.get(String.class), recordsListType);
+
+		MethodSpec.Builder csvWriterMethod = MethodSpec.methodBuilder("toCsvRecordsByTable")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC).returns(returnType)
+				.addParameter(mappingSpec.getHeaderEntity(), "entity");
+
+		csvWriterMethod.addComment("Verify the input.");
+		csvWriterMethod.addStatement("$T.requireNonNull(entity)", Objects.class);
+
+		csvWriterMethod.addCode("\n");
+		csvWriterMethod.addStatement("$T csvRecordsByTable = new $T<>(2)", returnType, HashMap.class);
+
+		// Generate the header conversion.
+		csvWriterMethod.addCode("\n");
+		csvWriterMethod.addComment("Convert the header fields.");
+		csvWriterMethod.addStatement("$T headerRecords = new $T[2][]", recordsListType, Object.class);
+		String headerColumnsList = headerEntity.fieldSpecs.stream().filter(f -> {
+			if (mappingSpec.getHasLines() && f.name.equals(mappingSpec.getHeaderEntityLinesField()))
+				return false;
+			return true;
+		}).map(f -> "\"" + f.name + "\"").collect(Collectors.joining(", "));
+		csvWriterMethod.addStatement("headerRecords[0] = new $1T{ $2L }", recordType, headerColumnsList);
+		String headerGettersList = headerEntity.fieldSpecs.stream().filter(f -> {
+			if (mappingSpec.getHasLines() && f.name.equals(mappingSpec.getHeaderEntityLinesField()))
+				return false;
+			return true;
+		}).map(f -> calculateFieldToCsvValueCode("entity", f, mappingSpec, null, null))
+				.collect(Collectors.joining(", "));
+		csvWriterMethod.addStatement("$1T headerRecord = new $1T{ $2L }", recordType, headerGettersList);
+		csvWriterMethod.addStatement("headerRecords[1] = headerRecord");
+		csvWriterMethod.addStatement("csvRecordsByTable.put($S, headerRecords)", mappingSpec.getHeaderTable());
+
+		// Generate the line conversion.
+		if (mappingSpec.getHasLines()) {
+			FieldSpec linesField = headerEntity.fieldSpecs.stream()
+					.filter(f -> f.name.equals(mappingSpec.getHeaderEntityLinesField())).findAny().get();
+			String linesFieldGetter = calculateGetterName(linesField);
+			csvWriterMethod.addCode("\n");
+			csvWriterMethod.addComment("Convert the line fields.");
+			csvWriterMethod.addStatement("$T lineRecords = new $T[entity.$L().size() + 1][]", recordsListType,
+					Object.class,
+					linesFieldGetter);
+			csvWriterMethod.addStatement("csvRecordsByTable.put($S, lineRecords)", mappingSpec.getLineTable());
+			String lineColumnsList = lineEntity.get().fieldSpecs.stream().map(f -> "\"" + f.name + "\"")
+					.collect(Collectors.joining(", "));
+			csvWriterMethod.addStatement("lineRecords[0] = new $1T{ $2L }", recordType, lineColumnsList);
+			csvWriterMethod.beginControlFlow("for (int lineIndex = 0; lineIndex < entity.$L().size();lineIndex++)",
+					linesFieldGetter);
+			csvWriterMethod.addStatement("$T lineEntity = entity.$L().get(lineIndex)", mappingSpec.getLineEntity(),
+					linesFieldGetter);
+			FieldSpec parentField = lineEntity.get().fieldSpecs.stream()
+					.filter(f -> f.name.equals(mappingSpec.getLineEntityParentField())).findAny().get();
+			FieldSpec headerIdField = headerEntity.fieldSpecs.stream()
+					.filter(f -> f.name.equals(mappingSpec.getHeaderEntityIdField())).findAny().get();
+			String lineGettersList = lineEntity.get().fieldSpecs.stream().map(f -> {
+				return calculateFieldToCsvValueCode("lineEntity", f, mappingSpec, parentField, headerIdField);
+			}).collect(Collectors.joining(", "));
+			csvWriterMethod.addStatement("$1T lineRecord = new $1T{ $2L }", recordType, lineGettersList);
+			csvWriterMethod.addStatement("lineRecords[lineIndex + 1] = lineRecord");
+			csvWriterMethod.endControlFlow();
+		}
+
+		csvWriterMethod.addStatement("return csvRecordsByTable");
+		csvWriterClass.addMethod(csvWriterMethod.build());
+
+		TypeSpec parsingClassFinal = csvWriterClass.build();
+		JavaFile parsingClassFile = JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
+		parsingClassFile.writeTo(processingEnv.getFiler());
+
+		return parsingClassFinal;
+	}
+
+	/**
+	 * Used in {@link #generateCsvWriter(MappingSpec, TypeSpec, Optional)} and
+	 * generates the field-to-CSV-value conversion code for the specified field.
+	 * 
+	 * @param instanceName
+	 *            the name of the object that the value will be pulled from
+	 * @param field
+	 *            the field to generate conversion code for
+	 * @param mappingSpec
+	 *            the {@link MappingSpec} of the field to generate conversion
+	 *            code for
+	 * @param parentField
+	 *            the {@link MappingSpec#getLineEntityParentField()} field, or
+	 *            <code>null</code> if this is a header field
+	 * @param headerIdField
+	 *            the {@link MappingSpec#getHeaderEntityIdField()} field, or
+	 *            <code>null</code> if this is a header field
+	 * @return the field-to-CSV-value conversion code for the specified field
+	 */
+	private String calculateFieldToCsvValueCode(String instanceName, FieldSpec field, MappingSpec mappingSpec,
+			FieldSpec parentField, FieldSpec headerIdField) {
+		StringBuilder code = new StringBuilder();
+		code.append(instanceName);
+		code.append(".");
+
+		Optional<RifField> rifField = mappingSpec.getRifLayout().getRifFields().stream()
+				.filter(f -> field.name.equals(f.getJavaFieldName())).findAny();
+		if (field == parentField) {
+			// This is the line-level "parent" field.
+			code.append(calculateGetterName(parentField));
+			code.append("().");
+			code.append(calculateGetterName(headerIdField));
+			code.append("()");
+		} else if (rifField.isPresent() && rifField.get().isRifColumnOptional()) {
+			code.append(calculateGetterName(field));
+			code.append("().orElse(null)");
+		} else {
+			code.append(calculateGetterName(field));
+			code.append("()");
+		}
+
+		return code.toString();
 	}
 
 	/**

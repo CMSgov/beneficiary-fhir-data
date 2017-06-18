@@ -249,8 +249,16 @@ public final class MappingSpec {
 	 * @return the {@link ClassName} for the class to be built that will contain
 	 *         parsing code for the layout
 	 */
-	public ClassName getParsingClass() {
+	public ClassName getParserClass() {
 		return ClassName.get(packageName, headerEntity + "Parser");
+	}
+
+	/**
+	 * @return the {@link ClassName} for the class to be built that will contain
+	 *         CSV writing for the layout
+	 */
+	public ClassName getCsvWriterClass() {
+		return ClassName.get(packageName, headerEntity + "CsvWriter");
 	}
 
 	/**
