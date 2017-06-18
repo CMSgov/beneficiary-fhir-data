@@ -310,7 +310,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				.builder(mappingSpec.getHeaderEntity(), mappingSpec.getLineEntityParentField(), Modifier.PRIVATE)
 				.addAnnotation(Id.class).addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
 				.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
-						.addMember("name", "$S", "`" + mappingSpec.getHeaderEntityIdField() + "`").build())
+						.addMember("name", "$S", "`" + mappingSpec.getLineEntityParentField() + "`").build())
 				.build();
 		lineEntity.addField(parentClaimField);
 		MethodSpec parentClaimGetter = MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
