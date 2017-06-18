@@ -1,10 +1,10 @@
 package gov.hhs.cms.bluebutton.data.pipeline.rif.load;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Slf4jReporter;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -69,26 +70,29 @@ public final class RifLoaderIT {
 				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toSet()));
 
 		// Setup the metrics that we'll log to.
-		MetricRegistry fhirMetrics = new MetricRegistry();
+		MetricRegistry metrics = new MetricRegistry();
 
 		// Create the processors that will handle each stage of the pipeline.
 		RifFilesProcessor processor = new RifFilesProcessor();
-		RifLoader loader = new RifLoader(RifLoaderTestUtils.getLoadOptions(), fhirMetrics);
+		RifLoader loader = new RifLoader(RifLoaderTestUtils.getLoadOptions(), metrics);
 
 		// Link up the pipeline and run it.
 		LOGGER.info("Loading RIF records...");
-		List<RifRecordLoadResult> resultsList = new ArrayList<>();
+		Queue<RifRecordLoadResult> successfulRecords = new ConcurrentLinkedQueue<>();
 		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
 			loader.process(rifRecordEvents, error -> {
+				LOGGER.warn("Record(s) failed to load.", error);
 				throw new RuntimeException(error);
 			}, result -> {
-				resultsList.add(result);
+				successfulRecords.add(result);
 			});
 		}
-		LOGGER.info("Loaded RIF records: '{}'.", resultsList.size());
+		LOGGER.info("Loaded RIF records: '{}'.", successfulRecords.size());
+		Slf4jReporter metricsReporter = Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build();
+		metricsReporter.report();
 
 		// Verify that the expected number of records were run successfully.
-		Assert.assertEquals(sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(), resultsList.size());
+		Assert.assertEquals(sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(), successfulRecords.size());
 
 		/*
 		 * Run the extraction an extra time and verify that each record can now

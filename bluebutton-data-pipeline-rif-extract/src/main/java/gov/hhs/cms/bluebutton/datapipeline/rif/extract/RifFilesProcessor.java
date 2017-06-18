@@ -169,17 +169,10 @@ public final class RifFilesProcessor {
 		/*
 		 * Approach used here to parse CSV as a Java 8 Stream is courtesy of
 		 * https://rumianom.pl/rumianom/entry/apache-commons-csv-with-java.
-		 * However, we have to screw around directly with the Iterator in order
-		 * to ensure that the CSVParser (and its Reader and InputStream) are
-		 * properly closed after the last record is read. Unfortunately,
-		 * try-with-resources won't work here, due to the lazy nature of Stream
-		 * processing (the CSVParser would be closed before it's even used).
 		 */
 
 		LOGGER.info("Processing RIF file: " + file);
 		CSVParser parser = RifParsingUtils.createCsvParser(file);
-
-		Stream<RifRecordEvent<?>> rifRecordStream;
 
 		boolean isGrouped;
 		TriFunction<RifFilesEvent, RifFile, List<CSVRecord>, RifRecordEvent<?>> recordParser;
@@ -214,39 +207,15 @@ public final class RifFilesProcessor {
 			throw new UnsupportedRifFileTypeException("Unsupported file type:" + file.getFileType());
 		}
 
+		/*
+		 * Use the CSVParser to drive a Stream of grouped CSVRecords
+		 * (specifically, group by claim ID/lines).
+		 */
 		CsvRecordGrouper grouper = new ColumnValueCsvRecordGrouper(isGrouped ? file.getFileType().getIdColumn() : null);
 		Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
 		Spliterator<List<CSVRecord>> spliterator = Spliterators.spliteratorUnknownSize(csvIterator,
-				Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.NONNULL);
-		Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false);
-
-		rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
-			try {
-				RifRecordEvent<?> recordEvent = recordParser.apply(rifFilesEvent, file, csvRecordGroup);
-				closeParserIfDone(parser, csvIterator);
-				return recordEvent;
-			} catch (InvalidRifValueException e) {
-				LOGGER.warn("Parse error encountered near record number '{}'.",
-						csvRecordGroup.get(0).getRecordNumber());
-				throw new InvalidRifValueException(e);
-			}
-		});
-
-		return rifRecordStream;
-	}
-
-	/**
-	 * Closes the specified {@link CSVParser} if {@link Iterator#hasNext()} is
-	 * <code>false</code> for the specified {@link Iterator}.
-	 * 
-	 * @param parser
-	 *            the {@link CSVParser} to close
-	 * @param csvIterator
-	 *            the {@link Iterator} that is being used, from the specified
-	 *            {@link CSVParser}
-	 */
-	private static void closeParserIfDone(CSVParser parser, Iterator<?> csvIterator) {
-		if (!csvIterator.hasNext()) {
+				Spliterator.ORDERED | Spliterator.NONNULL);
+		Stream<List<CSVRecord>> csvRecordStream = StreamSupport.stream(spliterator, false).onClose(() -> {
 			try {
 				/*
 				 * This will also close the Reader and InputStream that the
@@ -256,7 +225,21 @@ public final class RifFilesProcessor {
 			} catch (IOException e) {
 				LOGGER.warn("Unable to close CSVParser", e);
 			}
-		}
+		});
+
+		/* Map each record group to a single RifRecordEvent. */
+		Stream<RifRecordEvent<?>> rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
+			try {
+				RifRecordEvent<?> recordEvent = recordParser.apply(rifFilesEvent, file, csvRecordGroup);
+				return recordEvent;
+			} catch (InvalidRifValueException e) {
+				LOGGER.warn("Parse error encountered near line number '{}'.",
+						csvRecordGroup.get(0).getRecordNumber());
+				throw new InvalidRifValueException(e);
+			}
+		});
+
+		return rifRecordStream;
 	}
 
 	/**
