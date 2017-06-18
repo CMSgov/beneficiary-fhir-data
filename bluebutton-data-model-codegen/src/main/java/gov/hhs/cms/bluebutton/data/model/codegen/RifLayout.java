@@ -74,14 +74,14 @@ public final class RifLayout {
 		while (rows.hasNext()) {
 			Row row = rows.next();
 
-			String rifColumnName = row.getCell(0).getStringCellValue();
-
 			/*
 			 * The spreadsheet has a number of empty or
 			 * "Need Missing Field Here" rows, which we should skip.
 			 */
-			if (rifColumnName.trim().isEmpty())
+			if (row.getCell(0) == null || row.getCell(0).getStringCellValue().trim().isEmpty())
 				continue;
+
+			String rifColumnName = row.getCell(0).getStringCellValue();
 
 			/*
 			 * Always skip the "DML_IND" field, as we handle it elsewhere in
