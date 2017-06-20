@@ -111,7 +111,7 @@ public final class RifLoader {
 		 * http://www.nurkiewicz.com/2014/11/executorservice-10-tips-and-tricks.
 		 * html.
 		 */
-		BlockingQueue<Runnable> loadExecutorQueue = new ArrayBlockingQueue<>(options.getLoaderThreads());
+		BlockingQueue<Runnable> loadExecutorQueue = new ArrayBlockingQueue<>(options.getLoaderThreads() * 100);
 		this.loadExecutorService = new ThreadPoolExecutor(options.getLoaderThreads(), options.getLoaderThreads(), 0L,
 				TimeUnit.MILLISECONDS, loadExecutorQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 
