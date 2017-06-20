@@ -1,0 +1,251 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd"
+	objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+
+	<changeSet author="karlmdavis" id="0001">
+		<!-- This change set was mostly derived from an auto-generated one produced 
+			by the DatabaseSchemaManager.generateChangeLogFromJpa() method. -->
+		<createTable tableName="Beneficiaries">
+			<column name="beneficiaryId" type="VARCHAR(15)">
+				<constraints nullable="false" />
+			</column>
+			<column name="birthDate" type="date">
+				<constraints nullable="false" />
+			</column>
+			<column name="countyCode" type="VARCHAR(10)">
+				<constraints nullable="false" />
+			</column>
+			<column name="endStageRenalDiseaseCode" type="CHAR(1)" />
+			<column name="entitlementCodeCurrent" type="CHAR(1)" />
+			<column name="entitlementCodeOriginal" type="CHAR(1)" />
+			<column name="hicn" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="medicareEnrollmentStatusCode" type="VARCHAR(2)" />
+			<column name="nameGiven" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="nameMiddleInitial" type="CHAR(1)" />
+			<column name="nameSurname" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="partATerminationCode" type="CHAR(1)" />
+			<column name="partBTerminationCode" type="CHAR(1)" />
+			<column name="postalCode" type="VARCHAR(9)">
+				<constraints nullable="false" />
+			</column>
+			<column name="race" type="CHAR(1)" />
+			<column name="sex" type="CHAR(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="stateCode" type="VARCHAR(2)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createTable tableName="CarrierClaimLines">
+			<column name="number" type="NUMBER(15, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="parentClaim" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="allowedChargeAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="anesthesiaUnitCount" type="NUMBER(4, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="beneficiaryPartBDeductAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="beneficiaryPaymentAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="betosCode" type="VARCHAR(3)" />
+			<column name="cliaLabNumber" type="VARCHAR(10)" />
+			<column name="cmsServiceTypeCode" type="CHAR(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="coinsuranceAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="diagnosisCode" type="VARCHAR(7)" />
+			<column name="diagnosisCodeVersion" type="CHAR(1)" />
+			<column name="firstExpenseDate" type="date" />
+			<column name="hcpcsCode" type="VARCHAR(5)" />
+			<column name="hcpcsInitialModifierCode" type="VARCHAR(5)" />
+			<column name="hcpcsSecondModifierCode" type="VARCHAR(5)" />
+			<column name="hctHgbTestResult" type="NUMBER(6, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="hctHgbTestTypeCode" type="VARCHAR(2)" />
+			<column name="hpsaScarcityCode" type="CHAR(1)" />
+			<column name="lastExpenseDate" type="date" />
+			<column name="linePricingLocalityCode" type="VARCHAR(2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="mtusCode" type="CHAR(1)" />
+			<column name="mtusCount" type="NUMBER(7, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="nationalDrugCode" type="VARCHAR(11)" />
+			<column name="organizationNpi" type="VARCHAR(10)" />
+			<column name="paymentAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="paymentCode" type="CHAR(1)" />
+			<column name="performingPhysicianNpi" type="VARCHAR(12)" />
+			<column name="performingPhysicianUpin" type="VARCHAR(12)" />
+			<column name="performingProviderIdNumber" type="VARCHAR(15)">
+				<constraints nullable="false" />
+			</column>
+			<column name="placeOfServiceCode" type="VARCHAR(2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="primaryPayerCode" type="CHAR(1)" />
+			<column name="primaryPayerPaidAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="processingIndicatorCode" type="VARCHAR(2)" />
+			<column name="providerParticipatingIndCode" type="CHAR(1)" />
+			<column name="providerPaymentAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="providerSpecialityCode" type="VARCHAR(3)" />
+			<column name="providerStateCode" type="VARCHAR(2)" />
+			<column name="providerTaxNumber" type="VARCHAR(10)">
+				<constraints nullable="false" />
+			</column>
+			<column name="providerTypeCode" type="CHAR(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="providerZipCode" type="VARCHAR(9)" />
+			<column name="reducedPaymentPhysicianAsstCode" type="CHAR(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="rxNumber" type="VARCHAR(30)" />
+			<column name="serviceCount" type="NUMBER(6, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="serviceDeductibleCode" type="CHAR(1)" />
+			<column name="submittedChargeAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createTable tableName="CarrierClaims">
+			<column name="claimId" type="VARCHAR(15)">
+				<constraints nullable="false" />
+			</column>
+			<column name="allowedChargeAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="beneficiaryId" type="VARCHAR(15)">
+				<constraints nullable="false" />
+			</column>
+			<column name="beneficiaryPartBDeductAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="beneficiaryPaymentAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="carrierNumber" type="VARCHAR(5)">
+				<constraints nullable="false" />
+			</column>
+			<column name="claimDispositionCode" type="VARCHAR(2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="claimEntryCode" type="CHAR(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="claimTypeCode" type="VARCHAR(2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="clinicalTrialNumber" type="VARCHAR(8)" />
+			<column name="dateFrom" type="date">
+				<constraints nullable="false" />
+			</column>
+			<column name="dateThrough" type="date">
+				<constraints nullable="false" />
+			</column>
+			<column name="diagnosis10Code" type="VARCHAR(7)" />
+			<column name="diagnosis10CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis11Code" type="VARCHAR(7)" />
+			<column name="diagnosis11CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis12Code" type="VARCHAR(7)" />
+			<column name="diagnosis12CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis1Code" type="VARCHAR(7)" />
+			<column name="diagnosis1CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis2Code" type="VARCHAR(7)" />
+			<column name="diagnosis2CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis3Code" type="VARCHAR(7)" />
+			<column name="diagnosis3CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis4Code" type="VARCHAR(7)" />
+			<column name="diagnosis4CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis5Code" type="VARCHAR(7)" />
+			<column name="diagnosis5CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis6Code" type="VARCHAR(7)" />
+			<column name="diagnosis6CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis7Code" type="VARCHAR(7)" />
+			<column name="diagnosis7CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis8Code" type="VARCHAR(7)" />
+			<column name="diagnosis8CodeVersion" type="CHAR(1)" />
+			<column name="diagnosis9Code" type="VARCHAR(7)" />
+			<column name="diagnosis9CodeVersion" type="CHAR(1)" />
+			<column name="diagnosisPrincipalCode" type="VARCHAR(7)" />
+			<column name="diagnosisPrincipalCodeVersion" type="CHAR(1)" />
+			<column name="hcpcsYearCode" type="CHAR(1)" />
+			<column name="nearLineRecordIdCode" type="CHAR(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="paymentAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="paymentDenialCode" type="VARCHAR(2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="primaryPayerPaidAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="providerAssignmentIndicator" type="CHAR(1)" />
+			<column name="providerPaymentAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="referringPhysicianNpi" type="VARCHAR(12)" />
+			<column name="referringPhysicianUpin" type="VARCHAR(12)">
+				<constraints nullable="false" />
+			</column>
+			<column name="referringProviderIdNumber" type="VARCHAR(14)">
+				<constraints nullable="false" />
+			</column>
+			<column name="submittedChargeAmount" type="NUMBER(14, 2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="weeklyProcessDate" type="date">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="karlmdavis" id="0002" context="primaryKeys">
+		<!-- This change set was mostly derived from an auto-generated one produced 
+			by the DatabaseSchemaManager.generateChangeLogFromJpa() method. -->
+		<addPrimaryKey columnNames="beneficiaryId"
+			constraintName="BeneficiariesPK" tableName="Beneficiaries" />
+		<addPrimaryKey columnNames="number, parentClaim"
+			constraintName="CarrierClaimLinesPK" tableName="CarrierClaimLines" />
+		<addPrimaryKey columnNames="claimId" constraintName="CarrierClaimsPK"
+			tableName="CarrierClaims" />
+	</changeSet>
+
+	<changeSet author="karlmdavis" id="0002" context="foreignKeys">
+		<!-- This change set was mostly derived from an auto-generated one produced 
+			by the DatabaseSchemaManager.generateChangeLogFromJpa() method. -->
+		<addForeignKeyConstraint baseColumnNames="parentClaim"
+			baseTableName="CarrierClaimLines" constraintName="CarrierClaimLinesClaimIdToCarrierClaims"
+			deferrable="false" initiallyDeferred="false" referencedColumnNames="claimId"
+			referencedTableName="CarrierClaims" />
+	</changeSet>
+
+</databaseChangeLog>

@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +98,7 @@ public final class RifLoaderTestUtils {
 	 *         in tests
 	 */
 	public static EntityManagerFactory createEntityManagerFactory() {
-		return RifLoader.createEntityManagerFactory(getLoadOptions(), new MetricRegistry());
+		DataSource jdbcDataSource = RifLoader.createDataSource(getLoadOptions(), new MetricRegistry());
+		return RifLoader.createEntityManagerFactory(jdbcDataSource);
 	}
 }

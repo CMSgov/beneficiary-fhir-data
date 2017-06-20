@@ -40,6 +40,7 @@ import javax.persistence.Persistence;
 import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.sql.DataSource;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
@@ -68,6 +69,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifRecordLoadResult.LoadAction;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.schema.DatabaseSchemaManager;
 
 /**
  * Pushes CCW beneficiary and claims data from {@link RifRecordEvent}s into the
@@ -95,7 +97,10 @@ public final class RifLoader {
 		this.options = options;
 		this.metrics = metrics;
 
-		this.entityManagerFactory = createEntityManagerFactory(options, metrics);
+		DataSource jdbcDataSource = createDataSource(options, metrics);
+		DatabaseSchemaManager dbSchemaManager = new DatabaseSchemaManager();
+		dbSchemaManager.createOrUpdateSchema(jdbcDataSource);
+		this.entityManagerFactory = createEntityManagerFactory(jdbcDataSource);
 		this.isPostgreSql = isDatabasePostgreSql();
 
 		this.secretKeyFactory = createSecretKeyFactory();
@@ -125,10 +130,10 @@ public final class RifLoader {
 	 *            the {@link LoadAppOptions} to use
 	 * @param metrics
 	 *            the {@link MetricRegistry} to use
-	 * @return a JPA {@link EntityManagerFactory} for the Blue Button API's
+	 * @return a JDBC {@link DataSource} for the Blue Button API backend
 	 *         database
 	 */
-	static EntityManagerFactory createEntityManagerFactory(LoadAppOptions options, MetricRegistry metrics) {
+	static DataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
 		HikariDataSource dataSource = new HikariDataSource();
 		dataSource.setMaximumPoolSize(options.getLoaderThreads());
 		dataSource.setJdbcUrl(options.getDatabaseUrl());
@@ -137,9 +142,22 @@ public final class RifLoader {
 		dataSource.setRegisterMbeans(true);
 		dataSource.setMetricRegistry(metrics);
 
+		return dataSource;
+	}
+
+	/**
+	 * @param jdbcDataSource
+	 *            the JDBC {@link DataSource} for the Blue Button API backend
+	 *            database
+	 * @param metrics
+	 *            the {@link MetricRegistry} to use
+	 * @return a JPA {@link EntityManagerFactory} for the Blue Button API
+	 *         backend database
+	 */
+	static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
 		Map<String, Object> hibernateProperties = new HashMap<>();
-		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
-		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.UPDATE);
+		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
+		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
 
 		EntityManagerFactory entityManagerFactory = Persistence
 				.createEntityManagerFactory("gov.hhs.cms.bluebutton.data", hibernateProperties);
