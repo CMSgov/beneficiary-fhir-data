@@ -38,6 +38,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Table;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
@@ -280,6 +282,7 @@ public final class RifLoader {
 			}
 		}
 
+		logRecordCounts();
 		LOGGER.trace("Completed process(...).");
 	}
 
@@ -374,6 +377,42 @@ public final class RifLoader {
 			LOGGER.trace("Failed to load '{}' record.", rifFileType);
 
 			throw new RifLoadFailure(rifRecordEvent, t);
+		} finally {
+			if (entityManager != null)
+				entityManager.close();
+		}
+	}
+
+	/**
+	 * Computes and logs a count for all record types.
+	 */
+	private void logRecordCounts() {
+		Timer.Context timerCounting = metrics.timer(MetricRegistry.name(getClass(), "timer", "recordCounting")).time();
+		String entityTypeCounts = entityManagerFactory.getMetamodel().getManagedTypes().stream()
+				.map(t -> t.getJavaType()).map(t -> {
+					long entityTypeRecordCount = queryForEntityCount(t);
+					return String.format("%s: %d", t.getSimpleName(), entityTypeRecordCount);
+				}).collect(Collectors.joining(", "));
+		LOGGER.info("Record counts by entity type: '{}'.", entityTypeCounts);
+		timerCounting.stop();
+	}
+
+	/**
+	 * @param entityType
+	 *            the JPA {@link Entity} type to count instances of
+	 * @return a count of the number of instances of the specified JPA
+	 *         {@link Entity} type that are currently in the database
+	 */
+	private long queryForEntityCount(Class<?> entityType) {
+		EntityManager entityManager = null;
+		try {
+			entityManager = entityManagerFactory.createEntityManager();
+
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+			criteriaQuery.select(criteriaBuilder.count(criteriaQuery.from(entityType)));
+
+			return entityManager.createQuery(criteriaQuery).getSingleResult();
 		} finally {
 			if (entityManager != null)
 				entityManager.close();
