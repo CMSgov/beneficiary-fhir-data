@@ -326,6 +326,7 @@ public final class RifLoader {
 		Timer.Context timerBundleTypeFailure = metrics.timer(MetricRegistry.name(getClass(), "timer", "records",
 				rifRecordEvent.getFile().getFileType().name(), "failed")).time();
 
+		EntityManager entityManager = null;
 		try {
 			/*
 			 * FIXME A batch size of 1 RIF record ain't great. But fixing that
@@ -344,11 +345,18 @@ public final class RifLoader {
 			if (rifRecordEvent.getRecordAction() == RecordAction.INSERT && isPostgreSql) {
 				postgresBatch.add(rifRecordEvent.getRecord());
 			} else {
-				// Push the input bundle.
+				// Push the record, if it's not already in DB.
 				LOGGER.trace("Loading '{}' record.", rifFileType);
-				EntityManager entityManager = entityManagerFactory.createEntityManager();
+				entityManager = entityManagerFactory.createEntityManager();
 				entityManager.getTransaction().begin();
-				entityManager.persist(rifRecordEvent.getRecord());
+
+				Object record = rifRecordEvent.getRecord();
+				Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
+				if (recordId == null)
+					throw new BadCodeMonkeyException();
+				if (entityManager.find(record.getClass(), recordId) == null)
+					entityManager.persist(record);
+
 				entityManager.getTransaction().commit();
 				LOGGER.trace("Loaded '{}' record.", rifFileType);
 			}
@@ -366,6 +374,9 @@ public final class RifLoader {
 			LOGGER.trace("Failed to load '{}' record.", rifFileType);
 
 			throw new RifLoadFailure(rifRecordEvent, t);
+		} finally {
+			if (entityManager != null)
+				entityManager.close();
 		}
 	}
 
