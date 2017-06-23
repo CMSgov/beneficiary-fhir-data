@@ -106,22 +106,12 @@ public final class RifLayout {
 				continue;
 
 			RifColumnType rifColumnType = RifColumnType.valueOf(row.getCell(1).getStringCellValue());
-			int rifColumnLength = (int) row.getCell(2).getNumericCellValue();
-
-			/*
-			 * TODO switch to using rifField.getRifColumnScale(), once it's
-			 * filled out
-			 */
-			int fixedScale = 2;
-			// boolean rifColumnHasScale = row.getCell(3).getCellTypeEnum() ==
-			// CellType.NUMERIC ? true : false;
-			// Optional<Integer> rifColumnScale = rifColumnHasScale
-			// ? Optional.of((int) row.getCell(3).getNumericCellValue()) :
-			// Optional.empty();
-			Optional<Integer> rifColumnScale = rifColumnType == RifColumnType.NUM ? Optional.of(fixedScale)
-					: Optional.empty();
-			if (rifColumnScale.isPresent())
-				rifColumnLength += fixedScale;
+			@SuppressWarnings("deprecation")
+			Optional<Integer> rifColumnLength = row.getCell(2).getCellTypeEnum() == CellType.NUMERIC
+					? Optional.of((int) row.getCell(2).getNumericCellValue()) : Optional.empty();
+			@SuppressWarnings("deprecation")
+			Optional<Integer> rifColumnScale = row.getCell(3).getCellTypeEnum() == CellType.NUMERIC
+					? Optional.of((int) row.getCell(3).getNumericCellValue()) : Optional.empty();
 
 			boolean rifColumnOptional = parseBoolean(row.getCell(4));
 			URL dataDictionaryEntry = parseUrl(row.getCell(6));
@@ -179,7 +169,7 @@ public final class RifLayout {
 	public static final class RifField {
 		private final String rifColumnName;
 		private final RifColumnType rifColumnType;
-		private final int rifColumnLength;
+		private final Integer rifColumnLength;
 		private final Integer rifColumnScale;
 		private final boolean rifColumnOptional;
 		private final URL dataDictionaryEntry;
@@ -206,15 +196,15 @@ public final class RifLayout {
 		 * @param javaFieldName
 		 *            the value to use for {@link #getJavaFieldName()}
 		 */
-		public RifField(String rifColumnName, RifColumnType rifColumnType, int rifColumnLength,
+		public RifField(String rifColumnName, RifColumnType rifColumnType, Optional<Integer> rifColumnLength,
 				Optional<Integer> rifColumnScale, boolean rifColumnOptional, URL dataDictionaryEntry,
 				String rifColumnLabel, String javaFieldName) {
 			if (Strings.isNullOrEmpty(rifColumnName))
 				throw new IllegalArgumentException("Missing 'Column Name'.");
 			if (rifColumnType == null)
 				throw new IllegalArgumentException("Missing 'Type'.");
-			if (rifColumnLength < 1)
-				throw new IllegalArgumentException("Missing or invalid 'Length'.");
+			if (rifColumnLength.isPresent() && rifColumnLength.get() < 0)
+				throw new IllegalArgumentException("Invalid 'Length'.");
 			if (rifColumnScale.isPresent() && rifColumnScale.get() < 0)
 				throw new IllegalArgumentException("Invalid 'Scale'.");
 			if (Objects.isNull(javaFieldName))
@@ -224,7 +214,7 @@ public final class RifLayout {
 
 			this.rifColumnName = rifColumnName;
 			this.rifColumnType = rifColumnType;
-			this.rifColumnLength = rifColumnLength;
+			this.rifColumnLength = rifColumnLength.orElse(null);
 			this.rifColumnScale = rifColumnScale.orElse(null);
 			this.rifColumnOptional = rifColumnOptional;
 			this.dataDictionaryEntry = dataDictionaryEntry;
@@ -249,10 +239,11 @@ public final class RifLayout {
 
 		/**
 		 * @return the length (or, for <code>NUM</code> columns, the precision)
-		 *         of the RIF column, as specified in the data dictionary
+		 *         of the RIF column, as specified in the data dictionary, or
+		 *         {@link Optional#empty()} if none is defined
 		 */
-		public int getRifColumnLength() {
-			return rifColumnLength;
+		public Optional<Integer> getRifColumnLength() {
+			return Optional.ofNullable(rifColumnLength);
 		}
 
 		/**

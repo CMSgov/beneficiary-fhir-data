@@ -507,16 +507,20 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
 			// Determine which parsing utility method to use.
 			String parseUtilsMethodName;
-			if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() > 1) {
+			if (rifField.getRifColumnType() == RifColumnType.CHAR
+					&& rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) > 1) {
 				// Handle a String field.
 				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalString" : "parseString";
-			} else if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() == 1) {
+			} else if (rifField.getRifColumnType() == RifColumnType.CHAR
+					&& rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1) {
 				// Handle a Character field.
 				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalCharacter" : "parseCharacter";
-			} else if (rifField.getRifColumnType() == RifColumnType.NUM && rifField.getRifColumnScale().get() == 0) {
+			} else if (rifField.getRifColumnType() == RifColumnType.NUM
+					&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0) {
 				// Handle an Integer field.
 				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalInteger" : "parseInteger";
-			} else if (rifField.getRifColumnType() == RifColumnType.NUM && rifField.getRifColumnScale().get() > 0) {
+			} else if (rifField.getRifColumnType() == RifColumnType.NUM
+					&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0) {
 				// Handle a Decimal field.
 				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDecimal" : "parseDecimal";
 			} else if (rifField.getRifColumnType() == RifColumnType.DATE) {
@@ -624,8 +628,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			csvWriterMethod.addCode("\n");
 			csvWriterMethod.addComment("Convert the line fields.");
 			csvWriterMethod.addStatement("$T lineRecords = new $T[entity.$L().size() + 1][]", recordsListType,
-					Object.class,
-					linesFieldGetter);
+					Object.class, linesFieldGetter);
 			csvWriterMethod.addStatement("csvRecordsByTable.put($S, lineRecords)", mappingSpec.getLineTable());
 			String lineColumnsList = lineEntity.get().fieldSpecs.stream().map(f -> "\"" + f.name + "\"")
 					.collect(Collectors.joining(", "));
@@ -746,18 +749,22 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	 *         represent the specified {@link RifField} in a JPA entity
 	 */
 	private static TypeName selectJavaFieldType(RifField rifField) {
-		if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() == 1
-				&& !rifField.isRifColumnOptional())
+		if (rifField.getRifColumnType() == RifColumnType.CHAR
+				&& rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1 && !rifField.isRifColumnOptional())
 			return TypeName.CHAR;
-		else if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength() == 1
-				&& rifField.isRifColumnOptional())
+		else if (rifField.getRifColumnType() == RifColumnType.CHAR
+				&& rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1 && rifField.isRifColumnOptional())
 			return ClassName.get(Character.class);
 		else if (rifField.getRifColumnType() == RifColumnType.CHAR)
 			return ClassName.get(String.class);
-		else if (rifField.getRifColumnType() == RifColumnType.DATE && rifField.getRifColumnLength() == 8)
+		else if (rifField.getRifColumnType() == RifColumnType.DATE && rifField.getRifColumnLength().orElse(0) == 8)
 			return ClassName.get(LocalDate.class);
-		else if (rifField.getRifColumnType() == RifColumnType.NUM)
+		else if (rifField.getRifColumnType() == RifColumnType.NUM
+				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0)
 			return ClassName.get(BigDecimal.class);
+		else if (rifField.getRifColumnType() == RifColumnType.NUM
+				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0)
+			return ClassName.get(Integer.class);
 		else
 			throw new IllegalArgumentException("Unhandled field type: " + rifField);
 	}
@@ -801,8 +808,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		AnnotationSpec.Builder columnAnnotation = AnnotationSpec.builder(Column.class)
 				.addMember("name", "$S", "`" + rifField.getJavaFieldName() + "`")
 				.addMember("nullable", "$L", rifField.isRifColumnOptional());
-		if (rifField.getRifColumnType() == RifColumnType.CHAR) {
-			columnAnnotation.addMember("length", "$L", rifField.getRifColumnLength());
+		if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength().isPresent()) {
+			columnAnnotation.addMember("length", "$L", rifField.getRifColumnLength().get());
 		} else if (rifField.getRifColumnType() == RifColumnType.NUM) {
 			/*
 			 * In SQL, the precision is the number of digits in the unscaled
@@ -810,8 +817,40 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			 * number of digits to the right of the decimal point, e.g. "123.45"
 			 * has a scale of 2.
 			 */
-			columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength());
-			columnAnnotation.addMember("scale", "$L", rifField.getRifColumnScale().get());
+
+			if (rifField.getRifColumnLength().isPresent() && rifField.getRifColumnScale().isPresent()) {
+				columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength().get());
+				columnAnnotation.addMember("scale", "$L", rifField.getRifColumnScale().get());
+			} else {
+				/*
+				 * Unfortunately, Hibernate's SQL schema generation (HBM2DDL)
+				 * doesn't correctly handle SQL numeric datatypes that don't
+				 * have a defined precision and scale. What it _should_ do is
+				 * represent those types in PostgreSQL as a "NUMERIC", but what
+				 * it does instead is insert a default precision and scale as
+				 * "NUMBER(19, 2)". The only way to force the correct behavior
+				 * is to specify a columnDefinition, so we do that. This leads
+				 * to incorrect behavior with HSQL (for different reasons), but
+				 * fortunately that doesn't happen to cause problems with our
+				 * tests.
+				 */
+				StringBuilder columnDefinition = new StringBuilder();
+				columnDefinition.append("NUMERIC");
+				if (rifField.getRifColumnLength().isPresent() || rifField.getRifColumnScale().isPresent()) {
+					columnDefinition.append('(');
+					if (rifField.getRifColumnLength().isPresent()) {
+						columnDefinition.append(rifField.getRifColumnLength().get());
+					}
+					if (rifField.getRifColumnScale().isPresent()) {
+						columnDefinition.append(", ");
+						columnDefinition.append(rifField.getRifColumnScale().get());
+					}
+					columnDefinition.append(')');
+				}
+				if (!rifField.isRifColumnOptional())
+					columnDefinition.append(" NOT NULL");
+				columnAnnotation.addMember("columnDefinition", "$S", columnDefinition.toString());
+			}
 		}
 		annotations.add(columnAnnotation.build());
 

@@ -242,7 +242,7 @@ public final class MappingSpec {
 	public String getLineEntityLineNumberField() {
 		if (!hasLines)
 			throw new IllegalStateException();
-		return "number";
+		return "lineNumber";
 	}
 
 	/**
