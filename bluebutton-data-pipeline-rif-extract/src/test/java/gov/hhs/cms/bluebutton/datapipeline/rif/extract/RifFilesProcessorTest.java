@@ -251,7 +251,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify one of the claim lines.
 		CarrierClaimLine claimLine = claimGroup.getLines().get(0);
-		Assert.assertEquals(new BigDecimal(1), claimLine.getNumber());
+		Assert.assertEquals(new BigDecimal(1), claimLine.getLineNumber());
 		Assert.assertEquals("K25555", claimLine.getPerformingProviderIdNumber());
 		Assert.assertFalse(claimLine.getPerformingPhysicianUpin().isPresent());
 		Assert.assertEquals("1923124", claimLine.getPerformingPhysicianNpi().get());

@@ -14,6 +14,9 @@
 
 	<!-- At 'trace', Hibernate will log SQL parameter values. -->
 	<logger name="org.hibernate.type" level="info" />
+	
+	<!-- At 'debug', Liquibase will log its DDL statements. -->
+	<logger name="liquibase" level="info" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->

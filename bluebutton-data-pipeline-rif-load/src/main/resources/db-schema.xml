@@ -24,7 +24,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="medicareEnrollmentStatusCode" type="VARCHAR(2)" />
-			<column name="nameGiven" type="VARCHAR(20)">
+			<column name="nameGiven" type="VARCHAR(24)">
 				<constraints nullable="false" />
 			</column>
 			<column name="nameMiddleInitial" type="CHAR(1)" />
@@ -45,22 +45,22 @@
 			</column>
 		</createTable>
 		<createTable tableName="CarrierClaimLines">
-			<column name="number" type="NUMBER(15, 2)">
+			<column name="lineNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="parentClaim" type="VARCHAR(255)">
 				<constraints nullable="false" />
 			</column>
-			<column name="allowedChargeAmount" type="NUMBER(14, 2)">
+			<column name="allowedChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="anesthesiaUnitCount" type="NUMBER(4, 2)">
+			<column name="anesthesiaUnitCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
-			<column name="beneficiaryPartBDeductAmount" type="NUMBER(14, 2)">
+			<column name="beneficiaryPartBDeductAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="beneficiaryPaymentAmount" type="NUMBER(14, 2)">
+			<column name="beneficiaryPaymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="betosCode" type="VARCHAR(3)" />
@@ -68,7 +68,7 @@
 			<column name="cmsServiceTypeCode" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
-			<column name="coinsuranceAmount" type="NUMBER(14, 2)">
+			<column name="coinsuranceAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="diagnosisCode" type="VARCHAR(7)" />
@@ -77,7 +77,7 @@
 			<column name="hcpcsCode" type="VARCHAR(5)" />
 			<column name="hcpcsInitialModifierCode" type="VARCHAR(5)" />
 			<column name="hcpcsSecondModifierCode" type="VARCHAR(5)" />
-			<column name="hctHgbTestResult" type="NUMBER(6, 2)">
+			<column name="hctHgbTestResult" type="NUMBER(4)">
 				<constraints nullable="false" />
 			</column>
 			<column name="hctHgbTestTypeCode" type="VARCHAR(2)" />
@@ -87,12 +87,12 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="mtusCode" type="CHAR(1)" />
-			<column name="mtusCount" type="NUMBER(7, 2)">
+			<column name="mtusCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="nationalDrugCode" type="VARCHAR(11)" />
 			<column name="organizationNpi" type="VARCHAR(10)" />
-			<column name="paymentAmount" type="NUMBER(14, 2)">
+			<column name="paymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="paymentCode" type="CHAR(1)" />
@@ -105,12 +105,12 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="primaryPayerCode" type="CHAR(1)" />
-			<column name="primaryPayerPaidAmount" type="NUMBER(14, 2)">
+			<column name="primaryPayerPaidAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="processingIndicatorCode" type="VARCHAR(2)" />
 			<column name="providerParticipatingIndCode" type="CHAR(1)" />
-			<column name="providerPaymentAmount" type="NUMBER(14, 2)">
+			<column name="providerPaymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="providerSpecialityCode" type="VARCHAR(3)" />
@@ -126,11 +126,11 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="rxNumber" type="VARCHAR(30)" />
-			<column name="serviceCount" type="NUMBER(6, 2)">
+			<column name="serviceCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="serviceDeductibleCode" type="CHAR(1)" />
-			<column name="submittedChargeAmount" type="NUMBER(14, 2)">
+			<column name="submittedChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
@@ -138,16 +138,16 @@
 			<column name="claimId" type="VARCHAR(15)">
 				<constraints nullable="false" />
 			</column>
-			<column name="allowedChargeAmount" type="NUMBER(14, 2)">
+			<column name="allowedChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="beneficiaryId" type="VARCHAR(15)">
 				<constraints nullable="false" />
 			</column>
-			<column name="beneficiaryPartBDeductAmount" type="NUMBER(14, 2)">
+			<column name="beneficiaryPartBDeductAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="beneficiaryPaymentAmount" type="NUMBER(14, 2)">
+			<column name="beneficiaryPaymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="carrierNumber" type="VARCHAR(5)">
@@ -199,17 +199,17 @@
 			<column name="nearLineRecordIdCode" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
-			<column name="paymentAmount" type="NUMBER(14, 2)">
+			<column name="paymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="paymentDenialCode" type="VARCHAR(2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="primaryPayerPaidAmount" type="NUMBER(14, 2)">
+			<column name="primaryPayerPaidAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="providerAssignmentIndicator" type="CHAR(1)" />
-			<column name="providerPaymentAmount" type="NUMBER(14, 2)">
+			<column name="providerPaymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="referringPhysicianNpi" type="VARCHAR(12)" />
@@ -219,7 +219,7 @@
 			<column name="referringProviderIdNumber" type="VARCHAR(14)">
 				<constraints nullable="false" />
 			</column>
-			<column name="submittedChargeAmount" type="NUMBER(14, 2)">
+			<column name="submittedChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="weeklyProcessDate" type="date">
@@ -233,13 +233,13 @@
 			by the DatabaseSchemaManager.generateChangeLogFromJpa() method. -->
 		<addPrimaryKey columnNames="beneficiaryId"
 			constraintName="BeneficiariesPK" tableName="Beneficiaries" />
-		<addPrimaryKey columnNames="number, parentClaim"
+		<addPrimaryKey columnNames="lineNumber, parentClaim"
 			constraintName="CarrierClaimLinesPK" tableName="CarrierClaimLines" />
 		<addPrimaryKey columnNames="claimId" constraintName="CarrierClaimsPK"
 			tableName="CarrierClaims" />
 	</changeSet>
 
-	<changeSet author="karlmdavis" id="0002" context="foreignKeys">
+	<changeSet author="karlmdavis" id="0003" context="foreignKeys">
 		<!-- This change set was mostly derived from an auto-generated one produced 
 			by the DatabaseSchemaManager.generateChangeLogFromJpa() method. -->
 		<addForeignKeyConstraint baseColumnNames="parentClaim"

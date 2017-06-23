@@ -698,7 +698,7 @@ public final class RifFilesProcessor {
 		 * dupes.
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claimGroup.getLines().size(); fakeLineNumber++)
-			claimGroup.getLines().get(fakeLineNumber - 1).setNumber(new BigDecimal(fakeLineNumber));
+			claimGroup.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<CarrierClaim>(filesEvent, file, recordAction, claimGroup);
 	}
 
