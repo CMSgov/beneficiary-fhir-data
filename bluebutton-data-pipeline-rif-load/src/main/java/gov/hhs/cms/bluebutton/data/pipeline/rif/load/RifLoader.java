@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -81,7 +82,6 @@ public final class RifLoader {
 	private final LoadAppOptions options;
 	private final MetricRegistry metrics;
 	private final EntityManagerFactory entityManagerFactory;
-	private final boolean isPostgreSql;
 	private final SecretKeyFactory secretKeyFactory;
 	private final ExecutorService loadExecutorService;
 
@@ -101,7 +101,6 @@ public final class RifLoader {
 		DatabaseSchemaManager dbSchemaManager = new DatabaseSchemaManager();
 		dbSchemaManager.createOrUpdateSchema(jdbcDataSource);
 		this.entityManagerFactory = createEntityManagerFactory(jdbcDataSource);
-		this.isPostgreSql = isDatabasePostgreSql();
 
 		this.secretKeyFactory = createSecretKeyFactory();
 
@@ -162,6 +161,18 @@ public final class RifLoader {
 		EntityManagerFactory entityManagerFactory = Persistence
 				.createEntityManagerFactory("gov.hhs.cms.bluebutton.data", hibernateProperties);
 		return entityManagerFactory;
+	}
+
+	/**
+	 * @return the {@link LoadStrategy} that should be used
+	 */
+	private LoadStrategy selectStrategy(LoadFeatures features) {
+		if (features.isIdempotencyRequired())
+			return LoadStrategy.INSERT_IDEMPOTENT;
+		else if (features.isCopyDesired() && isDatabasePostgreSql())
+			return LoadStrategy.COPY_NON_IDEMPOTENT;
+		else
+			return LoadStrategy.INSERT_NON_IDEMPOTENT;
 	}
 
 	/**
@@ -330,6 +341,10 @@ public final class RifLoader {
 	 *         operation
 	 */
 	public RifRecordLoadResult process(RifRecordEvent<?> rifRecordEvent, PostgreSqlCopyInserter postgresBatch) {
+		// TODO make the features configurable
+		LoadFeatures features = new LoadFeatures(false, false);
+		LoadStrategy strategy = selectStrategy(features);
+
 		String rifFileType = rifRecordEvent.getFile().getFileType().name();
 
 		// If this is a Beneficiary record, first hash its HICN.
@@ -359,9 +374,10 @@ public final class RifLoader {
 			 * which are ludicrously fast.
 			 */
 			LoadAction loadAction;
-			if (rifRecordEvent.getRecordAction() == RecordAction.INSERT && isPostgreSql) {
+			if (strategy == LoadStrategy.COPY_NON_IDEMPOTENT
+					&& rifRecordEvent.getRecordAction() == RecordAction.INSERT) {
 				postgresBatch.add(rifRecordEvent.getRecord());
-				loadAction = LoadAction.INSERTED;
+				loadAction = LoadAction.QUEUED;
 			} else {
 				// Push the record, if it's not already in DB.
 				LOGGER.trace("Loading '{}' record.", rifFileType);
@@ -369,15 +385,20 @@ public final class RifLoader {
 				entityManager.getTransaction().begin();
 
 				Object record = rifRecordEvent.getRecord();
-				Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
-				if (recordId == null)
-					throw new BadCodeMonkeyException();
-				if (entityManager.find(record.getClass(), recordId) == null) {
+				if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
+					Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
+					Objects.requireNonNull(recordId);
+					if (entityManager.find(record.getClass(), recordId) == null) {
+						loadAction = LoadAction.INSERTED;
+						entityManager.persist(record);
+					} else {
+						loadAction = LoadAction.DID_NOTHING;
+					}
+				} else if (strategy == LoadStrategy.INSERT_NON_IDEMPOTENT) {
 					loadAction = LoadAction.INSERTED;
 					entityManager.persist(record);
-				} else {
-					loadAction = LoadAction.DO_NOTHING;
-				}
+				} else
+					throw new BadCodeMonkeyException();
 
 				entityManager.getTransaction().commit();
 				LOGGER.trace("Loaded '{}' record.", rifFileType);
@@ -782,6 +803,55 @@ public final class RifLoader {
 			File backingTempFile = null;
 			String[] columnNames = null;
 			AtomicInteger recordsPrinted = new AtomicInteger(0);
+		}
+	}
+
+	/**
+	 * Enumerates the {@link RifLoader} record handling strategies.
+	 */
+	private static enum LoadStrategy {
+		INSERT_IDEMPOTENT,
+
+		INSERT_NON_IDEMPOTENT,
+
+		COPY_NON_IDEMPOTENT;
+	}
+
+	/**
+	 * Encapsulates the {@link RifLoader} record handling preferences.
+	 */
+	private static final class LoadFeatures {
+		private final boolean idempotencyRequired;
+		private final boolean copyDesired;
+
+		/**
+		 * Constructs a new {@link LoadFeatures} instance.
+		 * 
+		 * @param idempotencyRequired
+		 *            the value to use for {@link #isIdempotencyRequired()}
+		 * @param copyDesired
+		 *            the value to use for {@link #isCopyDesired()}
+		 */
+		public LoadFeatures(boolean idempotencyRequired, boolean copyDesired) {
+			this.idempotencyRequired = idempotencyRequired;
+			this.copyDesired = copyDesired;
+		}
+
+		/**
+		 * @return <code>true</code> if record inserts must be idempotent,
+		 *         <code>false</code> if that's not required
+		 */
+		public boolean isIdempotencyRequired() {
+			return idempotencyRequired;
+		}
+
+		/**
+		 * @return <code>true</code> if PostgreSQL's {@link CopyManager} APIs
+		 *         should be used to load data when possible, <code>false</code>
+		 *         if not
+		 */
+		public boolean isCopyDesired() {
+			return copyDesired;
 		}
 	}
 }
