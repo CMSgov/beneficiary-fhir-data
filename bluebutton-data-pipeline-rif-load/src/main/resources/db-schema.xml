@@ -213,9 +213,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="referringPhysicianNpi" type="VARCHAR(12)" />
-			<column name="referringPhysicianUpin" type="VARCHAR(12)">
-				<constraints nullable="false" />
-			</column>
+			<column name="referringPhysicianUpin" type="VARCHAR(12)" />
 			<column name="referringProviderIdNumber" type="VARCHAR(14)">
 				<constraints nullable="false" />
 			</column>
@@ -227,7 +225,7 @@
 			</column>
 		</createTable>
 		<createTable tableName="DMEClaimLines">
-			<column name="lineNumber" type="NUMBER(13)">
+			<column name="lineNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="parentClaim" type="VARCHAR(255)">
@@ -263,7 +261,7 @@
 			<column name="hctHgbTestTypeCode" type="VARCHAR(2)" />
 			<column name="lastExpenseDate" type="date" />
 			<column name="mtusCode" type="CHAR(1)" />
-			<column name="mtusCount" type="NUMBER(7)">
+			<column name="mtusCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="nationalDrugCode" type="VARCHAR(11)" />
@@ -283,12 +281,8 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="processingIndicatorCode" type="VARCHAR(2)" />
-			<column name="providerBillingNumber" type="VARCHAR(10)">
-				<constraints nullable="false" />
-			</column>
-			<column name="providerNPI" type="VARCHAR(12)">
-				<constraints nullable="false" />
-			</column>
+			<column name="providerBillingNumber" type="VARCHAR(10)" />
+			<column name="providerNPI" type="VARCHAR(12)" />
 			<column name="providerParticipatingIndCode" type="CHAR(1)" />
 			<column name="providerPaymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
@@ -303,10 +297,8 @@
 			<column name="purchasePriceAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="screenSavingsAmount" type="NUMBER(12, 2)">
-				<constraints nullable="false" />
-			</column>
-			<column name="serviceCount" type="NUMBER(4)">
+			<column name="screenSavingsAmount" type="NUMBER(12, 2)" />
+			<column name="serviceCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="serviceDeductibleCode" type="CHAR(1)" />
@@ -405,30 +397,26 @@
 			</column>
 		</createTable>
 		<createTable tableName="HHAClaimLines">
-			<column name="lineNumber" type="NUMBER(13)">
+			<column name="lineNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="parentClaim" type="VARCHAR(255)">
 				<constraints nullable="false" />
 			</column>
-			<column name="apcOrHippsCode" type="VARCHAR(5)">
-				<constraints nullable="false" />
-			</column>
+			<column name="apcOrHippsCode" type="VARCHAR(5)" />
 			<column name="deductibleCoinsuranceCd" type="CHAR(1)" />
 			<column name="hcpcsCode" type="VARCHAR(5)" />
 			<column name="hcpcsInitialModifierCode" type="VARCHAR(5)" />
 			<column name="hcpcsSecondModifierCode" type="VARCHAR(5)" />
 			<column name="nationalDrugCodeQualifierCode" type="VARCHAR(2)" />
-			<column name="nationalDrugCodeQuantity" type="NUMBER(10)" />
+			<column name="nationalDrugCodeQuantity" type="NUMBER" />
 			<column name="nonCoveredChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
 			<column name="paymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="paymentMethodCode" type="VARCHAR(2)">
-				<constraints nullable="false" />
-			</column>
+			<column name="paymentMethodCode" type="VARCHAR(2)" />
 			<column name="rateAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
@@ -436,18 +424,14 @@
 			<column name="revenueCenterCode" type="VARCHAR(4)">
 				<constraints nullable="false" />
 			</column>
-			<column name="revenueCenterDate" type="date">
-				<constraints nullable="false" />
-			</column>
+			<column name="revenueCenterDate" type="date" />
 			<column name="revenueCenterRenderingPhysicianNPI" type="VARCHAR(12)" />
 			<column name="revenueCenterRenderingPhysicianUPIN" type="VARCHAR(12)" />
-			<column name="statusCode" type="VARCHAR(2)">
-				<constraints nullable="false" />
-			</column>
+			<column name="statusCode" type="VARCHAR(2)" />
 			<column name="totalChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="unitCount" type="NUMBER(8)">
+			<column name="unitCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
@@ -561,12 +545,8 @@
 			<column name="diagnosisExternalFirstCodeVersion" type="CHAR(1)" />
 			<column name="diagnosisPrincipalCode" type="VARCHAR(7)" />
 			<column name="diagnosisPrincipalCodeVersion" type="CHAR(1)" />
-			<column name="fiscalIntermediaryClaimProcessDate" type="date">
-				<constraints nullable="false" />
-			</column>
-			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)">
-				<constraints nullable="false" />
-			</column>
+			<column name="fiscalIntermediaryClaimProcessDate" type="date" />
+			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)" />
 			<column name="nearLineRecordIdCode" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
@@ -600,7 +580,7 @@
 			</column>
 		</createTable>
 		<createTable tableName="HospiceClaimLines">
-			<column name="lineNumber" type="NUMBER(13)">
+			<column name="lineNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="parentClaim" type="VARCHAR(255)">
@@ -614,10 +594,8 @@
 			<column name="hcpcsInitialModifierCode" type="VARCHAR(5)" />
 			<column name="hcpcsSecondModifierCode" type="VARCHAR(5)" />
 			<column name="nationalDrugCodeQualifierCode" type="VARCHAR(2)" />
-			<column name="nationalDrugCodeQuantity" type="NUMBER(10)" />
-			<column name="nonCoveredChargeAmount" type="NUMBER(12, 2)">
-				<constraints nullable="false" />
-			</column>
+			<column name="nationalDrugCodeQuantity" type="NUMBER" />
+			<column name="nonCoveredChargeAmount" type="NUMBER(12, 2)" />
 			<column name="paymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
@@ -630,15 +608,13 @@
 			<column name="revenueCenterCode" type="VARCHAR(4)">
 				<constraints nullable="false" />
 			</column>
-			<column name="revenueCenterDate" type="date">
-				<constraints nullable="false" />
-			</column>
+			<column name="revenueCenterDate" type="date" />
 			<column name="revenueCenterRenderingPhysicianNPI" type="VARCHAR(12)" />
 			<column name="revenueCenterRenderingPhysicianUPIN" type="VARCHAR(12)" />
 			<column name="totalChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="unitCount" type="NUMBER(8)">
+			<column name="unitCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
@@ -751,15 +727,9 @@
 			<column name="diagnosisExternalFirstCodeVersion" type="CHAR(1)" />
 			<column name="diagnosisPrincipalCode" type="VARCHAR(7)" />
 			<column name="diagnosisPrincipalCodeVersion" type="CHAR(1)" />
-			<column name="fiscalIntermediaryClaimProcessDate" type="date">
-				<constraints nullable="false" />
-			</column>
-			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)">
-				<constraints nullable="false" />
-			</column>
-			<column name="hospicePeriodCount" type="NUMBER(2)">
-				<constraints nullable="false" />
-			</column>
+			<column name="fiscalIntermediaryClaimProcessDate" type="date" />
+			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)" />
+			<column name="hospicePeriodCount" type="NUMBER(2)" />
 			<column name="nearLineRecordIdCode" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
@@ -783,7 +753,7 @@
 			<column name="totalChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="utilizationDayCount" type="NUMBER(3)">
+			<column name="utilizationDayCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="weeklyProcessDate" type="date">
@@ -791,7 +761,7 @@
 			</column>
 		</createTable>
 		<createTable tableName="InpatientClaimLines">
-			<column name="lineNumber" type="NUMBER(13)">
+			<column name="lineNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="parentClaim" type="VARCHAR(255)">
@@ -800,7 +770,7 @@
 			<column name="deductibleCoinsuranceCd" type="CHAR(1)" />
 			<column name="hcpcsCode" type="VARCHAR(5)" />
 			<column name="nationalDrugCodeQualifierCode" type="VARCHAR(2)" />
-			<column name="nationalDrugCodeQuantity" type="NUMBER(10)" />
+			<column name="nationalDrugCodeQuantity" type="NUMBER" />
 			<column name="nonCoveredChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
@@ -815,7 +785,7 @@
 			<column name="totalChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="unitCount" type="NUMBER(8)">
+			<column name="unitCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
@@ -835,7 +805,7 @@
 			<column name="bloodDeductibleLiabilityAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="bloodPintsFurnishedQty" type="NUMBER(3)">
+			<column name="bloodPintsFurnishedQty" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="claimAdmissionDate" type="date" />
@@ -847,9 +817,7 @@
 			</column>
 			<column name="claimNonPaymentReasonCode" type="VARCHAR(2)" />
 			<column name="claimPPSCapitalDisproportionateShareAmt" type="NUMBER(12, 2)" />
-			<column name="claimPPSCapitalDrgWeightNumber" type="NUMBER(7, 4)">
-				<constraints nullable="false" />
-			</column>
+			<column name="claimPPSCapitalDrgWeightNumber" type="NUMBER(7, 4)" />
 			<column name="claimPPSCapitalExceptionAmount" type="NUMBER(12, 2)" />
 			<column name="claimPPSCapitalFSPAmount" type="NUMBER(12, 2)" />
 			<column name="claimPPSCapitalIMEAmount" type="NUMBER(12, 2)" />
@@ -866,7 +834,7 @@
 			<column name="claimTypeCode" type="VARCHAR(2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="coinsuranceDayCount" type="NUMBER(3)">
+			<column name="coinsuranceDayCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="coveredCareThoughDate" type="date" />
@@ -1000,31 +968,19 @@
 			<column name="diagnosisRelatedGroupOutlierStayCd" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
-			<column name="disproportionateShareAmount" type="NUMBER(12)">
-				<constraints nullable="false" />
-			</column>
+			<column name="disproportionateShareAmount" type="NUMBER" />
 			<column name="drgOutlierApprovedPaymentAmount" type="NUMBER(12, 2)" />
-			<column name="fiscalIntermediaryClaimActionCode" type="CHAR(1)">
-				<constraints nullable="false" />
-			</column>
-			<column name="fiscalIntermediaryClaimProcessDate" type="date">
-				<constraints nullable="false" />
-			</column>
-			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)">
-				<constraints nullable="false" />
-			</column>
-			<column name="indirectMedicalEducationAmount" type="NUMBER(12)">
-				<constraints nullable="false" />
-			</column>
-			<column name="lifetimeReservedDaysUsedCount" type="NUMBER(3)">
-				<constraints nullable="false" />
-			</column>
+			<column name="fiscalIntermediaryClaimActionCode" type="CHAR(1)" />
+			<column name="fiscalIntermediaryClaimProcessDate" type="date" />
+			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)" />
+			<column name="indirectMedicalEducationAmount" type="NUMBER" />
+			<column name="lifetimeReservedDaysUsedCount" type="NUMBER" />
 			<column name="mcoPaidSw" type="CHAR(1)" />
 			<column name="medicareBenefitsExhaustedDate" type="date" />
 			<column name="nearLineRecordIdCode" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
-			<column name="nonUtilizationDayCount" type="NUMBER(5)">
+			<column name="nonUtilizationDayCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="noncoveredCharge" type="NUMBER(12, 2)">
@@ -1131,9 +1087,7 @@
 			<column name="professionalComponentCharge" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="prospectivePaymentCode" type="CHAR(1)">
-				<constraints nullable="false" />
-			</column>
+			<column name="prospectivePaymentCode" type="CHAR(1)" />
 			<column name="providerNumber" type="VARCHAR(9)">
 				<constraints nullable="false" />
 			</column>
@@ -1147,7 +1101,7 @@
 			<column name="totalDeductionAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="utilizationDayCount" type="NUMBER(3)">
+			<column name="utilizationDayCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="weeklyProcessDate" type="date">
@@ -1155,15 +1109,13 @@
 			</column>
 		</createTable>
 		<createTable tableName="OutpatientClaimLines">
-			<column name="lineNumber" type="NUMBER(13)">
+			<column name="lineNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="parentClaim" type="VARCHAR(255)">
 				<constraints nullable="false" />
 			</column>
-			<column name="apcOrHippsCode" type="VARCHAR(5)">
-				<constraints nullable="false" />
-			</column>
+			<column name="apcOrHippsCode" type="VARCHAR(5)" />
 			<column name="benficiaryPaymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
@@ -1182,7 +1134,7 @@
 			<column name="hcpcsSecondModifierCode" type="VARCHAR(5)" />
 			<column name="nationalDrugCode" type="VARCHAR(24)" />
 			<column name="nationalDrugCodeQualifierCode" type="VARCHAR(2)" />
-			<column name="nationalDrugCodeQuantity" type="NUMBER(10)" />
+			<column name="nationalDrugCodeQuantity" type="NUMBER" />
 			<column name="nonCoveredChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
@@ -1194,9 +1146,7 @@
 			<column name="paymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="paymentMethodCode" type="VARCHAR(2)">
-				<constraints nullable="false" />
-			</column>
+			<column name="paymentMethodCode" type="VARCHAR(2)" />
 			<column name="providerPaymentAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
@@ -1213,21 +1163,17 @@
 			<column name="revenueCenterCode" type="VARCHAR(4)">
 				<constraints nullable="false" />
 			</column>
-			<column name="revenueCenterDate" type="date">
-				<constraints nullable="false" />
-			</column>
+			<column name="revenueCenterDate" type="date" />
 			<column name="revenueCenterRenderingPhysicianNPI" type="VARCHAR(12)" />
 			<column name="revenueCenterRenderingPhysicianUPIN" type="VARCHAR(12)" />
 			<column name="secondMspPaidAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="statusCode" type="VARCHAR(2)">
-				<constraints nullable="false" />
-			</column>
+			<column name="statusCode" type="VARCHAR(2)" />
 			<column name="totalChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="unitCount" type="NUMBER(8)">
+			<column name="unitCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="wageAdjustedCoinsuranceAmount" type="NUMBER(12, 2)">
@@ -1362,12 +1308,8 @@
 			<column name="diagnosisExternalFirstCodeVersion" type="CHAR(1)" />
 			<column name="diagnosisPrincipalCode" type="VARCHAR(7)" />
 			<column name="diagnosisPrincipalCodeVersion" type="CHAR(1)" />
-			<column name="fiscalIntermediaryClaimProcessDate" type="date">
-				<constraints nullable="false" />
-			</column>
-			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)">
-				<constraints nullable="false" />
-			</column>
+			<column name="fiscalIntermediaryClaimProcessDate" type="date" />
+			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)" />
 			<column name="mcoPaidSw" type="CHAR(1)" />
 			<column name="nearLineRecordIdCode" type="CHAR(1)">
 				<constraints nullable="false" />
@@ -1491,7 +1433,7 @@
 			<column name="compoundCode" type="INT">
 				<constraints nullable="false" />
 			</column>
-			<column name="daysSupply" type="INT">
+			<column name="daysSupply" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="dispenseAsWrittenProductSelectionCode" type="CHAR(1)">
@@ -1501,7 +1443,7 @@
 			<column name="drugCoverageStatusCode" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
-			<column name="fillNumber" type="INT">
+			<column name="fillNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="gapDiscountAmount" type="NUMBER(8, 2)">
@@ -1577,7 +1519,7 @@
 			</column>
 		</createTable>
 		<createTable tableName="SNFClaimLines">
-			<column name="lineNumber" type="NUMBER(13)">
+			<column name="lineNumber" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="parentClaim" type="VARCHAR(255)">
@@ -1586,7 +1528,7 @@
 			<column name="deductibleCoinsuranceCd" type="CHAR(1)" />
 			<column name="hcpcsCode" type="VARCHAR(5)" />
 			<column name="nationalDrugCodeQualifierCode" type="VARCHAR(2)" />
-			<column name="nationalDrugCodeQuantity" type="NUMBER(10)" />
+			<column name="nationalDrugCodeQuantity" type="NUMBER" />
 			<column name="nonCoveredChargeAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
@@ -1621,7 +1563,7 @@
 			<column name="bloodDeductibleLiabilityAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="bloodPintsFurnishedQty" type="NUMBER(3)">
+			<column name="bloodPintsFurnishedQty" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="claimAdmissionDate" type="date" />
@@ -1648,7 +1590,7 @@
 			<column name="claimTypeCode" type="VARCHAR(2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="coinsuranceDayCount" type="NUMBER(3)">
+			<column name="coinsuranceDayCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="coveredCareThroughDate" type="date" />
@@ -1742,21 +1684,15 @@
 			<column name="diagnosisPrincipalCode" type="VARCHAR(7)" />
 			<column name="diagnosisPrincipalCodeVersion" type="CHAR(1)" />
 			<column name="diagnosisRelatedGroupCd" type="VARCHAR(3)" />
-			<column name="fiscalIntermediaryClaimActionCode" type="CHAR(1)">
-				<constraints nullable="false" />
-			</column>
-			<column name="fiscalIntermediaryClaimProcessDate" type="date">
-				<constraints nullable="false" />
-			</column>
-			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)">
-				<constraints nullable="false" />
-			</column>
+			<column name="fiscalIntermediaryClaimActionCode" type="CHAR(1)" />
+			<column name="fiscalIntermediaryClaimProcessDate" type="date" />
+			<column name="fiscalIntermediaryNumber" type="VARCHAR(5)" />
 			<column name="mcoPaidSw" type="CHAR(1)" />
 			<column name="medicareBenefitsExhaustedDate" type="date" />
 			<column name="nearLineRecordIdCode" type="CHAR(1)">
 				<constraints nullable="false" />
 			</column>
-			<column name="nonUtilizationDayCount" type="NUMBER(5)">
+			<column name="nonUtilizationDayCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="noncoveredCharge" type="NUMBER(12, 2)">
@@ -1857,9 +1793,7 @@
 			<column name="procedure9Code" type="VARCHAR(7)" />
 			<column name="procedure9CodeVersion" type="CHAR(1)" />
 			<column name="procedure9Date" type="date" />
-			<column name="prospectivePaymentCode" type="CHAR(1)">
-				<constraints nullable="false" />
-			</column>
+			<column name="prospectivePaymentCode" type="CHAR(1)" />
 			<column name="providerNumber" type="VARCHAR(9)">
 				<constraints nullable="false" />
 			</column>
@@ -1875,7 +1809,7 @@
 			<column name="totalDeductionAmount" type="NUMBER(12, 2)">
 				<constraints nullable="false" />
 			</column>
-			<column name="utilizationDayCount" type="NUMBER(3)">
+			<column name="utilizationDayCount" type="NUMBER NOT NULL">
 				<constraints nullable="false" />
 			</column>
 			<column name="weeklyProcessDate" type="date">
