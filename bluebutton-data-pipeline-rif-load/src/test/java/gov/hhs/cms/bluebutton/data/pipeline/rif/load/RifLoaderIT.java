@@ -18,15 +18,12 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
-import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
-import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
-import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifRecordLoadResult.LoadAction;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
 
 /**
@@ -62,9 +59,7 @@ public final class RifLoaderIT {
 	 */
 	private void loadSample(StaticRifResourceGroup sampleGroup) {
 		// Generate the sample RIF data to feed through the pipeline.
-		// TODO remove filter one everything is JPAified
 		Set<StaticRifResource> sampleResources = Arrays.stream(sampleGroup.getResources())
-				.filter(r -> Arrays.asList(RifFileType.BENEFICIARY, RifFileType.CARRIER).contains(r.getRifFileType()))
 				.collect(Collectors.toSet());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
 				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toSet()));
@@ -92,7 +87,9 @@ public final class RifLoaderIT {
 		metricsReporter.report();
 
 		// Verify that the expected number of records were run successfully.
-		Assert.assertEquals(sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(), successfulRecords.size());
+		// FIXME remove suucessfulRecords filter once CBBD-266 is resolved
+		Assert.assertEquals(sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
+				successfulRecords.stream().filter(r -> r.getLoadAction() == LoadAction.INSERTED).count());
 
 		/*
 		 * Run the extraction an extra time and verify that each record can now
@@ -101,12 +98,7 @@ public final class RifLoaderIT {
 		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory();
 		for (Stream<RifRecordEvent<?>> rifRecordEventsCopy : processor.process(rifFilesEvent)) {
 			rifRecordEventsCopy.forEach(r -> {
-				if (r.getFile().getFileType() == RifFileType.BENEFICIARY)
-					assertIsInDatabase(entityManagerFactory, (Beneficiary) r.getRecord());
-				else if (r.getFile().getFileType() == RifFileType.CARRIER)
-					assertIsInDatabase(entityManagerFactory, (CarrierClaim) r.getRecord());
-				else
-					throw new BadCodeMonkeyException();
+				assertIsInDatabase(entityManagerFactory, r.getRecord());
 			});
 		}
 	}
@@ -128,19 +120,7 @@ public final class RifLoaderIT {
 	 * @param record
 	 *            the RIF record to verify
 	 */
-	private static void assertIsInDatabase(EntityManagerFactory entityManagerFactory, Beneficiary record) {
-		// TODO Auto-generated method stub
-	}
-
-	/**
-	 * Verifies that the specified RIF record is actually in the database.
-	 * 
-	 * @param entityManagerFactory
-	 *            the {@link EntityManagerFactory} to use
-	 * @param record
-	 *            the RIF record to verify
-	 */
-	private static void assertIsInDatabase(EntityManagerFactory entityManagerFactory, CarrierClaim record) {
+	private static void assertIsInDatabase(EntityManagerFactory entityManagerFactory, Object record) {
 		// TODO Auto-generated method stub
 	}
 }

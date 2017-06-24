@@ -154,9 +154,7 @@ public final class S3ToDatabaseLoadAppBenchmark {
 		Instant startInstant = Instant.now();
 		LOGGER.info("Starting benchmark against sample data: '{}'...", sampleData.name());
 
-		// TODO remove filter one everything is JPAified
 		List<StaticRifResource> sampleResources = Arrays.stream(sampleData.getResources())
-				.filter(r -> Arrays.asList(RifFileType.BENEFICIARY, RifFileType.CARRIER).contains(r.getRifFileType()))
 				.collect(Collectors.toList());
 
 		String ec2KeyName = System.getProperty(SYS_PROP_EC2_KEY_NAME, null);

@@ -48,11 +48,14 @@ public final class RifRecordLoadResult {
 	 */
 	public static enum LoadAction {
 		/**
-		 * Indicates that the record(s) were successfully loaded to the
-		 * database.
+		 * Indicates that the record(s) were successfully added to the database.
 		 */
-		LOADED;
+		INSERTED,
 
-		// TODO ALREADY_PRESENT
+		/**
+		 * Indicates that the record(s) were skipped, presumably because they
+		 * were already present in the database.
+		 */
+		DO_NOTHING;
 	}
 }

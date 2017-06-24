@@ -354,17 +354,14 @@ public final class RifLoader {
 			 * is an optimization for a later date.
 			 */
 
-			// FIXME remove this once everything is JPAified
-			if (!Arrays.asList(RifFileType.BENEFICIARY, RifFileType.CARRIER)
-					.contains(rifRecordEvent.getFile().getFileType()))
-				return new RifRecordLoadResult(rifRecordEvent, LoadAction.LOADED);
-
 			/*
 			 * If we can, load the record using PostgreSQL's native copy APIs,
 			 * which are ludicrously fast.
 			 */
+			LoadAction loadAction;
 			if (rifRecordEvent.getRecordAction() == RecordAction.INSERT && isPostgreSql) {
 				postgresBatch.add(rifRecordEvent.getRecord());
+				loadAction = LoadAction.INSERTED;
 			} else {
 				// Push the record, if it's not already in DB.
 				LOGGER.trace("Loading '{}' record.", rifFileType);
@@ -375,8 +372,12 @@ public final class RifLoader {
 				Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
 				if (recordId == null)
 					throw new BadCodeMonkeyException();
-				if (entityManager.find(record.getClass(), recordId) == null)
+				if (entityManager.find(record.getClass(), recordId) == null) {
+					loadAction = LoadAction.INSERTED;
 					entityManager.persist(record);
+				} else {
+					loadAction = LoadAction.DO_NOTHING;
+				}
 
 				entityManager.getTransaction().commit();
 				LOGGER.trace("Loaded '{}' record.", rifFileType);
@@ -387,7 +388,7 @@ public final class RifLoader {
 			timerBundleTypeSuccess.stop();
 			metrics.meter(MetricRegistry.name(getClass(), "meter", "records", "loaded")).mark(1);
 
-			return new RifRecordLoadResult(rifRecordEvent, LoadAction.LOADED);
+			return new RifRecordLoadResult(rifRecordEvent, loadAction);
 		} catch (Throwable t) {
 			timerBundleFailure.stop();
 			timerBundleTypeFailure.stop();

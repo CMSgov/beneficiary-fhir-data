@@ -40,15 +40,15 @@ import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
-import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimGroup;
-import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimGroup;
-import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimGroup;
-import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimGroup;
-import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimGroup;
-import gov.hhs.cms.bluebutton.data.model.rif.PartDEventRow;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEventColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
-import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimGroup;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.TestDataSetLocation;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
@@ -113,13 +113,13 @@ public final class DataSetSubsetter {
 		Map<RifFileType, Enum<?>> beneficiaryColumnByFileType = new HashMap<>();
 		beneficiaryColumnByFileType.put(RifFileType.BENEFICIARY, BeneficiaryColumn.BENE_ID);
 		beneficiaryColumnByFileType.put(RifFileType.CARRIER, CarrierClaimColumn.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.DME, DMEClaimGroup.Column.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.HHA, HHAClaimGroup.Column.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.HOSPICE, HospiceClaimGroup.Column.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.INPATIENT, InpatientClaimGroup.Column.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.OUTPATIENT, OutpatientClaimGroup.Column.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.PDE, PartDEventRow.Column.BENE_ID);
-		beneficiaryColumnByFileType.put(RifFileType.SNF, SNFClaimGroup.Column.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.DME, DMEClaimColumn.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.HHA, HHAClaimColumn.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.HOSPICE, HospiceClaimColumn.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.INPATIENT, InpatientClaimColumn.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.OUTPATIENT, OutpatientClaimColumn.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.PDE, PartDEventColumn.BENE_ID);
+		beneficiaryColumnByFileType.put(RifFileType.SNF, SNFClaimColumn.BENE_ID);
 
 		for (RifFile rifFile : rifFiles) {
 			LOGGER.info("Subsetting RIF file: '{}'...", rifFile.getDisplayName());

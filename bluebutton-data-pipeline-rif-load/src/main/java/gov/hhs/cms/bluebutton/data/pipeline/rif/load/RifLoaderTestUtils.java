@@ -1,6 +1,9 @@
 package gov.hhs.cms.bluebutton.data.pipeline.rif.load;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -15,8 +18,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
-import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
-import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 
 /**
  * <p>
@@ -66,14 +67,28 @@ public final class RifLoaderTestUtils {
 		if (!DB_URL.contains("hsql"))
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
 
-		LOGGER.info("Deleting all resources...");
-
 		EntityManagerFactory entityManagerFactory = createEntityManagerFactory();
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-		// TODO add other entity classes
+		// Determine the entity types to delete, and the order to do so in.
+		Comparator<Class<?>> entityDeletionSorter = (t1,t2) -> {
+			if(t1.equals(Beneficiary.class))
+				return 1;
+			if(t2.equals(Beneficiary.class))
+				return -1;
+			if (t1.getSimpleName().endsWith("Line"))
+				return -1;
+			if (t2.getSimpleName().endsWith("Line"))
+				return 1;
+			return 0;
+		};
+		List<Class<?>> entityTypesInDeletionOrder = entityManagerFactory.getMetamodel().getEntities().stream()
+				.map(t -> t.getJavaType()).sorted(entityDeletionSorter)
+				.collect(Collectors.toList());
+
+		LOGGER.info("Deleting all resources...");
 		entityManager.getTransaction().begin();
-		for (Class<?> entityClass : new Class[] { CarrierClaimLine.class, CarrierClaim.class, Beneficiary.class }) {
+		for (Class<?> entityClass : entityTypesInDeletionOrder) {
 			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 			CriteriaDelete query = builder.createCriteriaDelete(entityClass);
 			query.from(entityClass);
