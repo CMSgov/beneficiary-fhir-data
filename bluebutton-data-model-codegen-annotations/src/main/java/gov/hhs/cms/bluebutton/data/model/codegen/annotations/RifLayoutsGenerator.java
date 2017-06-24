@@ -26,7 +26,49 @@ public @interface RifLayoutsGenerator {
 
 	/**
 	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for PDE claims data
+	 */
+	String pdeSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
 	 *         layout for carrier claims data
 	 */
 	String carrierSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for inpatient claims data
+	 */
+	String inpatientSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for outpatient claims data
+	 */
+	String outpatientSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for HHA claims data
+	 */
+	String hhaSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for DME claims data
+	 */
+	String dmeSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for hospice claims data
+	 */
+	String hospiceSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for SNF claims data
+	 */
+	String snfSheet();
 }

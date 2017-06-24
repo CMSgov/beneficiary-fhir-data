@@ -85,13 +85,9 @@ public final class SampleDataColumnsTest {
 				 * Remove from consideration the processing metadata columns
 				 * that intentionally aren't in the enums.
 				 */
-				// TODO remove if-guard once JPA-ification complete
-				if (sampleFile.getRifFileType() == RifFileType.BENEFICIARY
-						|| sampleFile.getRifFileType() == RifFileType.CARRIER) {
-					List<String> metadataColumns = Arrays.asList("VERSION", "DML_IND");
-					columnsInSample = Arrays.stream(columnsInSample).filter(c -> !metadataColumns.contains(c))
-							.toArray(String[]::new);
-				}
+				List<String> metadataColumns = Arrays.asList("VERSION", "DML_IND");
+				columnsInSample = Arrays.stream(columnsInSample).filter(c -> !metadataColumns.contains(c))
+						.toArray(String[]::new);
 
 				Assert.assertEquals(
 						String.format("Column count mismatch for '%s'.\nSample Columns: %s\nEnum Columns:   %s\n",

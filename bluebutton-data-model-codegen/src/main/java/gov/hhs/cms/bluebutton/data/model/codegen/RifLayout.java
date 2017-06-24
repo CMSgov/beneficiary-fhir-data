@@ -118,6 +118,20 @@ public final class RifLayout {
 			String rifColumnLabel = row.getCell(7).getStringCellValue();
 			String javaFieldName = row.getCell(8).getStringCellValue();
 
+			// FIXME remove workarounds once CBBD-283 is resolved
+			if ("HHA,Hospice,Inpatient,Outpatient,SNF".contains(sheetName) && "AT_PHYSN_UPIN".equals(rifColumnName))
+				rifColumnLength = Optional.of(9);
+			if ("Inpatient,Outpatient,SNF".contains(sheetName) && "OP_PHYSN_UPIN".equals(rifColumnName))
+				rifColumnLength = Optional.of(9);
+			if ("Hospice".contains(sheetName) && "BENE_HOSPC_PRD_CNT".equals(rifColumnName))
+				rifColumnLength = Optional.of(2);
+			if ("Inpatient,Outpatient,SNF".contains(sheetName) && "OT_PHYSN_UPIN".equals(rifColumnName))
+				rifColumnLength = Optional.of(9);
+			if ("HHA,Hospice,Inpatient,Outpatient,SNF".contains(sheetName) && "PRVDR_NUM".equals(rifColumnName))
+				rifColumnLength = Optional.of(9);
+			if ("HHA".contains(sheetName) && "CLM_HHA_TOT_VISIT_CNT".equals(rifColumnName))
+				rifColumnLength = Optional.of(4);
+
 			rifFields.add(new RifField(rifColumnName, rifColumnType, rifColumnLength, rifColumnScale, rifColumnOptional,
 					dataDictionaryEntry, rifColumnLabel, javaFieldName));
 		}

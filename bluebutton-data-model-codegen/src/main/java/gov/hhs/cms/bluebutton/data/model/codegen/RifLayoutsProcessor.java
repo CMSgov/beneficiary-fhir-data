@@ -170,9 +170,37 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntity("Beneficiary").setHeaderTable("Beneficiaries")
 					.setHeaderEntityIdField("beneficiaryId").setHasLines(false));
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
+					.setHeaderEntity("PartDEvent").setHeaderTable("PartDEvents").setHeaderEntityIdField("eventId")
+					.setHasLines(false));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
 					.setHeaderEntity("CarrierClaim").setHeaderTable("CarrierClaims").setHeaderEntityIdField("claimId")
 					.setHasLines(true).setLineTable("CarrierClaimLines"));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
+					.setHeaderEntity("InpatientClaim").setHeaderTable("InpatientClaims")
+					.setHeaderEntityIdField("claimId").setHasLines(true).setLineTable("InpatientClaimLines"));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
+					.setHeaderEntity("OutpatientClaim").setHeaderTable("OutpatientClaims")
+					.setHeaderEntityIdField("claimId").setHasLines(true).setLineTable("OutpatientClaimLines"));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hhaSheet()))
+					.setHeaderEntity("HHAClaim").setHeaderTable("HHAClaims").setHeaderEntityIdField("claimId")
+					.setHasLines(true).setLineTable("HHAClaimLines"));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.dmeSheet()))
+					.setHeaderEntity("DMEClaim").setHeaderTable("DMEClaims").setHeaderEntityIdField("claimId")
+					.setHasLines(true).setLineTable("DMEClaimLines"));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hospiceSheet()))
+					.setHeaderEntity("HospiceClaim").setHeaderTable("HospiceClaims").setHeaderEntityIdField("claimId")
+					.setHasLines(true).setLineTable("HospiceClaimLines"));
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
+					.setHeaderEntity("SNFClaim").setHeaderTable("SNFClaims").setHeaderEntityIdField("claimId")
+					.setHasLines(true).setLineTable("SNFClaimLines"));
 		} finally {
 			if (spreadsheetWorkbook != null)
 				spreadsheetWorkbook.close();
@@ -763,7 +791,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0)
 			return ClassName.get(BigDecimal.class);
 		else if (rifField.getRifColumnType() == RifColumnType.NUM
-				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0)
+				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0 && !rifField.isRifColumnOptional())
+			return TypeName.INT;
+		else if (rifField.getRifColumnType() == RifColumnType.NUM
+				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0 && rifField.isRifColumnOptional())
 			return ClassName.get(Integer.class);
 		else
 			throw new IllegalArgumentException("Unhandled field type: " + rifField);

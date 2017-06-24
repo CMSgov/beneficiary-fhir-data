@@ -8,19 +8,19 @@ public enum RifFileType {
 
 	CARRIER(CarrierClaimColumn.CLM_ID),
 
-	DME(DMEClaimGroup.Column.CLM_ID),
+	DME(DMEClaimColumn.CLM_ID),
 
-	HHA(HHAClaimGroup.Column.CLM_ID),
+	HHA(HHAClaimColumn.CLM_ID),
 
-	HOSPICE(HospiceClaimGroup.Column.CLM_ID),
+	HOSPICE(HospiceClaimColumn.CLM_ID),
 
-	INPATIENT(InpatientClaimGroup.Column.CLM_ID),
+	INPATIENT(InpatientClaimColumn.CLM_ID),
 
-	OUTPATIENT(OutpatientClaimGroup.Column.CLM_ID),
+	OUTPATIENT(OutpatientClaimColumn.CLM_ID),
 
-	PDE(PartDEventRow.Column.PDE_ID),
+	PDE(PartDEventColumn.PDE_ID),
 
-	SNF(SNFClaimGroup.Column.CLM_ID);
+	SNF(SNFClaimColumn.CLM_ID);
 
 	private final Enum<?> idColumn;
 
