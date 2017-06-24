@@ -67,7 +67,7 @@ public final class DatabaseSchemaManager {
 			 * Run Liquibase to apply the entire schema change log.
 			 */
 			try {
-				liquibase.update(new Contexts("", "primaryKeys"));
+				liquibase.update(new Contexts("", "!primaryKeys", "!foreignKeys"));
 			} catch (LiquibaseException e) {
 				throw new UncheckedLiquibaseException(e);
 			}
