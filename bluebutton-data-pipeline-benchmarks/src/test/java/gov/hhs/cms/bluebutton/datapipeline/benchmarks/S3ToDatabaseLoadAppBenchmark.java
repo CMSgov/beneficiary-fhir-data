@@ -111,10 +111,18 @@ public final class S3ToDatabaseLoadAppBenchmark {
 	private static final int MAX_ACTIVE_ENVIRONMENTS = 10;
 
 	/**
+	 * The name of the S3 {@link Bucket} that will be used to transfer benchmark
+	 * resources (e.g. the application being benchmarked) to the benchmark
+	 * systems. Note that this bucket name is also used by the Ansible scripts
+	 * -- if it's changed here it needs to be adjusted in the scripts, as well.
+	 */
+	private static final String BUCKET_BENCHMARK_RESOURCES = "gov-hhs-cms-bluebutton-datapipeline-benchmark-resources";
+
+	/**
 	 * The name of the S3 {@link Bucket} to store the original copy of the RIF
 	 * data set to benchmark the processing of in.
 	 */
-	private static final String BUCKET_DATA_SET_MASTER = "gov.hhs.cms.bluebutton.datapipeline.benchmark.dataset";
+	private static final String BUCKET_DATA_SET_MASTER = "gov-hhs-cms-bluebutton-datapipeline-benchmark-dataset";
 
 	/**
 	 * Benchmarks against {@link StaticRifResourceGroup#SAMPLE_B}.
@@ -182,7 +190,7 @@ public final class S3ToDatabaseLoadAppBenchmark {
 		Bucket dataSetBucket = null;
 		List<BenchmarkResult> benchmarkResults;
 		try {
-			resourcesBucket = s3Client.createBucket("gov.hhs.cms.bluebutton.datapipeline.benchmark.resources");
+			resourcesBucket = s3Client.createBucket(BUCKET_BENCHMARK_RESOURCES);
 			pushResourcesToS3(s3Client, resourcesBucket);
 			dataSetBucket = s3Client.createBucket(BUCKET_DATA_SET_MASTER);
 			pushDataSetToS3(s3Client, dataSetBucket, sampleResources);
