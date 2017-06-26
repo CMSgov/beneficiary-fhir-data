@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -458,7 +459,7 @@ public final class RifLoader {
 	private void logRecordCounts() {
 		Timer.Context timerCounting = metrics.timer(MetricRegistry.name(getClass(), "timer", "recordCounting")).time();
 		String entityTypeCounts = entityManagerFactory.getMetamodel().getManagedTypes().stream()
-				.map(t -> t.getJavaType()).map(t -> {
+				.map(t -> t.getJavaType()).sorted(Comparator.comparing(Class::getName)).map(t -> {
 					long entityTypeRecordCount = queryForEntityCount(t);
 					return String.format("%s: %d", t.getSimpleName(), entityTypeRecordCount);
 				}).collect(Collectors.joining(", "));

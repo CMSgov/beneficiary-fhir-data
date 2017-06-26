@@ -126,7 +126,7 @@ public final class RifFilesProcessor {
 				else if (o1.getFileType() != RifFileType.BENEFICIARY && o2.getFileType() == RifFileType.BENEFICIARY)
 					return 1;
 				else
-					return 0;
+					return Integer.compare(o1.getFileType().ordinal(), o2.getFileType().ordinal());
 			}
 		};
 		Collections.sort(filesOrderedSafely, someComparator);
