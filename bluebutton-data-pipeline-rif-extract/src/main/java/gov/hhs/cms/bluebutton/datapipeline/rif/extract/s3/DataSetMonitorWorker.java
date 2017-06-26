@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -270,12 +271,12 @@ public final class DataSetMonitorWorker implements Runnable {
 		 */
 		LOGGER.info("Data set ready. Processing it...");
 		Instant dataSetManifestTimestamp = manifestToProcess.getTimestamp();
-		Set<S3RifFile> rifFiles = manifestToProcess.getEntries().stream().map(e -> {
+		List<S3RifFile> rifFiles = manifestToProcess.getEntries().stream().map(e -> {
 			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
 					DateTimeFormatter.ISO_INSTANT.format(dataSetManifestTimestamp), e.getName());
 			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(options.getS3BucketName(), key));
-		}).collect(Collectors.toSet());
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(), new HashSet<>(rifFiles));
+		}).collect(Collectors.toList());
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(), new ArrayList<>(rifFiles));
 
 		/*
 		 * Now we hand that off to the DataSetMonitorListener, to do the *real*

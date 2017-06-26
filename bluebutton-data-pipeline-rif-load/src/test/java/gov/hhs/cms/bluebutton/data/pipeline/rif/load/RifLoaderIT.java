@@ -2,8 +2,8 @@ package gov.hhs.cms.bluebutton.data.pipeline.rif.load;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -60,9 +60,10 @@ public final class RifLoaderIT {
 	 */
 	private void loadSample(StaticRifResourceGroup sampleGroup) {
 		// Generate the sample RIF data to feed through the pipeline.
-		Set<StaticRifResource> sampleResources = Arrays.stream(sampleGroup.getResources()).collect(Collectors.toSet());
+		List<StaticRifResource> sampleResources = Arrays.stream(sampleGroup.getResources())
+				.filter(r -> r.getRifFileType() != RifFileType.PDE).collect(Collectors.toList());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
-				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toSet()));
+				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
 		// Setup the metrics that we'll log to.
 		MetricRegistry metrics = new MetricRegistry();
