@@ -9,52 +9,38 @@ package gov.hhs.cms.bluebutton.data.model.rif;
  *            the record type stored in this {@link RifRecordEvent}
  */
 public final class RifRecordEvent<R> {
-	private final RifFilesEvent filesEvent;
-	private final RifFile file;
+	private final RifFileEvent fileEvent;
 	private final RecordAction recordAction;
 	private final R record;
 
 	/**
 	 * Constructs a new {@link RifRecordEvent} instance.
 	 * 
-	 * @param filesEvent
-	 *            the value to use for {@link #getFilesEvent()}
-	 * @param file
-	 *            the value to use for {@link #getFile()}
+	 * @param fileEvent
+	 *            the value to use for {@link #getFileEvent()}
 	 * @param recordAction
 	 *            the value to use for {@link #getRecordAction()}
 	 * @param record
 	 *            the value to use for {@link #getRecord()}
 	 */
-	public RifRecordEvent(RifFilesEvent filesEvent, RifFile file, RecordAction recordAction, R record) {
-		if (filesEvent == null)
-			throw new IllegalArgumentException();
-		if (file == null)
+	public RifRecordEvent(RifFileEvent fileEvent, RecordAction recordAction, R record) {
+		if (fileEvent == null)
 			throw new IllegalArgumentException();
 		if (recordAction == null)
 			throw new IllegalArgumentException();
 		if (record == null)
 			throw new IllegalArgumentException();
 
-		this.filesEvent = filesEvent;
-		this.file = file;
+		this.fileEvent = fileEvent;
 		this.recordAction = recordAction;
 		this.record = record;
 	}
 
 	/**
-	 * @return the {@link RifFilesEvent} that this is a child of
+	 * @return the {@link RifFileEvent} that this is a child of
 	 */
-	public RifFilesEvent getFilesEvent() {
-		return filesEvent;
-	}
-
-	/**
-	 * @return the specific {@link RifFile} that this {@link RifRecordEvent}'s
-	 *         data is from
-	 */
-	public RifFile getFile() {
-		return file;
+	public RifFileEvent getFileEvent() {
+		return fileEvent;
 	}
 
 	/**
@@ -78,10 +64,8 @@ public final class RifRecordEvent<R> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RifRecordEvent [filesEvent=");
-		builder.append(filesEvent);
-		builder.append(", file=");
-		builder.append(file);
+		builder.append("RifRecordEvent [fileEvent=");
+		builder.append(fileEvent);
 		builder.append(", recordAction=");
 		builder.append(recordAction);
 		builder.append(", record=");

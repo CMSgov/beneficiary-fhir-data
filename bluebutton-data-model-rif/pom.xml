@@ -55,6 +55,11 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
+		<dependency>
+			<!-- Used to monitor performance and other statistics at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-core</artifactId>
+		</dependency>
 
 		<dependency>
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
