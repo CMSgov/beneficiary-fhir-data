@@ -68,6 +68,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimCsvWriter;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
@@ -241,7 +242,7 @@ public final class RifLoader {
 	 *            successfully-processed input {@link RifRecordEvent}s, which
 	 *            will be run on the caller's thread
 	 */
-	public void process(Stream<RifRecordEvent<?>> dataToLoad, Consumer<Throwable> errorHandler,
+	public void process(RifFileRecords dataToLoad, Consumer<Throwable> errorHandler,
 			Consumer<RifRecordLoadResult> resultHandler) {
 		LOGGER.trace("Started process(...)...");
 
@@ -323,7 +324,7 @@ public final class RifLoader {
 			};
 
 			// Collect records into batches and submit each to batchProcessor.
-			BatchSpliterator.batches(dataToLoad, RECORD_BATCH_SIZE).forEach(batchProcessor);
+			BatchSpliterator.batches(dataToLoad.getRecords(), RECORD_BATCH_SIZE).forEach(batchProcessor);
 
 			// Wait for all submitted batches to complete.
 			phaser.arriveAndAwaitAdvance();

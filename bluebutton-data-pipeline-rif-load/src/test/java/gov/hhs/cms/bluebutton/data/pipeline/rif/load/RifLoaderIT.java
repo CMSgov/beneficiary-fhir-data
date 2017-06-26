@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.persistence.EntityManagerFactory;
 
@@ -20,8 +19,9 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
-import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifRecordLoadResult.LoadAction;
@@ -75,8 +75,8 @@ public final class RifLoaderIT {
 		LOGGER.info("Loading RIF records...");
 		AtomicInteger failureCount = new AtomicInteger(0);
 		Queue<RifRecordLoadResult> successfulRecords = new ConcurrentLinkedQueue<>();
-		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
-			loader.process(rifRecordEvents, error -> {
+		for (RifFileRecords rifFileRecords : processor.process(rifFilesEvent)) {
+			loader.process(rifFileRecords, error -> {
 				failureCount.incrementAndGet();
 				LOGGER.warn("Record(s) failed to load.", error);
 			}, result -> {
@@ -98,8 +98,8 @@ public final class RifLoaderIT {
 		 * be found in the database.
 		 */
 		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory();
-		for (Stream<RifRecordEvent<?>> rifRecordEventsCopy : processor.process(rifFilesEvent)) {
-			rifRecordEventsCopy.forEach(r -> {
+		for (RifFileRecords rifFileRecordsCopy : processor.process(rifFilesEvent)) {
+			rifFileRecordsCopy.getRecords().forEach(r -> {
 				assertIsInDatabase(entityManagerFactory, r.getRecord());
 			});
 		}

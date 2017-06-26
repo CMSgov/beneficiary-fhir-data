@@ -39,6 +39,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEventParser;
 import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
@@ -91,32 +92,16 @@ public final class RifFilesProcessor {
 	 * {@link RifFile}s is functioning correctly (i.e. it's producing and
 	 * pushing files to S3 in the correct order), it is always safe to process a
 	 * single {@link RifFile}, if it's the only one found/available. There is no
-	 * need to wait for a "full" set of {@link RifFile}s to be present. The
-	 * above constraints only impact this class' behavior when multiple RIF
-	 * files are found/available at the same time.
+	 * need to wait for a "full" complement of {@link RifFilesEvent}s to be
+	 * present. The above constraints only impact this class' behavior when
+	 * multiple RIF files are found/available at the same time.
 	 * </p>
 	 * 
 	 * @param event
 	 *            the {@link RifFilesEvent} to be processed
-	 * @return a {@link List} of {@link RifRecordEvent} {@link Stream}s, one
-	 *         {@link Stream} per {@link RifFile}, where each {@link Stream}
-	 *         must be processed serially in a single thread, to avoid data race
-	 *         conditions
+	 * @return a {@link List} of {@link RifFileRecords}, one per {@link RifFile}
 	 */
-	public List<Stream<RifRecordEvent<?>>> process(RifFilesEvent event) {
-		/*
-		 * Given that the bottleneck in our ETL processing is the Load phase
-		 * (and likely always will be, due to network overhead and the FHIR
-		 * server's performance), the Extract and Transform phases are
-		 * single-threaded and likely to remain so. This allows the system to
-		 * prevent resource over-consumption by blocking in the Load phase: the
-		 * Load phase should block the Extract and Load phases' thread if too
-		 * many records are in-flight at once. This is effectively backpressure,
-		 * which will keep the Extract phase from over-producing and blowing the
-		 * heap.
-		 */
-		// TODO test the above assertions, to ensure I'm not a liar
-
+	public List<RifFileRecords> process(RifFilesEvent event) {
 		List<RifFile> filesOrderedSafely = new ArrayList<>(event.getFiles());
 		Comparator<RifFile> someComparator = new Comparator<RifFile>() {
 			@Override
@@ -131,14 +116,9 @@ public final class RifFilesProcessor {
 		};
 		Collections.sort(filesOrderedSafely, someComparator);
 
-		/*
-		 * FIXME I've got a resource ownership problem: no way to tell when the
-		 * stream is fully mapped, such that it's safe to close the parser.
-		 */
-
-		List<Stream<RifRecordEvent<?>>> recordProducer = filesOrderedSafely.stream()
-				.map(file -> produceRecords(event, file)).collect(Collectors.toList());
-		return recordProducer;
+		List<RifFileRecords> recordsBundles = filesOrderedSafely.stream().map(file -> produceRecords(event, file))
+				.collect(Collectors.toList());
+		return recordsBundles;
 	}
 
 	/**
@@ -146,10 +126,10 @@ public final class RifFilesProcessor {
 	 *            the {@link RifFilesEvent} that is being processed
 	 * @param file
 	 *            the {@link RifFile} to produce {@link RifRecordEvent}s from
-	 * @return a {@link Stream} that produces the {@link RifRecordEvent}s
-	 *         represented in the specified {@link RifFile}
+	 * @return a {@link RifFileRecords} with the {@link RifRecordEvent}s
+	 *         produced from the specified {@link RifFile}
 	 */
-	private Stream<RifRecordEvent<?>> produceRecords(RifFilesEvent rifFilesEvent, RifFile file) {
+	private RifFileRecords produceRecords(RifFilesEvent rifFilesEvent, RifFile file) {
 		/*
 		 * Approach used here to parse CSV as a Java 8 Stream is courtesy of
 		 * https://rumianom.pl/rumianom/entry/apache-commons-csv-with-java.
@@ -217,13 +197,12 @@ public final class RifFilesProcessor {
 				RifRecordEvent<?> recordEvent = recordParser.apply(rifFilesEvent, file, csvRecordGroup);
 				return recordEvent;
 			} catch (InvalidRifValueException e) {
-				LOGGER.warn("Parse error encountered near line number '{}'.",
-						csvRecordGroup.get(0).getRecordNumber());
+				LOGGER.warn("Parse error encountered near line number '{}'.", csvRecordGroup.get(0).getRecordNumber());
 				throw new InvalidRifValueException(e);
 			}
 		});
 
-		return rifRecordStream;
+		return new RifFileRecords(rifFilesEvent, file, rifRecordStream);
 	}
 
 	/**
@@ -333,8 +312,8 @@ public final class RifFilesProcessor {
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<OutpatientClaim> buildOutpatientClaimEvent(RifFilesEvent filesEvent,
-			RifFile file, List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<OutpatientClaim> buildOutpatientClaimEvent(RifFilesEvent filesEvent, RifFile file,
+			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 

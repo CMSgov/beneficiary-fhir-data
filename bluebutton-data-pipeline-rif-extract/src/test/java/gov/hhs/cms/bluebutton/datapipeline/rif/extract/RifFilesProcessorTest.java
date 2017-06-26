@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -29,6 +28,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
@@ -50,11 +50,11 @@ public final class RifFilesProcessorTest {
 	public void process1BeneRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_BENES.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENES.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -92,11 +92,11 @@ public final class RifFilesProcessorTest {
 	public void processBeneRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_BENES.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_BENES.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -110,11 +110,11 @@ public final class RifFilesProcessorTest {
 	public void process1PDERecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_PDE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_PDE.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -173,11 +173,11 @@ public final class RifFilesProcessorTest {
 	public void processPDERecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_PDE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_PDE.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_PDE.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -191,11 +191,11 @@ public final class RifFilesProcessorTest {
 	public void process1CarrierClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_CARRIER.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_CARRIER.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -303,11 +303,11 @@ public final class RifFilesProcessorTest {
 	public void processCarrierClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_CARRIER.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_CARRIER.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_CARRIER.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -321,11 +321,11 @@ public final class RifFilesProcessorTest {
 	public void process1InpatientClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_INPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_INPATIENT.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -411,11 +411,11 @@ public final class RifFilesProcessorTest {
 	public void processInpatientClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_INPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_INPATIENT.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_INPATIENT.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -429,11 +429,11 @@ public final class RifFilesProcessorTest {
 	public void process1OutpatientClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_OUTPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_OUTPATIENT.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -497,11 +497,11 @@ public final class RifFilesProcessorTest {
 	public void processOutpatientClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_OUTPATIENT.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_OUTPATIENT.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_OUTPATIENT.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -515,11 +515,11 @@ public final class RifFilesProcessorTest {
 	public void process1SNFClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_SNF.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_SNF.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -598,11 +598,11 @@ public final class RifFilesProcessorTest {
 	public void processSNFClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_SNF.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_SNF.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_SNF.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -616,11 +616,11 @@ public final class RifFilesProcessorTest {
 	public void process1HospiceClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_HOSPICE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_HOSPICE.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -675,11 +675,11 @@ public final class RifFilesProcessorTest {
 	public void processHospiceClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HOSPICE.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_HOSPICE.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_HOSPICE.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -693,11 +693,11 @@ public final class RifFilesProcessorTest {
 	public void process1HHAClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_HHA.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_HHA.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -751,11 +751,11 @@ public final class RifFilesProcessorTest {
 	public void processHHAClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_HHA.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		Assert.assertEquals(1, rifEvents.size());
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		Assert.assertEquals(1, recordsBundles.size());
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_HHA.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_HHA.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());
@@ -769,10 +769,10 @@ public final class RifFilesProcessorTest {
 	public void process1DMEClaimRecord() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_A_DME.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_A_DME.getRecordCount(), rifEventsList.size());
 
 		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
@@ -861,10 +861,10 @@ public final class RifFilesProcessorTest {
 	public void processDMEClaimRecords() {
 		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(), StaticRifResource.SAMPLE_B_DME.toRifFile());
 		RifFilesProcessor processor = new RifFilesProcessor();
-		List<Stream<RifRecordEvent<?>>> rifEvents = processor.process(filesEvent);
+		List<RifFileRecords> recordsBundles = processor.process(filesEvent);
 
-		Assert.assertNotNull(rifEvents);
-		List<RifRecordEvent<?>> rifEventsList = rifEvents.get(0).collect(Collectors.toList());
+		Assert.assertNotNull(recordsBundles);
+		List<RifRecordEvent<?>> rifEventsList = recordsBundles.get(0).getRecords().collect(Collectors.toList());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_DME.getRecordCount(), rifEventsList.size());
 		Assert.assertEquals(StaticRifResource.SAMPLE_B_DME.getRifFileType(),
 				rifEventsList.get(0).getFile().getFileType());

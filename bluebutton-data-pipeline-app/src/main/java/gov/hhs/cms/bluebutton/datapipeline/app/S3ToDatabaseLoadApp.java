@@ -4,7 +4,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +14,8 @@ import com.codahale.metrics.Timer;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
-import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoader;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifRecordLoadResult;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
@@ -119,11 +118,11 @@ public final class S3ToDatabaseLoadApp {
 				 * Each ETL stage produces a stream that will be handed off to
 				 * and processed by the next stage.
 				 */
-				for (Stream<RifRecordEvent<?>> rifRecordStream : rifProcessor.process(rifFilesEvent)) {
+				for (RifFileRecords rifFileRecords : rifProcessor.process(rifFilesEvent)) {
 					Timer.Context timerDataSetFile = metrics
 							.timer(MetricRegistry.name(S3ToDatabaseLoadApp.class, "dataSet", "file", "processed")).time();
 
-					rifLoader.process(rifRecordStream, errorHandler, resultHandler);
+					rifLoader.process(rifFileRecords, errorHandler, resultHandler);
 					timerDataSetFile.stop();
 				}
 				timerDataSet.stop();
