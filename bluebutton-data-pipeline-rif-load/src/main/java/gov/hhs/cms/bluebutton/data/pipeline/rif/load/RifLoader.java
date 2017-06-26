@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -77,6 +78,13 @@ import gov.hhs.cms.bluebutton.data.pipeline.rif.schema.DatabaseSchemaManager;
  * Blue Button API's database.
  */
 public final class RifLoader {
+	/**
+	 * The number of {@link RifRecordEvent}s that will be included in each
+	 * processing batch. Note that larger batch sizes mean that more
+	 * {@link RifRecordEvent}s will be held in memory simultaneously.
+	 */
+	private static final int RECORD_BATCH_SIZE = 1000;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifLoader.class);
 
 	private final LoadAppOptions options;
@@ -157,6 +165,7 @@ public final class RifLoader {
 		Map<String, Object> hibernateProperties = new HashMap<>();
 		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
 		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, RECORD_BATCH_SIZE);
 
 		EntityManagerFactory entityManagerFactory = Persistence
 				.createEntityManagerFactory("gov.hhs.cms.bluebutton.data", hibernateProperties);
@@ -247,7 +256,8 @@ public final class RifLoader {
 		 * always run in a consistent manner.
 		 */
 
-		Function<Throwable, ? extends RifRecordLoadResult> errorHandlerWrapper = error -> {
+		// Define the batch error handler.
+		Function<Throwable, ? extends List<RifRecordLoadResult>> errorHandlerWrapper = error -> {
 			errorHandler.accept(error);
 
 			/*
@@ -257,6 +267,11 @@ public final class RifLoader {
 			 */
 
 			return null;
+		};
+
+		// Define the batch (successful) result handler.
+		Consumer<List<RifRecordLoadResult>> batchResultHandler = batchResult -> {
+			batchResult.forEach(recordResult -> resultHandler.accept(recordResult));
 		};
 
 		try (PostgreSqlCopyInserter postgresBatch = new PostgreSqlCopyInserter(entityManagerFactory, metrics)) {
@@ -272,15 +287,16 @@ public final class RifLoader {
 			 */
 			Phaser phaser = new Phaser(1);
 
-			// Submit every record in the stream for loading.
-			dataToLoad.forEach(rifRecordEvent -> {
+			// Define the Consumer that will handle each batch.
+			Consumer<List<RifRecordEvent<?>>> batchProcessor = recordsBatch -> {
 				/*
-				 * Increment the Phaser to mark that a new task is pending.
+				 * Increment the Phaser to mark that a new batch is pending.
 				 * Then, create the decrementer function that we will register
 				 * with the task's CompletableFuture.
 				 */
 				phaser.register();
-				BiFunction<RifRecordLoadResult, Throwable, RifRecordLoadResult> phaserDecrementer = (r, t) -> {
+				BiFunction<List<RifRecordLoadResult>, Throwable, List<RifRecordLoadResult>> phaserDecrementer = (r,
+						t) -> {
 					phaser.arriveAndDeregister();
 					return r != null ? r : null;
 				};
@@ -292,17 +308,21 @@ public final class RifLoader {
 				 * pending. That's desirable behavior, as it prevents
 				 * OutOfMemoryErrors.
 				 */
-				CompletableFuture<RifRecordLoadResult> recordResultFuture = processAsync(rifRecordEvent, postgresBatch);
+				CompletableFuture<List<RifRecordLoadResult>> recordResultFuture = processAsync(recordsBatch,
+						postgresBatch);
 
 				/*
 				 * Wire the up the Future to notify the Phaser decrementer and
 				 * error/result handler, as appropriate, when it completes.
 				 */
 				recordResultFuture.handle(phaserDecrementer).exceptionally(errorHandlerWrapper)
-						.thenAccept(resultHandler);
-			});
+						.thenAccept(batchResultHandler);
+			};
 
-			// Wait for all submitted tasks to complete.
+			// Collect records into batches and submit each to batchProcessor.
+			BatchSpliterator.batches(dataToLoad, RECORD_BATCH_SIZE).forEach(batchProcessor);
+
+			// Wait for all submitted batches to complete.
 			phaser.arriveAndAwaitAdvance();
 
 			// Submit the queued PostgreSQL COPY operations, if any.
@@ -316,108 +336,115 @@ public final class RifLoader {
 	}
 
 	/**
-	 * @param rifRecordEvent
-	 *            the {@link RifRecordEvent} to process
+	 * @param recordsBatch
+	 *            the {@link RifRecordEvent}s to process
 	 * @param postgresBatch
 	 *            the {@link PostgreSqlCopyInserter} for the current set of
 	 *            {@link RifFilesEvent}s being processed
-	 * @return a {@link CompletableFuture} for the {@link RifRecordLoadResult}
-	 *         that models the results of the operation
+	 * @return a {@link CompletableFuture}s for the {@link RifRecordLoadResult}s
+	 *         that model the results of the operation
 	 */
-	private CompletableFuture<RifRecordLoadResult> processAsync(RifRecordEvent<?> rifRecordEvent,
+	private CompletableFuture<List<RifRecordLoadResult>> processAsync(List<RifRecordEvent<?>> recordsBatch,
 			PostgreSqlCopyInserter postgresBatch) {
 		return CompletableFuture.supplyAsync(() -> {
-			return process(rifRecordEvent, postgresBatch);
+			return process(recordsBatch, postgresBatch);
 		}, loadExecutorService);
 	}
 
 	/**
-	 * @param rifRecordEvent
-	 *            the {@link RifRecordEvent} to process
+	 * @param recordsBatch
+	 *            the {@link RifRecordEvent}s to process
 	 * @param postgresBatch
 	 *            the {@link PostgreSqlCopyInserter} for the current set of
 	 *            {@link RifFilesEvent}s being processed
-	 * @return the {@link RifRecordLoadResult} that models the results of the
+	 * @return the {@link RifRecordLoadResult}s that model the results of the
 	 *         operation
 	 */
-	public RifRecordLoadResult process(RifRecordEvent<?> rifRecordEvent, PostgreSqlCopyInserter postgresBatch) {
+	private List<RifRecordLoadResult> process(List<RifRecordEvent<?>> recordsBatch,
+			PostgreSqlCopyInserter postgresBatch) {
 		// TODO make the features configurable
 		LoadFeatures features = new LoadFeatures(false, false);
 		LoadStrategy strategy = selectStrategy(features);
 
-		String rifFileType = rifRecordEvent.getFile().getFileType().name();
+		RifFileType rifFileType = recordsBatch.get(0).getFile().getFileType();
 
-		// If this is a Beneficiary record, first hash its HICN.
-		if (rifRecordEvent.getFile().getFileType() == RifFileType.BENEFICIARY) {
-			hashBeneficiaryHicn(rifRecordEvent);
+		// If these are Beneficiary records, first hash their HICNs.
+		if (rifFileType == RifFileType.BENEFICIARY) {
+			for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+				hashBeneficiaryHicn(rifRecordEvent);
 		}
 
 		// Only one of each failure/success Timer.Contexts will be applied.
-		Timer.Context timerBundleSuccess = metrics.timer(MetricRegistry.name(getClass(), "timer", "records", "loaded"))
-				.time();
-		Timer.Context timerBundleTypeSuccess = metrics
-				.timer(MetricRegistry.name(getClass(), "timer", "records", rifFileType, "loaded")).time();
-		Timer.Context timerBundleFailure = metrics.timer(MetricRegistry.name(getClass(), "timer", "records", "failed"))
-				.time();
-		Timer.Context timerBundleTypeFailure = metrics.timer(MetricRegistry.name(getClass(), "timer", "records",
-				rifRecordEvent.getFile().getFileType().name(), "failed")).time();
+		Timer.Context timerBatchSuccess = metrics
+				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", "loaded")).time();
+		Timer.Context timerBatchTypeSuccess = metrics
+				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", rifFileType.name(), "loaded")).time();
+		Timer.Context timerBundleFailure = metrics
+				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", "failed")).time();
+		Timer.Context timerBundleTypeFailure = metrics
+				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", rifFileType.name(), "failed")).time();
 
 		EntityManager entityManager = null;
 		try {
-			/*
-			 * FIXME A batch size of 1 RIF record ain't great. But fixing that
-			 * is an optimization for a later date.
-			 */
+			entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
 
-			/*
-			 * If we can, load the record using PostgreSQL's native copy APIs,
-			 * which are ludicrously fast.
-			 */
-			LoadAction loadAction;
-			if (strategy == LoadStrategy.COPY_NON_IDEMPOTENT
-					&& rifRecordEvent.getRecordAction() == RecordAction.INSERT) {
-				postgresBatch.add(rifRecordEvent.getRecord());
-				loadAction = LoadAction.QUEUED;
-			} else {
-				// Push the record, if it's not already in DB.
-				LOGGER.trace("Loading '{}' record.", rifFileType);
-				entityManager = entityManagerFactory.createEntityManager();
-				entityManager.getTransaction().begin();
-
+			List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
+			for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
 				Object record = rifRecordEvent.getRecord();
-				if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
-					Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
-					Objects.requireNonNull(recordId);
-					if (entityManager.find(record.getClass(), recordId) == null) {
+
+				/*
+				 * If we can, load the record using PostgreSQL's native copy
+				 * APIs, which are ludicrously fast.
+				 */
+				LoadAction loadAction;
+				if (strategy == LoadStrategy.COPY_NON_IDEMPOTENT
+						&& rifRecordEvent.getRecordAction() == RecordAction.INSERT) {
+					postgresBatch.add(record);
+					loadAction = LoadAction.QUEUED;
+				} else {
+					// Push the record, if it's not already in DB.
+					LOGGER.trace("Loading '{}' record.", rifFileType);
+
+					if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
+						Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
+						Objects.requireNonNull(recordId);
+						if (entityManager.find(record.getClass(), recordId) == null) {
+							loadAction = LoadAction.INSERTED;
+							entityManager.persist(record);
+						} else {
+							loadAction = LoadAction.DID_NOTHING;
+						}
+					} else if (strategy == LoadStrategy.INSERT_NON_IDEMPOTENT) {
 						loadAction = LoadAction.INSERTED;
 						entityManager.persist(record);
-					} else {
-						loadAction = LoadAction.DID_NOTHING;
-					}
-				} else if (strategy == LoadStrategy.INSERT_NON_IDEMPOTENT) {
-					loadAction = LoadAction.INSERTED;
-					entityManager.persist(record);
-				} else
-					throw new BadCodeMonkeyException();
+					} else
+						throw new BadCodeMonkeyException();
 
-				entityManager.getTransaction().commit();
-				LOGGER.trace("Loaded '{}' record.", rifFileType);
+					LOGGER.trace("Loaded '{}' record.", rifFileType);
+				}
+
+				metrics.meter(MetricRegistry.name(getClass(), "meter", "records", "loaded")).mark(1);
+				loadResults.add(new RifRecordLoadResult(rifRecordEvent, loadAction));
 			}
 
-			// Update the metrics now that things have been pushed.
-			timerBundleSuccess.stop();
-			timerBundleTypeSuccess.stop();
-			metrics.meter(MetricRegistry.name(getClass(), "meter", "records", "loaded")).mark(1);
+			entityManager.getTransaction().commit();
 
-			return new RifRecordLoadResult(rifRecordEvent, loadAction);
+			// Update the metrics now that things have been pushed.
+			timerBatchSuccess.stop();
+			timerBatchTypeSuccess.stop();
+
+			return loadResults;
 		} catch (Throwable t) {
 			timerBundleFailure.stop();
 			timerBundleTypeFailure.stop();
-			metrics.meter(MetricRegistry.name(getClass(), "meter", "records", "failed")).mark(1);
-			LOGGER.trace("Failed to load '{}' record.", rifFileType);
+			metrics.meter(MetricRegistry.name(getClass(), "meter", "recordBatches", "failed")).mark(1);
+			LOGGER.warn("Failed to load '{}' record.", rifFileType, t);
 
-			throw new RifLoadFailure(rifRecordEvent, t);
+			throw new RifLoadFailure(recordsBatch, t);
 		} finally {
+			if (entityManager != null && entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
 			if (entityManager != null)
 				entityManager.close();
 		}

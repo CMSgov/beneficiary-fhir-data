@@ -1,5 +1,7 @@
 package gov.hhs.cms.bluebutton.data.pipeline.rif.load;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
@@ -14,21 +16,21 @@ public final class RifLoadFailure extends RuntimeException {
 
 	private static final boolean LOG_SOURCE_DATA = false;
 
-	private final RifRecordEvent<?> failedRecordEvent;
+	private final List<RifRecordEvent<?>> failedRecordEvents;
 
 	/**
 	 * Constructs a new {@link RifLoadFailure} instance, for a specific
 	 * {@link RifRecordEvent} failure.
 	 * 
 	 * @param failedRecordEvent
-	 *            the value to use for {@link #getFailedRecordEvent()}
+	 *            the value to use for {@link #getFailedRecordEvents()}
 	 * @param cause
 	 *            the {@link Throwable} that was encountered, when the
 	 *            {@link RifRecordEvent} failed to load
 	 */
 	public RifLoadFailure(RifRecordEvent<?> failedRecordEvent, Throwable cause) {
 		super(buildMessage(failedRecordEvent), cause);
-		this.failedRecordEvent = failedRecordEvent;
+		this.failedRecordEvents = Arrays.asList(failedRecordEvent);
 	}
 
 	/**
@@ -41,7 +43,22 @@ public final class RifLoadFailure extends RuntimeException {
 	 */
 	public RifLoadFailure(Throwable cause) {
 		super(cause);
-		this.failedRecordEvent = null;
+		this.failedRecordEvents = null;
+	}
+
+	/**
+	 * Constructs a new {@link RifLoadFailure} instance, for a failure in
+	 * processing a group of {@link RifRecordEvent}s.
+	 * 
+	 * @param failedRecordEvents
+	 *            the value to use for {@link #getFailedRecordEvents()}
+	 * @param cause
+	 *            the {@link Throwable} that was encountered, when the
+	 *            {@link RifRecordEvent} failed to load
+	 */
+	public RifLoadFailure(List<RifRecordEvent<?>> failedRecordEvents, Throwable cause) {
+		super(buildMessage(failedRecordEvents), cause);
+		this.failedRecordEvents = failedRecordEvents;
 	}
 
 	/**
@@ -58,9 +75,23 @@ public final class RifLoadFailure extends RuntimeException {
 	}
 
 	/**
+	 * @param inputBundle
+	 *            the {@link TransformedBundle} that failed to load
+	 * @return the value to use for {@link #getMessage()}
+	 */
+	private static String buildMessage(List<RifRecordEvent<?>> failedRecordEvents) {
+		if (LOG_SOURCE_DATA)
+			return String.format("Failed to load '%s' records: '%s'.",
+					failedRecordEvents.get(0).getFile().getFileType().name(), failedRecordEvents.toString());
+		else
+			return String.format("Failed to load '%s' records.",
+					failedRecordEvents.get(0).getFile().getFileType().name());
+	}
+
+	/**
 	 * @return the {@link RifRecordEvent} that failed to load, if known
 	 */
-	public Optional<RifRecordEvent<?>> getFailedRecordEvent() {
-		return Optional.ofNullable(failedRecordEvent);
+	public Optional<List<RifRecordEvent<?>>> getFailedRecordEvents() {
+		return Optional.ofNullable(failedRecordEvents);
 	}
 }
