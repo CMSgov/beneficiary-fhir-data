@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -271,6 +271,10 @@ public final class RifLoader {
 
 		// Define the batch (successful) result handler.
 		Consumer<List<RifRecordLoadResult>> batchResultHandler = batchResult -> {
+			// Ignore error results.
+			if (batchResult == null)
+				return;
+
 			batchResult.forEach(recordResult -> resultHandler.accept(recordResult));
 		};
 
@@ -295,10 +299,8 @@ public final class RifLoader {
 				 * with the task's CompletableFuture.
 				 */
 				phaser.register();
-				BiFunction<List<RifRecordLoadResult>, Throwable, List<RifRecordLoadResult>> phaserDecrementer = (r,
-						t) -> {
+				BiConsumer<List<RifRecordLoadResult>, Throwable> phaserDecrementer = (r, t) -> {
 					phaser.arriveAndDeregister();
-					return r != null ? r : null;
 				};
 
 				/*
@@ -315,7 +317,7 @@ public final class RifLoader {
 				 * Wire the up the Future to notify the Phaser decrementer and
 				 * error/result handler, as appropriate, when it completes.
 				 */
-				recordResultFuture.handle(phaserDecrementer).exceptionally(errorHandlerWrapper)
+				recordResultFuture.whenComplete(phaserDecrementer).exceptionally(errorHandlerWrapper)
 						.thenAccept(batchResultHandler);
 			};
 

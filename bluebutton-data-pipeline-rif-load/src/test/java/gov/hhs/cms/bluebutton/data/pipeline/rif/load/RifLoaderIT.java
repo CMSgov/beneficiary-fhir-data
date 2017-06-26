@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,8 +60,7 @@ public final class RifLoaderIT {
 	 */
 	private void loadSample(StaticRifResourceGroup sampleGroup) {
 		// Generate the sample RIF data to feed through the pipeline.
-		Set<StaticRifResource> sampleResources = Arrays.stream(sampleGroup.getResources())
-				.collect(Collectors.toSet());
+		Set<StaticRifResource> sampleResources = Arrays.stream(sampleGroup.getResources()).collect(Collectors.toSet());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
 				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toSet()));
 
@@ -73,11 +73,12 @@ public final class RifLoaderIT {
 
 		// Link up the pipeline and run it.
 		LOGGER.info("Loading RIF records...");
+		AtomicInteger failureCount = new AtomicInteger(0);
 		Queue<RifRecordLoadResult> successfulRecords = new ConcurrentLinkedQueue<>();
 		for (Stream<RifRecordEvent<?>> rifRecordEvents : processor.process(rifFilesEvent)) {
 			loader.process(rifRecordEvents, error -> {
+				failureCount.incrementAndGet();
 				LOGGER.warn("Record(s) failed to load.", error);
-				throw new RuntimeException(error);
 			}, result -> {
 				successfulRecords.add(result);
 			});
@@ -87,7 +88,8 @@ public final class RifLoaderIT {
 		metricsReporter.report();
 
 		// Verify that the expected number of records were run successfully.
-		// FIXME remove suucessfulRecords filter once CBBD-266 is resolved
+		Assert.assertEquals(0, failureCount.get());
+		// FIXME remove successfulRecords filter once CBBD-266 is resolved
 		Assert.assertEquals(sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
 				successfulRecords.stream().filter(r -> r.getLoadAction() == LoadAction.INSERTED).count());
 
