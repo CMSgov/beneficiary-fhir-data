@@ -69,9 +69,10 @@ public final class RifLoadFailure extends RuntimeException {
 	private static String buildMessage(RifRecordEvent<?> failedRecordEvent) {
 		if (LOG_SOURCE_DATA)
 			return String.format("Failed to load a '%s' record: '%s'.",
-					failedRecordEvent.getFile().getFileType().name(), failedRecordEvent.toString());
+					failedRecordEvent.getFileEvent().getFile().getFileType().name(), failedRecordEvent.toString());
 		else
-			return String.format("Failed to load a '%s' record.", failedRecordEvent.getFile().getFileType().name());
+			return String.format("Failed to load a '%s' record.",
+					failedRecordEvent.getFileEvent().getFile().getFileType().name());
 	}
 
 	/**
@@ -82,10 +83,11 @@ public final class RifLoadFailure extends RuntimeException {
 	private static String buildMessage(List<RifRecordEvent<?>> failedRecordEvents) {
 		if (LOG_SOURCE_DATA)
 			return String.format("Failed to load '%s' records: '%s'.",
-					failedRecordEvents.get(0).getFile().getFileType().name(), failedRecordEvents.toString());
+					failedRecordEvents.get(0).getFileEvent().getFile().getFileType().name(),
+					failedRecordEvents.toString());
 		else
 			return String.format("Failed to load '%s' records.",
-					failedRecordEvents.get(0).getFile().getFileType().name());
+					failedRecordEvents.get(0).getFileEvent().getFile().getFileType().name());
 	}
 
 	/**

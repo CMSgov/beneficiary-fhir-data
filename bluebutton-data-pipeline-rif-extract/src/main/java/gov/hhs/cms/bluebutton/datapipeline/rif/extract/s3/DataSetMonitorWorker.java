@@ -36,6 +36,8 @@ import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
@@ -103,6 +105,7 @@ public final class DataSetMonitorWorker implements Runnable {
 	private static final Pattern REGEX_COMPLETED_MANIFEST = Pattern
 			.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
+	private final MetricRegistry appMetrics;
 	private final ExtractionOptions options;
 	private final DataSetMonitorListener listener;
 	private final AmazonS3 s3Client;
@@ -122,12 +125,15 @@ public final class DataSetMonitorWorker implements Runnable {
 	/**
 	 * Constructs a new {@link DataSetMonitorWorker} instance.
 	 * 
+	 * @param appMetrics
+	 *            the {@link MetricRegistry} for the overall application
 	 * @param options
 	 *            the {@link ExtractionOptions} to use
 	 * @param listener
 	 *            the {@link DataSetMonitorListener} to send events to
 	 */
-	public DataSetMonitorWorker(ExtractionOptions options, DataSetMonitorListener listener) {
+	public DataSetMonitorWorker(MetricRegistry appMetrics, ExtractionOptions options, DataSetMonitorListener listener) {
+		this.appMetrics = appMetrics;
 		this.options = options;
 		this.listener = listener;
 		this.s3Client = S3Utilities.createS3Client(options);
@@ -270,13 +276,22 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * there and ready to go.
 		 */
 		LOGGER.info("Data set ready. Processing it...");
+
 		Instant dataSetManifestTimestamp = manifestToProcess.getTimestamp();
 		List<S3RifFile> rifFiles = manifestToProcess.getEntries().stream().map(e -> {
 			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
 					DateTimeFormatter.ISO_INSTANT.format(dataSetManifestTimestamp), e.getName());
-			return new S3RifFile(s3Client, e.getType(), new GetObjectRequest(options.getS3BucketName(), key));
+
+			Timer.Context timerDownload = appMetrics
+					.timer(MetricRegistry.name(getClass().getSimpleName(), "rifDownload")).time();
+			S3RifFile s3RifFile = new S3RifFile(s3Client, e.getType(),
+					new GetObjectRequest(options.getS3BucketName(), key));
+			timerDownload.close();
+
+			return s3RifFile;
 		}).collect(Collectors.toList());
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(), new ArrayList<>(rifFiles));
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(),
+				new ArrayList<>(rifFiles));
 
 		/*
 		 * Now we hand that off to the DataSetMonitorListener, to do the *real*
@@ -295,7 +310,12 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * deletes/moves are only *eventually* consistent, so #2 may not take
 		 * effect right away.)
 		 */
+		Timer.Context timerS3Cleanup = appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "s3Cleanup"))
+				.time();
+		LOGGER.info("Marking data set as complete in S3...");
 		rifFiles.stream().forEach(f -> f.cleanupTempFile());
+		LOGGER.info("Marked data set as complete in S3.");
+		timerS3Cleanup.close();
 		recentlyProcessedManifests.add(manifestToProcess.getId());
 			markDataSetCompleteInS3(manifestToProcess);
 	}

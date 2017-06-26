@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
@@ -65,28 +66,27 @@ public final class RifLoaderIT {
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
 				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
-		// Setup the metrics that we'll log to.
-		MetricRegistry metrics = new MetricRegistry();
-
 		// Create the processors that will handle each stage of the pipeline.
+		MetricRegistry appMetrics = new MetricRegistry();
 		RifFilesProcessor processor = new RifFilesProcessor();
-		RifLoader loader = new RifLoader(RifLoaderTestUtils.getLoadOptions(), metrics);
+		RifLoader loader = new RifLoader(appMetrics, RifLoaderTestUtils.getLoadOptions());
 
 		// Link up the pipeline and run it.
 		LOGGER.info("Loading RIF records...");
 		AtomicInteger failureCount = new AtomicInteger(0);
 		Queue<RifRecordLoadResult> successfulRecords = new ConcurrentLinkedQueue<>();
-		for (RifFileRecords rifFileRecords : processor.process(rifFilesEvent)) {
+		for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+			RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
 			loader.process(rifFileRecords, error -> {
 				failureCount.incrementAndGet();
 				LOGGER.warn("Record(s) failed to load.", error);
 			}, result -> {
 				successfulRecords.add(result);
 			});
+			Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
 		}
 		LOGGER.info("Loaded RIF records: '{}'.", successfulRecords.size());
-		Slf4jReporter metricsReporter = Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build();
-		metricsReporter.report();
+		Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build().report();
 
 		// Verify that the expected number of records were run successfully.
 		Assert.assertEquals(0, failureCount.get());
@@ -99,7 +99,8 @@ public final class RifLoaderIT {
 		 * be found in the database.
 		 */
 		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory();
-		for (RifFileRecords rifFileRecordsCopy : processor.process(rifFilesEvent)) {
+		for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+			RifFileRecords rifFileRecordsCopy = processor.produceRecords(rifFileEvent);
 			rifFileRecordsCopy.getRecords().forEach(r -> {
 				assertIsInDatabase(entityManagerFactory, r.getRecord());
 			});

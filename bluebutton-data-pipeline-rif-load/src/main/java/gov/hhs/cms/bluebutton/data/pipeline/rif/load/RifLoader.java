@@ -56,6 +56,7 @@ import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -68,6 +69,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimCsvWriter;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
@@ -89,8 +91,8 @@ public final class RifLoader {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifLoader.class);
 
+	private final MetricRegistry appMetrics;
 	private final LoadAppOptions options;
-	private final MetricRegistry metrics;
 	private final EntityManagerFactory entityManagerFactory;
 	private final SecretKeyFactory secretKeyFactory;
 	private final ExecutorService loadExecutorService;
@@ -98,16 +100,17 @@ public final class RifLoader {
 	/**
 	 * Constructs a new {@link RifLoader} instance.
 	 * 
+	 * @param appMetrics
+	 *            the {@link MetricRegistry} being used for the overall
+	 *            application (as opposed to a specific data set)
 	 * @param options
 	 *            the {@link LoadAppOptions} to use
-	 * @param metrics
-	 *            the {@link MetricRegistry} to use
 	 */
-	public RifLoader(LoadAppOptions options, MetricRegistry metrics) {
+	public RifLoader(MetricRegistry appMetrics, LoadAppOptions options) {
+		this.appMetrics = appMetrics;
 		this.options = options;
-		this.metrics = metrics;
 
-		DataSource jdbcDataSource = createDataSource(options, metrics);
+		DataSource jdbcDataSource = createDataSource(options, appMetrics);
 		DatabaseSchemaManager dbSchemaManager = new DatabaseSchemaManager();
 		dbSchemaManager.createOrUpdateSchema(jdbcDataSource);
 		this.entityManagerFactory = createEntityManagerFactory(jdbcDataSource);
@@ -244,7 +247,10 @@ public final class RifLoader {
 	 */
 	public void process(RifFileRecords dataToLoad, Consumer<Throwable> errorHandler,
 			Consumer<RifRecordLoadResult> resultHandler) {
-		LOGGER.trace("Started process(...)...");
+		MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
+		Timer.Context timerDataSetFile = appMetrics
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "dataSet", "file", "processed")).time();
+		LOGGER.info("Processing '{}'...", dataToLoad);
 
 		/*
 		 * Design history note: Initially, this function just returned a stream
@@ -280,7 +286,8 @@ public final class RifLoader {
 			batchResult.forEach(recordResult -> resultHandler.accept(recordResult));
 		};
 
-		try (PostgreSqlCopyInserter postgresBatch = new PostgreSqlCopyInserter(entityManagerFactory, metrics)) {
+		try (PostgreSqlCopyInserter postgresBatch = new PostgreSqlCopyInserter(entityManagerFactory,
+				fileEventMetrics)) {
 			/*
 			 * We need a way to wait for all of the asynchronous jobs to
 			 * complete, without keeping all of their Futures in memory (which
@@ -292,6 +299,8 @@ public final class RifLoader {
 			 * exactly this use case.
 			 */
 			Phaser phaser = new Phaser(1);
+			Counter activeBatchesCounter = fileEventMetrics
+					.counter(MetricRegistry.name(getClass().getSimpleName(), "activeBatches"));
 
 			// Define the Consumer that will handle each batch.
 			Consumer<List<RifRecordEvent<?>>> batchProcessor = recordsBatch -> {
@@ -300,8 +309,10 @@ public final class RifLoader {
 				 * Then, create the decrementer function that we will register
 				 * with the task's CompletableFuture.
 				 */
+				activeBatchesCounter.inc();
 				phaser.register();
 				BiConsumer<List<RifRecordLoadResult>, Throwable> phaserDecrementer = (r, t) -> {
+					activeBatchesCounter.dec();
 					phaser.arriveAndDeregister();
 				};
 
@@ -335,8 +346,10 @@ public final class RifLoader {
 			}
 		}
 
+		LOGGER.info("Processed '{}'.", dataToLoad);
+		timerDataSetFile.stop();
+
 		logRecordCounts();
-		LOGGER.trace("Completed process(...).");
 	}
 
 	/**
@@ -366,27 +379,28 @@ public final class RifLoader {
 	 */
 	private List<RifRecordLoadResult> process(List<RifRecordEvent<?>> recordsBatch,
 			PostgreSqlCopyInserter postgresBatch) {
+		RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
+		MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
+
 		// TODO make the features configurable
 		LoadFeatures features = new LoadFeatures(false, false);
 		LoadStrategy strategy = selectStrategy(features);
 
-		RifFileType rifFileType = recordsBatch.get(0).getFile().getFileType();
+		RifFileType rifFileType = fileEvent.getFile().getFileType();
 
 		// If these are Beneficiary records, first hash their HICNs.
 		if (rifFileType == RifFileType.BENEFICIARY) {
 			for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
-				hashBeneficiaryHicn(rifRecordEvent);
+				hashBeneficiaryHicn(fileEventMetrics, rifRecordEvent);
 		}
 
 		// Only one of each failure/success Timer.Contexts will be applied.
-		Timer.Context timerBatchSuccess = metrics
-				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", "loaded")).time();
-		Timer.Context timerBatchTypeSuccess = metrics
-				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", rifFileType.name(), "loaded")).time();
-		Timer.Context timerBundleFailure = metrics
-				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", "failed")).time();
-		Timer.Context timerBundleTypeFailure = metrics
-				.timer(MetricRegistry.name(getClass(), "timer", "recordBatches", rifFileType.name(), "failed")).time();
+		Timer.Context timerBatchSuccess = appMetrics
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches")).time();
+		Timer.Context timerBatchTypeSuccess = fileEventMetrics
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", rifFileType.name())).time();
+		Timer.Context timerBundleFailure = appMetrics
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed")).time();
 
 		EntityManager entityManager = null;
 		try {
@@ -428,7 +442,8 @@ public final class RifLoader {
 					LOGGER.trace("Loaded '{}' record.", rifFileType);
 				}
 
-				metrics.meter(MetricRegistry.name(getClass(), "meter", "records", "loaded")).mark(1);
+				fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "meter", "records", "loaded"))
+						.mark(1);
 				loadResults.add(new RifRecordLoadResult(rifRecordEvent, loadAction));
 			}
 
@@ -441,8 +456,8 @@ public final class RifLoader {
 			return loadResults;
 		} catch (Throwable t) {
 			timerBundleFailure.stop();
-			timerBundleTypeFailure.stop();
-			metrics.meter(MetricRegistry.name(getClass(), "meter", "recordBatches", "failed")).mark(1);
+			fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "meter", "recordBatches", "failed"))
+					.mark(1);
 			LOGGER.warn("Failed to load '{}' record.", rifFileType, t);
 
 			throw new RifLoadFailure(recordsBatch, t);
@@ -458,7 +473,9 @@ public final class RifLoader {
 	 * Computes and logs a count for all record types.
 	 */
 	private void logRecordCounts() {
-		Timer.Context timerCounting = metrics.timer(MetricRegistry.name(getClass(), "timer", "recordCounting")).time();
+		Timer.Context timerCounting = appMetrics
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "recordCounting")).time();
+		LOGGER.info("Counting records...");
 		String entityTypeCounts = entityManagerFactory.getMetamodel().getManagedTypes().stream()
 				.map(t -> t.getJavaType()).sorted(Comparator.comparing(Class::getName)).map(t -> {
 					long entityTypeRecordCount = queryForEntityCount(t);
@@ -503,14 +520,17 @@ public final class RifLoader {
 	 * All other {@link RifRecordEvent}s are left unmodified.
 	 * </p>
 	 * 
+	 * @param metrics
+	 *            the {@link MetricRegistry} to use
 	 * @param rifRecordEvent
 	 *            the {@link RifRecordEvent} to (possibly) modify
 	 */
-	private void hashBeneficiaryHicn(RifRecordEvent<?> rifRecordEvent) {
-		if (rifRecordEvent.getFile().getFileType() != RifFileType.BENEFICIARY)
+	private void hashBeneficiaryHicn(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+		if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY)
 			return;
 
-		Timer.Context timerHashing = metrics.timer(MetricRegistry.name(getClass(), "timer", "hicnsHashed")).time();
+		Timer.Context timerHashing = metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "hicnsHashed"))
+				.time();
 
 		Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
 		beneficiary.setHicn(computeHicnHash(beneficiary.getHicn()));
@@ -735,7 +755,7 @@ public final class RifLoader {
 		 */
 		public void submit() {
 			Timer.Context submitTimer = metrics
-					.timer(MetricRegistry.name(getClass(), "timer", "postgresSqlBatches", "submitted")).time();
+					.timer(MetricRegistry.name(getClass().getSimpleName(), "postgresSqlBatches", "submitted")).time();
 
 			EntityManager entityManager = null;
 			try {
@@ -782,8 +802,8 @@ public final class RifLoader {
 								 * Crack open the queued CSV records and feed
 								 * them into the CopyManager.
 								 */
-								Timer.Context postgresCopyTimer = metrics
-										.timer(MetricRegistry.name(getClass(), "timer", "postgresCopy", "completed"))
+								Timer.Context postgresCopyTimer = metrics.timer(
+										MetricRegistry.name(getClass().getSimpleName(), "postgresCopy", "completed"))
 										.time();
 								LOGGER.info("Submitting PostgreSQL COPY queue: '{}'...", b.tableName);
 								FileReader reader = new FileReader(b.backingTempFile);

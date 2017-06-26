@@ -11,6 +11,8 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 
 /**
@@ -60,6 +62,7 @@ public final class DataSetMonitor {
 	 */
 	public static final int EXIT_CODE_MONITOR_ERROR = 2;
 
+	private final MetricRegistry appMetrics;
 	private final ExtractionOptions options;
 	private final int scanRepeatDelay;
 	private final DataSetMonitorListener listener;
@@ -72,6 +75,8 @@ public final class DataSetMonitor {
 	 * used as a singleton service in the application: only one instance running
 	 * at a time is supported.
 	 * 
+	 * @param appMetrics
+	 *            the {@link MetricRegistry} for the overall application
 	 * @param options
 	 *            the {@link ExtractionOptions} to use
 	 * @param scanRepeatDelay
@@ -81,7 +86,9 @@ public final class DataSetMonitor {
 	 *            the {@link DataSetMonitorListener} that will be notified when
 	 *            events occur
 	 */
-	public DataSetMonitor(ExtractionOptions options, int scanRepeatDelay, DataSetMonitorListener listener) {
+	public DataSetMonitor(MetricRegistry appMetrics, ExtractionOptions options, int scanRepeatDelay,
+			DataSetMonitorListener listener) {
+		this.appMetrics = appMetrics;
 		this.options = options;
 		this.scanRepeatDelay = scanRepeatDelay;
 		this.listener = listener;
@@ -102,7 +109,7 @@ public final class DataSetMonitor {
 			throw new IllegalStateException();
 
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
-		Runnable dataSetWatcher = new DataSetMonitorWorker(options, listener);
+		Runnable dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, listener);
 		Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
 		/*

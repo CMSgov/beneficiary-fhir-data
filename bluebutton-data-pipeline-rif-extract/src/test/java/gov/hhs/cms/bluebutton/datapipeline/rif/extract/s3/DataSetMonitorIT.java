@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.codahale.metrics.MetricRegistry;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -38,7 +39,7 @@ public final class DataSetMonitorIT {
 	public void missingBucket() throws InterruptedException {
 		// Start the monitor against a bucket that doesn't exist.
 		MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-		DataSetMonitor monitor = new DataSetMonitor(new ExtractionOptions("foo"), 1, listener);
+		DataSetMonitor monitor = new DataSetMonitor(new MetricRegistry(), new ExtractionOptions("foo"), 1, listener);
 		monitor.start();
 
 		// Wait for the monitor to error out.
@@ -64,7 +65,7 @@ public final class DataSetMonitorIT {
 
 			// Start the monitor and then stop it.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitor monitor = new DataSetMonitor(options, 1, listener);
+			DataSetMonitor monitor = new DataSetMonitor(new MetricRegistry(), options, 1, listener);
 			monitor.start();
 			Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> listener.getNoDataAvailableEvents() > 0);
 			monitor.stop();
@@ -116,7 +117,7 @@ public final class DataSetMonitorIT {
 
 			// Start the monitor up.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitor monitor = new DataSetMonitor(options, 1, listener);
+			DataSetMonitor monitor = new DataSetMonitor(new MetricRegistry(), options, 1, listener);
 			monitor.start();
 
 			// Wait for the monitor to generate events for the three data sets.

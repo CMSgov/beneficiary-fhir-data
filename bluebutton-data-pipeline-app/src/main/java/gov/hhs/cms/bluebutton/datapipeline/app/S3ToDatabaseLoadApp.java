@@ -14,6 +14,7 @@ import com.codahale.metrics.Timer;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoader;
@@ -70,18 +71,18 @@ public final class S3ToDatabaseLoadApp {
 			System.exit(EXIT_CODE_BAD_CONFIG);
 		}
 
-		MetricRegistry metrics = new MetricRegistry();
-		metrics.registerAll(new MemoryUsageGaugeSet());
-		metrics.registerAll(new GarbageCollectorMetricSet());
-		Slf4jReporter metricsReporter = Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build();
-		metricsReporter.start(300, TimeUnit.SECONDS);
+		MetricRegistry appMetrics = new MetricRegistry();
+		appMetrics.registerAll(new MemoryUsageGaugeSet());
+		appMetrics.registerAll(new GarbageCollectorMetricSet());
+		Slf4jReporter appMetricsReporter = Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
+		appMetricsReporter.start(1, TimeUnit.HOURS);
 
 		/*
 		 * Create the services that will be used to handle each stage in the
 		 * extract, transform, and load process.
 		 */
 		RifFilesProcessor rifProcessor = new RifFilesProcessor();
-		RifLoader rifLoader = new RifLoader(appConfig.getLoadOptions(), metrics);
+		RifLoader rifLoader = new RifLoader(appMetrics, appConfig.getLoadOptions());
 
 		/*
 		 * Create the DataSetMonitorListener that will glue those stages
@@ -90,8 +91,9 @@ public final class S3ToDatabaseLoadApp {
 		DataSetMonitorListener dataSetMonitorListener = new DataSetMonitorListener() {
 			@Override
 			public void dataAvailable(RifFilesEvent rifFilesEvent) {
-				Timer.Context timerDataSet = metrics
-						.timer(MetricRegistry.name(S3ToDatabaseLoadApp.class, "dataSet", "processed")).time();
+				Timer.Context timerDataSet = appMetrics
+						.timer(MetricRegistry.name(S3ToDatabaseLoadApp.class.getSimpleName(), "dataSet", "processed"))
+						.time();
 
 				Consumer<Throwable> errorHandler = error -> {
 					/*
@@ -103,7 +105,7 @@ public final class S3ToDatabaseLoadApp {
 					 * failure, but we probably want to be more discriminating
 					 * than that.
 					 */
-					 throw new IllegalStateException(
+					throw new IllegalStateException(
 							"Record failed to load, and we have no error recovery strategy yet.", error);
 				};
 
@@ -118,12 +120,16 @@ public final class S3ToDatabaseLoadApp {
 				 * Each ETL stage produces a stream that will be handed off to
 				 * and processed by the next stage.
 				 */
-				for (RifFileRecords rifFileRecords : rifProcessor.process(rifFilesEvent)) {
-					Timer.Context timerDataSetFile = metrics
-							.timer(MetricRegistry.name(S3ToDatabaseLoadApp.class, "dataSet", "file", "processed")).time();
+				for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+					Slf4jReporter dataSetFileMetricsReporter = Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics())
+							.outputTo(LOGGER).build();
+					dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
 
+					RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
 					rifLoader.process(rifFileRecords, errorHandler, resultHandler);
-					timerDataSetFile.stop();
+
+					dataSetFileMetricsReporter.stop();
+					dataSetFileMetricsReporter.report();
 				}
 				timerDataSet.stop();
 			}
@@ -157,10 +163,9 @@ public final class S3ToDatabaseLoadApp {
 		 * they're pushed into S3. As each data set is found, it will be handed
 		 * off to the DataSetMonitorListener to be run through the ETL pipeline.
 		 */
-		DataSetMonitor s3Monitor = new DataSetMonitor(appConfig.getExtractionOptions(),
-				(int) S3_SCAN_INTERVAL.toMillis(),
-				dataSetMonitorListener);
-		registerShutdownHook(metrics, s3Monitor);
+		DataSetMonitor s3Monitor = new DataSetMonitor(appMetrics, appConfig.getExtractionOptions(),
+				(int) S3_SCAN_INTERVAL.toMillis(), dataSetMonitorListener);
+		registerShutdownHook(appMetrics, s3Monitor);
 		s3Monitor.start();
 		LOGGER.info("Monitoring S3 for new data sets to process...");
 

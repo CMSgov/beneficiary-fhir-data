@@ -3,14 +3,11 @@ package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.stream.Collectors;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -19,6 +16,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -39,6 +38,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEventParser;
 import gov.hhs.cms.bluebutton.data.model.rif.RecordAction;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
@@ -64,72 +64,14 @@ public final class RifFilesProcessor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
 	/**
-	 * <p>
-	 * Processes the specified {@link RifFilesEvent}, reading in the data found
-	 * in it and converting that data into {@link RifRecordEvent}s that can be
-	 * handled downstream in the ETL pipeline.
-	 * </p>
-	 * <h3>Design Notes</h3>
-	 * <p>
-	 * This method must accept {@link RifFilesEvent} instances, rather than
-	 * individual {@link RifFile} instances. This is due to processing order
-	 * constraints that would otherwise be impossible to implement:
-	 * </p>
-	 * <ol>
-	 * <li>{@link RifFileType#BENEFICIARY} files must always be processed first
-	 * (if more than one {@link RifFile} is available). This is necessary in
-	 * order to ensure that FHIR <code>Patient</code> resources are always
-	 * created before (and can be referenced by)
-	 * <code>ExplanationOfBenefit</code> resources.</li>
-	 * <li>While still honoring the previous rule, {@link RifFile}s generated
-	 * earlier must be processed before those with later values. This is
-	 * necessary in order to ensure that, if a backlog of {@link RifFile}s
-	 * occurs, FHIR updates are not pushed out of order, which would result in
-	 * newer data being overwritten by older data.</li>
-	 * </ol>
-	 * <p>
-	 * Please note that, assuming the extraction process that produces
-	 * {@link RifFile}s is functioning correctly (i.e. it's producing and
-	 * pushing files to S3 in the correct order), it is always safe to process a
-	 * single {@link RifFile}, if it's the only one found/available. There is no
-	 * need to wait for a "full" complement of {@link RifFilesEvent}s to be
-	 * present. The above constraints only impact this class' behavior when
-	 * multiple RIF files are found/available at the same time.
-	 * </p>
-	 * 
-	 * @param event
-	 *            the {@link RifFilesEvent} to be processed
-	 * @return a {@link List} of {@link RifFileRecords}, one per {@link RifFile}
-	 */
-	public List<RifFileRecords> process(RifFilesEvent event) {
-		List<RifFile> filesOrderedSafely = new ArrayList<>(event.getFiles());
-		Comparator<RifFile> someComparator = new Comparator<RifFile>() {
-			@Override
-			public int compare(RifFile o1, RifFile o2) {
-				if (o1.getFileType() == RifFileType.BENEFICIARY && o2.getFileType() != RifFileType.BENEFICIARY)
-					return -1;
-				else if (o1.getFileType() != RifFileType.BENEFICIARY && o2.getFileType() == RifFileType.BENEFICIARY)
-					return 1;
-				else
-					return Integer.compare(o1.getFileType().ordinal(), o2.getFileType().ordinal());
-			}
-		};
-		Collections.sort(filesOrderedSafely, someComparator);
-
-		List<RifFileRecords> recordsBundles = filesOrderedSafely.stream().map(file -> produceRecords(event, file))
-				.collect(Collectors.toList());
-		return recordsBundles;
-	}
-
-	/**
-	 * @param rifFilesEvent
-	 *            the {@link RifFilesEvent} that is being processed
-	 * @param file
-	 *            the {@link RifFile} to produce {@link RifRecordEvent}s from
+	 * @param rifFileEvent
+	 *            the {@link RifFileEvent} that is being processed
 	 * @return a {@link RifFileRecords} with the {@link RifRecordEvent}s
-	 *         produced from the specified {@link RifFile}
+	 *         produced from the specified {@link RifFileEvent}
 	 */
-	private RifFileRecords produceRecords(RifFilesEvent rifFilesEvent, RifFile file) {
+	public RifFileRecords produceRecords(RifFileEvent rifFileEvent) {
+		RifFile file = rifFileEvent.getFile();
+
 		/*
 		 * Approach used here to parse CSV as a Java 8 Stream is courtesy of
 		 * https://rumianom.pl/rumianom/entry/apache-commons-csv-with-java.
@@ -139,7 +81,7 @@ public final class RifFilesProcessor {
 		CSVParser parser = RifParsingUtils.createCsvParser(file);
 
 		boolean isGrouped;
-		TriFunction<RifFilesEvent, RifFile, List<CSVRecord>, RifRecordEvent<?>> recordParser;
+		BiFunction<RifFileEvent, List<CSVRecord>, RifRecordEvent<?>> recordParser;
 		if (file.getFileType() == RifFileType.BENEFICIARY) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildBeneficiaryEvent;
@@ -194,7 +136,11 @@ public final class RifFilesProcessor {
 		/* Map each record group to a single RifRecordEvent. */
 		Stream<RifRecordEvent<?>> rifRecordStream = csvRecordStream.map(csvRecordGroup -> {
 			try {
-				RifRecordEvent<?> recordEvent = recordParser.apply(rifFilesEvent, file, csvRecordGroup);
+				Timer.Context parsingTimer = rifFileEvent.getEventMetrics()
+						.timer(MetricRegistry.name(getClass().getSimpleName(), "recordParsing")).time();
+				RifRecordEvent<?> recordEvent = recordParser.apply(rifFileEvent, csvRecordGroup);
+				parsingTimer.close();
+
 				return recordEvent;
 			} catch (InvalidRifValueException e) {
 				LOGGER.warn("Parse error encountered near line number '{}'.", csvRecordGroup.get(0).getRecordNumber());
@@ -202,15 +148,12 @@ public final class RifFilesProcessor {
 			}
 		});
 
-		return new RifFileRecords(rifFilesEvent, file, rifRecordStream);
+		return new RifFileRecords(rifFileEvent, rifRecordStream);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord} to be mapped (in a single-element
 	 *            {@link List}), which must be from a
@@ -218,7 +161,7 @@ public final class RifFilesProcessor {
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<Beneficiary> buildBeneficiaryEvent(RifFilesEvent filesEvent, RifFile file,
+	private static RifRecordEvent<Beneficiary> buildBeneficiaryEvent(RifFileEvent fileEvent,
 			List<CSVRecord> csvRecords) {
 		if (csvRecords.size() != 1)
 			throw new BadCodeMonkeyException();
@@ -233,23 +176,19 @@ public final class RifFilesProcessor {
 		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
 
 		Beneficiary beneficiaryRow = BeneficiaryParser.parseRif(csvRecords);
-		return new RifRecordEvent<Beneficiary>(filesEvent, file, recordAction, beneficiaryRow);
+		return new RifRecordEvent<Beneficiary>(fileEvent, recordAction, beneficiaryRow);
 	}
 
 	/**
-	 * @param filesEvent
+	 * @param fileEvent
 	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#PDE} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<PartDEvent> buildPartDEvent(RifFilesEvent filesEvent, RifFile file,
-			List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<PartDEvent> buildPartDEvent(RifFileEvent fileEvent, List<CSVRecord> csvRecords) {
 		if (csvRecords.size() != 1)
 			throw new BadCodeMonkeyException();
 		if (LOGGER.isTraceEnabled())
@@ -263,22 +202,20 @@ public final class RifFilesProcessor {
 		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
 
 		PartDEvent partDEvent = PartDEventParser.parseRif(csvRecords);
-		return new RifRecordEvent<PartDEvent>(filesEvent, file, recordAction, partDEvent);
+		return new RifRecordEvent<PartDEvent>(fileEvent, recordAction, partDEvent);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed that is being
+	 *            processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#INPATIENT} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<InpatientClaim> buildInpatientClaimEvent(RifFilesEvent filesEvent, RifFile file,
+	private static RifRecordEvent<InpatientClaim> buildInpatientClaimEvent(RifFileEvent fileEvent,
 			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
@@ -297,22 +234,20 @@ public final class RifFilesProcessor {
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
 			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
-		return new RifRecordEvent<InpatientClaim>(filesEvent, file, recordAction, claim);
+		return new RifRecordEvent<InpatientClaim>(fileEvent, recordAction, claim);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed that is being
+	 *            processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#OUTPATIENT} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<OutpatientClaim> buildOutpatientClaimEvent(RifFilesEvent filesEvent, RifFile file,
+	private static RifRecordEvent<OutpatientClaim> buildOutpatientClaimEvent(RifFileEvent fileEvent,
 			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
@@ -331,22 +266,19 @@ public final class RifFilesProcessor {
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
 			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
-		return new RifRecordEvent<OutpatientClaim>(filesEvent, file, recordAction, claim);
+		return new RifRecordEvent<OutpatientClaim>(fileEvent, recordAction, claim);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#CARRIER} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<CarrierClaim> buildCarrierClaimEvent(RifFilesEvent filesEvent, RifFile file,
+	private static RifRecordEvent<CarrierClaim> buildCarrierClaimEvent(RifFileEvent fileEvent,
 			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
@@ -365,23 +297,19 @@ public final class RifFilesProcessor {
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
 			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
-		return new RifRecordEvent<CarrierClaim>(filesEvent, file, recordAction, claim);
+		return new RifRecordEvent<CarrierClaim>(fileEvent, recordAction, claim);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#SNF} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<SNFClaim> buildSNFClaimEvent(RifFilesEvent filesEvent, RifFile file,
-			List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<SNFClaim> buildSNFClaimEvent(RifFileEvent fileEvent, List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
@@ -399,22 +327,19 @@ public final class RifFilesProcessor {
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
 			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
-		return new RifRecordEvent<SNFClaim>(filesEvent, file, recordAction, claim);
+		return new RifRecordEvent<SNFClaim>(fileEvent, recordAction, claim);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#HOSPICE} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<HospiceClaim> buildHospiceClaimEvent(RifFilesEvent filesEvent, RifFile file,
+	private static RifRecordEvent<HospiceClaim> buildHospiceClaimEvent(RifFileEvent fileEvent,
 			List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
@@ -433,23 +358,19 @@ public final class RifFilesProcessor {
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
 			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
-		return new RifRecordEvent<HospiceClaim>(filesEvent, file, recordAction, claim);
+		return new RifRecordEvent<HospiceClaim>(fileEvent, recordAction, claim);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#HHA} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<HHAClaim> buildHHAClaimEvent(RifFilesEvent filesEvent, RifFile file,
-			List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<HHAClaim> buildHHAClaimEvent(RifFileEvent fileEvent, List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
@@ -467,23 +388,19 @@ public final class RifFilesProcessor {
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
 			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
-		return new RifRecordEvent<HHAClaim>(filesEvent, file, recordAction, claim);
+		return new RifRecordEvent<HHAClaim>(fileEvent, recordAction, claim);
 	}
 
 	/**
-	 * @param filesEvent
-	 *            the {@link RifFilesEvent} being processed
-	 * @param file
-	 *            the specific {@link RifFile} in that {@link RifFilesEvent}
-	 *            that is being processed
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
 	 * @param csvRecords
 	 *            the {@link CSVRecord}s to be mapped, which must be from a
 	 *            {@link RifFileType#DME} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified
 	 *         {@link CSVRecord}s
 	 */
-	private static RifRecordEvent<DMEClaim> buildDMEClaimEvent(RifFilesEvent filesEvent, RifFile file,
-			List<CSVRecord> csvRecords) {
+	private static RifRecordEvent<DMEClaim> buildDMEClaimEvent(RifFileEvent fileEvent, List<CSVRecord> csvRecords) {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecords.toString());
 
@@ -501,6 +418,6 @@ public final class RifFilesProcessor {
 		 */
 		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
 			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
-		return new RifRecordEvent<DMEClaim>(filesEvent, file, recordAction, claim);
+		return new RifRecordEvent<DMEClaim>(fileEvent, recordAction, claim);
 	}
 }

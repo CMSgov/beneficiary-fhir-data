@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.codahale.metrics.MetricRegistry;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -38,7 +39,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.run();
 
 			// Verify that no data sets were generated.
@@ -78,14 +79,14 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
 			Assert.assertEquals(0, listener.getNoDataAvailableEvents());
 			Assert.assertEquals(1, listener.getDataEvents().size());
 			Assert.assertEquals(manifest.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
-			Assert.assertEquals(manifest.getEntries().size(), listener.getDataEvents().get(0).getFiles().size());
+			Assert.assertEquals(manifest.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
 			Assert.assertEquals(0, listener.getErrorEvents().size());
 
 			// Verify that the data set was renamed.
@@ -133,7 +134,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.setS3MaxKeys(1);
 			monitorWorker.run();
 
@@ -141,7 +142,7 @@ public final class DataSetMonitorWorkerIT {
 			Assert.assertEquals(0, listener.getNoDataAvailableEvents());
 			Assert.assertEquals(1, listener.getDataEvents().size());
 			Assert.assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
-			Assert.assertEquals(manifestA.getEntries().size(), listener.getDataEvents().get(0).getFiles().size());
+			Assert.assertEquals(manifestA.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
 			Assert.assertEquals(0, listener.getErrorEvents().size());
 
 			/*
@@ -190,7 +191,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(options, listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
