@@ -3,8 +3,7 @@ package gov.hhs.cms.bluebutton.data.model.rif;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Models a RIF file event, in which a new set of RIF files have been made
@@ -12,7 +11,7 @@ import java.util.Set;
  */
 public final class RifFilesEvent {
 	private final Instant timestamp;
-	private final Set<RifFile> files;
+	private final List<RifFile> files;
 
 	/**
 	 * Constructs a new {@link RifFilesEvent} instance.
@@ -22,7 +21,7 @@ public final class RifFilesEvent {
 	 * @param files
 	 *            the value to use for {@link #getFiles()}
 	 */
-	public RifFilesEvent(Instant timestamp, Set<RifFile> files) {
+	public RifFilesEvent(Instant timestamp, List<RifFile> files) {
 		if (timestamp == null)
 			throw new IllegalArgumentException();
 		if (files == null)
@@ -46,7 +45,7 @@ public final class RifFilesEvent {
 	 *            the value to use for {@link #getFiles()}
 	 */
 	public RifFilesEvent(Instant timestamp, RifFile... files) {
-		this(timestamp, new HashSet<>(Arrays.asList(files)));
+		this(timestamp, Arrays.asList(files));
 	}
 
 	/**
@@ -59,7 +58,7 @@ public final class RifFilesEvent {
 	/**
 	 * @return the {@link RifFile}s that are now available for processing
 	 */
-	public Set<RifFile> getFiles() {
+	public List<RifFile> getFiles() {
 		return files;
 	}
 
