@@ -90,6 +90,8 @@ public final class RifLoader {
 	private static final int RECORD_BATCH_SIZE = 1000;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifLoader.class);
+	private static final Logger LOGGER_RECORD_COUNTS = LoggerFactory
+			.getLogger(RifLoader.class.getName() + ".recordCounts");
 
 	private final MetricRegistry appMetrics;
 	private final LoadAppOptions options;
@@ -473,15 +475,18 @@ public final class RifLoader {
 	 * Computes and logs a count for all record types.
 	 */
 	private void logRecordCounts() {
+		if (!LOGGER_RECORD_COUNTS.isDebugEnabled())
+			return;
+
 		Timer.Context timerCounting = appMetrics
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "recordCounting")).time();
-		LOGGER.info("Counting records...");
+		LOGGER.debug("Counting records...");
 		String entityTypeCounts = entityManagerFactory.getMetamodel().getManagedTypes().stream()
 				.map(t -> t.getJavaType()).sorted(Comparator.comparing(Class::getName)).map(t -> {
 					long entityTypeRecordCount = queryForEntityCount(t);
 					return String.format("%s: %d", t.getSimpleName(), entityTypeRecordCount);
 				}).collect(Collectors.joining(", "));
-		LOGGER.info("Record counts by entity type: '{}'.", entityTypeCounts);
+		LOGGER.debug("Record counts by entity type: '{}'.", entityTypeCounts);
 		timerCounting.stop();
 	}
 

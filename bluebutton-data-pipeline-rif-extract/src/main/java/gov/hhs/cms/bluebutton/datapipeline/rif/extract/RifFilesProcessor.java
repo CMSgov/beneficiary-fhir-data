@@ -77,7 +77,6 @@ public final class RifFilesProcessor {
 		 * https://rumianom.pl/rumianom/entry/apache-commons-csv-with-java.
 		 */
 
-		LOGGER.info("Processing RIF file: " + file);
 		CSVParser parser = RifParsingUtils.createCsvParser(file);
 
 		boolean isGrouped;

@@ -277,6 +277,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 */
 		LOGGER.info("Data set ready. Processing it...");
 
+		LOGGER.info("Downloading local copies of data set files...");
 		Instant dataSetManifestTimestamp = manifestToProcess.getTimestamp();
 		List<S3RifFile> rifFiles = manifestToProcess.getEntries().stream().map(e -> {
 			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
@@ -292,6 +293,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		}).collect(Collectors.toList());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(),
 				new ArrayList<>(rifFiles));
+		LOGGER.info("Downloaded local copies of data set files.");
 
 		/*
 		 * Now we hand that off to the DataSetMonitorListener, to do the *real*
@@ -310,14 +312,9 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * deletes/moves are only *eventually* consistent, so #2 may not take
 		 * effect right away.)
 		 */
-		Timer.Context timerS3Cleanup = appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "s3Cleanup"))
-				.time();
-		LOGGER.info("Marking data set as complete in S3...");
 		rifFiles.stream().forEach(f -> f.cleanupTempFile());
-		LOGGER.info("Marked data set as complete in S3.");
-		timerS3Cleanup.close();
 		recentlyProcessedManifests.add(manifestToProcess.getId());
-			markDataSetCompleteInS3(manifestToProcess);
+		markDataSetCompleteInS3(manifestToProcess);
 	}
 
 	/**
@@ -429,6 +426,10 @@ public final class DataSetMonitorWorker implements Runnable {
 	 *            complete
 	 */
 	private void markDataSetCompleteInS3(DataSetManifest dataSetManifest) {
+		Timer.Context timerS3Cleanup = appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "s3Cleanup"))
+				.time();
+		LOGGER.info("Renaming data set in S3, now that processing is complete...");
+
 		/*
 		 * S3 doesn't support batch/transactional operations, or an atomic move
 		 * operation. Instead, we have to first copy all of the objects to their
@@ -490,6 +491,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		LOGGER.debug("Data set deleted in S3 (step 2 of move).");
 
 		LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
+		timerS3Cleanup.close();
 	}
 
 	/**
