@@ -1,0 +1,12 @@
+# Ignore the Python virtual environment.
+venv/
+
+# Ignore Eclipse metadata.
+.project
+
+# Ignore the Ansible Vault password file.
+vault.password
+
+# Ignore Ansible retry files.
+*.retry
+

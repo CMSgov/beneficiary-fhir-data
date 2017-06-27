@@ -1,0 +1,91 @@
+---
+
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    # Needed to run the ETL service.
+    - java-1.8.0-openjdk-devel
+  become: true
+
+- name: Create ETL Service User
+  user:
+    name: "{{ data_pipeline_user }}"
+    shell: /bin/false
+  become: true
+
+- name: Create ETL Service Directory
+  file:
+    path: "{{ data_pipeline_dir }}"
+    state: directory
+    owner: "{{ data_pipeline_user }}"
+    group: "{{ data_pipeline_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+# If the app's JAR is in S3, grab it from there.
+- block:
+    - name: Install boto
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        # Needed to use the `s3` module.
+        - python-boto
+      become: true
+    - name: Copy Pipeline Application
+      s3:
+        mode: get
+        bucket: "{{ data_pipeline_appjar_s3_bucket }}"
+        object: "{{ item }}"
+        dest: "{{ data_pipeline_dir }}/{{ item }}"
+      with_items:
+        - "{{ data_pipeline_appjar_name }}"
+      become: true
+  when: data_pipeline_appjar_s3_bucket is defined
+
+# If the app's JAR is available locally, copy it over.
+- block:
+    - name: Copy Pipeline Application
+      copy:
+        src: "{{ data_pipeline_appjar_localpath }}/{{ data_pipeline_appjar_name }}"
+        dest: "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}"
+  when: data_pipeline_appjar_localpath is defined
+
+- name: Configure Pipeline Application Permissions
+  file:
+    path: "{{ data_pipeline_appjar_localpath }}/{{ data_pipeline_appjar_name }}"
+    owner: "{{ data_pipeline_user }}"
+    group: "{{ data_pipeline_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create Pipeline Service Wrapper Script
+  template:
+    src: bluebutton-data-pipeline-app.sh.j2
+    dest: "{{ data_pipeline_dir }}/bluebutton-data-pipeline-app.sh"
+    owner: "{{ data_pipeline_user }}"
+    group: "{{ data_pipeline_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create Pipeline Service Definition
+  template:
+    src: bluebutton-data-pipeline-app.service.j2
+    dest: /etc/systemd/system/bluebutton-data-pipeline-app.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+
+- name: Load Pipeline Service Definition
+  command: /usr/bin/systemctl daemon-reload
+  become: true
+
+- name: Start Pipeline Service
+  service:
+    name: bluebutton-data-pipeline-app
+    state: started
+  become: true
+
