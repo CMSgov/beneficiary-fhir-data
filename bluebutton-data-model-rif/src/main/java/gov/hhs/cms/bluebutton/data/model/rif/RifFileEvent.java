@@ -59,10 +59,10 @@ public final class RifFileEvent {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RifFileEvent [parentFilesEvent.timestamp=");
-		builder.append(parentFilesEvent.getTimestamp());
-		builder.append(", file=");
+		builder.append("RifFileEvent [file=");
 		builder.append(file);
+		builder.append(", parentFilesEvent.timestamp=");
+		builder.append(parentFilesEvent.getTimestamp());
 		builder.append("]");
 		return builder.toString();
 	}
