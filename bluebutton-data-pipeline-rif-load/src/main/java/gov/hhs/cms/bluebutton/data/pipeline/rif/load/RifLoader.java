@@ -87,7 +87,7 @@ public final class RifLoader {
 	 * processing batch. Note that larger batch sizes mean that more
 	 * {@link RifRecordEvent}s will be held in memory simultaneously.
 	 */
-	private static final int RECORD_BATCH_SIZE = 1000;
+	private static final int RECORD_BATCH_SIZE = 100;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifLoader.class);
 	private static final Logger LOGGER_RECORD_COUNTS = LoggerFactory
@@ -169,10 +169,19 @@ public final class RifLoader {
 	 *         backend database
 	 */
 	static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
+		/*
+		 * The number of JDBC statements that will be queued/batched within a
+		 * single transaction. Most recommendations suggest this should be 5-30.
+		 * Paradoxically, setting it higher seems to actually slow things down.
+		 * Presumably, it's delaying work that could be done earlier in a batch,
+		 * and that starts to cost more than the extra network roundtrips.
+		 */
+		int jdbcBatchSize = 10;
+
 		Map<String, Object> hibernateProperties = new HashMap<>();
 		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
 		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
-		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, RECORD_BATCH_SIZE);
+		hibernateProperties.put(org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
 
 		EntityManagerFactory entityManagerFactory = Persistence
 				.createEntityManagerFactory("gov.hhs.cms.bluebutton.data", hibernateProperties);
@@ -337,7 +346,14 @@ public final class RifLoader {
 			};
 
 			// Collect records into batches and submit each to batchProcessor.
-			BatchSpliterator.batches(dataToLoad.getRecords(), RECORD_BATCH_SIZE).forEach(batchProcessor);
+			if (RECORD_BATCH_SIZE > 1)
+				BatchSpliterator.batches(dataToLoad.getRecords(), RECORD_BATCH_SIZE).forEach(batchProcessor);
+			else
+				dataToLoad.getRecords().map(record -> {
+					List<RifRecordEvent<?>> ittyBittyBatch = new LinkedList<>();
+					ittyBittyBatch.add(record);
+					return ittyBittyBatch;
+				}).forEach(batchProcessor);
 
 			// Wait for all submitted batches to complete.
 			phaser.arriveAndAwaitAdvance();
