@@ -151,6 +151,7 @@
             volume_type: gp2
             # The sample RIF data set is about 92GB total.
             volume_size: 200
+            delete_on_termination: true
         wait: true
         exact_count: 1
         count_tag:
