@@ -622,13 +622,13 @@ public final class RifLoader {
 	 * PostgreSQL's non-standard {@link CopyManager} APIs.
 	 * </p>
 	 * <p>
-	 * In <a href=" Populating a Database">PostgreSQL 9.6 Manual: Populating a
-	 * Database</a>, this is recommended as the fastest way to insert large
-	 * amounts of data. However, real-world testing with Blue Button data has
-	 * shown that to be not be exactly true: highly parallelized
-	 * <code>INSERT</code>s (e.g. hundreds of simultaneous connections) can
-	 * actually be about 18% faster. Even still, this code may eventually be
-	 * useful for some situations, so we'll keep it around.
+	 * In <a href="https://www.postgresql.org/docs/9.6/static/populate.html">
+	 * PostgreSQL 9.6 Manual: Populating a Database</a>, this is recommended as
+	 * the fastest way to insert large amounts of data. However, real-world
+	 * testing with Blue Button data has shown that to be not be exactly true:
+	 * highly parallelized <code>INSERT</code>s (e.g. hundreds of simultaneous
+	 * connections) can actually be about 18% faster. Even still, this code may
+	 * eventually be useful for some situations, so we'll keep it around.
 	 * </p>
 	 */
 	private static final class PostgreSqlCopyInserter implements AutoCloseable {
