@@ -10,11 +10,15 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.transfer.Download;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
@@ -46,13 +50,23 @@ public final class S3RifFile implements RifFile {
 		this.fileType = fileType;
 		this.displayName = String.format("%s:%s", objectRequest.getBucketName(), objectRequest.getKey());
 
-		try (InputStream s3ObjectStream = s3Client.getObject(objectRequest).getObjectContent();) {
+		TransferManager s3TransferManager = null;
+		try {
+			s3TransferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-			Files.copy(s3ObjectStream, localTempFile, StandardCopyOption.REPLACE_EXISTING);
+			Download downloadHandle = s3TransferManager.download(objectRequest, localTempFile.toFile());
+			downloadHandle.waitForCompletion();
+			s3TransferManager.shutdownNow(false);
 
 			this.localTempFile = localTempFile;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		} catch (AmazonClientException e) {
+			// FIXME better exception type
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			// Shouldn't happen, as our apps don't use thread interrupts.
+			throw new BadCodeMonkeyException(e);
 		}
 	}
 
