@@ -51,6 +51,7 @@
       copy:
         src: "{{ data_pipeline_appjar_localpath }}/{{ data_pipeline_appjar_name }}"
         dest: "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}"
+      become: true
   when: data_pipeline_appjar_localpath is defined
 
 - name: Configure Pipeline Application Permissions
