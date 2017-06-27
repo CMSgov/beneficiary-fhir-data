@@ -56,7 +56,7 @@
 
 - name: Configure Pipeline Application Permissions
   file:
-    path: "{{ data_pipeline_appjar_localpath }}/{{ data_pipeline_appjar_name }}"
+    path: "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}"
     owner: "{{ data_pipeline_user }}"
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
