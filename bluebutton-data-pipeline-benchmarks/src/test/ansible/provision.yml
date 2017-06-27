@@ -82,6 +82,7 @@
         # parameter_group: bluebutton-etl-benchmark-db-params
         tags:
           CreatedBy: "{{ whoami.stdout }}"
+          Application: "BlueButton"
         wait: true
         wait_timeout: "{{ rds_wait_timeout }}"
       register: rds_server
