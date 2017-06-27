@@ -1,18 +1,19 @@
+---
 galaxy_info:
   author: Karl M. Davis
   description: This Ansible role can be used to install and configure the bluebutton-data-pipeline application on a system. 
   company: Centers for Medicare and Medicaid Services
 
-  license: Public Domain / CC0
+  license: 'Public Domain / CC0'
 
-  min_ansible_version: 2.2.0.0
+  min_ansible_version: 2.2
 
   #
   # Below are all platforms currently available. Just uncomment
   # the ones that apply to your role. If you don't see your
   # platform on this list, let us know and we'll get it added!
   #
-  #platforms:
+  platforms:
   #- name: OpenBSD
   #  versions:
   #  - all
