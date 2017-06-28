@@ -11,4 +11,5 @@ export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 java \
 	{{ data_pipeline_jvm_args }} \
 	-jar "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}" \
-	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline-app.log"
+	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
+
