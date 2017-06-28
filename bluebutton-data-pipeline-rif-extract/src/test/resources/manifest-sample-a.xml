@@ -2,7 +2,7 @@
 <!-- This sample DataSetManifest file can be used for manual testing. Place it 
 	and the sample file(s) that it lists into a directory named: 
 	"1994-11-05T13:15:30Z" (matches the root's timestamp, below.) -->
-<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v2" 
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v6" 
 	timestamp="1994-11-05T13:15:30Z" sequenceId="1">
 
 	<!-- Copy from 

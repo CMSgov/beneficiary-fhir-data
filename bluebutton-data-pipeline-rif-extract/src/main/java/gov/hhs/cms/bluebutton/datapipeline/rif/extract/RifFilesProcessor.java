@@ -50,16 +50,11 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.ColumnValueCsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.UnsupportedRifVersionException;
 
 /**
  * Contains services responsible for handling new RIF files.
  */
 public final class RifFilesProcessor {
-	/**
-	 * The RIF schema version that is currently supported.
-	 */
-	public static final int RECORD_FORMAT_VERSION = 5;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifFilesProcessor.class);
 
@@ -169,11 +164,7 @@ public final class RifFilesProcessor {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.trace(csvRecord.toString());
 
-		int schemaVersion = RifParsingUtils.parseInteger(csvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
-
 		Beneficiary beneficiaryRow = BeneficiaryParser.parseRif(csvRecords);
 		return new RifRecordEvent<Beneficiary>(fileEvent, recordAction, beneficiaryRow);
 	}
@@ -195,11 +186,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord csvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(csvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
-
 		PartDEvent partDEvent = PartDEventParser.parseRif(csvRecords);
 		return new RifRecordEvent<PartDEvent>(fileEvent, recordAction, partDEvent);
 	}
@@ -221,11 +208,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord firstCsvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(firstCsvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-
 		InpatientClaim claim = InpatientClaimParser.parseRif(csvRecords);
 		/*
 		 * FIXME Can't use real line numbers because random/dummy test data has
@@ -253,11 +236,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord firstCsvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(firstCsvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-
 		OutpatientClaim claim = OutpatientClaimParser.parseRif(csvRecords);
 		/*
 		 * FIXME Can't use real line numbers because random/dummy test data has
@@ -284,11 +263,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord firstCsvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(firstCsvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-
 		CarrierClaim claim = CarrierClaimParser.parseRif(csvRecords);
 		/*
 		 * FIXME Can't use real line numbers because random/dummy test data has
@@ -314,11 +289,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord firstCsvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(firstCsvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-
 		SNFClaim claim = SNFClaimParser.parseRif(csvRecords);
 		/*
 		 * FIXME Can't use real line numbers because random/dummy test data has
@@ -345,11 +316,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord firstCsvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(firstCsvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-
 		HospiceClaim claim = HospiceClaimParser.parseRif(csvRecords);
 		/*
 		 * FIXME Can't use real line numbers because random/dummy test data has
@@ -375,11 +342,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord firstCsvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(firstCsvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-
 		HHAClaim claim = HHAClaimParser.parseRif(csvRecords);
 		/*
 		 * FIXME Can't use real line numbers because random/dummy test data has
@@ -405,11 +368,7 @@ public final class RifFilesProcessor {
 
 		CSVRecord firstCsvRecord = csvRecords.get(0);
 
-		int schemaVersion = RifParsingUtils.parseInteger(firstCsvRecord.get("VERSION"));
-		if (RECORD_FORMAT_VERSION != schemaVersion)
-			throw new UnsupportedRifVersionException(schemaVersion);
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
-
 		DMEClaim claim = DMEClaimParser.parseRif(csvRecords);
 		/*
 		 * FIXME Can't use real line numbers because random/dummy test data has
