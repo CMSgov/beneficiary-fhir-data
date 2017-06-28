@@ -1,0 +1,10 @@
+---
+
+# Ansible pipelining will not work if `requiretty` is forced for sudo.
+- name: Disable 'requiretty' for sudo
+  replace:
+    dest: /etc/sudoers
+    regexp: "^Defaults    requiretty"
+    replace: "# Defaults    requiretty"
+  become: true
+

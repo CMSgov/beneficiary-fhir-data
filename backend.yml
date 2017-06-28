@@ -1,0 +1,18 @@
+---
+
+##
+# Manages the rollout/upgrade of Blue Button API backend systems.
+##
+
+- name: Configure ETL System for Ansible Pipelining
+  hosts: bluebutton-healthapt-prod-etl
+  vars:
+    ansible_ssh_pipelining: false
+  roles:
+    - rhel_ansible_pipelining
+
+- name: Configure ETL System
+  hosts: bluebutton-healthapt-prod-etl
+  roles:
+    - karlmdavis.bluebutton_data_pipeline
+
