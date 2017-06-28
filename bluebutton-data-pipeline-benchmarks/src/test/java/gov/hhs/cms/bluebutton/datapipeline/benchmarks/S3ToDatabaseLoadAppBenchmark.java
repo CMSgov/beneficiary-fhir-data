@@ -163,6 +163,8 @@ public final class S3ToDatabaseLoadAppBenchmark {
 		LOGGER.info("Starting benchmark against sample data: '{}'...", sampleData.name());
 
 		List<StaticRifResource> sampleResources = Arrays.stream(sampleData.getResources())
+				// Temporary workaround for CBBD-266
+				.filter(r -> r.getRifFileType() != RifFileType.PDE)
 				.collect(Collectors.toList());
 
 		String ec2KeyName = System.getProperty(SYS_PROP_EC2_KEY_NAME, null);
