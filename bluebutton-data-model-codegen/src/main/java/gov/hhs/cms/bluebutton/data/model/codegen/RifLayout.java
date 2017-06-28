@@ -98,13 +98,6 @@ public final class RifLayout {
 					&& rifFields.stream().filter(f -> f.rifColumnName.equals("BENE_ID")).count() > 0)
 				continue;
 
-			/*
-			 * TODO Until we move everything to the latest schema version, skip
-			 * the CLM_GRP_ID field.
-			 */
-			if (rifColumnName.trim().equals("CLM_GRP_ID"))
-				continue;
-
 			RifColumnType rifColumnType = RifColumnType.valueOf(row.getCell(1).getStringCellValue());
 			@SuppressWarnings("deprecation")
 			Optional<Integer> rifColumnLength = row.getCell(2).getCellTypeEnum() == CellType.NUMERIC
