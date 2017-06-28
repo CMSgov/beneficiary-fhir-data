@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.sql.DataSource;
 
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public final class RifLoaderTestUtils {
 	 * database server used in tests.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void cleanDatabaseServer() {
+	public static void cleanDatabaseServerViaDeletes() {
 		// Before disabling this check, please go and update your resume.
 		if (!DB_URL.contains("hsql"))
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
@@ -96,6 +97,20 @@ public final class RifLoaderTestUtils {
 		}
 		entityManager.getTransaction().commit();
 		LOGGER.info("Deleted all resources.");
+	}
+
+	/**
+	 * <strong>Serious Business:</strong> deletes all resources from the
+	 * database server used in tests.
+	 */
+	public static void cleanDatabaseServer() {
+		// Before disabling this check, please go and update your resume.
+		if (!DB_URL.contains("hsql"))
+			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
+
+		Flyway flyway = new Flyway();
+		flyway.setDataSource(RifLoader.createDataSource(getLoadOptions(), new MetricRegistry()));
+		flyway.clean();
 	}
 
 	/**
