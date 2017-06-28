@@ -44,43 +44,12 @@
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 		</dependency>
-
 		<dependency>
 			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager 
 				class. -->
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-			<version>3.5.3</version>
-		</dependency>
-		<dependency>
-			<!-- Liquibase uses it's own pluggable logging framework. This dependency 
-				re-routes the logging events in it to SLF4J. -->
-			<groupId>com.mattbertolini</groupId>
-			<artifactId>liquibase-slf4j</artifactId>
-			<version>2.0.0</version>
-		</dependency>
-		<dependency>
-			<!-- Can use Hibernate/JPA as a metadata source for Liquidata, which is 
-				useful for keeping Liquibase's schema in sync with what JPA needs. -->
-			<groupId>org.liquibase.ext</groupId>
-			<artifactId>liquibase-hibernate5</artifactId>
-			<version>3.6</version>
-		</dependency>
-		<dependency>
-			<!-- Only required by DatabaseSchemaManager.generateChangeLogFromJpa(), 
-				so marked optional to keep it out of the final JARs, and off the production 
-				classpath. -->
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<!-- Only required by DatabaseSchemaManager.generateChangeLogFromJpa(), 
-				so marked optional to keep it out of the final JARs, and off the production 
-				classpath. -->
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<optional>true</optional>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>4.2.0</version>
 		</dependency>
 
 		<dependency>

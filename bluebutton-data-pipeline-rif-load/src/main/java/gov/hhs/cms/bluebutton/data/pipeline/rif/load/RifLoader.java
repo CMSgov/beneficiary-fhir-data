@@ -113,8 +113,7 @@ public final class RifLoader {
 		this.options = options;
 
 		DataSource jdbcDataSource = createDataSource(options, appMetrics);
-		DatabaseSchemaManager dbSchemaManager = new DatabaseSchemaManager();
-		dbSchemaManager.createOrUpdateSchema(jdbcDataSource);
+		DatabaseSchemaManager.createOrUpdateSchema(jdbcDataSource);
 		this.entityManagerFactory = createEntityManagerFactory(jdbcDataSource);
 
 		this.secretKeyFactory = createSecretKeyFactory();
