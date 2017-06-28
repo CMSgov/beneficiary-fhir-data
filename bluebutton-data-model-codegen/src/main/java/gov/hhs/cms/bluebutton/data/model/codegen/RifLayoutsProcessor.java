@@ -33,6 +33,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
@@ -346,7 +347,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				.builder(mappingSpec.getHeaderEntity(), mappingSpec.getLineEntityParentField(), Modifier.PRIVATE)
 				.addAnnotation(Id.class).addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
 				.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
-						.addMember("name", "$S", "`" + mappingSpec.getLineEntityParentField() + "`").build())
+						.addMember("name", "$S", "`" + mappingSpec.getLineEntityParentField() + "`")
+						.addMember("foreignKey", "@$T(name = $S)", ForeignKey.class,
+								String.format("%s_%s_to_%s", mappingSpec.getLineTable(),
+										mappingSpec.getLineEntityParentField(), mappingSpec.getHeaderTable()))
+						.build())
 				.build();
 		lineEntity.addField(parentClaimField);
 		MethodSpec parentClaimGetter = MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
@@ -866,7 +871,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				 * tests.
 				 */
 				StringBuilder columnDefinition = new StringBuilder();
-				columnDefinition.append("NUMERIC");
+				columnDefinition.append("numeric");
 				if (rifField.getRifColumnLength().isPresent() || rifField.getRifColumnScale().isPresent()) {
 					columnDefinition.append('(');
 					if (rifField.getRifColumnLength().isPresent()) {
@@ -878,8 +883,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					}
 					columnDefinition.append(')');
 				}
-				if (!rifField.isRifColumnOptional())
-					columnDefinition.append(" NOT NULL");
 				columnAnnotation.addMember("columnDefinition", "$S", columnDefinition.toString());
 			}
 		}
