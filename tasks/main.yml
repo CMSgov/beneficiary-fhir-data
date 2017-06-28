@@ -91,7 +91,3 @@
     - 'Reload Service Definitions'
     - 'Restart Pipeline Service'
 
-- name: Load Pipeline Service Definition
-  command: /usr/bin/systemctl daemon-reload
-  become: true
-
