@@ -8,6 +8,8 @@
     # Needed to run the ETL service.
     - java-1.8.0-openjdk
   become: true
+  notify:
+    - 'Restart Pipeline Service'
 
 - name: Create ETL Service User
   user:
@@ -43,6 +45,8 @@
       with_items:
         - "{{ data_pipeline_appjar_name }}"
       become: true
+      notify:
+        - 'Restart Pipeline Service'
   when: data_pipeline_appjar_s3_bucket is defined
 
 # If the app's JAR is available locally, copy it over.
@@ -52,6 +56,8 @@
         src: "{{ data_pipeline_appjar_localpath }}/{{ data_pipeline_appjar_name }}"
         dest: "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}"
       become: true
+      notify:
+        - 'Restart Pipeline Service'
   when: data_pipeline_appjar_localpath is defined
 
 - name: Configure Pipeline Application Permissions
@@ -70,6 +76,8 @@
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
+  notify:
+    - 'Restart Pipeline Service'
 
 - name: Create Pipeline Service Definition
   template:
@@ -79,14 +87,11 @@
     group: root
     mode: u=rw,g=r,o=r
   become: true
+  notify:
+    - 'Reload Service Definitions'
+    - 'Restart Pipeline Service'
 
 - name: Load Pipeline Service Definition
   command: /usr/bin/systemctl daemon-reload
-  become: true
-
-- name: Start Pipeline Service
-  service:
-    name: bluebutton-data-pipeline-app
-    state: started
   become: true
 

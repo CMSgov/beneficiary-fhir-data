@@ -1,0 +1,8 @@
+---
+
+- name: Restart Pipeline Service
+  service:
+    name: bluebutton-data-pipeline-app
+    state: restarted
+  become: true
+
