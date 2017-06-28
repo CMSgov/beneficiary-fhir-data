@@ -8,6 +8,9 @@ export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 
+# Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
+export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
+
 java \
 	{{ data_pipeline_jvm_args }} \
 	-jar "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}" \

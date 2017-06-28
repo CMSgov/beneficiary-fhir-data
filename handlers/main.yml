@@ -7,6 +7,7 @@
 - name: Restart Pipeline Service
   service:
     name: bluebutton-data-pipeline
-    state: restarted
+    state: stopped
+    #state: restarted
   become: true
 
