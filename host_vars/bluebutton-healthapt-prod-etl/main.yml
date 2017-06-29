@@ -3,6 +3,7 @@ data_pipeline_dir: '/u01/bluebutton-data-pipeline'
 data_pipeline_appjar_name: 'bluebutton-data-pipeline-app-0.1.0-SNAPSHOT-capsule-fat.jar'
 data_pipeline_appjar_localpath: '~/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/0.1.0-SNAPSHOT'
 data_pipeline_jvm_args: '-Xmx12g'
+data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
 
 # The following variables are security-sensitive and thus contained in the 
 # encrypted `vault.yml` file next to this one.
