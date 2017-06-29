@@ -33,6 +33,7 @@
     owner: "{{ data_pipeline_user }}"
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
+  become: true
   when: data_pipeline_tmp_dir is defined
 
 # If the app's JAR is in S3, grab it from there.
