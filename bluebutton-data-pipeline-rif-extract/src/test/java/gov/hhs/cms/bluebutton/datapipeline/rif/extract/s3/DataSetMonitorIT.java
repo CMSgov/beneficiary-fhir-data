@@ -135,9 +135,8 @@ public final class DataSetMonitorIT {
 			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
 					DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, 0, java.time.Duration.ofSeconds(10));
 			DataSetTestUtilities.waitForBucketObjectCount(s3Client, bucket,
-					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS,
-					1 + manifestA.getEntries().size() + 1 + manifestB.getEntries().size() + 1
-							+ manifestC.getEntries().size(),
+					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, 1 + manifestA.getEntries().size() + 1
+							+ manifestB.getEntries().size() + 1 + manifestC.getEntries().size(),
 					java.time.Duration.ofSeconds(10));
 		} finally {
 			if (bucket != null)
