@@ -1,6 +1,5 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
-import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
-import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -32,6 +30,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestId;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetQueue.QueuedDataSet;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
 /**
@@ -134,7 +133,8 @@ public final class DataSetMonitorWorker implements Runnable {
 		}
 
 		// We've found the oldest manifest.
-		DataSetManifest manifestToProcess = dataSetQueue.getNextManifestToProcess().get();
+		QueuedDataSet dataSetToProcess = dataSetQueue.getNextDataSetToProcess().get();
+		DataSetManifest manifestToProcess = dataSetToProcess.getManifest();
 		LOGGER.info(
 				"Found data set to process: '{}'."
 						+ " There were '{}' total pending data sets and '{}' completed ones.",
@@ -175,23 +175,11 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * there and ready to go.
 		 */
 		LOGGER.info("Data set ready. Processing it...");
-
-		LOGGER.info("Downloading local copies of data set files...");
-		Instant dataSetManifestTimestamp = manifestToProcess.getTimestamp();
-		List<S3RifFile> rifFiles = manifestToProcess.getEntries().stream().map(e -> {
-			String key = String.format("%s/%s/%s", S3_PREFIX_PENDING_DATA_SETS,
-					DateTimeFormatter.ISO_INSTANT.format(dataSetManifestTimestamp), e.getName());
-
-			Timer.Context timerDownload = appMetrics
-					.timer(MetricRegistry.name(getClass().getSimpleName(), "rifDownload")).time();
-			S3RifFile s3RifFile = new S3RifFile(s3TaskManager.getS3Client(), e.getType(),
-					new GetObjectRequest(options.getS3BucketName(), key));
-			timerDownload.close();
-
-			return s3RifFile;
-		}).collect(Collectors.toList());
+		List<S3RifFile> rifFiles = manifestToProcess.getEntries().stream()
+				.map(manifestEntry -> new S3RifFile(appMetrics, manifestEntry,
+						dataSetToProcess.getManifestEntryDownloads().get(manifestEntry)))
+				.collect(Collectors.toList());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(), new ArrayList<>(rifFiles));
-		LOGGER.info("Downloaded local copies of data set files.");
 
 		/*
 		 * Now we hand that off to the DataSetMonitorListener, to do the *real*

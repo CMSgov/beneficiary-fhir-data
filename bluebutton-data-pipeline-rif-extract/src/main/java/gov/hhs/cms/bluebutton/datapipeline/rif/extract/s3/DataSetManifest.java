@@ -6,12 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -68,6 +70,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 		this.timestamp = timestamp;
 		this.sequenceId = sequenceId;
 		this.entries = Arrays.asList(entries);
+		this.entries.forEach(entry -> entry.parentManifest = this);
 	}
 
 	/**
@@ -145,6 +148,9 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 	 */
 	@XmlAccessorType(XmlAccessType.FIELD)
 	public static final class DataSetManifestEntry {
+		@XmlTransient
+		private DataSetManifest parentManifest;
+
 		@XmlAttribute
 		private final String name;
 
@@ -160,6 +166,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 		 *            the value to use for {@link #getType()}
 		 */
 		public DataSetManifestEntry(String name, RifFileType type) {
+			this.parentManifest = null;
 			this.name = name;
 			this.type = type;
 		}
@@ -172,6 +179,14 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 		private DataSetManifestEntry() {
 			this.name = null;
 			this.type = null;
+		}
+
+		/**
+		 * @return the {@link DataSetManifest} that this
+		 *         {@link DataSetManifestEntry} is a part of
+		 */
+		public DataSetManifest getParentManifest() {
+			return parentManifest;
 		}
 
 		/**
@@ -193,12 +208,32 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 		}
 
 		/**
+		 * Per the {@link Unmarshaller} JavaDocs, when unmarshalling
+		 * {@link DataSetManifestEntry} instances from XML via JAX-B, this
+		 * method is called after all the properties (except IDREF) are
+		 * unmarshalled for this object, but before this object is set to the
+		 * parent object.
+		 * 
+		 * @param unmarshaller
+		 *            the {@link Unmarshaller} that created this instance
+		 * @param parent
+		 *            the value to use for {@link #getParentManifest()}
+		 */
+		void afterUnmarshal(Unmarshaller unmarshaller, Object parent) {
+			this.parentManifest = (DataSetManifest) parent;
+		}
+
+		/**
 		 * @see java.lang.Object#toString()
 		 */
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append("DataSetManifestEntry [name=");
+			builder.append("DataSetManifestEntry [parentManifest.getTimestamp()=");
+			builder.append(parentManifest.getTimestamp());
+			builder.append(", parentManifest.getSequenceId()=");
+			builder.append(parentManifest.getSequenceId());
+			builder.append(", name=");
 			builder.append(name);
 			builder.append(", type=");
 			builder.append(type);
