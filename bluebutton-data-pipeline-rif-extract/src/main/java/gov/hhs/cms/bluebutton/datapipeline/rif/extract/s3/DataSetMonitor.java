@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
 /**
  * <p>
@@ -21,14 +22,22 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
  * (CCW) into Amazon's S3 API. The data in S3 will be structured as follows:
  * </p>
  * <ul>
- * <li>Amazon S3 Bucket: <code>etl-data</code>
+ * <li>Amazon S3 Bucket: <code>&lt;s3-bucket-name&gt;</code>
  * <ul>
  * <li><code>1997-07-16T19:20:30Z</code>
  * <ul>
- * <li><code>manifest.xml</code></li>
- * <li><code>beneficiaries.rif</code></li>
- * <li><code>bcarrier.rif</code></li>
- * <li><code>pde.rif</code></li>
+ * <li><code>Incoming</code>
+ * <ul>
+ * <li><code>23_manifest.xml</code></li>
+ * <li><code>beneficiaries_42.rif</code></li>
+ * <li><code>bcarrier_58.rif</code></li>
+ * <li><code>pde_93.rif</code></li>
+ * </ul>
+ * <li><code>Done</code>
+ * <ul>
+ * <li><code>64_manifest.xml</code></li>
+ * <li><code>beneficiaries_45.rif</code></li>
+ * </ul>
  * </ul>
  * </li>
  * </ul>
@@ -40,17 +49,13 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
  * Its name will be an <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601
  * date and time</a> expressed in UTC, to a precision of at least seconds. This
  * will represent (roughly) the time that the data set was created. Within each
- * of those directories will be a manifest file and the set of RIF files to be
- * processed.
+ * of those directories will be manifest files and the RIF files that they
+ * reference.
  * </p>
  * <p>
  * The ETL operates in a loop: periodically checking for the oldest manifest
- * file that can be found, waiting for all of the files listed in it to be
- * available (to avoid race conditions in uploads), and then processing all of
- * those files. At this level of detail, everything occurs synchronously; the
- * ETL pipeline will never process more than one data set at a time. This is
- * necessary to ensure data integrity: if updates to claims are processed out of
- * order, the data will end up in the wrong final state.
+ * file that can be found and then handing it off to the rest of the pipeline
+ * for processing.
  * </p>
  */
 public final class DataSetMonitor {
@@ -69,6 +74,7 @@ public final class DataSetMonitor {
 
 	private ScheduledExecutorService dataSetWatcherService;
 	private ScheduledFuture<?> dataSetWatcherFuture;
+	private S3TaskManager s3TaskManager;
 
 	/**
 	 * Constructs a new {@link DataSetMonitor} instance. Note that this must be
@@ -95,6 +101,7 @@ public final class DataSetMonitor {
 
 		this.dataSetWatcherService = null;
 		this.dataSetWatcherFuture = null;
+		this.s3TaskManager = null;
 	}
 
 	/**
@@ -105,11 +112,13 @@ public final class DataSetMonitor {
 	 */
 	public void start() {
 		// Instances of this class are single-use-only.
-		if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null)
+		if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null
+				|| this.s3TaskManager != null)
 			throw new IllegalStateException();
 
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
-		Runnable dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, listener);
+		this.s3TaskManager = new S3TaskManager(options);
+		Runnable dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
 		Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
 		/*
@@ -148,11 +157,18 @@ public final class DataSetMonitor {
 		if (dataSetWatcherService.isShutdown())
 			return;
 
-		// Signal the scheduler to stop after the current execution (if any).
+		/*
+		 * Signal the scheduler to stop after the current DataSetMonitorWorker
+		 * execution (if any), then wait for that to happen.
+		 */
 		dataSetWatcherFuture.cancel(false);
-
-		// Wait for the current execution (if any) to complete.
 		waitForStop();
+
+		/*
+		 * Stop accepting new S3 tasks, cancel those tasks that can be canceled
+		 * safely, and wait for the rest to complete.
+		 */
+		s3TaskManager.shutdownSafely();
 
 		// Clean house.
 		dataSetWatcherService.shutdown();
@@ -183,6 +199,8 @@ public final class DataSetMonitor {
 			 */
 			LOGGER.info("Waiting for any in-progress data set processing to gracefully complete...");
 			dataSetWatcherFuture.get();
+			LOGGER.info("Waiting for any in-progress data set downloads to gracefully complete...");
+			// TODO wait for downloads?
 		} catch (CancellationException e) {
 			/*
 			 * This is expected to occur when the app is being gracefully shut

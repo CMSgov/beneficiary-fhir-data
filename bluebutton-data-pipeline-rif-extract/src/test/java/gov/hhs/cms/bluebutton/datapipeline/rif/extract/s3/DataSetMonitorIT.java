@@ -108,7 +108,7 @@ public final class DataSetMonitorIT {
 					new DataSetManifestEntry("pde.rif", RifFileType.PDE));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB, manifestB.getEntries().get(0),
-					StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
+					StaticRifResource.SAMPLE_A_PDE.getResourceUrl()));
 			DataSetManifest manifestC = new DataSetManifest(Instant.now(), 0,
 					new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
 			s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestC));

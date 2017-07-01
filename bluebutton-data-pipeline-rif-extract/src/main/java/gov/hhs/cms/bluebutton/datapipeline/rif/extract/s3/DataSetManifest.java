@@ -26,7 +26,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public final class DataSetManifest {
+public final class DataSetManifest implements Comparable<DataSetManifest> {
 	@XmlAttribute
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TweakedInstantXmlAdapter.class)
@@ -111,6 +111,16 @@ public final class DataSetManifest {
 	 */
 	public List<DataSetManifestEntry> getEntries() {
 		return entries;
+	}
+
+	/**
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(DataSetManifest o) {
+		if (o == null)
+			return 1;
+		return getId().compareTo(o.getId());
 	}
 
 	/**
@@ -259,6 +269,17 @@ public final class DataSetManifest {
 			int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(2));
 
 			return new DataSetManifestId(dataSetTimestamp, dataSetSequenceId);
+		}
+
+		/**
+		 * @param s3Prefix
+		 *            the S3 key prefix that should be prepended to the
+		 *            calculated S3 key, e.g. "<code>Incoming</code>"
+		 * @return the S3 key for this {@link DataSetManifestId}, under the
+		 *         specified prefix
+		 */
+		public String computeS3Key(String s3Prefix) {
+			return String.format("%s/%s/%d_manifest.xml", s3Prefix, timestamp.toString(), sequenceId);
 		}
 
 		/**

@@ -17,6 +17,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
 /**
  * Integration tests for {@link DataSetMonitorWorker}.
@@ -39,7 +40,8 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
+					new S3TaskManager(options), listener);
 			monitorWorker.run();
 
 			// Verify that no data sets were generated.
@@ -79,7 +81,8 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
+					new S3TaskManager(options), listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -106,7 +109,8 @@ public final class DataSetMonitorWorkerIT {
 	 */
 	@Test
 	public void multipleDataSetsTest() {
-		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
+		ExtractionOptions options = new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)), null,
+				1);
 		AmazonS3 s3Client = S3Utilities.createS3Client(options);
 		Bucket bucket = null;
 		try {
@@ -134,8 +138,8 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
-			monitorWorker.setS3MaxKeys(1);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
+					new S3TaskManager(options), listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -191,7 +195,8 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
+					new S3TaskManager(options), listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
