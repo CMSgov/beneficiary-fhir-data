@@ -6,6 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
@@ -18,10 +21,12 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 
 /**
- * Represents an asynchronous/lazy operation to download the contents of a
- * specific {@link DataSetManifestEntry} from S3.
+ * Represents an asynchronous operation to download the contents of a specific
+ * {@link DataSetManifestEntry} from S3.
  */
 public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDownloadResult> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
+
 	private final S3TaskManager s3TaskManager;
 	private final ExtractionOptions options;
 	private final DataSetManifestEntry manifestEntry;
@@ -35,7 +40,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 	 *            the {@link ExtractionOptions} to use
 	 * @param manifestEntry
 	 *            the {@link DataSetManifestEntry} to download the file for
-	 * 
 	 */
 	public ManifestEntryDownloadTask(S3TaskManager s3TaskManager, ExtractionOptions options,
 			DataSetManifestEntry manifestEntry) {
@@ -55,9 +59,11 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 							manifestEntry.getParentManifest().getTimestamp().toString(), manifestEntry.getName()));
 			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
+			LOGGER.debug("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,
 					localTempFile.toFile());
 			downloadHandle.waitForCompletion();
+			LOGGER.debug("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
 
 			return new ManifestEntryDownloadResult(manifestEntry, localTempFile);
 		} catch (IOException e) {

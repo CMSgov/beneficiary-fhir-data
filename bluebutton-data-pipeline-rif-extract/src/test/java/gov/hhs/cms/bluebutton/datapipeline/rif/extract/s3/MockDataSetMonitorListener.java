@@ -4,12 +4,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 
 /**
  * A mock {@link DataSetMonitorListener} that tracks the events it receives.
  */
 final class MockDataSetMonitorListener implements DataSetMonitorListener {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MockDataSetMonitorListener.class);
+
 	private int noDataAvailableEvents = 0;
 	private final List<RifFilesEvent> dataEvents = new LinkedList<>();
 	final List<Throwable> errorEvents = new LinkedList<>();
@@ -51,6 +56,7 @@ final class MockDataSetMonitorListener implements DataSetMonitorListener {
 	 */
 	@Override
 	public void errorOccurred(Throwable error) {
+		LOGGER.warn("Error received.", error);
 		errorEvents.add(error);
 	}
 

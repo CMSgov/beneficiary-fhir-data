@@ -1,6 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task;
 
-import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -21,7 +21,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDown
 public final class S3TaskManager {
 	private final AmazonS3 s3Client;
 	private final TransferManager s3TransferManager;
-	private final ThreadPoolExecutor backgroundTaskService;
+	private final ExecutorService downloadTasksService;
+	private final ExecutorService moveTasksService;
 
 	/**
 	 * Constructs a new {@link S3TaskManager}.
@@ -33,9 +34,15 @@ public final class S3TaskManager {
 		this.s3Client = S3Utilities.createS3Client(options);
 		this.s3TransferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-		this.backgroundTaskService = new ThreadPoolExecutor(10, 10, 100L, TimeUnit.MILLISECONDS,
+		ThreadPoolExecutor cancellableTasksService = new ThreadPoolExecutor(10, 10, 100L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>());
-		this.backgroundTaskService.allowCoreThreadTimeOut(true);
+		cancellableTasksService.allowCoreThreadTimeOut(true);
+		this.downloadTasksService = cancellableTasksService;
+
+		ThreadPoolExecutor nonCancellableTasksService = new ThreadPoolExecutor(10, 10, 100L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>());
+		nonCancellableTasksService.allowCoreThreadTimeOut(true);
+		this.moveTasksService = nonCancellableTasksService;
 	}
 
 	/**
@@ -60,28 +67,26 @@ public final class S3TaskManager {
 	 */
 	public void shutdownSafely() {
 		/*
-		 * This will prevent any tasks that have not started from starting, and
-		 * will attempt to interrupt all threads currently running active tasks.
-		 * Some of our tasks are interruptible (e.g. TODO), some aren't (e.g. S3
-		 * renames), so we will have to wait for the service to finish shutting
-		 * down, which will include waiting for the non-interruptible tasks to
-		 * complete.
+		 * Prevent any new download tasks from being submitted and cancel those
+		 * that are queued.
 		 */
-		List<Runnable> tasksThatNeverStarted = this.backgroundTaskService.shutdownNow();
+		this.downloadTasksService.shutdownNow();
+
+		/*
+		 * Prevent any new move tasks from being submitted, while allowing those
+		 * that are queued and/or actively running to complete. This is
+		 * necessary to ensure that data sets present in the database aren't
+		 * left marked as pending in S3.
+		 */
+		this.moveTasksService.shutdown();
+
 		try {
-			this.backgroundTaskService.awaitTermination(30, TimeUnit.MINUTES);
+			this.downloadTasksService.awaitTermination(30, TimeUnit.MINUTES);
+			this.moveTasksService.awaitTermination(30, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			// We're not expecting interrupts here, so go boom.
 			throw new BadCodeMonkeyException(e);
 		}
-
-		/*
-		 * Some of the operations that never got to start **must** be run, or
-		 * the application's data will be left in an inconsistent state (e.g.
-		 * the data is in the database, but still marked as pending in S3). So,
-		 * we run those tasks synchronously here.
-		 */
-		// TODO don't have any of those tasks yet
 	}
 
 	/**
@@ -92,6 +97,14 @@ public final class S3TaskManager {
 	 *         {@link ManifestEntryDownloadTask}
 	 */
 	public Future<ManifestEntryDownloadResult> submit(ManifestEntryDownloadTask task) {
-		return backgroundTaskService.submit(task);
+		return downloadTasksService.submit(task);
+	}
+
+	/**
+	 * @param task
+	 *            the {@link DataSetMoveTask} to be asynchronously run
+	 */
+	public void submit(DataSetMoveTask task) {
+		moveTasksService.submit(task);
 	}
 }

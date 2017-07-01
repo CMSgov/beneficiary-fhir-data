@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -151,6 +152,7 @@ public final class S3RifFile implements RifFile {
 	 * {@link S3RifFile}'s corresponding S3 object data locally.
 	 */
 	public void cleanupTempFile() {
+		LOGGER.debug("Cleaning up '{}'...", this);
 		if (!manifestEntryDownload.isDone()) {
 			manifestEntryDownload.cancel(false);
 			return;
@@ -161,7 +163,10 @@ public final class S3RifFile implements RifFile {
 			Files.delete(fileDownloadResult.getLocalDownload());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		} catch (CancellationException e) {
+			LOGGER.debug("Download was cancelled and can't be cleaned up.");
 		}
+		LOGGER.debug("Cleaned up '{}'.", this);
 	}
 
 	/**
@@ -169,20 +174,25 @@ public final class S3RifFile implements RifFile {
 	 */
 	@Override
 	public String toString() {
+		String localDownloadPath;
 		try {
-			StringBuilder builder = new StringBuilder();
-			builder.append("S3RifFile [manifestEntry=");
-			builder.append(manifestEntry);
-			builder.append(", manifestEntryDownload.localPath=");
-			builder.append(
-					manifestEntryDownload.isDone() ? manifestEntryDownload.get().getLocalDownload() : "(pending)");
-			builder.append("]");
-			return builder.toString();
+			localDownloadPath = manifestEntryDownload.isDone()
+					? manifestEntryDownload.get().getLocalDownload().toAbsolutePath().toString() : "(not downloaded)";
 		} catch (InterruptedException e) {
 			// We're not expecting interrupts here, so go boom.
 			throw new BadCodeMonkeyException(e);
 		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
+			localDownloadPath = "(download failed)";
+		} catch (CancellationException e) {
+			localDownloadPath = "(download cancelled)";
 		}
+
+		StringBuilder builder = new StringBuilder();
+		builder.append("S3RifFile [manifestEntry=");
+		builder.append(manifestEntry);
+		builder.append(", manifestEntryDownload.localPath=");
+		builder.append(localDownloadPath);
+		builder.append("]");
+		return builder.toString();
 	}
 }

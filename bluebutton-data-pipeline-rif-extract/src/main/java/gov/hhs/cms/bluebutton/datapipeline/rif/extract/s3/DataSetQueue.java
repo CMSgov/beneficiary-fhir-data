@@ -17,6 +17,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -304,12 +305,19 @@ public final class DataSetQueue {
 	}
 
 	/**
+	 * @return the {@link Stream} that {@link QueuedDataSet}s should be pulled
+	 *         from, when requested
+	 */
+	private Stream<DataSetManifest> getManifestsToProcess() {
+		return manifestsToProcess.stream().filter(manifest -> !recentlyProcessedManifests.contains(manifest.getId()));
+	}
+
+	/**
 	 * @return <code>false</code> if there is at least one pending
 	 *         {@link DataSetManifest} to process, <code>true</code> if not
 	 */
 	public boolean isEmpty() {
-		return manifestsToProcess.stream().filter(manifest -> !recentlyProcessedManifests.contains(manifest.getId()))
-				.count() == 0;
+		return getManifestsToProcess().count() == 0;
 	}
 
 	/**
@@ -321,7 +329,7 @@ public final class DataSetQueue {
 			return Optional.empty();
 		}
 
-		DataSetManifest nextManifestToProcess = manifestsToProcess.first();
+		DataSetManifest nextManifestToProcess = getManifestsToProcess().findFirst().get();
 		Map<DataSetManifestEntry, Future<ManifestEntryDownloadResult>> manifestEntryDownloads = nextManifestToProcess
 				.getEntries().stream().collect(Collectors.toMap(Function.identity(), this.manifestEntryDownloads::get));
 		return Optional.of(new QueuedDataSet(nextManifestToProcess, manifestEntryDownloads));

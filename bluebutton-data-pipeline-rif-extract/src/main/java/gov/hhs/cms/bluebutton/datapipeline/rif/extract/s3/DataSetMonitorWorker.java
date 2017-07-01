@@ -12,25 +12,16 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.s3.model.CopyObjectRequest;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
-import com.amazonaws.services.s3.transfer.Copy;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetQueue.QueuedDataSet;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.DataSetMoveTask;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
 /**
@@ -200,7 +191,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 */
 		rifFiles.stream().forEach(f -> f.cleanupTempFile());
 		dataSetQueue.markProcessed(manifestToProcess);
-		markDataSetCompleteInS3(manifestToProcess);
+		s3TaskManager.submit(new DataSetMoveTask(s3TaskManager, options, manifestToProcess));
 	}
 
 	/**
@@ -255,81 +246,5 @@ public final class DataSetMonitorWorker implements Runnable {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Deletes the (now complete) data set in S3, after copying it to a
-	 * "<code>Done</code>" folder in the same bucket.
-	 * 
-	 * @param dataSetManifest
-	 *            the {@link DataSetManifest} of the data set to mark as
-	 *            complete
-	 */
-	private void markDataSetCompleteInS3(DataSetManifest dataSetManifest) {
-		Timer.Context timerS3Cleanup = appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "s3Cleanup"))
-				.time();
-		LOGGER.info("Renaming data set in S3, now that processing is complete...");
-
-		/*
-		 * S3 doesn't support batch/transactional operations, or an atomic move
-		 * operation. Instead, we have to first copy all of the objects to their
-		 * new location, and then remove the old objects. If something blows up
-		 * in the middle of this method, orphaned S3 object WILL be created.
-		 * That's an unlikely enough occurrence, though, that we're not going to
-		 * engineer around it right now.
-		 */
-
-		// First, get a list of all the object keys to work on.
-		List<String> s3KeySuffixesToMove = dataSetManifest.getEntries()
-				.stream().map(e -> String.format("%s/%s",
-						DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), e.getName()))
-				.collect(Collectors.toList());
-		s3KeySuffixesToMove.add(String.format("%s/%d_manifest.xml",
-				DateTimeFormatter.ISO_INSTANT.format(dataSetManifest.getTimestamp()), dataSetManifest.getSequenceId()));
-
-		/*
-		 * Then, loop through each of those objects and copy them (S3 has no
-		 * bulk copy operation).
-		 */
-		TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3TaskManager.getS3Client())
-				.build();
-		for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
-			String sourceKey = String.format("%s/%s", S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
-			String targetKey = String.format("%s/%s", S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
-
-			/*
-			 * Before copying, grab the metadata of the source object to ensure
-			 * that we maintain its encryption settings (by default, the copy
-			 * will maintain all metadata EXCEPT: server-side-encryption,
-			 * storage-class, and website-redirect-location).
-			 */
-			ObjectMetadata objectMetadata = s3TaskManager.getS3Client().getObjectMetadata(options.getS3BucketName(),
-					sourceKey);
-			CopyObjectRequest copyRequest = new CopyObjectRequest(options.getS3BucketName(), sourceKey,
-					options.getS3BucketName(), targetKey);
-			if (objectMetadata.getSSEAwsKmsKeyId() != null) {
-				copyRequest.setSSEAwsKeyManagementParams(
-						new SSEAwsKeyManagementParams(objectMetadata.getSSEAwsKmsKeyId()));
-			}
-
-			Copy copyOperation = transferManager.copy(copyRequest);
-			try {
-				copyOperation.waitForCopyResult();
-			} catch (InterruptedException e) {
-				throw new BadCodeMonkeyException(e);
-			}
-		}
-		transferManager.shutdownNow(false);
-		LOGGER.debug("Data set copied in S3 (step 1 of move).");
-
-		DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(options.getS3BucketName());
-		deleteObjectsRequest
-				.setKeys(s3KeySuffixesToMove.stream().map(k -> String.format("%s/%s", S3_PREFIX_PENDING_DATA_SETS, k))
-						.map(k -> new KeyVersion(k)).collect(Collectors.toList()));
-		s3TaskManager.getS3Client().deleteObjects(deleteObjectsRequest);
-		LOGGER.debug("Data set deleted in S3 (step 2 of move).");
-
-		LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
-		timerS3Cleanup.close();
 	}
 }

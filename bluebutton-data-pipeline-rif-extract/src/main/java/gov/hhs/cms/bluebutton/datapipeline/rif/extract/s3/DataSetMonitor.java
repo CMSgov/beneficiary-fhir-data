@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
@@ -112,8 +113,7 @@ public final class DataSetMonitor {
 	 */
 	public void start() {
 		// Instances of this class are single-use-only.
-		if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null
-				|| this.s3TaskManager != null)
+		if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null || this.s3TaskManager != null)
 			throw new IllegalStateException();
 
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
@@ -149,13 +149,17 @@ public final class DataSetMonitor {
 	 * </p>
 	 */
 	public void stop() {
+		LOGGER.debug("Stopping...");
+
 		// If we haven't started yet, this is easy.
-		if (dataSetWatcherFuture == null)
+		if (dataSetWatcherFuture == null) {
 			return;
+		}
 
 		// If something has already shut us down, we're done.
-		if (dataSetWatcherService.isShutdown())
+		if (dataSetWatcherService.isShutdown()) {
 			return;
+		}
 
 		/*
 		 * Signal the scheduler to stop after the current DataSetMonitorWorker
@@ -172,6 +176,8 @@ public final class DataSetMonitor {
 
 		// Clean house.
 		dataSetWatcherService.shutdown();
+
+		LOGGER.debug("Stopped.");
 	}
 
 	/**
@@ -199,8 +205,6 @@ public final class DataSetMonitor {
 			 */
 			LOGGER.info("Waiting for any in-progress data set processing to gracefully complete...");
 			dataSetWatcherFuture.get();
-			LOGGER.info("Waiting for any in-progress data set downloads to gracefully complete...");
-			// TODO wait for downloads?
 		} catch (CancellationException e) {
 			/*
 			 * This is expected to occur when the app is being gracefully shut
@@ -215,20 +219,19 @@ public final class DataSetMonitor {
 			 * Many Java applications use InterruptedExceptions to signal that a
 			 * thread should stop what it's doing ASAP. This app doesn't, so
 			 * this is unexpected, and accordingly, we don't know what to do.
-			 * Safest bet is to shut down and blow up.
+			 * Safest bet is to blow up.
 			 */
-			dataSetWatcherService.shutdown();
-			throw new RuntimeException(e);
+			throw new BadCodeMonkeyException(e);
 		} catch (ExecutionException e) {
 			/*
 			 * This will only occur if the Runnable (dataSetWatcherFuture)
 			 * failed with an unhandled exception. This is unexpected, and
-			 * accordingly, we don't know what to do. Safest bet is to shut down
-			 * and blow up.
+			 * accordingly, we don't know what to do. Safest bet is to blow up.
 			 */
-			dataSetWatcherService.shutdown();
-			throw new RuntimeException(e);
+			throw new BadCodeMonkeyException(e);
 		}
+
+		LOGGER.info("Data set processing was stopped.");
 	}
 
 	/**
