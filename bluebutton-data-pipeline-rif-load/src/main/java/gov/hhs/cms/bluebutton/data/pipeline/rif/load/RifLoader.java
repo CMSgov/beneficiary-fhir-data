@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,7 +48,6 @@ import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -120,8 +118,7 @@ public final class RifLoader {
 		 * producer when the task queue is full.
 		 */
 		int threadPoolSize = options.getLoaderThreads();
-		// The task queue must be <= (Phaser.MAX_PARTIES - threadPoolSize).
-		int taskQueueSize = 0xffff - threadPoolSize;
+		int taskQueueSize = 1000 * threadPoolSize;
 		NotifyingBlockingThreadPoolExecutor loadExecutorService = new NotifyingBlockingThreadPoolExecutor(
 				threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
 		this.loadExecutorService = loadExecutorService;
@@ -255,7 +252,7 @@ public final class RifLoader {
 		LOGGER.info("Processing '{}'...", dataToLoad);
 
 		dataToLoad.getSourceEvent().getEventMetrics().register(
-				MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService.getQueue().size()"),
+				MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "queueSize"),
 				new Gauge<Integer>() {
 					/**
 					 * @see com.codahale.metrics.Gauge#getValue()
@@ -263,6 +260,17 @@ public final class RifLoader {
 					@Override
 					public Integer getValue() {
 						return loadExecutorService.getQueue().size();
+					}
+				});
+		dataToLoad.getSourceEvent().getEventMetrics().register(
+				MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService", "activeBatches"),
+				new Gauge<Integer>() {
+					/**
+					 * @see com.codahale.metrics.Gauge#getValue()
+					 */
+					@Override
+					public Integer getValue() {
+						return loadExecutorService.getActiveCount();
 					}
 				});
 
@@ -280,27 +288,6 @@ public final class RifLoader {
 
 		try (PostgreSqlCopyInserter postgresBatch = new PostgreSqlCopyInserter(entityManagerFactory,
 				fileEventMetrics)) {
-			/*
-			 * We need a way to wait for all of the asynchronous jobs to
-			 * complete, without keeping all of their Futures in memory (which
-			 * would cause OutOfMemoryErrors). This calls for something like the
-			 * JDK's CountDownLatch, but that also supports incrementing. The
-			 * Phaser class supports this use case, with its register() method
-			 * being equivalent to a countUp() and its arrive*() methods being
-			 * equivalent to countDown(). See its JavaDoc for an example of
-			 * exactly this use case.
-			 */
-			Phaser phaserForSubmittedBatches = new Phaser(1);
-			Counter counterForActiveBatches = fileEventMetrics
-					.counter(MetricRegistry.name(getClass().getSimpleName(), "activeBatches"));
-			Runnable startHandler = () -> {
-				counterForActiveBatches.inc();
-			};
-			Runnable completionHandler = () -> {
-				counterForActiveBatches.dec();
-				phaserForSubmittedBatches.arriveAndDeregister();
-			};
-
 			// Define the Consumer that will handle each batch.
 			Consumer<List<RifRecordEvent<?>>> batchProcessor = recordsBatch -> {
 				/*
@@ -310,15 +297,7 @@ public final class RifLoader {
 				 * pending. That's desirable behavior, as it prevents
 				 * OutOfMemoryErrors.
 				 */
-				processAsync(recordsBatch, postgresBatch, startHandler, completionHandler, resultHandler, errorHandler);
-
-				/*
-				 * We must register with the Phaser before exiting this block,
-				 * to ensure that the arriveAndAwaitAdvance() call below
-				 * actually blocks until all work has been submitted AND
-				 * completed.
-				 */
-				phaserForSubmittedBatches.register();
+				processAsync(recordsBatch, postgresBatch, resultHandler, errorHandler);
 			};
 
 			// Collect records into batches and submit each to batchProcessor.
@@ -332,7 +311,12 @@ public final class RifLoader {
 				}).forEach(batchProcessor);
 
 			// Wait for all submitted batches to complete.
-			phaserForSubmittedBatches.arriveAndAwaitAdvance();
+			try {
+				this.loadExecutorService.await();
+			} catch (InterruptedException e) {
+				// Interrupts should not be used on this thread, so go boom.
+				throw new RuntimeException(e);
+			}
 
 			// Submit the queued PostgreSQL COPY operations, if any.
 			if (!postgresBatch.isEmpty()) {
@@ -352,11 +336,6 @@ public final class RifLoader {
 	 * @param postgresBatch
 	 *            the {@link PostgreSqlCopyInserter} for the current set of
 	 *            {@link RifFilesEvent}s being processed
-	 * @param startHandler
-	 *            the {@link Runnable} to always execute when the batch starts
-	 * @param completionHandler
-	 *            the {@link Runnable} to always execute when the batch
-	 *            completes, regardless of success or failure
 	 * @param resultHandler
 	 *            the {@link Consumer} to notify when the batch completes
 	 *            successfully
@@ -365,17 +344,13 @@ public final class RifLoader {
 	 *            reason
 	 */
 	private void processAsync(List<RifRecordEvent<?>> recordsBatch, PostgreSqlCopyInserter postgresBatch,
-			Runnable startHandler, Runnable completionHandler, Consumer<RifRecordLoadResult> resultHandler,
-			Consumer<Throwable> errorHandler) {
+			Consumer<RifRecordLoadResult> resultHandler, Consumer<Throwable> errorHandler) {
 		loadExecutorService.submit(() -> {
 			try {
-				startHandler.run();
 				List<RifRecordLoadResult> processResults = process(recordsBatch, postgresBatch);
 				processResults.forEach(resultHandler::accept);
 			} catch (Throwable e) {
 				errorHandler.accept(e);
-			} finally {
-				completionHandler.run();
 			}
 		});
 	}
