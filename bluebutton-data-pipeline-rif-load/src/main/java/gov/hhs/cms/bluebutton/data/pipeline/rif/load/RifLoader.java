@@ -18,12 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Phaser;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -97,7 +94,7 @@ public final class RifLoader {
 	private final LoadAppOptions options;
 	private final EntityManagerFactory entityManagerFactory;
 	private final SecretKeyFactory secretKeyFactory;
-	private final ExecutorService loadExecutorService;
+	private final NotifyingBlockingThreadPoolExecutor loadExecutorService;
 
 	/**
 	 * Constructs a new {@link RifLoader} instance.
@@ -119,23 +116,20 @@ public final class RifLoader {
 		this.secretKeyFactory = createSecretKeyFactory();
 
 		/*
-		 * A bit of a trick, here: our thread pool will only accept an
-		 * (arbitrary) fixed number of pending tasks, before it starts rejecting
-		 * new submissions. But because the "rejection policy" is
-		 * CallerRunsPolicy, any rejected tasks will instead be run on the
-		 * submitting thread. This effectively ensures that all submitted tasks
-		 * get run, but that the number of submitted tasks is kept in check via
-		 * this backpressure, preventing OutOfMemoryErrors. This trick and a
-		 * similar one were found here:
-		 * https://stackoverflow.com/a/9510713/1851299, and here:
-		 * http://www.nurkiewicz.com/2014/11/executorservice-10-tips-and-tricks.
-		 * html.
+		 * I feel like a hipster using "found" code like
+		 * NotifyingBlockingThreadPoolExecutor: this really cool (and old) class
+		 * supports our use case beautifully. It hands out tasks to multiple
+		 * consumers, and allows a single producer to feed it, blocking that
+		 * producer when the task queue is full.
 		 */
-		BlockingQueue<Runnable> loadExecutorQueue = new ArrayBlockingQueue<>(options.getLoaderThreads() * 100);
-		this.loadExecutorService = new ThreadPoolExecutor(options.getLoaderThreads(), options.getLoaderThreads(), 0L,
-				TimeUnit.MILLISECONDS, loadExecutorQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+		int threadPoolSize = options.getLoaderThreads();
+		int taskQueueSize = threadPoolSize * 1000;
+		NotifyingBlockingThreadPoolExecutor loadExecutorService = new NotifyingBlockingThreadPoolExecutor(
+				threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
+		this.loadExecutorService = loadExecutorService;
 
-		LOGGER.info("Configured to load with '{}' threads.", options.getLoaderThreads());
+		LOGGER.info("Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
+				options.getLoaderThreads(), taskQueueSize, RECORD_BATCH_SIZE);
 	}
 
 	/**
@@ -261,6 +255,18 @@ public final class RifLoader {
 		Timer.Context timerDataSetFile = appMetrics
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "dataSet", "file", "processed")).time();
 		LOGGER.info("Processing '{}'...", dataToLoad);
+
+		dataToLoad.getSourceEvent().getEventMetrics().register(
+				MetricRegistry.name(getClass().getSimpleName(), "loadExecutorService.getQueue().size()"),
+				new Gauge<Integer>() {
+					/**
+					 * @see com.codahale.metrics.Gauge#getValue()
+					 */
+					@Override
+					public Integer getValue() {
+						return loadExecutorService.getQueue().size();
+					}
+				});
 
 		/*
 		 * Design history note: Initially, this function just returned a stream
