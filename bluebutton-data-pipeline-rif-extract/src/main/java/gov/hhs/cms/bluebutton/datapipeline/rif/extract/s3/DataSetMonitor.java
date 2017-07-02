@@ -146,7 +146,7 @@ public final class DataSetMonitor {
 	 * </p>
 	 * <p>
 	 * <strong>Note:</strong> This might block for a while! Some data sets have
-	 * terrabytes of data, and there is no way to safely stop processing in the
+	 * terabytes of data, and there is no way to safely stop processing in the
 	 * middle of a data set.
 	 * </p>
 	 */
