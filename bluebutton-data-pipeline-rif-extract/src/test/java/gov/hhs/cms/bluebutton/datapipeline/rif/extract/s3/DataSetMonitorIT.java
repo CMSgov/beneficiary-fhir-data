@@ -138,6 +138,9 @@ public final class DataSetMonitorIT {
 					DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, 1 + manifestA.getEntries().size() + 1
 							+ manifestB.getEntries().size() + 1 + manifestC.getEntries().size(),
 					java.time.Duration.ofSeconds(10));
+		} catch (Exception e) {
+			LOGGER.warn("Test case failed.", e);
+			throw new RuntimeException(e);
 		} finally {
 			if (bucket != null)
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);

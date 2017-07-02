@@ -43,6 +43,20 @@ public final class RifRecordLoadResult {
 	}
 
 	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("RifRecordLoadResult [rifRecordEvent=");
+		builder.append(rifRecordEvent);
+		builder.append(", loadAction=");
+		builder.append(loadAction);
+		builder.append("]");
+		return builder.toString();
+	}
+
+	/**
 	 * Enumerates the types of actions that a load operation may have resulted
 	 * in on the database.
 	 */

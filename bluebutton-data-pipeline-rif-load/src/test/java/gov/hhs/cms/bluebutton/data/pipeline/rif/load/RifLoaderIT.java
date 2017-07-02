@@ -91,7 +91,8 @@ public final class RifLoaderIT {
 		// Verify that the expected number of records were run successfully.
 		Assert.assertEquals(0, failureCount.get());
 		// FIXME remove successfulRecords filter once CBBD-266 is resolved
-		Assert.assertEquals(sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
+		Assert.assertEquals("Unexpected number of successful records: " + successfulRecords,
+				sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
 				successfulRecords.stream().filter(r -> r.getLoadAction() == LoadAction.INSERTED).count());
 
 		/*
