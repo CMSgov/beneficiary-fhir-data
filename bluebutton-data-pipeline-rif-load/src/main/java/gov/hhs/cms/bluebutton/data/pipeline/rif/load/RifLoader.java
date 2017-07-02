@@ -18,14 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -123,7 +120,8 @@ public final class RifLoader {
 		 * producer when the task queue is full.
 		 */
 		int threadPoolSize = options.getLoaderThreads();
-		int taskQueueSize = threadPoolSize * 1000;
+		// The task queue must be <= (Phaser.MAX_PARTIES - threadPoolSize).
+		int taskQueueSize = 0xffff - threadPoolSize;
 		NotifyingBlockingThreadPoolExecutor loadExecutorService = new NotifyingBlockingThreadPoolExecutor(
 				threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
 		this.loadExecutorService = loadExecutorService;
@@ -280,28 +278,6 @@ public final class RifLoader {
 		 * always run in a consistent manner.
 		 */
 
-		// Define the batch error handler.
-		Function<Throwable, ? extends List<RifRecordLoadResult>> errorHandlerWrapper = error -> {
-			errorHandler.accept(error);
-
-			/*
-			 * If we eventually want to retry failed records (in some or all
-			 * cases), this is the place to do/arrange that. Right now, though:
-			 * we don't retry any errors.
-			 */
-
-			return null;
-		};
-
-		// Define the batch (successful) result handler.
-		BiConsumer<List<RifRecordLoadResult>, Throwable> batchResultHandler = (batchResult, error) -> {
-			// Ignore error results.
-			if (batchResult == null)
-				return;
-
-			batchResult.forEach(recordResult -> resultHandler.accept(recordResult));
-		};
-
 		try (PostgreSqlCopyInserter postgresBatch = new PostgreSqlCopyInserter(entityManagerFactory,
 				fileEventMetrics)) {
 			/*
@@ -314,23 +290,26 @@ public final class RifLoader {
 			 * equivalent to countDown(). See its JavaDoc for an example of
 			 * exactly this use case.
 			 */
-			Phaser phaser = new Phaser(1);
-			Counter activeBatchesCounter = fileEventMetrics
+			Phaser phaserForSubmittedBatches = new Phaser(1);
+			Counter counterForActiveBatches = fileEventMetrics
 					.counter(MetricRegistry.name(getClass().getSimpleName(), "activeBatches"));
+			Runnable startHandler = () -> {
+				counterForActiveBatches.inc();
+			};
+			Runnable completionHandler = () -> {
+				counterForActiveBatches.dec();
+				phaserForSubmittedBatches.arriveAndDeregister();
+			};
 
 			// Define the Consumer that will handle each batch.
 			Consumer<List<RifRecordEvent<?>>> batchProcessor = recordsBatch -> {
 				/*
-				 * Increment the Phaser to mark that a new batch is pending.
-				 * Then, create the decrementer function that we will register
-				 * with the task's CompletableFuture.
+				 * We must register with the Phaser before submitting the task,
+				 * to ensure that the arriveAndAwaitAdvance() call below
+				 * actually blocks until all work has been submitted AND
+				 * completed.
 				 */
-				activeBatchesCounter.inc();
-				phaser.register();
-				BiConsumer<List<RifRecordLoadResult>, Throwable> phaserDecrementer = (r, t) -> {
-					activeBatchesCounter.dec();
-					phaser.arriveAndDeregister();
-				};
+				phaserForSubmittedBatches.register();
 
 				/*
 				 * Submit the RifRecordEvent for asynchronous processing. Note
@@ -339,15 +318,7 @@ public final class RifLoader {
 				 * pending. That's desirable behavior, as it prevents
 				 * OutOfMemoryErrors.
 				 */
-				CompletableFuture<List<RifRecordLoadResult>> recordResultFuture = processAsync(recordsBatch,
-						postgresBatch);
-
-				/*
-				 * Wire the up the Future to notify the Phaser decrementer and
-				 * error/result handler, as appropriate, when it completes.
-				 */
-				recordResultFuture.exceptionally(errorHandlerWrapper).whenComplete(batchResultHandler)
-						.whenComplete(phaserDecrementer);
+				processAsync(recordsBatch, postgresBatch, startHandler, completionHandler, resultHandler, errorHandler);
 			};
 
 			// Collect records into batches and submit each to batchProcessor.
@@ -361,7 +332,7 @@ public final class RifLoader {
 				}).forEach(batchProcessor);
 
 			// Wait for all submitted batches to complete.
-			phaser.arriveAndAwaitAdvance();
+			phaserForSubmittedBatches.arriveAndAwaitAdvance();
 
 			// Submit the queued PostgreSQL COPY operations, if any.
 			if (!postgresBatch.isEmpty()) {
@@ -381,14 +352,32 @@ public final class RifLoader {
 	 * @param postgresBatch
 	 *            the {@link PostgreSqlCopyInserter} for the current set of
 	 *            {@link RifFilesEvent}s being processed
-	 * @return a {@link CompletableFuture}s for the {@link RifRecordLoadResult}s
-	 *         that model the results of the operation
+	 * @param startHandler
+	 *            the {@link Runnable} to always execute when the batch starts
+	 * @param completionHandler
+	 *            the {@link Runnable} to always execute when the batch
+	 *            completes, regardless of success or failure
+	 * @param resultHandler
+	 *            the {@link Consumer} to notify when the batch completes
+	 *            successfully
+	 * @param errorHandler
+	 *            the {@link Consumer} to notify when the batch fails for any
+	 *            reason
 	 */
-	private CompletableFuture<List<RifRecordLoadResult>> processAsync(List<RifRecordEvent<?>> recordsBatch,
-			PostgreSqlCopyInserter postgresBatch) {
-		return CompletableFuture.supplyAsync(() -> {
-			return process(recordsBatch, postgresBatch);
-		}, loadExecutorService);
+	private void processAsync(List<RifRecordEvent<?>> recordsBatch, PostgreSqlCopyInserter postgresBatch,
+			Runnable startHandler, Runnable completionHandler, Consumer<RifRecordLoadResult> resultHandler,
+			Consumer<Throwable> errorHandler) {
+		loadExecutorService.submit(() -> {
+			try {
+				startHandler.run();
+				List<RifRecordLoadResult> processResults = process(recordsBatch, postgresBatch);
+				processResults.forEach(resultHandler::accept);
+			} catch (Throwable e) {
+				errorHandler.accept(e);
+			} finally {
+				completionHandler.run();
+			}
+		});
 	}
 
 	/**
