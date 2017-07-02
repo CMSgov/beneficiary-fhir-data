@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,10 +68,15 @@ public final class S3ToDatabaseLoadAppIT {
 		appRunBuilder.environment().clear();
 		appRunBuilder.redirectErrorStream(true);
 		Process appProcess = appRunBuilder.start();
-		new ProcessOutputConsumer(appProcess);
+
+		// Read the app's output.
+		ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+		Thread appRunConsumerThread = new Thread(appRunConsumer);
+		appRunConsumerThread.start();
 
 		// Wait for it to exit with an error.
 		appProcess.waitFor(1, TimeUnit.MINUTES);
+		appRunConsumerThread.join();
 
 		// Verify that the application exited as expected.
 		Assert.assertEquals(S3ToDatabaseLoadApp.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
@@ -95,10 +101,15 @@ public final class S3ToDatabaseLoadAppIT {
 			ProcessBuilder appRunBuilder = createAppProcessBuilder(new Bucket("foo"));
 			appRunBuilder.redirectErrorStream(true);
 			appProcess = appRunBuilder.start();
+
+			// Read the app's output.
 			ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+			Thread appRunConsumerThread = new Thread(appRunConsumer);
+			appRunConsumerThread.start();
 
 			// Wait for it to exit with an error.
 			appProcess.waitFor(1, TimeUnit.MINUTES);
+			appRunConsumerThread.join();
 
 			// Verify that the application exited as expected.
 			Assert.assertEquals(String.format("Wrong exit code. Output [\n%s]\n", appRunConsumer.getStdoutContents()),
@@ -134,7 +145,11 @@ public final class S3ToDatabaseLoadAppIT {
 			ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
 			appRunBuilder.redirectErrorStream(true);
 			appProcess = appRunBuilder.start();
+
+			// Read the app's output.
 			ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+			Thread appRunConsumerThread = new Thread(appRunConsumer);
+			appRunConsumerThread.start();
 
 			// Wait for it to complete a scan.
 			Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> hasAScanFoundNothing(appRunConsumer));
@@ -142,6 +157,7 @@ public final class S3ToDatabaseLoadAppIT {
 			// Stop the application.
 			sendSigterm(appProcess);
 			appProcess.waitFor(1, TimeUnit.MINUTES);
+			appRunConsumerThread.join();
 
 			// Verify that the application exited as expected.
 			verifyExitValueMatchesSignal(SIGTERM, appProcess);
@@ -190,7 +206,12 @@ public final class S3ToDatabaseLoadAppIT {
 			ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
 			appRunBuilder.redirectErrorStream(true);
 			appProcess = appRunBuilder.start();
+			appProcess.getOutputStream().close();
+
+			// Read the app's output.
 			ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+			Thread appRunConsumerThread = new Thread(appRunConsumer);
+			appRunConsumerThread.start();
 
 			// Wait for it to process a data set.
 			Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> hasADataSetBeenProcessed(appRunConsumer));
@@ -201,6 +222,7 @@ public final class S3ToDatabaseLoadAppIT {
 			// Stop the application.
 			sendSigterm(appProcess);
 			appProcess.waitFor(1, TimeUnit.MINUTES);
+			appRunConsumerThread.join();
 
 			// Verify that the application exited as expected.
 			verifyExitValueMatchesSignal(SIGTERM, appProcess);
@@ -265,10 +287,38 @@ public final class S3ToDatabaseLoadAppIT {
 	 */
 	private static void sendSigterm(Process process) {
 		/*
-		 * Verified on Ubuntu Trusty with Oracle Java 8: calling this sends a
-		 * SIGTERM to the process.
+		 * We have to use reflection and external commands here to work around
+		 * this ridiculous JDK bug:
+		 * https://bugs.openjdk.java.net/browse/JDK-5101298.
 		 */
-		process.destroy();
+		if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
+			try {
+				Field pidField = process.getClass().getDeclaredField("pid");
+				pidField.setAccessible(true);
+
+				int processPid = pidField.getInt(process);
+
+				ProcessBuilder killBuilder = new ProcessBuilder("/bin/kill", "--signal", "TERM", "" + processPid);
+				int killBuilderExitCode = killBuilder.start().waitFor();
+				if (killBuilderExitCode != 0)
+					process.destroy();
+			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException
+					| InterruptedException | IOException e) {
+				process.destroy();
+				throw new RuntimeException(e);
+			}
+		} else {
+			/*
+			 * Not sure if this bug exists on Windows or not (may cause test
+			 * cases to fail, if it does, because we wouldn't be able to read
+			 * all of the processes' output after they're stopped). If it does,
+			 * we could follow up on the ideas here to add a similar
+			 * platform-specific workaround:
+			 * https://stackoverflow.com/questions/140111/sending-an-arbitrary-
+			 * signal-in-windows.
+			 */
+			process.destroy();
+		}
 	}
 
 	/**
@@ -300,6 +350,7 @@ public final class S3ToDatabaseLoadAppIT {
 	private static ProcessBuilder createAppProcessBuilder(Bucket bucket) {
 		String[] command = createCommandForCapsule();
 		ProcessBuilder appRunBuilder = new ProcessBuilder(command);
+		appRunBuilder.redirectErrorStream(true);
 
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
@@ -369,9 +420,6 @@ public final class S3ToDatabaseLoadAppIT {
 			InputStream stdout = process.getInputStream();
 			this.stdoutReader = new BufferedReader(new InputStreamReader(stdout));
 			this.stdoutContents = new StringBuffer();
-
-			// Start this running.
-			new Thread(this).start();
 		}
 
 		/**
@@ -391,6 +439,7 @@ public final class S3ToDatabaseLoadAppIT {
 					stdoutContents.append('\n');
 				}
 			} catch (IOException e) {
+				e.printStackTrace();
 				throw new UncheckedIOException(e);
 			}
 		}
