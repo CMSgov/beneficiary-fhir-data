@@ -51,7 +51,7 @@ public final class DataSetMoveTask implements Callable<Void> {
 	 */
 	@Override
 	public Void call() throws Exception {
-		LOGGER.debug("Renaming data set in S3, now that processing is complete...");
+		LOGGER.debug("Renaming data set '{}' in S3, now that processing is complete...", manifest);
 
 		/*
 		 * S3 doesn't support batch/transactional operations, or an atomic move
@@ -110,7 +110,7 @@ public final class DataSetMoveTask implements Callable<Void> {
 		s3TaskManager.getS3Client().deleteObjects(deleteObjectsRequest);
 		LOGGER.debug("Data set deleted in S3 (step 2 of move).");
 
-		LOGGER.debug(DataSetMonitorWorker.LOG_MESSAGE_DATA_SET_COMPLETE);
+		LOGGER.debug("Renamed data set '{}' in S3, now that processing is complete.", manifest);
 		return null;
 	}
 }

@@ -497,9 +497,9 @@ public final class S3ToDatabaseLoadAppBenchmark {
 	 */
 	private static final class BenchmarkTask implements Callable<BenchmarkResult> {
 		private static final Pattern PATTERN_DATA_SET_START = Pattern
-				.compile("^(\\S* \\S*) .* Data set ready. Processing it...$");
+				.compile("^(\\S* \\S*) .* " + DataSetMonitorWorker.LOG_MESSAGE_DATA_SET_READY + "$");
 		private static final Pattern PATTERN_DATA_SET_COMPLETE = Pattern
-				.compile("^(\\S* \\S*) .* Data set renamed in S3, now that processing is complete.$");
+				.compile("^(\\S* \\S*) .* " + DataSetMonitorWorker.LOG_MESSAGE_DATA_SET_COMPLETE + "$");
 		private static final DateTimeFormatter ETL_LOG_DATE_TIME_FORMATTER = DateTimeFormatter
 				.ofPattern("yyyy-MM-dd HH:mm:ss,SSS");
 

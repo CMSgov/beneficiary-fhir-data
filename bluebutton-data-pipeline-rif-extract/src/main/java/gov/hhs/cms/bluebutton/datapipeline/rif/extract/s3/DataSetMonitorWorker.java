@@ -63,9 +63,15 @@ public final class DataSetMonitorWorker implements Runnable {
 
 	/**
 	 * The {@link Logger} message that will be recorded if/when the
+	 * {@link DataSetMonitorWorker} starts processing a data set.
+	 */
+	public static final String LOG_MESSAGE_DATA_SET_READY = "Data set ready. Processing it...";
+
+	/**
+	 * The {@link Logger} message that will be recorded if/when the
 	 * {@link DataSetMonitorWorker} completes the processing of a data set.
 	 */
-	public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set renamed in S3, now that processing is complete.";
+	public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set processing complete.";
 
 	/**
 	 * A regex for {@link DataSetManifest} keys in S3. Provides capturing groups
@@ -165,7 +171,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * Huzzah! We've got a data set to process and we've verified it's all
 		 * there and ready to go.
 		 */
-		LOGGER.info("Data set ready. Processing it...");
+		LOGGER.info(LOG_MESSAGE_DATA_SET_READY);
 		List<S3RifFile> rifFiles = manifestToProcess.getEntries().stream()
 				.map(manifestEntry -> new S3RifFile(appMetrics, manifestEntry,
 						dataSetToProcess.getManifestEntryDownloads().get(manifestEntry)))
@@ -180,6 +186,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * consistency problems).
 		 */
 		listener.dataAvailable(rifFilesEvent);
+		LOGGER.info(LOG_MESSAGE_DATA_SET_COMPLETE);
 
 		/*
 		 * Now that the data set has been processed, we need to ensure that we
