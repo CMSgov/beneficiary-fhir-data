@@ -16,7 +16,8 @@ import javax.xml.bind.Marshaller;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -43,14 +44,17 @@ public class DataSetTestUtilities {
 	 *            the {@link Bucket} to empty and delete
 	 */
 	public static void deleteObjectsAndBucket(AmazonS3 s3Client, Bucket bucket) {
-		ObjectListing objectListing = s3Client.listObjects(bucket.getName());
+		ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
+		s3BucketListRequest.setBucketName(bucket.getName());
+		ListObjectsV2Result s3ObjectListing;
 		do {
-			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
+			s3ObjectListing = s3Client.listObjectsV2(s3BucketListRequest);
+			for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
 				s3Client.deleteObject(bucket.getName(), objectSummary.getKey());
 			}
 
-			objectListing = s3Client.listNextBatchOfObjects(objectListing);
-		} while (objectListing.isTruncated());
+			s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
+		} while (s3ObjectListing.isTruncated());
 		s3Client.deleteBucket(bucket.getName());
 	}
 
