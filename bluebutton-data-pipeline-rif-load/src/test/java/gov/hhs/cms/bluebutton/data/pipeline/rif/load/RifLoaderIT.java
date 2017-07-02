@@ -7,7 +7,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.junit.After;
@@ -102,9 +104,7 @@ public final class RifLoaderIT {
 		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory();
 		for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
 			RifFileRecords rifFileRecordsCopy = processor.produceRecords(rifFileEvent);
-			rifFileRecordsCopy.getRecords().forEach(r -> {
-				assertIsInDatabase(entityManagerFactory, r.getRecord());
-			});
+			assertAreInDatabase(entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
 		}
 	}
 
@@ -118,14 +118,26 @@ public final class RifLoaderIT {
 	}
 
 	/**
-	 * Verifies that the specified RIF record is actually in the database.
+	 * Verifies that the specified RIF records are actually in the database.
 	 * 
 	 * @param entityManagerFactory
 	 *            the {@link EntityManagerFactory} to use
-	 * @param record
-	 *            the RIF record to verify
+	 * @param records
+	 *            the RIF records to verify
 	 */
-	private static void assertIsInDatabase(EntityManagerFactory entityManagerFactory, Object record) {
-		// TODO Auto-generated method stub
+	private static void assertAreInDatabase(EntityManagerFactory entityManagerFactory, Stream<Object> records) {
+		EntityManager entityManager = null;
+		try {
+			entityManager = entityManagerFactory.createEntityManager();
+
+			for (Object record : records.collect(Collectors.toList())) {
+				Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
+				Object recordFromDb = entityManager.find(record.getClass(), recordId);
+				Assert.assertNotNull(recordFromDb);
+			}
+		} finally {
+			if (entityManager != null)
+				entityManager.close();
+		}
 	}
 }
