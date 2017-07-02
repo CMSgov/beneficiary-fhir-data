@@ -304,14 +304,6 @@ public final class RifLoader {
 			// Define the Consumer that will handle each batch.
 			Consumer<List<RifRecordEvent<?>>> batchProcessor = recordsBatch -> {
 				/*
-				 * We must register with the Phaser before submitting the task,
-				 * to ensure that the arriveAndAwaitAdvance() call below
-				 * actually blocks until all work has been submitted AND
-				 * completed.
-				 */
-				phaserForSubmittedBatches.register();
-
-				/*
 				 * Submit the RifRecordEvent for asynchronous processing. Note
 				 * that, due to the ExecutorService's configuration (see in
 				 * constructor), this will block if too many tasks are already
@@ -319,6 +311,14 @@ public final class RifLoader {
 				 * OutOfMemoryErrors.
 				 */
 				processAsync(recordsBatch, postgresBatch, startHandler, completionHandler, resultHandler, errorHandler);
+
+				/*
+				 * We must register with the Phaser before exiting this block,
+				 * to ensure that the arriveAndAwaitAdvance() call below
+				 * actually blocks until all work has been submitted AND
+				 * completed.
+				 */
+				phaserForSubmittedBatches.register();
 			};
 
 			// Collect records into batches and submit each to batchProcessor.
