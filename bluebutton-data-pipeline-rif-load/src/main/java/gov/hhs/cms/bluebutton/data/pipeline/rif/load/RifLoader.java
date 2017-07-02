@@ -288,7 +288,7 @@ public final class RifLoader {
 		};
 
 		// Define the batch (successful) result handler.
-		Consumer<List<RifRecordLoadResult>> batchResultHandler = batchResult -> {
+		BiConsumer<List<RifRecordLoadResult>, Throwable> batchResultHandler = (batchResult, error) -> {
 			// Ignore error results.
 			if (batchResult == null)
 				return;
@@ -340,8 +340,8 @@ public final class RifLoader {
 				 * Wire the up the Future to notify the Phaser decrementer and
 				 * error/result handler, as appropriate, when it completes.
 				 */
-				recordResultFuture.whenComplete(phaserDecrementer).exceptionally(errorHandlerWrapper)
-						.thenAccept(batchResultHandler);
+				recordResultFuture.exceptionally(errorHandlerWrapper).whenComplete(batchResultHandler)
+						.whenComplete(phaserDecrementer);
 			};
 
 			// Collect records into batches and submit each to batchProcessor.
