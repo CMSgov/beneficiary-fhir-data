@@ -247,4 +247,12 @@ public final class DataSetMonitorWorker implements Runnable {
 
 		return true;
 	}
+
+	/**
+	 * Cleans up all resources in use by this {@link DataSetMonitorWorker}, in
+	 * preparation for application shutdown.
+	 */
+	public void cleanup() {
+		this.dataSetQueue.cleanup();
+	}
 }

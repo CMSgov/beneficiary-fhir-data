@@ -76,6 +76,7 @@ public final class DataSetMonitor {
 	private ScheduledExecutorService dataSetWatcherService;
 	private ScheduledFuture<?> dataSetWatcherFuture;
 	private S3TaskManager s3TaskManager;
+	private DataSetMonitorWorker dataSetWatcher;
 
 	/**
 	 * Constructs a new {@link DataSetMonitor} instance. Note that this must be
@@ -103,6 +104,7 @@ public final class DataSetMonitor {
 		this.dataSetWatcherService = null;
 		this.dataSetWatcherFuture = null;
 		this.s3TaskManager = null;
+		this.dataSetWatcher = null;
 	}
 
 	/**
@@ -118,7 +120,7 @@ public final class DataSetMonitor {
 
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
 		this.s3TaskManager = new S3TaskManager(options);
-		Runnable dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
+		this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
 		Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
 		/*
@@ -175,6 +177,7 @@ public final class DataSetMonitor {
 		s3TaskManager.shutdownSafely();
 
 		// Clean house.
+		dataSetWatcher.cleanup();
 		dataSetWatcherService.shutdown();
 
 		LOGGER.debug("Stopped.");

@@ -365,6 +365,18 @@ public final class DataSetQueue {
 	}
 
 	/**
+	 * Cleans up all of the local copies of S3 files that this
+	 * {@link DataSetQueue} has downloaded, in preparation for application
+	 * shutdown.
+	 */
+	public void cleanup() {
+		this.manifestEntryDownloads.entrySet().forEach(e -> {
+			// Hacky, but takes advantage of code re-use.
+			new S3RifFile(appMetrics, e.getKey(), e.getValue()).cleanupTempFile();
+		});
+	}
+
+	/**
 	 * Represents a specific data set queued in a {@link DataSetQueue}, waiting
 	 * to be processed.
 	 */

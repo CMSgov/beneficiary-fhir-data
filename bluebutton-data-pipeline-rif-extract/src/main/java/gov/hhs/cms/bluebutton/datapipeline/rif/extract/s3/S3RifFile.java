@@ -158,9 +158,9 @@ public final class S3RifFile implements RifFile {
 			return;
 		}
 
-		ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
 		try {
-			Files.delete(fileDownloadResult.getLocalDownload());
+			ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
+			Files.deleteIfExists(fileDownloadResult.getLocalDownload());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} catch (CancellationException e) {

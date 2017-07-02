@@ -6,6 +6,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
@@ -19,6 +22,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDown
  * Handles the execution and management of S3-related tasks.
  */
 public final class S3TaskManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(S3TaskManager.class);
+
 	private final AmazonS3 s3Client;
 	private final TransferManager s3TransferManager;
 	private final ExecutorService downloadTasksService;
@@ -81,8 +86,17 @@ public final class S3TaskManager {
 		this.moveTasksService.shutdown();
 
 		try {
-			this.downloadTasksService.awaitTermination(30, TimeUnit.MINUTES);
-			this.moveTasksService.awaitTermination(30, TimeUnit.MINUTES);
+			if (!this.downloadTasksService.isTerminated()) {
+				LOGGER.info("Waiting for in-progress downloads to complete...");
+				this.downloadTasksService.awaitTermination(30, TimeUnit.MINUTES);
+				LOGGER.info("All in-progress downloads are complete.");
+			}
+
+			if (!this.moveTasksService.isTerminated()) {
+				LOGGER.info("Waiting for all S3 rename/move operations to complete...");
+				this.moveTasksService.awaitTermination(30, TimeUnit.MINUTES);
+				LOGGER.info("All S3 rename/move operations are complete.");
+			}
 		} catch (InterruptedException e) {
 			// We're not expecting interrupts here, so go boom.
 			throw new BadCodeMonkeyException(e);
