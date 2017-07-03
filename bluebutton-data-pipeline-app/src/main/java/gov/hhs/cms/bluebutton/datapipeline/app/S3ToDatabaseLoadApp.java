@@ -97,16 +97,16 @@ public final class S3ToDatabaseLoadApp {
 
 				Consumer<Throwable> errorHandler = error -> {
 					/*
-					 * This is not the right place to do any error _recovery_
-					 * (that'd have to be inside RifLoader itself), but it is
-					 * likely the right place to decide when/if a failure is
-					 * "bad enough" that the rest of processing should be
-					 * stopped. Right now we don't stop that way for _any_
-					 * failure, but we probably want to be more discriminating
-					 * than that.
+					 * This will be called on the same thread used to run each
+					 * RifLoader task (probably a background one). This is not
+					 * the right place to do any error _recovery_ (that'd have
+					 * to be inside RifLoader itself), but it is likely the
+					 * right place to decide when/if a failure is "bad enough"
+					 * that the rest of processing should be stopped. Right now
+					 * we stop that way for _any_ failure, but we probably want
+					 * to be more discriminating than that.
 					 */
-					throw new IllegalStateException(
-							"Record failed to load, and we have no error recovery strategy yet.", error);
+					errorOccurred(error);
 				};
 
 				Consumer<RifRecordLoadResult> resultHandler = result -> {
