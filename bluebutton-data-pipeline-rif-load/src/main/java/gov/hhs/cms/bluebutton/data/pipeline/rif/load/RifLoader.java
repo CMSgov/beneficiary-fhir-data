@@ -429,8 +429,9 @@ public final class RifLoader {
 					LOGGER.trace("Loaded '{}' record.", rifFileType);
 				}
 
-				fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "meter", "records", "loaded"))
+				fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "records", loadAction.name()))
 						.mark(1);
+
 				loadResults.add(new RifRecordLoadResult(rifRecordEvent, loadAction));
 			}
 
@@ -443,8 +444,7 @@ public final class RifLoader {
 			return loadResults;
 		} catch (Throwable t) {
 			timerBundleFailure.stop();
-			fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "meter", "recordBatches", "failed"))
-					.mark(1);
+			fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed")).mark(1);
 			LOGGER.warn("Failed to load '{}' record.", rifFileType, t);
 
 			throw new RifLoadFailure(recordsBatch, t);
