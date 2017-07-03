@@ -17,7 +17,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
 /**
  * Integration tests for {@link DataSetMonitorWorker}.
@@ -40,8 +39,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
-					new S3TaskManager(options), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.run();
 
 			// Verify that no data sets were generated.
@@ -81,8 +79,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
-					new S3TaskManager(options), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -138,8 +135,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
-					new S3TaskManager(options), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.
@@ -195,8 +191,7 @@ public final class DataSetMonitorWorkerIT {
 
 			// Run the worker.
 			MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options,
-					new S3TaskManager(options), listener);
+			DataSetMonitorWorker monitorWorker = new DataSetMonitorWorker(new MetricRegistry(), options, listener);
 			monitorWorker.run();
 
 			// Verify what was handed off to the DataSetMonitorListener.

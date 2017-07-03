@@ -85,8 +85,8 @@ public final class DataSetMonitorWorker implements Runnable {
 
 	private final MetricRegistry appMetrics;
 	private final ExtractionOptions options;
-	private final S3TaskManager s3TaskManager;
 	private final DataSetMonitorListener listener;
+	private final S3TaskManager s3TaskManager;
 
 	private final DataSetQueue dataSetQueue;
 
@@ -97,17 +97,14 @@ public final class DataSetMonitorWorker implements Runnable {
 	 *            the {@link MetricRegistry} for the overall application
 	 * @param options
 	 *            the {@link ExtractionOptions} to use
-	 * @param s3TaskManager
-	 *            the {@link S3TaskManager} to use
 	 * @param listener
 	 *            the {@link DataSetMonitorListener} to send events to
 	 */
-	public DataSetMonitorWorker(MetricRegistry appMetrics, ExtractionOptions options, S3TaskManager s3TaskManager,
-			DataSetMonitorListener listener) {
+	public DataSetMonitorWorker(MetricRegistry appMetrics, ExtractionOptions options, DataSetMonitorListener listener) {
 		this.appMetrics = appMetrics;
 		this.options = options;
-		this.s3TaskManager = s3TaskManager;
 		this.listener = listener;
+		this.s3TaskManager = new S3TaskManager(options);
 
 		this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
 	}
@@ -260,6 +257,16 @@ public final class DataSetMonitorWorker implements Runnable {
 	 * preparation for application shutdown.
 	 */
 	public void cleanup() {
+		/*
+		 * Have the data set queue clean itself up, to ensure that temp files
+		 * aren't left around wasting disk space after we exit.
+		 */
 		this.dataSetQueue.cleanup();
+
+		/*
+		 * Stop accepting new S3 tasks, cancel those tasks that can be canceled
+		 * safely, and wait for the rest to complete.
+		 */
+		s3TaskManager.shutdownSafely();
 	}
 }

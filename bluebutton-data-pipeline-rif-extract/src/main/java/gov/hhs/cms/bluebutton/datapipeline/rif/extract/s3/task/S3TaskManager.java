@@ -72,12 +72,6 @@ public final class S3TaskManager {
 	 */
 	public void shutdownSafely() {
 		/*
-		 * Prevent any new download tasks from being submitted and cancel those
-		 * that are queued.
-		 */
-		this.downloadTasksService.shutdownNow();
-
-		/*
 		 * Prevent any new move tasks from being submitted, while allowing those
 		 * that are queued and/or actively running to complete. This is
 		 * necessary to ensure that data sets present in the database aren't
@@ -85,17 +79,23 @@ public final class S3TaskManager {
 		 */
 		this.moveTasksService.shutdown();
 
-		try {
-			if (!this.downloadTasksService.isTerminated()) {
-				LOGGER.info("Waiting for in-progress downloads to complete...");
-				this.downloadTasksService.awaitTermination(30, TimeUnit.MINUTES);
-				LOGGER.info("All in-progress downloads are complete.");
-			}
+		/*
+		 * Prevent any new download tasks from being submitted and cancel those
+		 * that are queued.
+		 */
+		this.downloadTasksService.shutdownNow();
 
+		try {
 			if (!this.moveTasksService.isTerminated()) {
 				LOGGER.info("Waiting for all S3 rename/move operations to complete...");
 				this.moveTasksService.awaitTermination(30, TimeUnit.MINUTES);
 				LOGGER.info("All S3 rename/move operations are complete.");
+			}
+
+			if (!this.downloadTasksService.isTerminated()) {
+				LOGGER.info("Waiting for in-progress downloads to complete...");
+				this.downloadTasksService.awaitTermination(30, TimeUnit.MINUTES);
+				LOGGER.info("All in-progress downloads are complete.");
 			}
 		} catch (InterruptedException e) {
 			// We're not expecting interrupts here, so go boom.

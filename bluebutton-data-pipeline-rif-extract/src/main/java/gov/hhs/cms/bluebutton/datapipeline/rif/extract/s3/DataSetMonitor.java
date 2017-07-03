@@ -15,7 +15,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
 /**
  * <p>
@@ -75,7 +74,6 @@ public final class DataSetMonitor {
 
 	private ScheduledExecutorService dataSetWatcherService;
 	private ScheduledFuture<?> dataSetWatcherFuture;
-	private S3TaskManager s3TaskManager;
 	private DataSetMonitorWorker dataSetWatcher;
 
 	/**
@@ -103,7 +101,6 @@ public final class DataSetMonitor {
 
 		this.dataSetWatcherService = null;
 		this.dataSetWatcherFuture = null;
-		this.s3TaskManager = null;
 		this.dataSetWatcher = null;
 	}
 
@@ -115,12 +112,11 @@ public final class DataSetMonitor {
 	 */
 	public void start() {
 		// Instances of this class are single-use-only.
-		if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null || this.s3TaskManager != null)
+		if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null)
 			throw new IllegalStateException();
 
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
-		this.s3TaskManager = new S3TaskManager(options);
-		this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
+		this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, listener);
 		Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
 		/*
@@ -169,12 +165,6 @@ public final class DataSetMonitor {
 		 */
 		dataSetWatcherFuture.cancel(false);
 		waitForStop();
-
-		/*
-		 * Stop accepting new S3 tasks, cancel those tasks that can be canceled
-		 * safely, and wait for the rest to complete.
-		 */
-		s3TaskManager.shutdownSafely();
 
 		// Clean house.
 		dataSetWatcher.cleanup();
