@@ -442,7 +442,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.initializer("new $T<>()", LinkedList.class);
 			childField.addAnnotation(AnnotationSpec.builder(OneToMany.class)
 					.addMember("mappedBy", "$S", mappingSpec.getLineEntityParentField())
-					.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
+					.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.LAZY", FetchType.class)
 					.addMember("cascade", "$T.ALL", CascadeType.class).build());
 			childField.addAnnotation(AnnotationSpec.builder(OrderBy.class)
 					.addMember("value", "$S", mappingSpec.getLineEntityLineNumberField() + " ASC").build());
