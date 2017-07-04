@@ -197,7 +197,7 @@ public final class DataSetQueue {
 					return;
 
 				Future<ManifestEntryDownloadResult> manifestEntryDownload = s3TaskManager
-						.submit(new ManifestEntryDownloadTask(s3TaskManager, options, manifestEntry));
+						.submit(new ManifestEntryDownloadTask(s3TaskManager, appMetrics, options, manifestEntry));
 				manifestEntryDownloads.put(manifestEntry, manifestEntryDownload);
 			});
 		}

@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
@@ -28,6 +30,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 	private static final Logger LOGGER = LoggerFactory.getLogger(ManifestEntryDownloadTask.class);
 
 	private final S3TaskManager s3TaskManager;
+	private final MetricRegistry appMetrics;
 	private final ExtractionOptions options;
 	private final DataSetManifestEntry manifestEntry;
 
@@ -36,14 +39,17 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 	 * 
 	 * @param s3TaskManager
 	 *            the {@link S3TaskManager} to use
+	 * @param appMetrics
+	 *            the {@link MetricRegistry} for the overall application
 	 * @param options
 	 *            the {@link ExtractionOptions} to use
 	 * @param manifestEntry
 	 *            the {@link DataSetManifestEntry} to download the file for
 	 */
-	public ManifestEntryDownloadTask(S3TaskManager s3TaskManager, ExtractionOptions options,
+	public ManifestEntryDownloadTask(S3TaskManager s3TaskManager, MetricRegistry appMetrics, ExtractionOptions options,
 			DataSetManifestEntry manifestEntry) {
 		this.s3TaskManager = s3TaskManager;
+		this.appMetrics = appMetrics;
 		this.options = options;
 		this.manifestEntry = manifestEntry;
 	}
@@ -59,11 +65,14 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 							manifestEntry.getParentManifest().getTimestamp().toString(), manifestEntry.getName()));
 			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
+			Timer.Context downloadTimer = appMetrics
+					.timer(MetricRegistry.name(getClass().getSimpleName(), "downloadSystemTime")).time();
 			LOGGER.debug("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,
 					localTempFile.toFile());
 			downloadHandle.waitForCompletion();
 			LOGGER.debug("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
+			downloadTimer.close();
 
 			return new ManifestEntryDownloadResult(manifestEntry, localTempFile);
 		} catch (IOException e) {
