@@ -39,15 +39,15 @@ public final class S3TaskManager {
 		this.s3Client = S3Utilities.createS3Client(options);
 		this.s3TransferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-		ThreadPoolExecutor cancellableTasksService = new ThreadPoolExecutor(10, 10, 100L, TimeUnit.MILLISECONDS,
+		ThreadPoolExecutor downloadTasksService = new ThreadPoolExecutor(1, 1, 100L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>());
-		cancellableTasksService.allowCoreThreadTimeOut(true);
-		this.downloadTasksService = cancellableTasksService;
+		downloadTasksService.allowCoreThreadTimeOut(true);
+		this.downloadTasksService = downloadTasksService;
 
-		ThreadPoolExecutor nonCancellableTasksService = new ThreadPoolExecutor(10, 10, 100L, TimeUnit.MILLISECONDS,
+		ThreadPoolExecutor moveTasksService = new ThreadPoolExecutor(2, 2, 100L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>());
-		nonCancellableTasksService.allowCoreThreadTimeOut(true);
-		this.moveTasksService = nonCancellableTasksService;
+		moveTasksService.allowCoreThreadTimeOut(true);
+		this.moveTasksService = moveTasksService;
 	}
 
 	/**

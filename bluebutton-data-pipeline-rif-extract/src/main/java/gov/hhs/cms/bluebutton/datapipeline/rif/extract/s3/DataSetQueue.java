@@ -192,6 +192,10 @@ public final class DataSetQueue {
 				if (manifestToProcessIndex.get() > 0 && usableFreeTempSpace < 50 * GIGA)
 					return;
 
+				/* Don't download too many files ahead, either. */
+				if (manifestToProcessIndex.get() >= 3)
+					return;
+
 				Future<ManifestEntryDownloadResult> manifestEntryDownload = s3TaskManager
 						.submit(new ManifestEntryDownloadTask(s3TaskManager, options, manifestEntry));
 				manifestEntryDownloads.put(manifestEntry, manifestEntryDownload);
