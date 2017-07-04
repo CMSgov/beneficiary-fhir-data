@@ -151,7 +151,14 @@ public final class RifLoader {
 	 */
 	static DataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
 		HikariDataSource dataSource = new HikariDataSource();
+
+		/*
+		 * FIXME The pool size needs to be double the number of loader threads
+		 * when idempotent loads are being used. Apparently, the queries need a
+		 * separate Connection?
+		 */
 		dataSource.setMaximumPoolSize(options.getLoaderThreads());
+
 		dataSource.setJdbcUrl(options.getDatabaseUrl());
 		dataSource.setUsername(options.getDatabaseUsername());
 		dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
