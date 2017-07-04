@@ -111,14 +111,28 @@ public final class RifLoader {
 		this.secretKeyFactory = createSecretKeyFactory();
 
 		/*
+		 * A 16 vCPU ETL server can handle 400 loader threads at less than 30%
+		 * CPU usage (once a steady state is hit). The biggest limit here is
+		 * what the DB will allow.
+		 */
+		int threadPoolSize = options.getLoaderThreads();
+
+		/*
+		 * It's tempting to think that a large queue will improve performance,
+		 * but in reality: nope. Once the ETL hits a steady state, the queue
+		 * will almost always be empty, so about all it accomplishes is
+		 * unnecessarily eating up a bunch of RAM when the ETL happens to be
+		 * running more slowly (for whatever reason).
+		 */
+		int taskQueueSize = 10 * threadPoolSize;
+
+		/*
 		 * I feel like a hipster using "found" code like
 		 * NotifyingBlockingThreadPoolExecutor: this really cool (and old) class
 		 * supports our use case beautifully. It hands out tasks to multiple
 		 * consumers, and allows a single producer to feed it, blocking that
 		 * producer when the task queue is full.
 		 */
-		int threadPoolSize = options.getLoaderThreads();
-		int taskQueueSize = 1000 * threadPoolSize;
 		NotifyingBlockingThreadPoolExecutor loadExecutorService = new NotifyingBlockingThreadPoolExecutor(
 				threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
 		this.loadExecutorService = loadExecutorService;
