@@ -433,9 +433,15 @@ public final class RifLoader {
 					LOGGER.trace("Loading '{}' record.", rifFileType);
 
 					if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
+						// Check to see if record already exists.
+						Timer.Context timerIdempotencyQuery = fileEventMetrics
+								.timer(MetricRegistry.name(getClass().getSimpleName(), "idempotencyQueries")).time();
 						Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
 						Objects.requireNonNull(recordId);
-						if (entityManager.find(record.getClass(), recordId) == null) {
+						Object recordInDb = entityManager.find(record.getClass(), recordId);
+						timerIdempotencyQuery.close();
+
+						if (recordInDb == null) {
 							loadAction = LoadAction.INSERTED;
 							entityManager.persist(record);
 						} else {
