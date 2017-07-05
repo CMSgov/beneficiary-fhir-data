@@ -104,12 +104,23 @@ public final class RifLoaderTestUtils {
 	 * database server used in tests.
 	 */
 	public static void cleanDatabaseServer() {
+		cleanDatabaseServer(getLoadOptions());
+	}
+
+	/**
+	 * <strong>Serious Business:</strong> deletes all resources from the
+	 * database server used in tests.
+	 * 
+	 * @param options
+	 *            the {@link LoadAppOptions} specifying the DB to clean
+	 */
+	public static void cleanDatabaseServer(LoadAppOptions options) {
 		// Before disabling this check, please go and update your resume.
-		if (!DB_URL.contains("hsql"))
+		if (!options.getDatabaseUrl().contains("hsql"))
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
 
 		Flyway flyway = new Flyway();
-		flyway.setDataSource(RifLoader.createDataSource(getLoadOptions(), new MetricRegistry()));
+		flyway.setDataSource(RifLoader.createDataSource(options, new MetricRegistry()));
 		flyway.clean();
 	}
 
