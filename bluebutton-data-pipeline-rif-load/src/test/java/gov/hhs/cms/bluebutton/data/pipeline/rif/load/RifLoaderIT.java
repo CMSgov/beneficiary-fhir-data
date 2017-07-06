@@ -71,7 +71,8 @@ public final class RifLoaderIT {
 		// Create the processors that will handle each stage of the pipeline.
 		MetricRegistry appMetrics = new MetricRegistry();
 		RifFilesProcessor processor = new RifFilesProcessor();
-		RifLoader loader = new RifLoader(appMetrics, RifLoaderTestUtils.getLoadOptions());
+		LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
+		RifLoader loader = new RifLoader(appMetrics, options);
 
 		// Link up the pipeline and run it.
 		LOGGER.info("Loading RIF records...");
@@ -101,7 +102,7 @@ public final class RifLoaderIT {
 		 * Run the extraction an extra time and verify that each record can now
 		 * be found in the database.
 		 */
-		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory();
+		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(options);
 		for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
 			RifFileRecords rifFileRecordsCopy = processor.produceRecords(rifFileEvent);
 			assertAreInDatabase(entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
@@ -114,7 +115,7 @@ public final class RifLoaderIT {
 	 */
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
-		RifLoaderTestUtils.cleanDatabaseServer();
+		RifLoaderTestUtils.cleanDatabaseServer(RifLoaderTestUtils.getLoadOptions());
 	}
 
 	/**

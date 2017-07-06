@@ -61,21 +61,24 @@ public final class RifLoaderTestUtils {
 	/**
 	 * <strong>Serious Business:</strong> deletes all resources from the
 	 * database server used in tests.
+	 * 
+	 * @param options
+	 *            the {@link LoadAppOptions} specifying the DB to clean
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void cleanDatabaseServerViaDeletes() {
+	public static void cleanDatabaseServerViaDeletes(LoadAppOptions options) {
 		// Before disabling this check, please go and update your resume.
 		if (!DB_URL.contains("hsql"))
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
 
-		EntityManagerFactory entityManagerFactory = createEntityManagerFactory();
+		EntityManagerFactory entityManagerFactory = createEntityManagerFactory(options);
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
 		// Determine the entity types to delete, and the order to do so in.
-		Comparator<Class<?>> entityDeletionSorter = (t1,t2) -> {
-			if(t1.equals(Beneficiary.class))
+		Comparator<Class<?>> entityDeletionSorter = (t1, t2) -> {
+			if (t1.equals(Beneficiary.class))
 				return 1;
-			if(t2.equals(Beneficiary.class))
+			if (t2.equals(Beneficiary.class))
 				return -1;
 			if (t1.getSimpleName().endsWith("Line"))
 				return -1;
@@ -84,8 +87,7 @@ public final class RifLoaderTestUtils {
 			return 0;
 		};
 		List<Class<?>> entityTypesInDeletionOrder = entityManagerFactory.getMetamodel().getEntities().stream()
-				.map(t -> t.getJavaType()).sorted(entityDeletionSorter)
-				.collect(Collectors.toList());
+				.map(t -> t.getJavaType()).sorted(entityDeletionSorter).collect(Collectors.toList());
 
 		LOGGER.info("Deleting all resources...");
 		entityManager.getTransaction().begin();
@@ -97,14 +99,6 @@ public final class RifLoaderTestUtils {
 		}
 		entityManager.getTransaction().commit();
 		LOGGER.info("Deleted all resources.");
-	}
-
-	/**
-	 * <strong>Serious Business:</strong> deletes all resources from the
-	 * database server used in tests.
-	 */
-	public static void cleanDatabaseServer() {
-		cleanDatabaseServer(getLoadOptions());
 	}
 
 	/**
@@ -135,11 +129,13 @@ public final class RifLoaderTestUtils {
 	}
 
 	/**
+	 * @param options
+	 *            the {@link LoadAppOptions} specifying the DB to use
 	 * @return a JPA {@link EntityManagerFactory} for the database server used
 	 *         in tests
 	 */
-	public static EntityManagerFactory createEntityManagerFactory() {
-		DataSource jdbcDataSource = RifLoader.createDataSource(getLoadOptions(), new MetricRegistry());
+	public static EntityManagerFactory createEntityManagerFactory(LoadAppOptions options) {
+		DataSource jdbcDataSource = RifLoader.createDataSource(options, new MetricRegistry());
 		return RifLoader.createEntityManagerFactory(jdbcDataSource);
 	}
 }
