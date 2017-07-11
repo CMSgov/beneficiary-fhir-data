@@ -136,6 +136,14 @@
 		</dependency>
 
 		<dependency>
+			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager 
+				class. -->
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+
+		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
