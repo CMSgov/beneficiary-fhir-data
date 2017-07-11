@@ -21,26 +21,35 @@
 	</properties>
 
 	<dependencies>
-		<!-- This dependency includes the core HAPI-FHIR classes -->
 		<dependency>
+			<!-- Hibernate's JPA implementation is used to read data from the Blue 
+				Button API's database. -->
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
+				for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides the JPA entities used to represent the Blue Button API backend's 
+				data in the database. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- This dependency includes the core HAPI-FHIR classes -->
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
-
-		<!-- At least one "structures" JAR must also be included -->
 		<dependency>
+			<!-- At least one "structures" JAR must also be included -->
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
-
-		<!-- FIXME: This should be removed eventually, but we're leaving it in 
-			now to ease the transition away from HAPI's JPA layer. Having it in just 
-			makes it easier to look at the "old" HAPI code. -->
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
 
@@ -79,13 +88,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
-				for details. -->
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Logging backend for WAR/application. Note: due to an incompatibility 
 				between Hibernate 5 and Wildfly 8, this application can't use Wildfly's logging 
 				and instead has to handle its own logging separately. See `jboss-deployment-structure.xml` 
@@ -113,17 +115,31 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
-		<dependency>
-			<!-- The builds for this and other Blue Button API projects use HSQL in 
-				tests. -->
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-		</dependency>
 
 		<dependency>
 			<!-- The test framework used for unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- The builds for this and other Blue Button API projects use HSQL in 
+				tests. -->
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<!-- Only used by tests, but still has to be packaged in WAR. -->
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<!-- Provides sample data used in tests. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used to load sample data in tests. -->
+			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

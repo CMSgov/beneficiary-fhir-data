@@ -53,20 +53,30 @@
 	</modules>
 
 	<properties>
+		<bluebutton-data-model.version>1.0.0-SNAPSHOT</bluebutton-data-model.version>
+		<bluebutton-data-pipeline.version>0.1.0-SNAPSHOT</bluebutton-data-pipeline.version>
 		<metrics.version>3.1.2</metrics.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
 			plugin. These settings are pulled out as POM properties so that they can 
-			be adjusted via profiles. This is required because the CI server doesn't 
-			have enough RAM to run with an in-mem DB, and so requires a different configuration. -->
+			be adjusted via profiles. Note that the specific DB URL here is special-cased 
+			by SpringConfiguration, which will launch an embedded HSQL DB to host it. -->
 		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
-		<its.bbfhir.db.url>jdbc:hsqldb:mem:test;hsqldb.tx=mvcc</its.bbfhir.db.url>
-		<its.bbfhir.db.username></its.bbfhir.db.username>
-		<its.bbfhir.db.password></its.bbfhir.db.password>
+		<its.bbfhir.db.url>jdbc:hsqldb:hsql://localhost/test-embedded</its.bbfhir.db.url>
+		<its.bbfhir.db.username>test</its.bbfhir.db.username>
+		<its.bbfhir.db.password>test</its.bbfhir.db.password>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<!-- Provides the JPA entities used to represent the Blue Button API 
+					backend's data in the database. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif</artifactId>
+				<version>${bluebutton-data-model.version}</version>
+			</dependency>
+
 			<dependency>
 				<!-- Used as a logging backed/target for SLF4J. -->
 				<groupId>ch.qos.logback</groupId>
@@ -102,6 +112,20 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.12</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- Provides sample data used in tests. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif-samples</artifactId>
+				<version>${bluebutton-data-model.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- Used to load sample data in tests. -->
+				<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+				<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
+				<version>${bluebutton-data-pipeline.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>

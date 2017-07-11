@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -13,6 +14,8 @@ import javax.sql.DataSource;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
+import org.hsqldb.persist.HsqlProperties;
+import org.hsqldb.server.ServerAcl.AclFormatException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -26,12 +29,14 @@ import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.zaxxer.hikari.HikariDataSource;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import gov.hhs.cms.bluebutton.data.model.rif.schema.DatabaseSchemaManager;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
 
@@ -102,7 +107,48 @@ public class SpringConfiguration {
 		poolingDataSource.setRegisterMbeans(true);
 		poolingDataSource.setMetricRegistry(metricRegistry);
 
+		createTestDatabaseIfNeeded(poolingDataSource);
+
 		return poolingDataSource;
+	}
+
+	/**
+	 * Needed by our integration tests: if we're configured to run against the
+	 * embedded HSQL DB, start a server for that database. The standalone
+	 * embedded HSQL server has to be used, in order to ensure that the tests
+	 * can connect directly to the database (to insert data, etc.).
+	 * 
+	 * @param dataSource
+	 *            the {@link DataSource} that will be used to connect to the
+	 *            database
+	 */
+	private void createTestDatabaseIfNeeded(HikariDataSource dataSource) {
+		String jdbcUrl = System.getProperty(SpringConfiguration.PROP_DB_URL, "");
+		if (!jdbcUrl.startsWith("jdbc:hsqldb:hsql://localhost/test-embedded"))
+			return;
+
+		HsqlProperties p = new HsqlProperties();
+		p.setProperty("server.database.0", "mem:test-embedded;user=test;password=test");
+		p.setProperty("server.dbname.0", "test-embedded");
+		p.setProperty("server.port", "9001");
+		p.setProperty("hsqldb.tx", "mvcc");
+		org.hsqldb.server.Server server = new org.hsqldb.server.Server();
+
+		try {
+			server.setProperties(p);
+		} catch (IOException | AclFormatException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+
+		server.setLogWriter(null);
+		server.setErrWriter(null);
+		server.start();
+
+		/*
+		 * Ensure the DataSource DB's schema is ready to use, because once
+		 * Spring starts, anything can try to use it.
+		 */
+		DatabaseSchemaManager.createOrUpdateSchema(dataSource);
 	}
 
 	/**
@@ -126,14 +172,13 @@ public class SpringConfiguration {
 	 */
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
-		retVal.setPersistenceUnitName("gov.hhs.cms.bluebutton.data");
-		retVal.setDataSource(dataSource);
-		retVal.setPackagesToScan("gov.hhs.cms.bluebutton");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
-		retVal.setJpaProperties(jpaProperties());
-		retVal.afterPropertiesSet();
-		return retVal;
+		LocalContainerEntityManagerFactoryBean containerEmfBean = new LocalContainerEntityManagerFactoryBean();
+		containerEmfBean.setDataSource(dataSource);
+		containerEmfBean.setPackagesToScan("gov.hhs.cms.bluebutton.data.model.rif");
+		containerEmfBean.setPersistenceProvider(new HibernatePersistenceProvider());
+		containerEmfBean.setJpaProperties(jpaProperties());
+		containerEmfBean.afterPropertiesSet();
+		return containerEmfBean;
 	}
 
 	/**
@@ -142,11 +187,7 @@ public class SpringConfiguration {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
-		extraProperties.put("hibernate.cache.use_query_cache", "false");
-		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
-		extraProperties.put("hibernate.cache.use_structured_entries", "false");
-		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
-
+		
 		/*
 		 * These configuration settings will set Hibernate to log all SQL
 		 * statements and collect statistics, logging them out at the end of
