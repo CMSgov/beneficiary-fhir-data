@@ -44,13 +44,6 @@
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 		</dependency>
-		<dependency>
-			<!-- Provides a database schema mechanism. See the DatabaseSchemaManager 
-				class. -->
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>4.2.0</version>
-		</dependency>
 
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 

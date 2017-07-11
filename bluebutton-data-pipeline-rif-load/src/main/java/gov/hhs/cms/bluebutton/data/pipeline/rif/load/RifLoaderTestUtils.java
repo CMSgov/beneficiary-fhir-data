@@ -131,11 +131,21 @@ public final class RifLoaderTestUtils {
 	/**
 	 * @param options
 	 *            the {@link LoadAppOptions} specifying the DB to use
+	 * @return a JDBC {@link DataSource} for the database server used in tests
+	 */
+	public static DataSource createDataSouce(LoadAppOptions options) {
+		DataSource jdbcDataSource = RifLoader.createDataSource(options, new MetricRegistry());
+		return jdbcDataSource;
+	}
+
+	/**
+	 * @param options
+	 *            the {@link LoadAppOptions} specifying the DB to use
 	 * @return a JPA {@link EntityManagerFactory} for the database server used
 	 *         in tests
 	 */
 	public static EntityManagerFactory createEntityManagerFactory(LoadAppOptions options) {
-		DataSource jdbcDataSource = RifLoader.createDataSource(options, new MetricRegistry());
+		DataSource jdbcDataSource = createDataSouce(options);
 		return RifLoader.createEntityManagerFactory(jdbcDataSource);
 	}
 }

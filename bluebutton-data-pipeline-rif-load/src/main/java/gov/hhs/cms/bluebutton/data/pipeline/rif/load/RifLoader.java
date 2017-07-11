@@ -66,8 +66,8 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.schema.DatabaseSchemaManager;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifRecordLoadResult.LoadAction;
-import gov.hhs.cms.bluebutton.data.pipeline.rif.schema.DatabaseSchemaManager;
 
 /**
  * Pushes CCW beneficiary and claims data from {@link RifRecordEvent}s into the
