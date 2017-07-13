@@ -24,7 +24,7 @@ public final class RifParsingUtils {
 	/**
 	 * The {@link CSVFormat} for RIF file parsing/writing.
 	 */
-	public static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape(null);
+	public static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
 
 	private final static DateTimeFormatter RIF_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
 			.appendPattern("dd-MMM-yyyy").toFormatter();
@@ -82,8 +82,6 @@ public final class RifParsingUtils {
 	 *         method, but it's here for consistency)
 	 */
 	public static String parseString(String string) {
-		string = handleBadBackslashes(string);
-
 		return string;
 	}
 
@@ -96,8 +94,6 @@ public final class RifParsingUtils {
 	 *         specified value
 	 */
 	public static Optional<String> parseOptionalString(String string) {
-		string = handleBadBackslashes(string);
-
 		return string.isEmpty() ? Optional.empty() : Optional.of(string);
 	}
 
@@ -107,8 +103,6 @@ public final class RifParsingUtils {
 	 * @return the specified text parsed into an {@link Integer}
 	 */
 	public static Integer parseInteger(String intText) {
-		intText = handleBadBackslashes(intText);
-
 		/*
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
@@ -127,8 +121,6 @@ public final class RifParsingUtils {
 	 *         input has data, or an empty Optional if not
 	 */
 	public static Optional<Integer> parseOptionalInteger(String intText) {
-		intText = handleBadBackslashes(intText);
-
 		if (intText.isEmpty()) {
 			return Optional.empty();
 		} else {
@@ -142,8 +134,6 @@ public final class RifParsingUtils {
 	 * @return the specified text parsed into a {@link BigDecimal}
 	 */
 	public static BigDecimal parseDecimal(String decimalText) {
-		decimalText = handleBadBackslashes(decimalText);
-
 		/*
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
@@ -167,8 +157,6 @@ public final class RifParsingUtils {
 	 *         isn't empty, or an empty Optional if it is empty
 	 */
 	public static Optional<BigDecimal> parseOptionalDecimal(String decimalText) {
-		decimalText = handleBadBackslashes(decimalText);
-
 		if (decimalText.isEmpty()) {
 			return Optional.empty();
 		} else {
@@ -183,8 +171,6 @@ public final class RifParsingUtils {
 	 *         {@link #RIF_DATE_FORMATTER}
 	 */
 	public static LocalDate parseDate(String dateText) {
-		dateText = handleBadBackslashes(dateText);
-
 		/*
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
@@ -205,8 +191,6 @@ public final class RifParsingUtils {
 	 *         input has data, or an empty Optional if not
 	 */
 	public static Optional<LocalDate> parseOptionalDate(String dateText) {
-		dateText = handleBadBackslashes(dateText);
-
 		if (dateText.isEmpty()) {
 			return Optional.empty();
 		} else {
@@ -221,8 +205,6 @@ public final class RifParsingUtils {
 	 *         parsed using {@link #RIF_DATE_FORMATTER}
 	 */
 	public static Character parseCharacter(String charText) {
-		charText = handleBadBackslashes(charText);
-
 		/*
 		 * Might seem silly to pull this out, but it makes the code a bit easier
 		 * to read, and ensures that this parsing is standardized.
@@ -241,24 +223,10 @@ public final class RifParsingUtils {
 	 *         input has data, or an empty Optional if not
 	 */
 	public static Optional<Character> parseOptionalCharacter(String charText) {
-		charText = handleBadBackslashes(charText);
-
 		if (charText.isEmpty()) {
 			return Optional.empty();
 		} else {
 			return Optional.of(parseCharacter(charText));
 		}
-	}
-
-	/**
-	 * A workaround for CBBD-286.
-	 * 
-	 * @param string
-	 *            the input {@link String} to check
-	 * @return the input {@link String}, unless it was only a single backslash
-	 *         character, in which case an empty {@link String} is returned
-	 */
-	private static String handleBadBackslashes(String string) {
-		return "\\".equals(string) ? "" : string;
 	}
 }
