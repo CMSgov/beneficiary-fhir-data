@@ -98,7 +98,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException(patientId);
 		}
 
-		Patient patient = BeneficiaryToPatientTransformer.transform(beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(beneficiary);
 		return patient;
 	}
 
@@ -111,7 +111,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 * <ul>
 	 * <li>Matching a {@link Beneficiary#getHicn()} hash value: when
 	 * {@link TokenParam#getSystem()} matches
-	 * {@link BeneficiaryToPatientTransformer#CODING_SYSTEM_CCW_BENE_HICN_HASH}.
+	 * {@link BeneficiaryTransformer#CODING_SYSTEM_CCW_BENE_HICN_HASH}.
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -136,7 +136,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
 
-		if (!BeneficiaryToPatientTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH.equals(identifier.getSystem()))
+		if (!BeneficiaryTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH.equals(identifier.getSystem()))
 			throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
 		try {
@@ -168,7 +168,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		Beneficiary beneficiary = entityManager.createQuery(criteria).getSingleResult();
 
-		Patient patient = BeneficiaryToPatientTransformer.transform(beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(beneficiary);
 		return patient;
 	}
 }

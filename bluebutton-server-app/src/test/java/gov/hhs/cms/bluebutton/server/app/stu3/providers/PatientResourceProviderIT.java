@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.BeneficiaryToPatientTransformer;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.BeneficiaryTransformer;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
 
 /**
@@ -68,7 +68,7 @@ public final class PatientResourceProviderIT {
 				.findFirst().get();
 		Bundle searchResults = fhirClient.search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier(
-						BeneficiaryToPatientTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH, beneficiary.getHicn()))
+						BeneficiaryTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH, beneficiary.getHicn()))
 				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
@@ -89,7 +89,7 @@ public final class PatientResourceProviderIT {
 		// No data is loaded, so this should return 0 matches.
 		Bundle searchResults = fhirClient.search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly()
-						.systemAndIdentifier(BeneficiaryToPatientTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH, "1234"))
+						.systemAndIdentifier(BeneficiaryTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH, "1234"))
 				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
