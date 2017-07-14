@@ -14,8 +14,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.BeneficiaryTransformer;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
 
 /**
  * Integration tests for {@link PatientResourceProvider}.
@@ -37,7 +35,7 @@ public final class PatientResourceProviderIT {
 		Patient patient = fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
 
 		Assert.assertNotNull(patient);
-		Assert.assertTrue(patient.getId().endsWith(beneficiary.getBeneficiaryId()));
+		BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
 	}
 
 	/**
@@ -74,7 +72,7 @@ public final class PatientResourceProviderIT {
 		Assert.assertNotNull(searchResults);
 		Assert.assertEquals(1, searchResults.getTotal());
 		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-		Assert.assertTrue(patientFromSearchResult.getId().endsWith(beneficiary.getBeneficiaryId()));
+		BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
 	}
 
 	/**

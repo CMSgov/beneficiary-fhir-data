@@ -40,7 +40,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.CARRIER, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
-		assertMatches(claim, eob);
+		CarrierClaimTransformerTest.assertMatches(claim, eob);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		ExplanationOfBenefit carrierClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource()).findFirst().get();
-		assertMatches(carrierClaim, carrierClaimFromSearchResult);
+		CarrierClaimTransformerTest.assertMatches(carrierClaim, carrierClaimFromSearchResult);
 	}
 
 	/**
@@ -114,21 +114,5 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
 		ServerTestUtils.cleanDatabaseServer();
-	}
-
-	/**
-	 * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if
-	 * it were produced from the specified {@link CarrierClaim}.
-	 * 
-	 * @param claim
-	 *            the {@link CarrierClaim} that the {@link ExplanationOfBenefit}
-	 *            was generated from
-	 * @param eob
-	 *            the {@link ExplanationOfBenefit} that was generated from the
-	 *            specified {@link CarrierClaim}
-	 */
-	private static void assertMatches(CarrierClaim claim, ExplanationOfBenefit eob) {
-		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.CARRIER, claim.getClaimId()),
-				eob.getIdElement().getIdPart());
 	}
 }

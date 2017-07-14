@@ -140,6 +140,25 @@ public final class ServerTestUtils {
 
 	/**
 	 * @param sampleResources
+	 *            the sample RIF resources to parse
+	 * @return the {@link List} of RIF records that were parsed (e.g.
+	 *         {@link Beneficiary}s, etc.)
+	 */
+	public static List<Object> parseData(List<StaticRifResource> sampleResources) {
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
+				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
+		RifFilesProcessor processor = new RifFilesProcessor();
+		List<Object> recordsParsed = new ArrayList<>();
+		for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+			RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
+			rifFileRecords.getRecords().map(r -> r.getRecord()).forEach(r -> recordsParsed.add(r));
+		}
+
+		return recordsParsed;
+	}
+
+	/**
+	 * @param sampleResources
 	 *            the sample RIF resources to load
 	 * @return the {@link List} of RIF records that were loaded (e.g.
 	 *         {@link Beneficiary}s, etc.)

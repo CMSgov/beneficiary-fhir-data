@@ -13,7 +13,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
  * Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient}
  * resources.
  */
-public final class BeneficiaryTransformer {
+final class BeneficiaryTransformer {
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">

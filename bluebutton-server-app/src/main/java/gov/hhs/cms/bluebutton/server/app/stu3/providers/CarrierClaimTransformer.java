@@ -55,7 +55,7 @@ final class CarrierClaimTransformer {
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
 	 *         specified {@link CarrierClaim}
 	 */
-	static ExplanationOfBenefit transformClaim(CarrierClaim claimGroup) {
+	private static ExplanationOfBenefit transformClaim(CarrierClaim claimGroup) {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
 		eob.setId(TransformerUtils.buildEobId(ClaimType.CARRIER, claimGroup.getClaimId()));
