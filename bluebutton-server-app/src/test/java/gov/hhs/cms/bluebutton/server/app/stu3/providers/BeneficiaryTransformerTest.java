@@ -22,7 +22,7 @@ public final class BeneficiaryTransformerTest {
 	 * {@link Beneficiary}.
 	 */
 	@Test
-	public void transformSampleAClaim() {
+	public void transformSampleARecord() {
 		List<Object> parsedRecords = ServerTestUtils
 				.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = parsedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)

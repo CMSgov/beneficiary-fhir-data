@@ -22,7 +22,7 @@ public final class CarrierClaimTransformerTest {
 	 * {@link CarrierClaim}.
 	 */
 	@Test
-	public void transformSampleAClaim() {
+	public void transformSampleARecord() {
 		List<Object> parsedRecords = ServerTestUtils
 				.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		CarrierClaim claim = parsedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
