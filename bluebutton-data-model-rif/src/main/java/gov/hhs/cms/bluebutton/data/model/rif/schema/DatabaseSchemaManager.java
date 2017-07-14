@@ -95,10 +95,12 @@ public final class DatabaseSchemaManager {
 				placeholders.put("type.int4", "integer");
 				placeholders.put("logic.if-exists", "");
 				placeholders.put("logic.tablespaces-escape", "--");
+				placeholders.put("logic.alter-column-type", "");
 			} else {
 				placeholders.put("type.int4", "int4");
 				placeholders.put("logic.if-exists", "if exists");
 				placeholders.put("logic.tablespaces-escape", "--");
+				placeholders.put("logic.alter-column-type", "type");
 			}
 		} catch (SQLException e) {
 			throw new UncheckedSqlException(e);
