@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.server.app;
+package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
+import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.BeneficiaryToPatientTransformer;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
 
