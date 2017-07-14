@@ -24,8 +24,6 @@ import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponen
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -39,8 +37,6 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel
  * {@link ExplanationOfBenefit} resources.
  */
 final class CarrierClaimTransformer {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CarrierClaimTransformer.class);
-
 	/**
 	 * @param claim
 	 *            the CCW {@link CarrierClaim} to transform
