@@ -6,11 +6,15 @@ import java.util.Date;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 
 /**
  * Contains shared constants and methods used to transform CCW JPA entities
@@ -64,5 +68,31 @@ final class TransformerUtils {
 
 		Coding coding = codeableConcept.addCoding();
 		coding.setSystem(codingSystem).setCode(codingCode);
+	}
+
+	/**
+	 * @param claimType
+	 *            the {@link ClaimType} to compute an
+	 *            {@link ExplanationOfBenefit#getId()} for
+	 * @param claimId
+	 *            the <code>claimId</code> field value (e.g. from
+	 *            {@link CarrierClaim#getClaimId()}) to compute an
+	 *            {@link ExplanationOfBenefit#getId()} for
+	 * @return the {@link ExplanationOfBenefit#getId()} value to use for the
+	 *         specified <code>claimId</code> value
+	 */
+	static String buildEobId(ClaimType claimType, String claimId) {
+		return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
+	}
+
+	/**
+	 * @param beneficiary
+	 *            the {@link Beneficiary} to calculate the
+	 *            {@link Patient#getId()} value for
+	 * @return the {@link Patient#getId()} value that will be used for the
+	 *         specified {@link Beneficiary}
+	 */
+	static IdDt buildPatientId(Beneficiary beneficiary) {
+		return new IdDt("Patient", beneficiary.getBeneficiaryId());
 	}
 }
