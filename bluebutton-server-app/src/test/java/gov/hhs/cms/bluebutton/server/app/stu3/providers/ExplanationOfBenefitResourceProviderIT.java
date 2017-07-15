@@ -6,6 +6,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,9 +28,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
 	 * works as expected for a {@link CarrierClaim}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@Test
-	public void readEobForExistingCarrierClaim() {
+	public void readEobForExistingCarrierClaim() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -61,9 +65,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
 	 */
 	@Test
-	public void searchForEobsByExistingPatient() {
+	public void searchForEobsByExistingPatient() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
