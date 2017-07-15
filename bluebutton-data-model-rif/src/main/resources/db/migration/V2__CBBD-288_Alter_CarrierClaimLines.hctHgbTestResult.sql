@@ -4,4 +4,4 @@
  */
 
 alter table "CarrierClaimLines" 
-   alter column "hctHgbTestResult" ${logic.alter-column-type} numeric(3,1);
+   alter column "hctHgbTestResult" ${logic.alter-column-type} numeric(4,1);
