@@ -4,27 +4,173 @@
  * `Drop_all_constraints.sql` script.
  */
 
--- alter table "CarrierClaimLines" drop constraint ${logic.if-exists} "CarrierClaimLines_parentClaim_to_CarrierClaims";
--- alter table "DMEClaimLines" drop constraint ${logic.if-exists} "DMEClaimLines_parentClaim_to_DMEClaims";
--- alter table "HHAClaimLines" drop constraint ${logic.if-exists} "HHAClaimLines_parentClaim_to_HHAClaims";
--- alter table "HospiceClaimLines" drop constraint ${logic.if-exists} "HospiceClaimLines_parentClaim_to_HospiceClaims";
--- alter table "InpatientClaimLines" drop constraint ${logic.if-exists} "InpatientClaimLines_parentClaim_to_InpatientClaims";
--- alter table "OutpatientClaimLines" drop constraint ${logic.if-exists} "OutpatientClaimLines_parentClaim_to_OutpatientClaims";
--- alter table "SNFClaimLines" drop constraint ${logic.if-exists} "SNFClaimLines_parentClaim_to_SNFClaims";
 
-alter table "Beneficiaries" add constraint "Beneficiaries_pkey" primary key ("beneficiaryId");
-alter table "CarrierClaimLines" add constraint "CarrierClaimLines_pkey" primary key ("lineNumber", "parentClaim");
-alter table "CarrierClaims" add constraint "CarrierClaims_pkey" primary key ("claimId");
--- alter table "DMEClaimLines" drop constraint ${logic.if-exists} "DMEClaimLines_pkey";
--- alter table "DMEClaims" drop constraint ${logic.if-exists} "DMEClaims_pkey";
--- alter table "HHAClaimLines" drop constraint ${logic.if-exists} "HHAClaimLines_pkey";
--- alter table "HHAClaims" drop constraint ${logic.if-exists} "HHAClaims_pkey";
--- alter table "HospiceClaimLines" drop constraint ${logic.if-exists} "HospiceClaimLines_pkey";
--- alter table "HospiceClaims" drop constraint ${logic.if-exists} "HospiceClaims_pkey";
--- alter table "InpatientClaimLines" drop constraint ${logic.if-exists} "InpatientClaimLines_pkey";
--- alter table "InpatientClaims" drop constraint ${logic.if-exists} "InpatientClaims_pkey";
--- alter table "OutpatientClaimLines" drop constraint ${logic.if-exists} "OutpatientClaimLines_pkey";
--- alter table "OutpatientClaims" drop constraint ${logic.if-exists} "OutpatientClaims_pkey";
--- alter table "PartDEvents" drop constraint ${logic.if-exists} "PartDEvents_pkey";
--- alter table "SNFClaimLines" drop constraint ${logic.if-exists} "SNFClaimLines_pkey";
--- alter table "SNFClaims" drop constraint ${logic.if-exists} "SNFClaims_pkey";
+-- Create all of the primary keys.
+alter table "Beneficiaries" 
+    add constraint "Beneficiaries_pkey" 
+    primary key ("beneficiaryId");
+
+alter table "CarrierClaimLines" 
+    add constraint "CarrierClaimLines_pkey" 
+    primary key ("lineNumber", "parentClaim");
+
+alter table "CarrierClaims" 
+    add constraint "CarrierClaims_pkey" 
+    primary key ("claimId");
+
+alter table "DMEClaimLines" 
+    add constraint "DMEClaimLines_pkey" 
+    primary key ("lineNumber", "parentClaim");
+
+alter table "DMEClaims" 
+    add constraint "DMEClaims_pkey" 
+    primary key ("claimId");
+
+alter table "HHAClaimLines" 
+    add constraint "HHAClaimLines_pkey" 
+    primary key ("lineNumber", "parentClaim");
+
+alter table "HHAClaims" 
+    add constraint "HHAClaims_pkey" 
+    primary key ("claimId");
+
+alter table "HospiceClaimLines" 
+    add constraint "HospiceClaimLines_pkey" 
+    primary key ("lineNumber", "parentClaim");
+
+alter table "HospiceClaims" 
+    add constraint "HospiceClaims_pkey" 
+    primary key ("claimId");
+
+alter table "InpatientClaimLines" 
+    add constraint "InpatientClaimLines_pkey" 
+    primary key ("lineNumber", "parentClaim");
+
+alter table "InpatientClaims" 
+    add constraint "InpatientClaims_pkey" 
+    primary key ("claimId");
+
+alter table "OutpatientClaimLines" 
+    add constraint "OutpatientClaimLines_pkey" 
+    primary key ("lineNumber", "parentClaim");
+
+alter table "OutpatientClaims" 
+    add constraint "OutpatientClaims_pkey" 
+    primary key ("claimId");
+
+alter table "PartDEvents" 
+    add constraint "PartDEvents_pkey" 
+    primary key ("eventId");
+
+alter table "SNFClaimLines" 
+    add constraint "SNFClaimLines_pkey" 
+    primary key ("lineNumber", "parentClaim");
+
+alter table "SNFClaims" 
+    add constraint "SNFClaims_pkey" 
+    primary key ("claimId");
+
+
+-- Create all of the header-to-line table foreign keys.
+alter table "CarrierClaimLines" 
+   add constraint "CarrierClaimLines_parentClaim_to_CarrierClaims" 
+   foreign key ("parentClaim") 
+   references "CarrierClaims";
+
+alter table "DMEClaimLines" 
+   add constraint "DMEClaimLines_parentClaim_to_DMEClaims" 
+   foreign key ("parentClaim") 
+   references "DMEClaims";
+
+alter table "HHAClaimLines" 
+   add constraint "HHAClaimLines_parentClaim_to_HHAClaims" 
+   foreign key ("parentClaim") 
+   references "HHAClaims";
+
+alter table "HospiceClaimLines" 
+   add constraint "HospiceClaimLines_parentClaim_to_HospiceClaims" 
+   foreign key ("parentClaim") 
+   references "HospiceClaims";
+
+alter table "InpatientClaimLines" 
+   add constraint "InpatientClaimLines_parentClaim_to_InpatientClaims" 
+   foreign key ("parentClaim") 
+   references "InpatientClaims";
+
+alter table "OutpatientClaimLines" 
+   add constraint "OutpatientClaimLines_parentClaim_to_OutpatientClaims" 
+   foreign key ("parentClaim") 
+   references "OutpatientClaims";
+
+alter table "SNFClaimLines" 
+   add constraint "SNFClaimLines_parentClaim_to_SNFClaims" 
+   foreign key ("parentClaim") 
+   references "SNFClaims";
+
+
+-- Create all of the claim-to-bene table foreign keys.
+alter table "CarrierClaims" 
+   add constraint "CarrierClaims_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+alter table "DMEClaims" 
+   add constraint "DMEClaims_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+alter table "HHAClaims" 
+   add constraint "HHAClaims_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+alter table "HospiceClaims" 
+   add constraint "HospiceClaims_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+alter table "InpatientClaims" 
+   add constraint "InpatientClaims_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+alter table "OutpatientClaims" 
+   add constraint "OutpatientClaims_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+alter table "PartDEvents" 
+   add constraint "PartDEvents_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+alter table "SNFClaims" 
+   add constraint "SNFClaims_beneficiaryId_to_Beneficiaries" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+
+
+-- Create all of the "beneficiaryId" column indexes for claim tables.
+create index "CarrierClaims_beneficiaryId_idx" 
+    on "CarrierClaims" ("beneficiaryId");
+
+create index "DMEClaims_beneficiaryId_idx" 
+    on "DMEClaims" ("beneficiaryId");
+
+create index "HHAClaims_beneficiaryId_idx" 
+    on "HHAClaims" ("beneficiaryId");
+
+create index "HospiceClaims_beneficiaryId_idx" 
+    on "HospiceClaims" ("beneficiaryId");
+
+create index "InpatientClaims_beneficiaryId_idx" 
+    on "InpatientClaims" ("beneficiaryId");
+
+create index "OutpatientClaims_beneficiaryId_idx" 
+    on "OutpatientClaims" ("beneficiaryId");
+
+create index "PartDEvents_beneficiaryId_idx" 
+    on "PartDEvents" ("beneficiaryId");
+
+create index "SNFClaims_beneficiaryId_idx" 
+    on "SNFClaims" ("beneficiaryId");
