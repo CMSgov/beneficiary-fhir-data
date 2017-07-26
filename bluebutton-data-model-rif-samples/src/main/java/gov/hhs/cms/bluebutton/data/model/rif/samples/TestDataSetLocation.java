@@ -4,19 +4,19 @@ package gov.hhs.cms.bluebutton.data.model.rif.samples;
  * Enumerates the locations of various test data sets in S3.
  */
 public enum TestDataSetLocation {
-	DUMMY_DATA_1000000_BENES("data-random/1000000-beneficiaries-2017-04-18T05:03:30Z"),
+	DUMMY_DATA_1000000_BENES("data-random/1000000-beneficiaries-2017-07-11T00:00:00.000Z"),
 
-	DUMMY_DATA_100000_BENES("data-random/100000-beneficiaries-2017-06-08T04:42:41.601Z"),
+	DUMMY_DATA_100000_BENES("data-random/100000-beneficiaries-2017-07-11T00:00:00.000Z"),
 
-	DUMMY_DATA_10000_BENES("data-random/10000-beneficiaries-2017-06-08T17:48:51.293Z"),
+	DUMMY_DATA_10000_BENES("data-random/10000-beneficiaries-2017-07-11T00:00:00.000Z"),
 
-	DUMMY_DATA_1000_BENES("data-random/1000-beneficiaries-2017-06-08T19:02:02.652Z"),
+	DUMMY_DATA_1000_BENES("data-random/1000-beneficiaries-2017-07-11T00:00:00.000Z"),
 
-	DUMMY_DATA_100_BENES("data-random/100-beneficiaries-2017-06-08T19:14:30.246Z"),
+	DUMMY_DATA_100_BENES("data-random/100-beneficiaries-2017-07-11T00:00:00.000Z"),
 
-	DUMMY_DATA_10_BENES("data-random/10-beneficiaries-2017-06-08T19:15:28.988Z"),
+	DUMMY_DATA_10_BENES("data-random/10-beneficiaries-2017-07-11T00:00:00.000Z"),
 
-	DUMMY_DATA_1_BENES("data-random/1-beneficiaries-2017-06-08T19:16:50.658Z");
+	DUMMY_DATA_1_BENES("data-random/1-beneficiaries-2017-07-11T00:00:00.000Z");
 
 	/**
 	 * The {@link TestDataSetLocation} used by all of the "SAMPLE_B"
