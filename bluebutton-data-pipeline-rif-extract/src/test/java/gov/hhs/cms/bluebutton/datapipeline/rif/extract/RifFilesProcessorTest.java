@@ -120,6 +120,7 @@ public final class RifFilesProcessorTest {
 		PartDEvent pdeRow = (PartDEvent) rifRecordEvent.getRecord();
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("89", pdeRow.getEventId());
+		Assert.assertEquals(new BigDecimal(900), pdeRow.getClaimGroupId());
 		Assert.assertEquals("567834", pdeRow.getBeneficiaryId());
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.getPrescriptionFillDate());
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 27), pdeRow.getPaymentDate().get());
@@ -200,6 +201,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
 		Assert.assertEquals("9991831999", claimGroup.getClaimId());
+		Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
 		Assert.assertEquals('O', claimGroup.getNearLineRecordIdCode());
 		Assert.assertEquals("71", claimGroup.getClaimTypeCode());
 		Assert.assertEquals(LocalDate.of(1999, 10, 27), claimGroup.getDateFrom());
@@ -326,6 +328,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
 		Assert.assertEquals("333333222222", claimGroup.getClaimId());
+		Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
 		Assert.assertEquals('V', claimGroup.getNearLineRecordIdCode());
 		Assert.assertEquals("60", claimGroup.getClaimTypeCode());
 		Assert.assertEquals(LocalDate.of(2016, 01, 15), claimGroup.getDateFrom());
@@ -430,6 +433,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
 		Assert.assertEquals("1234567890", claimGroup.getClaimId());
+		Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
 		Assert.assertEquals('W', claimGroup.getNearLineRecordIdCode());
 		Assert.assertEquals("40", claimGroup.getClaimTypeCode());
 		Assert.assertEquals(LocalDate.of(2011, 01, 24), claimGroup.getDateFrom());
@@ -512,6 +516,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
 		Assert.assertEquals("777777777", claimGroup.getClaimId());
+		Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
 		Assert.assertEquals('V', claimGroup.getNearLineRecordIdCode());
 		Assert.assertEquals("20", claimGroup.getClaimTypeCode());
 		Assert.assertEquals(LocalDate.of(2013, 12, 01), claimGroup.getDateFrom());
@@ -610,6 +615,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
 		Assert.assertEquals("9992223422", claimGroup.getClaimId());
+		Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
 		Assert.assertEquals('V', claimGroup.getNearLineRecordIdCode());
 		Assert.assertEquals("50", claimGroup.getClaimTypeCode());
 		Assert.assertEquals(LocalDate.of(2014, 1, 01), claimGroup.getDateFrom());
@@ -683,6 +689,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
 		Assert.assertEquals("2925555555", claimGroup.getClaimId());
+		Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
 		Assert.assertEquals('W', claimGroup.getNearLineRecordIdCode());
 		Assert.assertEquals("10", claimGroup.getClaimTypeCode());
 		Assert.assertEquals('2', claimGroup.getClaimServiceClassificationTypeCode());
@@ -756,6 +763,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 		Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
 		Assert.assertEquals("2188888888", claimGroup.getClaimId());
+		Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
 		Assert.assertEquals('M', claimGroup.getNearLineRecordIdCode());
 		Assert.assertEquals("82", claimGroup.getClaimTypeCode());
 		Assert.assertEquals(LocalDate.of(2014, 02, 03), claimGroup.getDateFrom());

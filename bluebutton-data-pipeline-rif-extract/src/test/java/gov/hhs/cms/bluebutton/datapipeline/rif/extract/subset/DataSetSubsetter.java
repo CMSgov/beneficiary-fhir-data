@@ -7,8 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
@@ -35,7 +34,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryColumn;
@@ -170,7 +168,6 @@ public final class DataSetSubsetter {
 		 * 
 		 * @param outputDirectory
 		 *            the {@link Path} of the directory to write the output to
-		 *            (must already exist)
 		 * @param timestamp
 		 *            the timestamp of the dataset to output
 		 * @throws IOException
@@ -178,13 +175,9 @@ public final class DataSetSubsetter {
 		 *             along.
 		 */
 		public LocalDataSetWriter(Path outputDirectory, Instant timestamp) throws IOException {
-			if (!Files.isDirectory(outputDirectory))
-				throw new IllegalArgumentException();
+			Files.createDirectories(outputDirectory);
 
-			Path dataSetDirectory = outputDirectory.resolve(DateTimeFormatter.ISO_INSTANT.format(timestamp));
-			Files.createDirectory(dataSetDirectory);
-
-			this.outputDirectory = dataSetDirectory;
+			this.outputDirectory = outputDirectory;
 			this.timestamp = timestamp;
 			this.printers = new HashMap<>();
 		}
@@ -225,7 +218,7 @@ public final class DataSetSubsetter {
 			DataSetManifest manifest = new DataSetManifest(timestamp, 1, entries);
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			FileWriter writer = new FileWriter(outputDirectory.resolve("manifest.xml").toFile());
+			FileWriter writer = new FileWriter(outputDirectory.resolve("1_manifest.xml").toFile());
 			jaxbMarshaller.marshal(manifest, writer);
 			writer.close();
 
@@ -255,32 +248,38 @@ public final class DataSetSubsetter {
 	 */
 	public static void main(String[] args) throws Exception {
 		/*
-		 * These two variables can be adjusted to specify the data set to start
-		 * from and the desired size of the copy/subset being created. From the
-		 * original 1M beneficiary dummy sample data set, subsets were created
-		 * going down in size by powers of ten. This gives test authors lots of
-		 * good options for how much data to test against.
+		 * From the original source data set of 1M beneficiaries and their
+		 * claims, create subsets going all the way down by powers of ten. This
+		 * gives test authors lots of good options for how much data to test
+		 * against. Note that on Karl's `jordan-u` system, this took 5.5h to
+		 * run.
 		 */
-		TestDataSetLocation originalDataSetLocation = TestDataSetLocation.DUMMY_DATA_10_BENES;
-		int targetBeneficiaryCountForSubset = 1;
+		for (int beneCount = 1000000; beneCount >= 10; beneCount /= 10) {
+			// Grab the source and target constants.
+			final int sourceBeneCount = beneCount;
+			final int targetBeneCount = beneCount / 10;
+			TestDataSetLocation sourceDataSet = Arrays.stream(TestDataSetLocation.class.getEnumConstants())
+					.filter(c -> c.name().matches("DUMMY_DATA_" + sourceBeneCount + "_BENES")).findAny().get();
+			TestDataSetLocation targetDataSet = Arrays.stream(TestDataSetLocation.class.getEnumConstants())
+					.filter(c -> c.name().matches("DUMMY_DATA_" + targetBeneCount + "_BENES")).findAny().get();
 
-		String originalDataSetId = null;
-		StringTokenizer originalDataSetLocationTokens = new StringTokenizer(originalDataSetLocation.getS3KeyPrefix(),
-				"/");
-		while (originalDataSetLocationTokens.hasMoreTokens())
-			originalDataSetId = originalDataSetLocationTokens.nextToken();
-		if (originalDataSetId == null)
-			throw new BadCodeMonkeyException();
+			// Figure out what directories to store the source in locally.
+			Path outputDirectory = Paths.get(".", "test-data-random");
+			Files.createDirectories(outputDirectory);
+			String sourceDataSetId = Arrays.stream(sourceDataSet.getS3KeyPrefix().split("/")).reduce((a, b) -> b).get();
+			Path sourceDataSetDirectory = outputDirectory.resolve(sourceDataSetId);
 
-		Path outputDirectory = Paths.get(".", "test-data-random");
-		Files.createDirectories(outputDirectory);
-		Path downloadDirectory = outputDirectory.resolve(originalDataSetId);
-		Files.createDirectories(downloadDirectory);
+			// Download the source data set and build the target from it.
+			ExtractionOptions options = new ExtractionOptions(sourceDataSet.getS3BucketName());
+			String targetDataSetId = Arrays.stream(targetDataSet.getS3KeyPrefix().split("/")).reduce((a, b) -> b).get();
+			Path targetDataSetDirectory = outputDirectory.resolve(targetDataSetId);
+			Instant targetDataSetTimestamp = Instant.parse(targetDataSetId.replaceFirst("\\d+-beneficiaries-", ""));
+			try (IDataSetWriter output = new LocalDataSetWriter(targetDataSetDirectory, targetDataSetTimestamp)) {
+				Files.createDirectories(sourceDataSetDirectory);
+				List<RifFile> rifFiles = downloadDataSet(options, sourceDataSetId, sourceDataSetDirectory);
 
-		ExtractionOptions options = new ExtractionOptions("gov-hhs-cms-bluebutton-sandbox-etl-test-data");
-		try (IDataSetWriter output = new LocalDataSetWriter(outputDirectory, Instant.now());) {
-			List<RifFile> rifFiles = downloadDataSet(options, originalDataSetId, downloadDirectory);
-			DataSetSubsetter.createSubset(output, targetBeneficiaryCountForSubset, rifFiles);
+				DataSetSubsetter.createSubset(output, targetBeneCount, rifFiles);
+			}
 		}
 	}
 
@@ -300,7 +299,7 @@ public final class DataSetSubsetter {
 		TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
 		String dataSetPrefix = "data-random/" + dataSetS3KeyPrefix;
-		String manifestSuffix = "manifest.xml";
+		String manifestSuffix = "1_manifest.xml";
 
 		Path manifestDownloadPath = downloadDirectory.resolve(manifestSuffix);
 		if (!Files.exists(manifestDownloadPath)) {
@@ -319,8 +318,7 @@ public final class DataSetSubsetter {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			dummyDataSetManifest = (DataSetManifest) jaxbUnmarshaller
-					.unmarshal(manifestDownloadPath.toFile());
+			dummyDataSetManifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestDownloadPath.toFile());
 		} catch (JAXBException e) {
 			throw new UncheckedJaxbException(e);
 		}
