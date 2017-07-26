@@ -50,7 +50,6 @@
 		<module>bluebutton-data-pipeline-rif-load</module>
 		<module>bluebutton-data-pipeline-app</module>
 		<module>bluebutton-data-pipeline-benchmarks</module>
-		<!-- <module>bluebutton-data-pipeline-fhir-load</module> -->
 	</modules>
 
 	<properties>
