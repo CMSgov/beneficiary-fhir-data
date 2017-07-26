@@ -14,7 +14,6 @@ import javax.persistence.EntityManagerFactory;
 
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,6 @@ import com.codahale.metrics.Slf4jReporter;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
-import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
@@ -51,8 +49,6 @@ public final class RifLoaderIT {
 	 * {@link StaticRifResourceGroup#SAMPLE_B} data.
 	 */
 	@Test
-	// FIXME Temporary workaround until CBBD-253 and CBBD-283 are resolved.
-	@Ignore
 	public void loadSampleB() {
 		loadSample(StaticRifResourceGroup.SAMPLE_B);
 	}
@@ -67,7 +63,7 @@ public final class RifLoaderIT {
 	private void loadSample(StaticRifResourceGroup sampleGroup) {
 		// Generate the sample RIF data to feed through the pipeline.
 		List<StaticRifResource> sampleResources = Arrays.stream(sampleGroup.getResources())
-				.filter(r -> r.getRifFileType() != RifFileType.PDE).collect(Collectors.toList());
+				.collect(Collectors.toList());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
 				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 

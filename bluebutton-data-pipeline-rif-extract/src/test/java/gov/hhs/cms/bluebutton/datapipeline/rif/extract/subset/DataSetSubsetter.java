@@ -251,7 +251,8 @@ public final class DataSetSubsetter {
 		 * From the original source data set of 1M beneficiaries and their
 		 * claims, create subsets going all the way down by powers of ten. This
 		 * gives test authors lots of good options for how much data to test
-		 * against.
+		 * against. Note that on Karl's `jordan-u` system, this took 5.5h to
+		 * run.
 		 */
 		for (int beneCount = 1000000; beneCount >= 10; beneCount /= 10) {
 			// Grab the source and target constants.
