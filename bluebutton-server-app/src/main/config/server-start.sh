@@ -162,6 +162,10 @@ JAVA_OPTS="-Xms64m ${maxHeapArg} -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack
 JAVA_OPTS="\$JAVA_OPTS -Djboss.modules.system.pkgs=\$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
 JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
 
+# Uncomment this next line to enable debugging Wildfly at launch. It will wait 
+# for a debugger to connect when first launching the server.
+# JAVA_OPTS="\$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y"
+
 # These ports are only used until the server is configured, but need to be
 # set anyways, as the defaults on first launch conflict with Jenkins and other 
 # such services.
