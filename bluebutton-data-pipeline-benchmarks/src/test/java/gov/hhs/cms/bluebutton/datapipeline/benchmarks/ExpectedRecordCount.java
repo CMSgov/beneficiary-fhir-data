@@ -1,6 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.benchmarks;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 
 /**
  * Enumerates the expected record counts by {@link RifFileType}.

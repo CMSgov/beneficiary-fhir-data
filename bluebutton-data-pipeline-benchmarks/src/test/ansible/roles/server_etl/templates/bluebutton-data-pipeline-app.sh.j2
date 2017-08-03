@@ -1,11 +1,11 @@
 #!/bin/bash
 
-export S3_BUCKET_NAME='gov.hhs.cms.bluebutton.datapipeline.benchmark.iteration{{ iteration_index }}'
-export FHIR_SERVER_URL='https://{{ hostvars['fhir']['ansible_host'] }}:{{ fhir_port }}/baseDstu3'
-export KEY_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-keystore.jks'
-export KEY_STORE_PASSWORD='changeit'
-export TRUST_STORE_PATH='/usr/local/bluebutton-data-pipeline-app/client-etl-truststore.jks'
-export TRUST_STORE_PASSWORD='changeit'
+export S3_BUCKET_NAME='gov-hhs-cms-bluebutton-datapipeline-benchmark-iteration{{ iteration_index }}'
+export HICN_HASH_ITERATIONS='2'  # The minimum number of iterations recommended by NIST is 1000.
+export HICN_HASH_PEPPER='6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
+export DATABASE_URL='jdbc:postgresql://{{ hostvars['rds']['endpoint'] }}:{{ hostvars['rds']['port'] }}/fhirdb'
+export DATABASE_USERNAME='{{ postgres_master_username }}'
+export DATABASE_PASSWORD='{{ postgres_master_password }}'
 export LOADER_THREADS={{ etl_loader_threads }}
 
 {# The 'env' lookup plugin retries values from the management machine. #}

@@ -20,12 +20,12 @@
     - lineinfile: regexp="^Defaults    requiretty" dest=/etc/sudoers state=absent
       become: true
 
-- name: Configure and Start FHIR Server
-  hosts: fhir
-  user: "{{ ssh_user }}"
-  gather_facts: true
-  roles:
-    - server_fhir
+#- name: Configure and Start FHIR Server
+#  hosts: fhir
+#  user: "{{ ssh_user }}"
+#  gather_facts: true
+#  roles:
+#    - server_fhir
 
 - name: Configure ETL Server
   hosts: etl
@@ -52,8 +52,8 @@
     - name: Wait for ETL to Finish Processing Data Set
       wait_for:
         path: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log'
-        search_regex: 'Data set renamed in S3, now that processing is complete.'
-        timeout: 28800
-      # Let it run for 8h, checking it every 30s to see if it's done.
-      async: 28800
+        search_regex: '(Data set processing complete.|Application has finished shutting down.)'
+        timeout: 10800
+      # Let it run for 3h, checking it every 30s to see if it's done.
+      async: 10800
       poll: 30

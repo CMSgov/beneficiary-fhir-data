@@ -9,10 +9,10 @@
 	<parent>
 		<groupId>gov.hhs.cms.bluebutton</groupId>
 		<artifactId>bluebutton-parent</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
 
-	<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+	<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
 	<artifactId>bluebutton-data-pipeline</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -46,113 +46,38 @@
 	</scm>
 
 	<modules>
-		<module>bluebutton-data-pipeline-sampledata</module>
-		<module>bluebutton-data-pipeline-rif</module>
 		<module>bluebutton-data-pipeline-rif-extract</module>
-		<module>bluebutton-data-pipeline-fhir-load</module>
+		<module>bluebutton-data-pipeline-rif-load</module>
 		<module>bluebutton-data-pipeline-app</module>
 		<module>bluebutton-data-pipeline-benchmarks</module>
 	</modules>
 
 	<properties>
-		<hapi-fhir.version>2.4.0-PR660</hapi-fhir.version>
-		<metrics.version>3.1.2</metrics.version>
-
 		<!-- The version of the capsule library for the capsule-maven-plugin to 
 			use. We need to override the default, to avoid https://github.com/puniverse/capsule/issues/90, 
 			as this is seen in whichever version of the library is used by default in 
 			the 1.0.1 version of the plugin. -->
 		<capsule.version>1.0.1</capsule.version>
 
-		<!-- The version of the Blue Button FHIR server to test against. -->
-		<bluebutton-server.version>1.0.0-SNAPSHOT</bluebutton-server.version>
-
-		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec 
-			plugin. These settings are pulled out as POM properties so that they can 
-			be adjusted via profiles. This is required because the CI server doesn't 
-			have enough RAM to run with an in-mem DB, and so requires a different configuration. -->
-		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
-		<its.bbfhir.db.url>jdbc:hsqldb:mem:test</its.bbfhir.db.url>
-		<its.bbfhir.db.username></its.bbfhir.db.username>
-		<its.bbfhir.db.password></its.bbfhir.db.password>
+		<!-- The version of the Blue Button API Data Model to use. -->
+		<bluebutton.data.model.version>1.0.0-SNAPSHOT</bluebutton.data.model.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<!-- Provides the FHIR client being used to create/push resources to 
-					the server. -->
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-base</artifactId>
-				<version>${hapi-fhir.version}</version>
+				<!-- Provides the JPA entities that are used to store the incoming RIF 
+					data, in the Blue Button API's database. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif</artifactId>
+				<version>${bluebutton.data.model.version}</version>
 			</dependency>
 			<dependency>
-				<!-- At least one "structures" JAR must also be included -->
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-fhir-structures-dstu3</artifactId>
-				<version>${hapi-fhir.version}</version>
-			</dependency>
-
-			<dependency>
-				<!-- Provides various utilities, particularly for managing DB connections. -->
-				<groupId>com.justdavis.karl.jessentials</groupId>
-				<artifactId>jessentials-misc</artifactId>
-				<version>3.2.0</version>
-			</dependency>
-
-			<dependency>
-				<!-- Provides a sane facade for the giant mess of incompatible logging 
-					frameworks in Java. -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>1.7.7</version>
-			</dependency>
-
-			<dependency>
-				<!-- Used to measure performance and collect other runtime statistics 
-					within these projects. -->
-				<groupId>io.dropwizard.metrics</groupId>
-				<artifactId>metrics-core</artifactId>
-				<version>${metrics.version}</version>
-			</dependency>
-			<dependency>
-				<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
-					at runtime. -->
-				<groupId>io.dropwizard.metrics</groupId>
-				<artifactId>metrics-jvm</artifactId>
-				<version>${metrics.version}</version>
-			</dependency>
-
-			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>9.4.1208</version>
-			</dependency>
-
-			<dependency>
-				<!-- Lock & harmonize the versions of the various AWS SDK components, 
-					per http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-project-maven.html. -->
-				<groupId>com.amazonaws</groupId>
-				<artifactId>aws-java-sdk-bom</artifactId>
-				<version>1.11.105</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<!-- Used to run our unit and integration tests. -->
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.12</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<!-- In-memory database that is used in some tests to speed things up. -->
-				<groupId>org.hsqldb</groupId>
-				<artifactId>hsqldb</artifactId>
-				<version>2.2.4</version>
-				<scope>test</scope>
+				<!-- Provides sample RIF data that mimics what will be received from 
+					the CCW. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif-samples</artifactId>
+				<version>${bluebutton.data.model.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -168,72 +93,9 @@
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.10</version>
 					<configuration>
-						<artifactItems>
-							<artifactItem>
-								<!-- Wildfly 8.1 is the upstream release that JBoss EAP 7 is based 
-									on. Though our application will run in JBoss EAP in production, we test it 
-									against Wildfly here because Wildfly is available for unauthenticated download 
-									(and JBoss EAP isn't). -->
-								<groupId>org.wildfly</groupId>
-								<artifactId>wildfly-dist</artifactId>
-								<version>8.1.0.Final</version>
-								<type>tar.gz</type>
-								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-							</artifactItem>
-							<artifactItem>
-								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bluebutton-server-app</artifactId>
-								<version>${bluebutton-server.version}</version>
-								<type>war</type>
-								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bluebutton-server-app.war</destFileName>
-							</artifactItem>
-							<artifactItem>
-								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bluebutton-server-app</artifactId>
-								<version>${bluebutton-server.version}</version>
-								<type>sh</type>
-								<classifier>server-config</classifier>
-								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bluebutton-server-app-server-config.sh</destFileName>
-							</artifactItem>
-							<artifactItem>
-								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bluebutton-server-app</artifactId>
-								<version>${bluebutton-server.version}</version>
-								<type>sh</type>
-								<classifier>server-start</classifier>
-								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bluebutton-server-app-server-start.sh</destFileName>
-							</artifactItem>
-							<artifactItem>
-								<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-								<artifactId>bluebutton-server-app</artifactId>
-								<version>${bluebutton-server.version}</version>
-								<type>sh</type>
-								<classifier>server-stop</classifier>
-								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-								<destFileName>bluebutton-server-app-server-stop.sh</destFileName>
-							</artifactItem>
-						</artifactItems>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>
 					</configuration>
-				</plugin>
-				<plugin>
-					<!-- Can be used as part of the integration test setup to mark the `bluebutton-server-app-server-*.sh` 
-						scripts as executable. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.6</version>
-				</plugin>
-				<plugin>
-					<!-- The exec plugin can be used in child modules to run the `bluebutton-server-app-server-*.sh` 
-						scripts, which will start and stop the Blue Button API FHIR server for use 
-						in testing. -->
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.5.0</version>
 				</plugin>
 				<plugin>
 					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
@@ -260,34 +122,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Always generate a source JAR. This is a best practice, but is 
-							also required by OSSRH/Maven Central. -->
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Always generate a Javadoc JAR. This is a best practice, but is 
-							also required by OSSRH/Maven Central. -->
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -334,26 +168,6 @@
 					</plugins>
 				</pluginManagement>
 			</build>
-		</profile>
-
-		<profile>
-			<!-- When activated via '-Prun-its-with-db-on-disk' this profile sets 
-				the ITs to run with an on-disk DB, instead of an in-memory one. This needs 
-				to be activated when running on systems without a lot of memory (such as 
-				the CI server). Note that, on Karl's personal laptop, this adds an extra 
-				40 minutes or so to the project's build time. -->
-			<!-- Note: As of 2016-07-23, the CI server for this project only has 4 
-				GB of memory, and no swap space. Running FhirLoaderIT.loadRifDataSampleB() 
-				takes at least 2.5 GB of free memory (when the DB was configured to be in-memory), 
-				and Cargo was failing on the CI server due to its inability to reserve that 
-				much. -->
-			<id>run-its-with-db-on-disk</id>
-			<properties>
-				<its.bbfhir.server.jvmargs>-Xmx1g</its.bbfhir.server.jvmargs>
-				<its.bbfhir.db.url>jdbc:hsqldb:file:target/hsql-db-for-its</its.bbfhir.db.url>
-				<its.bbfhir.db.username></its.bbfhir.db.username>
-				<its.bbfhir.db.password></its.bbfhir.db.password>
-			</properties>
 		</profile>
 	</profiles>
 

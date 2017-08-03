@@ -9,8 +9,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 
 /**
  * This {@link RifFile} implementation represents a local file on disk.

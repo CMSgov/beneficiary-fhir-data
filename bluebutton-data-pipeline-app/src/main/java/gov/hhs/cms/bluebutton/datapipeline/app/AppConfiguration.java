@@ -1,9 +1,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.app;
 
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -11,10 +8,10 @@ import org.apache.commons.codec.binary.Hex;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 
-import gov.hhs.cms.bluebutton.datapipeline.fhir.LoadAppOptions;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.LoadAppOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
  * <p>
@@ -67,36 +64,23 @@ public final class AppConfiguration implements Serializable {
 
 	/**
 	 * The name of the environment variable that should be used to provide the
-	 * {@link #getLoadOptions()} {@link LoadAppOptions#getFhirServer()} value.
+	 * {@link #getLoadOptions()} {@link LoadAppOptions#getDatabaseUrl()} value.
 	 */
-	public static final String ENV_VAR_KEY_FHIR = "FHIR_SERVER_URL";
+	public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
 
 	/**
 	 * The name of the environment variable that should be used to provide the
-	 * {@link #getLoadOptions()} {@link LoadAppOptions#getKeyStorePath()} value.
-	 */
-	public static final String ENV_VAR_KEY_KEY_STORE_PATH = "KEY_STORE_PATH";
-
-	/**
-	 * The name of the environment variable that should be used to provide the
-	 * {@link #getLoadOptions()} {@link LoadAppOptions#getKeyStorePassword()}
+	 * {@link #getLoadOptions()} {@link LoadAppOptions#getDatabaseUsername()}
 	 * value.
 	 */
-	public static final String ENV_VAR_KEY_KEY_STORE_PASSWORD = "KEY_STORE_PASSWORD";
+	public static final String ENV_VAR_KEY_DATABASE_USERNAME = "DATABASE_USERNAME";
 
 	/**
 	 * The name of the environment variable that should be used to provide the
-	 * {@link #getLoadOptions()} {@link LoadAppOptions#getTrustStorePath()}
+	 * {@link #getLoadOptions()} {@link LoadAppOptions#getDatabasePassword()}
 	 * value.
 	 */
-	public static final String ENV_VAR_KEY_TRUST_STORE_PATH = "TRUST_STORE_PATH";
-
-	/**
-	 * The name of the environment variable that should be used to provide the
-	 * {@link #getLoadOptions()} {@link LoadAppOptions#getTrustStorePassword()}
-	 * value.
-	 */
-	public static final String ENV_VAR_KEY_TRUST_STORE_PASSWORD = "TRUST_STORE_PASSWORD";
+	public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "DATABASE_PASSWORD";
 
 	/**
 	 * The name of the environment variable that should be used to provide the
@@ -220,39 +204,20 @@ public final class AppConfiguration implements Serializable {
 					String.format("Invalid value for configuration environment variable '%s': '%s'",
 							ENV_VAR_KEY_HICN_HASH_PEPPER, hicnHashPepperText));
 
-		String fhirServerUrlText = System.getenv(ENV_VAR_KEY_FHIR);
-		if (fhirServerUrlText == null || fhirServerUrlText.isEmpty())
-			throw new AppConfigurationException(
-					String.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_FHIR));
-		URI fhirServerUri;
-		try {
-			fhirServerUri = new URI(fhirServerUrlText);
-		} catch (URISyntaxException e) {
-			throw new AppConfigurationException(
-					String.format("Invalid value for configuration environment variable '%s': '%s'", ENV_VAR_KEY_FHIR,
-							fhirServerUrlText),
-					e);
-		}
-
-		String keyStorePath = System.getenv(ENV_VAR_KEY_KEY_STORE_PATH);
-		if (keyStorePath == null || keyStorePath.isEmpty())
+		String databaseUrl = System.getenv(ENV_VAR_KEY_DATABASE_URL);
+		if (databaseUrl == null || databaseUrl.isEmpty())
 			throw new AppConfigurationException(String
-					.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_KEY_STORE_PATH));
+					.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_DATABASE_URL));
 
-		String keyStorePassword = System.getenv(ENV_VAR_KEY_KEY_STORE_PASSWORD);
-		if (keyStorePassword == null || keyStorePassword.isEmpty())
-			throw new AppConfigurationException(String
-					.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_KEY_STORE_PASSWORD));
-
-		String trustStorePath = System.getenv(ENV_VAR_KEY_TRUST_STORE_PATH);
-		if (trustStorePath == null || trustStorePath.isEmpty())
-			throw new AppConfigurationException(String
-					.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_TRUST_STORE_PATH));
-
-		String trustStorePassword = System.getenv(ENV_VAR_KEY_TRUST_STORE_PASSWORD);
-		if (trustStorePassword == null || trustStorePassword.isEmpty())
+		String databaseUsername = System.getenv(ENV_VAR_KEY_DATABASE_USERNAME);
+		if (databaseUsername == null)
 			throw new AppConfigurationException(String.format(
-					"Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_TRUST_STORE_PASSWORD));
+					"Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_DATABASE_USERNAME));
+
+		String databasePassword = System.getenv(ENV_VAR_KEY_DATABASE_PASSWORD);
+		if (databasePassword == null)
+			throw new AppConfigurationException(String.format(
+					"Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_DATABASE_PASSWORD));
 
 		String loaderThreadsText = System.getenv(ENV_VAR_KEY_LOADER_THREADS);
 		if (loaderThreadsText == null || loaderThreadsText.isEmpty())
@@ -286,8 +251,7 @@ public final class AppConfiguration implements Serializable {
 		}
 
 		return new AppConfiguration(new ExtractionOptions(s3BucketName, allowedRifFileType),
-				new LoadAppOptions(hicnHashIterations, hicnHashPepper, fhirServerUri, Paths.get(keyStorePath),
-						keyStorePassword.toCharArray(), Paths.get(trustStorePath), trustStorePassword.toCharArray(),
-						loaderThreads));
+				new LoadAppOptions(hicnHashIterations, hicnHashPepper, databaseUrl, databaseUsername,
+						databasePassword.toCharArray(), loaderThreads));
 	}
 }

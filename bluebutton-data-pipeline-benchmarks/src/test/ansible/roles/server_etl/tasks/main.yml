@@ -5,11 +5,25 @@
     name: "{{ item }}"
     state: latest
   with_items:
-    # Needed to supply `keytool` and also to run the ETL service.
+    # Needed to run the ETL service.
     - java-1.8.0-openjdk-devel
+    # Needed to use the `postgresql_db` module.
+    - python-psycopg2
     # Needed to use the `s3_object` module.
     - python-boto
   become: true
+
+- name: Create FHIR DB
+  postgresql_db:
+    login_host: "{{ hostvars['rds']['endpoint'] }}"
+    port: "{{ hostvars['rds']['port'] }}"
+    login_user: "{{ postgres_master_username }}"
+    login_password: "{{ postgres_master_password }}"
+    name: fhirdb
+    encoding: 'UNICODE'
+    lc_collate: 'C'
+    lc_ctype: 'C'
+    template: 'template0'
 
 - name: Create ETL Service User
   user:
@@ -24,18 +38,6 @@
     owner: bb-etl
     group: bb-etl
     mode: u=rwx,g=rx,o=rx
-  become: true
-
-- name: Copy Key Store and Trust Store
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    owner: "bb-etl"
-    group: "bb-etl"
-    mode: "u=rw,g=r,o=r"
-  with_items:
-    - { src: "../../../target/benchmark-iterations/{{ iteration_index }}/client-etl-keystore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
-    - { src: "../../../target/benchmark-iterations/{{ iteration_index }}/client-etl-truststore.jks", dest: '/usr/local/bluebutton-data-pipeline-app' }
   become: true
 
 - name: Copy Pipeline Application

@@ -32,7 +32,7 @@ postgres_master_password: "notsecureatall"
 fhir_port: 8443
 
 # The name of the S3 bucket that the benchmark resources can be found in.
-s3_benchmark_resources_bucket: gov.hhs.cms.bluebutton.datapipeline.benchmark.resources
+s3_benchmark_resources_bucket: gov-hhs-cms-bluebutton-datapipeline-benchmark-resources
 
 # When `true`, Ansible will configure the FHIR server to run such that Java
 # flame graphs can be collected. This will incur a performance penalty of 1%-
@@ -43,4 +43,4 @@ java_flame_graphs: false
 # loader threads to use in the ETL service. These should be adjusted based on
 # the EC2 instance types being used.
 fhir_db_connections: 400
-etl_loader_threads: 390
+etl_loader_threads: 400

@@ -9,20 +9,11 @@
 		</encoder>
 	</appender>
 
-	<!-- At 'debug', this will ensure that request and response headers are logged. 
-		At 'trace', this will ensure that request and response bodies are logged. -->
-	<logger name="gov.hhs.cms.bluebutton.datapipeline.fhir.load.FhirLoader"
-		level="info" />
+	<!-- At 'debug', Hibernate will log SQL statements. -->
+	<logger name="org.hibernate.SQL" level="info" />
 
-	<!-- This logger should be controlled by modifying the 'gov.**.FhirLoader' 
-		levels, as specified above. -->
-	<logger name="ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor"
-		level="all" />
-
-	<!-- Eliminate some logging noise from the HAPI FHIR client. -->
-	<logger name="ca.uhn.fhir.util.VersionUtil" level="warn" />
-	<logger name="ca.uhn.fhir.context.FhirContext" level="warn" />
-	<logger name="ca.uhn.fhir.util.XmlUtil" level="warn" />
+	<!-- At 'trace', Hibernate will log SQL parameter values. -->
+	<logger name="org.hibernate.type" level="info" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->

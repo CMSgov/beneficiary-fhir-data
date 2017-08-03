@@ -1,13 +1,15 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.amazonaws.regions.Region;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
 
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
 
 /**
  * Models the user-configurable options for extraction of RIF data from S3.
@@ -17,6 +19,7 @@ public final class ExtractionOptions implements Serializable {
 
 	private final String s3BucketName;
 	private final RifFileType allowedRifFileType;
+	private final Integer s3ListMaxKeys;
 
 	/**
 	 * Constructs a new {@link ExtractionOptions} instance.
@@ -27,8 +30,23 @@ public final class ExtractionOptions implements Serializable {
 	 *            the value to use for {@link #getDataSetFilter()}
 	 */
 	public ExtractionOptions(String s3BucketName, RifFileType allowedRifFileType) {
+		this(s3BucketName, allowedRifFileType, null);
+	}
+
+	/**
+	 * Constructs a new {@link ExtractionOptions} instance.
+	 * 
+	 * @param s3BucketName
+	 *            the value to use for {@link #getS3BucketName()}
+	 * @param allowedRifFileType
+	 *            the value to use for {@link #getDataSetFilter()}
+	 * @param s3ListMaxKeys
+	 *            the value to use for {@link #getS3ListMaxKeys()}
+	 */
+	public ExtractionOptions(String s3BucketName, RifFileType allowedRifFileType, Integer s3ListMaxKeys) {
 		this.s3BucketName = s3BucketName;
 		this.allowedRifFileType = allowedRifFileType;
+		this.s3ListMaxKeys = s3ListMaxKeys;
 	}
 
 	/**
@@ -86,6 +104,18 @@ public final class ExtractionOptions implements Serializable {
 			return d -> d.getEntries().stream().map(e -> e.getType()).allMatch(t -> allowedRifFileType == t);
 		else
 			return e -> true;
+	}
+
+	/**
+	 * Note: This method is intended for test purposes: setting this value to
+	 * <code>1</code> in tests can help to verify the S3 paging logic.
+	 * 
+	 * @return the value to use for
+	 *         {@link ListObjectsV2Request#setMaxKeys(Integer)} in all S3 list
+	 *         operations
+	 */
+	public Optional<Integer> getS3ListMaxKeys() {
+		return Optional.ofNullable(s3ListMaxKeys);
 	}
 
 	/**

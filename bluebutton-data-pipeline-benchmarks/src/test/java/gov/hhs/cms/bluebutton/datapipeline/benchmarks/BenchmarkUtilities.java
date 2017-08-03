@@ -66,7 +66,7 @@ final class BenchmarkUtilities {
 	 *         should store its data in
 	 */
 	static String computeBenchmarkDataBucketName(int iterationIndex) {
-		return String.format("gov.hhs.cms.bluebutton.datapipeline.benchmark.iteration%d", iterationIndex);
+		return String.format("gov-hhs-cms-bluebutton-datapipeline-benchmark-iteration%d", iterationIndex);
 	}
 
 	/**

@@ -9,15 +9,26 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.s3.model.S3Object;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile;
-import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.AwsFailureException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 
 /**
  * This {@link RifFile} implementation can be used for files that are backed by
@@ -25,55 +36,54 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFileType;
  * connections are not opened until needed.
  */
 public final class S3RifFile implements RifFile {
-	private final RifFileType fileType;
-	private final String displayName;
-	private final Path localTempFile;
+	private static final Logger LOGGER = LoggerFactory.getLogger(S3RifFile.class);
+
+	private final MetricRegistry appMetrics;
+	private final DataSetManifestEntry manifestEntry;
+	private final Future<ManifestEntryDownloadResult> manifestEntryDownload;
 
 	/**
 	 * Constructs a new {@link S3RifFile} instance.
 	 * 
-	 * @param s3Client
-	 *            the {@link AmazonS3} client to use to get the contents of the
-	 *            object that backs this {@link S3RifFile}
-	 * @param fileType
-	 *            the {@link RifFileType} of the object that backs this
+	 * @param appMetrics
+	 *            the {@link MetricRegistry} for the overall application
+	 * @param manifestEntry
+	 *            the specific {@link DataSetManifestEntry} represented by this
 	 *            {@link S3RifFile}
-	 * @param objectRequest
-	 *            an S3 {@link GetObjectRequest} that will retrieve the object
-	 *            represented by this {@link S3RifFile}
+	 * @param manifestEntryDownload
+	 *            a {@link Future} for the {@link ManifestEntryDownloadResult}
+	 *            with a local download of the RIF file's contents
 	 */
-	public S3RifFile(AmazonS3 s3Client, RifFileType fileType, GetObjectRequest objectRequest) {
-		this.fileType = fileType;
-		this.displayName = String.format("%s:%s", objectRequest.getBucketName(), objectRequest.getKey());
+	public S3RifFile(MetricRegistry appMetrics, DataSetManifestEntry manifestEntry,
+			Future<ManifestEntryDownloadResult> manifestEntryDownload) {
+		Objects.requireNonNull(appMetrics);
+		Objects.requireNonNull(manifestEntry);
+		Objects.requireNonNull(manifestEntryDownload);
 
-		try (InputStream s3ObjectStream = s3Client.getObject(objectRequest).getObjectContent();) {
-			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-			Files.copy(s3ObjectStream, localTempFile, StandardCopyOption.REPLACE_EXISTING);
-
-			this.localTempFile = localTempFile;
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+		this.appMetrics = appMetrics;
+		this.manifestEntry = manifestEntry;
+		this.manifestEntryDownload = manifestEntryDownload;
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getFileType()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#getFileType()
 	 */
 	@Override
 	public RifFileType getFileType() {
-		return fileType;
+		return manifestEntry.getType();
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getDisplayName()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#getDisplayName()
 	 */
 	@Override
 	public String getDisplayName() {
-		return displayName;
+		return String.format("%s.%d:%s", manifestEntry.getParentManifest().getTimestamp().toString(),
+				manifestEntry.getParentManifest().getSequenceId(), manifestEntry.getName());
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#getCharset()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#getCharset()
 	 */
 	@Override
 	public Charset getCharset() {
@@ -81,15 +91,60 @@ public final class S3RifFile implements RifFile {
 	}
 
 	/**
-	 * @see gov.hhs.cms.bluebutton.datapipeline.rif.model.RifFile#open()
+	 * @see gov.hhs.cms.bluebutton.data.model.rif.RifFile#open()
 	 */
 	@Override
 	public InputStream open() {
+		ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
+
+		// Open a stream for the file.
+		InputStream fileDownloadStream;
 		try {
-			return new BufferedInputStream(new FileInputStream(localTempFile.toFile()));
+			fileDownloadStream = new BufferedInputStream(
+					new FileInputStream(fileDownloadResult.getLocalDownload().toFile()));
 		} catch (FileNotFoundException e) {
 			throw new UncheckedIOException(e);
 		}
+
+		return fileDownloadStream;
+	}
+
+	/**
+	 * @return the completed {@link ManifestEntryDownloadResult} for
+	 *         {@link #manifestEntryDownload}
+	 */
+	private ManifestEntryDownloadResult waitForDownload() {
+		Timer.Context downloadWaitTimer = null;
+		if (!manifestEntryDownload.isDone()) {
+			downloadWaitTimer = appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "waitingForDownloads"))
+					.time();
+			LOGGER.info("Waiting for RIF file download: '{}'...", getDisplayName());
+		}
+
+		// Get the file download result, blocking and waiting if necessary.
+		ManifestEntryDownloadResult fileDownloadResult;
+		try {
+			fileDownloadResult = manifestEntryDownload.get(1, TimeUnit.HOURS);
+		} catch (InterruptedException e) {
+			// We're not expecting interrupts here, so go boom.
+			throw new BadCodeMonkeyException(e);
+		} catch (ExecutionException e) {
+			throw new AwsFailureException(e);
+		} catch (TimeoutException e) {
+			/*
+			 * We expect downloads to complete within the (generous) timeout. If
+			 * they don't, it's more likely than not that something's wrong, so
+			 * the service should go boom.
+			 */
+			throw new AwsFailureException(e);
+		}
+
+		if (downloadWaitTimer != null) {
+			LOGGER.info("RIF file downloaded: '{}'.", getDisplayName());
+			downloadWaitTimer.close();
+		}
+
+		return fileDownloadResult;
 	}
 
 	/**
@@ -97,11 +152,21 @@ public final class S3RifFile implements RifFile {
 	 * {@link S3RifFile}'s corresponding S3 object data locally.
 	 */
 	public void cleanupTempFile() {
+		LOGGER.debug("Cleaning up '{}'...", this);
+		if (!manifestEntryDownload.isDone()) {
+			manifestEntryDownload.cancel(false);
+			return;
+		}
+
 		try {
-			Files.delete(localTempFile);
+			ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
+			Files.deleteIfExists(fileDownloadResult.getLocalDownload());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		} catch (CancellationException e) {
+			LOGGER.debug("Download was cancelled and can't be cleaned up.");
 		}
+		LOGGER.debug("Cleaned up '{}'.", this);
 	}
 
 	/**
@@ -109,13 +174,24 @@ public final class S3RifFile implements RifFile {
 	 */
 	@Override
 	public String toString() {
+		String localDownloadPath;
+		try {
+			localDownloadPath = manifestEntryDownload.isDone()
+					? manifestEntryDownload.get().getLocalDownload().toAbsolutePath().toString() : "(not downloaded)";
+		} catch (InterruptedException e) {
+			// We're not expecting interrupts here, so go boom.
+			throw new BadCodeMonkeyException(e);
+		} catch (ExecutionException e) {
+			localDownloadPath = "(download failed)";
+		} catch (CancellationException e) {
+			localDownloadPath = "(download cancelled)";
+		}
+
 		StringBuilder builder = new StringBuilder();
-		builder.append("S3RifFile [fileType=");
-		builder.append(fileType);
-		builder.append(", displayName=");
-		builder.append(displayName);
-		builder.append(", localTempFile=");
-		builder.append(localTempFile);
+		builder.append("S3RifFile [manifestEntry=");
+		builder.append(manifestEntry);
+		builder.append(", manifestEntryDownload.localPath=");
+		builder.append(localDownloadPath);
 		builder.append("]");
 		return builder.toString();
 	}

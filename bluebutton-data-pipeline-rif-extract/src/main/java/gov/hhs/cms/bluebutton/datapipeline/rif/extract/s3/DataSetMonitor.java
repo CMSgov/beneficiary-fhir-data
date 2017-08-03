@@ -11,6 +11,9 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 
 /**
@@ -19,14 +22,22 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
  * (CCW) into Amazon's S3 API. The data in S3 will be structured as follows:
  * </p>
  * <ul>
- * <li>Amazon S3 Bucket: <code>etl-data</code>
+ * <li>Amazon S3 Bucket: <code>&lt;s3-bucket-name&gt;</code>
  * <ul>
  * <li><code>1997-07-16T19:20:30Z</code>
  * <ul>
- * <li><code>manifest.xml</code></li>
- * <li><code>beneficiaries.rif</code></li>
- * <li><code>bcarrier.rif</code></li>
- * <li><code>pde.rif</code></li>
+ * <li><code>Incoming</code>
+ * <ul>
+ * <li><code>23_manifest.xml</code></li>
+ * <li><code>beneficiaries_42.rif</code></li>
+ * <li><code>bcarrier_58.rif</code></li>
+ * <li><code>pde_93.rif</code></li>
+ * </ul>
+ * <li><code>Done</code>
+ * <ul>
+ * <li><code>64_manifest.xml</code></li>
+ * <li><code>beneficiaries_45.rif</code></li>
+ * </ul>
  * </ul>
  * </li>
  * </ul>
@@ -38,17 +49,13 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
  * Its name will be an <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601
  * date and time</a> expressed in UTC, to a precision of at least seconds. This
  * will represent (roughly) the time that the data set was created. Within each
- * of those directories will be a manifest file and the set of RIF files to be
- * processed.
+ * of those directories will be manifest files and the RIF files that they
+ * reference.
  * </p>
  * <p>
  * The ETL operates in a loop: periodically checking for the oldest manifest
- * file that can be found, waiting for all of the files listed in it to be
- * available (to avoid race conditions in uploads), and then processing all of
- * those files. At this level of detail, everything occurs synchronously; the
- * ETL pipeline will never process more than one data set at a time. This is
- * necessary to ensure data integrity: if updates to claims are processed out of
- * order, the data will end up in the wrong final state.
+ * file that can be found and then handing it off to the rest of the pipeline
+ * for processing.
  * </p>
  */
 public final class DataSetMonitor {
@@ -60,18 +67,22 @@ public final class DataSetMonitor {
 	 */
 	public static final int EXIT_CODE_MONITOR_ERROR = 2;
 
+	private final MetricRegistry appMetrics;
 	private final ExtractionOptions options;
 	private final int scanRepeatDelay;
 	private final DataSetMonitorListener listener;
 
 	private ScheduledExecutorService dataSetWatcherService;
 	private ScheduledFuture<?> dataSetWatcherFuture;
+	private DataSetMonitorWorker dataSetWatcher;
 
 	/**
 	 * Constructs a new {@link DataSetMonitor} instance. Note that this must be
 	 * used as a singleton service in the application: only one instance running
 	 * at a time is supported.
 	 * 
+	 * @param appMetrics
+	 *            the {@link MetricRegistry} for the overall application
 	 * @param options
 	 *            the {@link ExtractionOptions} to use
 	 * @param scanRepeatDelay
@@ -81,13 +92,16 @@ public final class DataSetMonitor {
 	 *            the {@link DataSetMonitorListener} that will be notified when
 	 *            events occur
 	 */
-	public DataSetMonitor(ExtractionOptions options, int scanRepeatDelay, DataSetMonitorListener listener) {
+	public DataSetMonitor(MetricRegistry appMetrics, ExtractionOptions options, int scanRepeatDelay,
+			DataSetMonitorListener listener) {
+		this.appMetrics = appMetrics;
 		this.options = options;
 		this.scanRepeatDelay = scanRepeatDelay;
 		this.listener = listener;
 
 		this.dataSetWatcherService = null;
 		this.dataSetWatcherFuture = null;
+		this.dataSetWatcher = null;
 	}
 
 	/**
@@ -102,7 +116,7 @@ public final class DataSetMonitor {
 			throw new IllegalStateException();
 
 		this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
-		Runnable dataSetWatcher = new DataSetMonitorWorker(options, listener);
+		this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, listener);
 		Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
 		/*
@@ -128,27 +142,35 @@ public final class DataSetMonitor {
 	 * </p>
 	 * <p>
 	 * <strong>Note:</strong> This might block for a while! Some data sets have
-	 * terrabytes of data, and there is no way to safely stop processing in the
+	 * terabytes of data, and there is no way to safely stop processing in the
 	 * middle of a data set.
 	 * </p>
 	 */
 	public void stop() {
+		LOGGER.debug("Stopping...");
+
 		// If we haven't started yet, this is easy.
-		if (dataSetWatcherFuture == null)
+		if (dataSetWatcherFuture == null) {
 			return;
+		}
 
 		// If something has already shut us down, we're done.
-		if (dataSetWatcherService.isShutdown())
+		if (dataSetWatcherService.isShutdown()) {
 			return;
+		}
 
-		// Signal the scheduler to stop after the current execution (if any).
+		/*
+		 * Signal the scheduler to stop after the current DataSetMonitorWorker
+		 * execution (if any), then wait for that to happen.
+		 */
 		dataSetWatcherFuture.cancel(false);
-
-		// Wait for the current execution (if any) to complete.
 		waitForStop();
 
 		// Clean house.
+		dataSetWatcher.cleanup();
 		dataSetWatcherService.shutdown();
+
+		LOGGER.debug("Stopped.");
 	}
 
 	/**
@@ -190,20 +212,19 @@ public final class DataSetMonitor {
 			 * Many Java applications use InterruptedExceptions to signal that a
 			 * thread should stop what it's doing ASAP. This app doesn't, so
 			 * this is unexpected, and accordingly, we don't know what to do.
-			 * Safest bet is to shut down and blow up.
+			 * Safest bet is to blow up.
 			 */
-			dataSetWatcherService.shutdown();
-			throw new RuntimeException(e);
+			throw new BadCodeMonkeyException(e);
 		} catch (ExecutionException e) {
 			/*
 			 * This will only occur if the Runnable (dataSetWatcherFuture)
 			 * failed with an unhandled exception. This is unexpected, and
-			 * accordingly, we don't know what to do. Safest bet is to shut down
-			 * and blow up.
+			 * accordingly, we don't know what to do. Safest bet is to blow up.
 			 */
-			dataSetWatcherService.shutdown();
-			throw new RuntimeException(e);
+			throw new BadCodeMonkeyException(e);
 		}
+
+		LOGGER.info("Data set processing was stopped.");
 	}
 
 	/**

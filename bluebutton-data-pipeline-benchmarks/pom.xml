@@ -7,7 +7,7 @@
 	</prerequisites>
 
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+		<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
 		<artifactId>bluebutton-data-pipeline</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
@@ -28,7 +28,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
 			<artifactId>bluebutton-data-pipeline-app</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -88,9 +88,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-sampledata</artifactId>
-			<version>${project.version}</version>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -119,15 +118,6 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Use the dependency plugin to copy the Blue Button FHIR Server, 
-							for use in benchmarks. -->
-						<id>server-copy-artifacts</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-					</execution>
-					<execution>
 						<!-- Also copy some additional artifacts needed for use in benchmarks. -->
 						<id>benchmarks-copy-artifacts</id>
 						<phase>pre-integration-test</phase>
@@ -136,15 +126,6 @@
 						</goals>
 						<configuration>
 							<artifactItems>
-								<artifactItem>
-									<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-									<artifactId>bluebutton-server-app</artifactId>
-									<version>${bluebutton-server.version}</version>
-									<type>sh</type>
-									<classifier>server-config-healthapt</classifier>
-									<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
-									<destFileName>bluebutton-server-app-server-config-healthapt.sh</destFileName>
-								</artifactItem>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>
 									<artifactId>bluebutton-data-pipeline-app</artifactId>

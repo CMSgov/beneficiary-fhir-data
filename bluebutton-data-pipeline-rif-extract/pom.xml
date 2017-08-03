@@ -7,7 +7,7 @@
 	</prerequisites>
 
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
+		<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
 		<artifactId>bluebutton-data-pipeline</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
@@ -25,9 +25,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-rif</artifactId>
-			<version>${project.version}</version>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif</artifactId>
 		</dependency>
 
 		<dependency>
@@ -88,9 +87,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.datapipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-sampledata</artifactId>
-			<version>${project.version}</version>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
