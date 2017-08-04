@@ -64,10 +64,10 @@ public final class DataSetMoveTask implements Callable<Void> {
 
 		// First, get a list of all the object keys to work on.
 		List<String> s3KeySuffixesToMove = manifest.getEntries().stream()
-				.map(e -> String.format("%s/%s", manifest.getTimestamp().toString(), e.getName()))
+				.map(e -> String.format("%s/%s", manifest.getTimestampText(), e.getName()))
 				.collect(Collectors.toList());
 		s3KeySuffixesToMove
-				.add(String.format("%s/%d_manifest.xml", manifest.getTimestamp().toString(), manifest.getSequenceId()));
+				.add(String.format("%s/%d_manifest.xml", manifest.getTimestampText(), manifest.getSequenceId()));
 
 		/*
 		 * Then, loop through each of those objects and copy them (S3 has no

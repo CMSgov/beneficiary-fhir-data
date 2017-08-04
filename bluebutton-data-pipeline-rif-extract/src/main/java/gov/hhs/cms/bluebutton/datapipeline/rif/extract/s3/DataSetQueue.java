@@ -68,9 +68,9 @@ public final class DataSetQueue {
 	private final Map<DataSetManifestEntry, Future<ManifestEntryDownloadResult>> manifestEntryDownloads;
 
 	/**
-	 * Tracks the {@link DataSetManifest#getTimestamp()} values of the most
-	 * recently processed data sets, to ensure that the same data set isn't
-	 * processed more than once.
+	 * Tracks the {@link DataSetManifest#getId()} values of the most recently
+	 * processed data sets, to ensure that the same data set isn't processed
+	 * more than once.
 	 */
 	private final Set<DataSetManifestId> recentlyProcessedManifests;
 
@@ -292,19 +292,19 @@ public final class DataSetQueue {
 			 * This could likely be retried, but we don't currently support
 			 * that. For now, just go boom.
 			 */
-			throw new RuntimeException(e);
+			throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
 		} catch (AmazonClientException e) {
 			/*
 			 * This could likely be retried, but we don't currently support
 			 * that. For now, just go boom.
 			 */
-			throw new RuntimeException(e);
+			throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
 		} catch (IOException e) {
 			/*
 			 * This could likely be retried, but we don't currently support
 			 * that. For now, just go boom.
 			 */
-			throw new RuntimeException(e);
+			throw new RuntimeException("Error reading manifest: " + manifestToProcessKey, e);
 		}
 	}
 

@@ -78,7 +78,7 @@ public final class S3RifFile implements RifFile {
 	 */
 	@Override
 	public String getDisplayName() {
-		return String.format("%s.%d:%s", manifestEntry.getParentManifest().getTimestamp().toString(),
+		return String.format("%s.%d:%s", manifestEntry.getParentManifest().getTimestampText(),
 				manifestEntry.getParentManifest().getSequenceId(), manifestEntry.getName());
 	}
 

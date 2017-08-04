@@ -406,8 +406,7 @@ public final class S3ToDatabaseLoadAppBenchmark {
 				String sourceBucketName = s3HttpObjectMatcher.group(1);
 				String sourceKey = s3HttpObjectMatcher.group(2);
 				String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
-						DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()),
-						manifest.getEntries().get(i).getName());
+						manifest.getTimestampText(), manifest.getEntries().get(i).getName());
 
 				Copy s3CopyOperation = transferManager
 						.copy(new CopyObjectRequest(sourceBucketName, sourceKey, bucket.getName(), objectKey));
