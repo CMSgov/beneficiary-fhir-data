@@ -240,7 +240,7 @@ public final class RifFilesProcessorTest {
 
 		// Verify one of the claim lines.
 		CarrierClaimLine claimLine = claimGroup.getLines().get(0);
-		Assert.assertEquals(new BigDecimal(1), claimLine.getLineNumber());
+		Assert.assertEquals(new BigDecimal(6), claimLine.getLineNumber());
 		Assert.assertEquals("K25555", claimLine.getPerformingProviderIdNumber());
 		Assert.assertFalse(claimLine.getPerformingPhysicianUpin().isPresent());
 		Assert.assertEquals("1923124", claimLine.getPerformingPhysicianNpi().get());
@@ -464,7 +464,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(1, claimGroup.getLines().size());
 		// Verify one of the claim lines.
 		OutpatientClaimLine claimLine = claimGroup.getLines().get(0);
-		Assert.assertEquals(new BigDecimal(1), claimLine.getLineNumber());
+		Assert.assertEquals(new BigDecimal(25), claimLine.getLineNumber());
 		Assert.assertEquals("M99", claimGroup.getLines().get(0).getHcpcsCode().get());
 		Assert.assertEquals("XX", claimGroup.getLines().get(0).getHcpcsInitialModifierCode().get());
 		Assert.assertFalse(claimLine.getHcpcsSecondModifierCode().isPresent());
