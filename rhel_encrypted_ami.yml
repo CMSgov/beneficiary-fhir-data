@@ -42,6 +42,7 @@
           image: "{{ ami_id_rhel_7_unencrypted }}"
           region: "{{ aws_region }}"
           zone: "{{ aws_zone }}"
+          vpc_subnet_id: "{{ aws_vpc_subnet }}"
           wait: true
           exact_count: 1
           count_tag:

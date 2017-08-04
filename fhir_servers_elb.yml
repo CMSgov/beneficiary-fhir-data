@@ -93,7 +93,7 @@
         availability_zones:
           - "{{ aws_zone }}"
         vpc_zone_identifier:
-          - "{{ aws_subnet }}"
+          - "{{ aws_vpc_subnet }}"
         tags:
           - Name: bluebutton-backend-fhir-autoscaled
           - Application: "{{ ec2_tag_application }}"

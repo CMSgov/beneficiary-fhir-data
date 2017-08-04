@@ -54,6 +54,7 @@
         name: 'default'
         description: 'default VPC security group'
         region: "{{ aws_region }}"
+        vpc_id: "{{ aws_vpc }}"
         rules:
           - proto: 'all'
             group_name: 'default'
@@ -69,6 +70,7 @@
         name: ssh-all
         description: Allows incoming traffic on port 22 (from all IPs).
         region: "{{ aws_region }}"
+        vpc_id: "{{ aws_vpc }}"
         rules:
           - proto: tcp
             from_port: 22
@@ -86,6 +88,7 @@
         name: bluebutton-backend-fhir-internal
         description: "Allows incoming traffic on port {{ backend_fhir_port_internal }}  (from subnet IPs)."
         region: "{{ aws_region }}"
+        vpc_id: "{{ aws_vpc }}"
         rules:
           - proto: tcp
             from_port: "{{ backend_fhir_port_internal }}"
@@ -100,6 +103,7 @@
         name: bluebutton-backend-fhir-external
         description: "Allows incoming traffic on port {{ backend_fhir_port_external }}  (from all IPs)."
         region: "{{ aws_region }}"
+        vpc_id: "{{ aws_vpc }}"
         rules:
           - proto: tcp
             from_port: "{{ backend_fhir_port_external }}"
