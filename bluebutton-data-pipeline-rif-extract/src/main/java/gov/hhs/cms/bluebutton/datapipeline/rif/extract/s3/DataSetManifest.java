@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -12,12 +13,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import com.migesok.jaxb.adapter.javatime.InstantXmlAdapter;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 
@@ -29,10 +25,8 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class DataSetManifest implements Comparable<DataSetManifest> {
-	@XmlAttribute
-	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(TweakedInstantXmlAdapter.class)
-	private final Instant timestamp;
+	@XmlAttribute(name = "timestamp")
+	private final String timestampText;
 
 	@XmlAttribute
 	private int sequenceId;
@@ -43,34 +37,60 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 	/**
 	 * Constructs a new {@link DataSetManifest} instance.
 	 * 
-	 * @param timestamp
-	 *            the value to use for {@link #getTimestamp()}
+	 * @param timestampText
+	 *            the value to use for {@link #getTimestampText()}
 	 * @param sequenceId
 	 *            the value to use for {@link #getSequenceId()}
 	 * @param entries
 	 *            the value to use for {@link #getEntries()}
 	 */
-	public DataSetManifest(Instant timestamp, int sequenceId, List<DataSetManifestEntry> entries) {
-		this.timestamp = timestamp;
+	public DataSetManifest(String timestampText, int sequenceId, List<DataSetManifestEntry> entries) {
+		this.timestampText = timestampText;
 		this.sequenceId = sequenceId;
 		this.entries = entries;
+		this.entries.forEach(entry -> entry.parentManifest = this);
 	}
 
 	/**
 	 * Constructs a new {@link DataSetManifest} instance.
 	 * 
 	 * @param timestamp
-	 *            the value to use for {@link #getTimestamp()}
+	 *            the value to use for {@link #getTimestampText()}
+	 * @param sequenceId
+	 *            the value to use for {@link #getSequenceId()}
+	 * @param entries
+	 *            the value to use for {@link #getEntries()}
+	 */
+	public DataSetManifest(Instant timestamp, int sequenceId, List<DataSetManifestEntry> entries) {
+		this(DateTimeFormatter.ISO_INSTANT.format(timestamp), sequenceId, entries);
+	}
+
+	/**
+	 * Constructs a new {@link DataSetManifest} instance.
+	 * 
+	 * @param timestampText
+	 *            the value to use for {@link #getTimestampText()}
+	 * @param sequenceId
+	 *            the value to use for {@link #getSequenceId()}
+	 * @param entries
+	 *            the value to use for {@link #getEntries()}
+	 */
+	public DataSetManifest(String timestampText, int sequenceId, DataSetManifestEntry... entries) {
+		this(timestampText, sequenceId, Arrays.asList(entries));
+	}
+
+	/**
+	 * Constructs a new {@link DataSetManifest} instance.
+	 * 
+	 * @param timestamp
+	 *            the value to use for {@link #getTimestampText()}
 	 * @param sequenceId
 	 *            the value to use for {@link #getSequenceId()}
 	 * @param entries
 	 *            the value to use for {@link #getEntries()}
 	 */
 	public DataSetManifest(Instant timestamp, int sequenceId, DataSetManifestEntry... entries) {
-		this.timestamp = timestamp;
-		this.sequenceId = sequenceId;
-		this.entries = Arrays.asList(entries);
-		this.entries.forEach(entry -> entry.parentManifest = this);
+		this(DateTimeFormatter.ISO_INSTANT.format(timestamp), sequenceId, Arrays.asList(entries));
 	}
 
 	/**
@@ -79,9 +99,24 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 	 */
 	@SuppressWarnings("unused")
 	private DataSetManifest() {
-		this.timestamp = null;
+		this.timestampText = null;
 		this.entries = null;
 		this.sequenceId = 0;
+	}
+
+	/**
+	 * @return the {@link String} representation of {@link #getTimestamp()} used
+	 *         to identify this {@link DataSetManifest} in S3 and elsewhere
+	 */
+	public String getTimestampText() {
+		/*
+		 * Design note: As discovered in CBBD-298, Java's DateTimeFormatter and
+		 * Instant classes don't always preserve the precision of parsed
+		 * timestamps. Accordingly, we need to store this value as a String to
+		 * ensure that the S3 key of the manifest isn't mangled.
+		 */
+
+		return timestampText;
 	}
 
 	/**
@@ -89,7 +124,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 	 *         created/prepared at
 	 */
 	public Instant getTimestamp() {
-		return timestamp;
+		return Instant.parse(timestampText.trim());
 	}
 
 	/**
@@ -133,7 +168,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("DataSetManifest [timestamp=");
-		builder.append(timestamp);
+		builder.append(timestampText);
 		builder.append(", sequenceId=");
 		builder.append(sequenceId);
 		builder.append(", entries=");
@@ -230,7 +265,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
 			builder.append("DataSetManifestEntry [parentManifest.getTimestamp()=");
-			builder.append(parentManifest.getTimestamp());
+			builder.append(parentManifest.getTimestampText());
 			builder.append(", parentManifest.getSequenceId()=");
 			builder.append(parentManifest.getSequenceId());
 			builder.append(", name=");
@@ -248,19 +283,22 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 	 * processing order of {@link DataSetManifest}s can be determined.
 	 */
 	public static final class DataSetManifestId implements Comparable<DataSetManifestId> {
+		private final String timestampText;
 		private final Instant timestamp;
 		private final int sequenceId;
 
 		/**
 		 * Constructs a new {@link DataSetManifestId}.
 		 * 
-		 * @param timestamp
-		 *            the {@link DataSetManifest#getTimestamp()} value
+		 * @param timestampText
+		 *            a {@link String} representation of the
+		 *            {@link DataSetManifest#getTimestamp()} value
 		 * @param sequenceId
 		 *            the {@link DataSetManifest#getSequenceId()} value
 		 */
-		private DataSetManifestId(Instant timestamp, int sequenceId) {
-			this.timestamp = timestamp;
+		private DataSetManifestId(String timestampText, int sequenceId) {
+			this.timestampText = timestampText;
+			this.timestamp = Instant.parse(timestampText);
 			this.sequenceId = sequenceId;
 		}
 
@@ -272,7 +310,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 		 *            {@link DataSetManifestId} from
 		 */
 		public DataSetManifestId(DataSetManifest manifest) {
-			this(manifest.getTimestamp(), manifest.getSequenceId());
+			this(manifest.getTimestampText(), manifest.getSequenceId());
 		}
 
 		/**
@@ -293,17 +331,16 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 			if (!keyMatchesRegex)
 				return null;
 
-			String dataSetId = manifestKeyMatcher.group(1);
-			Instant dataSetTimestamp;
+			String dataSetTimestampText = manifestKeyMatcher.group(1);
 			try {
-				dataSetTimestamp = Instant.parse(dataSetId);
+				Instant.parse(dataSetTimestampText);
 			} catch (DateTimeParseException e) {
 				return null;
 			}
 
 			int dataSetSequenceId = Integer.parseInt(manifestKeyMatcher.group(2));
 
-			return new DataSetManifestId(dataSetTimestamp, dataSetSequenceId);
+			return new DataSetManifestId(dataSetTimestampText, dataSetSequenceId);
 		}
 
 		/**
@@ -314,7 +351,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 		 *         specified prefix
 		 */
 		public String computeS3Key(String s3Prefix) {
-			return String.format("%s/%s/%d_manifest.xml", s3Prefix, timestamp.toString(), sequenceId);
+			return String.format("%s/%s/%d_manifest.xml", s3Prefix, timestampText, sequenceId);
 		}
 
 		/**
@@ -383,33 +420,6 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
 			builder.append(sequenceId);
 			builder.append("]");
 			return builder.toString();
-		}
-	}
-
-	/**
-	 * This is a slightly tweaked version of {@link InstantXmlAdapter}. The
-	 * specific tweak here allows leading whitespace in unmarshalled values, to
-	 * workaround the issue encountered in
-	 * <a href="http://issues.hhsdevcloud.us/browse/CBBD-207">CBBD-207: Invalid
-	 * manifest timestamp causes ETL service to fail</a>.
-	 */
-	private static final class TweakedInstantXmlAdapter extends XmlAdapter<String, Instant> {
-		private static final XmlAdapter<String, Instant> WRAPPED_ADAPTER = new InstantXmlAdapter();
-
-		/**
-		 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
-		 */
-		@Override
-		public Instant unmarshal(String v) throws Exception {
-			return WRAPPED_ADAPTER.unmarshal(v != null ? v.trim() : null);
-		}
-
-		/**
-		 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
-		 */
-		@Override
-		public String marshal(Instant v) throws Exception {
-			return WRAPPED_ADAPTER.marshal(v);
 		}
 	}
 }

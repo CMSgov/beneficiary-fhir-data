@@ -8,7 +8,6 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -75,8 +74,7 @@ public class DataSetTestUtilities {
 			marshaller.marshal(manifest, manifestOutputStream);
 
 			String objectKey = String.format("%s/%s/%d_%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
-					DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()), manifest.getSequenceId(),
-					"manifest.xml");
+					manifest.getTimestampText(), manifest.getSequenceId(), "manifest.xml");
 			byte[] manifestByteArray = manifestOutputStream.toByteArray();
 			InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
 
@@ -106,7 +104,7 @@ public class DataSetTestUtilities {
 	public static PutObjectRequest createPutRequest(Bucket bucket, DataSetManifest manifest,
 			DataSetManifestEntry manifestEntry, URL objectContentsUrl) {
 		String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
-				DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()), manifestEntry.getName());
+				manifest.getTimestampText(), manifestEntry.getName());
 
 		try {
 			// If this isn't specified, the AWS API logs annoying warnings.

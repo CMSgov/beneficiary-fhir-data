@@ -1,6 +1,5 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -215,8 +214,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		 * option #1.
 		 */
 
-		String dataSetKeyPrefix = String.format("%s/%s/", S3_PREFIX_PENDING_DATA_SETS,
-				DateTimeFormatter.ISO_INSTANT.format(manifest.getTimestamp()));
+		String dataSetKeyPrefix = String.format("%s/%s/", S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
 
 		ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
 		s3BucketListRequest.setBucketName(options.getS3BucketName());

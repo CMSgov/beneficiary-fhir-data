@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestId;
 
 /**
  * Unit tests for {@link DataSetManifest}.
@@ -102,6 +103,21 @@ public final class DataSetManifestTest {
 
 		Assert.assertNotNull(manifest);
 		Assert.assertNotNull(manifest.getTimestamp());
+	}
+
+	/**
+	 * Verifies that {@link DataSetManifestId}s can be round-tripped, as
+	 * expected. A regression test case for
+	 * <a href="http://issues.hhsdevcloud.us/browse/CBBD-298">CBBD-298: Error
+	 * reading some data set manifests in S3:
+	 * "AmazonS3Exception: The specified key does not exist"</a>.
+	 */
+	@Test
+	public void manifestIdRoundtrip() {
+		String s3Key = DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS + "/2017-07-11T00:00:00.000Z/1_manifest.xml";
+		DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(s3Key);
+
+		Assert.assertEquals(s3Key, manifestId.computeS3Key(DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS));
 	}
 
 	/**
