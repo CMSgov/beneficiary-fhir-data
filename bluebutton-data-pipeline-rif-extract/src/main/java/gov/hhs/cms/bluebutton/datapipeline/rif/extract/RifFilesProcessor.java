@@ -2,7 +2,6 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
@@ -210,12 +209,6 @@ public final class RifFilesProcessor {
 
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
 		InpatientClaim claim = InpatientClaimParser.parseRif(csvRecords);
-		/*
-		 * FIXME Can't use real line numbers because random/dummy test data has
-		 * dupes.
-		 */
-		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
-			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<InpatientClaim>(fileEvent, recordAction, claim);
 	}
 
@@ -238,12 +231,6 @@ public final class RifFilesProcessor {
 
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
 		OutpatientClaim claim = OutpatientClaimParser.parseRif(csvRecords);
-		/*
-		 * FIXME Can't use real line numbers because random/dummy test data has
-		 * dupes.
-		 */
-		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
-			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<OutpatientClaim>(fileEvent, recordAction, claim);
 	}
 
@@ -265,12 +252,6 @@ public final class RifFilesProcessor {
 
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
 		CarrierClaim claim = CarrierClaimParser.parseRif(csvRecords);
-		/*
-		 * FIXME Can't use real line numbers because random/dummy test data has
-		 * dupes.
-		 */
-		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
-			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<CarrierClaim>(fileEvent, recordAction, claim);
 	}
 
@@ -291,12 +272,6 @@ public final class RifFilesProcessor {
 
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
 		SNFClaim claim = SNFClaimParser.parseRif(csvRecords);
-		/*
-		 * FIXME Can't use real line numbers because random/dummy test data has
-		 * dupes.
-		 */
-		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
-			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<SNFClaim>(fileEvent, recordAction, claim);
 	}
 
@@ -318,12 +293,6 @@ public final class RifFilesProcessor {
 
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
 		HospiceClaim claim = HospiceClaimParser.parseRif(csvRecords);
-		/*
-		 * FIXME Can't use real line numbers because random/dummy test data has
-		 * dupes.
-		 */
-		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
-			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<HospiceClaim>(fileEvent, recordAction, claim);
 	}
 
@@ -344,12 +313,6 @@ public final class RifFilesProcessor {
 
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
 		HHAClaim claim = HHAClaimParser.parseRif(csvRecords);
-		/*
-		 * FIXME Can't use real line numbers because random/dummy test data has
-		 * dupes.
-		 */
-		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
-			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<HHAClaim>(fileEvent, recordAction, claim);
 	}
 
@@ -370,12 +333,6 @@ public final class RifFilesProcessor {
 
 		RecordAction recordAction = RecordAction.match(firstCsvRecord.get("DML_IND"));
 		DMEClaim claim = DMEClaimParser.parseRif(csvRecords);
-		/*
-		 * FIXME Can't use real line numbers because random/dummy test data has
-		 * dupes.
-		 */
-		for (int fakeLineNumber = 1; fakeLineNumber <= claim.getLines().size(); fakeLineNumber++)
-			claim.getLines().get(fakeLineNumber - 1).setLineNumber(new BigDecimal(fakeLineNumber));
 		return new RifRecordEvent<DMEClaim>(fileEvent, recordAction, claim);
 	}
 }
