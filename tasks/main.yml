@@ -1,15 +1,15 @@
 ---
 
-- name: Install Pre-requisites
-  yum:
-    name: "{{ item }}"
-    state: latest
-  with_items:
-    # Needed to run the ETL service.
-    - java-1.8.0-openjdk
-  become: true
-  notify:
-    - 'Restart Pipeline Service'
+#- name: Install Pre-requisites
+#  yum:
+#    name: "{{ item }}"
+#    state: latest
+#  with_items:
+#    # Needed to run the ETL service.
+#    - java-1.8.0-openjdk
+#  become: true
+#  notify:
+#    - 'Restart Pipeline Service'
 
 - name: Create ETL Service User
   user:
