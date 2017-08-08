@@ -16,13 +16,43 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent_;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim_;
 
 /**
  * Enumerates the various Blue Button claim types that are supported by
  * {@link ExplanationOfBenefitResourceProvider}.
  */
 enum ClaimType {
-	CARRIER(CarrierClaim.class, CarrierClaim_.claimId, CarrierClaimTransformer::transform, CarrierClaim_.lines);
+	CARRIER(CarrierClaim.class, CarrierClaim_.claimId, CarrierClaimTransformer::transform, CarrierClaim_.lines),
+	
+	DME(DMEClaim.class, DMEClaim_.claimId, DMEClaimTransformer::transform, DMEClaim_.lines),
+	
+	HHA(HHAClaim.class, HHAClaim_.claimId, HHAClaimTransformer::transform, HHAClaim_.lines),
+
+	HOSPICE(HospiceClaim.class, HospiceClaim_.claimId, HospiceClaimTransformer::transform, HospiceClaim_.lines),
+
+	INPATIENT(InpatientClaim.class, InpatientClaim_.claimId, InpatientClaimTransformer::transform,
+			InpatientClaim_.lines),
+
+	OUTPATIENT(OutpatientClaim.class, OutpatientClaim_.claimId, OutpatientClaimTransformer::transform,
+			OutpatientClaim_.lines),
+
+	PDE(PartDEvent.class, PartDEvent_.eventId, PartDEventTransformer::transform, OutpatientClaim_.lines),
+
+	SNF(SNFClaim.class, SNFClaim_.claimId, SNFClaimTransformer::transform, SNFClaim_.lines);
 
 	private final Class<?> entityClass;
 	private final SingularAttribute<?, ?> entityIdAttribute;

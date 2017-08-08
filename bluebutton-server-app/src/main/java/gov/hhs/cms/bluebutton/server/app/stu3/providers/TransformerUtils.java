@@ -1,5 +1,8 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -13,7 +16,10 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -23,6 +29,8 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -105,7 +113,7 @@ final class TransformerUtils {
 		diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
 		if (diagnosis.getPresentOnAdmission().isPresent()) {
 			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_SYSTEM_CCW_INP_POA_CD,
-					diagnosis.getPresentOnAdmission().get()));
+					String.valueOf(diagnosis.getPresentOnAdmission().get())));
 		}
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequenceElement().getValue();
@@ -162,6 +170,58 @@ final class TransformerUtils {
 	}
 
 	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to (possibly) modify
+	 * @param infoCategory
+	 *            the {@link CodeableConcept} to use as a
+	 *            {@link SupportingInformationComponent#getCategory()} value, if
+	 *            such an entry is not already present
+	 * @return the {@link SupportingInformationComponent#getSequence()} of the
+	 *         existing or newly-added entry
+	 */
+	static int addInformation(ExplanationOfBenefit eob, CodeableConcept infoCategory) {
+		Optional<SupportingInformationComponent> existingInfo = eob.getInformation().stream()
+				.filter(d -> infoCategory.equalsDeep(d.getCategory())).findAny();
+		if (existingInfo.isPresent())
+			return existingInfo.get().getSequenceElement().getValue();
+
+		SupportingInformationComponent infoComponent = new SupportingInformationComponent()
+				.setSequence(eob.getInformation().size() + 1);
+		infoComponent.setCategory(infoCategory);
+		eob.getInformation().add(infoComponent);
+
+		return infoComponent.getSequenceElement().getValue();
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to (possibly) modify
+	 * @param diagnosis
+	 *            the {@link Diagnosis} to add, if it's not already present
+	 * @return the {@link ProcedureComponent#getSequence()} of the existing or
+	 *         newly-added entry
+	 */
+	static int addProcedureCode(ExplanationOfBenefit eob, CCWProcedure
+	procedure) {
+
+		Optional<ProcedureComponent> existingProcedure = eob.getProcedure().stream()
+				.filter(pc -> pc.getProcedure() instanceof CodeableConcept)
+				.filter(pc -> isCodeInConcept((CodeableConcept) pc.getProcedure(), procedure.getFhirSystem(),
+						procedure.getCode()))
+				.findAny();
+		if (existingProcedure.isPresent())
+			return existingProcedure.get().getSequenceElement().getValue();
+
+		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size() + 1);
+		procedureComponent.setProcedure(createCodeableConcept(procedure.getFhirSystem(), procedure.getCode()));
+		procedureComponent.setDate(convertToDate(procedure.getProcedureDate()));
+
+		eob.getProcedure().add(procedureComponent);
+		return procedureComponent.getSequenceElement().getValue();
+
+	}
+
+	/**
 	 * @param claimType
 	 *            the {@link ClaimType} to compute an
 	 *            {@link ExplanationOfBenefit#getId()} for
@@ -201,6 +261,7 @@ final class TransformerUtils {
 		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
 
+
 	/**
 	 * @param codingSystem
 	 *            the {@link Coding#getSystem()} to use
@@ -238,8 +299,58 @@ final class TransformerUtils {
 	 *            {@link Reference#getIdentifier()}
 	 * @return a {@link Reference} with the specified {@link Identifier}
 	 */
-	private static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
+	static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
 		return new Reference().setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue));
+	}
+
+	/**
+	 * @return a Reference to the {@link Organization} for CMS, which will only
+	 *         be valid if {@link #upsertSharedData()} has been run
+	 */
+	public static Reference createReferenceToCms() {
+		return new Reference("Organization?name=" + urlEncode(TransformerConstants.COVERAGE_ISSUER));
+	}
+
+	/**
+	 * @param concept
+	 *            the {@link CodeableConcept} to check
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to match
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to match
+	 * @return <code>true</code> if the specified {@link CodeableConcept}
+	 *         contains the specified {@link Coding}, <code>false</code> if it
+	 *         does not
+	 */
+	static boolean isCodeInConcept(CodeableConcept concept, String codingSystem, String codingCode) {
+		return isCodeInConcept(concept, codingSystem, null, codingCode);
+	}
+
+	/**
+	 * @param concept
+	 *            the {@link CodeableConcept} to check
+	 * @param codingSystem
+	 *            the {@link Coding#getSystem()} to match
+	 * @param codingSystem
+	 *            the {@link Coding#getVersion()} to match
+	 * @param codingCode
+	 *            the {@link Coding#getCode()} to match
+	 * @return <code>true</code> if the specified {@link CodeableConcept}
+	 *         contains the specified {@link Coding}, <code>false</code> if it
+	 *         does not
+	 */
+	static boolean isCodeInConcept(CodeableConcept concept, String codingSystem, String codingVersion,
+			String codingCode) {
+		return concept.getCoding().stream().anyMatch(c -> {
+			if (!codingSystem.equals(c.getSystem()))
+				return false;
+			if (codingVersion != null && !codingVersion.equals(c.getVersion()))
+				return false;
+			if (!codingCode.equals(c.getCode()))
+				return false;
+
+			return true;
+		});
 	}
 
 	/**
@@ -301,6 +412,19 @@ final class TransformerUtils {
 	 */
 	static void setPeriodStart(Period period, LocalDate date) {
 		period.setStart(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()), TemporalPrecisionEnum.DAY);
+	}
+
+	/**
+	 * @param urlText
+	 *            the URL or URL portion to be encoded
+	 * @return a URL-encoded version of the specified text
+	 */
+	static String urlEncode(String urlText) {
+		try {
+			return URLEncoder.encode(urlText, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			throw new BadCodeMonkeyException(e);
+		}
 	}
 
 	/**

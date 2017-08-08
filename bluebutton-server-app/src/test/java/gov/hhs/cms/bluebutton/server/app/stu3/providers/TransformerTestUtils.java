@@ -62,7 +62,7 @@ final class TransformerTestUtils {
 	 * @param actuals
 	 *            the actual {@link AdjudicationComponent}s to verify
 	 */
-	private static void assertAdjudicationNotPresent(String expectedCategoryCode, List<AdjudicationComponent> actuals) {
+	static void assertAdjudicationNotPresent(String expectedCategoryCode, List<AdjudicationComponent> actuals) {
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
 				TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS, expectedCategoryCode)).findAny();
 		Assert.assertFalse(adjudication.isPresent());
@@ -127,7 +127,7 @@ final class TransformerTestUtils {
 	 * @param actuals
 	 *            the actual {@link BenefitComponent}s to verify
 	 */
-	private static void assertBenefitBalanceEquals(String expectedFinancialTypeSystem, String expectedFinancialTypeCode,
+	static void assertBenefitBalanceEquals(String expectedFinancialTypeSystem, String expectedFinancialTypeCode,
 			Integer expectedAmount, List<BenefitComponent> actuals) {
 		Optional<BenefitComponent> benefitComponent = actuals.stream()
 				.filter(a -> isCodeInConcept(a.getType(), expectedFinancialTypeSystem, expectedFinancialTypeCode))
@@ -154,7 +154,7 @@ final class TransformerTestUtils {
 	 *            the actual {@link BenefitComponent}s to verify
 	 */
 
-	private static void assertBenefitBalanceUsedEquals(String expectedFinancialTypeSystem,
+	static void assertBenefitBalanceUsedEquals(String expectedFinancialTypeSystem,
 			String expectedFinancialTypeCode, Integer expectedAmount, List<BenefitComponent> actuals) {
 		Optional<BenefitComponent> benefitComponent = actuals.stream()
 				.filter(a -> isCodeInConcept(a.getType(), expectedFinancialTypeSystem, expectedFinancialTypeCode))
@@ -337,7 +337,7 @@ final class TransformerTestUtils {
 	 * @param actuals
 	 *            the actual {@link SupportingInformationComponent}s to verify
 	 */
-	private static void assertInformationDateEquals(String expectedSystem, String expectedCode, LocalDate expectedDate,
+	static void assertInformationDateEquals(String expectedSystem, String expectedCode, LocalDate expectedDate,
 			List<SupportingInformationComponent> actuals) {
 		Optional<SupportingInformationComponent> supportingInformationComponent = actuals.stream()
 				.filter(a -> isCodeInConcept(a.getCategory(), expectedSystem, expectedCode)).findAny();
@@ -363,7 +363,7 @@ final class TransformerTestUtils {
 	 * @param actuals
 	 *            the actual {@link SupportingInformationComponent}s to verify
 	 */
-	private static void assertInformationPeriodEquals(String expectedSystem, String expectedCode,
+	static void assertInformationPeriodEquals(String expectedSystem, String expectedCode,
 			LocalDate expectedFromDate, LocalDate expectedThruDate, List<SupportingInformationComponent> actuals) {
 		Optional<SupportingInformationComponent> supportingInformationComponent = actuals.stream()
 				.filter(a -> isCodeInConcept(a.getCategory(), expectedSystem, expectedCode)).findAny();
@@ -388,6 +388,7 @@ final class TransformerTestUtils {
 	static void assertNoEncodedOptionals(Resource resource) {
 		FhirContext fhirContext = FhirContext.forDstu3();
 		String encodedResource = fhirContext.newXmlParser().encodeResourceToString(resource);
+		System.out.println(encodedResource);
 
 		Assert.assertFalse(encodedResource.contains("Optional"));
 	}
@@ -400,7 +401,7 @@ final class TransformerTestUtils {
 	 * @param actualReference
 	 *            the {@link Reference} to check
 	 */
-	private static void assertReferenceEquals(String expectedIdentifierSystem, String expectedIdentifierValue,
+	static void assertReferenceEquals(String expectedIdentifierSystem, String expectedIdentifierValue,
 			Reference actualReference) {
 		Assert.assertTrue("Reference doesn't match: " + actualReference,
 				doesReferenceMatchIdentifier(expectedIdentifierSystem, expectedIdentifierValue, actualReference));
