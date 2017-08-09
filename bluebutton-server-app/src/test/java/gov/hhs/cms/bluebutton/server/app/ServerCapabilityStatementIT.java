@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.util.VersionUtil;
 
 /**
  * <p>
@@ -43,9 +44,13 @@ public final class ServerCapabilityStatementIT {
 		// Verify that our custom server metadata is correct.
 		Assert.assertEquals(BlueButtonStu3Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
 		Assert.assertEquals(BlueButtonStu3Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
-		Assert.assertEquals("1.0.0-SNAPSHOT", capabilities.getSoftware().getVersion());
 		Assert.assertEquals("gov.hhs.cms.bluebutton.fhir:bluebutton-server-app",
 				capabilities.getImplementation().getDescription());
+		Assert.assertNotEquals(null, capabilities.getSoftware().getVersion());
+		Assert.assertNotEquals("", capabilities.getSoftware().getVersion());
+
+		// The default for this field is HAPI's version but we don't use that.
+		Assert.assertNotEquals(VersionUtil.getVersion(), capabilities.getSoftware().getVersion());
 
 		Assert.assertEquals(1, capabilities.getRest().size());
 		CapabilityStatementRestComponent restCapabilities = capabilities.getRestFirstRep();
