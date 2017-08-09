@@ -120,7 +120,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *         multiple matching resources, or may also be empty.
 	 */
 	@Search
-	public List<Patient> findByLogicalId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId) {
+	public List<Patient> searchByLogicalId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId) {
 		if (logicalId.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
@@ -164,7 +164,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *         multiple matching resources, or may also be empty.
 	 */
 	@Search
-	public List<Patient> findByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier) {
+	public List<Patient> searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier) {
 		if (identifier.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
@@ -173,7 +173,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
 		try {
-			return Arrays.asList(findByHicnHash(identifier.getValue()));
+			return Arrays.asList(queryDatabaseByHicnHash(identifier.getValue()));
 		} catch (NoResultException e) {
 			return new LinkedList<>();
 		}
@@ -188,7 +188,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *             A {@link NoResultException} will be thrown if no matching
 	 *             {@link Beneficiary} can be found
 	 */
-	private Patient findByHicnHash(String hicnHash) {
+	private Patient queryDatabaseByHicnHash(String hicnHash) {
 		if (hicnHash == null || hicnHash.trim().isEmpty())
 			throw new IllegalArgumentException();
 

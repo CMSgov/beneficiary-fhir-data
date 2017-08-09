@@ -53,7 +53,7 @@ public final class PatientResourceProviderIT {
 
 	/**
 	 * Verifies that
-	 * {@link PatientResourceProvider#findByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 * {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB.
 	 */
 	@Test
@@ -76,7 +76,7 @@ public final class PatientResourceProviderIT {
 
 	/**
 	 * Verifies that
-	 * {@link PatientResourceProvider#findByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 * {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
 	 * works as expected for a {@link Patient} that does not exist in the DB.
 	 */
 	@Test
@@ -93,7 +93,7 @@ public final class PatientResourceProviderIT {
 
 	/**
 	 * Verifies that
-	 * {@link PatientResourceProvider#findByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 * {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB.
 	 */
 	@Test
@@ -117,7 +117,7 @@ public final class PatientResourceProviderIT {
 
 	/**
 	 * Verifies that
-	 * {@link PatientResourceProvider#findByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 * {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
 	 * works as expected for a {@link Patient} that does not exist in the DB.
 	 */
 	@Test
