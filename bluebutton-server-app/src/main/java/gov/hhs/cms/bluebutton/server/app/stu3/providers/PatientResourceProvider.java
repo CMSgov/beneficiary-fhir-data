@@ -59,7 +59,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 * <p>
 	 * Adds support for the FHIR "read" operation, for {@link Patient}s. The
 	 * {@link Read} annotation indicates that this method supports the read
-	 * and/or vread operation.
+	 * operation.
 	 * </p>
 	 * <p>
 	 * Read operations take a single parameter annotated with {@link IdParam},
@@ -73,7 +73,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 * @return Returns a resource matching the specified {@link IdDt}, or
 	 *         <code>null</code> if none exists.
 	 */
-	@Read(version = true)
+	@Read(version = false)
 	public Patient read(@IdParam IdType patientId) {
 		if (patientId == null)
 			throw new IllegalArgumentException();
