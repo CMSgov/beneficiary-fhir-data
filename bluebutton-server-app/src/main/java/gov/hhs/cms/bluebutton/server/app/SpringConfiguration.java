@@ -249,16 +249,6 @@ public class SpringConfiguration {
 	}
 
 	/**
-	 * @return the application's {@link ExplanationOfBenefitResourceProvider}
-	 *         bean
-	 */
-	@Bean
-	public ExplanationOfBenefitResourceProvider eobResourceProvider() {
-		ExplanationOfBenefitResourceProvider eobResourceProvider = new ExplanationOfBenefitResourceProvider();
-		return eobResourceProvider;
-	}
-
-	/**
 	 * @return the {@link MetricRegistry} for the application, which can be used
 	 *         to collect statistics on the application's performance
 	 */
