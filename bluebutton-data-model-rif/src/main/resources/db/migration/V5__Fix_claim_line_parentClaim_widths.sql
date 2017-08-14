@@ -6,22 +6,22 @@
  */
 
 alter table "CarrierClaimLines"
-  alter column "parentClaim" type varchar(15);
+  alter column "parentClaim" ${logic.alter-column-type} varchar(15);
 
 alter table "DMEClaimLines"
-  alter column "parentClaim" type varchar(15);
+  alter column "parentClaim" ${logic.alter-column-type} varchar(15);
 
 alter table "HHAClaimLines"
-  alter column "parentClaim" type varchar(15);
+  alter column "parentClaim" ${logic.alter-column-type} varchar(15);
 
 alter table "HospiceClaimLines"
-  alter column "parentClaim" type varchar(15);
+  alter column "parentClaim" ${logic.alter-column-type} varchar(15);
 
 alter table "InpatientClaimLines"
-  alter column "parentClaim" type varchar(15);
+  alter column "parentClaim" ${logic.alter-column-type} varchar(15);
 
 alter table "OutpatientClaimLines"
-  alter column "parentClaim" type varchar(15);
+  alter column "parentClaim" ${logic.alter-column-type} varchar(15);
 
 alter table "SNFClaimLines"
-  alter column "parentClaim" type varchar(15);
+  alter column "parentClaim" ${logic.alter-column-type} varchar(15);
