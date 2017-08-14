@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestCompo
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.RestfulCapabilityMode;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -65,6 +66,14 @@ public final class ServerCapabilityStatementIT {
 				.filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE).findAny().isPresent());
 		Assert.assertFalse(patientCapabilities.getInteraction().stream()
 				.filter(i -> i.getCode() == TypeRestfulInteraction.CREATE).findAny().isPresent());
+
+		// Verify that Coverage resource support looks like expected.
+		CapabilityStatementRestResourceComponent coverageCapabilities = restCapabilities.getResource().stream()
+				.filter(r -> r.getType().equals(Coverage.class.getSimpleName())).findAny().get();
+		Assert.assertTrue(coverageCapabilities.getInteraction().stream()
+				.filter(i -> i.getCode() == TypeRestfulInteraction.READ).findAny().isPresent());
+		Assert.assertTrue(coverageCapabilities.getInteraction().stream()
+				.filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE).findAny().isPresent());
 
 		// Verify that EOB resource support looks like expected.
 		CapabilityStatementRestResourceComponent eobCapabilities = restCapabilities.getResource().stream()
