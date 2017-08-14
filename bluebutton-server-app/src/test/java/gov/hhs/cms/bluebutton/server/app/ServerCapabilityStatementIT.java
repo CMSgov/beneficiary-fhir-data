@@ -80,7 +80,7 @@ public final class ServerCapabilityStatementIT {
 				.filter(r -> r.getType().equals(ExplanationOfBenefit.class.getSimpleName())).findAny().get();
 		Assert.assertTrue(eobCapabilities.getInteraction().stream()
 				.filter(i -> i.getCode() == TypeRestfulInteraction.READ).findAny().isPresent());
-		Assert.assertTrue(patientCapabilities.getInteraction().stream()
+		Assert.assertTrue(eobCapabilities.getInteraction().stream()
 				.filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE).findAny().isPresent());
 
 		// Spot check that an arbitrary unsupported resource isn't listed.
