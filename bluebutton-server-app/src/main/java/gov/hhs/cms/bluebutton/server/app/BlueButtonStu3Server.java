@@ -1,13 +1,19 @@
 package gov.hhs.cms.bluebutton.server.app;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
@@ -30,7 +36,11 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  * </p>
  */
 public class BlueButtonStu3Server extends RestfulServer {
+
 	private static final long serialVersionUID = 1L;
+
+	static final String CAPABILITIES_PUBLISHER = "Centers for Medicare & Medicaid Services";
+	static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 
 	/**
 	 * Constructs a new {@link BlueButtonStu3Server} instance.
@@ -38,6 +48,35 @@ public class BlueButtonStu3Server extends RestfulServer {
 	public BlueButtonStu3Server() {
 		super(FhirContext.forDstu3());
 		setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
+		configureServerInfoMetadata();
+	}
+
+	/**
+	 * Configures various metadata fields that will be included in this server's
+	 * {@link CapabilityStatement}.
+	 */
+	private void configureServerInfoMetadata() {
+		setServerName(CAPABILITIES_SERVER_NAME);
+
+		/*
+		 * Read in some of the project metadata from a Maven-filtered properties
+		 * file, which ensures that it's always up to date.
+		 */
+		Properties projectProps = new Properties();
+		try (InputStream projectPropsStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("project.properties");) {
+			projectProps.load(projectPropsStream);
+
+			setImplementationDescription(projectProps.getProperty("project.id"));
+			setServerVersion(projectProps.getProperty("project.version"));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+
+		// Lightly customize the capability provider to set publisher name.
+		ServerCapabilityStatementProvider capabilityStatementProvider = new ServerCapabilityStatementProvider(this);
+		capabilityStatementProvider.setPublisher(CAPABILITIES_PUBLISHER);
+		setServerConformanceProvider(capabilityStatementProvider);
 	}
 
 	/**
