@@ -53,7 +53,47 @@ public final class PatientResourceProviderIT {
 
 	/**
 	 * Verifies that
-	 * {@link PatientResourceProvider#findByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 * {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB.
+	 */
+	@Test
+	public void searchForExistingPatientByLogicalId() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Bundle searchResults = fhirClient.search().forResource(Patient.class)
+				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Assert.assertEquals(1, searchResults.getTotal());
+		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+		BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for a {@link Patient} that does not exist in the DB.
+	 */
+	@Test
+	public void searchForMissingPatientByLogicalId() {
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		// No data is loaded, so this should return 0 matches.
+		Bundle searchResults = fhirClient.search().forResource(Patient.class)
+				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, "foo")).returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Assert.assertEquals(0, searchResults.getTotal());
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB.
 	 */
 	@Test
@@ -77,8 +117,8 @@ public final class PatientResourceProviderIT {
 
 	/**
 	 * Verifies that
-	 * {@link PatientResourceProvider#findByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-	 * works as expected for a {@link Patient} that does exist in the DB.
+	 * {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for a {@link Patient} that does not exist in the DB.
 	 */
 	@Test
 	public void searchForMissingPatientByHicnHash() {

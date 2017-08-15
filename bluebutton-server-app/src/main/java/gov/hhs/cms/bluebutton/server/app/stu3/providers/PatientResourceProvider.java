@@ -105,14 +105,47 @@ public final class PatientResourceProvider implements IResourceProvider {
 	/**
 	 * <p>
 	 * Adds support for the FHIR "search" operation for {@link Patient}s,
+	 * allowing users to search by {@link Patient#getId()}.
+	 * <p>
+	 * The {@link Search} annotation indicates that this method supports the
+	 * search operation. There may be many different methods annotated with this
+	 * {@link Search} annotation, to support many different search criteria.
+	 * </p>
+	 * 
+	 * @param logicalId
+	 *            a {@link TokenParam} (with no system, per the spec) for the
+	 *            {@link Patient#getId()} to try and find a matching
+	 *            {@link Patient} for
+	 * @return Returns a {@link List} of {@link Patient}s, which may contain
+	 *         multiple matching resources, or may also be empty.
+	 */
+	@Search
+	public List<Patient> searchByLogicalId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId) {
+		if (logicalId.getQueryParameterQualifier() != null)
+			throw new InvalidRequestException(
+					"Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
+		if (logicalId.getSystem() != null && !logicalId.getSystem().isEmpty())
+			throw new InvalidRequestException("Unsupported query parameter system: " + logicalId.getSystem());
+		if (logicalId.getValueNotNull().isEmpty())
+			throw new InvalidRequestException("Unsupported query parameter value: " + logicalId.getValue());
+
+		try {
+			return Arrays.asList(read(new IdType(logicalId.getValue())));
+		} catch (ResourceNotFoundException e) {
+			return new LinkedList<>();
+		}
+	}
+
+	/**
+	 * <p>
+	 * Adds support for the FHIR "search" operation for {@link Patient}s,
 	 * allowing users to search by {@link Patient#getIdentifier()}.
 	 * Specifically, the following criteria are supported:
 	 * </p>
 	 * <ul>
 	 * <li>Matching a {@link Beneficiary#getHicn()} hash value: when
 	 * {@link TokenParam#getSystem()} matches
-	 * {@link BeneficiaryTransformer#CODING_SYSTEM_CCW_BENE_HICN_HASH}.
-	 * </li>
+	 * {@link BeneficiaryTransformer#CODING_SYSTEM_CCW_BENE_HICN_HASH}.</li>
 	 * </ul>
 	 * <p>
 	 * Searches that don't match one of the above forms are not supported.
@@ -131,7 +164,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *         multiple matching resources, or may also be empty.
 	 */
 	@Search
-	public List<Patient> findByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier) {
+	public List<Patient> searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier) {
 		if (identifier.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
@@ -140,7 +173,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
 		try {
-			return Arrays.asList(findByHicnHash(identifier.getValue()));
+			return Arrays.asList(queryDatabaseByHicnHash(identifier.getValue()));
 		} catch (NoResultException e) {
 			return new LinkedList<>();
 		}
@@ -155,7 +188,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *             A {@link NoResultException} will be thrown if no matching
 	 *             {@link Beneficiary} can be found
 	 */
-	private Patient findByHicnHash(String hicnHash) {
+	private Patient queryDatabaseByHicnHash(String hicnHash) {
 		if (hicnHash == null || hicnHash.trim().isEmpty())
 			throw new IllegalArgumentException();
 
