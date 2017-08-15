@@ -108,7 +108,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		Class<?> entityClass = eobIdType.get().getEntityClass();
 		CriteriaQuery criteria = builder.createQuery(entityClass);
 		Root root = criteria.from(entityClass);
-		eobIdType.get().getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
+		eobIdType.get().getEntityLazyAttributes().get().stream().forEach(a -> root.fetch(a));
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(eobIdType.get().getEntityIdAttribute()), eobIdClaimIdText));
 
@@ -171,7 +171,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		CriteriaQuery<CarrierClaim> criteria = builder.createQuery(CarrierClaim.class);
 		Root<CarrierClaim> root = criteria.from(CarrierClaim.class);
-		ClaimType.CARRIER.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		ClaimType.CARRIER.getEntityLazyAttributes().get().stream().forEach(a -> root.fetch((PluralAttribute) a));
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(CarrierClaim_.beneficiaryId), patient.getIdPart()));
 

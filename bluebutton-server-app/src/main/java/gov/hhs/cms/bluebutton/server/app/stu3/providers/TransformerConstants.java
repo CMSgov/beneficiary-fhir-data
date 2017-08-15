@@ -16,6 +16,8 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
  * {@link Beneficiary}) into FHIR resources (e.g. {@link Patient}).
  */
 final class TransformerConstants {
+	static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
+
 	static final String BENEFIT_BALANCE_TYPE = "http://bluebutton.cms.hhs.gov/coding#benefitBalanceType";
 
 	static final String BENEFIT_COVERAGE_DATE = "Benefit Coverage Date";
