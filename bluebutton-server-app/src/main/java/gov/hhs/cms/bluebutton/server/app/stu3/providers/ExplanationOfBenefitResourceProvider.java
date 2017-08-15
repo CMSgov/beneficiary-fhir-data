@@ -68,7 +68,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 * <p>
 	 * Adds support for the FHIR "read" operation, for
 	 * {@link ExplanationOfBenefit}s. The {@link Read} annotation indicates that
-	 * this method supports the read and/or vread operation.
+	 * this method supports the read operation.
 	 * </p>
 	 * <p>
 	 * Read operations take a single parameter annotated with {@link IdParam},
@@ -83,7 +83,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *         <code>null</code> if none exists.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Read(version = true)
+	@Read(version = false)
 	public ExplanationOfBenefit read(@IdParam IdType eobId) {
 		if (eobId == null)
 			throw new IllegalArgumentException();

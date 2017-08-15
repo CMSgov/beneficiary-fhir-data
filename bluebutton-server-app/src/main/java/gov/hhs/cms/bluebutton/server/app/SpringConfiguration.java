@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import gov.hhs.cms.bluebutton.data.model.rif.schema.DatabaseSchemaManager;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.CoverageResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
 
@@ -228,6 +229,8 @@ public class SpringConfiguration {
 	/**
 	 * @param patientResourceProvider
 	 *            the application's {@link PatientResourceProvider} bean
+	 * @param coverageResourceProvider
+	 *            the application's {@link CoverageResourceProvider} bean
 	 * @param eobResourceProvider
 	 *            the application's {@link ExplanationOfBenefitResourceProvider}
 	 *            bean
@@ -236,21 +239,13 @@ public class SpringConfiguration {
 	 */
 	@Bean(name = BLUEBUTTON_STU3_RESOURCE_PROVIDERS)
 	public List<IResourceProvider> stu3ResourceProviders(PatientResourceProvider patientResourceProvider,
+			CoverageResourceProvider coverageResourceProvider,
 			ExplanationOfBenefitResourceProvider eobResourceProvider) {
 		List<IResourceProvider> stu3ResourceProviders = new ArrayList<IResourceProvider>();
 		stu3ResourceProviders.add(patientResourceProvider);
+		stu3ResourceProviders.add(coverageResourceProvider);
 		stu3ResourceProviders.add(eobResourceProvider);
 		return stu3ResourceProviders;
-	}
-
-	/**
-	 * @return the application's {@link ExplanationOfBenefitResourceProvider}
-	 *         bean
-	 */
-	@Bean
-	public ExplanationOfBenefitResourceProvider eobResourceProvider() {
-		ExplanationOfBenefitResourceProvider eobResourceProvider = new ExplanationOfBenefitResourceProvider();
-		return eobResourceProvider;
 	}
 
 	/**

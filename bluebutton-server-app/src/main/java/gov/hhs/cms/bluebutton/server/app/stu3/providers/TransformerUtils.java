@@ -184,7 +184,47 @@ final class TransformerUtils {
 	 *         specified {@link Beneficiary}
 	 */
 	static IdDt buildPatientId(Beneficiary beneficiary) {
-		return new IdDt("Patient", beneficiary.getBeneficiaryId());
+		return buildPatientId(beneficiary.getBeneficiaryId());
+	}
+
+	/**
+	 * @param beneficiary
+	 *            the {@link Beneficiary#getBeneficiaryId()} to calculate the
+	 *            {@link Patient#getId()} value for
+	 * @return the {@link Patient#getId()} value that will be used for the
+	 *         specified {@link Beneficiary}
+	 */
+	static IdDt buildPatientId(String beneficiaryId) {
+		return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
+	}
+
+	/**
+	 * @param medicareSegment
+	 *            the {@link MedicareSegment} to compute a
+	 *            {@link Coverage#getId()} for
+	 * @param beneficiary
+	 *            the {@link Beneficiary} to compute a {@link Coverage#getId()}
+	 *            for
+	 * @return the {@link Coverage#getId()} value to use for the specified
+	 *         values
+	 */
+	static IdDt buildCoverageId(MedicareSegment medicareSegment, Beneficiary beneficiary) {
+		return buildCoverageId(medicareSegment, beneficiary.getBeneficiaryId());
+	}
+
+	/**
+	 * @param medicareSegment
+	 *            the {@link MedicareSegment} to compute a
+	 *            {@link Coverage#getId()} for
+	 * @param beneficiary
+	 *            the {@link Beneficiary#getBeneficiaryId()} value to compute a
+	 *            {@link Coverage#getId()} for
+	 * @return the {@link Coverage#getId()} value to use for the specified
+	 *         values
+	 */
+	static IdDt buildCoverageId(MedicareSegment medicareSegment, String beneficiaryId) {
+		return new IdDt(Coverage.class.getSimpleName(),
+				String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
 	}
 
 	/**
@@ -267,6 +307,17 @@ final class TransformerUtils {
 	static Reference referencePatient(String patientId) {
 		return new Reference(
 				String.format("Patient?identifier=%s|%s", TransformerConstants.CODING_SYSTEM_CCW_BENE_ID, patientId));
+	}
+
+	/**
+	 * @param beneficiary
+	 *            the {@link Beneficiary} to generate a {@link Patient}
+	 *            {@link Reference} for
+	 * @return a {@link Reference} to the {@link Patient} resource for the
+	 *         specified {@link Beneficiary}
+	 */
+	static Reference referencePatient(Beneficiary beneficiary) {
+		return referencePatient(beneficiary.getBeneficiaryId());
 	}
 
 	/**

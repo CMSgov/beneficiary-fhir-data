@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestCompo
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.RestfulCapabilityMode;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -66,12 +67,20 @@ public final class ServerCapabilityStatementIT {
 		Assert.assertFalse(patientCapabilities.getInteraction().stream()
 				.filter(i -> i.getCode() == TypeRestfulInteraction.CREATE).findAny().isPresent());
 
+		// Verify that Coverage resource support looks like expected.
+		CapabilityStatementRestResourceComponent coverageCapabilities = restCapabilities.getResource().stream()
+				.filter(r -> r.getType().equals(Coverage.class.getSimpleName())).findAny().get();
+		Assert.assertTrue(coverageCapabilities.getInteraction().stream()
+				.filter(i -> i.getCode() == TypeRestfulInteraction.READ).findAny().isPresent());
+		Assert.assertTrue(coverageCapabilities.getInteraction().stream()
+				.filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE).findAny().isPresent());
+
 		// Verify that EOB resource support looks like expected.
 		CapabilityStatementRestResourceComponent eobCapabilities = restCapabilities.getResource().stream()
 				.filter(r -> r.getType().equals(ExplanationOfBenefit.class.getSimpleName())).findAny().get();
 		Assert.assertTrue(eobCapabilities.getInteraction().stream()
 				.filter(i -> i.getCode() == TypeRestfulInteraction.READ).findAny().isPresent());
-		Assert.assertTrue(patientCapabilities.getInteraction().stream()
+		Assert.assertTrue(eobCapabilities.getInteraction().stream()
 				.filter(i -> i.getCode() == TypeRestfulInteraction.SEARCHTYPE).findAny().isPresent());
 
 		// Spot check that an arbitrary unsupported resource isn't listed.
