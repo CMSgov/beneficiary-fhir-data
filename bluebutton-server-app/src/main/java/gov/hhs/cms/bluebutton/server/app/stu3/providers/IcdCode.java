@@ -10,8 +10,8 @@ import org.hl7.fhir.dstu3.model.Coding;
  * Models a icdCode code entry in a claim.
  */
 abstract class IcdCode {
-	public String icdCode;
-	public Character icdVersionCode;
+	private final String icdCode;
+	private final Character icdVersionCode;
 
 	/**
 	 * Constructs a new {@link IcdCode}.
@@ -23,10 +23,8 @@ abstract class IcdCode {
 	 *            "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
 	 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other
 	 *            similar fields) of the code's ICD version, if any
-	 * @param labels
-	 *            the value to use for {@link #getLabels()}
 	 */
-	public IcdCode(Optional<String> icdCode, Optional<Character> icdVersionCode) {
+	protected IcdCode(Optional<String> icdCode, Optional<Character> icdVersionCode) {
 		Objects.requireNonNull(icdCode);
 		Objects.requireNonNull(icdVersionCode);
 
@@ -82,7 +80,7 @@ abstract class IcdCode {
 	 *         FHIR Coding system</a> value for this {@link IcdCode}'
 	 *         {@link #icdVersionCode} value
 	 */
-	public String getFhirSystem() {
+	protected String getFhirSystem() {
 		String system;
 		if (icdVersionCode == null || icdVersionCode.equals("9"))
 			system = "http://hl7.org/fhir/sid/icd-9-cm";

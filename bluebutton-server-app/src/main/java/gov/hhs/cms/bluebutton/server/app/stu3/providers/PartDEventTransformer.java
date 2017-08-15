@@ -223,10 +223,11 @@ final class PartDEventTransformer {
 		rxItem.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_PDE_DAYS_SUPPLY,
 				String.valueOf(claimGroup.getDaysSupply())));
 
-		// CBBD-241 - This code was commented out because values other than "01"
+		// TODO CBBD-241 - This code was commented out because values other than
+		// "01"
 		// were coming thru
 		// such as "07". Need to discuss with Karl if this check needs to be
-		// here - DEH
+		// here -
 
 		/*
 		 * if (claimGroup.serviceProviderIdQualiferCode == null ||

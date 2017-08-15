@@ -307,7 +307,7 @@ final class TransformerUtils {
 	 * @return a Reference to the {@link Organization} for CMS, which will only
 	 *         be valid if {@link #upsertSharedData()} has been run
 	 */
-	public static Reference createReferenceToCms() {
+	static Reference createReferenceToCms() {
 		return new Reference("Organization?name=" + urlEncode(TransformerConstants.COVERAGE_ISSUER));
 	}
 

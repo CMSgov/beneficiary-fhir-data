@@ -12,7 +12,7 @@ import java.util.Set;
  */
 final class Diagnosis extends IcdCode {
 
-	private Character presentOnAdmission;
+	private final Character presentOnAdmission;
 	private final Set<DiagnosisLabel> labels;
 
 	/**
@@ -34,8 +34,6 @@ final class Diagnosis extends IcdCode {
 		Objects.requireNonNull(icdVersionCode);
 		Objects.requireNonNull(labels);
 
-		this.icdCode = icdCode.get();
-		this.icdVersionCode = icdVersionCode.orElse(null);
 		this.presentOnAdmission = null;
 		this.labels = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(labels)));
 	}
@@ -60,9 +58,6 @@ final class Diagnosis extends IcdCode {
 		Objects.requireNonNull(icdVersionCode);
 		Objects.requireNonNull(presentOnAdmission);
 
-
-		this.icdCode = icdCode.get();
-		this.icdVersionCode = icdVersionCode.orElse(null);
 		this.presentOnAdmission = presentOnAdmission.orElse(null);
 		this.labels = null;
 
@@ -84,8 +79,8 @@ final class Diagnosis extends IcdCode {
 	}
 
 	/**
-	 * Constructs a new {@link Diagnosis}, if the specified <code>code</code> is
-	 * present.
+	 * Constructs a new {@link Diagnosis}, if the specified <code>icdCode</code>
+	 * is present.
 	 * 
 	 * @param icdCode
 	 *            the ICD code of the diagnosis, if any
@@ -97,7 +92,7 @@ final class Diagnosis extends IcdCode {
 	 * @param labels
 	 *            the value to use for {@link #getLabels()}
 	 * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no
-	 *         <code>code</code> was present
+	 *         <code>icdCode</code> was present
 	 */
 	static Optional<Diagnosis> from(Optional<String> icdCode, Optional<Character> icdVersionCode,
 			DiagnosisLabel... labels) {
