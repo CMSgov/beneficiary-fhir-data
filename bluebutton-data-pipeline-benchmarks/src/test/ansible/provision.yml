@@ -32,7 +32,33 @@
         rules_egress:
           - proto: all
             cidr_ip: 0.0.0.0/0
-    
+
+    # Create an IAM role associated with the Blue Button tests services running
+    # in EC2.
+    - name: Create IAM Role for Blue Button Test Services
+      iam:
+        iam_type: role
+        name: BlueButtonTest-EC2Services
+        state: present
+        # The `trust_policy` only defines what/who can assume/become this role; it
+        # doesn't define what the role will have access to.
+        trust_policy:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+
+    - name: Give BlueButtonTest-EC2Services Access to Blue Button Test S3 Buckets
+      iam_policy:
+        iam_type: role
+        iam_name: BlueButtonTest-EC2Services
+        policy_name: "BlueButtonTest-S3"
+        state: present
+        # Note: Watch out for this Ansible bug: https://github.com/ansible/ansible/issues/19310
+        policy_json: "{{ lookup('template','bluebutton_test_s3_policy.json.j2') | to_json }}"
+ 
 # FIXME: Disabled, because I don't have permissions for it.    
 #    - name: IAM - Create EC2 'BenchmarkRunner' Role
 #      iam_policy:
@@ -144,8 +170,7 @@
         image: "{{ ami_id }}"
         region: "{{ region }}"
         zone: "{{ zone }}"
-        # FIXME: Disabled, because I don't have permissions for it.
-        #instance_profile_name: 'BlueButtonBenchmarkRunner'
+        instance_profile_name: BlueButtonTest-EC2Services
         volumes:
           - device_name: /dev/sda1
             volume_type: gp2
@@ -185,3 +210,5 @@
       with_flattened:
         - "{{ ec2_etl.instances }}"
         - "{{ ec2_fhir.instances }}"
+
+

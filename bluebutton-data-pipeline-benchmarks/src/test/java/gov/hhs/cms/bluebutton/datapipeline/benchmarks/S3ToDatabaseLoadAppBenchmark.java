@@ -600,7 +600,7 @@ public final class S3ToDatabaseLoadAppBenchmark {
 			 * to find out how long things took.
 			 */
 			Path etlLogPath = benchmarkIterationDir
-					.resolve(String.format("bluebutton-data-pipeline-app.log", iterationIndex));
+					.resolve(String.format("bluebutton-data-pipeline.log", iterationIndex));
 			if (!Files.isReadable(etlLogPath))
 				throw new BenchmarkError(
 						String.format("Failed to collect ETL log for benchmark iteration '%d'.", iterationIndex));

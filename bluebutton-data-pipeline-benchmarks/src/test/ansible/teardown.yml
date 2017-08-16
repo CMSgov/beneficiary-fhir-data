@@ -42,13 +42,13 @@
     # Not strictly necessary, but ensures that metrics are included in the log.
     - name: Stop ETL Service
       service:
-        name: bluebutton-data-pipeline-app
+        name: bluebutton-data-pipeline
         state: stopped
       become: true
       ignore_errors: true
     
     - fetch:
-        src: '/usr/local/bluebutton-data-pipeline-app/bluebutton-data-pipeline-app.log'
+        src: '/usr/local/bluebutton-data-pipeline/bluebutton-data-pipeline.log'
         dest: "../../../target/benchmark-iterations/{{ iteration_index }}/"
         flat: true
         fail_on_missing: false
@@ -108,3 +108,4 @@
         dest: "../../../target/benchmark-iterations/{{ iteration_index }}_ansible_hosts"
         regexp: '^rds.*$'
         state: absent
+
