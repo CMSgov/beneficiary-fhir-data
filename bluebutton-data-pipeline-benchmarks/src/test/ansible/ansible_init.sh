@@ -49,9 +49,15 @@ if [[ ! -d "${virtualEnvDirectory}" ]]; then
 	echo 'Python virtualenv created.'
 
 	echo "Installing Ansible and its dependencies into the virtualenv..."
-	python `which pip` install -r "${scriptDirectory}/requirements.txt"
+	python `which pip` install -r "${scriptDirectory}/requirements.freeze.txt"
 	echo 'Ansible and dependencies have been installed.'
 else
 	echo "Python virtualenv already exists in '${virtualEnvDirectory}'."
 	source "${virtualEnvDirectory}/bin/activate"
 fi
+
+echo "Installing Ansible roles..."
+cd "${scriptDirectory}"
+python `which ansible-galaxy` install --role-file=install_roles.yml
+echo "Installed Ansible roles."
+
