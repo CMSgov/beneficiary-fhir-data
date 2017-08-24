@@ -1,0 +1,21 @@
+---
+
+# The directory that the Blue Button Data Server will be installed to. 
+data_server_dir: /usr/local/bluebutton-data-server
+
+# The system user that the Blue Button Data Server will run as.
+data_server_user: bb-data
+
+# The management port used by the app server (Wildfly/JBoss).
+data_server_appserver_management_port: 9090
+
+# The management admin credentials for the app server (Wildfly/JBoss). An empty username indicates that no authentication should be expected or used.
+data_server_appserver_management_username: ''
+data_server_appserver_management_password: ''
+
+# The port that the app server (Wildfly/JBoss) should host HTTPS on.
+data_server_appserver_https_port: 8443
+
+# The max size of the DB connection pool for the Blue Button Data Server.
+data_server_db_max_connections: 100
+

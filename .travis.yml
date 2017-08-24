@@ -1,0 +1,41 @@
+---
+language: python
+python: "2.7"
+
+# The tests will be run in Docker containers, to verify compatibility with 
+# various OSes.
+sudo: required
+services:
+  - docker
+env:
+  # Used as a standin for RHEL 7.
+  - TEST_CASE=centos_7
+
+addons:
+  apt:
+    packages:
+      - sshpass
+
+install:
+  # Prep the Docker container that will be used.
+  - ./.travis/docker_launch.sh
+
+  # Install ansible.
+  - pip install -r requirements.freeze.txt
+  - ansible --version
+  - mkdir .travis/roles
+  - ln -s ./ .travis/roles/karlmdavis.bluebutton_data_server
+
+script:
+  # Basic role syntax check
+  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory --syntax-check
+
+  # Run the Ansible test case.
+  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory
+
+after_script:
+  - docker stop $(docker ps -a -q)
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+

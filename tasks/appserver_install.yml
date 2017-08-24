@@ -1,0 +1,44 @@
+---
+
+# If the installer is in S3, grab it from there.
+- name: Copy App Server Installer from S3
+  s3:
+    mode: get
+    bucket: "{{ data_server_artifacts_s3_bucket }}"
+    object: "{{ item }}"
+    dest: "{{ data_server_dir }}/{{ item }}"
+  with_items:
+    - "{{ data_server_appserver_installer_name }}"
+  become: true
+  when: data_server_artifacts.mode == 's3'
+
+# If the installer is being copied from local path, do so.
+- name: Copy App Server Installer from Local Path
+  copy:
+    src: "{{ data_server_artifacts.appserver_local_dir }}/{{ data_server_appserver_installer_name }}"
+    dest: "{{ data_server_dir }}/{{ data_server_appserver_installer_name }}"
+  become: true
+  when: data_server_artifacts.mode == 'local'
+
+- name: Extract App Server
+  unarchive:
+    src: "{{ data_server_dir }}/{{ data_server_appserver_installer_name }}"
+    dest: "{{ data_server_dir }}"
+    copy: false
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rwx,o=rx
+  become: true
+
+- name: Create App Server Service Definition
+  template:
+    src: bluebutton-appserver.service.j2
+    dest: /etc/systemd/system/bluebutton-appserver.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify:
+    - 'Reload Service Definitions'
+    - 'Restart App Server Service'
+
