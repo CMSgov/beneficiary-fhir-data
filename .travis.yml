@@ -17,7 +17,10 @@ addons:
       # Need this due to hardcoding Ansible hosts' passwords in our test inventory.
       - sshpass
       # Required by the `maven_artifact` Ansible module used during test setup.
-      - python-lxml
+      - python-dev
+      - libxml2
+      - libxml2-dev
+      - libxslt-dev
 
 install:
   # Prep the Docker container that will be used.
