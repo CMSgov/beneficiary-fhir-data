@@ -16,10 +16,6 @@
         version: 7.2.0
         extension: war
         dest: /tmp/bluebutton-data-server.war
-    - name: Install Java
-      apt:
-        name: openjdk-8-jdk
-      become: true
 
 - hosts: docker_container
   tasks:
