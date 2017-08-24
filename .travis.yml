@@ -14,7 +14,10 @@ env:
 addons:
   apt:
     packages:
+      # Need this due to hardcoding Ansible hosts' passwords in our test inventory.
       - sshpass
+      # Required by the `maven_artifact` Ansible module used during test setup.
+      - python-lxml
 
 install:
   # Prep the Docker container that will be used.
