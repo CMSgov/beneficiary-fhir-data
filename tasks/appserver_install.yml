@@ -10,7 +10,7 @@
   with_items:
     - "{{ data_server_appserver_installer_name }}"
   become: true
-  when: data_server_artifacts.mode == 's3'
+  when: data_server_artifacts_mode == 's3'
 
 # If the installer is being copied from local path, do so.
 - name: Copy App Server Installer from Local Path
@@ -18,7 +18,7 @@
     src: "{{ data_server_artifacts.appserver_local_dir }}/{{ data_server_appserver_installer_name }}"
     dest: "{{ data_server_dir }}/{{ data_server_appserver_installer_name }}"
   become: true
-  when: data_server_artifacts.mode == 'local'
+  when: data_server_artifacts_mode == 'local'
 
 - name: Extract App Server
   unarchive:

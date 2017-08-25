@@ -11,7 +11,7 @@
     - "{{ data_server_war_name }}"
   register: copy_war
   become: true
-  when: data_server_artifacts.mode == 's3'
+  when: data_server_artifacts_mode == 's3'
 
 # If the WAR is being copied from local path, do so.
 - name: Copy WAR from Local Path
@@ -20,7 +20,7 @@
     dest: "{{ data_server_dir }}/{{ data_server_war_name }}"
   register: copy_war
   become: true
-  when: data_server_artifacts.mode == 'local'
+  when: data_server_artifacts_mode == 'local'
 
 - name: Deploy WAR
   # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
