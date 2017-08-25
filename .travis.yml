@@ -33,11 +33,14 @@ install:
   - ln -s ./ .travis/roles/karlmdavis.bluebutton_data_server
 
 script:
+  # Ensure that Ansible treats this folder as the project's base.
+  - cd .travis/
+  
   # Basic role syntax check
-  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory --roles-path .travis/roles --syntax-check
+  - ansible-playbook test_${TEST_CASE}.yml --inventory-file=inventory --syntax-check
 
   # Run the Ansible test case.
-  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory --roles-path .travis/roles
+  - ansible-playbook test_${TEST_CASE}.yml --inventory-file=inventory
 
 after_script:
   # Inspect the Docker container a bit post-test. Just to aid in debugging.
