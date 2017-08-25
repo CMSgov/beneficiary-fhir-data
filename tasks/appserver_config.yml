@@ -24,7 +24,7 @@
   become: true
 
 - name: Create App Server SSL Keystore
-  command: "keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname cn={{ data_server_ssl_server.common_name }} -validity 3650 -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit"
+  command: "keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname cn={{ data_server_ssl_server_common_name }} -validity 3650 -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit"
   when: stat_appserver_keystore.isreg is not defined
   become: true
   become_user: "{{ data_server_user }}"
