@@ -41,9 +41,9 @@ script:
 
 after_script:
   # Inspect the Docker container a bit post-test. Just to aid in debugging.
-  - docker exec ansible_test_bluebutton_data_server/${TEST_CASE} /usr/bin/ls /usr/local/bluebutton-data-server
-  - docker exec ansible_test_bluebutton_data_server/${TEST_CASE} /usr/bin/cat /usr/local/bluebutton-data-server/wildfly-8.1.0.Final/standalone/log/server.log
-  - docker exec ansible_test_bluebutton_data_server/${TEST_CASE} /usr/bin/cat /usr/local/bluebutton-data-server/bluebutton-server-app.log
+  - docker exec ansible_test_bluebutton_data_server.${TEST_CASE} /usr/bin/ls /usr/local/bluebutton-data-server
+  - docker exec ansible_test_bluebutton_data_server.${TEST_CASE} /usr/bin/cat /usr/local/bluebutton-data-server/wildfly-8.1.0.Final/standalone/log/server.log
+  - docker exec ansible_test_bluebutton_data_server.${TEST_CASE} /usr/bin/cat /usr/local/bluebutton-data-server/bluebutton-server-app.log
   
   # Stop all Docker containers.
   - docker stop $(docker ps -a -q)
