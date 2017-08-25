@@ -43,6 +43,11 @@ script:
   - ansible-playbook test_${TEST_CASE}.yml --inventory-file=inventory -vvvv
 
 after_script:
+  # Inspect the management host environment a bit post-test. Just to aid in debugging.
+  - pwd
+  - ls -la ../
+  - ls -la ./
+
   # Inspect the Docker container a bit post-test. Just to aid in debugging.
   - docker exec ansible_test_bluebutton_data_server.${TEST_CASE} /usr/bin/ls /usr/local/bluebutton-data-server
   - docker exec ansible_test_bluebutton_data_server.${TEST_CASE} /usr/bin/cat /usr/local/bluebutton-data-server/wildfly-8.1.0.Final/standalone/log/server.log
