@@ -19,9 +19,6 @@
 
 - hosts: docker_container
   tasks:
-    - debug:
-        var: hostvars[inventory_hostname]
-        verbosity: 4
     - name: Apply Ansible Role
       include_role:
         name: karlmdavis.bluebutton_data_server
@@ -39,7 +36,4 @@
         data_server_db_url: 'jdbc:hsqldb:mem:test'
         data_server_db_username: ""
         data_server_db_password: ""
-    - debug:
-        var: hostvars[inventory_hostname]
-        verbosity: 4
 
