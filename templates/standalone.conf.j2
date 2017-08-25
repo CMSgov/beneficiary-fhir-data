@@ -9,7 +9,3 @@ JAVA_OPTS="$JAVA_OPTS -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS -Dj
 # Just a command line marker, which makes it easier to identify what various Wildfly/JBoss processes are doing.
 JAVA_OPTS="$JAVA_OPTS -Dbluebutton-server"
 
-{% if java_flame_graphs %}
-# This option is only needed when collecting the runtime data for CPU flame graphs.
-JAVA_OPTS="$JAVA_OPTS -XX:+PreserveFramePointer"
-{% endif %}
