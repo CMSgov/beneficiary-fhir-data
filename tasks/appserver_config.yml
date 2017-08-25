@@ -50,7 +50,7 @@
 
 - name: Delete Previous App Server SSL Truststore Working Copy
   file:
-    state: missing
+    state: absent
     path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
   changed_when: false
   become: true
