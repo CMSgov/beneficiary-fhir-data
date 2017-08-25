@@ -30,7 +30,7 @@ install:
   - pip install -r requirements.freeze.txt
   - ansible --version
   - mkdir .travis/roles
-  - ln -s ./ .travis/roles/karlmdavis.bluebutton_data_server
+  - ln -s `pwd` .travis/roles/karlmdavis.bluebutton_data_server
 
 script:
   # Ensure that Ansible treats this folder as the project's base.
