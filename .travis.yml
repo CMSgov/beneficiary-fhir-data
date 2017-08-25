@@ -47,6 +47,7 @@ after_script:
   - pwd
   - ls -la ../
   - ls -la ./
+  - ls -la ./roles/
 
   # Inspect the Docker container a bit post-test. Just to aid in debugging.
   - docker exec ansible_test_bluebutton_data_server.${TEST_CASE} /usr/bin/ls /usr/local/bluebutton-data-server
