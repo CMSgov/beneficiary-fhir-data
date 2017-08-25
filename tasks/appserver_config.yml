@@ -75,7 +75,7 @@
 - name: Populate App Server SSL Truststore Working Copy
   java_cert:
     cert_alias: "{{ item.alias }}"
-    cert_path: "/tmp/bluebutton-appserver-ssl-client-{{ item.alias }}.crt"
+    cert_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
     keystore_pass: changeit
     keystore_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
   with_items: "{{ data_server_ssl_clients }}"
