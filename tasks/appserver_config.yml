@@ -68,7 +68,7 @@
   copy:
     content: "{{ item.certificate }}"
     dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
-  with_items: "{{ data_server_ssl_clients }}"i
+  with_items: "{{ data_server_ssl_clients }}"
   become: true
   become_user: "{{ data_server_user }}"
 
