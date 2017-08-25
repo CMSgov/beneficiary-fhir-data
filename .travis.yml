@@ -34,10 +34,10 @@ install:
 
 script:
   # Basic role syntax check
-  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory --syntax-check
+  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory --roles-path .travis/roles --syntax-check
 
   # Run the Ansible test case.
-  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory
+  - ansible-playbook .travis/test_${TEST_CASE}.yml --inventory-file=.travis/inventory --roles-path .travis/roles
 
 after_script:
   # Inspect the Docker container a bit post-test. Just to aid in debugging.
