@@ -15,5 +15,6 @@ docker run \
 	--volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
 	--tmpfs /run \
 	--tmpfs /run/lock \
+	--name ansible_test_bluebutton_data_server/${TEST_CASE} \
 	ansible_test_bluebutton_data_server/${TEST_CASE}
 
