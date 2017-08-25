@@ -15,7 +15,7 @@
 # If the installer is being copied from local path, do so.
 - name: Copy App Server Installer from Local Path
   copy:
-    src: "{{ data_server_artifacts_appserver_local_dir }}/{{ data_server_appserver_installer_name }}"
+    src: "{{ data_server_appserver_local_dir }}/{{ data_server_appserver_installer_name }}"
     dest: "{{ data_server_dir }}/{{ data_server_appserver_installer_name }}"
   become: true
   when: data_server_artifacts_mode == 'local'
