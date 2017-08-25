@@ -40,7 +40,7 @@ script:
   - ansible-playbook test_${TEST_CASE}.yml --inventory-file=inventory --syntax-check
 
   # Run the Ansible test case.
-  - ansible-playbook test_${TEST_CASE}.yml --inventory-file=inventory
+  - ansible-playbook test_${TEST_CASE}.yml --inventory-file=inventory -vvvv
 
 after_script:
   # Inspect the Docker container a bit post-test. Just to aid in debugging.
