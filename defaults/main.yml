@@ -10,7 +10,7 @@ data_server_user: bb-data
 data_server_appserver_jvmargs: '' 
 
 # The management port used by the app server (Wildfly/JBoss).
-data_server_appserver_management_port: 9090
+data_server_appserver_management_port: 9990
 
 # The management admin credentials for the app server (Wildfly/JBoss). An empty username indicates that no authentication should be expected or used.
 data_server_appserver_management_username: ''
