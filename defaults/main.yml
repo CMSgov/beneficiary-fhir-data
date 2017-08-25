@@ -6,6 +6,9 @@ data_server_dir: /usr/local/bluebutton-data-server
 # The system user that the Blue Button Data Server will run as.
 data_server_user: bb-data
 
+# The extra Java VM args to start the app server (Wildfly/JBoss) with.
+data_server_appserver_jvmargs: '' 
+
 # The management port used by the app server (Wildfly/JBoss).
 data_server_appserver_management_port: 9090
 
