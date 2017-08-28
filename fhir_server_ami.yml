@@ -63,30 +63,6 @@
   roles:
     - rhel_ansible_pipelining
 
-- name: Ensure FHIR Database Exists (Using FHIR Server Master)
-  hosts: backend_fhir_master
-  tasks:
-
-    - name: Install Pre-requisites
-      yum:
-        name: "{{ item }}"
-        state: latest
-      with_items:
-        - python-psycopg2
-      become: true
-    
-    - name: Create FHIR Database
-      postgresql_db:
-        login_host: "{{ hostvars['localhost']['backend_postgres_endpoint'] }}"
-        port: "{{ hostvars['localhost']['backend_postgres_port'] }}"
-        login_user: "{{ backend_postgres_master_username }}"
-        login_password: "{{ backend_postgres_master_password }}"
-        name: fhirdb
-        encoding: 'UNICODE'
-        lc_collate: 'C'
-        lc_ctype: 'C'
-        template: 'template0'
-
 - name: Configure FHIR Server Master
   hosts: backend_fhir_master
   roles:
