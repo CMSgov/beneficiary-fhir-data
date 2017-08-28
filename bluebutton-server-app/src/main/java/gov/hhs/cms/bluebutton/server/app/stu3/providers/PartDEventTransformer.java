@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
@@ -47,8 +46,8 @@ final class PartDEventTransformer {
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_CCW_PDE_ID).setValue(claimGroup.getEventId());
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_GRP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
-		eob.getInsurance().setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(),
-				TransformerConstants.COVERAGE_PLAN_PART_D));
+		eob.getInsurance()
+				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_D));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
@@ -248,19 +247,6 @@ final class PartDEventTransformer {
 					TransformerConstants.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD,
 					TransformerConstants.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, claimGroup.getPharmacyTypeCode());
 		}
-
-		Coverage coverage = new Coverage();
-		coverage.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID)
-				.setValue(claimGroup.getPlanContractId());
-		coverage.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID)
-				.setValue(claimGroup.getPlanBenefitPackageId());
-		coverage.getGrouping().setPlan(TransformerConstants.COVERAGE_PLAN)
-				.setSubPlan(TransformerConstants.COVERAGE_PLAN_PART_D);
-		coverage.addPayor(TransformerUtils.createReferenceToCms());
-		coverage.setBeneficiary(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
-		coverage.setSubscriber(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
-		coverage.setRelationship(TransformerUtils.createCodeableConcept("", "self"));
-		eob.getInsurance().setCoverage(new Reference(coverage));
 
 		/*
 		 * Storing code values in EOB.information below

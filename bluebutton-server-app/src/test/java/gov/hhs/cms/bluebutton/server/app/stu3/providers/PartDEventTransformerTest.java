@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -68,6 +67,10 @@ public final class PartDEventTransformerTest {
 				eob.getType());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
+		Assert.assertEquals(
+				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_D).getReference(),
+				eob.getInsurance().getCoverage().getReference());
+
 		Assert.assertEquals(Date.valueOf(claim.getPaymentDate().get()), eob.getPayment().getDate());
 
 		Assert.assertEquals("01", claim.getServiceProviderIdQualiferCode());
@@ -113,16 +116,6 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT,
 				claim.getGapDiscountAmount(),
 				rxItem.getAdjudication());
-
-		Coverage coverage = (Coverage) eob.getInsurance().getCoverage().getResource();
-
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID,
-				claim.getPlanContractId(),
-				coverage.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
-				claim.getPlanBenefitPackageId(), coverage.getIdentifier());
-		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getPlan());
-		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN_PART_D, coverage.getGrouping().getSubPlan());
 
 	}
 }

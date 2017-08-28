@@ -71,6 +71,10 @@ public final class SNFClaimTransformerTest {
 				TransformerConstants.CODING_SYSTEM_CCW_RECORD_ID_CD, "" + claim.getNearLineRecordIdCode());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
+		Assert.assertEquals(
+				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_A).getReference(),
+				eob.getInsurance().getCoverage().getReference());
+
 		Assert.assertEquals("active", eob.getStatus().toCode());
 
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
