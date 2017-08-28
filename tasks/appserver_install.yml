@@ -42,6 +42,10 @@
     - 'Reload Service Definitions'
     - 'Restart App Server Service'
 
+# Need to ensure service is running (and has been restarted if needed) before config, as it needs the server to be available.
+# And it's helpful to do this as early as possible, as the JBoss/Wildfly startup/restart lifecycle can cause some race conditions.
+- meta: flush_handlers
+
 - name: Create App Server Management User
   shell: "{{ data_server_dir }}/{{ data_server_appserver_name }}/bin/add-user.sh --silent {{ data_server_appserver_management_username }} {{ data_server_appserver_management_password }} &> {{ data_server_dir }}/{{ data_server_appserver_name }}/server-config.log"
   args:
