@@ -108,4 +108,6 @@
 - name: Run App Server Config Script
   command: "{{ data_server_dir }}/bluebutton-appserver-config.sh --serverhome {{ data_server_dir }}/{{ data_server_appserver_name }} --managementport {{ data_server_appserver_management_port }} --managementusername {{ data_server_appserver_management_username }} --managementpassword {{ data_server_appserver_management_password }} --httpsport {{ data_server_appserver_https_port }} --keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks --truststore {{ data_server_dir }}/bluebutton-appserver-truststore.jks --dburl {{ data_server_db_url }} --dbusername {{ data_server_db_username }} --dbpassword {{ data_server_db_password }} --dbconnectionsmax {{ data_server_db_max_connections }}"
   changed_when: true
+  become: true
+  become_user: "{{ data_server_user }}"
 
