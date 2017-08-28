@@ -48,5 +48,5 @@
     executable: /bin/bash
   become: true
   become_user: "{{ data_server_user }}"
-  when: data_server_management_user
+  when: data_server_appserver_management_user
 
