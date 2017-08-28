@@ -26,11 +26,13 @@
   # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
   command: "{{ data_server_dir }}/{{ data_server_appserver_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 \"deploy {{ data_server_dir }}/{{ data_server_war_name }} --name=ROOT.war --force\""
   become: true
+  become_user: "{{ data_server_user }}"
   when: copy_war.changed == true and data_server_appserver_management_username == ''
 
 - name: Deploy WAR (with Authentication)
   # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
   command: "{{ data_server_dir }}/{{ data_server_appserver_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 --user={{ data_server_appserver_management_username }} --password={{ data_server_appserver_management_password }} \"deploy {{ data_server_dir }}/{{ data_server_war_name }} --name=ROOT.war --force\""
   become: true
+  become_user: "{{ data_server_user }}"
   when: copy_war.changed == true and data_server_appserver_management_username != ''
 
