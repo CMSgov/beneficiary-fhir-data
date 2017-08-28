@@ -99,6 +99,9 @@ for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}"; do
 	fi
 done
 
+# Clear the config log file.
+> "${serverHome}/server-config.log"
+
 # Determine the authentication arguments to use with the Wildfly CLI.
 # Note: This isn't 100% secure. The CLI can't read the username and password 
 # from a file, so they have to be specified as command line aguments. Such 
@@ -112,8 +115,6 @@ fi
 # Define a function that can wait for the server to be ready.
 waitForServerReady() {
 	echo "Waiting for server to be ready..." |& tee --append "${serverHome}/server-config.log"
-	# FIXME: Remove this extra call, once script is debugged.
-	"${serverHome}/bin/jboss-cli.sh" --controller=localhost:${managementPort} --connect ${cliArgsAuthentication} --command=":read-attribute(name=server-state)" &> "${serverHome}/server-config.log"
 	startSeconds=$SECONDS
 	endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 	while true; do
@@ -152,7 +153,7 @@ EOF
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	${cliArgsAuthentication} \
 	--file=/dev/stdin \
-	&> "${serverHome}/server-config.log"
+	&>> "${serverHome}/server-config.log"
 echo "Server configured successfully (HTTPS enabled)."
 waitForServerReady
 
