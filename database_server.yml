@@ -17,6 +17,7 @@
         command: create
         region: "{{ aws_region }}"
         zone: "{{ aws_zone }}"
+        vpc_security_groups: "{{ ec2_group_default_id }}"
         instance_name: bluebutton-sandbox-backend
         db_engine: postgres
         #engine_version: 9.6.1

@@ -72,6 +72,7 @@
         image: "{{ ami_id_rhel_7_encrypted }}"
         region: "{{ aws_region }}"
         zone: "{{ aws_zone }}"
+        vpc_subnet_id: "{{ aws_vpc_subnet }}"
         volumes:
           - device_name: /dev/sda1
             volume_type: gp2
@@ -115,8 +116,40 @@
   roles:
     - rhel_ansible_pipelining
 
+- name: Ensure FHIR Database Exists (Using ETL Server)
+  hosts: backend_etl_new
+  tasks:
+
+    - name: Install Pre-requisites
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - python-psycopg2
+      become: true
+    
+    - name: Create FHIR Database
+      postgresql_db:
+        login_host: "{{ hostvars['localhost']['backend_postgres_endpoint'] }}"
+        port: "{{ hostvars['localhost']['backend_postgres_port'] }}"
+        login_user: "{{ backend_postgres_master_username }}"
+        login_password: "{{ backend_postgres_master_password }}"
+        name: bluebutton_backend_db
+        encoding: 'UNICODE'
+        lc_collate: 'C'
+        lc_ctype: 'C'
+        template: 'template0'
+
 - name: Configure ETL
   hosts: backend_etl_new
   roles:
-    - etl_server
+    - role: karlmdavis.bluebutton_data_pipeline
+      data_pipeline_appjar_name: "bluebutton-data-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar"
+      data_pipeline_appjar_s3_bucket: "{{ s3_bucket_deployment }}"
+      data_pipeline_s3_bucket: "{{ s3_bucket_etl_staging }}"
+      data_pipeline_hicn_hash_iterations: 2  # NIST recommends at least 1000, but this isn't production.
+      data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
+      data_pipeline_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/bluebutton_backend_db"
+      data_pipeline_db_username: "{{ backend_postgres_master_username }}"
+      data_pipeline_db_password: "{{ backend_postgres_master_password }}"
 

@@ -6,8 +6,9 @@
 
 aws_region: 'us-east-1'
 aws_zone: 'us-east-1a'
-aws_subnet: 'subnet-7858b153'
-#aws_subnet: 'subnet-9a1dfeb0'
+aws_vpc: 'vpc-a755dbc2'  # ITIO Innovation Lab
+aws_vpc_subnet: 'subnet-7858b153'
+#aws_vpc_subnet: 'subnet-9a1dfeb0'
 
 # The DNS domain that the Blue Button Backend services will be hosted under.
 backend_domain: 'backend.bluebutton.hhsdevcloud.us'
@@ -43,8 +44,8 @@ ec2_backend_fhir_instance_type: 'm4.4xlarge'
 ec2_backend_etl_instance_type: 'm4.4xlarge'
 backend_fhir_memory_args: '-Xmx58g -XX:MaxMetaspaceSize=4g'
 backend_fhir_dbconnectionsmax: '400'
-backend_etl_memory_args: '-Xmx58g'
-backend_etl_loader_threads: '390'
+data_pipeline_jvm_args: '-Xmx58g'
+data_pipeline_loader_threads: '390'
 # When `true`, Ansible will configure the FHIR server to run such that Java
 # flame graphs can be collected. This will incur a performance penalty of 1%-
 # 3%, and so should be left disabled unless specifically needed.
