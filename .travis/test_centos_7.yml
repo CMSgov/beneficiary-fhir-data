@@ -27,6 +27,8 @@
         data_server_appserver_installer_name: wildfly-dist.tar.gz
         data_server_appserver_name: wildfly-8.1.0.Final
         data_server_appserver_local_dir: /tmp
+        data_server_appserver_management_username: someadmin
+        data_server_appserver_management_password: somepassword
         data_server_war_name: bluebutton-data-server.war
         data_server_war_local_dir: /tmp
         data_server_ssl_server_common_name: localhost
