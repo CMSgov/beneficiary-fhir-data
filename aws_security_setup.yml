@@ -40,7 +40,7 @@
             Principal:
               Service: ec2.amazonaws.com
 
-    - name: Give bluebutton-backend/ec2-services Access to Blue Button S3 Buckets
+    - name: Give BlueButtonBackend-EC2Services Access to Blue Button S3 Buckets
       iam_policy:
         iam_type: role
         iam_name: BlueButtonBackend-EC2Services
