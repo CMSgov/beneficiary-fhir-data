@@ -25,6 +25,7 @@
         image: "{{ ami_id_rhel_7_encrypted }}"
         region: "{{ aws_region }}"
         zone: "{{ aws_zone }}"
+        vpc_subnet_id: "{{ aws_vpc_subnet }}"
         instance_profile_name: BlueButtonBackend-EC2Services
         wait: true
         exact_count: 1

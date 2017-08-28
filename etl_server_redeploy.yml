@@ -72,6 +72,7 @@
         image: "{{ ami_id_rhel_7_encrypted }}"
         region: "{{ aws_region }}"
         zone: "{{ aws_zone }}"
+        vpc_subnet_id: "{{ aws_vpc_subnet }}"
         volumes:
           - device_name: /dev/sda1
             volume_type: gp2

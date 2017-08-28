@@ -6,8 +6,9 @@
 
 aws_region: 'us-east-1'
 aws_zone: 'us-east-1a'
-aws_subnet: 'subnet-7858b153'
-#aws_subnet: 'subnet-9a1dfeb0'
+aws_vpc: 'vpc-a755dbc2'  # ITIO Innovation Lab
+aws_vpc_subnet: 'subnet-7858b153'
+#aws_vpc_subnet: 'subnet-9a1dfeb0'
 
 # The DNS domain that the Blue Button Backend services will be hosted under.
 backend_domain: 'backend.bluebutton.hhsdevcloud.us'
