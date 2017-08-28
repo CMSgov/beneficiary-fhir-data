@@ -45,5 +45,5 @@
 - name: Create App Server Management User
   command: "{{ data_server_dir }}/{{ data_server_appserver_name }}/bin/add-user.sh {{ data_server_appserver_management_username }} {{ data_server_appserver_management_password }}"
   become: true
-  become_user: {{ data_server_user }}
+  become_user: "{{ data_server_user }}"
 
