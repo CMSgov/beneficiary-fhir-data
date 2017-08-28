@@ -111,7 +111,9 @@ fi
 
 # Define a function that can wait for the server to be ready.
 waitForServerReady() {
-	echo "Waiting for server to be ready..."
+	echo "Waiting for server to be ready..." |& tee --append "${serverHome}/server-config.log"
+	# FIXME: Remove this extra call, once script is debugged.
+	"${serverHome}/bin/jboss-cli.sh" --controller=localhost:${managementPort} --connect ${cliArgsAuthentication} --command=":read-attribute(name=server-state)" &> "${serverHome}/server-config.log"
 	startSeconds=$SECONDS
 	endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 	while true; do
