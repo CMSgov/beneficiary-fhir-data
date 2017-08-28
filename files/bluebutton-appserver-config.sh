@@ -115,7 +115,7 @@ waitForServerReady() {
 	startSeconds=$SECONDS
 	endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 	while true; do
-		if "${serverHome}/bin/jboss-cli.sh" --controller=localhost:${managementPort} --connect ${cliArgsAuthentication} --command=":read-attribute(name=server-state)" 2>&1 | grep --quiet "\"result\" => \"running\""; then
+		if "${serverHome}/bin/jboss-cli.sh" --controller=localhost:${managementPort} --connect ${cliArgsAuthentication} --command=":read-attribute(name=server-state)" |& tee --append "${serverHome}/server-config.log" |& grep --quiet "\"result\" => \"running\""; then
 			echo "Server ready after $(($SECONDS - $startSeconds)) seconds."
 			break
 		fi
