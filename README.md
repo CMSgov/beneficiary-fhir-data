@@ -42,7 +42,7 @@ This role does not have any runtime dependencies on other Ansible roles.
 Example Playbook
 ----------------
 
-See the testcase in [.travis/test_centos_7.yml](./.travis/test_centos_7.yml) for an example of how to apply this role in an Ansible play.
+See the test script in [.travis/test_base.yml](./.travis/test_base.yml) and the test case variables in [.travis/vars/](./.travis/vars/) for examples of how to apply this role in Ansible plays.
 
 ## License
 

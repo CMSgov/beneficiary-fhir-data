@@ -7,7 +7,7 @@ set -e
 set -v
 
 # Build and start the container, running systemd and ssh.
-docker build --tag ansible_test_bluebutton_data_server/${TEST_CASE} ./.travis/${TEST_CASE}
+docker build --tag ansible_test_bluebutton_data_server/${PLATFORM} ./.travis/${PLATFORM}
 docker run \
 	--cap-add=SYS_ADMIN \
 	--detach \
@@ -15,6 +15,6 @@ docker run \
 	--volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
 	--tmpfs /run \
 	--tmpfs /run/lock \
-	--name ansible_test_bluebutton_data_server.${TEST_CASE} \
-	ansible_test_bluebutton_data_server/${TEST_CASE}
+	--name ansible_test_bluebutton_data_server.${PLATFORM} \
+	ansible_test_bluebutton_data_server/${PLATFORM}
 
