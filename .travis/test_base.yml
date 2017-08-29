@@ -20,11 +20,11 @@
 
 - hosts: docker_container
   tasks:
-    - name: Apply Ansible Role
-      include_role:
-        name: karlmdavis.bluebutton_data_server
-
     # Most of the differences between test cases are the variables used, so we pull them in with a test-case-specific include.
     - name: Set Ansible Variables for Test Case
       include_vars: "{{ lookup('env','TEST_CASE') }}.yml"
+
+    - name: Apply Ansible Role
+      include_role:
+        name: karlmdavis.bluebutton_data_server
 
