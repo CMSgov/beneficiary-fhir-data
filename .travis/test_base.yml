@@ -8,6 +8,7 @@
         version: 8.1.0.Final
         extension: tar.gz
         dest: /tmp/wildfly-dist.tar.gz
+
     - name: Download Blue Button Data Server WAR
       maven_artifact:
         # FIXME: Once the Blue Button CI server is available again, grab an actual bluebutton-server WAR.
@@ -22,6 +23,8 @@
     - name: Apply Ansible Role
       include_role:
         name: karlmdavis.bluebutton_data_server
-      # Most of the differences between test cases are the variables used, so we pull them in with a test-case-specific include.
+
+    # Most of the differences between test cases are the variables used, so we pull them in with a test-case-specific include.
+    - name: Set Ansible Variables for Test Case
       include_vars: "{{ lookup('env','TEST_CASE') }}.yml"
 
