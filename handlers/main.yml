@@ -1,12 +1,8 @@
 ---
 
 - name: Reload Service Definitions
-  command: /usr/bin/systemctl daemon-reload
-  become: true
+  include: reload_services.yml
 
 - name: Restart App Server Service
-  service:
-    name: bluebutton-appserver
-    state: restarted
-  become: true
+  include: restart_appserver.yml
 

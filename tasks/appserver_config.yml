@@ -108,6 +108,9 @@
     mode: u=rw,g=rw,o=r
   become: true
 
+# Need to ensure service is running (and has been restarted if needed) before config, as it needs the server to be available.
+- meta: flush_handlers
+
 - name: Copy App Server Config Script
   copy:
     src: files/bluebutton-appserver-config.sh
