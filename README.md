@@ -24,8 +24,11 @@ Variables that must be defined to use the role:
 * `data_server_appserver_local_dir`: The local directory for the app server installation bundle to be deployed. Must be set if `data_server_artifacts_mode` is "`local`".
 * `data_server_war_name`: The name of the WAR file to be deployed (as saved in either S3 or a local directory).
 * `data_server_war_local_dir`: The local directory of the WAR file to be deployed. Must be set if `data_server_artifacts_mode` is "`local`".
-* `data_server_ssl_server_common_name`: The common name to assign to the Java application server's SSL certificate.
-* `data_server_ssl_clients`: A list of the SSL client certificates that will be given access to the server.
+* `data_server_ssl_server_genkeypair_args`: The arguments to pass to the `keytool` command when generating a server keypair.
+* `data_server_ssl_client_cas`: A list of the SSL client certificate authorities that will be given access to the server.
+    * `alias`: The alias to assign to the SSL client certificate authority in the server's Java trust store.
+    * `certificate`: The contents of the public certificate authority for the SSL client to authorize.
+* `data_server_ssl_client_certificates`: A list of the (non-CA) SSL client certificates that will be given access to the server.
     * `alias`: The alias to assign to the SSL client certificate in the server's Java trust store.
     * `certificate`: The contents of the public certificate for the SSL client to authorize.
 * `data_server_db_url`: The JDBC URL to connect to.

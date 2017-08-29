@@ -24,7 +24,7 @@
   become: true
 
 - name: Create App Server SSL Keystore
-  command: "keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname cn={{ data_server_ssl_server_common_name }} -validity 3650 -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit"
+  command: "keytool -genkeypair -alias server {{ data_server_ssl_server_genkeypair_args }} -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit"
   when: stat_appserver_keystore.isreg is not defined
   become: true
   become_user: "{{ data_server_user }}"
@@ -68,17 +68,32 @@
   copy:
     content: "{{ item.certificate }}"
     dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
-  with_items: "{{ data_server_ssl_clients }}"
+  with_items: "{{ data_server_ssl_client_certificates }}"
   become: true
   become_user: "{{ data_server_user }}"
 
-- name: Populate App Server SSL Truststore Working Copy
+- name: Save App Server SSL Truststore Certificate Authorities
+  copy:
+    content: "{{ item.certificate }}"
+    dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
+  with_items: "{{ data_server_ssl_client_cas }}"
+  become: true
+  become_user: "{{ data_server_user }}"
+
+- name: Import Certificates into App Server SSL Truststore Working Copy
   java_cert:
     cert_alias: "{{ item.alias }}"
     cert_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
     keystore_pass: changeit
     keystore_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
-  with_items: "{{ data_server_ssl_clients }}"
+  with_items: "{{ data_server_ssl_client_certificates }}"
+  changed_when: false
+  become: true
+  become_user: "{{ data_server_user }}"
+
+- name: Import Certificate Authorities into App Server SSL Truststore Working Copy
+  command: "keytool -importcert -noprompt -trustcacerts -alias {{ item.alias }} -file {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
+  with_items: "{{ data_server_ssl_client_cas }}"
   changed_when: false
   become: true
   become_user: "{{ data_server_user }}"
