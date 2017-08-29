@@ -6,7 +6,7 @@
 #
 # Usage:
 # 
-# $ bluebutton-appserver-config.sh --serverhome /path-to-jboss --managementport 9090 --auth --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password" --dbconnectionsmax 42
+# $ bluebutton-appserver-config.sh --serverhome /path-to-jboss --managementport 9090 --managementusername someadmin --managementpassword somepass --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password" --dbconnectionsmax 42
 ##
 
 # Constants.
@@ -19,7 +19,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
 	-o h:m:U:P:s:k:t:u:n:p:c: \
-	--long serverhome:,managementport:,managementusername:,managementpassword:,auth,httpsport:,keystore:,truststore:,dburl:,dbusername:,dbpassword:,dbconnectionsmax: \
+	--long serverhome:,managementport:,managementusername:,managementpassword:,httpsport:,keystore:,truststore:,dburl:,dbusername:,dbpassword:,dbconnectionsmax: \
 	-n 'bluebutton-appserver-config.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -119,7 +119,7 @@ waitForServerReady() {
 	endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 	while true; do
 		if "${serverHome}/bin/jboss-cli.sh" --controller=localhost:${managementPort} --connect ${cliArgsAuthentication} --command=":read-attribute(name=server-state)" |& tee --append "${serverHome}/server-config.log" |& grep --quiet "\"result\" => \"running\""; then
-			echo "Server ready after $(($SECONDS - $startSeconds)) seconds."
+			echo "Server ready after $(($SECONDS - $startSeconds)) seconds." |& tee --append "${serverHome}/server-config.log"
 			break
 		fi
 		if [[ $SECONDS -gt $endSeconds ]]; then
