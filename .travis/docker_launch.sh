@@ -7,7 +7,7 @@ set -e
 set -v
 
 # Build and start the container, running systemd and ssh.
-docker build --tag ansible_test_bluebutton_data_server/${PLATFORM} ./.travis/${PLATFORM}
+docker build --tag ansible_test_bluebutton_data_server/${PLATFORM} ./.travis/docker_platforms/${PLATFORM}
 docker run \
 	--cap-add=SYS_ADMIN \
 	--detach \
