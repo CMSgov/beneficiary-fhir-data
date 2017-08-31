@@ -87,6 +87,10 @@ public final class CarrierClaimTransformerTest {
 				TransformerConstants.CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD, claim.getPaymentDenialCode());
 		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 
+		Assert.assertEquals(
+				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_B).getReference(),
+				eob.getInsurance().getCoverage().getReference());
+
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				referral.getSubject().getReference());

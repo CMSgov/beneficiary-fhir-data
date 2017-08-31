@@ -394,18 +394,17 @@ final class TransformerUtils {
 	}
 
 	/**
-	 * @param subPlan
-	 *            the {@link Coverage#getSubPlan()} value to match
 	 * @param beneficiaryPatientId
 	 *            the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
 	 *            value for the {@link Coverage#getBeneficiary()} value to match
+	 * @param coverageType
+	 *            the {@link MedicareSegment} value to match
 	 * @return a {@link Reference} to the {@link Coverage} resource where
 	 *         {@link Coverage#getPlan()} matches {@link #COVERAGE_PLAN} and the
 	 *         other parameters specified also match
 	 */
-	static Reference referenceCoverage(String beneficiaryPatientId, String subPlan) {
-		return new Reference(String.format("Coverage?beneficiary.identifier=%s|%s&subplan=%s",
-				TransformerConstants.CODING_SYSTEM_CCW_BENE_ID, beneficiaryPatientId, subPlan));
+	static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
+		return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
 	}
 
 	/**

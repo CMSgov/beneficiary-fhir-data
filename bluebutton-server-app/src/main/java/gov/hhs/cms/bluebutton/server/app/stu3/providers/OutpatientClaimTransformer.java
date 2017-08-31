@@ -52,8 +52,8 @@ final class OutpatientClaimTransformer {
 				.setValue(claimGroup.getClaimId());
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_GRP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
-		eob.getInsurance().setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(),
-				TransformerConstants.COVERAGE_PLAN_PART_B));
+		eob.getInsurance()
+				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_B));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 

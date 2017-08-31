@@ -67,9 +67,9 @@ final class CarrierClaimTransformer {
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
 
 		eob.getInsurance().setCoverage(
-				TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), TransformerConstants.COVERAGE_PLAN_PART_B));
+				TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_B));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
-		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);		
 
 		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_SYSTEM_CCW_RECORD_ID_CD,
 				TransformerConstants.CODING_SYSTEM_CCW_RECORD_ID_CD,
