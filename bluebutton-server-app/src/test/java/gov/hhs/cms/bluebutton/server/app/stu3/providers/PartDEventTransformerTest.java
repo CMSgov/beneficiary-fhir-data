@@ -70,6 +70,12 @@ public final class PartDEventTransformerTest {
 		Assert.assertEquals(
 				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_D).getReference(),
 				eob.getInsurance().getCoverage().getReference());
+		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID,
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, claim.getPlanContractId());
+		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID, claim.getPlanBenefitPackageId());
 
 		Assert.assertEquals(Date.valueOf(claim.getPaymentDate().get()), eob.getPayment().getDate());
 

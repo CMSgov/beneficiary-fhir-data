@@ -48,6 +48,12 @@ final class PartDEventTransformer {
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_D));
+		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID,
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, claimGroup.getPlanContractId());
+		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
+				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID, claimGroup.getPlanBenefitPackageId());
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
