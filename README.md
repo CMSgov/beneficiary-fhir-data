@@ -23,34 +23,36 @@ If it isn't already installed, install the `virtualenv` package. On Ubuntu, this
 
 Next, create a virtual environment for this project and install the project's dependencies into it:
 
-    $ cd bluebutton-ansible-role-data-pipeline.git
+    $ cd bluebutton-ansible-playbooks-backend.git
     $ virtualenv -p /usr/bin/python2.7 venv
     $ source venv/bin/activate
     $ pip install -r requirements.txt
 
 The `source` command above will need to be run every time you open a new terminal to work on this project.
 
-Be sure to update the `requirements.txt` file after `pip install`ing a new dependency for this project:
+Be sure to update the `requirements.frozen.txt` file after `pip install`ing a new dependency for this project:
 
-    $ pip freeze > requirements.txt
+    $ pip freeze > requirements.frozen.txt
 
 ### Ansible Roles
 
 Run the following command to download and install the roles required by this project into `~/.ansible/roles/`:
 
-    $ ansible-galaxy install -r install_roles.yml
+    $ ansible-galaxy remove karlmdavis.bluebutton_data_pipeline \
+        && ansible-galaxy remove karlmdavis.bluebutton_data_server \
+        && ansible-galaxy install -r install_roles.yml
 
 ### SSH
 
 These playbooks rely on SSH host aliases, which must be configured in your `~/.ssh/config` file. Here's an example with fake IPs and user names (ask a HealthAPT sysadmin for the correct values):
 
 ```
-Host bluebutton-healthapt-prod-etl
+Host bluebutton-healthapt-prod-data-pipeline
   HostName 1.2.3.4
   User myusername
   IdentityFile ~/workspaces/cms/healthapt-aws-sshkey.pem
 
-Host bluebutton-healthapt-prod-fhir
+Host bluebutton-healthapt-prod-data-server
   HostName 1.2.3.5
   User myusername
   IdentityFile ~/workspaces/cms/healthapt-aws-sshkey.pem
@@ -68,7 +70,7 @@ If you don't have this file, you will receive errors like the following when try
 
 The playbooks can be run, as follows:
 
-    $ ansible-playbook backend.yml --inventory-file=hosts-production
+    $ ansible-playbook backend.yml --inventory-file=hosts_production | tee "logs/ansible-production-$(date --iso-8601=seconds)".log
 
 ## License
 

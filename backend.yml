@@ -1,18 +1,64 @@
 ---
-
 ##
-# Manages the rollout/upgrade of Blue Button API backend systems.
+# Manages the rollout/upgrade of Blue Button API backend systems. Note that all 
+# of the variables prefixed with `vault_` are security-sensitive and are thus 
+# stored in encrypted Ansible Vault files. Those files can be edited using the 
+# `ansible-vault` command, e.g.:
+# 
+#     $ `ansible-vault edit group_vars/env_production/vault.yml`.
 ##
 
 - name: Configure ETL System for Ansible Pipelining
-  hosts: bluebutton-healthapt-prod-etl
+  hosts: all
   vars:
     ansible_ssh_pipelining: false
   roles:
     - rhel_ansible_pipelining
 
-- name: Configure ETL System
-  hosts: bluebutton-healthapt-prod-etl
-  roles:
-    - karlmdavis.bluebutton_data_pipeline
+- name: Configure Data Pipeline System
+  hosts: data_pipeline_systems
+  tasks:
+    - name: Apply Blue Button Data Pipeline Role
+      include_role:
+        name: karlmdavis.bluebutton_data_pipeline
+      vars:
+        data_pipeline_dir: '/u01/bluebutton-data-pipeline'
+        data_pipeline_appjar_name: "bluebutton-data-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
+        data_pipeline_appjar_localpath: "~/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/{{ data_pipeline_version }}"
+        data_pipeline_jvm_args: '-Xmx40g'
+        data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
+        data_pipeline_loader_threads: 200
+        data_pipeline_user: "{{ vault_data_pipeline_user }}"
+        data_pipeline_s3_bucket: "{{ vault_data_pipeline_s3_bucket }}"
+        data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
+        data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
+        data_pipeline_db_url: "{{ vault_data_db_url }}"
+        data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
+        data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
+
+- name: Configure Data Server System
+  hosts: data_server_systems
+  tasks:
+    - name: Apply Blue Button Data Server Role
+      include_role:
+        name: karlmdavis.bluebutton_data_server
+      vars:
+        data_server_dir: /u01/jboss
+        data_server_user: "{{ vault_data_server_user }}"
+        data_server_artifacts_mode: local
+        data_server_appserver_name: jboss-eap-7.0
+        data_server_appserver_installer_name: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
+        data_server_appserver_local_dir: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
+        data_server_appserver_jvmargs: '-Xmx128g -XX:MaxMetaspaceSize=8g'
+        data_server_appserver_management_port: "{{ vault_data_server_appserver_management_port }}"
+        data_server_appserver_management_username: "{{ vault_data_server_appserver_management_username }}"
+        data_server_appserver_management_password: "{{ vault_data_server_appserver_management_password }}"
+        data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
+        data_server_war_name: "bluebutton-server-app-{{ data_server_version }}.war"
+        data_server_war_local_dir: "~/.m2/repository/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ data_server_version }}"
+        data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
+        data_server_db_url: "{{ vault_data_db_url }}"
+        data_server_db_username: "{{ vault_data_server_db_username }}"
+        data_server_db_password: "{{ vault_data_server_db_password }}"
+        data_server_db_connections_max: 400
 

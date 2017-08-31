@@ -1,9 +1,0 @@
-# Our security policies mandate individual user accounts for everyone; we can't 
-# specify a shared username that all Ansible connections will use. Accordingly,
-# users must havee an SSH alias for these systems in their `~/.ssh/config` 
-# file, which must define the `HostName` `User`, and `IdentityFile` for each 
-system.
-
-# The Production ETL server.
-bluebutton-healthapt-prod-etl
-
