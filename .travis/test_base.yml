@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Download Blue Button Data Pipeline JAR
+      # FIXME: Not actually available in Maven Central right now.
+      maven_artifact:
+        group_id: 'gov.hhs.cms.bluebutton.data.pipeline'
+        artifact_id: 'bluebutton-data-pipeline-app'
+        version: '0.1.0-SNAPSHOT'
+        extension: 'jar'
+        classifier: 'capsule-fat'
+        dest: /tmp/bluebutton-data-pipeline-app-capsule-fat.jar
+
+- hosts: docker_container
+  tasks:
+    # Most of the differences between test cases are the variables used, so we pull them in with a test-case-specific include.
+    - name: Set Ansible Variables for Test Case
+      include_vars: "{{ lookup('env','TEST_CASE') }}.yml"
+
+    - name: Apply Ansible Role
+      include_role:
+        name: karlmdavis.bluebutton_data_pipeline
+
