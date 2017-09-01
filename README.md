@@ -70,7 +70,12 @@ If you don't have this file, you will receive errors like the following when try
 
 The playbooks can be run, as follows:
 
-    $ ansible-playbook backend.yml --inventory-file=hosts_production | tee "logs/ansible-production-$(date --iso-8601=seconds)".log
+    $ ansible-playbook backend.yml --inventory-file=hosts_production --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT" |& tee "logs/ansible-production-$(date --iso-8601=seconds).log"
+
+The `extra-vars` in that command may need to be adjusted:
+
+* `data_pipeline_version`: The version of the `gov.hhs.cms.bluebutton.data.pipeline:bluebutton-data-pipeline-app` artifact to deploy.
+* `data_server_version`: The version of the `gov.hhs.cms.bluebutton.fhir:bluebutton-server-app` artifact to deploy.
 
 ## License
 
