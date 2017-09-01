@@ -68,7 +68,7 @@
       become: true
       notify:
         - 'Restart Pipeline Service'
-  when: data_pipeline_appjar_localpath | default('') != ''
+  when: data_pipeline_appjar_localpath is defined
 
 - name: Configure Pipeline Application Permissions
   file:
