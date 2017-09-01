@@ -36,17 +36,19 @@ Example Playbook
 
 Here's an example of how to apply this role to the `etlbox` host in an Ansible play:
 
-    - hosts: etlbox
-      roles:
-         - role: karlmdavis.bluebutton_data_pipeline
-           data_pipeline_appjar_name: bluebutton-data-pipeline-app-0.1.0-SNAPSHOT-capsule-fat.jar
-           data_pipeline_appjar_localpath: /home/karlmdavis/workspaces/cms/bluebutton-data-pipeline.git/bluebutton-data-pipeline-app/target
-           data_pipeline_s3_bucket: name-of-the-s3-bucket-with-the-data-to-process
-           data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
-           data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
-           data_pipeline_db_url: 'jdbc:postgresql://mydbserver.example.com:5432/mydb'
-           data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
-           data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
+    - hosts: pipeline_box
+      tasks:
+        - include_role:
+            name: karlmdavis.bluebutton_data_pipeline
+          vars:
+            data_pipeline_appjar_name: bluebutton-data-pipeline-app-0.1.0-SNAPSHOT-capsule-fat.jar
+            data_pipeline_appjar_localpath: /home/karlmdavis/workspaces/cms/bluebutton-data-pipeline.git/bluebutton-data-pipeline-app/target
+            data_pipeline_s3_bucket: name-of-the-s3-bucket-with-the-data-to-process
+            data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
+            data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
+            data_pipeline_db_url: 'jdbc:postgresql://mydbserver.example.com:5432/mydb'
+            data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
+            data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
 
 ## License
 
