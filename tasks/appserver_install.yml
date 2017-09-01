@@ -48,5 +48,6 @@
     executable: /bin/bash
   become: true
   become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure that credentials aren't logged if this command fails.
   when: data_server_appserver_management_username != ''
 

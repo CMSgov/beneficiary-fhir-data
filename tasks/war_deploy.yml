@@ -34,5 +34,6 @@
   command: "{{ data_server_dir }}/{{ data_server_appserver_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 --user={{ data_server_appserver_management_username }} --password={{ data_server_appserver_management_password }} \"deploy {{ data_server_dir }}/{{ data_server_war_name }} --name=ROOT.war --force\""
   become: true
   become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure that credentials aren't logged if this command fails.
   when: copy_war.changed == true and data_server_appserver_management_username != ''
 

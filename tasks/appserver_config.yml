@@ -28,6 +28,7 @@
   when: stat_appserver_keystore.stat.isreg is not defined
   become: true
   become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure that the key args aren't logged if this command fails.
 
 # TODO: Export server's public cert and publish to S3 or somesuch (s0 the frontend and others can pick it up).
 
@@ -125,4 +126,5 @@
   changed_when: true
   become: true
   become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure passwords aren't logged if this fails.
 
