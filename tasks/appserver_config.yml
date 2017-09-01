@@ -25,7 +25,7 @@
 
 - name: Create App Server SSL Keystore
   command: "keytool -genkeypair -alias server {{ data_server_ssl_server_genkeypair_args }} -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit"
-  when: stat_appserver_keystore.isreg is not defined
+  when: stat_appserver_keystore.stat.isreg is not defined
   become: true
   become_user: "{{ data_server_user }}"
 
