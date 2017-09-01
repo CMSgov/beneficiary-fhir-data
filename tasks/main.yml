@@ -11,7 +11,7 @@
   register: stat_appserver_dir
 - debug: var=stat_appserver_dir
 - include: appserver_install.yml
-  when: stat_appserver_dir.isdir is undefined
+  when: stat_appserver_dir.stat.isdir is undefined
 
 - include: appserver_config.yml
 - include: war_deploy.yml
