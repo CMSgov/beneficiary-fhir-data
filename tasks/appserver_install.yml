@@ -39,7 +39,7 @@
     mode: u=rw,g=r,o=r
   become: true
   notify:
-    - 'Reload Service Definitions'
+    - 'Enable App Server Service'
     - 'Restart App Server Service'
 
 - name: Create App Server Management User
