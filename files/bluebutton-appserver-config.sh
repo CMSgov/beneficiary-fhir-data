@@ -228,6 +228,17 @@ end-if
 /interface=public:undefine-attribute(name=inet-address)
 /interface=public:write-attribute(name=any-address,value=true)
 
+# Enable and configure HTTP access logging.
+# 
+# References:
+# * https://kb.novaordis.com/index.php/Undertow_WildFly_Subsystem_Configuration_-_access-log
+# * https://stackoverflow.com/questions/34614874/wildfly-9-access-logging
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=record-request-start-time,value=true)
+if (outcome == success) of /subsystem=undertow/server=default-server/host=default-host/setting=access-log:read-resource
+	/subsystem=undertow/server=default-server/host=default-host/setting=access-log:remove
+end-if
+/subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l %u %t \\"%r\\" \\"?%q\\" %s %B %D", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
+
 # Reload the server to apply those changes.
 :reload
 EOF
