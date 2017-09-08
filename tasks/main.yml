@@ -98,6 +98,6 @@
     mode: u=rw,g=r,o=r
   become: true
   notify:
-    - 'Reload Service Definitions'
+    - 'Enable Pipeline Service'
     - 'Restart Pipeline Service'
 

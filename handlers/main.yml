@@ -1,7 +1,7 @@
 ---
 
-- name: Reload Service Definitions
-  command: /usr/bin/systemctl daemon-reload
+- name: Enable Pipeline Service
+  command: /usr/bin/systemctl --system enable bluebutton-data-pipeline
   become: true
 
 - name: Restart Pipeline Service
