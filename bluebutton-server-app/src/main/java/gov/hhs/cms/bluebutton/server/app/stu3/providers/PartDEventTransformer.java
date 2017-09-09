@@ -22,6 +22,12 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
  */
 final class PartDEventTransformer {
 	/**
+	 * The {@link TransformerConstants#CODING_SYSTEM_FHIR_CLAIM_TYPE} value for
+	 * {@link PartDEvent}s.
+	 */
+	public static final String CODED_FHIR_CLAIM_TYPE_PHARMACY = "pharmacy";
+
+	/**
 	 * @param claim
 	 *            the CCW {@link PartDEvent} to transform
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
@@ -60,8 +66,8 @@ final class PartDEventTransformer {
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
 				.setValue(String.valueOf(claimGroup.getPrescriptionReferenceNumber()));
 
-		eob.getType().addCoding(
-				new Coding().setSystem(TransformerConstants.CODING_SYSTEM_FHIR_CLAIM_TYPE).setCode("pharmacy"));
+		eob.getType().addCoding(new Coding().setSystem(TransformerConstants.CODING_SYSTEM_FHIR_CLAIM_TYPE)
+				.setCode(CODED_FHIR_CLAIM_TYPE_PHARMACY));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		Reference patientRef = TransformerUtils.referencePatient(claimGroup.getBeneficiaryId());
