@@ -4,10 +4,14 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -59,6 +63,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(\\p{Alnum}+)");
 
 	private EntityManager entityManager;
+	private ExecutorService databaseQueryExecutorService;
 
 	/**
 	 * @param entityManager
@@ -68,6 +73,16 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	@PersistenceContext
 	public void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
+	}
+
+	/**
+	 * @param databaseQueryExecutorService
+	 *            the {@link ExecutorService} bean that the application should
+	 *            run asynchronous database queries on
+	 */
+	@Inject
+	public void setDatabaseQueryExecutorService(ExecutorService databaseQueryExecutorService) {
+		this.databaseQueryExecutorService = databaseQueryExecutorService;
 	}
 
 	/**
@@ -166,22 +181,56 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 */
 		List<ExplanationOfBenefit> eobs = new LinkedList<>();
 
-		eobs.addAll(findCarrierClaimsByPatient(patient).stream().map(ClaimType.CARRIER.getTransformer())
-				.collect(Collectors.toList()));
-		eobs.addAll(findDMEClaimsByPatient(patient).stream().map(ClaimType.DME.getTransformer())
-				.collect(Collectors.toList()));
-		eobs.addAll(findHHAClaimsByPatient(patient).stream().map(ClaimType.HHA.getTransformer())
-				.collect(Collectors.toList()));
-		eobs.addAll(findHospiceClaimsByPatient(patient).stream().map(ClaimType.HOSPICE.getTransformer())
-				.collect(Collectors.toList()));
-		eobs.addAll(findInpatientClaimsByPatient(patient).stream().map(ClaimType.INPATIENT.getTransformer())
-				.collect(Collectors.toList()));
-		eobs.addAll(findOutpatientClaimsByPatient(patient).stream().map(ClaimType.OUTPATIENT.getTransformer())
-				.collect(Collectors.toList()));
-		eobs.addAll(findPartDEventsByPatient(patient).stream().map(ClaimType.PDE.getTransformer())
-				.collect(Collectors.toList()));
-		eobs.addAll(findSNFClaimsByPatient(patient).stream().map(ClaimType.SNF.getTransformer())
-				.collect(Collectors.toList()));
+		CompletableFuture<List<ExplanationOfBenefit>> carrierClaimsFuture = CompletableFuture
+				.supplyAsync(() -> findCarrierClaimsByPatient(patient).stream().map(ClaimType.CARRIER.getTransformer())
+						.collect(Collectors.toList()), databaseQueryExecutorService);
+		CompletableFuture<List<ExplanationOfBenefit>> dmeClaimsFuture = CompletableFuture
+				.supplyAsync(() -> findDMEClaimsByPatient(patient).stream().map(ClaimType.DME.getTransformer())
+						.collect(Collectors.toList()), databaseQueryExecutorService);
+		CompletableFuture<List<ExplanationOfBenefit>> hhaClaimsFuture = CompletableFuture
+				.supplyAsync(() -> findHHAClaimsByPatient(patient).stream().map(ClaimType.HHA.getTransformer())
+						.collect(Collectors.toList()), databaseQueryExecutorService);
+		CompletableFuture<List<ExplanationOfBenefit>> hospiceClaimsFuture = CompletableFuture
+				.supplyAsync(() -> findHospiceClaimsByPatient(patient).stream().map(ClaimType.HOSPICE.getTransformer())
+						.collect(Collectors.toList()), databaseQueryExecutorService);
+		CompletableFuture<List<ExplanationOfBenefit>> inpatientClaimsFuture = CompletableFuture.supplyAsync(
+				() -> findInpatientClaimsByPatient(patient).stream().map(ClaimType.INPATIENT.getTransformer())
+						.collect(Collectors.toList()),
+				databaseQueryExecutorService);
+		CompletableFuture<List<ExplanationOfBenefit>> outpatientClaimsFuture = CompletableFuture.supplyAsync(
+				() -> findOutpatientClaimsByPatient(patient).stream().map(ClaimType.OUTPATIENT.getTransformer())
+						.collect(Collectors.toList()),
+				databaseQueryExecutorService);
+		CompletableFuture<List<ExplanationOfBenefit>> partDEventsFuture = CompletableFuture
+				.supplyAsync(() -> findPartDEventsByPatient(patient).stream().map(ClaimType.PDE.getTransformer())
+						.collect(Collectors.toList()), databaseQueryExecutorService);
+		CompletableFuture<List<ExplanationOfBenefit>> snfClaimsFuture = CompletableFuture
+				.supplyAsync(() -> findSNFClaimsByPatient(patient).stream().map(ClaimType.SNF.getTransformer())
+						.collect(Collectors.toList()), databaseQueryExecutorService);
+
+		// Wait for all of the claim query & transform operations to complete.
+		CompletableFuture<Void> allClaimsFuture = CompletableFuture.allOf(carrierClaimsFuture, dmeClaimsFuture,
+				hhaClaimsFuture, hospiceClaimsFuture, inpatientClaimsFuture, outpatientClaimsFuture, partDEventsFuture,
+				snfClaimsFuture);
+		allClaimsFuture.join();
+
+		// Add all of the produced claims to the result list.
+		try {
+			eobs.addAll(carrierClaimsFuture.get());
+			eobs.addAll(dmeClaimsFuture.get());
+			eobs.addAll(hhaClaimsFuture.get());
+			eobs.addAll(hospiceClaimsFuture.get());
+			eobs.addAll(inpatientClaimsFuture.get());
+			eobs.addAll(outpatientClaimsFuture.get());
+			eobs.addAll(partDEventsFuture.get());
+			eobs.addAll(snfClaimsFuture.get());
+		} catch (InterruptedException e) {
+			// FIXME better exception
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			// FIXME better exception
+			throw new RuntimeException(e);
+		}
 
 		return eobs;
 	}
