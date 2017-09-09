@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -226,29 +224,6 @@ public class SpringConfiguration {
 	@Bean
 	public PersistenceAnnotationBeanPostProcessor persistenceAnnotationProcessor() {
 		return new PersistenceAnnotationBeanPostProcessor();
-	}
-
-	/**
-	 * @param connectionsMaxText
-	 *            the maximum number of database connections to use
-	 * @return the {@link ExecutorService} bean that the application should run
-	 *         asynchronous database queries on
-	 */
-	@Bean
-	public ExecutorService databaseQueryExecutorService(
-			@Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText) {
-		int connectionsMax;
-		try {
-			connectionsMax = Integer.parseInt(connectionsMaxText);
-		} catch (NumberFormatException e) {
-			connectionsMax = -1;
-		}
-		if (connectionsMax < 1) {
-			// Assign a reasonable default value, if none was specified.
-			connectionsMax = Runtime.getRuntime().availableProcessors() * 5;
-		}
-
-		return Executors.newFixedThreadPool(connectionsMax);
 	}
 
 	/**
