@@ -82,6 +82,9 @@
         data_server_ssl_client_cas:
           - alias: bluebutton_frontend_ca
             certificate: "{{ lookup('file', 'files/data_server_client_frontend_ca.pem') }}"
+        data_server_ssl_client_certificates:
+          - alias: client_test
+            certificate: "{{ lookup('file', 'files/client-test-certificate.pem') }}"
         data_server_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/bluebutton_backend_db"
         data_server_db_username: "{{ backend_postgres_master_username }}"
         data_server_db_password: "{{ backend_postgres_master_password }}"

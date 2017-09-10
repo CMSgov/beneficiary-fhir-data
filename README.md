@@ -86,6 +86,12 @@ This project has an unfortunately large amount of variables that must be specifi
 * `bluebutton_server_version`: The version of the `gov.hhs.cms.bluebutton.fhir:bluebutton-server-app:war` artifact (and related artifacts) to deploy as the Blue Button backend FHIR server.
 * `wildfly_version`: The version of the `org.wildfly:wildfly-dist:tar.gz` artifact to deploy and use to host the Blue Button backend FHIR server.
 
+### Querying the Data Server
+
+Ad-hoc queries can be run against the Blue Button backend Data Server, as follows:
+
+    $ curl --silent --insecure --cert-type pem --cert files/client-test-keypair.pem "https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3/ExplanationOfBenefit?patient=3960&_format=application%2Fjson%2Bfhir"
+
 ### Teardown
 
 **WARNING!** This should only be used in development or test environments. This command will terminate **all** EC2 and RDS instances in AWS that match the specified `Environment` tag (not just those specified in `site.yml`; it will terminate everything in the account that matches):
