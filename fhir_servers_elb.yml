@@ -76,7 +76,7 @@
 
     - name: 'Set Variable for Target Number of FHIR Servers'
       set_fact:
-        ec2_asg_backend_fhir_target_count: 1
+        ec2_asg_backend_fhir_target_count: 3
 
     - name: 'Create/Update EC2 Auto-Scaling Group for FHIR Servers'
       ec2_asg:
@@ -86,7 +86,7 @@
         health_check_type: 'EC2'
         min_size: "{{ ec2_asg_backend_fhir_target_count }}"
         desired_capacity: "{{ ec2_asg_backend_fhir_target_count }}"
-        max_size: 10
+        max_size: 10  # Watch out that this (plus extra instances for next deploy) doesn't exceed the max allowed DB connections!
         replace_all_instances: true
         replace_batch_size: 1
         region: "{{ aws_region }}"
