@@ -146,8 +146,9 @@ final class PartDEventTransformer {
 			 * Unexpected value encountered - drug coverage status code should
 			 * be one of the three above.
 			 */
-			throw new InvalidRifValueException("Unexpected value encountered - drug coverage status code is invalid: "
-					+ claimGroup.getDrugCoverageStatusCode());
+			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS)
+					.setCode("Unknown:" + claimGroup.getDrugCoverageStatusCode());
+			rxPaidAmountValue = claimGroup.getPartDPlanCoveredPaidAmount();
 		}
 		CodeableConcept rxCategory = new CodeableConcept();
 		rxCategory.addCoding(rxCategoryCoding);
