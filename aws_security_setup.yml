@@ -23,12 +23,10 @@
 
   tasks:
 
-    # Create an IAM role associated with the Blue Button backend services running
-    # in EC2.
-    - name: Create IAM Role for Blue Button Backend Services
+    - name: Create IAM Role for Blue Button Backend Data Pipeline
       iam:
         iam_type: role
-        name: BlueButtonBackend-EC2Services
+        name: BlueButtonBackend-DataPipeline
         state: present
         # The `trust_policy` only defines what/who can assume/become this role; it
         # doesn't define what the role will have access to.
@@ -40,14 +38,39 @@
             Principal:
               Service: ec2.amazonaws.com
 
-    - name: Give BlueButtonBackend-EC2Services Access to Blue Button S3 Buckets
+    - name: Create IAM Role for Blue Button Backend Data Server
+      iam:
+        iam_type: role
+        name: BlueButtonBackend-DataServer
+        state: present
+        # The `trust_policy` only defines what/who can assume/become this role; it
+        # doesn't define what the role will have access to.
+        trust_policy:
+          Version: '2012-10-17'
+          Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+
+    - name: Give BlueButtonBackend-* Write Access to CloudWatch
       iam_policy:
         iam_type: role
-        iam_name: BlueButtonBackend-EC2Services
-        policy_name: "BlueButtonBackend-S3"
+        iam_name: "{{ item }}"
+        policy_name: BlueButtonBackend-CloudWatch-Write
         state: present
-        # Note: Watch out for this Ansible bug: https://github.com/ansible/ansible/issues/19310
-        policy_json: "{{ lookup('template','bluebutton_backend_s3_policy.json.j2') | to_json }}"
+        policy_document: files/bluebutton_backend_cloudwatch_write_policy.json
+      with_items:
+        - BlueButtonBackend-DataPipeline
+        - BlueButtonBackend-DataServer
+
+    - name: Give BlueButtonBackend-DataPipeline Access to Blue Button S3 Buckets
+      iam_policy:
+        iam_type: role
+        iam_name: BlueButtonBackend-DataPipeline
+        policy_name: "BlueButtonBackend-DataPipeline-S3"
+        state: present
+        policy_json: "{{ lookup('template','bluebutton_backend_data_pipeline_s3_policy.json.j2') | to_json }}"
     
     - name: "Provision EC2 Security Group 'default'"
       ec2_group:

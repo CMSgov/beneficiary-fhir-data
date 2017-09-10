@@ -78,7 +78,7 @@
             volume_type: gp2
             # The sample RIF data set is about 92GB total.
             volume_size: 200
-        instance_profile_name: BlueButtonBackend-EC2Services
+        instance_profile_name: BlueButtonBackend-DataPipeline
         wait: true
         exact_count: 1
         count_tag:

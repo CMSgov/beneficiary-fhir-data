@@ -19,7 +19,7 @@
         image_id: "{{ ami_backend_fhir_master.image_id }}"
         instance_type: "{{ ec2_backend_fhir_instance_type }}"
         key_name: "{{ ec2_key_name }}"
-        instance_profile_name: 'BlueButtonBackend-EC2Services'
+        instance_profile_name: 'BlueButtonBackend-DataServer'
         region: "{{ aws_region }}"
         assign_public_ip: true
         security_groups:
