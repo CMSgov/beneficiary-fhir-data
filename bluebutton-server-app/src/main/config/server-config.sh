@@ -143,6 +143,14 @@ batch
 /subsystem=undertow/server=default-server/http-listener=default/:remove()
 /subsystem=remoting/http-connector=http-remoting-connector/:write-attribute(name=connector-ref,value=https)
 
+# Enable and configure HTTP access logging.
+# 
+# References:
+# * https://kb.novaordis.com/index.php/Undertow_WildFly_Subsystem_Configuration_-_access-log
+# * https://stackoverflow.com/questions/34614874/wildfly-9-access-logging
+/subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=record-request-start-time,value=true)
+/subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l %u %t \\"%r\\" \\"?%q\\" %s %B %D", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
+
 # Commit the configuration transaction.
 run-batch
 
