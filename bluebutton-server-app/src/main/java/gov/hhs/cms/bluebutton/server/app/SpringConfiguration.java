@@ -34,7 +34,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import gov.hhs.cms.bluebutton.data.model.rif.schema.DatabaseSchemaManager;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.CoverageResourceProvider;
@@ -262,22 +261,6 @@ public class SpringConfiguration {
 		reporter.start();
 
 		return metricRegistry;
-	}
-
-	/**
-	 * @return an {@link IServerInterceptor} that will do some fancy logging to
-	 *         create a nice access log that has details about each incoming
-	 *         request
-	 */
-	@Bean
-	public IServerInterceptor loggingInterceptor() {
-		LoggingInterceptor retVal = new LoggingInterceptor();
-		retVal.setLoggerName("bluebutton.web.access");
-		retVal.setMessageFormat(
-				"Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${operationName} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}] ResponseEncoding[${responseEncodingNoDefault}]");
-		retVal.setLogExceptions(true);
-		retVal.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
-		return retVal;
 	}
 
 	/**
