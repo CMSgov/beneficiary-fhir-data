@@ -63,6 +63,7 @@ while true; do
 	esac
 done
 
+#echo "pwd: $(pwd)"
 #echo "javaHome: '${javaHome}', maxHeapArg: '${maxHeapArg}', visualVm: '${visualVm}', directory: '${directory}', keyStore: '${keyStore}', trustStore: '${trustStore}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
 
 # Verify that all required options were specified.
