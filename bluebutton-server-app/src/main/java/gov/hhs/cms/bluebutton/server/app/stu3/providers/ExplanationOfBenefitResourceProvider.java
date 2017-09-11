@@ -31,6 +31,20 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim_;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent_;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim_;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3
@@ -108,7 +122,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		Class<?> entityClass = eobIdType.get().getEntityClass();
 		CriteriaQuery criteria = builder.createQuery(entityClass);
 		Root root = criteria.from(entityClass);
-		eobIdType.get().getEntityLazyAttributes().get().stream().forEach(a -> root.fetch(a));
+		eobIdType.get().getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(eobIdType.get().getEntityIdAttribute()), eobIdClaimIdText));
 
@@ -154,6 +168,20 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		eobs.addAll(findCarrierClaimsByPatient(patient).stream().map(ClaimType.CARRIER.getTransformer())
 				.collect(Collectors.toList()));
+		eobs.addAll(findDMEClaimsByPatient(patient).stream().map(ClaimType.DME.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findHHAClaimsByPatient(patient).stream().map(ClaimType.HHA.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findHospiceClaimsByPatient(patient).stream().map(ClaimType.HOSPICE.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findInpatientClaimsByPatient(patient).stream().map(ClaimType.INPATIENT.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findOutpatientClaimsByPatient(patient).stream().map(ClaimType.OUTPATIENT.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findPartDEventsByPatient(patient).stream().map(ClaimType.PDE.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findSNFClaimsByPatient(patient).stream().map(ClaimType.SNF.getTransformer())
+				.collect(Collectors.toList()));
 
 		return eobs;
 	}
@@ -171,11 +199,158 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		CriteriaQuery<CarrierClaim> criteria = builder.createQuery(CarrierClaim.class);
 		Root<CarrierClaim> root = criteria.from(CarrierClaim.class);
-		ClaimType.CARRIER.getEntityLazyAttributes().get().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		ClaimType.CARRIER.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(CarrierClaim_.beneficiaryId), patient.getIdPart()));
 
 		List<CarrierClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link DMEClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<DMEClaim> findDMEClaimsByPatient(ReferenceParam patient) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<DMEClaim> criteria = builder.createQuery(DMEClaim.class);
+		Root<DMEClaim> root = criteria.from(DMEClaim.class);
+		ClaimType.DME.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(DMEClaim_.beneficiaryId), patient.getIdPart()));
+
+		List<DMEClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link HHAClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<HHAClaim> findHHAClaimsByPatient(ReferenceParam patient) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<HHAClaim> criteria = builder.createQuery(HHAClaim.class);
+		Root<HHAClaim> root = criteria.from(HHAClaim.class);
+		ClaimType.HHA.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(HHAClaim_.beneficiaryId), patient.getIdPart()));
+
+		List<HHAClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link HospiceClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<HospiceClaim> findHospiceClaimsByPatient(ReferenceParam patient) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<HospiceClaim> criteria = builder.createQuery(HospiceClaim.class);
+		Root<HospiceClaim> root = criteria.from(HospiceClaim.class);
+		ClaimType.HOSPICE.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(HospiceClaim_.beneficiaryId), patient.getIdPart()));
+
+		List<HospiceClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link InpatientClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<InpatientClaim> findInpatientClaimsByPatient(ReferenceParam patient) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<InpatientClaim> criteria = builder.createQuery(InpatientClaim.class);
+		Root<InpatientClaim> root = criteria.from(InpatientClaim.class);
+		ClaimType.INPATIENT.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(InpatientClaim_.beneficiaryId), patient.getIdPart()));
+
+		List<InpatientClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link OutpatientClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<OutpatientClaim> findOutpatientClaimsByPatient(ReferenceParam patient) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<OutpatientClaim> criteria = builder.createQuery(OutpatientClaim.class);
+		Root<OutpatientClaim> root = criteria.from(OutpatientClaim.class);
+		ClaimType.OUTPATIENT.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(OutpatientClaim_.beneficiaryId), patient.getIdPart()));
+
+		List<OutpatientClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link PartDEvent}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<PartDEvent> findPartDEventsByPatient(ReferenceParam patient) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<PartDEvent> criteria = builder.createQuery(PartDEvent.class);
+		Root<PartDEvent> root = criteria.from(PartDEvent.class);
+		ClaimType.PDE.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(PartDEvent_.beneficiaryId), patient.getIdPart()));
+
+		List<PartDEvent> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link SNFClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<SNFClaim> findSNFClaimsByPatient(ReferenceParam patient) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<SNFClaim> criteria = builder.createQuery(SNFClaim.class);
+		Root<SNFClaim> root = criteria.from(SNFClaim.class);
+		ClaimType.SNF.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(SNFClaim_.beneficiaryId), patient.getIdPart()));
+
+		List<SNFClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
 		return claimEntities;
 	}
 }

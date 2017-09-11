@@ -83,7 +83,7 @@ public final class HHAClaimTransformerTest {
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob, TransformerConstants.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
 				TransformerConstants.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD, claim.getClaimNonPaymentReasonCode().get());
-		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
+		TransformerTestUtils.assertEquivalent(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 		Assert.assertEquals(claim.getTotalChargeAmount(), eob.getTotalCost().getValue());
 		
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),

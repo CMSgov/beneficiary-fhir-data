@@ -257,7 +257,7 @@ final class TransformerTestUtils {
 	 * @param actual
 	 *            the "actual" {@link BigDecimal} value
 	 */
-	private static void assertEquivalent(BigDecimal expected, BigDecimal actual) {
+	static void assertEquivalent(BigDecimal expected, BigDecimal actual) {
 		Assert.assertTrue(actual.precision() >= expected.precision());
 		Assert.assertTrue(actual.scale() >= expected.scale());
 		Assert.assertEquals(0, expected.compareTo(actual));

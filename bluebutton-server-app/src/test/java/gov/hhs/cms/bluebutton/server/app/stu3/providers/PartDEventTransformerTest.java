@@ -63,7 +63,8 @@ public final class PartDEventTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_FHIR_CLAIM_TYPE, "pharmacy",
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_FHIR_CLAIM_TYPE,
+				PartDEventTransformer.CODED_FHIR_CLAIM_TYPE_PHARMACY,
 				eob.getType());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());

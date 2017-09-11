@@ -50,14 +50,14 @@ enum ClaimType {
 	OUTPATIENT(OutpatientClaim.class, OutpatientClaim_.claimId, OutpatientClaimTransformer::transform,
 			OutpatientClaim_.lines),
 
-	PDE(PartDEvent.class, PartDEvent_.eventId, PartDEventTransformer::transform, null),
+	PDE(PartDEvent.class, PartDEvent_.eventId, PartDEventTransformer::transform),
 
 	SNF(SNFClaim.class, SNFClaim_.claimId, SNFClaimTransformer::transform, SNFClaim_.lines);
 
 	private final Class<?> entityClass;
 	private final SingularAttribute<?, ?> entityIdAttribute;
 	private final Function<Object, ExplanationOfBenefit> transformer;
-	private final Optional<Collection<PluralAttribute<?, ?, ?>>> entityLazyAttributes;
+	private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
 	/**
 	 * Enum constant constructor.
@@ -72,19 +72,13 @@ enum ClaimType {
 	 *            the value to use for {@link #getEntityLazyAttributes()}
 	 */
 	private ClaimType(Class<?> entityClass, SingularAttribute<?, ?> entityIdAttribute,
-			Function<Object, ExplanationOfBenefit> transformer,
-			PluralAttribute<?, ?, ?>... entityLazyAttributes) {
+			Function<Object, ExplanationOfBenefit> transformer, PluralAttribute<?, ?, ?>... entityLazyAttributes) {
 		this.entityClass = entityClass;
 		this.entityIdAttribute = entityIdAttribute;
 		this.transformer = transformer;
-		if (entityLazyAttributes == null) {
-			this.entityLazyAttributes = null;
-		} else {
-			this.entityLazyAttributes = Optional
-					.of(Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes)));
-		}
+		this.entityLazyAttributes = entityLazyAttributes != null
+				? Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes)) : Collections.emptyList();
 	}
-
 
 	/**
 	 * @return the JPA {@link Entity} {@link Class} used to store instances of
@@ -113,10 +107,8 @@ enum ClaimType {
 	 * @return the {@link PluralAttribute}s in the JPA {@link Entity} that are
 	 *         {@link FetchType#LAZY}
 	 */
-	public Optional<Collection<PluralAttribute<?, ?, ?>>> getEntityLazyAttributes() {
-		if (entityLazyAttributes.isPresent())
-			return entityLazyAttributes;
-		return Optional.empty();
+	public Collection<PluralAttribute<?, ?, ?>> getEntityLazyAttributes() {
+		return entityLazyAttributes;
 	}
 
 	/**
