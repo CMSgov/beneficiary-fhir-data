@@ -20,9 +20,6 @@
 	<logger name="org.hibernate.type" level="trace" />
 	<logger name="org.hibernate.stat" level="debug" />
 	 -->
-	
-	<!-- Enable request access logging (see SpringConfiguration). -->
-	<logger name="bluebutton.web.access" level="debug" />
 
 	<root level="info">
 		<appender-ref ref="FILE" />
