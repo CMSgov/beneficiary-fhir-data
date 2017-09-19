@@ -135,6 +135,30 @@ batch
 /socket-binding-group=standard-sockets/socket-binding=https/:write-attribute(name=port,value="${httpsPort}")
 /core-service=management/security-realm=ApplicationRealm/server-identity=ssl/:add(keystore-path="${keyStore//\\//}",keystore-password="changeit",key-password="changeit")
 
+# Per the recommendations on https://wiki.mozilla.org/Security/Server_Side_TLS,
+# we only support TLS v1.2 and the cipher suites listed below. The cipher
+# suites have two names: their names from their specification and their names
+# in OpenSSL. JBoss/Wildfly require the spec names, though most docs use the
+# OpenSSL names. The OpenSSL docs contain a mapping of the names:
+# https://www.openssl.org/docs/man1.1.0/apps/ciphers.html.
+#
+# +===============================================+===============================+
+# | Specification Name                            | OpenSSL Name                  |
+# +===============================================|===============================+
+# | TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384       | ECDHE-ECDSA-AES256-GCM-SHA384 |
+# | TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384         | ECDHE-RSA-AES256-GCM-SHA384   |
+# | TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 | ECDHE-ECDSA-CHACHA20-POLY1305 |
+# | TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256   | ECDHE-RSA-CHACHA20-POLY1305   |
+# | TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256       | ECDHE-ECDSA-AES128-GCM-SHA256 |
+# | TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256         | ECDHE-RSA-AES128-GCM-SHA256   |
+# | TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384       | ECDHE-ECDSA-AES256-SHA384     |
+# | TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384         | ECDHE-RSA-AES256-SHA384       |
+# | TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256       | ECDHE-ECDSA-AES128-SHA256     |
+# | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256         | ECDHE-RSA-AES128-SHA256       |
+# +-----------------------------------------------+-------------------------------+
+/subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=enabled-protocols,value="TLSv1.2")
+/subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=enabled-cipher-suites,value="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256")
+
 # Configure and enable mandatory client-auth SSL.
 /core-service=management/security-realm=ApplicationRealm/authentication=truststore:add(keystore-path="${trustStore//\\//}",keystore-password=changeit)
 /subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=verify-client,value=REQUIRED)
