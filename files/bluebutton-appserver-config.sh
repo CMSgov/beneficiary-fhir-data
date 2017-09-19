@@ -220,8 +220,13 @@ end-if
 # | TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256       | ECDHE-ECDSA-AES128-SHA256     |
 # | TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256         | ECDHE-RSA-AES128-SHA256       |
 # +-----------------------------------------------+-------------------------------+
+#
+# Note: Turns out that, for some unknown reason, the ChaCha20 algorithms aren't
+# supported in our HealthAPT AWS environments, which use JBoss EAP 7.0 (JBoss
+# fails to start if they're enabled, with an error). So we exclude them from
+# `enabled-cipher-suites`.
 /subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=enabled-protocols,value="TLSv1.2")
-/subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=enabled-cipher-suites,value="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256")
+/subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=enabled-cipher-suites,value="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256")
 
 # Configure and enable mandatory client-auth SSL.
 if (outcome == success) of /core-service=management/security-realm=ApplicationRealm/authentication=truststore:read-resource
