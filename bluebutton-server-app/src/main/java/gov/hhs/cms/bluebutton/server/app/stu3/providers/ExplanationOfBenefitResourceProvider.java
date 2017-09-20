@@ -1,6 +1,9 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +22,8 @@ import javax.persistence.metamodel.PluralAttribute;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -26,6 +31,8 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -57,6 +64,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 * {@link ExplanationOfBenefit#getId()}s used in this application.
 	 */
 	private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(\\p{Alnum}+)");
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
 
 	private EntityManager entityManager;
 
@@ -187,6 +195,124 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	}
 
 	/**
+	 * <p>
+	 * Adds support for the FHIR "search" operation for
+	 * {@link ExplanationOfBenefit}s, allowing users to search by
+	 * {@link ExplanationOfBenefit#getPatient()}.
+	 * </p>
+	 * <p>
+	 * The {@link Search} annotation indicates that this method supports the
+	 * search operation. There may be many different methods annotated with this
+	 * {@link Search} annotation, to support many different search criteria.
+	 * </p>
+	 * 
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return Returns a {@link List} of {@link ExplanationOfBenefit}s, which
+	 *         may contain multiple matching resources, or may also be empty.
+	 */
+	@Search
+	public List<ExplanationOfBenefit> findByPatientByDateRange(
+			@RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient,
+			@RequiredParam(name = "date") DateRangeParam dateRangeParam) {
+		/*
+		 * The way our JPA/SQL schema is setup, we have to run a separate search
+		 * for each claim type, then combine the results. It's not super
+		 * efficient, but it's also not so inefficient that it's worth fixing.
+		 */
+		List<ExplanationOfBenefit> eobs = new LinkedList<>();
+
+		LOGGER.info("deh-info in findByPatientByDateRange logging...");
+		Date from = dateRangeParam.getLowerBoundAsInstant();
+		if (dateRangeParam.getUpperBoundAsInstant() == null) {
+			LOGGER.info("deh-info in findByPatientByDateRange logging...date upperbound is null");
+		}
+		Date to = dateRangeParam.getUpperBoundAsInstant();
+		LOGGER.info("deh-info in findByPatientByDateRange logging...");
+		LOGGER.info("deh-from date " + from);
+		LOGGER.info("deh-to date " + to);
+
+		eobs.addAll(findCarrierClaimsByPatientByDateRange(patient, dateRangeParam).stream()
+				.map(ClaimType.CARRIER.getTransformer()).collect(Collectors.toList()));
+		eobs.addAll(findDMEClaimsByPatient(patient).stream().map(ClaimType.DME.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findHHAClaimsByPatient(patient).stream().map(ClaimType.HHA.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findHospiceClaimsByPatient(patient).stream().map(ClaimType.HOSPICE.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findInpatientClaimsByPatient(patient).stream().map(ClaimType.INPATIENT.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findOutpatientClaimsByPatient(patient).stream().map(ClaimType.OUTPATIENT.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findPartDEventsByPatient(patient).stream().map(ClaimType.PDE.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findSNFClaimsByPatient(patient).stream().map(ClaimType.SNF.getTransformer())
+				.collect(Collectors.toList()));
+
+		LOGGER.info("deh-info in findByPatientByDateRange at end of method...logging...");
+		return eobs;
+	}
+
+	/**
+	 * <p>
+	 * Adds support for the FHIR "search" operation for
+	 * {@link ExplanationOfBenefit}s, allowing users to search by
+	 * {@link ExplanationOfBenefit#getPatient()}.
+	 * </p>
+	 * <p>
+	 * The {@link Search} annotation indicates that this method supports the
+	 * search operation. There may be many different methods annotated with this
+	 * {@link Search} annotation, to support many different search criteria.
+	 * </p>
+	 * 
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return Returns a {@link List} of {@link ExplanationOfBenefit}s, which
+	 *         may contain multiple matching resources, or may also be empty.
+	 */
+	@Search
+	public List<ExplanationOfBenefit> findByPatientByDate(
+			@RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient,
+			@RequiredParam(name = "dateFrom") DateParam dateParam) {
+		/*
+		 * The way our JPA/SQL schema is setup, we have to run a separate search
+		 * for each claim type, then combine the results. It's not super
+		 * efficient, but it's also not so inefficient that it's worth fixing.
+		 */
+		List<ExplanationOfBenefit> eobs = new LinkedList<>();
+
+		LOGGER.info("deh-info in findByPatientByDate logging...");
+		Date from = dateParam.getValue();
+
+		LOGGER.info("deh-info in findByPatientByDate logging...");
+		LOGGER.info("deh-from date " + from);
+
+		eobs.addAll(findCarrierClaimsByPatientByDate(patient, from).stream().map(ClaimType.CARRIER.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findDMEClaimsByPatient(patient).stream().map(ClaimType.DME.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findHHAClaimsByPatient(patient).stream().map(ClaimType.HHA.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findHospiceClaimsByPatient(patient).stream().map(ClaimType.HOSPICE.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findInpatientClaimsByPatient(patient).stream().map(ClaimType.INPATIENT.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findOutpatientClaimsByPatient(patient).stream().map(ClaimType.OUTPATIENT.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findPartDEventsByPatient(patient).stream().map(ClaimType.PDE.getTransformer())
+				.collect(Collectors.toList()));
+		eobs.addAll(findSNFClaimsByPatient(patient).stream().map(ClaimType.SNF.getTransformer())
+				.collect(Collectors.toList()));
+
+		LOGGER.info("deh-info in findByPatientByDateRange at end of method...logging...");
+		return eobs;
+	}
+
+	/**
 	 * @param patient
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
@@ -204,6 +330,70 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.where(builder.equal(root.get(CarrierClaim_.beneficiaryId), patient.getIdPart()));
 
 		List<CarrierClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link CarrierClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<CarrierClaim> findCarrierClaimsByPatientByDateRange(ReferenceParam patient,
+			DateRangeParam dateRangeParam) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		LOGGER.info("deh-info in findCarrierClaimsByPatientByDateRange start of method...logging...");
+		CriteriaQuery<CarrierClaim> criteria = builder.createQuery(CarrierClaim.class);
+		Root<CarrierClaim> root = criteria.from(CarrierClaim.class);
+		ClaimType.CARRIER.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+  
+		Comparable dateRangeLowerBound = LocalDateTime.ofInstant(dateRangeParam.getLowerBoundAsInstant().toInstant(),
+				ZoneId.systemDefault()).toLocalDate();
+		if (dateRangeParam.getUpperBoundAsInstant() == null) {
+			LOGGER.info("deh-info in findCarrierClaimsByPatientByDateRange logging...date upperbound is null");
+			criteria.where(builder.and(builder.equal(root.get(CarrierClaim_.beneficiaryId), patient.getIdPart()),
+					builder.greaterThanOrEqualTo(root.get("dateFrom"), dateRangeLowerBound)));
+		} else {
+			LOGGER.info("deh-info in findCarrierClaimsByPatientByDateRange logging...date upperbound is NOT null");
+			Comparable dateRangeUpperBound = LocalDateTime
+					.ofInstant(dateRangeParam.getUpperBoundAsInstant().toInstant(), ZoneId.systemDefault()).toLocalDate();
+			criteria.where(builder.and(builder.equal(root.get(CarrierClaim_.beneficiaryId), patient.getIdPart()),
+					builder.between(root.get("dateFrom"), dateRangeLowerBound, dateRangeUpperBound)));
+		}
+
+		LOGGER.info("deh-info in findCarrierClaimsByPatientByDateRange-right before getResultList");
+		List<CarrierClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		LOGGER.info("deh-info in findCarrierClaimsByPatientByDateRange-claimEntities size is " + claimEntities.size());
+		return claimEntities;
+	}
+
+	/**
+	 * @param patient
+	 *            a {@link ReferenceParam} for the
+	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
+	 *            matches for
+	 * @return the {@link CarrierClaim}s
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Collection<CarrierClaim> findCarrierClaimsByPatientByDate(ReferenceParam patient, Date dateParam) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		LOGGER.info("deh-info in findCarrierClaimsByPatientByDate start of method...logging...");
+		CriteriaQuery<CarrierClaim> criteria = builder.createQuery(CarrierClaim.class);
+		Root<CarrierClaim> root = criteria.from(CarrierClaim.class);
+		ClaimType.CARRIER.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+		criteria.select(root);
+
+		Comparable dateLowerBound = LocalDateTime
+				.ofInstant(dateParam.toInstant(), ZoneId.systemDefault()).toLocalDate();
+		criteria.where(builder.and(builder.equal(root.get(CarrierClaim_.beneficiaryId), patient.getIdPart()),
+				builder.greaterThanOrEqualTo(root.get("dateFrom"), dateLowerBound)));
+
+		LOGGER.info("deh-info in findCarrierClaimsByPatientByDate-right before getResultList");
+		List<CarrierClaim> claimEntities = entityManager.createQuery(criteria).getResultList();
+		LOGGER.info("deh-info in findCarrierClaimsByPatientByDate-claimEntities size is " + claimEntities.size());
 		return claimEntities;
 	}
 
