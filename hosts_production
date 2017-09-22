@@ -2,13 +2,13 @@
 # Production Inventory
 # ====================
 #
-# To help prevent accidental deployments into the wrong environment, this 
+# To help prevent accidental deployments into the wrong environment, this
 # inventory file only contains the Production servers.
 #
-# Our security policies mandate individual user accounts for everyone; we can't 
+# Our security policies mandate individual user accounts for everyone; we can't
 # specify a shared username that all Ansible connections will use. Accordingly,
-# users must have an SSH alias for these systems in their `~/.ssh/config` 
-# file, which must define the `HostName` `User`, and `IdentityFile` for each 
+# users must have an SSH alias for these systems in their `~/.ssh/config`
+# file, which must define the `HostName` `User`, and `IdentityFile` for each
 # system.
 ##
 
@@ -19,11 +19,10 @@ bluebutton-healthapt-prod-data-pipeline
 bluebutton-healthapt-prod-data-server
 
 
-# This environment-wide group allows us to store all of the security-sensitive 
+# This environment-wide group allows us to store all of the security-sensitive
 # variables for each environment in a single Ansible Vault file:
 #
 #     $ ansible-vault edit group_vars/env_production/vault.yml
 [env_production:children]
 data_pipeline_systems
 data_server_systems
-
