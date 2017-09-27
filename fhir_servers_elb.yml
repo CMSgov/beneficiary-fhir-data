@@ -76,7 +76,7 @@
 
     - name: 'Set Variable for Target Number of FHIR Servers'
       set_fact:
-        ec2_asg_backend_fhir_target_count: 3
+        ec2_asg_backend_fhir_target_count: 1
 
     - name: 'Create/Update EC2 Auto-Scaling Group for FHIR Servers'
       ec2_asg:
