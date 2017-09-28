@@ -92,7 +92,11 @@ public enum StaticRifResource {
 
 	SAMPLE_C_PDE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"), RifFileType.PDE, 67566673),
 
-	SAMPLE_C_SNF(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175);
+	SAMPLE_C_SNF(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175),
+
+	SAMPLE_U_BENES(resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
+
+	SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;

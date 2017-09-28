@@ -7,10 +7,7 @@ package gov.hhs.cms.bluebutton.data.model.rif;
 public enum RecordAction {
 	INSERT("INSERT"),
 
-	/*
-	 * TODO
-	 */
-	UPDATE("TODO1"),
+	UPDATE("UPDATE"),
 
 	/*
 	 * TODO
