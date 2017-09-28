@@ -206,7 +206,7 @@ public final class RifLoader {
 		else if (features.isCopyDesired() && isDatabasePostgreSql())
 			return LoadStrategy.COPY_NON_IDEMPOTENT;
 		else
-			return LoadStrategy.INSERT_NON_IDEMPOTENT;
+			return LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT;
 	}
 
 	/**
@@ -444,12 +444,19 @@ public final class RifLoader {
 						if (recordInDb == null) {
 							loadAction = LoadAction.INSERTED;
 							entityManager.persist(record);
+							Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
 						} else {
 							loadAction = LoadAction.DID_NOTHING;
 						}
-					} else if (strategy == LoadStrategy.INSERT_NON_IDEMPOTENT) {
-						loadAction = LoadAction.INSERTED;
-						entityManager.persist(record);
+					} else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
+						if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
+							loadAction = LoadAction.INSERTED;
+							entityManager.persist(record);
+						} else {
+							loadAction = LoadAction.UPDATED;
+							entityManager.merge(record);
+						}
+
 					} else
 						throw new BadCodeMonkeyException();
 
@@ -880,7 +887,7 @@ public final class RifLoader {
 	private static enum LoadStrategy {
 		INSERT_IDEMPOTENT,
 
-		INSERT_NON_IDEMPOTENT,
+		INSERT_UPDATE_NON_IDEMPOTENT,
 
 		COPY_NON_IDEMPOTENT;
 	}
