@@ -1,46 +1,48 @@
 ---
+##
+# The Travis CI build for this project.
+##
+
 language: python
 python: "2.7"
 
-# The tests will be run in Docker containers, to verify compatibility with 
+# The tests will be run in Docker containers, to verify compatibility with
 # various OSes.
 sudo: required
 services:
   - docker
+
 env:
-  # CentOS is used as a standin for RHEL 7.
-  - PLATFORM=centos_7 TEST_CASE=artifacts_local
+  global:
+    - ROLE=karlmdavis.bluebutton-data-pipeline
+    - CONTAINER_PREFIX=ansible_test_pipeline
+
+# Each list item here will be run as a separate test by Travis CI.
+matrix:
+  include:
+    # Testing against CentOS would also (mostly) cover RHEL 7.
+    - env: TEST_PLAY=basic_test.yml PLATFORM=centos_7 ANSIBLE_SPEC="ansible"
 
 addons:
   apt:
     packages:
-      # Need this due to hardcoding Ansible hosts' passwords in our test inventory.
-      - sshpass
-      # Required by the `maven_artifact` Ansible module used during test setup.
+      # These four are required by the `maven_artifact` Ansible module used
+      # during test setup:
       - python-dev
       - libxml2
       - libxml2-dev
       - libxslt-dev
 
 install:
-  # Prep the Docker container that will be used.
-  - ./.travis/docker_launch.sh
+  # Generate an SSH key for use when connecting to Docker containers.
+  - ssh-keygen -t rsa -N '' -f /home/travis/.ssh/id_rsa
 
-  # Install ansible.
-  - pip install -r requirements.freeze.txt
-  - ansible --version
-  - mkdir .travis/roles
-  - ln -s `pwd` .travis/roles/karlmdavis.bluebutton_data_pipeline
+  # Prepare to run the tests.
+  - ./test/pre-test.sh /home/travis/.ssh/id_rsa.pub
 
 script:
-  # Ensure that Ansible treats this folder as the project's base.
-  - cd .travis/
-  
-  # Basic role syntax check
-  - ansible-playbook test_base.yml --inventory-file=inventory --syntax-check
-
-  # Run the Ansible test case.
-  - ansible-playbook test_base.yml --inventory-file=inventory
+  # Run the tests.
+  - test/test.sh
 
 after_script:
   # Inspect the management host environment a bit post-test. Just to aid in debugging.
@@ -50,12 +52,11 @@ after_script:
   - ls -la ./roles/
 
   # Inspect the Docker container a bit post-test. Just to aid in debugging.
-  - docker exec ansible_test_bluebutton_data_pipeline.${PLATFORM} /usr/bin/ls /usr/local/bluebutton-data-pipeline
-  - docker exec ansible_test_bluebutton_data_pipeline.${PLATFORM} /usr/bin/cat /usr/local/bluebutton-data-pipeline/bluebutton-data-pipeline.log
-  
-  # Stop all Docker containers.
-  - docker stop $(docker ps -a -q)
+  - docker exec ${CONTAINER_PREFIX}.${PLATFORM} ls -la /usr/local/bluebutton-data-pipeline
+  - docker exec ${CONTAINER_PREFIX}.${PLATFORM} cat /usr/local/bluebutton-data-pipeline/bluebutton-data-pipeline.log
+
+  # Clean up after the test.
+  - test/post-test.sh
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
-
