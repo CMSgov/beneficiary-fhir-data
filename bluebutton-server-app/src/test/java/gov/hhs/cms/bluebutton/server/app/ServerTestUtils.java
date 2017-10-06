@@ -106,7 +106,7 @@ public final class ServerTestUtils {
 		 * each.
 		 */
 		FhirContext ctx = FhirContext.forDstu3();
-		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
+		ctx.getRestfulClientFactory().setSocketTimeout((int) TimeUnit.MINUTES.toMillis(5));
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
 				RegistryBuilder.<ConnectionSocketFactory> create()
 						.register("http", PlainConnectionSocketFactory.getSocketFactory())
