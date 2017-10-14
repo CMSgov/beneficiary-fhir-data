@@ -8,7 +8,7 @@
 
 - name: Restart App Server Service
   service:
-    name: bluebutton-appserver
+    name: "{{ data_server_appserver_service }}"
     state: restarted
   become: true
 

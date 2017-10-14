@@ -3,6 +3,9 @@
 # The directory that the Blue Button Data Server will be installed to. 
 data_server_dir: /usr/local/bluebutton-data-server
 
+# The system service that will run the Blue Button Data Server's app server.
+data_server_appserver_service: bluebutton-appserver
+
 # The system user that the Blue Button Data Server will run as.
 data_server_user: bb-data
 

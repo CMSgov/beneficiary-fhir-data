@@ -5,6 +5,6 @@
 ##
 
 - name: Enable App Server Service
-  command: /usr/bin/systemctl --system enable bluebutton-appserver
+  command: /usr/bin/systemctl --system enable "{{ data_server_appserver_service }}"
   become: true
 
