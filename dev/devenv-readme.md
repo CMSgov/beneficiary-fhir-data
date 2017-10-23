@@ -19,24 +19,8 @@ It can be run as follows:
     $ apt-cyg install python3 python3-setuptools
     ```
 
-    __Note:__ If apt-cyg is having problems connecting to your cygwin mirror this may be due to an incorrect HOSTTYPE setting.  Verify your HOSTTYPE does not have additional decoration(i.e. x86_64-cygwin) and only contains the your system architecture(i.e. x86_64) that you are attempting to install on.
-    ```
-    # Example incorrect setting
-    $ echo $HOSTTYPE
-    x86_64-cygwin
-
-    # Example correct setting
-    $ echo $HOSTTYPE
-    x86_64
-    ```
-    HOSTTYPE can be overridden on the command line or set in your shell configuration(i.e. .bashrc, .cshrc, etc).  To override HOSTTYPE on the command line use the following construct:
-    ```
-    # for csh/tcsh
-    > setenv HOSTTYPE x86_64 && apt-cyg <command>
-
-    # for bash
-    $ HOSTTYPE=x86_64 apt-cyg <command>
-    ```
+    __Note:__ If apt-cyg is having problems connecting to your cygwin mirror this may be due to an [incorrect HOSTTYPE setting](#hosttype).
+    
 1. Run the script:
 
     ```
@@ -48,9 +32,10 @@ What does it do for you? Great question! It will create a `~/workspaces/tools/` 
 * An [Oracle Java 8 JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [Apache Maven](https://maven.apache.org/)
 * [Latest Eclipse Version](https://www.eclipse.org/downloads/)
+    * As of 10/20/2017, Eclipse Mars and Oxygen are known to work with our projects.
 * Eclipse __m2e-apt__ Plugin
     * The m2e-apt plugin allows Maven projects in Eclipse to easily leverage [the JDK's Annotation Processing framework](http://docs.oracle.com/javase/7/docs/technotes/guides/apt/).
-    * Install m2e-apt using the [Drag To Install](http://marketplace.eclipse.org/content/m2e-apt) option or install from within the Eclipse IDE by opening **Help > Eclipse Marketplace...** and searching for **m2e-apt** using the **Eclipse Marketplace** find dialog box.  Click the **Install** button for the plugin and restart Eclipse when prompted. 
+    * Manual installation of the m2e-apt plugin can be achieved by using the [Drag To Install](http://marketplace.eclipse.org/content/m2e-apt) option.  To install from within Eclipse IDE open **Help > Eclipse Marketplace...** and search for **m2e-apt** using the **Eclipse Marketplace** find dialog box.  Click the **Install** button for the plugin and restart Eclipse when prompted. 
     * [Usage Instructions for m2e-apt](https://developer.jboss.org/en/tools/blog/2012/05/20/annotation-processing-support-in-m2e-or-m2e-apt-100-is-out?_sscc=t)
 
 If you're not using one of those supported platforms, or would prefer to setup things manually, you'll want to download and install the items listed above yourself.
@@ -81,6 +66,30 @@ Shell scripts that end in .sh should be associated with the Cygwin shell you hav
     # Example setting Cygwin bash to be associated with .sh files 
     > ftype sh_auto_file="C:\cygwin64\bin\bash.exe" %1 %*
     ```
+<a name="hosttype"></a>
+### HOSTTYPE Configuration
+
+If apt-cyg is having problems connecting to a Cygwin mirror your HOSTTYPE configuration may be the problem.  Verify your HOSTTYPE does not have additional decoration(i.e. x86_64-cygwin) and only contains the system architecture(i.e. x86_64) that you are attempting to install on.
+
+    ```
+    # Example incorrect setting
+    $ echo $HOSTTYPE
+    x86_64-cygwin
+
+    # Example correct setting
+    $ echo $HOSTTYPE
+    x86_64
+    ```
+
+HOSTTYPE can be overridden on the command line or set in your shell configuration(i.e. .bashrc, .cshrc, etc).  To override HOSTTYPE on the command line use the following construct:
+
+    ```
+    # for csh/tcsh
+    > setenv HOSTTYPE x86_64 && apt-cyg <command>
+
+    # for bash
+    $ HOSTTYPE=x86_64 apt-cyg <command>
+    ```
 
 ## AWS Configuration
 
@@ -90,7 +99,6 @@ Many of the automated tests associated with the Blue Button framework use AWS re
 
 Below are links to detailed instructions on configuring your AWS credentials for your environment:
 
-  * [Configuring the AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
   * [Configuration and Credential Files](http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html)
 
 ## Github Configuration
@@ -160,7 +168,7 @@ GPG signing can also be disabled by adding `-Dgpg.skip=true` to your Maven build
 $ mvn clean verify -Dgpg.skip=true
 ```
 
-But please note that the `deploy` goal/phase will still fail if builds are not signed by an authorized user, as that's a requirement imposed by the repository itself.
+But please note that the `deploy` goal/phase will still fail if builds are not signed by an authorized user, as that's a requirement imposed by the repository itself.  To enable deployments you will need to configure [OSSRH Hosting](#ossrh).
 
 ### Proper HAPI-FHIR branch
 
@@ -245,7 +253,8 @@ target/generated-sources/annotations
 ```
 1. Click the **Apply and Close** button.
 1. When prompted to rebuild the project select **Yes**.
-  
+
+<a name="ossrh"></a>
 ## OSSRH Hosting
 
 Even with a GPG key, you will be unable to deploy to OSSRH/Maven Central, unless your account has been given permissions to do so. This will result in errors like the following:
@@ -260,3 +269,4 @@ Follow the following procedure to obtain those permissions and resolve this prob
 1. Ensure you've published your GPG key to a public key server, per [OSSRH: Working With PGP Signatures](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key).
 1. [File a new OSSRH issue](https://issues.sonatype.org/secure/CreateIssue.jspa) requesting authorization for the `gov.hhs.cms.bluebutton` repo in OSSRH. See [OSSRH-23379: Authorize Shaun Brockhoff to deploy to gov.hhs.cms.bluebutton repo](https://issues.sonatype.org/browse/OSSRH-23379) for an example.
 1. Follow the instructions on [OSSRH: Apache Maven: Distribution Management and Authentication](http://central.sonatype.org/pages/apache-maven.html#distribution-management-and-authentication) to ensure that your `~/.m2/settings.xml` file has a `<server/>` entry for `<id>ossrh</id>`, with your JIRA login and password.
+
