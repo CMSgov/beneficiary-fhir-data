@@ -411,6 +411,8 @@ public final class RifLoader {
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed")).time();
 
 		EntityManager entityManager = null;
+
+		// TODO: refactor the following to be less of an indented mess
 		try {
 			entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
