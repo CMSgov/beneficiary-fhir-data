@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>gov.hhs.cms.bluebutton</groupId>
 		<artifactId>bluebutton-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>gov.hhs.cms.bluebutton.fhirstress</groupId>
@@ -54,7 +54,7 @@
 	</repositories>
 
 	<properties>
-		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
+		<hapi-fhir.version>2.4.0-PR660</hapi-fhir.version>
 	</properties>
 
 	<dependencyManagement>

@@ -12,11 +12,11 @@ import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
-import org.hl7.fhir.dstu21.model.Bundle;
-import org.hl7.fhir.dstu21.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu21.model.DomainResource;
-import org.hl7.fhir.dstu21.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu21.model.Patient;
+import org.hl7.fhir.dstu2016may.model.Bundle;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2016may.model.DomainResource;
+import org.hl7.fhir.dstu2016may.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu2016may.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -159,8 +159,8 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 	private void runTest() {
 		String patientId = patientIds.get(rng.nextInt(patientIds.size()));
 		Bundle currentResultsPage = client.search().forResource(Patient.class)
-				.where(DomainResource.RES_ID.matchesExactly().value(patientId))
-				.revInclude(ExplanationOfBenefit.INCLUDE_PATIENT).returnBundle(Bundle.class).execute();
+				.where(DomainResource.RES_ID.exactly().identifier(patientId))
+				.revInclude(ExplanationOfBenefit.INCLUDE_PATIENTREFERENCE).returnBundle(Bundle.class).execute();
 		while (currentResultsPage != null) {
 			// Keep grabbing the next page, until there isn't one.
 			if (currentResultsPage.getLink(Bundle.LINK_NEXT) != null) {
