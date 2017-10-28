@@ -1,0 +1,28 @@
+##
+# Production Inventory
+# ====================
+#
+# To help prevent accidental deployments into the wrong environment, this
+# inventory file only contains the Production servers in Availability Zone 'A'.
+#
+# Our security policies mandate individual user accounts for everyone; we can't
+# specify a shared username that all Ansible connections will use. Accordingly,
+# users must have an SSH alias for these systems in their `~/.ssh/config`
+# file, which must define the `HostName` `User`, and `IdentityFile` for each
+# system.
+##
+
+#[data_pipeline_systems]
+#bluebutton-healthapt-prod-data-pipeline
+
+[data_server_systems]
+bluebutton-healthapt-prod-az-a-data-server
+
+
+# This environment-wide group allows us to store all of the security-sensitive
+# variables for each environment in a single Ansible Vault file:
+#
+#     $ ansible-vault edit group_vars/env_production_az_a/vault.yml
+[env_production_az_a:children]
+#data_pipeline_systems
+data_server_systems
