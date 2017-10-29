@@ -26,7 +26,8 @@ Next, create a virtual environment for this project and install the project's de
     $ cd bluebutton-ansible-playbooks-backend.git
     $ virtualenv -p /usr/bin/python2.7 venv
     $ source venv/bin/activate
-    $ pip install -r requirements.txt
+    $ pip install --upgrade setuptools
+    $ pip install --requirement requirements.txt
 
 The `source` command above will need to be run every time you open a new terminal to work on this project.
 

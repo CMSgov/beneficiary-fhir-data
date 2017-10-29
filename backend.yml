@@ -19,7 +19,7 @@
   hosts: data_pipeline_systems
   tasks:
     - name: Apply Blue Button Data Pipeline Role
-      include_role:
+      import_role:
         name: karlmdavis.bluebutton_data_pipeline
       vars:
         data_pipeline_dir: '/u01/bluebutton-data-pipeline'
@@ -40,7 +40,7 @@
   hosts: data_server_systems
   tasks:
     - name: Apply Blue Button Data Server Role
-      include_role:
+      import_role:
         name: karlmdavis.bluebutton_data_server
       vars:
         data_server_dir: /u01/jboss
