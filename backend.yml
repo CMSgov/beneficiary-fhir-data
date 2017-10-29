@@ -8,7 +8,7 @@
 #     $ `ansible-vault edit group_vars/env_production/vault.yml`.
 ##
 
-- name: Configure ETL System for Ansible Pipelining
+- name: Configure Systems for Ansible Pipelining
   hosts: all
   vars:
     ansible_ssh_pipelining: false
