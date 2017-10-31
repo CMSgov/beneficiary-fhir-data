@@ -28,7 +28,7 @@ import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoaderTestUtils;
  * an application in a separate process.
  * </p>
  */
-public final class AppConfigurationTest {
+public final class AppConfigurationTestIT {
 	/**
 	 * Verifies that
 	 * {@link AppConfiguration#readConfigFromEnvironmentVariables()} works as
@@ -129,7 +129,7 @@ public final class AppConfigurationTest {
 		Path java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
 		String classpath = System.getProperty("java.class.path");
 		ProcessBuilder testAppBuilder = new ProcessBuilder(java.toAbsolutePath().toString(), "-classpath", classpath,
-				AppConfigurationTest.class.getName());
+				AppConfigurationTestIT.class.getName());
 		return testAppBuilder;
 	}
 
