@@ -12,11 +12,11 @@ import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
-import org.hl7.fhir.dstu2016may.model.Bundle;
-import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2016may.model.DomainResource;
-import org.hl7.fhir.dstu2016may.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu2016may.model.Patient;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -159,6 +159,6 @@ public final class RetrievePatientAndFirstEobs extends AbstractJavaSamplerClient
 	private void runTest() {
 		String patientId = patientIds.get(rng.nextInt(patientIds.size()));
 		client.search().forResource(Patient.class).where(DomainResource.RES_ID.exactly().identifier(patientId))
-				.revInclude(ExplanationOfBenefit.INCLUDE_PATIENTREFERENCE).returnBundle(Bundle.class).execute();
+				.revInclude(ExplanationOfBenefit.INCLUDE_PATIENT).returnBundle(Bundle.class).execute();
 	}
 }
