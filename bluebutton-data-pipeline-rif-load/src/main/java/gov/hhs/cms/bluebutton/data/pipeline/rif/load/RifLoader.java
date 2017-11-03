@@ -421,7 +421,7 @@ public final class RifLoader {
 
 				/*
 				 * If we can, load the record using PostgreSQL's native copy
-				 * APIs, which are ludicrously fast.
+				 * APIs, which are ludicrously fast. FIXME inaccurate comment
 				 */
 				LoadAction loadAction;
 				if (strategy == LoadStrategy.COPY_NON_IDEMPOTENT
