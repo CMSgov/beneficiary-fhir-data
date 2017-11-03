@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.util.concurrent.Callable;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,7 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.AwsFailureException;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.ChecksumException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
@@ -63,15 +67,31 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			GetObjectRequest objectRequest = new GetObjectRequest(options.getS3BucketName(),
 					String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
 							manifestEntry.getParentManifest().getTimestampText(), manifestEntry.getName()));
+
 			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
 			Timer.Context downloadTimer = appMetrics
 					.timer(MetricRegistry.name(getClass().getSimpleName(), "downloadSystemTime")).time();
-			LOGGER.debug("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
+			LOGGER.info("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,
 					localTempFile.toFile());
+			// deh-start
+			LOGGER.info("localTempFile is " + localTempFile.toString());
+
+			String generatedMD5Hash = getMD5Hash(localTempFile);
+			LOGGER.info("deh-The generated from java MD5 (hexadecimal encoded) hash is:" + generatedMD5Hash);
+
+			String downloadedFileMD5Value = downloadHandle.getObjectMetadata().getContentMD5();
+			LOGGER.info("deh-ObjectMetadata MD5 value: " + downloadedFileMD5Value);
+
+			String downloadedFileETagValue = downloadHandle.getObjectMetadata().getETag();
+			LOGGER.info("deh-ObjectMetadata ETag value: " + downloadedFileETagValue);
+
+			if (!generatedMD5Hash.equalsIgnoreCase(downloadedFileMD5Value))
+				throw new ChecksumException("Checksum doesn't match on downloaded file " + localTempFile);
+			// deh-end
 			downloadHandle.waitForCompletion();
-			LOGGER.debug("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
+			LOGGER.info("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
 			downloadTimer.close();
 
 			return new ManifestEntryDownloadResult(manifestEntry, localTempFile);
@@ -121,5 +141,46 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 		public Path getLocalDownload() {
 			return localDownload;
 		}
+	}
+
+	/*
+	 * public static void main(String[] args) { Scanner sn = new
+	 * Scanner(System.in);
+	 * System.out.print("Please enter data for which MD5 is required:"); String
+	 * data = sn.nextLine();
+	 * 
+	 * MD5HashGenerator sj = new MD5HashGenerator(); String hash =
+	 * sj.getMD5Hash(data);
+	 * System.out.println("The MD5 (hexadecimal encoded) hash is:"+hash); }
+	 */
+	/**
+	 * Returns a hexadecimal encoded MD5 hash for the input String.
+	 * 
+	 * @param data
+	 * @return
+	 */
+	private String getMD5Hash(Path localTempFile) {
+		String result = null;
+		try {
+			byte[] bytes = Files.readAllBytes(localTempFile);
+			byte[] hash = MessageDigest.getInstance("MD5").digest(bytes);
+			LOGGER.info("deh-: hash value after digest command " + hash.toString());
+			return bytesToHex(hash); // make it printable
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return result;
+	}
+
+	/**
+	 * Use javax.xml.bind.DatatypeConverter class in JDK to convert byte array
+	 * to a hexadecimal string. Note that this generates hexadecimal in upper
+	 * case.
+	 * 
+	 * @param hash
+	 * @return
+	 */
+	private String bytesToHex(byte[] hash) {
+		return DatatypeConverter.printHexBinary(hash);
 	}
 }
