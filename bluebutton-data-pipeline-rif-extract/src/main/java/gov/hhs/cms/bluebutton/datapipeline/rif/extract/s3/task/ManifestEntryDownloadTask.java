@@ -85,7 +85,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			LOGGER.info("deh-ObjectMetadata MD5 value: " + downloadedFileMD5Value);
 
 			String downloadedFileETagValue = downloadHandle.getObjectMetadata().getETag();
-			LOGGER.info("deh-ObjectMetadata ETag value: " + downloadedFileETagValue);
+			LOGGER.info("deh--ObjectMetadata ETag value: " + downloadedFileETagValue);
 
 			if (!generatedMD5Hash.equalsIgnoreCase(downloadedFileMD5Value))
 				throw new ChecksumException("Checksum doesn't match on downloaded file " + localTempFile);
