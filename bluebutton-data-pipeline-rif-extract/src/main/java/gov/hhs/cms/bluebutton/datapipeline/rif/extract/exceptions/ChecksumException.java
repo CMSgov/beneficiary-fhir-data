@@ -11,7 +11,7 @@ public final class ChecksumException extends RuntimeException {
 	 * Constructs a new {@link ChecksumException}.
 	 * 
 	 * @param cause
-	 *            the value to use for {@link #getCause()}
+	 *            the value/description to use for {@link #getCause()}
 	 */
 	public ChecksumException(String cause) {
 		super(cause);

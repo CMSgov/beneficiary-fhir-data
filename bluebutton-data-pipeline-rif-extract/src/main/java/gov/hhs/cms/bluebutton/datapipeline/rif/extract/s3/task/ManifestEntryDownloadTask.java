@@ -76,7 +76,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,
 					localTempFile.toFile());
 			// deh-start
-			LOGGER.info("localTempFile is " + localTempFile.toString());
+			LOGGER.info("localTempFile is  " + localTempFile.toString());
 
 			String generatedMD5Hash = getMD5Hash(localTempFile);
 			LOGGER.info("deh-The generated from java MD5 (hexadecimal encoded) hash is:" + generatedMD5Hash);
