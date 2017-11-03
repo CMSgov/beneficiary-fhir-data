@@ -69,3 +69,107 @@ sort by
 ```
 
 This query took 122 min (7326516.742 ms) to run, with most indexes missing.
+
+## Query Times
+
+Queries such as the following can be used to select random rows from a table:
+
+    fhirdb2=# select * from "PartDEvents" offset random() * (select count(*) from "PartDEvents") limit 1;
+    Time: 2026784.711 ms
+
+(Note that this query will _not_ use any indexes and will be quite slow for large tables.)
+
+Here's the observed query performance of various tables after the initial production load:
+
+* 
+    
+    fhirdb2=# select * from "PartDEvents" where "eventId" = 'XXX';
+    Time: 12.154 ms
+    
+* 
+     
+    fhirdb2=# select * from "CarrierClaims" where "claimId" = 'XXX';
+    Time: 11.436 ms
+    
+* 
+    
+    fhirdb2=# select * from "CarrierClaimLines" where "parentClaim" = 'XXX';
+    Time: 483844.546 ms
+    
+    * Note that the poor performance here is due to [http://issues.hhsdevcloud.us/browse/CBBD-297](CBBD-297: Claim line indices have columns in wrong order, leading to poor query performance).
+
+## Disk Space Usage
+
+The following query was run after the initial load to determine the total disk space usage of the database:
+
+```
+fhirdb2=# SELECT
+fhirdb2-#     pg_size_pretty(sum(pg_relation_size(C.oid))) AS "size"
+fhirdb2-#   FROM pg_class C
+fhirdb2-#     LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+fhirdb2-#   WHERE nspname = 'public';
+  size   
+---------
+ 3245 GB
+(1 row)
+
+Time: 14.564 ms
+```
+
+And the following query broke that usage out by each table and index:
+
+```
+SELECT
+    nspname || '.' || relname AS "relation",
+    pg_size_pretty(pg_relation_size(C.oid)) AS "size"
+  FROM pg_class C
+    LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+  WHERE nspname = 'public'
+  ORDER BY relname ASC;
+
+                 relation                  |    size    
+-------------------------------------------+------------
+ public.Beneficiaries                      | 9981 MB
+ public.Beneficiaries_pkey                 | 1853 MB
+ public.CarrierClaimLines                  | 825 GB
+ public.CarrierClaimLines_pkey             | 155 GB
+ public.CarrierClaims                      | 354 GB
+ public.CarrierClaims_beneficiaryId_idx    | 55 GB
+ public.CarrierClaims_pkey                 | 56 GB
+ public.DMEClaimLines                      | 48 GB
+ public.DMEClaimLines_pkey                 | 9282 MB
+ public.DMEClaims                          | 24 GB
+ public.DMEClaims_beneficiaryId_idx        | 4011 MB
+ public.DMEClaims_pkey                     | 4118 MB
+ public.HHAClaimLines                      | 27 GB
+ public.HHAClaimLines_pkey                 | 7919 MB
+ public.HHAClaims                          | 3011 MB
+ public.HHAClaims_beneficiaryId_idx        | 378 MB
+ public.HHAClaims_pkey                     | 392 MB
+ public.HospiceClaimLines                  | 12 GB
+ public.HospiceClaimLines_pkey             | 3898 MB
+ public.HospiceClaims                      | 1210 MB
+ public.HospiceClaims_beneficiaryId_idx    | 157 MB
+ public.HospiceClaims_pkey                 | 163 MB
+ public.InpatientClaimLines                | 27 GB
+ public.InpatientClaimLines_pkey           | 11 GB
+ public.InpatientClaims                    | 10082 MB
+ public.InpatientClaims_beneficiaryId_idx  | 630 MB
+ public.InpatientClaims_pkey               | 650 MB
+ public.OutpatientClaimLines               | 343 GB
+ public.OutpatientClaimLines_pkey          | 74 GB
+ public.OutpatientClaims                   | 82 GB
+ public.OutpatientClaims_beneficiaryId_idx | 10 GB
+ public.OutpatientClaims_pkey              | 11 GB
+ public.PartDEvents                        | 826 GB
+ public.PartDEvents_beneficiaryId_idx      | 118 GB
+ public.PartDEvents_pkey                   | 121 GB
+ public.SNFClaimLines                      | 6160 MB
+ public.SNFClaimLines_pkey                 | 2361 MB
+ public.SNFClaims                          | 3254 MB
+ public.SNFClaims_beneficiaryId_idx        | 273 MB
+ public.SNFClaims_pkey                     | 285 MB
+ public.schema_version                     | 8192 bytes
+ public.schema_version_pk                  | 16 kB
+ public.schema_version_s_idx               | 16 kB
+```
