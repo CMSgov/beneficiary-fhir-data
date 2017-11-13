@@ -1,5 +1,7 @@
 package gov.hhs.cms.bluebutton.fhirstress.backend;
 
+import gov.hhs.cms.bluebutton.fhirclient.FhirClient;
+
 import java.io.StringWriter;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -54,10 +56,10 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 
 		this.hostName = getHostname();
 
-		this.client = createFhirClient(context.getParameter(PARAM_SERVER));
+		this.client = FhirClient.create(context.getParameter(PARAM_SERVER));
 
 		// Find the IDs that can be queried in each sample run.
-		this.patientIds = findPatientIds();
+		//this.patientIds = findPatientIds();
 	}
 
 	/**
@@ -107,19 +109,6 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 	}
 
 	/**
-	 * @param fhirServerUrlText
-	 *            a {@link String} for the URL of the FHIR server to create a
-	 *            client for
-	 * @return a new FHIR {@link IGenericClient} instance
-	 */
-	private IGenericClient createFhirClient(String fhirServerUrlText) {
-		FhirContext ctx = FhirContext.forDstu2_1();
-		ctx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-		IGenericClient client = ctx.newRestfulGenericClient(fhirServerUrlText);
-		return client;
-	}
-
-	/**
 	 * @see org.apache.jmeter.protocol.java.sampler.JavaSamplerClient#runTest(org.apache.jmeter.protocol.java.sampler.JavaSamplerContext)
 	 */
 	@Override
@@ -157,6 +146,8 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 	 * Actually run the test.
 	 */
 	private void runTest() {
+    Patient patient = client.read().resource(Patient.class).withId("3960").execute();
+  /*
 		String patientId = patientIds.get(rng.nextInt(patientIds.size()));
 		Bundle currentResultsPage = client.search().forResource(Patient.class)
 				.where(DomainResource.RES_ID.exactly().identifier(patientId))
@@ -169,5 +160,6 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 				currentResultsPage = null;
 			}
 		}
+    */
 	}
 }
