@@ -1,6 +1,8 @@
 package gov.hhs.cms.bluebutton.fhirstress.backend;
 
 import gov.hhs.cms.bluebutton.fhirclient.FhirClient;
+import gov.hhs.cms.bluebutton.rifparser.RifParser;
+import gov.hhs.cms.bluebutton.rifparser.RifEntry;
 
 import java.io.StringWriter;
 import java.net.Inet4Address;
@@ -18,24 +20,34 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Coverage;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
  * This JMeter sampler will run a search for a random FHIR {@link Patient} and
  * then retrieve that {@link Patient} and all of their
  * {@link ExplanationOfBenefit}s.
  */
-public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
+public final class RetrievePatients extends AbstractJavaSamplerClient {
 	private static final String PARAM_SERVER = "fhir_server";
+	private static final String RIFFILE = "riffile";
+	private static final String DELIMITER = "delimiter";
+	private static final String LOOPS = "thread_loops";
 	private static final String HOSTNAME_UNKNOWN = "unknown-host";
 
 	private Random rng = new Random();
 	private String hostName;
 	private IGenericClient client;
 	private List<String> patientIds;
+  private RifParser parser = null;
+  private int bene_id = 1;
 
 	/**
 	 * @see org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient#getDefaultParameters()
@@ -44,6 +56,9 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 	public Arguments getDefaultParameters() {
 		Arguments defaultParameters = new Arguments();
 		defaultParameters.addArgument(PARAM_SERVER, "http://localhost:8080/hapi-fhir/baseDstu2");
+		defaultParameters.addArgument(RIFFILE, "beneficiary_test.rif");
+		defaultParameters.addArgument(DELIMITER, "|");
+		defaultParameters.addArgument(LOOPS, "300");
 		return defaultParameters;
 	}
 
@@ -53,10 +68,10 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
-
 		this.hostName = getHostname();
-
 		this.client = FhirClient.create(context.getParameter(PARAM_SERVER));
+    this.parser = new RifParser(context.getParameter(RIFFILE), context.getParameter(DELIMITER));
+    //System.out.println("Thread loops = " + context.getParameter(LOOPS));
 
 		// Find the IDs that can be queried in each sample run.
 		//this.patientIds = findPatientIds();
@@ -122,7 +137,7 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 			sample.setSuccessful(true);
 			sample.setResponseMessage("Sample succeeded on host: " + hostName);
 			sample.setResponseCodeOK();
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException|InvalidRequestException e) {
 			// Mark this sample iteration as failed.
 			sample.sampleEnd();
 			sample.setSuccessful(false);
@@ -146,20 +161,13 @@ public final class RetrievePatientAndAllEobs extends AbstractJavaSamplerClient {
 	 * Actually run the test.
 	 */
 	private void runTest() {
-    Patient patient = client.read().resource(Patient.class).withId("3960").execute();
-  /*
-		String patientId = patientIds.get(rng.nextInt(patientIds.size()));
-		Bundle currentResultsPage = client.search().forResource(Patient.class)
-				.where(DomainResource.RES_ID.exactly().identifier(patientId))
-				.revInclude(ExplanationOfBenefit.INCLUDE_PATIENT).returnBundle(Bundle.class).execute();
-		while (currentResultsPage != null) {
-			// Keep grabbing the next page, until there isn't one.
-			if (currentResultsPage.getLink(Bundle.LINK_NEXT) != null) {
-				currentResultsPage = client.loadPage().next(currentResultsPage).execute();
-			} else {
-				currentResultsPage = null;
-			}
-		}
-    */
+    // Removed the Rif parser to speed things up
+    //if (this.parser.hasNext()) 
+    //{  
+      //RifEntry entry = this.parser.next();
+
+      // query a patient record
+		  Patient patient = client.read(Patient.class, String.valueOf(this.bene_id++));
+    //}
 	}
 }

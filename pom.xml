@@ -105,32 +105,22 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides the FHIR client being used to create/push resources to the 
-				server. -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-base</artifactId>
-			<version>${hapi-fhir.version}</version>
-			<exclusions>
-				<exclusion>
-					<!-- This has no business being included by a library. -->
-					<artifactId>jcl-over-slf4j</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
+	    <groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+	    <artifactId>bluebutton-server-app</artifactId>
+	    <version>1.0.0-SNAPSHOT</version>
+      <classifier>classes</classifier>
 		</dependency>
-		<dependency>
-			<!-- At least one "structures" JAR must also be included -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
-
 		<dependency>
 			<!-- Used for parsing JSON resources. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.7.3</version>
 		</dependency>
+    <dependency>
+        <groupId>com.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>4.0</version>
+    </dependency>
 	</dependencies>
 
 	<build>

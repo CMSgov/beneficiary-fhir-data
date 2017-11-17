@@ -113,6 +113,12 @@ public final class FhirClient
 							.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
 					null, null, null, 5000, TimeUnit.MILLISECONDS);
 
+      // defaults to 2 concurrent and 20 max that will not be enough
+      // https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/conn/PoolingHttpClientConnectionManager.html
+      // TODO - configure max connections to a meaningful number
+      connectionManager.setDefaultMaxPerRoute(42);
+      connectionManager.setMaxTotal(42);
+
 			@SuppressWarnings("deprecation")
 
       // configure connection properties

@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.fhirclient;
+package gov.hhs.cms.bluebutton;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -6,6 +6,7 @@ import junit.framework.TestSuite;
 
 import org.hl7.fhir.dstu3.model.Patient;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import gov.hhs.cms.bluebutton.fhirclient.FhirClient;
 import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
