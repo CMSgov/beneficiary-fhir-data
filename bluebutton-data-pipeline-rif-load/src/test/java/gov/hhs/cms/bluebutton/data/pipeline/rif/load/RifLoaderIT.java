@@ -1,6 +1,8 @@
 package gov.hhs.cms.bluebutton.data.pipeline.rif.load;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
@@ -21,9 +23,15 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 
+import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
+import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
+import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifRecordLoadResult.LoadAction;
@@ -175,6 +183,17 @@ public final class RifLoaderIT {
 			RifFileRecords rifFileRecordsCopy = processor.produceRecords(rifFileEvent);
 			assertAreInDatabase(entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
 		}
+
+		/*
+		 * Verify the updates for SAMPLE_U files worked
+		 */
+		if (sampleGroup.equals(StaticRifResourceGroup.SAMPLE_U)) {
+			for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+				RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
+				assertSampleUUpdates(entityManagerFactory, rifFileRecords);
+			}
+		}
+
 	}
 
 	/**
@@ -209,4 +228,66 @@ public final class RifLoaderIT {
 				entityManager.close();
 		}
 	}
+
+	/**
+	 * Verifies that the specified RIF records are updated in the database.
+	 * 
+	 * @param entityManagerFactory
+	 *            the {@link EntityManagerFactory} to use
+	 * @param rifFileRecords
+	 *            {@link RifFileRecords} the RIF records to update
+	 */
+	private static void assertSampleUUpdates(EntityManagerFactory entityManagerFactory, RifFileRecords rifFileRecords) {
+		RifFile file = rifFileRecords.getSourceEvent().getFile();
+		List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collect(Collectors.toList());
+		RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+
+		EntityManager entityManager = null;
+		entityManager = entityManagerFactory.createEntityManager();
+
+		if (file.getFileType() == RifFileType.BENEFICIARY) {
+			Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
+
+			try {
+				Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(beneRow);
+				Beneficiary beneRecordFromDb = entityManager.find(Beneficiary.class, recordId);
+				// Last Name inserted with value of "Doe"---updated with "Johnson"
+				Assert.assertEquals("Johnson", beneRecordFromDb.getNameSurname());
+				Assert.assertEquals(beneRow.getNameSurname(), beneRecordFromDb.getNameSurname());
+				// Following fields were NOT changed in update record so should be the same
+				Assert.assertEquals(beneRow.getNameGiven(), beneRecordFromDb.getNameGiven());
+				Assert.assertEquals(beneRow.getNameMiddleInitial(), beneRecordFromDb.getNameMiddleInitial());
+				// }
+			} finally {
+				if (entityManager != null)
+					entityManager.close();
+			}
+		}
+
+		if (file.getFileType() == RifFileType.CARRIER) {
+			CarrierClaim carrierRow = (CarrierClaim) rifRecordEvent.getRecord();
+			CarrierClaimLine carrierLine = carrierRow.getLines().get(0);
+
+			try {
+				Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(carrierRow);
+				CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, recordId);
+
+				Object lineNumber = entityManagerFactory.getPersistenceUnitUtil()
+						.getIdentifier(carrierLine);
+				CarrierClaimLine carrierLineRecordFromDb = entityManager.find(CarrierClaimLine.class, lineNumber);
+				// DateThrough inserted with value 10-27-1999---Updated with 10-27-2000
+				Assert.assertEquals(LocalDate.of(2000, Month.OCTOBER, 27), carrierRecordFromDb.getDateThrough());
+				Assert.assertEquals(carrierRow.getDateThrough(), carrierRecordFromDb.getDateThrough());
+				// CliaLabNumber inserted with value BB889999AA---Updated with GG443333HH
+				Assert.assertEquals(carrierLine.getCliaLabNumber(), carrierLineRecordFromDb.getCliaLabNumber());
+				Assert.assertEquals("GG443333HH", carrierLineRecordFromDb.getCliaLabNumber().get());
+
+			} finally {
+				if (entityManager != null)
+					entityManager.close();
+			}
+		}
+	}
+	
+	
 }
