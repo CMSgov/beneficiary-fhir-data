@@ -52,24 +52,24 @@ public enum StaticRifResource {
 			RifFileType.BENEFICIARY, 100),
 
 	SAMPLE_B_CARRIER(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"), RifFileType.CARRIER,
-			3210),
+			4378),
 
 	SAMPLE_B_INPATIENT(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "inpatient_test.rif"),
-			RifFileType.INPATIENT, 44),
+			RifFileType.INPATIENT, 49),
 
 	SAMPLE_B_OUTPATIENT(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "outpatient_test.rif"),
-			RifFileType.OUTPATIENT, 571),
+			RifFileType.OUTPATIENT, 829),
 
-	SAMPLE_B_SNF(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"), RifFileType.SNF, 7),
+	SAMPLE_B_SNF(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"), RifFileType.SNF, 14),
 
 	SAMPLE_B_HOSPICE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hospice_test.rif"), RifFileType.HOSPICE,
-			4),
+			10),
 
-	SAMPLE_B_HHA(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"), RifFileType.HHA, 21),
+	SAMPLE_B_HHA(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"), RifFileType.HHA, 51),
 
-	SAMPLE_B_DME(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"), RifFileType.DME, 220),
+	SAMPLE_B_DME(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"), RifFileType.DME, 248),
 
-	SAMPLE_B_PDE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"), RifFileType.PDE, 5907),
+	SAMPLE_B_PDE(localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"), RifFileType.PDE, 5714),
 
 	SAMPLE_C_BENES(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "beneficiary_test.rif"), RifFileType.BENEFICIARY,
 			1000000),
@@ -92,7 +92,11 @@ public enum StaticRifResource {
 
 	SAMPLE_C_PDE(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"), RifFileType.PDE, 67566673),
 
-	SAMPLE_C_SNF(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175);
+	SAMPLE_C_SNF(remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175),
+
+	SAMPLE_U_BENES(resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
+
+	SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
@@ -187,7 +191,7 @@ public enum StaticRifResource {
 
 			// Build the path that the resources will be downloaded to.
 			Path resourceDir = targetDir.resolve("test-data-from-s3").resolve(dataSetLocation.getS3BucketName())
-					.resolve(dataSetLocation.getS3KeyPrefix());
+					.resolve(dataSetLocation.getS3KeyPrefix().replaceAll(":", "-"));
 			Path resourceLocalCopy = resourceDir.resolve(fileName);
 
 			/*
