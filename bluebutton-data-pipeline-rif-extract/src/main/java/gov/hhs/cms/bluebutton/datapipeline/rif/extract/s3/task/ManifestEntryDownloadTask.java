@@ -5,9 +5,8 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.concurrent.Callable;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,24 +74,18 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			LOGGER.info("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,
 					localTempFile.toFile());
-			// deh-start
-			LOGGER.info("localTempFile is  " + localTempFile.toString());
-
-			String generatedMD5Hash = getMD5Hash(localTempFile);
-			LOGGER.info("deh-The generated from java MD5 (hexadecimal encoded) hash is:" + generatedMD5Hash);
-
-			String downloadedFileMD5Value = downloadHandle.getObjectMetadata().getContentMD5();
-			LOGGER.info("deh-ObjectMetadata MD5 value: " + downloadedFileMD5Value);
-
-			String downloadedFileETagValue = downloadHandle.getObjectMetadata().getETag();
-			LOGGER.info("deh--ObjectMetadata ETag value: " + downloadedFileETagValue);
-
-			if (!generatedMD5Hash.equalsIgnoreCase(downloadedFileMD5Value))
-				throw new ChecksumException("Checksum doesn't match on downloaded file " + localTempFile);
-			// deh-end
 			downloadHandle.waitForCompletion();
 			LOGGER.info("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
 			downloadTimer.close();
+
+			// generate MD5ChkSum value on file just downloaded
+			String generatedMD5ChkSum = getMD5ChkSum(localTempFile);
+
+			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
+
+			if (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum))
+				throw new ChecksumException("Checksum doesn't match on downloaded file " + localTempFile
+						+ "manifest entry is " + manifestEntry.toString());
 
 			return new ManifestEntryDownloadResult(manifestEntry, localTempFile);
 		} catch (IOException e) {
@@ -103,6 +96,24 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			// Shouldn't happen, as our apps don't use thread interrupts.
 			throw new BadCodeMonkeyException(e);
 		}
+	}
+
+	/**
+	 * Returns a Base64 encoded MD5chksum for the input file localTempFile.
+	 * 
+	 * @param localTempFile
+	 * @return
+	 */
+	public String getMD5ChkSum(Path localTempFile) {
+		String result = null;
+		try {
+			byte[] bytes = Files.readAllBytes(localTempFile);
+			byte[] hash = MessageDigest.getInstance("MD5").digest(bytes);
+			return Base64.getEncoder().encodeToString(hash);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	/**
@@ -143,44 +154,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 		}
 	}
 
-	/*
-	 * public static void main(String[] args) { Scanner sn = new
-	 * Scanner(System.in);
-	 * System.out.print("Please enter data for which MD5 is required:"); String
-	 * data = sn.nextLine();
-	 * 
-	 * MD5HashGenerator sj = new MD5HashGenerator(); String hash =
-	 * sj.getMD5Hash(data);
-	 * System.out.println("The MD5 (hexadecimal encoded) hash is:"+hash); }
-	 */
-	/**
-	 * Returns a hexadecimal encoded MD5 hash for the input String.
-	 * 
-	 * @param data
-	 * @return
-	 */
-	private String getMD5Hash(Path localTempFile) {
-		String result = null;
-		try {
-			byte[] bytes = Files.readAllBytes(localTempFile);
-			byte[] hash = MessageDigest.getInstance("MD5").digest(bytes);
-			LOGGER.info("deh-: hash value after digest command " + hash.toString());
-			return bytesToHex(hash); // make it printable
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return result;
-	}
 
-	/**
-	 * Use javax.xml.bind.DatatypeConverter class in JDK to convert byte array
-	 * to a hexadecimal string. Note that this generates hexadecimal in upper
-	 * case.
-	 * 
-	 * @param hash
-	 * @return
-	 */
-	private String bytesToHex(byte[] hash) {
-		return DatatypeConverter.printHexBinary(hash);
-	}
+
 }
