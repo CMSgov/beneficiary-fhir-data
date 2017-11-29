@@ -71,19 +71,19 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 
 			Timer.Context downloadTimer = appMetrics
 					.timer(MetricRegistry.name(getClass().getSimpleName(), "downloadSystemTime")).time();
-			LOGGER.info("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
+			LOGGER.debug("Downloading '{}' to '{}'...", manifestEntry, localTempFile.toAbsolutePath().toString());
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,
 					localTempFile.toFile());
 			downloadHandle.waitForCompletion();
-			LOGGER.info("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
+			LOGGER.debug("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
 			downloadTimer.close();
 
 			// generate MD5ChkSum value on file just downloaded
-			String generatedMD5ChkSum = getMD5ChkSum(localTempFile);
+			String generatedMD5ChkSum = computeMD5ChkSum(localTempFile);
 
 			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
-
-			if (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum))
+			// TODO Remove null check below once Jira CBBD-368 is completed
+			if ((downloadedFileMD5ChkSum != null) && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))
 				throw new ChecksumException("Checksum doesn't match on downloaded file " + localTempFile
 						+ "manifest entry is " + manifestEntry.toString());
 
@@ -104,7 +104,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 	 * @param localTempFile
 	 * @return
 	 */
-	public String getMD5ChkSum(Path localTempFile) {
+	public static String computeMD5ChkSum(Path localTempFile) {
 		String result = null;
 		try {
 			byte[] bytes = Files.readAllBytes(localTempFile);
