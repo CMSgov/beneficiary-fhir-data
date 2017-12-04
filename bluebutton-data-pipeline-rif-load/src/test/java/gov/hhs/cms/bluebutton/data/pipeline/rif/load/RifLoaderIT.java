@@ -97,6 +97,15 @@ public final class RifLoaderIT {
 	}
 
 	/**
+	 * Runs {@link RifLoader} against the
+	 * {@link StaticRifResourceGroup#SYNTHETIC_DATA} data.
+	 */
+	@Test
+	public void loadSyntheticData() {
+		loadSample(StaticRifResourceGroup.SYNTHETIC_DATA);
+	}
+
+	/**
 	 * Runs {@link RifLoader} against the specified
 	 * {@link StaticRifResourceGroup}.
 	 * 
