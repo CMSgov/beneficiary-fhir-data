@@ -4,6 +4,8 @@ package gov.hhs.cms.bluebutton.data.model.rif.samples;
  * Enumerates the locations of various test data sets in S3.
  */
 public enum TestDataSetLocation {
+	SYNTHETIC_DATA("data-synthetic/2017-11-27T00:00:00.000Z-fixed"),
+
 	DUMMY_DATA_1000000_BENES("data-random/1000000-beneficiaries-2017-10-21T00:00:00.000Z"),
 
 	DUMMY_DATA_100000_BENES("data-random/100000-beneficiaries-2017-10-21T00:00:00.000Z"),
@@ -33,7 +35,7 @@ public enum TestDataSetLocation {
 	/**
 	 * The S3 bucket that the project's ETL test data is stored in.
 	 */
-	private static final String S3_BUCKET_TEST_DATA = "gov-hhs-cms-bluebutton-sandbox-etl-test-data";
+	public static final String S3_BUCKET_TEST_DATA = "gov-hhs-cms-bluebutton-sandbox-etl-test-data";
 
 	private final String s3BucketName;
 	private final String s3KeyPrefix;

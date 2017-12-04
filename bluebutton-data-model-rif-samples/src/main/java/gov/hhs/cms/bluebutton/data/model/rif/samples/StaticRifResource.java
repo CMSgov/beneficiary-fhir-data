@@ -96,7 +96,79 @@ public enum StaticRifResource {
 
 	SAMPLE_U_BENES(resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
-	SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1);
+	SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
+
+	SYNTHETIC_BENEFICIARY_1999(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-1999.rif"),
+			RifFileType.BENEFICIARY, 10000),
+
+	SYNTHETIC_BENEFICIARY_2000(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2000.rif"),
+			RifFileType.BENEFICIARY, 10000),
+
+	SYNTHETIC_BENEFICIARY_2014(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2014.rif"),
+			RifFileType.BENEFICIARY, 10000),
+
+	SYNTHETIC_CARRIER_1999_1999(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-1999.rif"),
+			RifFileType.CARRIER, 102617),
+
+	SYNTHETIC_CARRIER_1999_2000(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2000.rif"),
+			RifFileType.CARRIER, 107665),
+
+	SYNTHETIC_CARRIER_1999_2001(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2001.rif"),
+			RifFileType.CARRIER, 113604),
+
+	SYNTHETIC_CARRIER_2000_2000(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2000.rif"),
+			RifFileType.CARRIER, 102178),
+
+	SYNTHETIC_CARRIER_2000_2001(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2001.rif"),
+			RifFileType.CARRIER, 108801),
+
+	SYNTHETIC_CARRIER_2000_2002(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2002.rif"),
+			RifFileType.CARRIER, 113806),
+
+	SYNTHETIC_CARRIER_2014_2014(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2014.rif"),
+			RifFileType.CARRIER, 108172),
+
+	SYNTHETIC_CARRIER_2014_2015(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2015.rif"),
+			RifFileType.CARRIER, 106577),
+
+	SYNTHETIC_CARRIER_2014_2016(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2016.rif"),
+			RifFileType.CARRIER, 86736),
+
+	SYNTHETIC_INPATIENT_1999_1999(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-1999.rif"),
+			RifFileType.INPATIENT, 650),
+
+	SYNTHETIC_INPATIENT_1999_2000(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2000.rif"),
+			RifFileType.INPATIENT, 646),
+
+	SYNTHETIC_INPATIENT_1999_2001(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2001.rif"),
+			RifFileType.INPATIENT, 700),
+
+	SYNTHETIC_INPATIENT_2000_2000(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2000.rif"),
+			RifFileType.INPATIENT, 706),
+
+	SYNTHETIC_INPATIENT_2000_2001(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2001.rif"),
+			RifFileType.INPATIENT, 641),
+
+	SYNTHETIC_INPATIENT_2000_2002(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2002.rif"),
+			RifFileType.INPATIENT, 680),
+
+	SYNTHETIC_INPATIENT_2014_2014(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2014.rif"),
+			RifFileType.INPATIENT, 352),
+
+	SYNTHETIC_INPATIENT_2014_2015(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2015.rif"),
+			RifFileType.INPATIENT, 309),
+
+	SYNTHETIC_INPATIENT_2014_2016(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2016.rif"),
+			RifFileType.INPATIENT, 387),
+
+	SYNTHETIC_PDE_2014(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2014.rif"), RifFileType.PDE,
+			127643),
+
+	SYNTHETIC_PDE_2015(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2015.rif"), RifFileType.PDE,
+			140176),
+
+	SYNTHETIC_PDE_2016(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2016.rif"),
+			RifFileType.PDE, 145526);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
