@@ -559,7 +559,7 @@ public final class RifLoader {
 				.time();
 
 		Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
-		beneficiary.setHicn(computeHicnHash(beneficiary.getHicn()));
+		beneficiary.setHicn(computeHicnHash(options, secretKeyFactory, beneficiary.getHicn()));
 
 		timerHashing.stop();
 	}
@@ -568,7 +568,7 @@ public final class RifLoader {
 	 * @return a new {@link SecretKeyFactory} for the
 	 *         <code>PBKDF2WithHmacSHA256</code> algorithm
 	 */
-	private static SecretKeyFactory createSecretKeyFactory() {
+	static SecretKeyFactory createSecretKeyFactory() {
 		try {
 			return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		} catch (NoSuchAlgorithmException e) {
@@ -584,12 +584,14 @@ public final class RifLoader {
 	 * 
 	 * @param options
 	 *            the {@link LoadAppOptions} to use
+	 * @param secretKeyFactory
+	 *            the {@link SecretKeyFactory} to use
 	 * @param hicn
 	 *            the Medicare beneficiary HICN to be hashed
 	 * @return a one-way cryptographic hash of the specified HICN value, exactly
 	 *         64 characters long
 	 */
-	private String computeHicnHash(String hicn) {
+	static String computeHicnHash(LoadAppOptions options, SecretKeyFactory secretKeyFactory, String hicn) {
 		try {
 			/*
 			 * Our approach here is NOT using a salt, as salts must be randomly
