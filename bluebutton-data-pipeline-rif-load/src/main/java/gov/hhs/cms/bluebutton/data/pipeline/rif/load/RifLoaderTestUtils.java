@@ -42,9 +42,18 @@ public final class RifLoaderTestUtils {
 	public static final byte[] HICN_HASH_PEPPER = "nottherealpepper".getBytes(StandardCharsets.UTF_8);
 
 	/**
-	 * The value to use for {@link LoadAppOptions#getDatabaseUrl()}.
+	 * The value to use for {@link LoadAppOptions#getDatabaseUrl()}. It's
+	 * occasionally useful for devs to manually change this to one of these
+	 * values:
+	 * <ul>
+	 * <li>In-memory HSQL DB (this is the default):
+	 * <code>jdbc:hsqldb:mem:test</code></li>
+	 * <li>On-disk HSQL DB (useful when the in-memory DB is running out of
+	 * memory):
+	 * <code>jdbc:hsqldb:file:target/hsql-db-for-its;hsqldb.tx=locks</code></li>
+	 * </ul>
 	 */
-	public static final String DB_URL = "jdbc:hsqldb:mem:test";
+	public static final String DB_URL = "jdbc:hsqldb:mem:test;hsqldb.tx=locks";
 
 	/**
 	 * The value to use for {@link LoadAppOptions#getDatabaseUsername()}.
