@@ -144,10 +144,23 @@ public final class RifLoaderIT {
 		 * be found in the database.
 		 */
 		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(options);
-		for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
-			RifFileRecords rifFileRecordsCopy = processor.produceRecords(rifFileEvent);
+		for (StaticRifResource rifResource : sampleResources) {
+			/*
+			 * This is too slow to run against larger data sets: for instance,
+			 * it took 45 minutes to run against the synthetic data. So, we skip
+			 * it for some things.
+			 */
+			if (rifResource.getRecordCount() > 10000) {
+				LOGGER.info("Skipping DB records check for: {}", rifResource);
+				continue;
+			}
+
+			LOGGER.info("Checking DB for records for: {}", rifResource);
+			RifFilesEvent rifFilesEventSingle = new RifFilesEvent(Instant.now(), rifResource.toRifFile());
+			RifFileRecords rifFileRecordsCopy = processor.produceRecords(rifFilesEventSingle.getFileEvents().get(0));
 			assertAreInDatabase(entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
 		}
+		LOGGER.info("All records found in DB.");
 	}
 
 	/**
