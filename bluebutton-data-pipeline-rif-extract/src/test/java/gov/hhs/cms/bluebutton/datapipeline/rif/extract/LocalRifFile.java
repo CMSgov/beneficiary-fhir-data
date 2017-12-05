@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.datapipeline.rif.extract.subset;
+package gov.hhs.cms.bluebutton.datapipeline.rif.extract;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -15,7 +15,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 /**
  * This {@link RifFile} implementation represents a local file on disk.
  */
-final class LocalRifFile implements RifFile {
+public final class LocalRifFile implements RifFile {
 	private final Path localFile;
 	private final RifFileType rifFileType;
 

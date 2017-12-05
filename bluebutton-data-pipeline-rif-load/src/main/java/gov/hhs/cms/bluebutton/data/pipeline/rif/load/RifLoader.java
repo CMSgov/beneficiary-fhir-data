@@ -89,7 +89,6 @@ public final class RifLoader {
 	private final LoadAppOptions options;
 	private final EntityManagerFactory entityManagerFactory;
 	private final SecretKeyFactory secretKeyFactory;
-	private final NotifyingBlockingThreadPoolExecutor loadExecutorService;
 
 	/**
 	 * Constructs a new {@link RifLoader} instance.
@@ -109,36 +108,6 @@ public final class RifLoader {
 		this.entityManagerFactory = createEntityManagerFactory(jdbcDataSource);
 
 		this.secretKeyFactory = createSecretKeyFactory();
-
-		/*
-		 * A 16 vCPU ETL server can handle 400 loader threads at less than 30%
-		 * CPU usage (once a steady state is hit). The biggest limit here is
-		 * what the DB will allow.
-		 */
-		int threadPoolSize = options.getLoaderThreads();
-
-		/*
-		 * It's tempting to think that a large queue will improve performance,
-		 * but in reality: nope. Once the ETL hits a steady state, the queue
-		 * will almost always be empty, so about all it accomplishes is
-		 * unnecessarily eating up a bunch of RAM when the ETL happens to be
-		 * running more slowly (for whatever reason).
-		 */
-		int taskQueueSize = 10 * threadPoolSize;
-
-		/*
-		 * I feel like a hipster using "found" code like
-		 * NotifyingBlockingThreadPoolExecutor: this really cool (and old) class
-		 * supports our use case beautifully. It hands out tasks to multiple
-		 * consumers, and allows a single producer to feed it, blocking that
-		 * producer when the task queue is full.
-		 */
-		NotifyingBlockingThreadPoolExecutor loadExecutorService = new NotifyingBlockingThreadPoolExecutor(
-				threadPoolSize, taskQueueSize, 100, TimeUnit.MILLISECONDS);
-		this.loadExecutorService = loadExecutorService;
-
-		LOGGER.info("Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
-				options.getLoaderThreads(), taskQueueSize, RECORD_BATCH_SIZE);
 	}
 
 	/**
@@ -195,6 +164,44 @@ public final class RifLoader {
 		EntityManagerFactory entityManagerFactory = Persistence
 				.createEntityManagerFactory("gov.hhs.cms.bluebutton.data", hibernateProperties);
 		return entityManagerFactory;
+	}
+
+	/**
+	 * @param options
+	 *            the {@link LoadAppOptions} to use
+	 * @return the {@link BlockingThreadPoolExecutor} to use for asynchronous
+	 *         load tasks
+	 */
+	private static BlockingThreadPoolExecutor createLoadExecutor(LoadAppOptions options) {
+		/*
+		 * A 16 vCPU ETL server can handle 400 loader threads at less than 30%
+		 * CPU usage (once a steady state is hit). The biggest limit here is
+		 * what the DB will allow.
+		 */
+		int threadPoolSize = options.getLoaderThreads();
+
+		/*
+		 * It's tempting to think that a large queue will improve performance,
+		 * but in reality: nope. Once the ETL hits a steady state, the queue
+		 * will almost always be empty, so about all it accomplishes is
+		 * unnecessarily eating up a bunch of RAM when the ETL happens to be
+		 * running more slowly (for whatever reason).
+		 */
+		int taskQueueSize = 10 * threadPoolSize;
+
+		LOGGER.info("Configured to load with '{}' threads, a queue of '{}', and a batch size of '{}'.",
+				options.getLoaderThreads(), taskQueueSize, RECORD_BATCH_SIZE);
+
+		/*
+		 * I feel like a hipster using "found" code like
+		 * BlockingThreadPoolExecutor: this really cool (and old) class supports
+		 * our use case beautifully. It hands out tasks to multiple consumers,
+		 * and allows a single producer to feed it, blocking that producer when
+		 * the task queue is full.
+		 */
+		BlockingThreadPoolExecutor loadExecutor = new BlockingThreadPoolExecutor(threadPoolSize, taskQueueSize, 100,
+				TimeUnit.MILLISECONDS);
+		return loadExecutor;
 	}
 
 	/**
@@ -267,6 +274,8 @@ public final class RifLoader {
 	 */
 	public void process(RifFileRecords dataToLoad, Consumer<Throwable> errorHandler,
 			Consumer<RifRecordLoadResult> resultHandler) {
+		BlockingThreadPoolExecutor loadExecutor = createLoadExecutor(options);
+
 		MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
 		Timer.Context timerDataSetFile = appMetrics
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "dataSet", "file", "processed")).time();
@@ -280,7 +289,7 @@ public final class RifLoader {
 					 */
 					@Override
 					public Integer getValue() {
-						return loadExecutorService.getQueue().size();
+						return loadExecutor.getQueue().size();
 					}
 				});
 		dataToLoad.getSourceEvent().getEventMetrics().register(
@@ -291,7 +300,7 @@ public final class RifLoader {
 					 */
 					@Override
 					public Integer getValue() {
-						return loadExecutorService.getActiveCount();
+						return loadExecutor.getActiveCount();
 					}
 				});
 
@@ -318,7 +327,7 @@ public final class RifLoader {
 				 * pending. That's desirable behavior, as it prevents
 				 * OutOfMemoryErrors.
 				 */
-				processAsync(recordsBatch, postgresBatch, resultHandler, errorHandler);
+				processAsync(loadExecutor, recordsBatch, postgresBatch, resultHandler, errorHandler);
 			};
 
 			// Collect records into batches and submit each to batchProcessor.
@@ -333,7 +342,12 @@ public final class RifLoader {
 
 			// Wait for all submitted batches to complete.
 			try {
-				this.loadExecutorService.await();
+				loadExecutor.shutdown();
+				boolean terminatedSuccessfully = loadExecutor.awaitTermination(72, TimeUnit.HOURS);
+				if (!terminatedSuccessfully)
+					throw new IllegalStateException(
+							String.format("%s failed to complete processing the records in time: '%s'.",
+									this.getClass().getSimpleName(), dataToLoad));
 			} catch (InterruptedException e) {
 				// Interrupts should not be used on this thread, so go boom.
 				throw new RuntimeException(e);
@@ -352,6 +366,9 @@ public final class RifLoader {
 	}
 
 	/**
+	 * @param loadExecutor
+	 *            the {@link BlockingThreadPoolExecutor} to use for asynchronous
+	 *            load tasks
 	 * @param recordsBatch
 	 *            the {@link RifRecordEvent}s to process
 	 * @param postgresBatch
@@ -364,9 +381,10 @@ public final class RifLoader {
 	 *            the {@link Consumer} to notify when the batch fails for any
 	 *            reason
 	 */
-	private void processAsync(List<RifRecordEvent<?>> recordsBatch, PostgreSqlCopyInserter postgresBatch,
+	private void processAsync(BlockingThreadPoolExecutor loadExecutor, List<RifRecordEvent<?>> recordsBatch,
+			PostgreSqlCopyInserter postgresBatch,
 			Consumer<RifRecordLoadResult> resultHandler, Consumer<Throwable> errorHandler) {
-		loadExecutorService.submit(() -> {
+		loadExecutor.submit(() -> {
 			try {
 				List<RifRecordLoadResult> processResults = process(recordsBatch, postgresBatch);
 				processResults.forEach(resultHandler::accept);
@@ -485,8 +503,23 @@ public final class RifLoader {
 
 			throw new RifLoadFailure(recordsBatch, t);
 		} finally {
-			if (entityManager != null && entityManager.getTransaction().isActive())
-				entityManager.getTransaction().rollback();
+			/*
+			 * Some errors (e.g. HSQL constraint violations) seem to cause the
+			 * rollback to fail. Extra error handling is needed here, too, to
+			 * ensure that the failing data is captured.
+			 */
+			try {
+				if (entityManager != null && entityManager.getTransaction().isActive())
+					entityManager.getTransaction().rollback();
+			} catch (Throwable t) {
+				timerBundleFailure.stop();
+				fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
+						.mark(1);
+				LOGGER.warn("Failed to load '{}' record.", rifFileType, t);
+
+				throw new RifLoadFailure(recordsBatch, t);
+			}
+
 			if (entityManager != null)
 				entityManager.close();
 		}
