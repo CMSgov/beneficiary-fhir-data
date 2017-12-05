@@ -83,7 +83,7 @@ public final class ManifestEntryDownloadTaskIT {
 			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
 			LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
 			// TODO Remove null check below once Jira CBBD-368 is completed
-			if ((downloadedFileMD5ChkSum != null) && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))
+			if (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum))
 				throw new ChecksumException("Checksum doesn't match on downloaded file " + objectRequest.getKey());
 
 			LOGGER.info("Downloaded '{}' to '{}'.", objectRequest.getKey(), localTempFile.toAbsolutePath().toString());
