@@ -67,6 +67,12 @@ public final class RifRecordLoadResult {
 		INSERTED,
 
 		/**
+		 * Indicates that the record(s) were successfully updated to the
+		 * database.
+		 */
+		UPDATED,
+
+		/**
 		 * Indicates that the record(s) were queued for insertion into the
 		 * database as part of a larger batch. The status of that batch is
 		 * indeterminate.
