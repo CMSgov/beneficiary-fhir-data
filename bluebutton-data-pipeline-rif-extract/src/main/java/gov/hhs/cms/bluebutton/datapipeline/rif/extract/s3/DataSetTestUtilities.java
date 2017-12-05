@@ -5,10 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -25,7 +22,6 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask;
 
 /**
  * <p>
@@ -150,16 +146,6 @@ public class DataSetTestUtilities {
 			int objectContentLength = objectContentsUrl.openConnection().getContentLength();
 			ObjectMetadata objectMetadata = new ObjectMetadata();
 			objectMetadata.setContentLength(objectContentLength);
-
-			// create md5chksum on file to be uploaded
-			Path fileToUploadPath = null;
-			try {
-				fileToUploadPath = Paths.get(objectContentsUrl.toURI());
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-			objectMetadata.addUserMetadata("md5chksum",
-					ManifestEntryDownloadTask.computeMD5ChkSum(fileToUploadPath));
 
 			PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContentsUrl.openStream(),
 					objectMetadata);

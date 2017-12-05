@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.util.Base64;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -20,7 +18,6 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.AwsFailureException;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.ChecksumException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
@@ -66,7 +63,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			GetObjectRequest objectRequest = new GetObjectRequest(options.getS3BucketName(),
 					String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
 							manifestEntry.getParentManifest().getTimestampText(), manifestEntry.getName()));
-
 			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
 			Timer.Context downloadTimer = appMetrics
@@ -78,15 +74,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			LOGGER.debug("Downloaded '{}' to '{}'.", manifestEntry, localTempFile.toAbsolutePath().toString());
 			downloadTimer.close();
 
-			// generate MD5ChkSum value on file just downloaded
-			String generatedMD5ChkSum = computeMD5ChkSum(localTempFile);
-
-			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
-			// TODO Remove null check below once Jira CBBD-368 is completed
-			if ((downloadedFileMD5ChkSum != null) && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))
-				throw new ChecksumException("Checksum doesn't match on downloaded file " + localTempFile
-						+ "manifest entry is " + manifestEntry.toString());
-
 			return new ManifestEntryDownloadResult(manifestEntry, localTempFile);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -96,24 +83,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			// Shouldn't happen, as our apps don't use thread interrupts.
 			throw new BadCodeMonkeyException(e);
 		}
-	}
-
-	/**
-	 * Returns a Base64 encoded MD5chksum for the input file localTempFile.
-	 * 
-	 * @param localTempFile
-	 * @return
-	 */
-	public static String computeMD5ChkSum(Path localTempFile) {
-		String result = null;
-		try {
-			byte[] bytes = Files.readAllBytes(localTempFile);
-			byte[] hash = MessageDigest.getInstance("MD5").digest(bytes);
-			return Base64.getEncoder().encodeToString(hash);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	/**
@@ -153,7 +122,4 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			return localDownload;
 		}
 	}
-
-
-
 }
