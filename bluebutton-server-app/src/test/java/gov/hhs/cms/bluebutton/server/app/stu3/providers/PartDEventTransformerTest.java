@@ -57,14 +57,14 @@ public final class PartDEventTransformerTest {
 		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.PDE, claim.getEventId()),
 				eob.getIdElement().getIdPart());
 
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_SYSTEM_CCW_PDE_ID, claim.getEventId(),
+		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_PARTD_EVENT_ID, claim.getEventId(),
 				eob.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_GRP_ID,
+		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID,
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_FHIR_CLAIM_TYPE,
-				PartDEventTransformer.CODED_FHIR_CLAIM_TYPE_PHARMACY,
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE,
+				org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.toCode(),
 				eob.getType());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
@@ -72,11 +72,11 @@ public final class PartDEventTransformerTest {
 				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_D).getReference(),
 				eob.getInsurance().getCoverage().getReference());
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID,
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, claim.getPlanContractId());
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID,
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID, claim.getPlanContractId());
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID, claim.getPlanBenefitPackageId());
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID,
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID, claim.getPlanBenefitPackageId());
 
 		Assert.assertEquals(Date.valueOf(claim.getPaymentDate().get()), eob.getPayment().getDate());
 
@@ -85,19 +85,19 @@ public final class PartDEventTransformerTest {
 
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType());
 
 		Assert.assertEquals(Date.valueOf(claim.getPrescriptionFillDate()), rxItem.getServicedDateType().getValue());
 
-		TransformerTestUtils.assertReferenceEquals(TransformerConstants.CODING_SYSTEM_NPI_US,
+		TransformerTestUtils.assertReferenceEquals(TransformerConstants.CODING_NPI_US,
 				claim.getServiceProviderId(), eob.getOrganization());
-		TransformerTestUtils.assertReferenceEquals(TransformerConstants.CODING_SYSTEM_NPI_US,
+		TransformerTestUtils.assertReferenceEquals(TransformerConstants.CODING_NPI_US,
 				claim.getServiceProviderId(),
 				eob.getFacility());
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getFacility(),
-				TransformerConstants.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD,
-				TransformerConstants.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, claim.getPharmacyTypeCode());
+				TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE,
+				TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE, claim.getPharmacyTypeCode());
 
 		// Default case has drug coverage status code as Covered
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PART_D_COVERED,

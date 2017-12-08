@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -59,16 +60,15 @@ public final class OutpatientClaimTransformerTest {
 		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, claim.getClaimId()),
 				eob.getIdElement().getIdPart());
 
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_ID, claim.getClaimId(),
+		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_ID, claim.getClaimId(),
 				eob.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_GRP_ID,
+		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID,
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
-				TransformerConstants.CODING_SYSTEM_CCW_RECORD_ID_CD,
-				TransformerConstants.CODING_SYSTEM_CCW_RECORD_ID_CD, "" + claim.getNearLineRecordIdCode());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_TYPE,
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				"" + claim.getNearLineRecordIdCode(), eob.getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
 		Assert.assertEquals(
 				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_B).getReference(),
@@ -81,58 +81,58 @@ public final class OutpatientClaimTransformerTest {
 				eob.getBillablePeriod().getEndElement());
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getBillablePeriod(),
-				TransformerConstants.CODING_SYSTEM_QUERY_CD, TransformerConstants.CODING_SYSTEM_QUERY_CD,
+				TransformerConstants.EXTENSION_CODING_CLAIM_QUERY, TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
 				String.valueOf(claim.getClaimQueryCode()));
 		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
-				TransformerConstants.CODING_SYSTEM_CCW_INP_PAYMENT_DENIAL_CD,
+				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
+				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
 				claim.getClaimNonPaymentReasonCode().get());
 
 		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 
 		Assert.assertEquals(claim.getTotalChargeAmount(), eob.getTotalCost().getValue());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.BENEFIT_BALANCE_TYPE,
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODING_NCH_BEN_PART_B_DED_AMT_URL, claim.getDeductibleAmount(),
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PARTB_DEDUCTIBLE, claim.getDeductibleAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODING_NCH_BENEFIT_BLOOD_DED_AMT_URL, claim.getBloodDeductibleLiabilityAmount(),
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY, claim.getBloodDeductibleLiabilityAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODING_NCH_PROFFESIONAL_CHARGE_URL, claim.getProfessionalComponentCharge(),
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE, claim.getProfessionalComponentCharge(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODING_NCH_BEN_PART_B_COINSUR_AMT_URL, claim.getCoinsuranceAmount(),
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PARTB_COINSURANCE_AMOUNT, claim.getCoinsuranceAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PAYMENT_B, claim.getProviderPaymentAmount(),
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT, claim.getProviderPaymentAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODING_CLAIM_OUTPAT_BEN__PAYMENT_AMT_URL, claim.getBeneficiaryPaymentAmount(),
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BENE_PAYMENT, claim.getBeneficiaryPaymentAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
 
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_SYSTEM_NPI_US,
+		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US,
 				claim.getOrganizationNpi().get(), eob.getOrganization());
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_SYSTEM_NPI_US,
+		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US,
 				claim.getOrganizationNpi().get(), eob.getFacility());
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getFacility(),
-				TransformerConstants.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
-				TransformerConstants.CODING_SYSTEM_CCW_FACILITY_TYPE_CD,
+				TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
+				TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
 				String.valueOf(claim.getClaimFacilityTypeCode()));
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
-				TransformerConstants.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD,
-				TransformerConstants.CODING_SYSTEM_CCW_CLAIM_SERVICE_CLASSIFICATION_TYPE_CD,
+				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
+				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
 				String.valueOf(claim.getClaimServiceClassificationTypeCode()));
 
 		TransformerTestUtils.assertCareTeamEquals(claim.getAttendingPhysicianNpi().get(),
-				TransformerConstants.CARE_TEAM_ROLE_PRIMARY, eob);
+				ClaimCareteamrole.PRIMARY.toCode(), eob);
 		TransformerTestUtils.assertCareTeamEquals(claim.getOperatingPhysicianNpi().get(),
-				TransformerConstants.CARE_TEAM_ROLE_ASSISTING, eob);
+				ClaimCareteamrole.ASSIST.toCode(), eob);
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 
@@ -151,32 +151,32 @@ public final class OutpatientClaimTransformerTest {
 				new Integer(eobItem0.getSequence()));
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
-				TransformerConstants.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
-				(TransformerConstants.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS));
+				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
+				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
+				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
 
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_NDC,
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC,
 				claimLine1.getNationalDrugCode().get(),
 				eobItem0.getService());
 
 		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD,
-				TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS, claimLine1.getRevCntr1stAnsiCd().get(),
+				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr1stAnsiCd().get(),
 				eobItem0.getAdjudication());
 		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_2ND_ANSI_CD,
-				TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS, claimLine1.getRevCntr2ndAnsiCd().get(),
+				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr2ndAnsiCd().get(),
 				eobItem0.getAdjudication());
 		TransformerTestUtils.assertAdjudicationNotPresent(TransformerConstants.CODED_ADJUDICATION_3RD_ANSI_CD,
 				eobItem0.getAdjudication());
 		TransformerTestUtils.assertAdjudicationNotPresent(TransformerConstants.CODED_ADJUDICATION_4TH_ANSI_CD,
 				eobItem0.getAdjudication());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_REVENUE_CENTER,
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
 				claimLine1.getRevenueCenterCode(), eobItem0.getRevenue());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, claimLine1.getHcpcsCode().get(),
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, claimLine1.getHcpcsCode().get(),
 				eobItem0.getModifier().get(0));
-		TransformerTestUtils.assertHasCoding(TransformerConstants.HCPCS_INITIAL_MODIFIER_CODE1,
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
 				claimLine1.getHcpcsInitialModifierCode().get(), eobItem0.getModifier().get(1));
 		Assert.assertFalse(claimLine1.getHcpcsSecondModifierCode().isPresent());
 
@@ -214,7 +214,7 @@ public final class OutpatientClaimTransformerTest {
 				claimLine1.getNonCoveredChargeAmount(), eobItem0.getAdjudication());
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
-				TransformerConstants.CARE_TEAM_ROLE_PRIMARY, eob);
+				ClaimCareteamrole.PRIMARY.toCode(), eob);
 	}
 
 }

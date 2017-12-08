@@ -22,6 +22,8 @@ import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
+import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -57,52 +59,68 @@ final class DMEClaimTransformer {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
 		eob.setId(TransformerUtils.buildEobId(ClaimType.DME, claimGroup.getClaimId()));
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_ID)
+		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
+				claimGroup.getClaimTypeCode()));
+		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_ID)
 				.setValue(claimGroup.getClaimId());
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_GRP_ID)
+		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
+
+		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
+				claimGroup.getClaimTypeCode()));
+		eob.getType().addCoding().setSystem(TransformerConstants.CODING_CCW_RECORD_ID_CODE)
+				.setCode(String.valueOf(claimGroup.getNearLineRecordIdCode()));
+		/*
+		 * Note: Can't add a org.hl7.fhir.dstu3.model.codesystems.ClaimType
+		 * Coding as there is not currently an option there that works for DME
+		 * claims.
+		 */
+
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_B));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		if (claimGroup.getClinicalTrialNumber().isPresent()) {
-			TransformerUtils.addExtensionCoding(eob, TransformerConstants.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER,
-					TransformerConstants.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER,
+			/*
+			 * FIXME this should be mapped as an extension valueIdentifier
+			 * instead of as a valueCodeableConcept
+			 */
+			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
+					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
 					claimGroup.getClinicalTrialNumber().get());
 		}
-
-		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_TYPE,
-				claimGroup.getClaimTypeCode()));
-		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_SYSTEM_CCW_RECORD_ID_CD,
-				TransformerConstants.CODING_SYSTEM_CCW_RECORD_ID_CD,
-				String.valueOf(claimGroup.getNearLineRecordIdCode()));
 
 		TransformerUtils.validatePeriodDates(claimGroup.getDateFrom(), claimGroup.getDateThrough());
 		TransformerUtils.setPeriodStart(eob.getBillablePeriod(), claimGroup.getDateFrom());
 		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
 
-		eob.setDisposition(TransformerConstants.CODING_SYSTEM_CCW_CARR_CLAIM_DISPOSITION);
-		TransformerUtils.addExtensionCoding(eob, TransformerConstants.CODING_SYSTEM_CCW_CARR_CARRIER_NUMBER,
-				TransformerConstants.CODING_SYSTEM_CCW_CARR_CARRIER_NUMBER,
+		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
+		/*
+		 * FIXME this should be mapped as an extension valueIdentifier instead
+		 * of as a valueCodeableConcept
+		 */
+		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
+				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				claimGroup.getCarrierNumber());
-		TransformerUtils.addExtensionCoding(eob, TransformerConstants.CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD,
-				TransformerConstants.CODING_SYSTEM_CCW_CARR_PAYMENT_DENIAL_CD,
+		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
+				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				claimGroup.getPaymentDenialCode());
 		eob.getPayment()
-				.setAmount((Money) new Money().setSystem(TransformerConstants.CODING_SYSTEM_MONEY_US)
+				.setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 						.setValue(claimGroup.getPaymentAmount()));
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BENEFIT_BALANCE_URL, "Medical"));
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
+						BenefitCategory.MEDICAL.toCode()));
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.getPrimaryPayerPaidAmount() != null) {
 			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.BENEFIT_BALANCE_TYPE,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 							TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
 			primaryPayerPaidAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 							.setValue(claimGroup.getPrimaryPayerPaidAmount()));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
 		}
@@ -122,56 +140,56 @@ final class DMEClaimTransformer {
 			eob.setReferral(new Reference(referral));
 		}
 
-		TransformerUtils.addExtensionCoding(eob, TransformerConstants.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
-				TransformerConstants.CODING_SYSTEM_CCW_PROVIDER_ASSIGNMENT,
+		TransformerUtils.addExtensionCoding(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
+				TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
 				String.valueOf(claimGroup.getProviderAssignmentIndicator()));
 
-		if (!claimGroup.getProviderPaymentAmount().equals(TransformerConstants.ZERO)) {
+		if (!claimGroup.getProviderPaymentAmount().equals(BigDecimal.ZERO)) {
 			BenefitComponent providerPaymentAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_PAYMENT_B));
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT));
 			providerPaymentAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 							.setValue(claimGroup.getProviderPaymentAmount()));
 			benefitBalances.getFinancial().add(providerPaymentAmount);
 		}
 
-		if (!claimGroup.getBeneficiaryPaymentAmount().equals(TransformerConstants.ZERO)) {
+		if (!claimGroup.getBeneficiaryPaymentAmount().equals(BigDecimal.ZERO)) {
 			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.BENEFIT_BALANCE_TYPE,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 							TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
 			beneficiaryPaymentAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 							.setValue(claimGroup.getBeneficiaryPaymentAmount()));
 			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
 		}
 
-		if (!claimGroup.getSubmittedChargeAmount().equals(TransformerConstants.ZERO)) {
+		if (!claimGroup.getSubmittedChargeAmount().equals(BigDecimal.ZERO)) {
 			BenefitComponent submittedChargeAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.BENEFIT_BALANCE_TYPE,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 							TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
 			submittedChargeAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 							.setValue(claimGroup.getSubmittedChargeAmount()));
 			benefitBalances.getFinancial().add(submittedChargeAmount);
 		}
 
-		if (!claimGroup.getAllowedChargeAmount().equals(TransformerConstants.ZERO)) {
+		if (!claimGroup.getAllowedChargeAmount().equals(BigDecimal.ZERO)) {
 			BenefitComponent allowedChargeAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.BENEFIT_BALANCE_TYPE,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 							TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE));
 			allowedChargeAmount
-					.setAllowed(new Money().setSystem(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 							.setValue(claimGroup.getAllowedChargeAmount()));
 			benefitBalances.getFinancial().add(allowedChargeAmount);
 		}
 
-		if (!claimGroup.getBeneficiaryPartBDeductAmount().equals(TransformerConstants.ZERO)) {
+		if (!claimGroup.getBeneficiaryPartBDeductAmount().equals(BigDecimal.ZERO)) {
 			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.BENEFIT_BALANCE_TYPE,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 							TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
 			beneficiaryPartBDeductAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 							.setValue(claimGroup.getBeneficiaryPartBDeductAmount()));
 			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
 		}
@@ -179,8 +197,8 @@ final class DMEClaimTransformer {
 		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
-		TransformerUtils.addExtensionCoding(eob, TransformerConstants.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER,
-				TransformerConstants.CODING_SYSTEM_CCW_CARR_CLINICAL_TRIAL_NUMBER,
+		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
+				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
 				claimGroup.getClinicalTrialNumber().get());
 
 		for (DMEClaimLine claimLine : claimGroup.getLines()) {
@@ -198,8 +216,8 @@ final class DMEClaimTransformer {
 			 */
 			if (claimLine.getProviderNPI().isPresent()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils
-						.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_SYSTEM_NPI_US,
-								claimLine.getProviderNPI().get(), TransformerConstants.CARE_TEAM_ROLE_PRIMARY);
+						.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_NPI_US,
+								claimLine.getProviderNPI().get(), ClaimCareteamrole.PRIMARY.toCode());
 				performingCareTeamMember.setResponsible(true);
 
 				/*
@@ -213,30 +231,30 @@ final class DMEClaimTransformer {
 				 * `qualification` entry.
 				 */
 				performingCareTeamMember.setQualification(TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_SYSTEM_CCW_CARR_PROVIDER_SPECIALTY_CD,
+						TransformerConstants.CODING_CCW_PROVIDER_SPECIALTY,
 						"" + claimLine.getProviderSpecialityCode().get()));
 
 				TransformerUtils.addExtensionCoding(performingCareTeamMember,
-						TransformerConstants.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
-						TransformerConstants.CODING_SYSTEM_CCW_CARR_PROVIDER_PARTICIPATING_CD,
+						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
+						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
 						"" + claimLine.getProviderParticipatingIndCode().get());
 			}
 
-			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
-					TransformerConstants.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE,
-					TransformerConstants.CODED_EOB_ITEM_TYPE_CLINICAL_SERVICES_AND_PRODUCTS);
+			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
+					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
+					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
 
 			item.setCategory(
 					TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_SYSTEM_FHIR_EOB_ITEM_TYPE_SERVICE,
+							TransformerConstants.CODING_CCW_TYPE_SERVICE,
 							String.valueOf(claimLine.getCmsServiceTypeCode())));
 
 			item.setLocation(TransformerUtils.createCodeableConcept(
-					TransformerConstants.CODING_SYSTEM_FHIR_EOB_ITEM_LOCATION, claimLine.getPlaceOfServiceCode()));
+					TransformerConstants.CODING_CCW_PLACE_OF_SERVICE, claimLine.getPlaceOfServiceCode()));
 			if (!claimLine.getProviderStateCode().isEmpty()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),
-						TransformerConstants.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
-						TransformerConstants.CODING_SYSTEM_CCW_CARR_PROVIDER_STATE_CD,
+						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
+						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 						claimLine.getProviderStateCode());
 			}
 
@@ -250,121 +268,121 @@ final class DMEClaimTransformer {
 			}
 
 			if (claimLine.getHcpcsCode().isPresent()) {
-				item.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS,
+				item.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
 						"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsCode().get()));
 			}
 			if (claimLine.getHcpcsInitialModifierCode().isPresent()) {
 				item.addModifier(TransformerUtils.createCodeableConcept(
-						TransformerConstants.HCPCS_INITIAL_MODIFIER_CODE1, "" + claimGroup.getHcpcsYearCode().get(),
+						TransformerConstants.CODING_HCPCS, "" + claimGroup.getHcpcsYearCode().get(),
 						claimLine.getHcpcsInitialModifierCode().get()));
 			}
 			if (claimLine.getHcpcsSecondModifierCode().isPresent()) {
 				item.addModifier(TransformerUtils.createCodeableConcept(
-						TransformerConstants.HCPCS_INITIAL_MODIFIER_CODE2, "" + claimGroup.getHcpcsYearCode().get(),
+						TransformerConstants.CODING_HCPCS, "" + claimGroup.getHcpcsYearCode().get(),
 						claimLine.getHcpcsSecondModifierCode().get()));
 			}
 
 			if (claimLine.getBetosCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_SYSTEM_BETOS,
-						TransformerConstants.CODING_SYSTEM_BETOS, claimLine.getBetosCode().get());
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_BETOS,
+						TransformerConstants.CODING_BETOS, claimLine.getBetosCode().get());
 			}
 
 			item.addAdjudication()
 					.setCategory(TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 							TransformerConstants.CODED_ADJUDICATION_PAYMENT))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPaymentAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 									TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getBeneficiaryPaymentAmount());
 
 			item.addAdjudication()
 					.setCategory(TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
-							TransformerConstants.CODED_ADJUDICATION_PAYMENT_B))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+							TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+							TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getProviderPaymentAmount());
 
 			item.addAdjudication()
 					.setCategory(TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 							TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getBeneficiaryPartBDeductAmount());
 
 			if (claimLine.getPrimaryPayerCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_SYSTEM_PRIMARY_PAYER_CD,
-						TransformerConstants.CODING_SYSTEM_PRIMARY_PAYER_CD,
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
+						TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
 						String.valueOf(claimLine.getPrimaryPayerCode().get()));
 			}
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 									TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPrimaryPayerPaidAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 									TransformerConstants.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getCoinsuranceAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 									TransformerConstants.CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPrimaryPayerAllowedChargeAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 									TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getSubmittedChargeAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 									TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getAllowedChargeAmount());
 
 			if (claimLine.getProcessingIndicatorCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item,
-						TransformerConstants.CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD,
-						TransformerConstants.CODING_SYSTEM_CCW_PROCESSING_INDICATOR_CD,
+						TransformerConstants.CODING_CCW_PROCESSING_INDICATOR,
+						TransformerConstants.CODING_CCW_PROCESSING_INDICATOR,
 						claimLine.getProcessingIndicatorCode().get());
 			}
 
 			if (claimLine.getPaymentCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item,
-						TransformerConstants.CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD,
-						TransformerConstants.CODING_SYSTEM_CCW_PAYMENT_80_100_INDICATOR_CD,
+						TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR,
+						TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR,
 						String.valueOf(claimLine.getPaymentCode().get()));
 			}
 
 			if (claimLine.getServiceDeductibleCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item,
-						TransformerConstants.CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
-						TransformerConstants.CODING_SYSTEM_CCW_DEDUCTIBLE_INDICATOR_CD,
+						TransformerConstants.EXTENSION_CODING_CCW_LINE_DEDUCTIBLE_SWITCH,
+						TransformerConstants.EXTENSION_CODING_CCW_LINE_DEDUCTIBLE_SWITCH,
 						String.valueOf(claimLine.getServiceDeductibleCode().get()));
 			}
 
@@ -375,52 +393,60 @@ final class DMEClaimTransformer {
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 									TransformerConstants.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-					.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPurchasePriceAmount());
 
 			if (claimLine.getPricingStateCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),
-						TransformerConstants.CODING_SYSTEM_PRICING_STATE_CD,
-						TransformerConstants.CODING_SYSTEM_PRICING_STATE_CD,
+						TransformerConstants.EXTENSION_CODING_CCW_PRICING_STATE_CD,
+						TransformerConstants.EXTENSION_CODING_CCW_PRICING_STATE_CD,
 						claimLine.getPricingStateCode().get());
 			}
 
 			if (claimLine.getSupplierTypeCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),
-						TransformerConstants.CODING_SYSTEM_SUPPLIER_TYPE_CD,
-						TransformerConstants.CODING_SYSTEM_SUPPLIER_TYPE_CD,
+						TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
+						TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
 						String.valueOf(claimLine.getSupplierTypeCode().get()));
 			}
 
 			if (claimLine.getHcpcsThirdModifierCode().isPresent()) {
 				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.HCPCS_INITIAL_MODIFIER_CODE3,
+						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
 								"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsThirdModifierCode().get()));
 			}
 			if (claimLine.getHcpcsFourthModifierCode().isPresent()) {
 				item.addModifier(TransformerUtils.createCodeableConcept(
-						TransformerConstants.HCPCS_INITIAL_MODIFIER_CODE4, "" + claimGroup.getHcpcsYearCode().get(),
+						TransformerConstants.CODING_HCPCS, "" + claimGroup.getHcpcsYearCode().get(),
 						claimLine.getHcpcsFourthModifierCode().get()));
 			}
 
-			if (!claimLine.getScreenSavingsAmount().equals(TransformerConstants.ZERO)) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_SYSTEM_SCREEN_SAVINGS_AMT,
-						TransformerConstants.CODING_SYSTEM_SCREEN_SAVINGS_AMT,
+			if (!claimLine.getScreenSavingsAmount().equals(BigDecimal.ZERO)) {
+				/*
+				 * FIXME this should be mapped as an extension valueQuantity
+				 * instead of as a valueCodeableConcept
+				 */
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
+						TransformerConstants.EXTENSION_SCREEN_SAVINGS,
 						String.valueOf(claimLine.getScreenSavingsAmount().get()));
 			}
 
 			if (claimLine.getMtusCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_SYSTEM_MTUS_CD,
-						TransformerConstants.CODING_SYSTEM_MTUS_CD,
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS,
+						TransformerConstants.EXTENSION_CODING_MTUS,
 						String.valueOf(claimLine.getMtusCode().get()));
 			}
 
-			if (!claimLine.getMtusCount().equals(TransformerConstants.ZERO)) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_SYSTEM_MTUS_COUNT,
-						TransformerConstants.CODING_SYSTEM_MTUS_COUNT,
+			if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
+				/*
+				 * FIXME this should be mapped as a valueQuantity, not a
+				 * valueCoding
+				 */
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_MTUS_COUNT,
+						TransformerConstants.EXTENSION_MTUS_COUNT,
 						String.valueOf(claimLine.getMtusCount()));
 			}
 
@@ -429,7 +455,7 @@ final class DMEClaimTransformer {
 				Observation hctHgbObservation = new Observation();
 				hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
 				CodeableConcept hctHgbTestType = new CodeableConcept();
-				hctHgbTestType.addCoding().setSystem(TransformerConstants.CODING_SYSTEM_CMS_HCT_OR_HGB_TEST_TYPE)
+				hctHgbTestType.addCoding().setSystem(TransformerConstants.CODING_CCW_HCT_OR_HGB_TEST_TYPE)
 						.setCode(claimLine.getHctHgbTestTypeCode().get());
 				hctHgbObservation.setCode(hctHgbTestType);
 				hctHgbObservation.setValue(new Quantity().setValue(claimLine.getHctHgbTestResult()));
@@ -445,8 +471,8 @@ final class DMEClaimTransformer {
 			}
 
 			if (claimLine.getNationalDrugCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_SYSTEM_NDC,
-						TransformerConstants.CODING_SYSTEM_NDC, claimLine.getNationalDrugCode().get());
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_NDC,
+						TransformerConstants.CODING_NDC, claimLine.getNationalDrugCode().get());
 			}
 
 		}

@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -78,7 +79,7 @@ final class TransformerUtils {
 			careTeamEntry.setProvider(new Reference()
 					.setIdentifier(new Identifier().setSystem(practitionerIdSystem).setValue(practitionerIdValue)));
 			careTeamEntry.setRole(
-					createCodeableConcept(TransformerConstants.CODING_SYSTEM_CARE_TEAM_ROLE, practitionerRole));
+					createCodeableConcept(TransformerConstants.CODING_FHIR_CARE_TEAM_ROLE, practitionerRole));
 		}
 	
 		// care team entry is at eob level so no need to create item link id
@@ -112,7 +113,7 @@ final class TransformerUtils {
 		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
 		diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
 		if (diagnosis.getPresentOnAdmission().isPresent()) {
-			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_SYSTEM_CCW_INP_POA_CD,
+			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
 					String.valueOf(diagnosis.getPresentOnAdmission().get())));
 		}
 		eob.getDiagnosis().add(diagnosisComponent);
@@ -415,8 +416,7 @@ final class TransformerUtils {
 	 *         the specified parameters
 	 */
 	static Reference referencePatient(String patientId) {
-		return new Reference(
-				String.format("Patient?identifier=%s|%s", TransformerConstants.CODING_SYSTEM_CCW_BENE_ID, patientId));
+		return new Reference(new IdType("Patient", patientId));
 	}
 
 	/**
@@ -439,7 +439,7 @@ final class TransformerUtils {
 	 *         matches the specified parameters
 	 */
 	static Reference referencePractitioner(String practitionerNpi) {
-		return createIdentifierReference(TransformerConstants.CODING_SYSTEM_NPI_US, practitionerNpi);
+		return createIdentifierReference(TransformerConstants.CODING_NPI_US, practitionerNpi);
 	}
 
 	/**

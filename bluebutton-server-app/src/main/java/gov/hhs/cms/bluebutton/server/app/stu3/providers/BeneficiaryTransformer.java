@@ -19,7 +19,7 @@ final class BeneficiaryTransformer {
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
 	 * CCW Data Dictionary: BENE_ID</a>.
 	 */
-	public static final String CODING_SYSTEM_CCW_BENE_ID = "http://bluebutton.cms.hhs.gov/identifier#bene_id";
+	public static final String CODING_CCW_BENE_ID = "http://bluebutton.cms.hhs.gov/identifier#bene_id";
 
 	/**
 	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
@@ -28,11 +28,11 @@ final class BeneficiaryTransformer {
 	 * HICNs. However, HICNs are still the primary/only Medicare identifier for
 	 * now.
 	 */
-	public static final String CODING_SYSTEM_CCW_BENE_HICN_HASH = "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
+	public static final String CODING_CCW_BENE_HICN_HASH = "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
 
-	static final String EXTENSION_URL_US_CORE_RACE = "http://hl7.org/fhir/StructureDefinition/us-core-race";
+	static final String EXTENSION_US_CORE_RACE = "http://hl7.org/fhir/StructureDefinition/us-core-race";
 
-	static final String CODING_SYSTEM_CCW_RACE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
+	static final String CODING_CCW_RACE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
 
 	/**
 	 * @param beneficiary
@@ -46,8 +46,8 @@ final class BeneficiaryTransformer {
 		Patient patient = new Patient();
 
 		patient.setId(beneficiary.getBeneficiaryId());
-		patient.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_ID).setValue(beneficiary.getBeneficiaryId());
-		patient.addIdentifier().setSystem(CODING_SYSTEM_CCW_BENE_HICN_HASH).setValue(beneficiary.getHicn());
+		patient.addIdentifier().setSystem(CODING_CCW_BENE_ID).setValue(beneficiary.getBeneficiaryId());
+		patient.addIdentifier().setSystem(CODING_CCW_BENE_HICN_HASH).setValue(beneficiary.getHicn());
 
 		patient.addAddress().setState(beneficiary.getStateCode()).setDistrict(beneficiary.getCountyCode())
 				.setPostalCode(beneficiary.getPostalCode());
@@ -69,7 +69,7 @@ final class BeneficiaryTransformer {
 		}
 
 		if (beneficiary.getRace().isPresent()) {
-			TransformerUtils.addExtensionCoding(patient, EXTENSION_URL_US_CORE_RACE, CODING_SYSTEM_CCW_RACE,
+			TransformerUtils.addExtensionCoding(patient, EXTENSION_US_CORE_RACE, CODING_CCW_RACE,
 					"" + beneficiary.getRace().get());
 		}
 
