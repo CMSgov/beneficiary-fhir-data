@@ -50,7 +50,7 @@ public final class FhirClient
 	 *            client for
 	 * @return a new FHIR {@link IGenericClient} for use
 	 */
-	public static IGenericClient create(String fhirServerUrlText) {
+	public static IGenericClient create(String fhirServerUrlText, String clientKeystoreDirText) {
 		final char[] JKS_PASSWORD = "changeit".toCharArray();
 		final char[] KEY_PASSWORD = "changeit".toCharArray();
 
@@ -76,7 +76,7 @@ public final class FhirClient
       // Load the java keystore
 			final KeyStore keystore = KeyStore.getInstance("JKS");
 			try(final InputStream is = new FileInputStream(
-        getClientKeyStorePath("dev/ssl-stores","client.keystore").toFile())) 
+        getClientKeyStorePath(clientKeystoreDirText, "client.keystore").toFile())) 
       {
 				keystore.load(is, JKS_PASSWORD); 
 			}	
@@ -164,6 +164,7 @@ public final class FhirClient
 			throw new IllegalStateException();
 
 		Path keyStorePath = sslStoresDir.resolve(storeName);
+    System.out.println("Debug: keyStorePath = " + keyStorePath.toString());
 		return keyStorePath;
 	}
 }

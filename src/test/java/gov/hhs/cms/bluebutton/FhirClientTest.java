@@ -39,7 +39,7 @@ public class FhirClientTest
     public void testFhirClient()
     {
         IGenericClient client = 
-          FhirClient.create("https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3");
+          FhirClient.create("https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3","./dev/ssl-stores");
         Patient patient = client.read().resource(Patient.class).withId("3960").execute();
         //System.out.println("Patient Family = " + patient.getName().get(0).getFamily()); 
         assertEquals(patient.getName().get(0).getFamily(), "Zvndwu");

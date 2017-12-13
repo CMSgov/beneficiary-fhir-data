@@ -12,6 +12,11 @@
             <stringProp name="Argument.value">${__P(fhir_server,https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="keystore_dir" elementType="Argument">
+            <stringProp name="Argument.name">keystore_dir</stringProp>
+            <stringProp name="Argument.value">${__P(keystore_dir,/opt/fhir_stress/dev/ssl-stores)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
           <elementProp name="riffile" elementType="Argument">
             <stringProp name="Argument.name">riffile</stringProp>
             <stringProp name="Argument.value">${__P(riffile,beneficiary_test.rif)}</stringProp>
@@ -60,19 +65,24 @@
                 <stringProp name="Argument.value">${fhir_server}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="keystore_dir" elementType="Argument">
+                <stringProp name="Argument.name">keystore_dir</stringProp>
+                <stringProp name="Argument.value">${keystore_dir}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
               <elementProp name="riffile" elementType="Argument">
                 <stringProp name="Argument.name">riffile</stringProp>
-                <stringProp name="Argument.value">${__P(riffile,beneficiary_test.rif)}</stringProp>
+                <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="delimiter" elementType="Argument">
                 <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${__P(delimiter,|)}</stringProp>
+                <stringProp name="Argument.value">${delimiter}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="thread_loops" elementType="Argument">
                 <stringProp name="Argument.name">thread_loops</stringProp>
-                <stringProp name="Argument.value">${__P(thread_loops,300)}</stringProp>
+                <stringProp name="Argument.value">${thread_loops}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -88,19 +98,24 @@
                 <stringProp name="Argument.value">${fhir_server}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="keystore_dir" elementType="Argument">
+                <stringProp name="Argument.name">keystore_dir</stringProp>
+                <stringProp name="Argument.value">${keystore_dir}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
               <elementProp name="riffile" elementType="Argument">
                 <stringProp name="Argument.name">riffile</stringProp>
-                <stringProp name="Argument.value">${__P(riffile,beneficiary_test.rif)}</stringProp>
+                <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="delimiter" elementType="Argument">
                 <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${__P(delimiter,|)}</stringProp>
+                <stringProp name="Argument.value">${delimiter}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="thread_loops" elementType="Argument">
                 <stringProp name="Argument.name">thread_loops</stringProp>
-                <stringProp name="Argument.value">${__P(thread_loops,300)}</stringProp>
+                <stringProp name="Argument.value">${thread_loops}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -116,19 +131,24 @@
                 <stringProp name="Argument.value">${fhir_server}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="keystore_dir" elementType="Argument">
+                <stringProp name="Argument.name">keystore_dir</stringProp>
+                <stringProp name="Argument.value">${keystore_dir}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
               <elementProp name="riffile" elementType="Argument">
                 <stringProp name="Argument.name">riffile</stringProp>
-                <stringProp name="Argument.value">${__P(riffile,beneficiary_test.rif)}</stringProp>
+                <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="delimiter" elementType="Argument">
                 <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${__P(delimiter,|)}</stringProp>
+                <stringProp name="Argument.value">${delimiter}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="thread_loops" elementType="Argument">
                 <stringProp name="Argument.name">thread_loops</stringProp>
-                <stringProp name="Argument.value">${__P(thread_loops,300)}</stringProp>
+                <stringProp name="Argument.value">${thread_loops}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -142,6 +162,11 @@
               <elementProp name="fhir_server" elementType="Argument">
                 <stringProp name="Argument.name">fhir_server</stringProp>
                 <stringProp name="Argument.value">${fhir_server}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="keystore_dir" elementType="Argument">
+                <stringProp name="Argument.name">keystore_dir</stringProp>
+                <stringProp name="Argument.value">${keystore_dir}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="riffile" elementType="Argument">
