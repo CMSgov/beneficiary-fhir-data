@@ -1,10 +1,13 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.concurrent.Callable;
 
@@ -79,7 +82,8 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			downloadTimer.close();
 
 			// generate MD5ChkSum value on file just downloaded
-			String generatedMD5ChkSum = computeMD5ChkSum(localTempFile);
+			InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
+			String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
 
 			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
 			// TODO Remove null check below once Jira CBBD-368 is completed
@@ -99,21 +103,32 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 	}
 
 	/**
-	 * Returns a Base64 encoded MD5chksum for the input file localTempFile.
+	 * Calculates and returns a Base64 encoded MD5chksum value for the file just
+	 * downloaded from S3
 	 * 
-	 * @param localTempFile
-	 * @return
+	 * @param downloadedS3File
+	 *            the {@link InputStream} of the file just downloaded from S3
+	 * @return Base64 encoded md5 value
 	 */
-	public static String computeMD5ChkSum(Path localTempFile) {
-		String result = null;
-		try {
-			byte[] bytes = Files.readAllBytes(localTempFile);
-			byte[] hash = MessageDigest.getInstance("MD5").digest(bytes);
-			return Base64.getEncoder().encodeToString(hash);
-		} catch (Exception e) {
-			e.printStackTrace();
+	public static String computeMD5ChkSum(InputStream downloadedS3File) throws IOException, NoSuchAlgorithmException {
+		// Create byte array to read data in chunks
+		byte[] byteArray = new byte[1024];
+		int bytesCount = 0;
+		MessageDigest md5Digest = MessageDigest.getInstance("MD5");
+
+		// Read file data and update in message digest
+		while ((bytesCount = downloadedS3File.read(byteArray)) != -1) {
+			md5Digest.update(byteArray, 0, bytesCount);
 		}
-		return result;
+
+		// close the stream
+		downloadedS3File.close();
+
+		// Get the hash's bytes
+		byte[] bytes = md5Digest.digest();
+
+		// return complete hash
+		return Base64.getEncoder().encodeToString(bytes);
 	}
 
 	/**

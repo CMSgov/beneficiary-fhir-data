@@ -1,6 +1,8 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,7 +79,8 @@ public final class ManifestEntryDownloadTaskIT {
 			downloadHandle.getProgress();
 			downloadHandle.waitForCompletion();
 
-			String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(localTempFile);
+			InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
+			String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
 			LOGGER.info("The generated MD5 value from Java (Base64 encoded) is:" + generatedMD5ChkSum);
 
 			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
@@ -101,5 +104,7 @@ public final class ManifestEntryDownloadTaskIT {
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
 		}
 	}
+
+
 
 }
