@@ -69,7 +69,6 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			GetObjectRequest objectRequest = new GetObjectRequest(options.getS3BucketName(),
 					String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
 							manifestEntry.getParentManifest().getTimestampText(), manifestEntry.getName()));
-
 			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
 
 			Timer.Context downloadTimer = appMetrics
@@ -168,7 +167,4 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			return localDownload;
 		}
 	}
-
-
-
 }

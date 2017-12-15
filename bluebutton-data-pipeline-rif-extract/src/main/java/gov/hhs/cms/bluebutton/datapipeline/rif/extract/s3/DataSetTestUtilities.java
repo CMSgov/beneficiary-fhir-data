@@ -69,6 +69,24 @@ public class DataSetTestUtilities {
 	 *         {@link DataSetManifest}
 	 */
 	public static PutObjectRequest createPutRequest(Bucket bucket, DataSetManifest manifest) {
+		String keyPrefix = String.format("%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+				manifest.getTimestampText());
+		return createPutRequest(bucket, keyPrefix, manifest);
+	}
+
+	/**
+	 * @param bucket
+	 *            the {@link Bucket} to place the new object in
+	 * @param keyPrefix
+	 *            the S3 key prefix to store the new object under
+	 * @param manifest
+	 *            the {@link DataSetManifest} to push as an object
+	 * @return a {@link PutObjectRequest} for the specified
+	 *         {@link DataSetManifest}
+	 */
+	public static PutObjectRequest createPutRequest(Bucket bucket, String keyPrefix, DataSetManifest manifest) {
+		String objectKey = String.format("%s/%d_%s", keyPrefix, manifest.getSequenceId(), "manifest.xml");
+
 		try {
 			// Serialize the manifest to a byte array.
 			JAXBContext jaxbContext = JAXBContext.newInstance(DataSetManifest.class);
@@ -76,8 +94,6 @@ public class DataSetTestUtilities {
 			ByteArrayOutputStream manifestOutputStream = new ByteArrayOutputStream();
 			marshaller.marshal(manifest, manifestOutputStream);
 
-			String objectKey = String.format("%s/%s/%d_%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
-					manifest.getTimestampText(), manifest.getSequenceId(), "manifest.xml");
 			byte[] manifestByteArray = manifestOutputStream.toByteArray();
 			InputStream manifestInputStream = new ByteArrayInputStream(manifestByteArray);
 
@@ -106,8 +122,27 @@ public class DataSetTestUtilities {
 	 */
 	public static PutObjectRequest createPutRequest(Bucket bucket, DataSetManifest manifest,
 			DataSetManifestEntry manifestEntry, URL objectContentsUrl) {
-		String objectKey = String.format("%s/%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
-				manifest.getTimestampText(), manifestEntry.getName());
+		String keyPrefix = String.format("%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+				manifest.getTimestampText());
+		return createPutRequest(bucket, keyPrefix, manifest, manifestEntry, objectContentsUrl);
+	}
+
+	/**
+	 * @param bucket
+	 *            the {@link Bucket} to place the new object in
+	 * @param keyPrefix
+	 *            the S3 key prefix to store the new object under
+	 * @param manifest
+	 *            the {@link DataSetManifest} to create an object for
+	 * @param manifestEntry
+	 *            the {@link DataSetManifestEntry} to create an object for
+	 * @param objectContentsUrl
+	 *            a {@link URL} to the data to push as the new object's content
+	 * @return a {@link PutObjectRequest} for the specified content
+	 */
+	public static PutObjectRequest createPutRequest(Bucket bucket, String keyPrefix, DataSetManifest manifest,
+			DataSetManifestEntry manifestEntry, URL objectContentsUrl) {
+		String objectKey = String.format("%s/%s", keyPrefix, manifestEntry.getName());
 
 		try {
 			// If this isn't specified, the AWS API logs annoying warnings.

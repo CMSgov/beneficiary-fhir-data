@@ -50,6 +50,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.TestDataSetLocation;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.LocalRifFile;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3RifFile;
