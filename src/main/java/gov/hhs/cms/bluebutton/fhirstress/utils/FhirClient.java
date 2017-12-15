@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.fhirclient;
+package gov.hhs.cms.bluebutton.fhirstress.utils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -24,6 +24,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.http.client.HttpClient;
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -48,9 +49,36 @@ public final class FhirClient
 	 * @param fhirServerUrlText
 	 *            a {@link String} for the URL of the FHIR server to create a
 	 *            client for
+	 * @param clientKeystoreDirText
+	 *            a {@link String} path to the client keystore directory 
 	 * @return a new FHIR {@link IGenericClient} for use
 	 */
-	public static IGenericClient create(String fhirServerUrlText, String clientKeystoreDirText) {
+	public static IGenericClient create(
+    String fhirServerUrlText, 
+    String clientKeystoreDirText) {
+    return FhirClient.create(fhirServerUrlText, clientKeystoreDirText, null, 0);
+  }
+
+	/**
+	 * @param fhirServerUrlText
+	 *            a {@link String} for the URL of the FHIR server to create a
+	 *            client for
+	 * @param clientKeystoreDirText
+	 *            a {@link String} path to the client keystore directory 
+	 * @param proxyHost
+	 *            a {@link String} to a proxy hostname to use for the client
+   *            connection 
+	 * @param proxyHost
+	 *            a {@link int} to the proxy port to use for the client
+   *            connection 
+	 * @return a new FHIR {@link IGenericClient} for use
+	 */
+	public static IGenericClient create(
+    String fhirServerUrlText, 
+    String clientKeystoreDirText,
+    String proxyHost,
+    int proxyPort) {
+
 		final char[] JKS_PASSWORD = "changeit".toCharArray();
 		final char[] KEY_PASSWORD = "changeit".toCharArray();
 
@@ -122,11 +150,24 @@ public final class FhirClient
 			@SuppressWarnings("deprecation")
 
       // configure connection properties
-			RequestConfig defaultRequestConfig = RequestConfig.custom()
+			RequestConfig defaultRequestConfig;
+      if(proxyHost != null) { // configuration with proxy
+			  defaultRequestConfig = RequestConfig.custom()
+					.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
+					.setConnectTimeout(ctx.getRestfulClientFactory().getConnectTimeout())
+					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
+          .setProxy(new HttpHost(proxyHost, proxyPort))
+					.setStaleConnectionCheckEnabled(true).build();
+        System.out.println("Debug: Using proxy " + proxyHost + ":" + proxyPort); 
+      }
+      else { // configuration without proxy
+			  defaultRequestConfig = RequestConfig.custom()
 					.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
 					.setConnectTimeout(ctx.getRestfulClientFactory().getConnectTimeout())
 					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
 					.setStaleConnectionCheckEnabled(true).build();
+        System.out.println("Debug: Direct connection, no proxy"); 
+      }
 
       // create http client
 			HttpClient httpClient = HttpClients.custom().setConnectionManager(connectionManager)
@@ -164,7 +205,7 @@ public final class FhirClient
 			throw new IllegalStateException();
 
 		Path keyStorePath = sslStoresDir.resolve(storeName);
-    System.out.println("Debug: keyStorePath = " + keyStorePath.toString());
+    //System.out.println("Debug: keyStorePath = " + keyStorePath.toString());
 		return keyStorePath;
 	}
 }

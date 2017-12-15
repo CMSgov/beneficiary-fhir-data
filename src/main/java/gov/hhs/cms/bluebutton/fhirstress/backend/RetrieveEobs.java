@@ -21,6 +21,8 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
+
 /**
  * This JMeter sampler will run a search for a random FHIR {@link Patient} and
  * then retrieve that {@link Patient} and all of their
@@ -29,7 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public final class RetrieveEobs extends CustomSamplerClient {
 	private Random rng = new Random();
 	private List<String> patientIds;
-  private int bene_id = 1;
+  private BenefitIdMgr bim; 
 
 	/**
 	 * @see org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient#setupTest(org.apache.jmeter.protocol.java.sampler.JavaSamplerContext)
@@ -37,6 +39,7 @@ public final class RetrieveEobs extends CustomSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
+    bim = new BenefitIdMgr(1,1,10000,"201400000","%05d"); 
 	}
 
 	/**
@@ -111,7 +114,7 @@ public final class RetrieveEobs extends CustomSamplerClient {
       // query all EOBs for a patient
 		  Bundle searchResults = client.search()
         .forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(String.valueOf(this.bene_id++))))
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(bim.nextId())))
 				.returnBundle(Bundle.class)
         .execute();
     //}

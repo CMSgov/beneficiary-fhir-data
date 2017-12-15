@@ -7,9 +7,9 @@ import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 
-import gov.hhs.cms.bluebutton.fhirclient.FhirClient;
-//import gov.hhs.cms.bluebutton.rifparser.RifParser;
-//import gov.hhs.cms.bluebutton.rifparser.RifEntry;
+import gov.hhs.cms.bluebutton.fhirstress.utils.FhirClient;
+//import gov.hhs.cms.bluebutton.fhirstress.utils.RifParser;
+//import gov.hhs.cms.bluebutton.fhirstress.utils.RifEntry;
 
 //import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -17,9 +17,10 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	protected static final String PARAM_SERVER = "fhir_server";
 	protected static final String KEYSTORE_DIR = "keystore_dir";
+	protected static final String PROXY_HOST = "proxy_host";
+	protected static final String PROXY_PORT = "proxy_port";
 	protected static final String RIFFILE = "riffile";
 	protected static final String DELIMITER = "delimiter";
-	protected static final String LOOPS = "thread_loops";
 	protected static final String HOSTNAME_UNKNOWN = "unknown-host";
 
 	protected String hostName;
@@ -32,11 +33,12 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	@Override
 	public Arguments getDefaultParameters() {
 		Arguments defaultParameters = new Arguments();
-		defaultParameters.addArgument(PARAM_SERVER, "http://localhost:8080/hapi-fhir/baseDstu2");
+		defaultParameters.addArgument(PARAM_SERVER, "https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3");
 		defaultParameters.addArgument(KEYSTORE_DIR, "/opt/fhir_stress/dev/ssl-stores");
+		defaultParameters.addArgument(PROXY_HOST, "null");
+		defaultParameters.addArgument(PROXY_PORT, "0");
 		defaultParameters.addArgument(RIFFILE, "beneficiary_test.rif");
 		defaultParameters.addArgument(DELIMITER, "|");
-		defaultParameters.addArgument(LOOPS, "300");
 		return defaultParameters;
 	}
 
@@ -47,10 +49,22 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
 		this.hostName = getHostname();
-		this.client = FhirClient.create(
-      context.getParameter(PARAM_SERVER),
-      context.getParameter(KEYSTORE_DIR)
-    );
+    int proxyPort = Integer.parseInt(context.getParameter(PROXY_PORT));
+
+    if(context.getParameter(PROXY_HOST).equals("null")) { // no proxy
+		  this.client = FhirClient.create(
+        context.getParameter(PARAM_SERVER),
+        context.getParameter(KEYSTORE_DIR)
+      );
+    }
+    else { // use proxy
+		  this.client = FhirClient.create(
+        context.getParameter(PARAM_SERVER),
+        context.getParameter(KEYSTORE_DIR),
+        context.getParameter(PROXY_HOST),
+        Integer.parseInt(context.getParameter(PROXY_PORT))
+      );
+    }
     //this.parser = new RifParser(context.getParameter(RIFFILE), context.getParameter(DELIMITER));
     //System.out.println("Thread loops = " + context.getParameter(LOOPS));
 

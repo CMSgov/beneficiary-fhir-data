@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.rifparser;
+package gov.hhs.cms.bluebutton.fhirstress.utils;
 
 import java.io.FileReader;
 import java.io.IOException;

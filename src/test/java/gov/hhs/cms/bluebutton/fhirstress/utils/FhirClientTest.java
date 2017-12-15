@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton;
+package gov.hhs.cms.bluebutton.fhirstress.utils;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -6,7 +6,6 @@ import junit.framework.TestSuite;
 
 import org.hl7.fhir.dstu3.model.Patient;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import gov.hhs.cms.bluebutton.fhirclient.FhirClient;
 import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
@@ -40,8 +39,9 @@ public class FhirClientTest
     {
         IGenericClient client = 
           FhirClient.create("https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3","./dev/ssl-stores");
-        Patient patient = client.read().resource(Patient.class).withId("3960").execute();
+        Patient patient =
+        client.read().resource(Patient.class).withId("20140000005499").execute();
         //System.out.println("Patient Family = " + patient.getName().get(0).getFamily()); 
-        assertEquals(patient.getName().get(0).getFamily(), "Zvndwu");
+        assertEquals("Doe", patient.getName().get(0).getFamily());
     }
 }

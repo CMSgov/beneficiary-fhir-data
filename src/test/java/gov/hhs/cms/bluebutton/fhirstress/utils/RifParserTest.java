@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton;
+package gov.hhs.cms.bluebutton.fhirstress.utils;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -12,9 +12,6 @@ import java.util.Collection;
 import java.io.FileReader;
 import java.io.IOException;
 import com.opencsv.CSVReader;
-
-import gov.hhs.cms.bluebutton.rifparser.RifEntry;
-import gov.hhs.cms.bluebutton.rifparser.RifParser;
 
 /**
  * Unit test for simple RifParser.

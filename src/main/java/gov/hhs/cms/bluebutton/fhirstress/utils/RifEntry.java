@@ -1,4 +1,4 @@
-package gov.hhs.cms.bluebutton.rifparser;
+package gov.hhs.cms.bluebutton.fhirstress.utils;
 
 import com.opencsv.bean.CsvBindByName;
 
