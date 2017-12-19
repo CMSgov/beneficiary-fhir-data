@@ -24,13 +24,14 @@ final class CCWProcedure extends IcdCode {
 	 * @param procedureDate
 	 *            the value to use for {@link #getProcedureDate()}
 	 */
-	public CCWProcedure(Optional<String> icdCode, Optional<Character> icdVersionCode, LocalDate procedureDate) {
+	public CCWProcedure(Optional<String> icdCode, Optional<Character> icdVersionCode,
+			Optional<LocalDate> procedureDate) {
 		super(icdCode, icdVersionCode);
 		Objects.requireNonNull(icdCode);
 		Objects.requireNonNull(icdVersionCode);
 		Objects.requireNonNull(procedureDate);
 
-		this.procedureDate = procedureDate;
+		this.procedureDate = procedureDate.get();
 
 	}
 
@@ -57,7 +58,7 @@ final class CCWProcedure extends IcdCode {
 	 *         <code>icdCode</code> was present
 	 */
 	static Optional<CCWProcedure> from(Optional<String> icdCode, Optional<Character> icdVersionCode,
-			LocalDate procedureDate) {
+			Optional<LocalDate> procedureDate) {
 		if (!icdCode.isPresent())
 			return Optional.empty();
 		return Optional.of(new CCWProcedure(icdCode, icdVersionCode, procedureDate));
