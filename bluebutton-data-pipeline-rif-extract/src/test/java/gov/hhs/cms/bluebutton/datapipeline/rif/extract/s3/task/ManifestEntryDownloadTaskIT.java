@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,12 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.AwsFailureException;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.ChecksumException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
+
 
 /**
  * Tests downloaded S3 file attributes such as MD5ChkSum
@@ -48,6 +49,7 @@ public final class ManifestEntryDownloadTaskIT {
 	 * Test to ensure the MD5ChkSum of the downloaded S3 file matches the generated
 	 * MD5ChkSum value
 	 */
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testMD5ChkSum()
 			throws Exception {
@@ -76,7 +78,6 @@ public final class ManifestEntryDownloadTaskIT {
 					localTempFile.toAbsolutePath().toString());
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,
 							localTempFile.toFile());
-			downloadHandle.getProgress();
 			downloadHandle.waitForCompletion();
 
 			InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
@@ -85,10 +86,8 @@ public final class ManifestEntryDownloadTaskIT {
 
 			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
 			LOGGER.info("The MD5 value from AWS S3 file's metadata is: " + downloadedFileMD5ChkSum);
-			// TODO Remove null check below once Jira CBBD-368 is completed
-			if (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum))
-				throw new ChecksumException("Checksum doesn't match on downloaded file " + objectRequest.getKey());
-
+			Assert.assertEquals("Checksum doesn't match on downloaded file " + objectRequest.getKey(),
+					downloadedFileMD5ChkSum, generatedMD5ChkSum);
 			LOGGER.info("Downloaded '{}' to '{}'.", objectRequest.getKey(), localTempFile.toAbsolutePath().toString());
 
 		} catch (IOException e) {

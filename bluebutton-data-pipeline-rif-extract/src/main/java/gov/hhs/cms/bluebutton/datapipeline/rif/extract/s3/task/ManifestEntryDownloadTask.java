@@ -81,14 +81,17 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
 			downloadTimer.close();
 
 			// generate MD5ChkSum value on file just downloaded
+			Timer.Context md5ChkSumTimer = appMetrics
+					.timer(MetricRegistry.name(getClass().getSimpleName(), "md5ChkSumSystemTime")).time();
 			InputStream downloadedInputStream = new FileInputStream(localTempFile.toString());
 			String generatedMD5ChkSum = ManifestEntryDownloadTask.computeMD5ChkSum(downloadedInputStream);
+			md5ChkSumTimer.close();
 
 			String downloadedFileMD5ChkSum = downloadHandle.getObjectMetadata().getUserMetaDataOf("md5chksum");
 			// TODO Remove null check below once Jira CBBD-368 is completed
 			if ((downloadedFileMD5ChkSum != null) && (!generatedMD5ChkSum.equals(downloadedFileMD5ChkSum)))
 				throw new ChecksumException("Checksum doesn't match on downloaded file " + localTempFile
-						+ "manifest entry is " + manifestEntry.toString());
+						+ " manifest entry is " + manifestEntry.toString());
 
 			return new ManifestEntryDownloadResult(manifestEntry, localTempFile);
 		} catch (IOException e) {

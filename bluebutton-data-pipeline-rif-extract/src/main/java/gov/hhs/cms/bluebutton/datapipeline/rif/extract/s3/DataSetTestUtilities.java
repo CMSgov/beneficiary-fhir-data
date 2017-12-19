@@ -169,7 +169,7 @@ public class DataSetTestUtilities {
 			throw new UncheckedIOException(e);
 		} catch (NoSuchAlgorithmException e) {
 			throw new ChecksumException("NoSuchAlgorithmException on file " + manifest.getTimestampText()
-					+ manifestEntry.getName() + "trying to build md5chksum" + e);
+					+ manifestEntry.getName() + "trying to build md5chksum", e);
 		}
 
 	}
