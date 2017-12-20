@@ -62,8 +62,8 @@
         <stringProp name="ThreadGroup.ramp_time"></stringProp>
         <longProp name="ThreadGroup.start_time">1510254020000</longProp>
         <longProp name="ThreadGroup.end_time">1510254020000</longProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">120</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration">300</stringProp>
         <stringProp name="ThreadGroup.delay">0</stringProp>
       </ThreadGroup>
       <hashTree>
@@ -98,11 +98,6 @@
               <elementProp name="delimiter" elementType="Argument">
                 <stringProp name="Argument.name">delimiter</stringProp>
                 <stringProp name="Argument.value">${delimiter}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="thread_loops" elementType="Argument">
-                <stringProp name="Argument.name">thread_loops</stringProp>
-                <stringProp name="Argument.value">${thread_loops}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -143,11 +138,6 @@
                 <stringProp name="Argument.value">${delimiter}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
-              <elementProp name="thread_loops" elementType="Argument">
-                <stringProp name="Argument.name">thread_loops</stringProp>
-                <stringProp name="Argument.value">${thread_loops}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
             </collectionProp>
           </elementProp>
           <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrieveEobs</stringProp>
@@ -186,11 +176,6 @@
                 <stringProp name="Argument.value">${delimiter}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
-              <elementProp name="thread_loops" elementType="Argument">
-                <stringProp name="Argument.name">thread_loops</stringProp>
-                <stringProp name="Argument.value">${thread_loops}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
             </collectionProp>
           </elementProp>
           <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrieveEobsByDate</stringProp>
@@ -221,17 +206,12 @@
               </elementProp>
               <elementProp name="riffile" elementType="Argument">
                 <stringProp name="Argument.name">riffile</stringProp>
-                <stringProp name="Argument.value">${__P(riffile,beneficiary_test.rif)}</stringProp>
+                <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="delimiter" elementType="Argument">
                 <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${__P(delimiter,|)}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
-              <elementProp name="thread_loops" elementType="Argument">
-                <stringProp name="Argument.name">thread_loops</stringProp>
-                <stringProp name="Argument.value">${__P(thread_loops,300)}</stringProp>
+                <stringProp name="Argument.value">${delimiter}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
