@@ -44,7 +44,7 @@
           </elementProp>
           <elementProp name="thread_loops" elementType="Argument">
             <stringProp name="Argument.name">thread_loops</stringProp>
-            <stringProp name="Argument.value">${__P(thread_loops,300)}</stringProp>
+            <stringProp name="Argument.value">${__P(thread_loops,1000)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -62,7 +62,7 @@
         <stringProp name="ThreadGroup.ramp_time"></stringProp>
         <longProp name="ThreadGroup.start_time">1510254020000</longProp>
         <longProp name="ThreadGroup.end_time">1510254020000</longProp>
-        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">300</stringProp>
         <stringProp name="ThreadGroup.delay">0</stringProp>
       </ThreadGroup>
