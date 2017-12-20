@@ -68,7 +68,7 @@ public final class FhirClient
 	 * @param proxyHost
 	 *            a {@link String} to a proxy hostname to use for the client
    *            connection 
-	 * @param proxyHost
+	 * @param proxyPort
 	 *            a {@link int} to the proxy port to use for the client
    *            connection 
 	 * @return a new FHIR {@link IGenericClient} for use
@@ -143,9 +143,10 @@ public final class FhirClient
 
       // defaults to 2 concurrent and 20 max that will not be enough
       // https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/conn/PoolingHttpClientConnectionManager.html
-      // TODO - configure max connections to a meaningful number
-      connectionManager.setDefaultMaxPerRoute(42);
-      connectionManager.setMaxTotal(42);
+      // Tweaked settings to perform well on a laptop running 10 threads with
+      // 1000 thread loop count 
+      connectionManager.setDefaultMaxPerRoute(100);
+      connectionManager.setMaxTotal(1000);
 
 			@SuppressWarnings("deprecation")
 
@@ -158,7 +159,7 @@ public final class FhirClient
 					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
           .setProxy(new HttpHost(proxyHost, proxyPort))
 					.setStaleConnectionCheckEnabled(true).build();
-        System.out.println("Debug: Using proxy " + proxyHost + ":" + proxyPort); 
+        //System.out.println("Debug: Using proxy " + proxyHost + ":" + proxyPort); 
       }
       else { // configuration without proxy
 			  defaultRequestConfig = RequestConfig.custom()
@@ -166,7 +167,7 @@ public final class FhirClient
 					.setConnectTimeout(ctx.getRestfulClientFactory().getConnectTimeout())
 					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
 					.setStaleConnectionCheckEnabled(true).build();
-        System.out.println("Debug: Direct connection, no proxy"); 
+        //System.out.println("Debug: Direct connection, no proxy"); 
       }
 
       // create http client

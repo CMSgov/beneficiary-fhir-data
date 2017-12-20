@@ -9,6 +9,18 @@ public class BenefitIdMgr {
 
   /** 
    * Constructor(s) 
+   *
+   * @param startIndex
+   *  a {@link int} containing the starting index to use for creating benefit IDs
+   * @param minIndex
+   *  a {@link int} containing the minimum index allowed for creating benefit IDs
+   * @param maxIndex
+   *  a {@link int} containing the maximum index allowed for creating benefit IDs
+   * @param prefix
+   *  a {@link String} containing the prefix used for creating benefit IDs
+   * @param format
+   *  a {@link String} containing the string formatter to use for formatting
+   *  indexes in benefit IDs
    */
   public BenefitIdMgr(int startIndex, int minIndex, int maxIndex, String prefix, String format) {
     this.minIndex = minIndex;
@@ -41,6 +53,9 @@ public class BenefitIdMgr {
   /**
    * Retrieves the next benefit id available by concating the prefix to the
    * next index value and increments the current index
+   *
+   * @return
+   *  a {@link String} containing the next benefit ID 
    */
   public String nextId() {
     String nextId = String.format(prefix + format, currIndex);
@@ -51,6 +66,9 @@ public class BenefitIdMgr {
   /**
    * Retrieves the previous benefit id available by concating the prefix to the
    * previous index value and decrements the current index
+   *
+   * @return
+   *  a {@link String} containing the previous benefit ID 
    */
   public String prevId() {
     decCurrIndex();
