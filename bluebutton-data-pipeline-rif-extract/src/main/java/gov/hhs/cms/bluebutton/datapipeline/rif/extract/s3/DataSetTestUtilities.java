@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -21,7 +22,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.exceptions.ChecksumException;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask;
 
 /**
  * <p>
@@ -147,6 +150,10 @@ public class DataSetTestUtilities {
 			ObjectMetadata objectMetadata = new ObjectMetadata();
 			objectMetadata.setContentLength(objectContentLength);
 
+			// create md5chksum on file to be uploaded
+			objectMetadata.addUserMetadata("md5chksum",
+					ManifestEntryDownloadTask.computeMD5ChkSum(objectContentsUrl.openStream()));
+
 			PutObjectRequest request = new PutObjectRequest(bucket.getName(), objectKey, objectContentsUrl.openStream(),
 					objectMetadata);
 
@@ -160,7 +167,11 @@ public class DataSetTestUtilities {
 			return request;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		} catch (NoSuchAlgorithmException e) {
+			throw new ChecksumException("NoSuchAlgorithmException on file " + manifest.getTimestampText()
+					+ manifestEntry.getName() + "trying to build md5chksum", e);
 		}
+
 	}
 
 	/**
