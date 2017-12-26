@@ -60,13 +60,9 @@ final class HHAClaimTransformer {
 
 		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claimGroup.getClaimTypeCode()));
-		eob.getType().addCoding().setSystem(TransformerConstants.CODING_CCW_RECORD_ID_CODE)
-				.setCode(String.valueOf(claimGroup.getNearLineRecordIdCode()));
-		/*
-		 * Note: Can't add a org.hl7.fhir.dstu3.model.codesystems.ClaimType
-		 * Coding as there is not currently an option there that works for HHA
-		 * claims.
-		 */
+		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				String.valueOf(claimGroup.getNearLineRecordIdCode()));
 
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);

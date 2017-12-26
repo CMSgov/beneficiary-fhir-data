@@ -60,10 +60,9 @@ final class SNFClaimTransformer {
 
 		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claimGroup.getClaimTypeCode()));
-		eob.getType().addCoding().setSystem(TransformerConstants.CODING_CCW_RECORD_ID_CODE)
-				.setCode(String.valueOf(claimGroup.getNearLineRecordIdCode()));
-		eob.getType().addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE)
-				.setCode(org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL.toCode());
+		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				String.valueOf(claimGroup.getNearLineRecordIdCode()));
 
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_A));
