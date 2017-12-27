@@ -18,7 +18,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -416,7 +415,9 @@ final class TransformerUtils {
 	 *         the specified parameters
 	 */
 	static Reference referencePatient(String patientId) {
-		return new Reference(new IdType("Patient", patientId));
+		// FIXME Should reference the Patient ID now (not an identifier)
+		return new Reference(
+				String.format("Patient?identifier=%s|%s", "CCW.BENE_ID", patientId));
 	}
 
 	/**

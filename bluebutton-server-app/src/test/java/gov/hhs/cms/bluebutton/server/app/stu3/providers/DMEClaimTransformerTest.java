@@ -67,8 +67,9 @@ public final class DMEClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				"" + claim.getNearLineRecordIdCode(), eob.getType());
+		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
+				TransformerConstants.CODING_CCW_RECORD_ID_CODE, TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				"" + claim.getNearLineRecordIdCode());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
 		Assert.assertEquals(
