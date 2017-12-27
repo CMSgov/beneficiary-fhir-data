@@ -13,6 +13,7 @@ import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,47 +51,47 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
  * Contains test utilities.
  */
 public final class ServerTestUtils {
+	/**
+	 * The base URL for the test server used in integration tests.
+	 */
+	public static final String TEST_SERVER_URL_BASE = "https://localhost:9094/baseDstu3";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServerTestUtils.class);
 
 	/**
-	 * @return a new FHIR {@link IGenericClient} for use
+	 * @return a new FHIR {@link IGenericClient} for use, configured to use the
+	 *         {@link ClientSslIdentity#TRUSTED} login
 	 */
 	public static IGenericClient createFhirClient() {
-		FhirContext ctx = FhirContext.forDstu3();
+		return createFhirClient(Optional.of(ClientSslIdentity.TRUSTED));
+	}
 
-		/*
-		 * The default timeout is 10s, which was failing for batches of 100. A
-		 * 300s timeout was failing for batches of 100 once Part B claims were
-		 * mostly mapped, so batches were cut to 10, which ran at 12s or so,
-		 * each.
-		 */
-		ctx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
-
+	/**
+	 * @param clientSslIdentity
+	 *            the {@link ClientSslIdentity} to use as a login for the FHIR
+	 *            server
+	 * @return a new FHIR {@link IGenericClient} for use
+	 */
+	public static IGenericClient createFhirClient(Optional<ClientSslIdentity> clientSslIdentity) {
 		/*
 		 * We need to override the FHIR client's SSLContext. Unfortunately, that
 		 * requires overriding the entire HttpClient that it uses. Otherwise,
 		 * the settings used here mirror those that the default FHIR HttpClient
 		 * would use.
 		 */
+		SSLContext sslContext;
 		try {
-			SSLContext sslContext = SSLContexts.custom()
-					.loadKeyMaterial(getClientKeyStorePath().toFile(), "changeit".toCharArray(),
-							"changeit".toCharArray())
-					.loadTrustMaterial(getClientTrustStorePath().toFile(), "changeit".toCharArray()).build();
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-					RegistryBuilder.<ConnectionSocketFactory> create()
-							.register("http", PlainConnectionSocketFactory.getSocketFactory())
-							.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
-					null, null, null, 5000, TimeUnit.MILLISECONDS);
-			@SuppressWarnings("deprecation")
-			RequestConfig defaultRequestConfig = RequestConfig.custom()
-					.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
-					.setConnectTimeout(ctx.getRestfulClientFactory().getConnectTimeout())
-					.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
-					.setStaleConnectionCheckEnabled(true).build();
-			HttpClient httpClient = HttpClients.custom().setConnectionManager(connectionManager)
-					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement().build();
-			ctx.getRestfulClientFactory().setHttpClient(httpClient);
+			SSLContextBuilder sslContextBuilder = SSLContexts.custom();
+
+			// If a client key is desired, configure the key store with it.
+			if (clientSslIdentity.isPresent())
+				sslContextBuilder.loadKeyMaterial(clientSslIdentity.get().getKeyStore(),
+						clientSslIdentity.get().getStorePassword(), clientSslIdentity.get().getKeyPass());
+
+			// Configure the trust store.
+			sslContextBuilder.loadTrustMaterial(getClientTrustStorePath().toFile(), "changeit".toCharArray());
+
+			sslContext = sslContextBuilder.build();
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		} catch (KeyManagementException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException
@@ -97,15 +99,38 @@ public final class ServerTestUtils {
 			throw new IllegalStateException(e);
 		}
 
-		IGenericClient client = ctx.newRestfulGenericClient("https://localhost:9094/baseDstu3".toString());
+		/*
+		 * The default timeout is 10s, which was failing for batches of 100. A
+		 * 300s timeout was failing for batches of 100 once Part B claims were
+		 * mostly mapped, so batches were cut to 10, which ran at 12s or so,
+		 * each.
+		 */
+		FhirContext ctx = FhirContext.forDstu3();
+		ctx.getRestfulClientFactory().setSocketTimeout((int) TimeUnit.MINUTES.toMillis(5));
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
+				RegistryBuilder.<ConnectionSocketFactory> create()
+						.register("http", PlainConnectionSocketFactory.getSocketFactory())
+						.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
+				null, null, null, 5000, TimeUnit.MILLISECONDS);
+		@SuppressWarnings("deprecation")
+		RequestConfig defaultRequestConfig = RequestConfig.custom()
+				.setSocketTimeout(ctx.getRestfulClientFactory().getSocketTimeout())
+				.setConnectTimeout(ctx.getRestfulClientFactory().getConnectTimeout())
+				.setConnectionRequestTimeout(ctx.getRestfulClientFactory().getConnectionRequestTimeout())
+				.setStaleConnectionCheckEnabled(true).build();
+		HttpClient httpClient = HttpClients.custom().setConnectionManager(connectionManager)
+				.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement().build();
+		ctx.getRestfulClientFactory().setHttpClient(httpClient);
+
+		IGenericClient client = ctx.newRestfulGenericClient(TEST_SERVER_URL_BASE);
 		return client;
 	}
 
 	/**
-	 * @return the local {@link Path} to the key store that FHIR clients should
-	 *         use
+	 * @return the local {@link Path} that development/test key and trust stores
+	 *         can be found in
 	 */
-	private static Path getClientKeyStorePath() {
+	static Path getSslStoresDirectory() {
 		/*
 		 * The working directory for tests will either be the module directory
 		 * or their parent directory. With that knowledge, we're searching for
@@ -116,9 +141,7 @@ public final class ServerTestUtils {
 			sslStoresDir = Paths.get("dev", "ssl-stores");
 		if (!Files.isDirectory(sslStoresDir))
 			throw new IllegalStateException();
-
-		Path keyStorePath = sslStoresDir.resolve("client.keystore");
-		return keyStorePath;
+		return sslStoresDir;
 	}
 
 	/**
@@ -126,7 +149,7 @@ public final class ServerTestUtils {
 	 *         should use
 	 */
 	private static Path getClientTrustStorePath() {
-		Path trustStorePath = getClientKeyStorePath().getParent().resolve("client.truststore");
+		Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.jks");
 		return trustStorePath;
 	}
 

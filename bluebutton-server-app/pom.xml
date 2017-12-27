@@ -323,9 +323,9 @@
 								<argument>--directory</argument>
 								<argument>${project.build.directory}/bluebutton-server</argument>
 								<argument>--keystore</argument>
-								<argument>${project.build.directory}/../../dev/ssl-stores/server.keystore</argument>
+								<argument>${project.build.directory}/../../dev/ssl-stores/server-keystore.jks</argument>
 								<argument>--truststore</argument>
-								<argument>${project.build.directory}/../../dev/ssl-stores/server.truststore</argument>
+								<argument>${project.build.directory}/../../dev/ssl-stores/server-truststore.jks</argument>
 								<argument>--dburl</argument>
 								<argument>${its.bbfhir.db.url}</argument>
 								<argument>--dbusername</argument>
