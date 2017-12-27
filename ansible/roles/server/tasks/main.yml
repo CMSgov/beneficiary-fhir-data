@@ -1,0 +1,17 @@
+---
+
+- name: Copy Stress Tests Library
+  copy: 
+    src={{ test_lib }}
+    dest={{ remoteJmeterDir }}/lib/ext/
+    owner=root group=root mode=0664
+
+- name: Create Keystore Directory 
+  file: path={{ remoteTestDir }}/dev/ssl-stores state=directory
+
+- name: Copy Client Keystore 
+  copy: 
+    src={{ test_keystore }}
+    dest={{ remoteTestDir }}/dev/ssl-stores
+    owner=root group=root mode=0664
+

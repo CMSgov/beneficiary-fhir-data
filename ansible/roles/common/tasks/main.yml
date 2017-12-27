@@ -1,0 +1,40 @@
+---
+
+# TODO do we need to install JRE in RHEL or is the OpenJDK enough?
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    # Needed to supply `keytool` and also to run the app server.
+    - java-1.8.0-openjdk-devel
+  become: true
+
+#- name: Add 'ppa:webupd8team/java' Repo
+  #apt_repository: repo='ppa:webupd8team/java'
+
+#- name: Accept 'oracle-java8-installer' License
+  # Reference: http://askubuntu.com/a/637514/41593
+  #debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+
+#- name: Install Java 8 JRE and Other Prerequisites
+  #apt: name={{ item }} update_cache=true cache_valid_time="{{ 60 * 15 }}"
+  #with_items:
+    #- oracle-java8-installer
+    #- oracle-java8-set-default
+
+- name: Create Directory Tree for '{{ remoteTestDir }}' 
+  file: path={{ remoteTestDir }} state=directory
+
+- name: Download and Unpack JMeter
+  unarchive: 
+    src=http://archive.apache.org/dist/jmeter/binaries/apache-jmeter-{{ jmeter_version }}.tgz
+    dest={{ remoteTestDir }}
+    copy=no
+
+- name: Fix JMeter Executable Permissions
+  file: path="{{ item }}" owner=root group=root mode=0774
+  with_items:
+    - "{{ remoteJmeterDir }}/bin/jmeter-server"
+    - "{{ remoteJmeterDir }}/bin/jmeter"
+

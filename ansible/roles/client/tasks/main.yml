@@ -1,0 +1,8 @@
+---
+
+- name: Copy Test Plan
+  copy: 
+    src={{ test_plan }}
+    dest={{ remoteTestDir }}
+    owner=root group=root mode=0664
+
