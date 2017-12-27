@@ -181,7 +181,7 @@ public final class InpatientClaimTransformerTest {
 		Assert.assertEquals(9, eob.getDiagnosis().size());
 
 		CCWProcedure ccwProcedure = new CCWProcedure(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
-				claim.getProcedure1Date().get());
+				claim.getProcedure1Date());
 		TransformerTestUtils.assertHasCoding(ccwProcedure.getFhirSystem().toString(),
 				claim.getProcedure1Code().get(),
 				eob.getProcedure().get(0).getProcedureCodeableConcept());

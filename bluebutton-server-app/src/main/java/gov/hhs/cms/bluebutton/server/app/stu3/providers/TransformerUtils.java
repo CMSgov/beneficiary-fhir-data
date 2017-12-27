@@ -40,7 +40,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
  * Contains shared methods used to transform CCW JPA entities (e.g.
  * {@link Beneficiary}) into FHIR resources (e.g. {@link Patient}).
  */
-final class TransformerUtils {
+public final class TransformerUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
 
 	/**
@@ -232,7 +232,7 @@ final class TransformerUtils {
 	 * @return the {@link ExplanationOfBenefit#getId()} value to use for the
 	 *         specified <code>claimId</code> value
 	 */
-	static String buildEobId(ClaimType claimType, String claimId) {
+	public static String buildEobId(ClaimType claimType, String claimId) {
 		return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
 	}
 
@@ -248,13 +248,13 @@ final class TransformerUtils {
 	}
 
 	/**
-	 * @param beneficiary
+	 * @param beneficiaryId
 	 *            the {@link Beneficiary#getBeneficiaryId()} to calculate the
 	 *            {@link Patient#getId()} value for
 	 * @return the {@link Patient#getId()} value that will be used for the
 	 *         specified {@link Beneficiary}
 	 */
-	static IdDt buildPatientId(String beneficiaryId) {
+	public static IdDt buildPatientId(String beneficiaryId) {
 		return new IdDt(Patient.class.getSimpleName(), beneficiaryId);
 	}
 
@@ -276,13 +276,13 @@ final class TransformerUtils {
 	 * @param medicareSegment
 	 *            the {@link MedicareSegment} to compute a
 	 *            {@link Coverage#getId()} for
-	 * @param beneficiary
+	 * @param beneficiaryId
 	 *            the {@link Beneficiary#getBeneficiaryId()} value to compute a
 	 *            {@link Coverage#getId()} for
 	 * @return the {@link Coverage#getId()} value to use for the specified
 	 *         values
 	 */
-	static IdDt buildCoverageId(MedicareSegment medicareSegment, String beneficiaryId) {
+	public static IdDt buildCoverageId(MedicareSegment medicareSegment, String beneficiaryId) {
 		return new IdDt(Coverage.class.getSimpleName(),
 				String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
 	}
