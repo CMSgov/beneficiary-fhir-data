@@ -10,3 +10,5 @@ vault.password
 # Ignore Ansible retry files.
 *.retry
 
+# Ignore Ansible logs, as there's no way to version them sanely.
+logs/
