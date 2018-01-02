@@ -230,7 +230,7 @@ final class PartDEventTransformer {
 		}
 
 		rxItem.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_NDC,
-				claimGroup.getPrescriptionOriginationCode().get().toString()));
+				claimGroup.getNationalDrugCode()));
 
 		SimpleQuantity quantityDispensed = new SimpleQuantity();
 		quantityDispensed.setValue(claimGroup.getQuantityDispensed());

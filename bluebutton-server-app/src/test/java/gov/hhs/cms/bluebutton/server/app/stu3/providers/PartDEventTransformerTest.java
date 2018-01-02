@@ -85,6 +85,9 @@ public final class PartDEventTransformerTest {
 
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC, claim.getNationalDrugCode(),
+				rxItem.getService());
+
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType());
 
 		Assert.assertEquals(Date.valueOf(claim.getPrescriptionFillDate()), rxItem.getServicedDateType().getValue());
@@ -120,6 +123,12 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_COST,
 				claim.getTotalPrescriptionCost(),
 				rxItem.getAdjudication());
+
+		Assert.assertTrue(eob.getInformation().stream()
+				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
+						TransformerConstants.CODING_CMS_RX_PRESCRIPTION_ORIGIN,
+						String.valueOf(claim.getPrescriptionOriginationCode().get()))));
+
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT,
 				claim.getGapDiscountAmount(),
 				rxItem.getAdjudication());
