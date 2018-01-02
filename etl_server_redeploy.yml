@@ -134,7 +134,7 @@
         port: "{{ hostvars['localhost']['backend_postgres_port'] }}"
         login_user: "{{ backend_postgres_master_username }}"
         login_password: "{{ backend_postgres_master_password }}"
-        name: bluebutton_backend_db
+        name: "{{ backend_db_name }}"
         encoding: 'UNICODE'
         lc_collate: 'C'
         lc_ctype: 'C'
@@ -149,7 +149,7 @@
       data_pipeline_s3_bucket: "{{ s3_bucket_etl_staging }}"
       data_pipeline_hicn_hash_iterations: 2  # NIST recommends at least 1000, but this isn't production.
       data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
-      data_pipeline_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/bluebutton_backend_db"
+      data_pipeline_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/{{ backend_db_name }}"
       data_pipeline_db_username: "{{ backend_postgres_master_username }}"
       data_pipeline_db_password: "{{ backend_postgres_master_password }}"
 

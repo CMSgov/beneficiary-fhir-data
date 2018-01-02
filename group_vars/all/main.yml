@@ -32,6 +32,9 @@ ssh_user_rhel: 'ec2-user'
 backend_postgres_master_username: "{{ vault_backend_postgres_master_username }}"
 backend_postgres_master_password: "{{ vault_backend_postgres_master_password }}"
 
+# The name of the DB that the backend Blue Button data will be stored in.
+backend_db_name: 'bluebutton_backend_sandbox'
+
 # The port that the FHIR server will run on.
 backend_fhir_port_internal: 8443
 backend_fhir_port_external: 443
