@@ -49,7 +49,7 @@ final class TransformerTestUtils {
 	static void assertAdjudicationEquals(String expectedCategoryCode, BigDecimal expectedAmount,
 			List<AdjudicationComponent> actuals) {
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS, expectedCategoryCode)).findAny();
+				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		assertEquivalent(expectedAmount, adjudication.get().getAmount().getValue());
 	}
@@ -64,7 +64,7 @@ final class TransformerTestUtils {
 	 */
 	static void assertAdjudicationNotPresent(String expectedCategoryCode, List<AdjudicationComponent> actuals) {
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS, expectedCategoryCode)).findAny();
+				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
 		Assert.assertFalse(adjudication.isPresent());
 	}
 
@@ -84,7 +84,7 @@ final class TransformerTestUtils {
 	static void assertAdjudicationReasonEquals(String expectedCategoryCode, String expectedReasonSystem,
 			String expectedReasonCode, List<AdjudicationComponent> actuals) {
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS, expectedCategoryCode)).findAny();
+				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		assertHasCoding(expectedReasonSystem, expectedReasonCode, adjudication.get().getReason());
 	}
@@ -180,9 +180,9 @@ final class TransformerTestUtils {
 	static void assertCareTeamEquals(String expectedPractitioner, String expectedPractitionerRole,
 			ExplanationOfBenefit eob) {
 		CareTeamComponent careTeamEntry = findCareTeamEntryForProviderIdentifier(
-				TransformerConstants.CODING_SYSTEM_NPI_US, expectedPractitioner, eob.getCareTeam());
+				TransformerConstants.CODING_NPI_US, expectedPractitioner, eob.getCareTeam());
 		Assert.assertNotNull(careTeamEntry);
-		assertCodingEquals(TransformerConstants.CODING_SYSTEM_CARE_TEAM_ROLE, expectedPractitionerRole,
+		assertCodingEquals(TransformerConstants.CODING_FHIR_CARE_TEAM_ROLE, expectedPractitionerRole,
 				careTeamEntry.getRole().getCodingFirstRep());
 	}
 
@@ -453,7 +453,7 @@ final class TransformerTestUtils {
 	 */
 	static CareTeamComponent findCareTeamEntryForProviderIdentifier(String expectedProviderNpi,
 			List<CareTeamComponent> careTeam) {
-		return findCareTeamEntryForProviderIdentifier(TransformerConstants.CODING_SYSTEM_NPI_US, expectedProviderNpi,
+		return findCareTeamEntryForProviderIdentifier(TransformerConstants.CODING_NPI_US, expectedProviderNpi,
 				careTeam);
 	}
 

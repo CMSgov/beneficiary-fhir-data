@@ -8,8 +8,8 @@ import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -21,12 +21,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
  * {@link ExplanationOfBenefit} resources.
  */
 final class PartDEventTransformer {
-	/**
-	 * The {@link TransformerConstants#CODING_SYSTEM_FHIR_CLAIM_TYPE} value for
-	 * {@link PartDEvent}s.
-	 */
-	public static final String CODED_FHIR_CLAIM_TYPE_PHARMACY = "pharmacy";
-
 	/**
 	 * @param claim
 	 *            the CCW {@link PartDEvent} to transform
@@ -49,29 +43,39 @@ final class PartDEventTransformer {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
 		eob.setId(TransformerUtils.buildEobId(ClaimType.PDE, claimGroup.getEventId()));
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_CCW_PDE_ID).setValue(claimGroup.getEventId());
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_CCW_CLAIM_GRP_ID)
+		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_PARTD_EVENT_ID).setValue(claimGroup.getEventId());
+		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
+		eob.addIdentifier().setSystem(TransformerConstants.IDENTIFIER_RX_SERVICE_REFERENCE_NUMBER)
+				.setValue(String.valueOf(claimGroup.getPrescriptionReferenceNumber()));
+
+		/*
+		 * Note: Part D events are the one CCW "claim" type that don't have
+		 * NCH_CLM_TYPE_CD or NCH_NEAR_LINE_REC_IDENT_CD codes.
+		 */
+		eob.getType()
+				.addCoding(new Coding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE)
+						.setCode(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.toCode()));
+
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_D));
+		/*
+		 * FIXME this should be mapped as an extension valueIdentifier instead
+		 * of as a valueCodeableConcept
+		 */
 		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID,
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_CONTRACT_ID, claimGroup.getPlanContractId());
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID,
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID, claimGroup.getPlanContractId());
+		/*
+		 * FIXME this should be mapped as an extension valueIdentifier instead
+		 * of as a valueCodeableConcept
+		 */
 		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID,
-				TransformerConstants.CODING_SYSTEM_PDE_PLAN_BENEFIT_PACKAGE_ID, claimGroup.getPlanBenefitPackageId());
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID,
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID, claimGroup.getPlanBenefitPackageId());
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_SYSTEM_RX_SRVC_RFRNC_NUM)
-				.setValue(String.valueOf(claimGroup.getPrescriptionReferenceNumber()));
-
-		eob.getType().addCoding(new Coding().setSystem(TransformerConstants.CODING_SYSTEM_FHIR_CLAIM_TYPE)
-				.setCode(CODED_FHIR_CLAIM_TYPE_PHARMACY));
-		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
-
-		Reference patientRef = TransformerUtils.referencePatient(claimGroup.getBeneficiaryId());
-		eob.setPatient(patientRef);
 		if (claimGroup.getPaymentDate().isPresent()) {
 			eob.getPayment().setDate(TransformerUtils.convertToDate(claimGroup.getPaymentDate().get()));
 		}
@@ -85,7 +89,7 @@ final class PartDEventTransformer {
 		case 2:
 			/* Pharmacy dispense invoice for a compound */
 			detail.getType()
-					.addCoding(new Coding().setSystem(TransformerConstants.CODING_SYSTEM_FHIR_ACT).setCode("RXCINV"));
+					.addCoding(new Coding().setSystem(TransformerConstants.CODING_FHIR_ACT).setCode("RXCINV"));
 			break;
 		// NOT_COMPOUNDED
 		case 1:
@@ -93,7 +97,7 @@ final class PartDEventTransformer {
 			 * Pharmacy dispense invoice not involving a compound
 			 */
 			detail.getType()
-					.addCoding(new Coding().setSystem(TransformerConstants.CODING_SYSTEM_FHIR_ACT).setCode("RXDINV"));
+					.addCoding(new Coding().setSystem(TransformerConstants.CODING_FHIR_ACT).setCode("RXDINV"));
 			break;
 		// NOT_SPECIFIED
 		case 0:
@@ -124,7 +128,7 @@ final class PartDEventTransformer {
 		 */
 		// COVERED
 		case 'C':
-			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS)
+			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY)
 					.setCode(TransformerConstants.CODED_ADJUDICATION_PART_D_COVERED);
 			rxPaidAmountValue = claimGroup.getPartDPlanCoveredPaidAmount();
 			break;
@@ -137,13 +141,13 @@ final class PartDEventTransformer {
 		 */
 		// SUPPLEMENTAL
 		case 'E':
-			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS)
+			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY)
 					.setCode(TransformerConstants.CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT);
 			rxPaidAmountValue = claimGroup.getPartDPlanNonCoveredPaidAmount();
 			break;
 		// OVER THE COUNTER
 		case '0':
-			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS)
+			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY)
 					.setCode(TransformerConstants.CODED_ADJUDICATION_PART_D_NONCOVERED_OTC);
 			rxPaidAmountValue = claimGroup.getPartDPlanNonCoveredPaidAmount();
 			break;
@@ -152,67 +156,67 @@ final class PartDEventTransformer {
 			 * Unexpected value encountered - drug coverage status code should
 			 * be one of the three above.
 			 */
-			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS)
+			rxCategoryCoding = new Coding().setSystem(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY)
 					.setCode("Unknown:" + claimGroup.getDrugCoverageStatusCode());
 			rxPaidAmountValue = claimGroup.getPartDPlanCoveredPaidAmount();
 		}
 		CodeableConcept rxCategory = new CodeableConcept();
 		rxCategory.addCoding(rxCategoryCoding);
-		rxItem.addAdjudication().setCategory(rxCategory).getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US).setValue(rxPaidAmountValue);
+		rxItem.addAdjudication().setCategory(rxCategory).getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD).setValue(rxPaidAmountValue);
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_GDCB))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD)
 				.setValue(claimGroup.getGrossCostBelowOutOfPocketThreshold());
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_GDCA))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD)
 				.setValue(claimGroup.getGrossCostAboveOutOfPocketThreshold());
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_PATIENT_PAY))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US).setValue(claimGroup.getPatientPaidAmount());
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimGroup.getPatientPaidAmount());
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_OTHER_TROOP_AMOUNT))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD)
 				.setValue(claimGroup.getOtherTrueOutOfPocketPaidAmount());
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD)
 				.setValue(claimGroup.getLowIncomeSubsidyPaidAmount());
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US)
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD)
 				.setValue(claimGroup.getPatientLiabilityReductionOtherPaidAmount());
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_TOTAL_COST))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US).setValue(claimGroup.getTotalPrescriptionCost());
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimGroup.getTotalPrescriptionCost());
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_ADJUDICATION_CMS,
+				.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 						TransformerConstants.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT))
-				.getAmount().setSystem(TransformerConstants.CODING_SYSTEM_MONEY)
-				.setCode(TransformerConstants.CODING_SYSTEM_MONEY_US).setValue(claimGroup.getGapDiscountAmount());
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+				.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimGroup.getGapDiscountAmount());
 
 		if (claimGroup.getPrescriberIdQualifierCode() == null
 				|| !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01"))
@@ -220,19 +224,23 @@ final class PartDEventTransformer {
 					"Prescriber ID Qualifier Code is invalid: " + claimGroup.getPrescriberIdQualifierCode());
 
 		if (claimGroup.getPrescriberId() != null) {
-			TransformerUtils.addCareTeamPractitioner(eob, rxItem, TransformerConstants.CODING_SYSTEM_NPI_US,
+			TransformerUtils.addCareTeamPractitioner(eob, rxItem, TransformerConstants.CODING_NPI_US,
 					claimGroup.getPrescriberId(),
-					TransformerConstants.CARE_TEAM_ROLE_PRIMARY);
+					ClaimCareteamrole.PRIMARY.toCode());
 		}
 
-		rxItem.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_NDC,
+		rxItem.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_NDC,
 				claimGroup.getPrescriptionOriginationCode().get().toString()));
 
 		SimpleQuantity quantityDispensed = new SimpleQuantity();
 		quantityDispensed.setValue(claimGroup.getQuantityDispensed());
 		rxItem.setQuantity(quantityDispensed);
 
-		rxItem.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_PDE_DAYS_SUPPLY,
+		/*
+		 * FIXME this should be mapped as an extension with a valueQuantity, not
+		 * as CodeableConcept
+		 */
+		rxItem.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.FIELD_PDE_DAYS_SUPPLY,
 				String.valueOf(claimGroup.getDaysSupply())));
 
 		// TODO CBBD-241 - This code was commented out because values other than
@@ -251,14 +259,14 @@ final class PartDEventTransformer {
 
 		if (!claimGroup.getServiceProviderId().isEmpty()) {
 			eob.setOrganization(
-					TransformerUtils.createIdentifierReference(TransformerConstants.CODING_SYSTEM_NPI_US,
+					TransformerUtils.createIdentifierReference(TransformerConstants.CODING_NPI_US,
 							claimGroup.getServiceProviderId()));
 			eob.setFacility(
-					TransformerUtils.createIdentifierReference(TransformerConstants.CODING_SYSTEM_NPI_US,
+					TransformerUtils.createIdentifierReference(TransformerConstants.CODING_NPI_US,
 							claimGroup.getServiceProviderId()));
 			TransformerUtils.addExtensionCoding(eob.getFacility(),
-					TransformerConstants.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD,
-					TransformerConstants.CODING_SYSTEM_CCW_PHRMCY_SRVC_TYPE_CD, claimGroup.getPharmacyTypeCode());
+					TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE,
+					TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE, claimGroup.getPharmacyTypeCode());
 		}
 
 		/*
@@ -266,60 +274,60 @@ final class PartDEventTransformer {
 		 */
 
 		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_DAW_PRODUCT_CD,
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_DISPENSE_AS_WRITTEN,
 						String.valueOf(claimGroup.getDispenseAsWrittenProductSelectionCode())));
 
 		if (claimGroup.getDispensingStatusCode().isPresent())
 			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_DISPENSE_STATUS_CD,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_DISPENSE_STATUS,
 							String.valueOf(claimGroup.getDispensingStatusCode().get())));
 
 		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_COVERAGE_STATUS_CD,
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_COVERAGE_STATUS,
 						String.valueOf(claimGroup.getDrugCoverageStatusCode())));
 
 		if (claimGroup.getAdjustmentDeletionCode().isPresent())
 			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_ADJUSTMENT_DEL_CD,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_ADJUSTMENT_DELETION,
 							String.valueOf(claimGroup.getAdjustmentDeletionCode().get())));
 
 		if (claimGroup.getNonstandardFormatCode().isPresent())
 			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_NON_STD_FORMAT_CD,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_NON_STANDARD_FORMAT,
 							String.valueOf(claimGroup.getNonstandardFormatCode().get())));
 
 		if (claimGroup.getPricingExceptionCode().isPresent())
 			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_PRICING_EXCEPTION_CD,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_PRICING_EXCEPTION,
 							String.valueOf(claimGroup.getPricingExceptionCode().get())));
 
 		if (claimGroup.getCatastrophicCoverageCode().isPresent())
 			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_CATASTROPHIC_COV_CD,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_CATASTROPHIC_COVERAGE,
 							String.valueOf(claimGroup.getCatastrophicCoverageCode().get())));
 
 		if (claimGroup.getPrescriptionOriginationCode().isPresent())
 			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_PRESCRIPTION_ORIGIN_CD,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_PRESCRIPTION_ORIGIN,
 							String.valueOf(claimGroup.getPrescriptionOriginationCode().get())));
 
 		if (claimGroup.getBrandGenericCode().isPresent())
 			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_BRAND_GENERIC_CD,
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_RX_BRAND_GENERIC,
 							String.valueOf(claimGroup.getBrandGenericCode().get())));
 
 		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_PHARMACY_SVC_TYPE_CD,
+				TransformerUtils.createCodeableConcept(TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE,
 						claimGroup.getPharmacyTypeCode()));
 
 		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_SYSTEM_RX_PATIENT_RESIDENCE_CD,
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_PATIENT_RESIDENCE,
 						claimGroup.getPatientResidenceCode()));
 
 		if (claimGroup.getSubmissionClarificationCode().isPresent())
 			TransformerUtils.addInformation(eob,
 					TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_SYSTEM_RX_SUBMISSION_CLARIFICATION_CD,
+							TransformerConstants.CODING_CMS_RX_SUBMISSION_CLARIFICATION,
 							claimGroup.getSubmissionClarificationCode().get()));
 
 		return eob;

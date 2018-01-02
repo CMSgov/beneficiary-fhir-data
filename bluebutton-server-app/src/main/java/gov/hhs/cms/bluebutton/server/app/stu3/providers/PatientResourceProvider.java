@@ -145,7 +145,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 * <ul>
 	 * <li>Matching a {@link Beneficiary#getHicn()} hash value: when
 	 * {@link TokenParam#getSystem()} matches
-	 * {@link BeneficiaryTransformer#CODING_SYSTEM_CCW_BENE_HICN_HASH}.</li>
+	 * {@link BeneficiaryTransformer#CODING_CCW_BENE_HICN_HASH}.</li>
 	 * </ul>
 	 * <p>
 	 * Searches that don't match one of the above forms are not supported.
@@ -169,7 +169,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
 
-		if (!BeneficiaryTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH.equals(identifier.getSystem()))
+		if (!BeneficiaryTransformer.CODING_CCW_BENE_HICN_HASH.equals(identifier.getSystem()))
 			throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
 		try {

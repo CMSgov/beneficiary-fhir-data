@@ -106,7 +106,7 @@ public final class PatientResourceProviderIT {
 				.findFirst().get();
 		Bundle searchResults = fhirClient.search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier(
-						BeneficiaryTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH, beneficiary.getHicn()))
+						BeneficiaryTransformer.CODING_CCW_BENE_HICN_HASH, beneficiary.getHicn()))
 				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
@@ -127,7 +127,7 @@ public final class PatientResourceProviderIT {
 		// No data is loaded, so this should return 0 matches.
 		Bundle searchResults = fhirClient.search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly()
-						.systemAndIdentifier(BeneficiaryTransformer.CODING_SYSTEM_CCW_BENE_HICN_HASH, "1234"))
+						.systemAndIdentifier(BeneficiaryTransformer.CODING_CCW_BENE_HICN_HASH, "1234"))
 				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
