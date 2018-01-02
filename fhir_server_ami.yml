@@ -116,10 +116,6 @@
 
   tasks:
 
-    - name: List Existing Metric Filters
-      command: aws logs describe-metric-filters --log-group-name bluebutton-sandbox-backend/data-server/access.log
-      register: command_list_aws_log_metrics
-
     - name: Create Filter Pattern Variable
       set_fact:
         filterPatternBase: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request, query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]'
@@ -131,7 +127,6 @@
         --filter-name "{{ item.name }}"
         --filter-pattern "{{ item.filterPattern }}"
         --metric-transformations "metricName={{ item.name }},metricNamespace=bluebutton-sandbox-backend,metricValue={{ item.metricValue }}{{ '' if item.defaultValue == "" else ',defaultValue={0}'.format(item.defaultValue) }}"
-      when: "'\"filterName\": \"{0}\",'.format(item.name) not in command_list_aws_log_metrics.stdout"
       with_items:
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/count', metricValue: '1', defaultValue: '0',
             filterPattern: "{{ filterPatternBase }}" }
