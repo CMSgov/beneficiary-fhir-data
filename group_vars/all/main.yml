@@ -8,16 +8,12 @@ aws_region: 'us-east-1'
 aws_zone: 'us-east-1a'
 aws_vpc: 'vpc-a755dbc2'  # ITIO Innovation Lab
 aws_vpc_subnet: 'subnet-7858b153'
-#aws_vpc_subnet: 'subnet-9a1dfeb0'
 
 # The DNS domain that the Blue Button Backend services will be hosted under.
 backend_domain: 'backend.bluebutton.hhsdevcloud.us'
-#backend_domain: 'tests.justdavis.com'
 
 s3_bucket_deployment: 'gov-hhs-cms-bluebutton-sandbox-deployment'
 s3_bucket_etl_staging: 'gov-hhs-cms-bluebutton-sandbox-etl-staging'
-#s3_bucket_deployment: 'karl-gov-hhs-cms-bluebutton-sandbox-deployment'
-#s3_bucket_etl_staging: 'karl-gov-hhs-cms-bluebutton-sandbox-etl-staging'
 
 ec2_tag_application: 'Blue Button Sandbox - Backend'
 
