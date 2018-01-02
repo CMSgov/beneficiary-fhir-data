@@ -52,9 +52,14 @@ For your convenience, a dev-only-really-don't-use-these-anywhere-else server key
     $ keytool -importcert -noprompt -trustcacerts -alias client-local-dev -file bluebutton-server.git/dev/ssl-stores/client.cer -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/server.truststore -storepass changeit
     ```
     
-1. Export the client certificate to a PFX file that you can use in your browser, if need be:
+1. Export the client keypair to a PFX file that you can use in your browser, if need be:
     
     ```
-    $ keytool -importkeystore -srckeystore bluebutton-server.git/dev/ssl-stores/client.keystore -destkeystore bluebutton-server.git/dev/ssl-stores/client.pfx -deststoretype PKCS12 -srcstorepass changeit -deststorepass changeit -srcalias client-local-dev
+    $ keytool -importkeystore -srckeystore dev/ssl-stores/client.keystore -destkeystore dev/ssl-stores/client.pfx -deststoretype PKCS12 -srcstorepass changeit -deststorepass changeit -srcalias client-local-dev
     ```
+
+1. Export the client keypair to a passwordless PEM file that you can use with `curl`, if need be:
     
+    ```
+    $ openssl pkcs12 -in dev/ssl-stores/client.pfx -passin pass:changeit -nodes -out dev/ssl-stores/client-unsecured.pem
+    ```
