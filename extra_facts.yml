@@ -12,11 +12,13 @@
       register: whoami
       changed_when: false
 
-    - name: Calculate Deployment Timestamp
-      set_fact:
-        deploy_timestamp: "{{ lookup('pipe', 'date --utc --iso-8601=seconds') }}"
+    - name: "Determine Default 'deploy_id'"
+      command: '/bin/date --utc +%Y-%m-%dT%H-%M-%SZ'
+      register: deploy_id_default
+      changed_when: false
 
-    - name: Calculate Deployment ID
+    # This can be overridden on the command line, but defaults to a timestamp.
+    - name: "Calculate 'deploy_id'"
       set_fact:
-        # This can be overridden on the command line, but defaults to a timestamp.
-        deploy_id: "{{ deploy_id_custom | default(deploy_timestamp | regex_replace(':', '-') | regex_replace('\\+0000', 'Z')) }}"
+        deploy_id: "{{ deploy_id_custom | default(deploy_id_default.stdout) }}"
+

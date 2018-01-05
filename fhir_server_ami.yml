@@ -132,15 +132,15 @@
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/count', metricValue: '1', defaultValue: '0',
             filterPattern: "{{ filterPatternBase }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/count/not-http-2xx', metricValue: '1', defaultValue: '0',
-            filterPattern: "{{ filterPatternBase | regex_replace('status_code', 'status_code != 2*') }}" }
+            filterPattern: "{{ filterPatternBase | regex_replace('status_code', 'status_code != 2\*') }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency', metricValue: '$duration_milliseconds', defaultValue: '',
             filterPattern: "{{ filterPatternBase }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency/patient', metricValue: '$duration_milliseconds', defaultValue: '',
-            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = *Patient*') }}" }
+            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = \*Patient\*') }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency/coverage', metricValue: '$duration_milliseconds', defaultValue: '',
-            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = *Coverage*') }}" }
+            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = \*Coverage\*') }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency/eob', metricValue: '$duration_milliseconds', defaultValue: '',
-            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = *ExplanationOfBenefit*') }}" }
+            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = \*ExplanationOfBenefit\*') }}" }
 
 - name: Convert FHIR Server Master to AMI
   hosts: localhost
