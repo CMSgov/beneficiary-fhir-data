@@ -14,6 +14,7 @@ import javax.persistence.EntityManagerFactory;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,6 +103,8 @@ public final class RifLoaderIT {
 	 */
 	@Test
 	public void loadSyntheticData() {
+		Assume.assumeTrue(String.format("Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
+				Runtime.getRuntime().maxMemory()), Runtime.getRuntime().maxMemory() >= 4500000000L);
 		loadSample(StaticRifResourceGroup.SYNTHETIC_DATA);
 	}
 
