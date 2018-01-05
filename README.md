@@ -72,6 +72,14 @@ Ensure that the EC2 key to be used is loaded into SSH Agent:
 
     $ ssh-add foo.pem
 
+### User Identity
+
+These plays need to know the identity of the user/system running them. Copy the identity template:
+
+    $ cp group_vars/all/management_user.yml.template group_vars/all/management_user.yml
+
+And then edit the resulting `group_vars/all/management_user.yml` file to fill in the required fields.
+
 ### Running the Playbooks
 
 The playbooks can be run, as follows:
