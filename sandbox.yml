@@ -25,6 +25,9 @@
 
 - include: extra_facts.yml
 
+# Send out a notification that a deploy is being run.
+- include: notify.yml
+
 # Provision the AWS IAM roles, KMS keys, etc. that will be used.
 - include: aws_security_setup.yml
 
