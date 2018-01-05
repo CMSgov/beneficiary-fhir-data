@@ -116,9 +116,9 @@
 
   tasks:
 
-    - name: List Existing Metric Filters
-      command: aws logs describe-metric-filters --log-group-name bluebutton-sandbox-backend/data-server/access.log
-      register: command_list_aws_log_metrics
+    - name: Create Filter Pattern Variable
+      set_fact:
+        filterPatternBase: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request, query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]'
 
     - name: Set Metric Filter for Counting All Requests
       command: >
@@ -127,20 +127,19 @@
         --filter-name "{{ item.name }}"
         --filter-pattern "{{ item.filterPattern }}"
         --metric-transformations "metricName={{ item.name }},metricNamespace=bluebutton-sandbox-backend,metricValue={{ item.metricValue }}{{ '' if item.defaultValue == "" else ',defaultValue={0}'.format(item.defaultValue) }}"
-      when: "'\"filterName\": \"{0}\",'.format(item.name) not in command_list_aws_log_metrics.stdout"
       with_items:
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/count', metricValue: '1', defaultValue: '0',
-            filterPattern: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request, query_string, status_code, bytes, duration_milliseconds]' }
+            filterPattern: "{{ filterPatternBase }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/count/not-http-2xx', metricValue: '1', defaultValue: '0',
-            filterPattern: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request, query_string, status_code != 2*, bytes, duration_milliseconds]' }
+            filterPattern: "{{ filterPatternBase | regex_replace('status_code', 'status_code != 2\*') }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency', metricValue: '$duration_milliseconds', defaultValue: '',
-            filterPattern: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request, query_string, status_code, bytes, duration_milliseconds]' }
+            filterPattern: "{{ filterPatternBase }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency/patient', metricValue: '$duration_milliseconds', defaultValue: '',
-            filterPattern: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request = *Patient*, query_string, status_code, bytes, duration_milliseconds]' }
+            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = \*Patient\*') }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency/coverage', metricValue: '$duration_milliseconds', defaultValue: '',
-            filterPattern: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request = *Coverage*, query_string, status_code, bytes, duration_milliseconds]' }
+            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = \*Coverage\*') }}" }
         - { name: 'bluebutton-sandbox-backend/data-server/http-requests/latency/eob', metricValue: '$duration_milliseconds', defaultValue: '',
-            filterPattern: '[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, timestamp_zone, request = *ExplanationOfBenefit*, query_string, status_code, bytes, duration_milliseconds]' }
+            filterPattern: "{{ filterPatternBase | regex_replace('request', 'request = \*ExplanationOfBenefit\*') }}" }
 
 - name: Convert FHIR Server Master to AMI
   hosts: localhost
@@ -169,4 +168,3 @@
         instance_ids: "{{ ec2_backend_fhir_master.instance_ids }}"
         region: "{{ aws_region }}"
       ignore_errors: true
-
