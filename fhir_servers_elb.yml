@@ -86,7 +86,7 @@
         health_check_type: 'EC2'
         min_size: "{{ ec2_asg_backend_fhir_target_count }}"
         desired_capacity: "{{ ec2_asg_backend_fhir_target_count }}"
-        max_size: 10  # Watch out that this (plus extra instances for next deploy) doesn't exceed the max allowed DB connections!
+        max_size: "{{ data_server_asg_max_size }}"
         replace_all_instances: true
         replace_batch_size: 1
         region: "{{ aws_region }}"
