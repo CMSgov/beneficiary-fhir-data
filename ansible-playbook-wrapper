@@ -1,0 +1,53 @@
+#!/bin/bash
+
+##
+# Acts as a wrapper for the default `ansible-playbook` command, renaming the
+# Ansible log file after each Ansible run.
+##
+
+set -e
+
+# Calculate the directory that this script is in.
+scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# The `ansible.cfg` file tells Ansible to log to this file automatically.
+originalLog="./logs/ansible.log"
+
+# Create the file if it doesn't exist yet.
+if [ ! -f "${originalLog}" ]; then
+  touch "${originalLog}"
+fi
+
+# Grab a timestamp now, which will be used later for the log.
+timestamp=$(date --iso-8601=seconds)
+
+# Call this function to rename the `ansible.log` file to include a timesatamp.
+timestampLog() {
+  # Timestamp the log file.
+  timestampedLog="./logs/ansible-production-${timestamp}.log"
+  mv "${originalLog}" "${timestampedLog}"
+  echo "Log written to: ${timestampedLog}"
+}
+
+# This function will be called if the script is interrupted by a `ctrl+c`.
+interrupt() {
+  timestampLog
+  exit 130
+}
+trap interrupt SIGINT
+
+# Handle errors manually, so that we can still manage the logs if things fail.
+set +e
+errorCode=0
+
+# Run Ansible, as requested.
+if [ $errorCode -eq 0 ]; then
+  echo "$ ansible-playbook $@" >> "${originalLog}"
+  ansible-playbook "$@"
+  errorCode=$?
+  echo -e "\n" | tee --append "${originalLog}"
+fi
+
+timestampLog
+exit ${errorCode}
+

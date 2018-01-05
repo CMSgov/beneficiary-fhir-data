@@ -76,7 +76,7 @@ Ensure that the EC2 key to be used is loaded into SSH Agent:
 
 The playbooks can be run, as follows:
 
-    $ ansible-playbook sandbox.yml --extra-vars "TODO"
+    $ ansible-playbook-wrapper sandbox.yml --extra-vars "ec2_key_name=<key-name> maven_repo=<local-repo-path> bluebutton_server_version=<version> wildfly_version=<version> backend_etl_version=<version>"
 
 This project has an unfortunately large amount of variables that must be specified for each run. Each of the `extra-vars` should be set, as follows:
 
