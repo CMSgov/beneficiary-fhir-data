@@ -12,6 +12,9 @@
 # system.
 ##
 
+[builds]
+bluebutton-healthapt-lss-builds
+
 [data_pipeline_systems]
 bluebutton-healthapt-prod-data-pipeline
 
@@ -23,6 +26,9 @@ bluebutton-healthapt-prod-data-server
 # variables for each environment in a single Ansible Vault file:
 #
 #     $ ansible-vault edit group_vars/env_production/vault.yml
+[env_production]
+bluebutton-healthapt-lss-builds
+
 [env_production:children]
 data_pipeline_systems
 data_server_systems

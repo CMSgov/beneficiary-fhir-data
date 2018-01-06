@@ -15,6 +15,9 @@
   roles:
     - rhel_ansible_pipelining
 
+- name: Include Build Server Playbook
+  import_playbook: build_server.yml
+
 - name: Configure Data Pipeline System
   hosts: data_pipeline_systems
   tasks:

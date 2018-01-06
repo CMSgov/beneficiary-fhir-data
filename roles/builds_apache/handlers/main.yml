@@ -1,0 +1,14 @@
+---
+
+- name: Reload Apache
+  systemd:
+    name: httpd
+    state: reloaded
+  become: true
+
+- name: Restart Apache
+  systemd:
+    name: httpd
+    state: restarted
+  become: true
+

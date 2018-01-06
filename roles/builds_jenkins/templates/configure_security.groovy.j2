@@ -1,0 +1,95 @@
+// These are the basic imports that Jenkins interactive script console
+// automatically includes.
+import jenkins.*;
+import jenkins.model.*;
+import hudson.*;
+import hudson.model.*;
+
+// Define some helper functions to check equality of config objects.
+def areSecurityRealmsEqual = { realm1, realm2 ->
+  if (realm1 == null && realm2 != null) return false
+  if (realm2 == null && realm1 != null) return false
+  if (realm1.getClass() != realm2.getClass()) return false
+
+  if (realm1.getClass() != hudson.security.HudsonPrivateSecurityRealm.class) throw new IllegalArgumentException()
+  if (realm1.allowsSignup() != realm2.allowsSignup()) return false
+  if (realm1.isEnableCaptcha() != realm2.isEnableCaptcha()) return false
+  return true
+}
+
+def areRealmDetailsPropertiesEqual = { detailsProperty1, detailsProperty2 ->
+  if (detailsProperty1 == null && detailsProperty2 != null) return false
+  if (detailsProperty2 == null && detailsProperty1 != null) return false
+  if (detailsProperty1.getClass() != detailsProperty2.getClass()) return false
+
+  if (detailsProperty1.getClass() != hudson.security.HudsonPrivateSecurityRealm.Details.class) throw new IllegalArgumentException("Unexpected type: '${detailsProperty1.getClass()}'")
+  if (detailsProperty1.getPassword() != detailsProperty2.getPassword()) return false
+  return true
+}
+
+def areUserMailPropertiesEqual = { mailProperty1, mailProperty2 ->
+  if (mailProperty1 == null && mailProperty2 != null) return false
+  if (mailProperty2 == null && mailProperty1 != null) return false
+  if (mailProperty1.getClass() != mailProperty2.getClass()) return false
+
+  if (mailProperty1.getClass() != hudson.tasks.Mailer.UserProperty.class) throw new IllegalArgumentException()
+  if (mailProperty1.getAddress() != mailProperty2.getAddress()) return false
+  return true
+}
+
+def areUsersEqual = { user1, user2 ->
+  if (user1 == null && user2 != null) return false
+  if (user2 == null && user1 != null) return false
+  if (user1.getClass() != user2.getClass()) return false
+
+  if (user1.getClass() != User.class) throw new IllegalArgumentException()
+  if (user1.getId() != user2.getId()) return false
+  if (user1.getFullName() != user2.getFullName()) return false
+  if (user1.getDescription() != user2.getDescription()) return false
+
+  // Note: No generic way to compare all properties, so we have to cherry-pick the ones we care about.
+  if (!areRealmDetailsPropertiesEqual(user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details.class), user2.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details.class))) return false
+  if (!areUserMailPropertiesEqual(user1.getProperty(hudson.tasks.Mailer.UserProperty.class), user2.getProperty(hudson.tasks.Mailer.UserProperty.class))) return false
+  return true
+}
+
+def areAuthorizationStrategiesEqual = { authzStrat1, authzStrat2 ->
+  if (authzStrat1 == null && authzStrat2 != null) return false
+  if (authzStrat2 == null && authzStrat1 != null) return false
+  if (authzStrat1.getClass() != authzStrat2.getClass()) return false
+
+  if (authzStrat1.getClass() != hudson.security.FullControlOnceLoggedInAuthorizationStrategy.class) throw new IllegalArgumentException()
+  if (authzStrat1.isAllowAnonymousRead() != authzStrat2.isAllowAnonymousRead()) return false
+  return true
+}
+
+// Configure the security realm, which handles authentication.
+def securityRealm = new hudson.security.HudsonPrivateSecurityRealm(false)
+if(!areSecurityRealmsEqual(securityRealm, Jenkins.instance.getSecurityRealm())) {
+  Jenkins.instance.setSecurityRealm(securityRealm)
+  Jenkins.instance.save()
+  println "Changed authentication."
+} else { println("Authentication already correct.") }
+
+
+// Create a user to login with.
+def adminUser = Jenkins.instance.getSecurityRealm().createAccount("{{ vault_jenkins_admin_username }}", "{{ vault_jenkins_admin_password }}")
+adminUser.addProperty(new hudson.tasks.Mailer.UserProperty("{{ vault_jenkins_admin_email }}"));
+existingAdminUser = null
+for (User user : Jenkins.instance.getSecurityRealm().getAllUsers())
+  if (user.getId() == adminUser.getId())
+    existingAdminUser = user
+if (!areUsersEqual(adminUser, existingAdminUser)) {
+  adminUser.save()
+  println("Changed admin user.")
+} else { println("Admin user already correct.") }
+
+
+// Configure the authorization strategy, which specifies who can do what.
+def authorizationStrategy = new hudson.security.FullControlOnceLoggedInAuthorizationStrategy()
+authorizationStrategy.setAllowAnonymousRead(false)
+if(!areAuthorizationStrategiesEqual(authorizationStrategy, Jenkins.instance.getAuthorizationStrategy())) {
+  Jenkins.instance.setAuthorizationStrategy(authorizationStrategy)
+  Jenkins.instance.save()
+  println "Changed authorization."
+} else { println("Authorization already correct.") }

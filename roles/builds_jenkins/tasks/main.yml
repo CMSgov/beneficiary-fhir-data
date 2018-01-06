@@ -1,0 +1,13 @@
+---
+
+- name: Install Jenkins
+  import_tasks: install.yml
+
+- name: Configure Jenkins Security
+  import_tasks: configure_security.yml
+
+#- name: Configure Tools
+#  import_tasks: configure_tools.yml
+#
+#- name: Configure Jobs
+#  import_tasks: configure_jobs.yml
