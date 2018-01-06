@@ -4,7 +4,7 @@
 - name: Disable 'requiretty' for sudo
   replace:
     dest: /etc/sudoers
-    regexp: "^Defaults    requiretty"
-    replace: "# Defaults    requiretty"
+    regexp: '^Defaults\s+requiretty'
+    replace: '# Defaults  requiretty'
   become: true
 
