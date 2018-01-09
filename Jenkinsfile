@@ -10,8 +10,12 @@ node {
 	
 	// Run the build, using Maven.
 	configFileProvider(
-			[configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:bluebutton-settings-xml', variable: 'MAVEN_SETTINGS')]) {
-		sh "${mvnHome}/bin/mvn -s $MAVEN_SETTINGS -Dmaven.test.failure.ignore clean install"
+			[
+				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
+				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
+			]
+	) {
+		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS clean install"
 	}
 	
 	
