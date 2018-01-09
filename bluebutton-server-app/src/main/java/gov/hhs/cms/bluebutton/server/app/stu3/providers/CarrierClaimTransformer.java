@@ -81,12 +81,10 @@ final class CarrierClaimTransformer {
 		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
 
 		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
-		/*
-		 * FIXME this should be mapped as an extension valueIdentifier instead
-		 * of as a valueCodeableConcept
-		 */
-		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, claimGroup.getCarrierNumber());
+
+		// Common fields between Carrier and DME
+		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber());
+
 		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, claimGroup.getPaymentDenialCode());
 		eob.getPayment().setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)

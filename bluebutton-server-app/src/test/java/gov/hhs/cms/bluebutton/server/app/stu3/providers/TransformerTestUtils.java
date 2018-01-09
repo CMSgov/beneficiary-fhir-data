@@ -545,4 +545,19 @@ final class TransformerTestUtils {
 			throw new IllegalStateException(e);
 		}
 	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to test against
+	 * @param common
+	 *            fields between Carrier and DME
+	 * 
+	 * @return the {@link ExplanationOfBenefit}
+	 * 
+	 */
+	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob, String carrierNumber) {
+		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
+				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
+
+	}
 }

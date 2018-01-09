@@ -81,9 +81,10 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
 		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
-		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, claim.getCarrierNumber());
+
+		// Test to ensure common fields between Carrier and DME match
+		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getCarrierNumber());
+
 		TransformerTestUtils.assertExtensionCodingEquals(eob,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, claim.getPaymentDenialCode());

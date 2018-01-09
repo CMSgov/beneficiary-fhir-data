@@ -516,4 +516,24 @@ public final class TransformerUtils {
 			return;
 		validatePeriodDates(dateFrom.get(), dateThrough.get());
 	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to (possibly) modify
+	 * @param common
+	 *            fields between Carrier and DME
+	 * 
+	 * @return the {@link ExplanationOfBenefit}
+	 * 
+	 */
+	static ExplanationOfBenefit mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String carrierNumber) {
+		/*
+		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
+		 * valueCodeableConcept
+		 */
+		addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
+				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
+
+		return eob;
+	}
 }
