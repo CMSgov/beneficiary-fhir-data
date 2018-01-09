@@ -9,7 +9,10 @@ node {
 	def mvnHome = tool 'maven-3'
 	
 	// Run the build, using Maven.
-	sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore clean install"
+	configFileProvider(
+			[configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:bluebutton-settings-xml', variable: 'MAVEN_SETTINGS')]) {
+		sh "${mvnHome}/bin/mvn -s $MAVEN_SETTINGS -Dmaven.test.failure.ignore clean install"
+	}
 	
 	
 	//stage 'Archive'
