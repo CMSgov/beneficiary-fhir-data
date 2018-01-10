@@ -82,8 +82,9 @@ public final class DMEClaimTransformerTest {
 
 		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
 
-		// Test to ensure common fields between Carrier and DME match
-		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getCarrierNumber());
+		// Test to ensure common group fields between Carrier and DME match
+		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getCarrierNumber(),
+				claim.getClinicalTrialNumber());
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
@@ -96,11 +97,6 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-
-		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				claim.getClinicalTrialNumber().get());
 
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
@@ -153,11 +149,6 @@ public final class DMEClaimTransformerTest {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_PLACE_OF_SERVICE,
 				claimLine1.getPlaceOfServiceCode(), eobItem0.getLocationCodeableConcept());
-
-		TransformerTestUtils.assertDateEquals(claimLine1.getFirstExpenseDate().get(),
-				eobItem0.getServicedPeriod().getStartElement());
-		TransformerTestUtils.assertDateEquals(claimLine1.getLastExpenseDate().get(),
-				eobItem0.getServicedPeriod().getEndElement());
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
 				claimLine1.getHcpcsInitialModifierCode().get(),
@@ -219,6 +210,10 @@ public final class DMEClaimTransformerTest {
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_NDC,
 				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
+
+		// Test to ensure common item fields between Carrier and DME match
+		TransformerUtils.mapEobCommonItemCarrierDME(eobItem0, claimLine1.getFirstExpenseDate(),
+				claimLine1.getLastExpenseDate());
 
 	}
 }

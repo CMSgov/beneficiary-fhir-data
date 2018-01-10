@@ -526,14 +526,46 @@ public final class TransformerUtils {
 	 * @return the {@link ExplanationOfBenefit}
 	 * 
 	 */
-	static ExplanationOfBenefit mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String carrierNumber) {
+	static ExplanationOfBenefit mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String carrierNumber,
+			Optional<String> clinicalTrialNumber) {
 		/*
 		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
 		 * valueCodeableConcept
 		 */
 		addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
+		if (clinicalTrialNumber.isPresent()) {
+			/*
+			 * FIXME this should be mapped as an extension valueIdentifier instead of as a
+			 * valueCodeableConcept
+			 */
+			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
+					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
+		}
 
 		return eob;
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to (possibly) modify
+	 * @param common
+	 *            fields between Carrier and DME
+	 * 
+	 * @return the {@link ExplanationOfBenefit}
+	 * 
+	 */
+	static ItemComponent mapEobCommonItemCarrierDME(ItemComponent item, Optional<LocalDate> firstExpenseDate,
+			Optional<LocalDate> lastExpenseDate) {
+		if (firstExpenseDate.isPresent() && lastExpenseDate.isPresent()) {
+			TransformerUtils.validatePeriodDates(firstExpenseDate, lastExpenseDate);
+			item.setServiced(new Period()
+					.setStart((TransformerUtils.convertToDate(firstExpenseDate.get())),
+							TemporalPrecisionEnum.DAY)
+					.setEnd((TransformerUtils.convertToDate(lastExpenseDate.get())),
+							TemporalPrecisionEnum.DAY));
+		}
+
+		return item;
 	}
 }

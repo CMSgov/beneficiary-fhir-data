@@ -80,8 +80,9 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
 
-		// Test to ensure common fields between Carrier and DME match
-		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getCarrierNumber());
+		// Test to ensure common group fields between Carrier and DME match
+		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getCarrierNumber(),
+				claim.getClinicalTrialNumber());
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
@@ -117,10 +118,7 @@ public final class CarrierClaimTransformerTest {
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
-		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				claim.getClinicalTrialNumber().get());
+
 
 		CarrierClaimLine claimLine1 = claim.getLines().get(0);
 		ItemComponent eobItem0 = eob.getItem().get(0);
@@ -165,11 +163,6 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getLocation(),
 				TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY,
 				TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY, "15");
-
-		TransformerTestUtils.assertDateEquals(claimLine1.getFirstExpenseDate().get(),
-				eobItem0.getServicedPeriod().getStartElement());
-		TransformerTestUtils.assertDateEquals(claimLine1.getLastExpenseDate().get(),
-				eobItem0.getServicedPeriod().getEndElement());
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
 				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(), eobItem0.getService());
@@ -247,5 +240,9 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getLocation(),
 				TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM, TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM,
 				claimLine1.getCliaLabNumber().get());
+
+		// Test to ensure common item fields between Carrier and DME match
+		TransformerUtils.mapEobCommonItemCarrierDME(eobItem0, claimLine1.getFirstExpenseDate(),
+				claimLine1.getLastExpenseDate());
 	}
 }

@@ -15,13 +15,11 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
-import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
@@ -93,9 +91,9 @@ final class DMEClaimTransformer {
 
 		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
 
-		// Common fields between Carrier and DME
-		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber());
-
+		// Common group level fields between Carrier and DME
+		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber(),
+				claimGroup.getClinicalTrialNumber());
 		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				claimGroup.getPaymentDenialCode());
@@ -190,10 +188,6 @@ final class DMEClaimTransformer {
 		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
-		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				claimGroup.getClinicalTrialNumber().get());
-
 		for (DMEClaimLine claimLine : claimGroup.getLines()) {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.getLineNumber().intValue());
@@ -249,15 +243,6 @@ final class DMEClaimTransformer {
 						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 						claimLine.getProviderStateCode());
-			}
-
-			if (claimLine.getFirstExpenseDate().isPresent() && claimLine.getLastExpenseDate().isPresent()) {
-				TransformerUtils.validatePeriodDates(claimLine.getFirstExpenseDate(), claimLine.getLastExpenseDate());
-				item.setServiced(new Period()
-						.setStart((TransformerUtils.convertToDate(claimLine.getFirstExpenseDate().get())),
-								TemporalPrecisionEnum.DAY)
-						.setEnd((TransformerUtils.convertToDate(claimLine.getLastExpenseDate().get())),
-								TemporalPrecisionEnum.DAY));
 			}
 
 			if (claimLine.getHcpcsCode().isPresent()) {
@@ -467,6 +452,9 @@ final class DMEClaimTransformer {
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_NDC,
 						TransformerConstants.CODING_NDC, claimLine.getNationalDrugCode().get());
 			}
+			// Common item level fields between Carrier and DME
+			TransformerUtils.mapEobCommonItemCarrierDME(item, claimLine.getFirstExpenseDate(),
+					claimLine.getLastExpenseDate());
 
 		}
 		return eob;

@@ -16,14 +16,12 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
-import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
@@ -82,8 +80,9 @@ final class CarrierClaimTransformer {
 
 		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
 
-		// Common fields between Carrier and DME
-		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber());
+		// Common group level fields between Carrier and DME
+		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber(),
+				claimGroup.getClinicalTrialNumber());
 
 		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, claimGroup.getPaymentDenialCode());
@@ -163,16 +162,6 @@ final class CarrierClaimTransformer {
 
 		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
-
-		if (claimGroup.getClinicalTrialNumber().isPresent()) {
-			/*
-			 * FIXME this should be mapped as an extension valueIdentifier
-			 * instead of as a valueCodeableConcept
-			 */
-			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-					claimGroup.getClinicalTrialNumber().get());
-		}
 
 		for (CarrierClaimLine claimLine : claimGroup.getLines()) {
 			ItemComponent item = eob.addItem();
@@ -258,12 +247,7 @@ final class CarrierClaimTransformer {
 			TransformerUtils.addExtensionCoding(item.getLocation(), TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY,
 					TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY, claimLine.getLinePricingLocalityCode());
 
-			if (claimLine.getFirstExpenseDate().isPresent() && claimLine.getLastExpenseDate().isPresent()) {
-				TransformerUtils.validatePeriodDates(claimLine.getFirstExpenseDate(), claimLine.getLastExpenseDate());
-				item.setServiced(new Period()
-						.setStart((TransformerUtils.convertToDate(claimLine.getFirstExpenseDate().get())), TemporalPrecisionEnum.DAY)
-						.setEnd((TransformerUtils.convertToDate(claimLine.getLastExpenseDate().get())), TemporalPrecisionEnum.DAY));
-			}
+
 
 			if (claimLine.getHcpcsCode().isPresent()) {
 				item.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
@@ -408,6 +392,11 @@ final class CarrierClaimTransformer {
 				TransformerUtils.addExtensionCoding(item.getLocation(), TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM,
 						TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM, claimLine.getCliaLabNumber().get());
 			}
+
+			// Common item level fields between Carrier and DME
+			TransformerUtils.mapEobCommonItemCarrierDME(item, claimLine.getFirstExpenseDate(),
+					claimLine.getLastExpenseDate());
+
 		}
 
 		return eob;

@@ -552,12 +552,29 @@ final class TransformerTestUtils {
 	 * @param common
 	 *            fields between Carrier and DME
 	 * 
-	 * @return the {@link ExplanationOfBenefit}
-	 * 
 	 */
-	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob, String carrierNumber) {
+	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob, String carrierNumber,
+			Optional<String> clinicalTrialNumber) {
 		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
+		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
+				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
+
+	}
+
+	/**
+	 * @param item
+	 *            the {@link ItemComponent} to test against
+	 * @param common
+	 *            item fields between Carrier and DME
+	 * 
+	 * @throws FHIRException
+	 * 
+	 */
+	static void assertEobCommonItemCarrierDMEEquals(ItemComponent item, Optional<LocalDate> firstExpenseDate,
+			Optional<LocalDate> lastExpenseDate) throws FHIRException {
+		assertDateEquals(firstExpenseDate.get(), item.getServicedPeriod().getStartElement());
+		assertDateEquals(lastExpenseDate.get(), item.getServicedPeriod().getEndElement());
 
 	}
 }
