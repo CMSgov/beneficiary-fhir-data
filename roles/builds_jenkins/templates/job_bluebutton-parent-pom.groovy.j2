@@ -1,0 +1,132 @@
+// These are the basic imports that Jenkins interactive script console
+// automatically includes.
+import jenkins.*;
+import jenkins.model.*;
+import hudson.*;
+import hudson.model.*;
+
+
+//
+// Create/Update Credential for GitHub Access Token
+//
+
+def createOrUpdateUsernamePassword = { id, description, username, password ->
+  domain = com.cloudbees.plugins.credentials.domains.Domain.global()
+  credsStore = Jenkins.instance.getExtensionList("com.cloudbees.plugins.credentials.SystemCredentialsProvider")[0].getStore()
+  
+  credentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
+    com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials.class,
+    Jenkins.instance
+  )
+  
+  matchingCredential = credentials.find { credential -> credential.id == id }
+  newCredential = new com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl(
+    com.cloudbees.plugins.credentials.CredentialsScope.GLOBAL,
+    id,
+    description,
+    username,
+    password
+  )
+  
+  if (matchingCredential) {
+    println "Credential found: ${matchingCredential.id}"
+    
+    if (
+        newCredential.scope != matchingCredential.scope ||
+        newCredential.description != matchingCredential.description ||
+        newCredential.username != matchingCredential.username ||
+        hudson.util.Secret.toString(newCredential.password) != hudson.util.Secret.toString(matchingCredential.password)
+    ) {
+      updateResult = credsStore.updateCredentials(domain, matchingCredential, newCredential)  
+      if (updateResult) {
+        println "Changed: credential updated: ${id}" 
+      } else {
+        println "Credential failed to update: ${id}"
+        throw new IllegalStateException()
+      }
+    }
+  } else {
+    println "Credential not found: ${id}"
+    credsStore.addCredentials(domain, newCredential)
+    println "Changed: credential created: ${id}"
+  }
+}
+
+credentialsId = "github-token-karlmdavis"
+createOrUpdateUsernamePassword(
+  credentialsId, 
+  "GitHub 'Personal Access Token' for karlmdavis with these permissions: [repo:status, repo_deployment, public_repo, admin:repo_hook, read:user, user:email]",
+  "{{ vault_jenkins_github_token_username }}",
+  "{{ vault_jenkins_github_token_secret }}"
+)
+
+
+//
+// Define All of the Project Variables in One Place
+//
+projectParent = Jenkins.instance
+projectName = 'bluebutton-parent-pom'
+gitHubOrg = 'CMSgov'
+gitHubRepo = projectName
+buildBranchesWithoutPullRequests = true
+buildBranchesWithPullRequests = true
+
+
+//
+// Check/Update the Project
+//
+
+boolean updated = false
+project = projectParent.getItem(projectName)
+
+if (project == null) {
+  println "Project wasn't found."
+  project = new org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject(Jenkins.instance, 'bluebutton-parent-pom')
+  projectParent.add(project, projectName)
+  updated = true
+}
+
+source = project.getSourcesList().find {
+  it instanceof jenkins.branch.BranchSource &&
+  it.source instanceof org.jenkinsci.plugins.github_branch_source.GitHubSCMSource &&
+  it.source.repoOwner == gitHubOrg &&
+  it.source.repository == gitHubRepo 
+}
+if (source == null) {
+  println "Matching source config wasn't found."
+  source = new jenkins.branch.BranchSource(new org.jenkinsci.plugins.github_branch_source.GitHubSCMSource(gitHubOrg, gitHubRepo))
+  project.getSourcesList().add(source)
+  updated = true
+}
+if (source.source.credentialsId != credentialsId) {
+  source.source.credentialsId = credentialsId
+  updated = true
+}
+branchDiscoveryTrait = source.source.traits.find { it instanceof org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait }
+if (branchDiscoveryTrait == null) {
+  branchDiscoveryTrait = new org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait(buildBranchesWithoutPullRequests, buildBranchesWithPullRequests)
+  source.source.traits.add(branchDiscoveryTrait)
+  updated = true
+}
+for (int scmTraitIndex = 0; scmTraitIndex < source.source.traits.size(); scmTraitIndex++) {
+  scmTrait = source.source.traits.get(scmTraitIndex)
+  if (
+    scmTrait instanceof org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait &&
+    scmTrait.isBuildBranch() != buildBranchesWithoutPullRequests &&
+    scmTrait.isBuildBranchesWithPR() != buildBranchesWithPullRequests
+  ) {
+    source.source.traits.remove(scmTraitIndex)
+    branchDiscoveryTrait = new org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait(buildBranchesWithoutPullRequests, buildBranchesWithPullRequests)
+    source.source.traits.add(branchDiscoveryTrait)
+    updated = true
+  }
+}
+
+
+//
+// Save the Project
+//
+if (updated) {
+  project.save()
+  println "Changed: job."
+}
