@@ -17,9 +17,6 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
-import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
-import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
@@ -91,12 +88,6 @@ final class DMEClaimTransformer {
 
 		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
 
-		// Common group level fields between Carrier and DME
-		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber(),
-				claimGroup.getClinicalTrialNumber());
-		TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
-				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
-				claimGroup.getPaymentDenialCode());
 		eob.getPayment()
 				.setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 						.setValue(claimGroup.getPaymentAmount()));
@@ -114,21 +105,6 @@ final class DMEClaimTransformer {
 					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 							.setValue(claimGroup.getPrimaryPayerPaidAmount()));
 			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
-		}
-
-		/*
-		 * Referrals are represented as contained resources, because otherwise
-		 * updating them would require an extra roundtrip to the server (can't
-		 * think of an intelligent client-specified ID for them).
-		 */
-		if (claimGroup.getReferringPhysicianNpi().isPresent()) {
-			ReferralRequest referral = new ReferralRequest();
-			referral.setStatus(ReferralRequestStatus.COMPLETED);
-			referral.setSubject(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
-			referral.setRequester(new ReferralRequestRequesterComponent(
-					TransformerUtils.referencePractitioner(claimGroup.getReferringPhysicianNpi().get())));
-			// Set the ReferralRequest as a contained resource in the EOB:
-			eob.setReferral(new Reference(referral));
 		}
 
 		TransformerUtils.addExtensionCoding(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
@@ -175,15 +151,11 @@ final class DMEClaimTransformer {
 			benefitBalances.getFinancial().add(allowedChargeAmount);
 		}
 
-		if (!claimGroup.getBeneficiaryPartBDeductAmount().equals(BigDecimal.ZERO)) {
-			BenefitComponent beneficiaryPartBDeductAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
-			beneficiaryPartBDeductAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getBeneficiaryPartBDeductAmount()));
-			benefitBalances.getFinancial().add(beneficiaryPartBDeductAmount);
-		}
+		// Common group level fields between Carrier and DME
+		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
+				claimGroup.getClinicalTrialNumber(), claimGroup.getBeneficiaryPartBDeductAmount(),
+				claimGroup.getPaymentDenialCode(), claimGroup.getReferringPhysicianNpi(),
+				Optional.of(claimGroup.getProviderAssignmentIndicator()));
 
 		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
@@ -260,11 +232,6 @@ final class DMEClaimTransformer {
 						claimLine.getHcpcsSecondModifierCode().get()));
 			}
 
-			if (claimLine.getBetosCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_BETOS,
-						TransformerConstants.CODING_BETOS, claimLine.getBetosCode().get());
-			}
-
 			item.addAdjudication()
 					.setCategory(TransformerUtils.createCodeableConcept(
 							TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
@@ -272,44 +239,6 @@ final class DMEClaimTransformer {
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPaymentAmount());
-
-			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getBeneficiaryPaymentAmount());
-
-			item.addAdjudication()
-					.setCategory(TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getProviderPaymentAmount());
-
-			item.addAdjudication()
-					.setCategory(TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getBeneficiaryPartBDeductAmount());
-
-			if (claimLine.getPrimaryPayerCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
-						TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
-						String.valueOf(claimLine.getPrimaryPayerCode().get()));
-			}
-
-			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getPrimaryPayerPaidAmount());
 
 			item.addAdjudication()
 					.setCategory(
@@ -454,7 +383,9 @@ final class DMEClaimTransformer {
 			}
 			// Common item level fields between Carrier and DME
 			TransformerUtils.mapEobCommonItemCarrierDME(item, claimLine.getFirstExpenseDate(),
-					claimLine.getLastExpenseDate());
+					claimLine.getLastExpenseDate(), claimLine.getBeneficiaryPaymentAmount(),
+					claimLine.getProviderPaymentAmount(), claimLine.getBeneficiaryPartBDeductAmount(),
+					claimLine.getPrimaryPayerCode(), claimLine.getPrimaryPayerPaidAmount(), claimLine.getBetosCode());
 
 		}
 		return eob;

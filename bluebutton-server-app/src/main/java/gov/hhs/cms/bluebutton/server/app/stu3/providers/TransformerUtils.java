@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -13,17 +14,22 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
+import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
+import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -526,21 +532,56 @@ public final class TransformerUtils {
 	 * @return the {@link ExplanationOfBenefit}
 	 * 
 	 */
-	static ExplanationOfBenefit mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String carrierNumber,
-			Optional<String> clinicalTrialNumber) {
+	static ExplanationOfBenefit mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String beneficiaryId,
+			String carrierNumber,
+			Optional<String> clinicalTrialNumber, BigDecimal beneficiaryPartBDeductAmount, String paymentDenialCode,
+			Optional<String> referringPhysicianNpi, Optional<Character> providerAssignmentIndicator) {
 		/*
 		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
 		 * valueCodeableConcept
 		 */
 		addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
+		addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
+				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
+
+		/*
+		 * Referrals are represented as contained resources, because otherwise updating
+		 * them would require an extra roundtrip to the server (can't think of an
+		 * intelligent client-specified ID for them).
+		 */
+		if (referringPhysicianNpi.isPresent()) {
+			ReferralRequest referral = new ReferralRequest();
+			referral.setStatus(ReferralRequestStatus.COMPLETED);
+			referral.setSubject(referencePatient(beneficiaryId));
+			referral.setRequester(new ReferralRequestRequesterComponent(
+					referencePractitioner(referringPhysicianNpi.get())));
+			referral.addRecipient(TransformerUtils.referencePractitioner(referringPhysicianNpi.get()));
+			// Set the ReferralRequest as a contained resource in the EOB:
+			eob.setReferral(new Reference(referral));
+		}
+
+		if (providerAssignmentIndicator.isPresent()) {
+			addExtensionCoding(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
+					TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
+					String.valueOf(providerAssignmentIndicator.get()));
+		}
+
 		if (clinicalTrialNumber.isPresent()) {
 			/*
 			 * FIXME this should be mapped as an extension valueIdentifier instead of as a
 			 * valueCodeableConcept
 			 */
-			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
+			addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
 					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
+		}
+		if (!beneficiaryPartBDeductAmount.equals(BigDecimal.ZERO)) {
+			BenefitComponent benePartBDeductAmount = new BenefitComponent(
+					createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
+			benePartBDeductAmount.setAllowed(
+					new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(beneficiaryPartBDeductAmount));
+			eob.getBenefitBalanceFirstRep().getFinancial().add((benePartBDeductAmount));
 		}
 
 		return eob;
@@ -556,15 +597,58 @@ public final class TransformerUtils {
 	 * 
 	 */
 	static ItemComponent mapEobCommonItemCarrierDME(ItemComponent item, Optional<LocalDate> firstExpenseDate,
-			Optional<LocalDate> lastExpenseDate) {
+			Optional<LocalDate> lastExpenseDate, BigDecimal beneficiaryPaymentAmount, BigDecimal providerPaymentAmount,
+			BigDecimal beneficiaryPartBDeductAmount, Optional<Character> primaryPayerCode,
+			BigDecimal primaryPayerPaidAmount, Optional<String> betosCode) {
+
+		if (betosCode.isPresent()) {
+			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_BETOS,
+					TransformerConstants.CODING_BETOS, betosCode.get());
+		}
+
 		if (firstExpenseDate.isPresent() && lastExpenseDate.isPresent()) {
-			TransformerUtils.validatePeriodDates(firstExpenseDate, lastExpenseDate);
+			validatePeriodDates(firstExpenseDate, lastExpenseDate);
 			item.setServiced(new Period()
 					.setStart((TransformerUtils.convertToDate(firstExpenseDate.get())),
 							TemporalPrecisionEnum.DAY)
 					.setEnd((TransformerUtils.convertToDate(lastExpenseDate.get())),
 							TemporalPrecisionEnum.DAY));
 		}
+
+		item.addAdjudication()
+				.setCategory(
+						createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+								TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
+				.setValue(beneficiaryPaymentAmount);
+
+		item.addAdjudication()
+				.setCategory(
+						createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+								TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
+				.setValue(providerPaymentAmount);
+
+		item.addAdjudication()
+				.setCategory(
+						createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+								TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE))
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
+				.setValue(beneficiaryPartBDeductAmount);
+
+		if (primaryPayerCode.isPresent()) {
+			addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
+					TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
+					String.valueOf(primaryPayerCode.get()));
+		}
+
+		item.addAdjudication()
+				.setCategory(
+						createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+								TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT))
+				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
+				.setValue(primaryPayerPaidAmount);
+
 
 		return item;
 	}

@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -553,12 +554,29 @@ final class TransformerTestUtils {
 	 *            fields between Carrier and DME
 	 * 
 	 */
-	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob, String carrierNumber,
-			Optional<String> clinicalTrialNumber) {
+	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob, String beneficiaryId,
+			String carrierNumber, Optional<String> clinicalTrialNumber, BigDecimal beneficiaryPartBDeductAmount,
+			String paymentDenialCode, Optional<String> referringPhysicianNpi) {
+
+		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
+				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
+
+		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+		Assert.assertEquals(TransformerUtils.referencePatient(beneficiaryId).getReference(),
+				referral.getSubject().getReference());
+		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
+				referral.getRequester().getAgent());
+		Assert.assertEquals(1, referral.getRecipient().size());
+		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
+				referral.getRecipientFirstRep());
+
 		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
 		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE, beneficiaryPartBDeductAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
 	}
 
@@ -572,9 +590,24 @@ final class TransformerTestUtils {
 	 * 
 	 */
 	static void assertEobCommonItemCarrierDMEEquals(ItemComponent item, Optional<LocalDate> firstExpenseDate,
-			Optional<LocalDate> lastExpenseDate) throws FHIRException {
+			Optional<LocalDate> lastExpenseDate, BigDecimal beneficiaryPaymentAmount, BigDecimal providerPaymentAmount,
+			BigDecimal beneficiaryPartBDeductAmount, Optional<Character> primaryPayerCode,
+			BigDecimal primaryPayerPaidAmount, Optional<String> betosCode) throws FHIRException {
+
+		assertExtensionCodingEquals(item, TransformerConstants.CODING_BETOS, TransformerConstants.CODING_BETOS,
+				betosCode.get());
 		assertDateEquals(firstExpenseDate.get(), item.getServicedPeriod().getStartElement());
 		assertDateEquals(lastExpenseDate.get(), item.getServicedPeriod().getEndElement());
+
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
+				beneficiaryPaymentAmount, item.getAdjudication());
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
+				providerPaymentAmount, item.getAdjudication());
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE,
+				beneficiaryPartBDeductAmount, item.getAdjudication());
+		// TODO insert primaryPayerCode test
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
+				primaryPayerPaidAmount, item.getAdjudication());
 
 	}
 }
