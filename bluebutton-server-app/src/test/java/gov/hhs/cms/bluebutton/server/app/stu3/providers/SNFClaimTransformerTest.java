@@ -67,8 +67,6 @@ public final class SNFClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE, "" + claim.getNearLineRecordIdCode());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
 		Assert.assertEquals(
@@ -235,5 +233,15 @@ public final class SNFClaimTransformerTest {
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
 
+		// verify {@link TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)} 
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
+				ClaimType.SNF.name(), eob.getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE,
+				org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL.name(), eob.getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				String.valueOf(claim.getNearLineRecordIdCode()), eob.getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE,
+				claim.getClaimTypeCode(), eob.getType());		
 	}
 }

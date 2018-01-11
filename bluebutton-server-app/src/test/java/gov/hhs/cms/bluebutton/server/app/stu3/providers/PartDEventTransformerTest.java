@@ -63,9 +63,7 @@ public final class PartDEventTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE,
-				org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.toCode(),
-				eob.getType());
+		
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
 		Assert.assertEquals(
@@ -123,7 +121,14 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT,
 				claim.getGapDiscountAmount(),
 				rxItem.getAdjudication());
-
+	
+		// verify {@link TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)} 
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
+				ClaimType.PDE.name(), eob.getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE,
+				org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.name(), eob.getType());
+		
 	}
 }
 

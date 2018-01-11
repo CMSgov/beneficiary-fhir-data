@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -53,10 +54,8 @@ final class PartDEventTransformer {
 		 * Note: Part D events are the one CCW "claim" type that don't have
 		 * NCH_CLM_TYPE_CD or NCH_NEAR_LINE_REC_IDENT_CD codes.
 		 */
-		eob.getType()
-				.addCoding(new Coding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE)
-						.setCode(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.toCode()));
-
+		TransformerUtils.mapEobType(eob.getType(), ClaimType.PDE, Optional.empty(), Optional.empty());
+		
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_D));
 		/*

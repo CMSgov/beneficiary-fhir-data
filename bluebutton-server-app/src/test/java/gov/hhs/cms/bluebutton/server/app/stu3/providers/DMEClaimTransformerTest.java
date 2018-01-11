@@ -67,9 +67,6 @@ public final class DMEClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE, TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				"" + claim.getNearLineRecordIdCode());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
 		Assert.assertEquals(
@@ -218,6 +215,16 @@ public final class DMEClaimTransformerTest {
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_NDC,
 				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
-
+		
+		// verify {@link TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)} 
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
+				ClaimType.DME.name(), eob.getType());
+		// FUTURE there currently is not an equivalent CODING_FHIR_CLAIM_TYPE mapping for this claim type.  If added
+		// then a test will need to be added for that mapping.
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+				String.valueOf(claim.getNearLineRecordIdCode()), eob.getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE,
+				claim.getClaimTypeCode(), eob.getType());
 	}
 }

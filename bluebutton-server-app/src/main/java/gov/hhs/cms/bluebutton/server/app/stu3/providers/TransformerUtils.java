@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.PositiveIntType;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
@@ -87,7 +88,7 @@ public final class TransformerUtils {
 		}
 	
 		// Link the EOB.item to the care team entry (if it isn't already).
-		if (!eobItem.getCareTeamLinkId().contains(careTeamEntry.getSequence())) {
+		if (!eobItem.getCareTeamLinkId().contains(new PositiveIntType(careTeamEntry.getSequence()))) {
 			eobItem.addCareTeamLinkId(careTeamEntry.getSequence());
 		}
 	
@@ -516,4 +517,68 @@ public final class TransformerUtils {
 			return;
 		validatePeriodDates(dateFrom.get(), dateThrough.get());
 	}
+
+	/**
+	 * maps a blue button claim type to a FHIR claim type
+	 * 
+	 * @param eobType
+	 * 		the {@link CodeableConcept} that will get remapped 
+	 * @param blueButtonClaimType
+	 * 		the blue button {@link ClaimType} we are mapping from 
+	 * @param ccwNearLineRecordIdCode
+	 * 		if present, the blue button near line id code {@link Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
+	 * @param ccwClaimTypeCode
+	 * 		if present, the blue button claim type code {@link Optional}&lt;{@link String}&gt; gets remapped to a nch claim type code
+	 */
+	static void mapEobType(CodeableConcept eobType, ClaimType blueButtonClaimType,
+			Optional<Character> ccwNearLineRecordIdCode, Optional<String> ccwClaimTypeCode) {
+		// This Coding MUST always be present as it's the only one we can definitely map for all 8 of our claim types.
+		eobType.addCoding().setSystem(TransformerConstants.CODING_CCW_CLAIM_TYPE).setCode(blueButtonClaimType.name());
+		
+		// Map a Coding for FHIR's ClaimType coding system, if we can.
+		switch(blueButtonClaimType) {
+		case CARRIER:
+		case OUTPATIENT:
+			// map these blue button claim types to PROFESSIONAL
+			eobType.addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE).setCode(
+					org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL.name());
+			break;
+			
+		case INPATIENT:
+		case HOSPICE:
+		case SNF:
+			// map these blue button claim types to INSTITUTIONAL
+			eobType.addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE).setCode(
+					org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL.name());
+			break;
+		case PDE:
+			// map these blue button claim types to PHARMACY
+			eobType.addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE).setCode(
+					org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.name());
+			break;
+			
+		case HHA:
+		case DME:
+			// FUTURE these blue button claim types currently have no equivalent CODING_FHIR_CLAIM_TYPE mapping
+			break;
+			
+		default:
+			// unknown claim type
+			throw new BadCodeMonkeyException();
+		}
+		
+		// map blue button near line record id to a ccw record id code
+		if(ccwNearLineRecordIdCode.isPresent()) {
+			eobType.addCoding().setSystem(TransformerConstants.CODING_CCW_RECORD_ID_CODE).setCode(
+					String.valueOf(ccwNearLineRecordIdCode.get()));
+		}
+		
+		// map blue button claim type code into a nch claim type
+		if(ccwClaimTypeCode.isPresent() ) {
+			eobType.addCoding().setSystem(TransformerConstants.CODING_NCH_CLAIM_TYPE).setCode(
+					ccwClaimTypeCode.get());
+		}
+	}
+
 }
+

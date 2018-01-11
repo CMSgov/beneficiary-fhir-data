@@ -84,6 +84,8 @@ The following [Coding](http://www.hl7.org/implement/standards/fhir/datatypes.htm
 
 The following [Identifier](http://hl7.org/fhir/STU3/datatypes.html#identifier) systems can be found in API responses:
 
+* `https://bluebutton.cms.gov/developer/docs/reference/some-thing` 
+	* temporary placeholder for claim type link
 * `http://bluebutton.cms.hhs.gov/identifier#bene_id`
 * `CCW.BENE_ID`
 * `http://bluebutton.cms.hhs.gov/identifier#hicnHash`

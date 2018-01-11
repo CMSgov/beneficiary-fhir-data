@@ -68,10 +68,11 @@ final class DMEClaimTransformer {
 
 		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claimGroup.getClaimTypeCode()));
-		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				String.valueOf(claimGroup.getNearLineRecordIdCode()));
 
+		// map eob type codes into FHIR
+		TransformerUtils.mapEobType(eob.getType(), ClaimType.DME, Optional.of(claimGroup.getNearLineRecordIdCode()), 
+				Optional.of(claimGroup.getClaimTypeCode()));
+		
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_B));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
