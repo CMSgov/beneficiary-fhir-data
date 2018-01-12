@@ -38,7 +38,7 @@
 
     # Specify the URL that users will use to access Jenkins (via the Apache
     # proxy).
-    jenkins_url_external: "{{ vault_builds_server_name }}{{ jenkins_context_path }}"
+    jenkins_url_external: "https://{{ vault_builds_server_name }}{{ jenkins_context_path }}"
 
     # The LDAP user that should be used when logging into Jenkins to run
     # configuration scripts.
