@@ -80,7 +80,7 @@ def readPomVersion() {
  */
 def calculateBuildId() {
 	gitBranchName = "${env.BRANCH_NAME}".toString()
-	gitCommitId = sh(script: "git rev-parse HEAD > .git/current-commit", returnStdout: true).trim()
+	gitCommitId = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
 
 	buildId = ""
 	if("master".equals(gitBranchName)) {
