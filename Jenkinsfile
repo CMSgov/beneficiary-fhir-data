@@ -26,13 +26,13 @@ node {
 	}
 
 	stage('Build') {
-		mvn "--update-snapshots -Dmaven.test.failure.ignore clean deploy"
+		mvn "--update-snapshots -Dmaven.test.failure.ignore clean install"
 	}
 
 	stage('Archive') {
 		// Fingerprint the output artifacts and archive the test results.
 		// (Archiving the artifacts here would waste space, as the build
-		// deploys them to the artifact repository.)
+		// deploys them to the local Maven repository.)
 		fingerprint '**/target/*.jar'
 		archiveArtifacts artifacts: '**/target/*-reports/TEST-*.xml', allowEmptyArchive: true, fingerprint: true
 	}
