@@ -1,8 +1,7 @@
 /**
  * <p>
  * This is the script that will be run by Jenkins to build and test this 
- * project. This drives the project's continuous integration, delivery, and
- * deployment.
+ * project. This drives the project's continuous integration and delivery.
  * </p>
  * <p>
  * This script is run by Jenkins' Pipeline feature. A good intro tutorial for
