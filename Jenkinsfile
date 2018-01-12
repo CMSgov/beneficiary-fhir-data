@@ -5,64 +5,57 @@
  * deployment.
  * </p>
  * <p>
- * This script is run by Jenkins' 
- * <a href="https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Plugin">Pipeline Plugin</a>. 
- * A good intro tutorial for working with this plugin can be found here: 
- * <a href="https://github.com/jenkinsci/pipeline-plugin/blob/master/TUTORIAL.md">jenkinsci/pipeline-plugin/TUTORIAL.md</a>.
+ * This script is run by Jenkins' Pipeline feature. A good intro tutorial for
+ * working with Jenkins Pipelines can be found here: 
+ * <a href="https://jenkins.io/doc/book/pipeline/">Jenkins > Pipeline</a>.
  * </p>
  * <p>
  * The canonical Jenkins server job for this project is located here: 
- * <a href="http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bluebutton-data-pipeline/">bluebutton-data-pipeline</a>.
+ * <a href="https://builds.ls.r53.cmsfhir.systems/jenkins/job/bluebutton-data-model">bluebutton-data-model</a>.
  * </p>
  */
 
 node {
-	stage 'Checkout'
+	stage('Checkout') {
+		// Grab the commit that triggered the build.
 		checkout scm
+
+		// Update the POM version so that the artifacts produced by this build
+		// are distinguishable from other builds.
 		setPomVersionUsingBuildId()
-	
-	stage 'Build'
-		/* 
-		 * Create the settings file for Maven (contains deploy credentials). 
-		 * Will be automatically cleaned up at end of block.
-		 */
-		wrap([$class: 'ConfigFileBuildWrapper', 
-				managedFiles: [[fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig:cms-bluebutton-settings-xml', 
-				variable: 'SETTINGS_PATH']]
-		]) {
-			/*
-			 * Pull the AWS credentials from Jenkins credentials store into the build environment. Some of the ITs need 
-			 * these. For example, DataSetMonitorIT uses them to create and teardown S3 buckets in tests.
-			 */
-			withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-					credentialsId: 'aws-credentials-builds',  
-					accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-				
-				// Run the build.
-				mvn "--settings ${env.SETTINGS_PATH} -Dmaven.test.failure.ignore -Prun-its-with-db-on-disk -U clean verify scm:tag"
-				
-			}
-		}
-	
-	stage 'Archive'
-		step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true, allowEmptyArchive: true])
-		step([$class: 'ArtifactArchiver', artifacts: '**/target/*.war', fingerprint: true, allowEmptyArchive: true])
-		step([$class: 'ArtifactArchiver', artifacts: '**/target/*.x', fingerprint: true, allowEmptyArchive: true])
-		step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml', allowEmptyResults: true])
-		step([$class: 'JUnitResultArchiver', testResults: '**/target/failsafe-reports/TEST-*.xml', allowEmptyResults: true])
-		
-	stage 'Trigger Downstream'
-		//build job: '../some-other-project/master', wait: false
+	}
+
+	stage('Build') {
+		mvn "--update-snapshots -Dmaven.test.failure.ignore clean deploy"
+	}
+
+	stage('Archive') {
+		// Fingerprint the output artifacts and archive the test results.
+		// (Archiving the artifacts here would waste space, as the build
+		// deploys them to the artifact repository.)
+		fingerprint '**/target/*.jar'
+		archiveArtifacts artifacts: '**/target/*-reports/TEST-*.xml', allowEmptyArchive: true, fingerprint: true
+	}
 }
 
 /**
  * Runs Maven with the specified arguments.
- * 
+ *
  * @param args the arguments to pass to <code>mvn</code>
  */
 def mvn(args) {
 	// This tool must be setup and named correctly in the Jenkins config.
-    sh "${tool 'maven-3'}/bin/mvn ${args}"
+	def mvnHome = tool 'maven-3'
+
+	// Run the build, using Maven, with the appropriate config.
+	configFileProvider(
+			[
+				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
+				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
+			]
+	) {
+		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
+	}
 }
 
 /**
@@ -74,7 +67,7 @@ def readPomVersion() {
 	mvn "--quiet --non-recursive -Dexec.executable='echo' -Dexec.args='\${project.version}' org.codehaus.mojo:exec-maven-plugin:1.3.1:exec > pom.project.version.txt"
 	pomProjectVersion = readFile('pom.project.version.txt').trim()
 	sh "rm -f pom.project.version.txt"
-	
+
 	echo "Current POM version: ${pomProjectVersion}"
 	return pomProjectVersion
 }
@@ -86,13 +79,15 @@ def readPomVersion() {
  *         "<code>${env.BRANCH_NAME}-${env.BUILD_NUMBER}</code>" for other branches
  */
 def calculateBuildId() {
-	// Calculate the build ID.
 	gitBranchName = "${env.BRANCH_NAME}".toString()
+	sh(script: "git rev-parse HEAD > .git/current-commit", returnStdout: "gitCommitId")
+	gitCommitId = gitCommitId.trim()
+
 	buildId = ""
 	if("master".equals(gitBranchName)) {
-		buildId = "${env.BUILD_NUMBER}"
+		buildId = "${gitCommitId}"
 	} else {
-		buildId = "${gitBranchName}-${env.BUILD_NUMBER}"
+		buildId = "${gitBranchName}-${gitCommitId}"
 	}
 
 	echo "Build ID: ${buildId} (for branch ${gitBranchName})"
