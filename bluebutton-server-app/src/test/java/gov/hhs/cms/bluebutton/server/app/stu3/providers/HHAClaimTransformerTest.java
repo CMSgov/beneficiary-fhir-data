@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -152,18 +153,15 @@ public final class HHAClaimTransformerTest {
 		
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
-		
-		// verify {@link TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)} 
-		// method worked as expected for this claim type
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				ClaimType.HHA.name(), eob.getType());
-		// FUTURE there currently is not an equivalent CODING_FHIR_CLAIM_TYPE mapping for this claim type.  If added
-		// then a test will need to be added for that mapping.
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				String.valueOf(claim.getNearLineRecordIdCode()), eob.getType());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE,
-				claim.getClaimTypeCode(), eob.getType());
 
+		// verify {@link
+		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.HHA,
+				// FUTURE there currently is not an equivalent CODING_FHIR_CLAIM_TYPE mapping
+				// for this claim type. If added then the Optional empty parameter below should
+				// be updated to match expected result.
+				Optional.empty(), Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
 	}
 }
 

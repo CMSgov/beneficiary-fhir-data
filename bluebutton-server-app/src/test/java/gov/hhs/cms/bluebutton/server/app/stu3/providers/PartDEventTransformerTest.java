@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -122,13 +123,12 @@ public final class PartDEventTransformerTest {
 				claim.getGapDiscountAmount(),
 				rxItem.getAdjudication());
 	
-		// verify {@link TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)} 
+		// verify {@link
+		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
 		// method worked as expected for this claim type
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				ClaimType.PDE.name(), eob.getType());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE,
-				org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.name(), eob.getType());
-		
+		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.PDE,
+				Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY), Optional.empty(),
+				Optional.empty());
 	}
 }
 

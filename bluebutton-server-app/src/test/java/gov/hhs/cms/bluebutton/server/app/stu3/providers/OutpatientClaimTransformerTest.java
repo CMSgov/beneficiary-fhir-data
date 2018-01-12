@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -213,17 +214,13 @@ public final class OutpatientClaimTransformerTest {
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
-		
-		// verify {@link TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)} 
+
+		// verify {@link
+		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
 		// method worked as expected for this claim type
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				ClaimType.OUTPATIENT.name(), eob.getType());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE,
-				org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL.name(), eob.getType());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				String.valueOf(claim.getNearLineRecordIdCode()), eob.getType());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE,
-				claim.getClaimTypeCode(), eob.getType());
+		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.OUTPATIENT,
+				Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL),
+				Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
 	}
 
 }
