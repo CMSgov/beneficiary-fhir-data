@@ -50,11 +50,8 @@ final class PartDEventTransformer {
 		eob.addIdentifier().setSystem(TransformerConstants.IDENTIFIER_RX_SERVICE_REFERENCE_NUMBER)
 				.setValue(String.valueOf(claimGroup.getPrescriptionReferenceNumber()));
 
-		/*
-		 * Note: Part D events are the one CCW "claim" type that don't have
-		 * NCH_CLM_TYPE_CD or NCH_NEAR_LINE_REC_IDENT_CD codes.
-		 */
-		TransformerUtils.mapEobType(eob.getType(), ClaimType.PDE, Optional.empty(), Optional.empty());
+		// map eob type codes into FHIR
+		TransformerUtils.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
 		
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_D));

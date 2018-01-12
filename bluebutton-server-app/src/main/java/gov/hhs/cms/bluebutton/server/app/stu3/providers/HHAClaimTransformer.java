@@ -58,11 +58,8 @@ final class HHAClaimTransformer {
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
 
-		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claimGroup.getClaimTypeCode()));
-
 		// map eob type codes into FHIR
-		TransformerUtils.mapEobType(eob.getType(), ClaimType.HHA, Optional.of(claimGroup.getNearLineRecordIdCode()), 
+		TransformerUtils.mapEobType(eob, ClaimType.HHA, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
 		
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));

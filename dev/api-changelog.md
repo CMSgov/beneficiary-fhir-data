@@ -1,5 +1,9 @@
 # API Changelog
 
+## CBBD-385
+
+* Created the TransformerUtils method mapEobType to map certain CCW codings into a corresponding FHIR coding where appropriate.
+
 ## CBBF-92
 
 * A number of coding system URIs have been fixed:
