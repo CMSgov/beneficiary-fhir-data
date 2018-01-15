@@ -19,7 +19,9 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -32,6 +34,10 @@ import org.junit.Assert;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
 
 /**
  * Contains utility methods useful for testing the transformers (e.g.
@@ -548,15 +554,19 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * Test the transformation of the common group level data elements between the
+	 * Carrier and DME claim types to FHIR
+	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to test against
 	 * @param common
-	 *            fields between Carrier and DME
-	 * 
+	 *            fields between {@link CarrierClaim} and {@link DMEClaim}
 	 */
 	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob, String beneficiaryId,
 			String carrierNumber, Optional<String> clinicalTrialNumber, BigDecimal beneficiaryPartBDeductAmount,
-			String paymentDenialCode, Optional<String> referringPhysicianNpi) {
+			String paymentDenialCode, Optional<String> referringPhysicianNpi,
+			Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
+			BigDecimal beneficiaryPaymentAmount, BigDecimal submittedChargeAmount, BigDecimal allowedChargeAmount) {
 
 		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
@@ -570,6 +580,9 @@ final class TransformerTestUtils {
 		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
 				referral.getRecipientFirstRep());
 
+		assertExtensionCodingEquals(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
+				TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT, String.valueOf(providerAssignmentIndicator.get()));
+
 		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
 		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
@@ -577,37 +590,101 @@ final class TransformerTestUtils {
 		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE, beneficiaryPartBDeductAmount,
 				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT, providerPaymentAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT, beneficiaryPaymentAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, submittedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE, allowedChargeAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
 
 	}
 
 	/**
+	 * Test the transformation of the item level data elements between the Carrier
+	 * and DME claim types to FHIR
+	 * 
 	 * @param item
 	 *            the {@link ItemComponent} to test against
 	 * @param common
-	 *            item fields between Carrier and DME
+	 *            fields between {@link CarrierClaimLine} and {@link DMEClaimLine}
 	 * 
 	 * @throws FHIRException
-	 * 
 	 */
-	static void assertEobCommonItemCarrierDMEEquals(ItemComponent item, Optional<LocalDate> firstExpenseDate,
+	static void assertEobCommonItemCarrierDMEEquals(ItemComponent item, ExplanationOfBenefit eob,
+			BigDecimal serviceCount, String placeOfServiceCode, Optional<LocalDate> firstExpenseDate,
 			Optional<LocalDate> lastExpenseDate, BigDecimal beneficiaryPaymentAmount, BigDecimal providerPaymentAmount,
 			BigDecimal beneficiaryPartBDeductAmount, Optional<Character> primaryPayerCode,
-			BigDecimal primaryPayerPaidAmount, Optional<String> betosCode) throws FHIRException {
+			BigDecimal primaryPayerPaidAmount, Optional<String> betosCode, BigDecimal paymentAmount,
+			Optional<Character> paymentCode, BigDecimal coinsuranceAmount, BigDecimal submittedChargeAmount,
+			BigDecimal allowedChargeAmount, Optional<String> processingIndicatorCode,
+			Optional<Character> serviceDeductibleCode, Optional<String> diagnosisCode,
+			Optional<Character> diagnosisCodeVersion,
+			Optional<String> hctHgbTestTypeCode, BigDecimal hctHgbTestResult,
+			char cmsServiceTypeCode, Optional<String> nationalDrugCode)
+			throws FHIRException {
 
+		Assert.assertEquals(serviceCount, item.getQuantity().getValue());
+		assertHasCoding(TransformerConstants.CODING_CCW_TYPE_SERVICE,
+				"" + cmsServiceTypeCode, item.getCategory());
+		assertHasCoding(TransformerConstants.CODING_CCW_PLACE_OF_SERVICE, placeOfServiceCode,
+				item.getLocationCodeableConcept());
 		assertExtensionCodingEquals(item, TransformerConstants.CODING_BETOS, TransformerConstants.CODING_BETOS,
 				betosCode.get());
 		assertDateEquals(firstExpenseDate.get(), item.getServicedPeriod().getStartElement());
 		assertDateEquals(lastExpenseDate.get(), item.getServicedPeriod().getEndElement());
 
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT, paymentAmount,
+				item.getAdjudication());
+		AdjudicationComponent adjudicationForPayment = item.getAdjudication().stream()
+				.filter(a -> isCodeInConcept(a.getCategory(),
+						TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+						TransformerConstants.CODED_ADJUDICATION_PAYMENT))
+				.findAny().get();
+		assertExtensionCodingEquals(adjudicationForPayment,
+				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR,
+				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR, "" + paymentCode.get());
 		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
 				beneficiaryPaymentAmount, item.getAdjudication());
 		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				providerPaymentAmount, item.getAdjudication());
 		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE,
 				beneficiaryPartBDeductAmount, item.getAdjudication());
-		// TODO insert primaryPayerCode test
+		assertExtensionCodingEquals(item, TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
+				TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER, "" + primaryPayerCode.get());
 		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
 				primaryPayerPaidAmount, item.getAdjudication());
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT, coinsuranceAmount,
+				item.getAdjudication());
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, submittedChargeAmount,
+				item.getAdjudication());
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE, allowedChargeAmount,
+				item.getAdjudication());
+		assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_LINE_PROCESSING_INDICATOR,
+				TransformerConstants.CODING_CCW_PROCESSING_INDICATOR, processingIndicatorCode.get(),
+				item.getAdjudication());
+		assertExtensionCodingEquals(item, TransformerConstants.EXTENSION_CODING_CCW_LINE_DEDUCTIBLE_SWITCH,
+				TransformerConstants.EXTENSION_CODING_CCW_LINE_DEDUCTIBLE_SWITCH, "" + serviceDeductibleCode.get());
 
+		assertDiagnosisLinkPresent(Diagnosis.from(diagnosisCode, diagnosisCodeVersion), eob, item);
+
+		List<Extension> hctHgbObservationExtension = item
+				.getExtensionsByUrl(TransformerConstants.EXTENSION_CMS_HCT_OR_HGB_RESULTS);
+		Assert.assertEquals(1, hctHgbObservationExtension.size());
+		Assert.assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
+		Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
+		Assert.assertTrue(hctHgbReference.getResource() instanceof Observation);
+		Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
+		assertCodingEquals(TransformerConstants.CODING_CCW_HCT_OR_HGB_TEST_TYPE,
+				hctHgbTestTypeCode.get(), hctHgbObservation.getCode().getCodingFirstRep());
+		Assert.assertEquals(hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
+
+		assertExtensionCodingEquals(item, TransformerConstants.CODING_NDC, TransformerConstants.CODING_NDC,
+				nationalDrugCode.get());
 	}
 }
