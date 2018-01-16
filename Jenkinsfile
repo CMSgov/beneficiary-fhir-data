@@ -65,9 +65,7 @@ def readPomVersion() {
 
 /**
  * @return an ID for the current build, in the form of
- *         "<code>${env.BUILD_NUMBER}</code>" for builds against the SCM's
- *         <code>master</code> branch, and
- *         "<code>${env.BRANCH_NAME}-${env.BUILD_NUMBER}</code>" for other branches
+ *         "<code>${env.BRANCH_NAME}-${env.BUILD_NUMBER}</code>"
  */
 def calculateBuildId() {
 	gitBranchName = "${env.BRANCH_NAME}".toString()
