@@ -22,6 +22,15 @@
   register: jenkins_script_file_provider
   changed_when: "(jenkins_script_file_provider | success) and 'Changed' in jenkins_script_file_provider.output"
 
+- name: Configure GitHub Settings
+  jenkins_script:
+    url: "{{ jenkins_url_local }}"
+    user: "{{ jenkins_dynamic_admin_username | default(omit) }}"
+    password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
+    script: "{{ lookup('template', 'templates/configureGitHub.groovy.j2') }}"
+  register: jenkins_script_github
+  changed_when: "(jenkins_script_github | success) and 'Changed' in jenkins_script_github.output"
+
 # This keypair was created per the instructions here:
 # <http://central.sonatype.org/pages/working-with-pgp-signatures.html>.
 - name: Jenkins GPG Key - Copy
