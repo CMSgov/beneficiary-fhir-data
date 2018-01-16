@@ -1,18 +1,23 @@
 # API Changelog
 
-## CBBD-385
+## CBBD-385 (Sprint 43, 2018-01)
 
-* Created the TransformerUtils method mapEobType to map certain CCW codings into a corresponding FHIR coding where appropriate.  This moved the configuration of the EOB type, near line record id and claim type code into a single location in TransformerUtils.  It also implements a default CCW claim type code encoding in this new method.  In this way, any further changes that may be  needed in relation to these specific encodings are now consolidated into the mapEobType method.  For more information on using this new mapping mechanism please refer to the javadocs located in the TransformerUtils class source file.
+* Standardized the [ExplanationOfBenefit.type](http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.type) field across all 8 claim types. This field's `CodeableConcept` will now have some of these possible `Coding`s:
+    1. `{ "system": "https://bluebutton.cms.gov/developer/docs/reference/some-thing", "code": "<carrier,dme,hhs,hospice,inpatient,outpatient,pde,snf>" }`
+        * This entry will be present for all EOBs.
+        * Only one of the listed `code` values will be present on each EOB, designating the CMS claim type.
+        * The "`some-thing`" system suffix value there is temporary, pending other in-progress work.
+    2. `{ "system": "http://hl7.org/fhir/ex-claimtype", "code": "<institutional,pharmacy,professional>" }`
+       * This entry will only be present for carrier, outpatient, inpatient, hospice, SNF, and Part D claims:
+           * carrier, outpatient: `professional`
+           * inpatient, hospice, SNF: `institutional`
+           * Part D: `pharmacy`
+           * HHA, DME: not mapped, as there are no equivalent FHIR [Claimtype]http://hl7.org/fhir/codesystem-claim-type.html() codes at the moment.
+    3. TODO: NCH claim type
+        * Please note that this `Coding` had previously been mapped to an extension.
+    4. TODO: near line record ID
 
-* CCW claim types now map to FHIR types as follows:
-	* CARRIER and OUTPATIENT -> PROFESSIONAL
-	* INPATIENT, HOSPICE and SNF -> INSTITUTIONAL
-	* PDE -> PHARMACY
-	* HHA and DME -> not mapped(no equivalent FHIR mapping at the moment).
-* The constant CODING_CCW_CLAIM_TYPE was change to a placeholder(https://bluebutton.cms.gov/developer/docs/reference/some-thing) while its old value(https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt) is now used by a new constant, CODING_NCH_CLAIM_TYPE, for the mapping of the CCW claim type code into FHIR.  	
-	        
-
-## CBBF-92
+## CBBF-92 (Sprint 42, 2018-01)
 
 * A number of coding system URIs have been fixed:
     * The care team role coding system is now `http://hl7.org/fhir/claimcareteamrole`, where it had previously used `http://build.fhir.org/valueset-claim-careteamrole.html`.
