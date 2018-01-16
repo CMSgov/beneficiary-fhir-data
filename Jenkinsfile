@@ -5,7 +5,7 @@
  * </p>
  * <p>
  * This script is run by Jenkins' Pipeline feature. A good intro tutorial for
- * working with Jenkins Pipelines can be found here: 
+ * working with Jenkins Pipelines can be found here:
  * <a href="https://jenkins.io/doc/book/pipeline/">Jenkins > Pipeline</a>.
  * </p>
  * <p>
@@ -73,9 +73,7 @@ def readPomVersion() {
 
 /**
  * @return an ID for the current build, in the form of
- *         "<code>${env.BUILD_NUMBER}</code>" for builds against the SCM's
- *         <code>master</code> branch, and
- *         "<code>${env.BRANCH_NAME}-${env.BUILD_NUMBER}</code>" for other branches
+ *         "<code>${env.BRANCH_NAME}-${env.BUILD_NUMBER}</code>"
  */
 def calculateBuildId() {
 	gitBranchName = "${env.BRANCH_NAME}".toString()
