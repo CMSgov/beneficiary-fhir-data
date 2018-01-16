@@ -33,7 +33,7 @@ node {
 		// (Archiving the artifacts here would waste space, as the build
 		// deploys them to the local Maven repository.)
 		fingerprint '**/target/*.jar'
-		archiveArtifacts artifacts: '**/target/*-reports/TEST-*.xml', allowEmptyArchive: true, fingerprint: true
+		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
 	}
 }
 
