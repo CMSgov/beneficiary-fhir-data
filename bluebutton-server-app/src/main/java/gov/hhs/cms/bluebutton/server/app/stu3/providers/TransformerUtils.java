@@ -1,30 +1,37 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.slf4j.Logger;
@@ -35,10 +42,15 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import ca.uhn.fhir.model.primitive.IdDt;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g.
  * {@link Beneficiary}) into FHIR resources (e.g. {@link Patient}).
+ */
+/**
+ * @author bglover
+ *
  */
 public final class TransformerUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
@@ -515,5 +527,288 @@ public final class TransformerUtils {
 		if (!dateThrough.isPresent())
 			return;
 		validatePeriodDates(dateFrom.get(), dateThrough.get());
+	}
+
+	/**
+	 * Adds field values to the benefit balance component that are common between
+	 * the Inpatient and SNF claim types.
+	 * 
+	 * @param benefitBalances
+	 *            the {@link BenefitBalanceComponent} that will be updated by this
+	 *            method
+	 * @param coinsuranceDayCount
+	 *            a {@link BigDecimal} shared field representing the coinsurance day
+	 *            count for the claim
+	 * @param nonUtilizationDayCount
+	 *            a {@link BigDecimal} shared field representing the non-utilization
+	 *            day count for the claim
+	 * @param deductibleAmount
+	 *            a {@link BigDecimal} shared field representing the deductible
+	 *            amount for the claim
+	 * @param partACoinsuranceLiabilityAmount
+	 *            a {@link BigDecimal} shared field representing the part A
+	 *            coinsurance amount for the claim
+	 * @param bloodPintsFurnishedQty
+	 *            a {@link BigDecimal} shared field representing the blood pints
+	 *            furnished quantity for the claim
+	 * @param noncoveredCharge
+	 *            a {@link BigDecimal} shared field representing the non-covered
+	 *            charge for the claim
+	 * @param totalDeductionAmount
+	 *            a {@link BigDecimal} shared field representing the total deduction
+	 *            amount for the claim
+	 * @param claimPPSCapitalDisproportionateShareAmt
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital disproportionate share amount
+	 *            for the claim
+	 * @param claimPPSCapitalExceptionAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital exception amount for the claim
+	 * @param claimPPSCapitalFSPAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital FSP amount for the claim
+	 * @param claimPPSCapitalIMEAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital IME amount for the claim
+	 * @param claimPPSCapitalOutlierAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital outlier amount for the claim
+	 * @param claimPPSOldCapitalHoldHarmlessAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS old capital hold harmless amount for
+	 *            the claim
+	 */
+	static void addCommonBenefitComponentInpatientSNF(BenefitBalanceComponent benefitBalances,
+			BigDecimal coinsuranceDayCount, BigDecimal nonUtilizationDayCount, BigDecimal deductibleAmount,
+			BigDecimal partACoinsuranceLiabilityAmount, BigDecimal bloodPintsFurnishedQty, BigDecimal noncoveredCharge,
+			BigDecimal totalDeductionAmount, Optional<BigDecimal> claimPPSCapitalDisproportionateShareAmt,
+			Optional<BigDecimal> claimPPSCapitalExceptionAmount, Optional<BigDecimal> claimPPSCapitalFSPAmount,
+			Optional<BigDecimal> claimPPSCapitalIMEAmount, Optional<BigDecimal> claimPPSCapitalOutlierAmount,
+			Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount) {
+		BenefitComponent bc;
+
+		// coinsuranceDayCount
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODING_CCW_COINSURANCE_DAY_COUNT));
+		bc.setUsed(new UnsignedIntType(coinsuranceDayCount.intValue()));
+		benefitBalances.getFinancial().add(bc);
+
+		// nonUtilizationDayCount
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NON_UTILIZATION_DAY_COUNT));
+		bc.setAllowed(new UnsignedIntType(nonUtilizationDayCount.intValue()));
+		benefitBalances.getFinancial().add(bc);
+
+		// deductibleAmount
+		if (deductibleAmount != null) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(deductibleAmount));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// partACoinsuranceLiabilityAmount
+		if (partACoinsuranceLiabilityAmount != null) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(partACoinsuranceLiabilityAmount));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// bloodPintsFurnishedQty
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_PINTS_FURNISHED));
+		bc.setUsed(new UnsignedIntType(bloodPintsFurnishedQty.intValue()));
+		benefitBalances.getFinancial().add(bc);
+
+		// noncoveredCharge
+		if (noncoveredCharge != null) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(noncoveredCharge));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// totalDeductionAmount
+		if (totalDeductionAmount != null) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalDeductionAmount));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// claimPPSCapitalDisproportionateShareAmt
+		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_DISPROPORTIONAL_SHARE));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimPPSCapitalDisproportionateShareAmt.get()));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// claimPPSCapitalExceptionAmount
+		if (claimPPSCapitalExceptionAmount.isPresent()) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_EXCEPTION));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimPPSCapitalExceptionAmount.get()));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// claimPPSCapitalFSPAmount
+		if (claimPPSCapitalFSPAmount.isPresent()) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_FEDRERAL_PORTION));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimPPSCapitalFSPAmount.get()));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// claimPPSCapitalIMEAmount
+		if (claimPPSCapitalIMEAmount.isPresent()) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_INDIRECT_MEDICAL_EDU));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimPPSCapitalIMEAmount.get()));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// claimPPSCapitalOutlierAmount
+		if (claimPPSCapitalOutlierAmount.isPresent()) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_OUTLIER));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimPPSCapitalOutlierAmount.get()));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+		// claimPPSOldCapitalHoldHarmlessAmount
+		if (claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
+			bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_OLD_CAPITAL_HOLD_HARMLESS));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimPPSOldCapitalHoldHarmlessAmount.get()));
+			benefitBalances.getFinancial().add(bc);
+		}
+
+	}
+
+	/**
+	 * Extracts diagnoses that are common between Inpatient and SNF claim types.
+	 * 
+	 * @param diagnosisAdder
+	 *            a {@link Consumer}&lt;{link Optional}&lt;{@link Diagnosis}&gt;&gt;
+	 *            object used to add the common diagnosis fields
+	 * @param diagnosisAdmittingCode
+	 *            an {@link Optional}&lt;{link String}&gt; shared field representing
+	 * @param diagnosisAdmittingCodeVersion
+	 *            an {@link Optional}&lt;{link Character}&gt; shared field
+	 *            representing the diagnosis admitting code version for the claim
+	 * @param admittingLabel
+	 *            a {@link DiagnosisLabel} shared field representing the admitting
+	 *            label for the claim
+	 */
+	static void extractCommonDiagnosesInpatientSNF(Consumer<Optional<Diagnosis>> diagnosisAdder,
+			Optional<String> diagnosisAdmittingCode, Optional<Character> diagnosisAdmittingCodeVersion,
+			DiagnosisLabel admittingLabel) {
+		diagnosisAdder.accept(Diagnosis.from(diagnosisAdmittingCode, diagnosisAdmittingCodeVersion, admittingLabel));
+	}
+
+	/**
+	 * Adds EOB information to fields that are common between the Inpatient and SNF
+	 * claim types.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that fields will be added to by
+	 *            this method
+	 * @param admissionTypeCd
+	 *            a {@link Character} shared field representing the admission type
+	 *            cd for the claim
+	 * @param sourceAdmissionCd
+	 *            an {@link Optional}&lt;{@link Character}&gt; shared field
+	 *            representing the source admission cd for the claim
+	 * @param noncoveredStayFromDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the non-covered stay from date for the claim
+	 * @param noncoveredStayThroughDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the non-covered stay through date for the claim
+	 * @param coveredCareThroughDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the covered stay through date for the claim
+	 * @param medicareBenefitsExhaustedDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the medicare benefits exhausted date for the claim
+	 * @param diagnosisRelatedGroupCd
+	 *            an {@link Optional}&lt;{@link String}&gt; shared field
+	 *            representing the non-covered stay from date for the claim
+	 */
+	static void addCommonEobInformationInpatientSNF(ExplanationOfBenefit eob, Character admissionTypeCd,
+			Optional<Character> sourceAdmissionCd, Optional<LocalDate> noncoveredStayFromDate,
+			Optional<LocalDate> noncoveredStayThroughDate, Optional<LocalDate> coveredCareThroughDate,
+			Optional<LocalDate> medicareBenefitsExhaustedDate, Optional<String> diagnosisRelatedGroupCd) {
+
+		// admissionTypeCd
+		eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(
+				TransformerConstants.CODING_CCW_ADMISSION_TYPE, String.valueOf(admissionTypeCd)));
+
+		// sourceAdmissionCd
+		if (sourceAdmissionCd.isPresent()) {
+			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(
+					TransformerConstants.CODING_CMS_SOURCE_ADMISSION, String.valueOf(sourceAdmissionCd.get())));
+		}
+
+		// noncoveredStayFromDate & noncoveredStayThroughDate
+		if (noncoveredStayFromDate.isPresent() && noncoveredStayThroughDate.isPresent()) {
+			TransformerUtils.validatePeriodDates(noncoveredStayFromDate, noncoveredStayThroughDate);
+			eob.addInformation()
+					.setCategory(TransformerUtils.createCodeableConcept(
+							TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+							TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_NONCOVERED))
+					.setTiming(new Period()
+							.setStart(TransformerUtils.convertToDate((noncoveredStayFromDate.get())),
+									TemporalPrecisionEnum.DAY)
+							.setEnd(TransformerUtils.convertToDate((noncoveredStayThroughDate.get())),
+									TemporalPrecisionEnum.DAY));
+		}
+
+		// coveredCareThroughDate
+		if (coveredCareThroughDate.isPresent()) {
+			eob.addInformation()
+					.setCategory(TransformerUtils.createCodeableConcept(
+							TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+							TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_STAY))
+					.setTiming(new DateType(TransformerUtils.convertToDate(coveredCareThroughDate.get())));
+		}
+		
+		// medicareBenefitsExhaustedDate
+		if (medicareBenefitsExhaustedDate.isPresent()) {
+			eob.addInformation()
+					.setCategory(TransformerUtils.createCodeableConcept(
+							TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+							TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_EXHAUSTED))
+					.setTiming(new DateType(TransformerUtils.convertToDate(medicareBenefitsExhaustedDate.get())));
+		}
+		
+		// diagnosisRelatedGroupCd
+		if (diagnosisRelatedGroupCd.isPresent()) {
+			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(
+					TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
+					diagnosisRelatedGroupCd.get()));
+		}
 	}
 }
