@@ -58,7 +58,7 @@ def mvn(args) {
 }
 
 /**
- * @return the <version /> from the POM of the project in the current working 
+ * @return the <version /> from the POM of the project in the current working
  *         directory.
  */
 def readPomVersion() {
@@ -72,21 +72,16 @@ def readPomVersion() {
 }
 
 /**
- * @return an ID for the current build, in the form of 
- *         "<code>${env.BUILD_NUMBER}</code>" for builds against the SCM's 
- *         <code>master</code> branch, and 
+ * @return an ID for the current build, in the form of
+ *         "<code>${env.BUILD_NUMBER}</code>" for builds against the SCM's
+ *         <code>master</code> branch, and
  *         "<code>${env.BRANCH_NAME}-${env.BUILD_NUMBER}</code>" for other branches
  */
 def calculateBuildId() {
 	gitBranchName = "${env.BRANCH_NAME}".toString()
 	gitCommitId = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
 
-	buildId = ""
-	if("master".equals(gitBranchName)) {
-		buildId = "${gitCommitId}"
-	} else {
-		buildId = "${gitBranchName}-${gitCommitId}"
-	}
+	buildId = "${gitBranchName}-${gitCommitId}"
 
 	echo "Build ID: ${buildId} (for branch ${gitBranchName})"
 	return buildId
@@ -94,19 +89,30 @@ def calculateBuildId() {
 
 /**
  * <p>
- * Uses <code>org.codehaus.mojo:versions-maven-plugin</code> to set the version
- * of the POM in the current working directory, such that it replaces 
- * "<code>SNAPSHOT</code>" with the value of {@link #calculateBuildId()}.
+ * The same artifact repository will store builds produced from all source code
+ * branches. Unfortunately, Maven's versioning scheme doesn't really account
+ * for branches: unless the version numbers are manually changed for each
+ * branch (and there isn't any graceful scheme that would accommodate that),
+ * the "latest <code>-SNAPSHOT</code>" artifact included in builds could be
+ * from any branch.
  * </p>
  * <p>
- * This ensures that every CI build has a continuous-deployment-friendly, 
- * unique version number.
+ * This method is used to workaround that problem. For non-<code>master</code>
+ * branch builds, the "<code>-SNAPSHOT</code> version qualifier is replaced
+ * with "<code>-&lt;branchName&gt;-&lt;commitSha1&gt;</code>, ensuring that
+ * those builds don't "pollute" the <code>master</code> branch's artifact
+ * history. Version numbers for <code>master</code> branch builds are left
+ * alone.
  * </p>
  */
 def setPomVersionUsingBuildId() {
-	// Update the POM version to include the build ID.
-	// Reference: https://maven.apache.org/maven-release/maven-release-plugin/examples/update-versions.html
-	pomProjectVersionWithBuildId = readPomVersion().replaceAll("SNAPSHOT", calculateBuildId())
-	mvn "--batch-mode --quiet org.codehaus.mojo:versions-maven-plugin:2.2:set -DnewVersion='${pomProjectVersionWithBuildId}' -DgenerateBackupPoms=false"
-	echo "Updated POM version: ${pomProjectVersionWithBuildId}"
+	gitBranchName = "${env.BRANCH_NAME}".toString()
+	if (!"master".equals(gitBranchName)) {
+		pomProjectVersionWithBuildId = readPomVersion().replaceAll("SNAPSHOT", calculateBuildId())
+
+		// Update the POM version to include the build ID.
+		// Reference: https://maven.apache.org/maven-release/maven-release-plugin/examples/update-versions.html
+		mvn "--batch-mode --quiet org.codehaus.mojo:versions-maven-plugin:2.2:set -DnewVersion='${pomProjectVersionWithBuildId}' -DgenerateBackupPoms=false"
+		echo "Updated POM version: ${pomProjectVersionWithBuildId}"
+	}
 }
