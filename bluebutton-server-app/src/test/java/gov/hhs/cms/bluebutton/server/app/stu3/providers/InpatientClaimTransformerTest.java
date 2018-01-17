@@ -74,6 +74,7 @@ public final class InpatientClaimTransformerTest {
 		Assert.assertEquals(
 				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_A).getReference(),
 				eob.getInsurance().getCoverage().getReference());
+		
 		Assert.assertEquals("active", eob.getStatus().toCode());
 
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
@@ -92,13 +93,7 @@ public final class InpatientClaimTransformerTest {
 				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
 				claim.getPrimaryPayerPaidAmount(), eob.getBenefitBalanceFirstRep().getFinancial());
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE, claim.getDeductibleAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PASS_THRU_PER_DIEM, claim.getPassThruPerDiemAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY, claim.getPartACoinsuranceLiabilityAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY, claim.getBloodDeductibleLiabilityAmount(),
@@ -107,47 +102,25 @@ public final class InpatientClaimTransformerTest {
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE, claim.getProfessionalComponentCharge(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE, claim.getNoncoveredCharge(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION, claim.getTotalDeductionAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_PPS_CAPITAL, claim.getClaimTotalPPSCapitalAmount().get(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_FEDRERAL_PORTION, claim.getClaimPPSCapitalFSPAmount().get(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_OUTLIER, claim.getClaimPPSCapitalOutlierAmount().get(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_DISPROPORTIONAL_SHARE,
-				claim.getClaimPPSCapitalDisproportionateShareAmt().get(), eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_INDIRECT_MEDICAL_EDU,
-				claim.getClaimPPSCapitalIMEAmount().get(), eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_EXCEPTION, claim.getClaimPPSCapitalExceptionAmount().get(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_OLD_CAPITAL_HOLD_HARMLESS,
-				claim.getClaimPPSOldCapitalHoldHarmlessAmount().get(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-
 		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, claim.getUtilizationDayCount().intValue(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODING_CCW_COINSURANCE_DAY_COUNT, claim.getCoinsuranceDayCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NON_UTILIZATION_DAY_COUNT,
-				claim.getNonUtilizationDayCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_PINTS_FURNISHED, claim.getBloodPintsFurnishedQty().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		
+		// test common benefit components between SNF and Inpatient claims are set as expected
+		TransformerTestUtils.assertCommonBenefitComponentInpatientSNF(eob, claim.getCoinsuranceDayCount(),
+				claim.getNonUtilizationDayCount(), claim.getDeductibleAmount(),
+				claim.getPartACoinsuranceLiabilityAmount(), claim.getBloodPintsFurnishedQty(),
+				claim.getNoncoveredCharge(), claim.getTotalDeductionAmount(),
+				claim.getClaimPPSCapitalDisproportionateShareAmt(), claim.getClaimPPSCapitalExceptionAmount(),
+				claim.getClaimPPSCapitalFSPAmount(), claim.getClaimPPSCapitalIMEAmount(),
+				claim.getClaimPPSCapitalOutlierAmount(), claim.getClaimPPSOldCapitalHoldHarmlessAmount());
+		
+		// test common eob information between SNF and Inpatient claims are set as expected
+		TransformerTestUtils.assertCommonEobInformationInpatientSNF(eob, claim.getNoncoveredStayFromDate(),
+				claim.getNoncoveredStayThroughDate(), claim.getCoveredCareThoughDate(),
+				claim.getMedicareBenefitsExhaustedDate(), claim.getDiagnosisRelatedGroupCd());
 
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DRUG_OUTLIER_APPROVED_PAYMENT,
@@ -172,11 +145,6 @@ public final class InpatientClaimTransformerTest {
 				ClaimCareteamrole.ASSIST.toCode(), eob);
 		TransformerTestUtils.assertCareTeamEquals(claim.getOtherPhysicianNpi().get(), ClaimCareteamrole.OTHER.toCode(),
 				eob);
-
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
-						TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
-						String.valueOf(claim.getDiagnosisRelatedGroupCd().get()))));
 
 		Assert.assertEquals(9, eob.getDiagnosis().size());
 

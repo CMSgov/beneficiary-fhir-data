@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
@@ -544,5 +545,201 @@ final class TransformerTestUtils {
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+	
+	/**
+	 * Tests field values of an eob's benefit balance component that are common
+	 * between the Inpatient and SNF claim types.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that will be tested by this
+	 *            method
+	 * @param coinsuranceDayCount
+	 *            a {@link BigDecimal} shared field representing the coinsurance day
+	 *            count for the claim
+	 * @param nonUtilizationDayCount
+	 *            a {@link BigDecimal} shared field representing the non-utilization
+	 *            day count for the claim
+	 * @param deductibleAmount
+	 *            a {@link BigDecimal} shared field representing the deductible
+	 *            amount for the claim
+	 * @param partACoinsuranceLiabilityAmount
+	 *            a {@link BigDecimal} shared field representing the part A
+	 *            coinsurance amount for the claim
+	 * @param bloodPintsFurnishedQty
+	 *            a {@link BigDecimal} shared field representing the blood pints
+	 *            furnished quantity for the claim
+	 * @param noncoveredCharge
+	 *            a {@link BigDecimal} shared field representing the non-covered
+	 *            charge for the claim
+	 * @param totalDeductionAmount
+	 *            a {@link BigDecimal} shared field representing the total deduction
+	 *            amount for the claim
+	 * @param claimPPSCapitalDisproportionateShareAmt
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital disproportionate share amount
+	 *            for the claim
+	 * @param claimPPSCapitalExceptionAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital exception amount for the claim
+	 * @param claimPPSCapitalFSPAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital FSP amount for the claim
+	 * @param claimPPSCapitalIMEAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital IME amount for the claim
+	 * @param claimPPSCapitalOutlierAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital outlier amount for the claim
+	 * @param claimPPSOldCapitalHoldHarmlessAmount
+	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS old capital hold harmless amount for
+	 *            the claim
+	 */
+	static void assertCommonBenefitComponentInpatientSNF(ExplanationOfBenefit eob, BigDecimal coinsuranceDayCount,
+			BigDecimal nonUtilizationDayCount, BigDecimal deductibleAmount, BigDecimal partACoinsuranceLiabilityAmount,
+			BigDecimal bloodPintsFurnishedQty, BigDecimal noncoveredCharge, BigDecimal totalDeductionAmount,
+			Optional<BigDecimal> claimPPSCapitalDisproportionateShareAmt,
+			Optional<BigDecimal> claimPPSCapitalExceptionAmount, Optional<BigDecimal> claimPPSCapitalFSPAmount,
+			Optional<BigDecimal> claimPPSCapitalIMEAmount, Optional<BigDecimal> claimPPSCapitalOutlierAmount,
+			Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount) {
+
+		// coinsuranceDayCount
+		assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODING_CCW_COINSURANCE_DAY_COUNT, coinsuranceDayCount.intValue(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// nonUtilizationDayCount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NON_UTILIZATION_DAY_COUNT,
+				nonUtilizationDayCount.intValue(), eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// deductibleAmount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE, deductibleAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// partACoinsuranceLiabilityAmount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY, partACoinsuranceLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// bloodPintsFurnishedQty
+		assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_PINTS_FURNISHED,
+				bloodPintsFurnishedQty.intValue(), eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// noncoveredCharge
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE, noncoveredCharge,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// totalDeductionAmount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION, totalDeductionAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// claimPPSCapitalDisproportionateShareAmt
+		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_DISPROPORTIONAL_SHARE,
+					claimPPSCapitalDisproportionateShareAmt.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalExceptionAmount
+		if (claimPPSCapitalExceptionAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_EXCEPTION,
+					claimPPSCapitalExceptionAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalFSPAmount
+		if (claimPPSCapitalFSPAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_FEDRERAL_PORTION,
+					claimPPSCapitalFSPAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalIMEAmount
+		if (claimPPSCapitalIMEAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_INDIRECT_MEDICAL_EDU,
+					claimPPSCapitalIMEAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalOutlierAmount
+		if (claimPPSCapitalOutlierAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_OUTLIER,
+					claimPPSCapitalOutlierAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSOldCapitalHoldHarmlessAmount
+		if (claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_OLD_CAPITAL_HOLD_HARMLESS,
+					claimPPSOldCapitalHoldHarmlessAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+	}
+	
+	/**
+	 * Tests EOB information fields that are common between the Inpatient and SNF
+	 * claim types.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that will be tested by this
+	 *            method
+	 * @param noncoveredStayFromDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the non-covered stay from date for the claim
+	 * @param noncoveredStayThroughDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the non-covered stay through date for the claim
+	 * @param coveredCareThroughDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the covered stay through date for the claim
+	 * @param medicareBenefitsExhaustedDate
+	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the medicare benefits exhausted date for the claim
+	 * @param diagnosisRelatedGroupCd
+	 *            an {@link Optional}&lt;{@link String}&gt; shared field
+	 *            representing the non-covered stay from date for the claim
+	 */
+	static void assertCommonEobInformationInpatientSNF(ExplanationOfBenefit eob, Optional<LocalDate> noncoveredStayFromDate, 
+			Optional<LocalDate> noncoveredStayThroughDate, Optional<LocalDate> coveredCareThroughDate,
+			Optional<LocalDate> medicareBenefitsExhaustedDate, Optional<String> diagnosisRelatedGroupCd) {
+		
+		/*
+		 * TODO missing tests for: admissionTypeCd, sourceAdmissionCd,
+		 * diagnosisAdmittingCode, diagnosisAdmittingCodeVersion
+		 */
+		
+		// noncoveredStayFromDate & noncoveredStayThroughDate
+		if (noncoveredStayFromDate.isPresent() && noncoveredStayThroughDate.isPresent()) {
+			assertInformationPeriodEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+					TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_NONCOVERED, noncoveredStayFromDate.get(),
+					noncoveredStayThroughDate.get(), eob.getInformation());
+		}
+		
+		// coveredCareThroughDate
+		if (coveredCareThroughDate.isPresent()) {
+			assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+					TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_STAY, coveredCareThroughDate.get(),
+					eob.getInformation());
+		}
+		
+		// medicareBenefitsExhaustedDate
+		if(medicareBenefitsExhaustedDate.isPresent()) {
+		assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+				TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_EXHAUSTED,
+				medicareBenefitsExhaustedDate.get(),
+				eob.getInformation());
+		}
+		
+		// diagnosisRelatedGroupCd
+		Assert.assertTrue(eob.getInformation().stream()
+				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
+						TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
+						String.valueOf(diagnosisRelatedGroupCd.get()))));
 	}
 }
