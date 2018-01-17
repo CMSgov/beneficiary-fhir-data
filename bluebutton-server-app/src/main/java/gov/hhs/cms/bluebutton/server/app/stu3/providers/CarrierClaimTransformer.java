@@ -189,13 +189,13 @@ final class CarrierClaimTransformer {
 					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode());
 
 			if (claimLine.getProviderStateCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(item.getLocation(),
+				TransformerUtils.addExtensionCoding(item.getLocation(),
 					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine.getProviderStateCode().get());
 			}
 
 			if (claimLine.getProviderZipCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(item.getLocation(),
+				TransformerUtils.addExtensionCoding(item.getLocation(),
 					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_ZIP,
 					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_ZIP, claimLine.getProviderZipCode().get());
 			}
@@ -204,14 +204,14 @@ final class CarrierClaimTransformer {
 					TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY, claimLine.getLinePricingLocalityCode());
 			if (claimLine.getCliaLabNumber().isPresent()) {
 				/*
-				 * FIXME this should be mapped as an extension valueIdentifier instead of as a
-				 * valueCodeableConcept
+				 * FIXME this should be mapped as an extension valueIdentifier
+				 * instead of as a valueCodeableConcept
 				 */
-				TransformerUtils.addExtensionCoding(item.getLocation(),
-						TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM,
+				TransformerUtils.addExtensionCoding(item.getLocation(), TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM,
 						TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM, claimLine.getCliaLabNumber().get());
 			}
 		}
+
 		return eob;
 	}
 

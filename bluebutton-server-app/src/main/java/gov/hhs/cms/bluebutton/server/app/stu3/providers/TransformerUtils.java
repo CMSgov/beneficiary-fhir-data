@@ -46,8 +46,10 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import ca.uhn.fhir.model.primitive.IdDt;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 
@@ -533,13 +535,36 @@ public final class TransformerUtils {
 	}
 
 	/**
-	 * Transforms the common group level data elements between the Carrier and DME
-	 * claim types to FHIR
+	 * Transforms the common group level data elements between the
+	 * {@link CarrierClaim} and {@link DMEClaim} claim types to FHIR. The method
+	 * parameter fields from {@link CarrierClaim} and {@link DMEClaim} are listed
+	 * below and their corresponding RIF CCW fields (denoted in all CAPS below from
+	 * {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
 	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to modify
-	 * @param common
-	 *            fields between {@link CarrierClaim} and {@link DMEClaim}
+	 * @param beneficiaryId
+	 *            BENE_ID, *
+	 * @param carrierNumber
+	 *            CARR_NUM,
+	 * @param clinicalTrialNumber
+	 *            CLM_CLNCL_TRIL_NUM,
+	 * @param beneficiaryPartBDeductAmount
+	 *            CARR_CLM_CASH_DDCTBL_APLD_AMT,
+	 * @param paymentDenialCode
+	 *            CARR_CLM_PMT_DNL_CD,
+	 * @param referringPhysicianNpi
+	 *            RFR_PHYSN_NPI
+	 * @param providerAssignmentIndicator
+	 *            CARR_CLM_PRVDR_ASGNMT_IND_SW,
+	 * @param providerPaymentAmount
+	 *            NCH_CLM_PRVDR_PMT_AMT,
+	 * @param beneficiaryPaymentAmount
+	 *            NCH_CLM_BENE_PMT_AMT,
+	 * @param submittedChargeAmount
+	 *            NCH_CARR_CLM_SBMTD_CHRG_AMT,
+	 * @param allowedChargeAmount
+	 *            NCH_CARR_CLM_ALOWD_AMT,
 	 * 
 	 * @return the {@link ExplanationOfBenefit}
 	 */
@@ -559,9 +584,8 @@ public final class TransformerUtils {
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
 
 		/*
-		 * Referrals are represented as contained resources, because otherwise updating
-		 * them would require an extra roundtrip to the server (can't think of an
-		 * intelligent client-specified ID for them).
+		 * Referrals are represented as contained resources, since they share the
+		 * lifecycle and identity of their containing EOB.
 		 */
 		if (referringPhysicianNpi.isPresent()) {
 			ReferralRequest referral = new ReferralRequest();
@@ -588,59 +612,105 @@ public final class TransformerUtils {
 			addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
 					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
 		}
-		if (!beneficiaryPartBDeductAmount.equals(BigDecimal.ZERO)) {
-			BenefitComponent beneficiaryPartBDeductAmt = new BenefitComponent(
-					createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
-			beneficiaryPartBDeductAmt.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(beneficiaryPartBDeductAmount));
-			eob.getBenefitBalanceFirstRep().getFinancial().add((beneficiaryPartBDeductAmt));
-		}
-		if (!providerPaymentAmount.equals(BigDecimal.ZERO)) {
-			BenefitComponent providerPaymentAmt = new BenefitComponent(createCodeableConcept(
-					TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-					TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT));
-			providerPaymentAmt.setAllowed(
+
+		BenefitComponent beneficiaryPartBDeductAmt = new BenefitComponent(
+				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
+		beneficiaryPartBDeductAmt.setAllowed(
+				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(beneficiaryPartBDeductAmount));
+		eob.getBenefitBalanceFirstRep().getFinancial().add((beneficiaryPartBDeductAmt));
+
+		BenefitComponent providerPaymentAmt = new BenefitComponent(
+				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT));
+		providerPaymentAmt.setAllowed(
 					new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(providerPaymentAmount));
-			eob.getBenefitBalanceFirstRep().getFinancial().add(providerPaymentAmt);
-		}
+		eob.getBenefitBalanceFirstRep().getFinancial().add(providerPaymentAmt);
 
-		if (!beneficiaryPaymentAmount.equals(BigDecimal.ZERO)) {
-			BenefitComponent beneficiaryPaymentAmt = new BenefitComponent(
-					createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+		BenefitComponent beneficiaryPaymentAmt = new BenefitComponent(
+				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 							TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
-			beneficiaryPaymentAmt.setAllowed(
+		beneficiaryPaymentAmt.setAllowed(
 					new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(beneficiaryPaymentAmount));
-			eob.getBenefitBalanceFirstRep().getFinancial().add(beneficiaryPaymentAmt);
-		}
+		eob.getBenefitBalanceFirstRep().getFinancial().add(beneficiaryPaymentAmt);
 
-		if (!submittedChargeAmount.equals(BigDecimal.ZERO)) {
-			BenefitComponent submittedChargeAmt = new BenefitComponent(
+		BenefitComponent submittedChargeAmt = new BenefitComponent(
 					createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 							TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
-			submittedChargeAmt.setAllowed(
+		submittedChargeAmt.setAllowed(
 					new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(submittedChargeAmount));
-			eob.getBenefitBalanceFirstRep().getFinancial().add(submittedChargeAmt);
-		}
+		eob.getBenefitBalanceFirstRep().getFinancial().add(submittedChargeAmt);
 
-		if (!allowedChargeAmount.equals(BigDecimal.ZERO)) {
-			BenefitComponent allowedChargeAmt = new BenefitComponent(createCodeableConcept(
-					TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE, TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE));
-			allowedChargeAmt.setAllowed(
+		BenefitComponent allowedChargeAmt = new BenefitComponent(
+				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE));
+		allowedChargeAmt.setAllowed(
 					new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(allowedChargeAmount));
-			eob.getBenefitBalanceFirstRep().getFinancial().add(allowedChargeAmt);
-		}
+		eob.getBenefitBalanceFirstRep().getFinancial().add(allowedChargeAmt);
+
 		return eob;
 	}
 
 	/**
-	 * Transforms the common item level data elements between the Carrier and DME
-	 * claim types to FHIR
+	 * Transforms the common item level data elements between the
+	 * {@link CarrierClaimLine} and {@link DMEClaimLine} claim types to FHIR. The
+	 * method parameter fields from {@link CarrierClaimLine} and
+	 * {@link DMEClaimLine} are listed below and their corresponding RIF CCW fields
+	 * (denoted in all CAPS below from {@link CarrierClaimColumn} and
+	 * {@link DMEClaimColumn}).
 	 * 
 	 * @param item
 	 *            the {@ ItemComponent} to modify
-	 * @param common
-	 *            fields between {@link CarrierClaimLine} and {@link DMEClaimLine}
+	 * @param eob
+	 *            the {@ ExplanationOfBenefit} to modify
+	 * @param claimId
+	 *            CLM_ID,
+	 * @param serviceCount
+	 *            LINE_SRVC_CNT,
+	 * @param placeOfServiceCode
+	 *            LINE_PLACE_OF_SRVC_CD,
+	 * @param firstExpenseDate
+	 *            LINE_1ST_EXPNS_DT,
+	 * @param lastExpenseDate
+	 *            LINE_LAST_EXPNS_DT,
+	 * @param beneficiaryPaymentAmount
+	 *            LINE_BENE_PMT_AMT,
+	 * @param providerPaymentAmount
+	 *            LINE_PRVDR_PMT_AMT,
+	 * @param beneficiaryPartBDeductAmount
+	 *            LINE_BENE_PTB_DDCTBL_AMT,
+	 * @param primaryPayerCode
+	 *            LINE_BENE_PRMRY_PYR_CD,
+	 * @param primaryPayerPaidAmount
+	 *            LINE_BENE_PRMRY_PYR_PD_AMT,
+	 * @param betosCode
+	 *            BETOS_CD,
+	 * @param paymentAmount
+	 *            LINE_NCH_PMT_AMT,
+	 * @param paymentCode
+	 *            LINE_PMT_80_100_CD,
+	 * @param coinsuranceAmount
+	 *            LINE_COINSRNC_AMT,
+	 * @param submittedChargeAmount
+	 *            LINE_SBMTD_CHRG_AMT,
+	 * @param allowedChargeAmount
+	 *            LINE_ALOWD_CHRG_AMT,
+	 * @param processingIndicatorCode
+	 *            LINE_PRCSG_IND_CD,
+	 * @param serviceDeductibleCode
+	 *            LINE_SERVICE_DEDUCTIBLE,
+	 * @param diagnosisCode
+	 *            LINE_ICD_DGNS_CD,
+	 * @param diagnosisCodeVersion
+	 *            LINE_ICD_DGNS_VRSN_CD,
+	 * @param hctHgbTestTypeCode
+	 *            LINE_HCT_HGB_TYPE_CD
+	 * @param hctHgbTestResult
+	 *            LINE_HCT_HGB_RSLT_NUM,
+	 * @param cmsServiceTypeCode
+	 *            LINE_CMS_TYPE_SRVC_CD,
+	 * @param nationalDrugCode
+	 *            LINE_NDC_CD
 	 * 
 	 * @return the {@link ItemComponent}
 	 */
