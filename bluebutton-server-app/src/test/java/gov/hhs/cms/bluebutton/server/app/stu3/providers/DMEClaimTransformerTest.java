@@ -3,11 +3,11 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
@@ -81,12 +81,15 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
 		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
-		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, claim.getCarrierNumber());
-		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
-				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, claim.getPaymentDenialCode());
+
+		// Test to ensure common group fields between Carrier and DME match
+		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(),
+				claim.getCarrierNumber(),
+				claim.getClinicalTrialNumber(), claim.getBeneficiaryPartBDeductAmount(), claim.getPaymentDenialCode(),
+				claim.getReferringPhysicianNpi(), Optional.of(claim.getProviderAssignmentIndicator()),
+				claim.getProviderPaymentAmount(), claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
+				claim.getAllowedChargeAmount());
+
 		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
@@ -94,31 +97,6 @@ public final class DMEClaimTransformerTest {
 
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-
-		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				claim.getClinicalTrialNumber().get());
-
-		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
-				referral.getSubject().getReference());
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US,
-				claim.getReferringPhysicianNpi().get(), referral.getRequester().getAgent());
-
-		TransformerTestUtils.assertExtensionCodingEquals(eob,
-				TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
-				TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT, "A");
-
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT, claim.getProviderPaymentAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, claim.getSubmittedChargeAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE, claim.getAllowedChargeAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
 
 		Assert.assertEquals(3, eob.getDiagnosis().size());
@@ -147,17 +125,6 @@ public final class DMEClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine1.getProviderStateCode());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_TYPE_SERVICE,
-				String.valueOf(claimLine1.getCmsServiceTypeCode()), eobItem0.getCategory());
-
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_PLACE_OF_SERVICE,
-				claimLine1.getPlaceOfServiceCode(), eobItem0.getLocationCodeableConcept());
-
-		TransformerTestUtils.assertDateEquals(claimLine1.getFirstExpenseDate().get(),
-				eobItem0.getServicedPeriod().getStartElement());
-		TransformerTestUtils.assertDateEquals(claimLine1.getLastExpenseDate().get(),
-				eobItem0.getServicedPeriod().getEndElement());
-
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
 				claimLine1.getHcpcsInitialModifierCode().get(),
 				eobItem0.getModifier().get(0));
@@ -165,37 +132,10 @@ public final class DMEClaimTransformerTest {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + claim.getHcpcsYearCode().get(),
 				claimLine1.getHcpcsCode().get(), eobItem0.getService());
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_BETOS,
-				TransformerConstants.CODING_BETOS, claimLine1.getBetosCode().get());
 
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT,
-				claimLine1.getPaymentAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
-				claimLine1.getBeneficiaryPaymentAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
-				claimLine1.getProviderPaymentAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE,
-				claimLine1.getBeneficiaryPartBDeductAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
-				claimLine1.getPrimaryPayerPaidAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT,
-				claimLine1.getCoinsuranceAmount(), eobItem0.getAdjudication());
 		TransformerTestUtils.assertAdjudicationEquals(
 				TransformerConstants.CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE,
 				claimLine1.getPrimaryPayerAllowedChargeAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT,
-				claimLine1.getSubmittedChargeAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE,
-				claimLine1.getAllowedChargeAmount(), eobItem0.getAdjudication());
-
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_CCW_PROCESSING_INDICATOR,
-				TransformerConstants.CODING_CCW_PROCESSING_INDICATOR,
-				claimLine1.getProcessingIndicatorCode().get());
-
-		TransformerTestUtils.assertDiagnosisLinkPresent(
-				Diagnosis.from(claimLine1.getDiagnosisCode(), claimLine1.getDiagnosisCodeVersion()), eob, eobItem0);
 
 		TransformerTestUtils.assertAdjudicationEquals(
 				TransformerConstants.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT, claimLine1.getPurchasePriceAmount(),
@@ -216,8 +156,20 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_MTUS_COUNT,
 				TransformerConstants.EXTENSION_MTUS_COUNT, String.valueOf(claimLine1.getMtusCount()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_NDC,
-				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
+		// Test to ensure common item fields between Carrier and DME match
+		TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(eobItem0, eob, claimLine1.getServiceCount(),
+				claimLine1.getPlaceOfServiceCode(),
+				claimLine1.getFirstExpenseDate(),
+				claimLine1.getLastExpenseDate(), claimLine1.getBeneficiaryPaymentAmount(),
+				claimLine1.getProviderPaymentAmount(), claimLine1.getBeneficiaryPartBDeductAmount(),
+				claimLine1.getPrimaryPayerCode(), claimLine1.getPrimaryPayerPaidAmount(), claimLine1.getBetosCode(),
+				claimLine1.getPaymentAmount(), claimLine1.getPaymentCode(), claimLine1.getCoinsuranceAmount(),
+				claimLine1.getSubmittedChargeAmount(), claimLine1.getAllowedChargeAmount(),
+				claimLine1.getProcessingIndicatorCode(), claimLine1.getServiceDeductibleCode(),
+				claimLine1.getDiagnosisCode(),
+				claimLine1.getDiagnosisCodeVersion(), 
+				claimLine1.getHctHgbTestTypeCode(), claimLine1.getHctHgbTestResult(),
+				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode());
 
 	}
 }
