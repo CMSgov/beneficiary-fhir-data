@@ -189,16 +189,6 @@ The default install goal for the maven build will run the integration tests.  If
 $ mvn clean install -DskipITs
 ```
 
-## Git Large File Storage
-
-You'll also need to manually (boo!) download and install [Git Large File Storage](https://git-lfs.github.com/), which is used by some of the projects to store the large amounts of sample data needed in tests. Once installed, you need to run the following command once on your system:
-
-    $ git lfs install
-
-If you've already cloned any of our repos, you'll also want to run the following command in each of them to download and checkout any LFS files (future clones should do this automagically for you, now that it's installed):
-
-    $ git lfs pull
-
 ## Eclipse Configuration
 
 The following instructions are to be executed from within the Eclipse IDE application to ensure proper configuration.
