@@ -555,44 +555,50 @@ final class TransformerTestUtils {
 	 *            the {@link ExplanationOfBenefit} that will be tested by this
 	 *            method
 	 * @param coinsuranceDayCount
-	 *            a {@link BigDecimal} shared field representing the coinsurance day
-	 *            count for the claim
+	 *            BENE_TOT_COINSRNC_DAYS_CNT: a {@link BigDecimal} shared field
+	 *            representing the coinsurance day count for the claim
 	 * @param nonUtilizationDayCount
-	 *            a {@link BigDecimal} shared field representing the non-utilization
-	 *            day count for the claim
+	 *            CLM_NON_UTLZTN_DAYS_CNT: a {@link BigDecimal} shared field
+	 *            representing the non-utilization day count for the claim
 	 * @param deductibleAmount
-	 *            a {@link BigDecimal} shared field representing the deductible
-	 *            amount for the claim
+	 *            NCH_BENE_IP_DDCTBL_AMT: a {@link BigDecimal} shared field
+	 *            representing the deductible amount for the claim
 	 * @param partACoinsuranceLiabilityAmount
-	 *            a {@link BigDecimal} shared field representing the part A
-	 *            coinsurance amount for the claim
+	 *            NCH_BENE_PTA_COINSRNC_LBLTY_AM: a {@link BigDecimal} shared field
+	 *            representing the part A coinsurance amount for the claim
 	 * @param bloodPintsFurnishedQty
-	 *            a {@link BigDecimal} shared field representing the blood pints
-	 *            furnished quantity for the claim
+	 *            NCH_BLOOD_PNTS_FRNSHD_QTY: a {@link BigDecimal} shared field
+	 *            representing the blood pints furnished quantity for the claim
 	 * @param noncoveredCharge
-	 *            a {@link BigDecimal} shared field representing the non-covered
-	 *            charge for the claim
+	 *            NCH_IP_NCVRD_CHRG_AMT: a {@link BigDecimal} shared field
+	 *            representing the non-covered charge for the claim
 	 * @param totalDeductionAmount
-	 *            a {@link BigDecimal} shared field representing the total deduction
-	 *            amount for the claim
+	 *            NCH_IP_TOT_DDCTN_AMT: a {@link BigDecimal} shared field
+	 *            representing the total deduction amount for the claim
 	 * @param claimPPSCapitalDisproportionateShareAmt
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital disproportionate share amount
 	 *            for the claim
 	 * @param claimPPSCapitalExceptionAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_EXCPTN_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital exception amount for the claim
 	 * @param claimPPSCapitalFSPAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_FSP_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital FSP amount for the claim
 	 * @param claimPPSCapitalIMEAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_IME_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital IME amount for the claim
 	 * @param claimPPSCapitalOutlierAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_OUTLIER_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital outlier amount for the claim
 	 * @param claimPPSOldCapitalHoldHarmlessAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS old capital hold harmless amount for
 	 *            the claim
 	 */
@@ -690,19 +696,23 @@ final class TransformerTestUtils {
 	 *            the {@link ExplanationOfBenefit} that will be tested by this
 	 *            method
 	 * @param noncoveredStayFromDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_VRFD_NCVRD_STAY_FROM_DT: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the non-covered stay from date for the claim
 	 * @param noncoveredStayThroughDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_VRFD_NCVRD_STAY_THRU_DT: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the non-covered stay through date for the claim
 	 * @param coveredCareThroughDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_ACTV_OR_CVRD_LVL_CARE_THRU: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the covered stay through date for the claim
 	 * @param medicareBenefitsExhaustedDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_BENE_MDCR_BNFTS_EXHTD_DT_I: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the medicare benefits exhausted date for the claim
 	 * @param diagnosisRelatedGroupCd
-	 *            an {@link Optional}&lt;{@link String}&gt; shared field
+	 *            CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared field
 	 *            representing the non-covered stay from date for the claim
 	 */
 	static void assertCommonEobInformationInpatientSNF(ExplanationOfBenefit eob, Optional<LocalDate> noncoveredStayFromDate, 

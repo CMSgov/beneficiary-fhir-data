@@ -537,44 +537,50 @@ public final class TransformerUtils {
 	 *            the {@link BenefitBalanceComponent} that will be updated by this
 	 *            method
 	 * @param coinsuranceDayCount
-	 *            a {@link BigDecimal} shared field representing the coinsurance day
-	 *            count for the claim
+	 *            BENE_TOT_COINSRNC_DAYS_CNT: a {@link BigDecimal} shared field
+	 *            representing the coinsurance day count for the claim
 	 * @param nonUtilizationDayCount
-	 *            a {@link BigDecimal} shared field representing the non-utilization
-	 *            day count for the claim
+	 *            CLM_NON_UTLZTN_DAYS_CNT: a {@link BigDecimal} shared field
+	 *            representing the non-utilization day count for the claim
 	 * @param deductibleAmount
-	 *            a {@link BigDecimal} shared field representing the deductible
-	 *            amount for the claim
+	 *            NCH_BENE_IP_DDCTBL_AMT: a {@link BigDecimal} shared field
+	 *            representing the deductible amount for the claim
 	 * @param partACoinsuranceLiabilityAmount
-	 *            a {@link BigDecimal} shared field representing the part A
-	 *            coinsurance amount for the claim
+	 *            NCH_BENE_PTA_COINSRNC_LBLTY_AM: a {@link BigDecimal} shared field
+	 *            representing the part A coinsurance amount for the claim
 	 * @param bloodPintsFurnishedQty
-	 *            a {@link BigDecimal} shared field representing the blood pints
-	 *            furnished quantity for the claim
+	 *            NCH_BLOOD_PNTS_FRNSHD_QTY: a {@link BigDecimal} shared field
+	 *            representing the blood pints furnished quantity for the claim
 	 * @param noncoveredCharge
-	 *            a {@link BigDecimal} shared field representing the non-covered
-	 *            charge for the claim
+	 *            NCH_IP_NCVRD_CHRG_AMT: a {@link BigDecimal} shared field
+	 *            representing the non-covered charge for the claim
 	 * @param totalDeductionAmount
-	 *            a {@link BigDecimal} shared field representing the total deduction
-	 *            amount for the claim
+	 *            NCH_IP_TOT_DDCTN_AMT: a {@link BigDecimal} shared field
+	 *            representing the total deduction amount for the claim
 	 * @param claimPPSCapitalDisproportionateShareAmt
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital disproportionate share amount
 	 *            for the claim
 	 * @param claimPPSCapitalExceptionAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_EXCPTN_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital exception amount for the claim
 	 * @param claimPPSCapitalFSPAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_FSP_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital FSP amount for the claim
 	 * @param claimPPSCapitalIMEAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_IME_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital IME amount for the claim
 	 * @param claimPPSCapitalOutlierAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_CPTL_OUTLIER_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS capital outlier amount for the claim
 	 * @param claimPPSOldCapitalHoldHarmlessAmount
-	 *            an {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
 	 *            representing the claim PPS old capital hold harmless amount for
 	 *            the claim
 	 */
@@ -602,6 +608,7 @@ public final class TransformerUtils {
 		benefitBalances.getFinancial().add(bc);
 
 		// deductibleAmount
+		// FIXME: check if this field is non-nullable and if not remove the "if" check 
 		if (deductibleAmount != null) {
 			bc = new BenefitComponent(
 					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
@@ -611,6 +618,7 @@ public final class TransformerUtils {
 		}
 
 		// partACoinsuranceLiabilityAmount
+		// FIXME: check if this field is non-nullable and if not remove the "if" check 
 		if (partACoinsuranceLiabilityAmount != null) {
 			bc = new BenefitComponent(
 					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
@@ -628,6 +636,7 @@ public final class TransformerUtils {
 		benefitBalances.getFinancial().add(bc);
 
 		// noncoveredCharge
+		// FIXME: check if this field is non-nullable and if not remove the "if" check 
 		if (noncoveredCharge != null) {
 			bc = new BenefitComponent(
 					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
@@ -637,6 +646,7 @@ public final class TransformerUtils {
 		}
 
 		// totalDeductionAmount
+		// FIXME: check if this field is non-nullable and if not remove the "if" check 
 		if (totalDeductionAmount != null) {
 			bc = new BenefitComponent(
 					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
@@ -714,10 +724,12 @@ public final class TransformerUtils {
 	 *            a {@link Consumer}&lt;{link Optional}&lt;{@link Diagnosis}&gt;&gt;
 	 *            object used to add the common diagnosis fields
 	 * @param diagnosisAdmittingCode
-	 *            an {@link Optional}&lt;{link String}&gt; shared field representing
+	 *            ADMTG_DGNS_CD: an {@link Optional}&lt;{link String}&gt; shared
+	 *            field representing
 	 * @param diagnosisAdmittingCodeVersion
-	 *            an {@link Optional}&lt;{link Character}&gt; shared field
-	 *            representing the diagnosis admitting code version for the claim
+	 *            ADMTG_DGNS_VRSN_CD: an {@link Optional}&lt;{link Character}&gt;
+	 *            shared field representing the diagnosis admitting code version for
+	 *            the claim
 	 * @param admittingLabel
 	 *            a {@link DiagnosisLabel} shared field representing the admitting
 	 *            label for the claim
@@ -736,25 +748,29 @@ public final class TransformerUtils {
 	 *            the {@link ExplanationOfBenefit} that fields will be added to by
 	 *            this method
 	 * @param admissionTypeCd
-	 *            a {@link Character} shared field representing the admission type
-	 *            cd for the claim
+	 *            CLM_IP_ADMSN_TYPE_CD: a {@link Character} shared field
+	 *            representing the admission type cd for the claim
 	 * @param sourceAdmissionCd
-	 *            an {@link Optional}&lt;{@link Character}&gt; shared field
-	 *            representing the source admission cd for the claim
+	 *            CLM_SRC_IP_ADMSN_CD: an {@link Optional}&lt;{@link Character}&gt;
+	 *            shared field representing the source admission cd for the claim
 	 * @param noncoveredStayFromDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_VRFD_NCVRD_STAY_FROM_DT: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the non-covered stay from date for the claim
 	 * @param noncoveredStayThroughDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_VRFD_NCVRD_STAY_THRU_DT: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the non-covered stay through date for the claim
 	 * @param coveredCareThroughDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_ACTV_OR_CVRD_LVL_CARE_THRU: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the covered stay through date for the claim
 	 * @param medicareBenefitsExhaustedDate
-	 *            an {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            NCH_BENE_MDCR_BNFTS_EXHTD_DT_I: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
 	 *            representing the medicare benefits exhausted date for the claim
 	 * @param diagnosisRelatedGroupCd
-	 *            an {@link Optional}&lt;{@link String}&gt; shared field
+	 *            CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared field
 	 *            representing the non-covered stay from date for the claim
 	 */
 	static void addCommonEobInformationInpatientSNF(ExplanationOfBenefit eob, Character admissionTypeCd,
