@@ -73,8 +73,8 @@ final class HHAClaimTransformer {
 		TransformerUtils.setPeriodStart(eob.getBillablePeriod(), claimGroup.getDateFrom());
 		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
 
-		eob.setProvider(TransformerUtils.createIdentifierReference(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
-				claimGroup.getProviderNumber()));
+		// set the provider number which is common among several claim types
+		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getClaimNonPaymentReasonCode().isPresent()) {
 			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,

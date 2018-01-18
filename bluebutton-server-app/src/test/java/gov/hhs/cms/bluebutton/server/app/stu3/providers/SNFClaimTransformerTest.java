@@ -84,8 +84,9 @@ public final class SNFClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CLAIM_QUERY, TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
 				String.valueOf(claim.getClaimQueryCode()));
 
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
-				claim.getProviderNumber(), eob.getProvider());
+		// test the common field provider number is set as expected in the EOB
+		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
+		
 		TransformerTestUtils.assertExtensionCodingEquals(eob,
 				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
 				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,

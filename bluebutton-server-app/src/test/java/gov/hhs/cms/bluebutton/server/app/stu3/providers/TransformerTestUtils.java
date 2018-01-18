@@ -763,4 +763,19 @@ final class TransformerTestUtils {
 		assertExtensionCodingEquals(item, TransformerConstants.CODING_NDC, TransformerConstants.CODING_NDC,
 				nationalDrugCode.get());
 	}
+	
+	/**
+	 * Tests the provider number field is set as expected in the EOB. This field is
+	 * common among these claim types: Inpatient, Outpatient, Hospice, HHA and SNF.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} this method will test against
+	 * @param providerNumber
+	 *            a {@link String} PRVDR_NUM: representing the expected provider
+	 *            number for the claim
+	 */
+	static void assertProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+		assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
+				providerNumber, eob.getProvider());
+	}
 }

@@ -80,6 +80,14 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
+		/*
+		 * TODO: DME does not have a provider number at the EOB level to map to but has
+		 * provider billing numbers at the claim line level. Need to do some research on
+		 * how this should be mapped, if it even can be, like the other claim types:
+		 * 
+		 * TransformerTestUtils.assertProviderNumber(eob, claimGroup.getProviderNumber());
+		 */
+		
 		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
 
 		// Test to ensure common group fields between Carrier and DME match

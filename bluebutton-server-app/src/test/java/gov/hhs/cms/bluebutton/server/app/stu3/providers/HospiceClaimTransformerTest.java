@@ -77,8 +77,8 @@ public final class HospiceClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
-				claim.getProviderNumber(), eob.getProvider());
+		// test the common field provider number is set as expected in the EOB
+		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob,
 				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,

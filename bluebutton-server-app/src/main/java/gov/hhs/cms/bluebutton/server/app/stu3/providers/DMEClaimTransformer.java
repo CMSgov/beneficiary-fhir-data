@@ -65,7 +65,15 @@ final class DMEClaimTransformer {
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_B));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
-
+		
+		/*
+		 * TODO: DME does not have a provider number at the EOB level to map to but has
+		 * provider billing numbers at the claim line level. Need to do some research on
+		 * how this should be mapped, if it even can be, like the other claim types:
+		 * 
+		 * TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
+		 */
+		
 		if (claimGroup.getClinicalTrialNumber().isPresent()) {
 			/*
 			 * FIXME this should be mapped as an extension valueIdentifier
