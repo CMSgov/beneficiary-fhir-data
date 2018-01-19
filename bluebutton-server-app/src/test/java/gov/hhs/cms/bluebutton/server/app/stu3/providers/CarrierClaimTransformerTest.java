@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
@@ -66,10 +67,9 @@ public final class CarrierClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE, "" + claim.getNearLineRecordIdCode());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
+		
 		Assert.assertEquals("active", eob.getStatus().toCode());
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
@@ -151,7 +151,14 @@ public final class CarrierClaimTransformerTest {
 				TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM, TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM,
 				claimLine1.getCliaLabNumber().get());
 
-		// Test to ensure common item fields between Carrier and DME match
+		// verify {@link
+		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.CARRIER,
+				Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL),
+				Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
+
+    // Test to ensure common item fields between Carrier and DME match
 		TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(eobItem0, eob, claimLine1.getServiceCount(),
 				claimLine1.getPlaceOfServiceCode(),
 				claimLine1.getFirstExpenseDate(),

@@ -58,12 +58,10 @@ final class InpatientClaimTransformer {
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
 
-		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claimGroup.getClaimTypeCode()));
-		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				String.valueOf(claimGroup.getNearLineRecordIdCode()));
-
+		// map eob type codes into FHIR
+		TransformerUtils.mapEobType(eob, ClaimType.INPATIENT, Optional.of(claimGroup.getNearLineRecordIdCode()), 
+				Optional.of(claimGroup.getClaimTypeCode()));
+		
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_A));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
@@ -76,6 +74,9 @@ final class InpatientClaimTransformer {
 		TransformerUtils.addExtensionCoding(eob.getBillablePeriod(), TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
 				TransformerConstants.EXTENSION_CODING_CLAIM_QUERY, String.valueOf(claimGroup.getClaimQueryCode()));
 
+		// set the provider number which is common among several claim types
+		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
+		
 		if (claimGroup.getClaimNonPaymentReasonCode().isPresent()) {
 			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
 					TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,

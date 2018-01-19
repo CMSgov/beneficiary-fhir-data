@@ -62,10 +62,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
  * Contains shared methods used to transform CCW JPA entities (e.g.
  * {@link Beneficiary}) into FHIR resources (e.g. {@link Patient}).
  */
-/**
- * @author bglover
- *
- */
 public final class TransformerUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
 
@@ -843,6 +839,69 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * maps a blue button claim type to a FHIR claim type
+	 * 
+	 * @param eobType
+	 * 		the {@link CodeableConcept} that will get remapped 
+	 * @param blueButtonClaimType
+	 * 		the blue button {@link ClaimType} we are mapping from 
+	 * @param ccwNearLineRecordIdCode
+	 * 		if present, the blue button near line id code {@link Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
+	 * @param ccwClaimTypeCode
+	 * 		if present, the blue button claim type code {@link Optional}&lt;{@link String}&gt; gets remapped to a nch claim type code
+	 */
+	static void mapEobType(ExplanationOfBenefit eob, ClaimType blueButtonClaimType,
+			Optional<Character> ccwNearLineRecordIdCode, Optional<String> ccwClaimTypeCode) {
+		
+		// map blue button claim type code into a nch claim type
+		if(ccwClaimTypeCode.isPresent() ) {
+			eob.getType().addCoding().setSystem(TransformerConstants.CODING_NCH_CLAIM_TYPE).setCode(
+					ccwClaimTypeCode.get());
+		}
+		
+		// This Coding MUST always be present as it's the only one we can definitely map for all 8 of our claim types.
+		eob.getType().addCoding().setSystem(TransformerConstants.CODING_CCW_CLAIM_TYPE).setCode(blueButtonClaimType.name());
+		
+		// Map a Coding for FHIR's ClaimType coding system, if we can.
+		switch(blueButtonClaimType) {
+		case CARRIER:
+		case OUTPATIENT:
+			// map these blue button claim types to PROFESSIONAL
+			eob.getType().addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE).setCode(
+					org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL.name());
+			break;
+			
+		case INPATIENT:
+		case HOSPICE:
+		case SNF:
+			// map these blue button claim types to INSTITUTIONAL
+			eob.getType().addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE).setCode(
+					org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL.name());
+			break;
+		case PDE:
+			// map these blue button claim types to PHARMACY
+			eob.getType().addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE).setCode(
+					org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.name());
+			break;
+			
+		case HHA:
+		case DME:
+			// FUTURE these blue button claim types currently have no equivalent CODING_FHIR_CLAIM_TYPE mapping
+			break;
+			
+		default:
+			// unknown claim type
+			throw new BadCodeMonkeyException();
+		}
+		
+		// map blue button near line record id to a ccw record id code
+		if(ccwNearLineRecordIdCode.isPresent()) {
+			eob.getType().addCoding().setSystem(TransformerConstants.CODING_CCW_RECORD_ID_CODE).setCode(
+					String.valueOf(ccwNearLineRecordIdCode.get()));
+		}
+  }
+
+	/**
 	 * Transforms the common group level data elements between the
 	 * {@link CarrierClaim} and {@link DMEClaim} claim types to FHIR. The method
 	 * parameter fields from {@link CarrierClaim} and {@link DMEClaim} are listed
@@ -1164,4 +1223,19 @@ public final class TransformerUtils {
 		return item;
 	}
 
+	/**
+	 * Sets the provider number field which is common among these claim types:
+	 * Inpatient, Outpatient, Hospice, HHA and SNF.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} this method will modify
+	 * @param providerNumber
+	 *            a {@link String} PRVDR_NUM: representing the provider number for
+	 *            the claim
+	 */
+	static void setProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+		eob.setProvider(TransformerUtils.createIdentifierReference(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
+				providerNumber));
+	}
 }
+

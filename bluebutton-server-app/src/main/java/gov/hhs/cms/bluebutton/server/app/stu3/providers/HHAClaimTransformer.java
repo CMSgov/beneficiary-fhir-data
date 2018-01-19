@@ -58,12 +58,10 @@ final class HHAClaimTransformer {
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
 
-		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claimGroup.getClaimTypeCode()));
-		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				String.valueOf(claimGroup.getNearLineRecordIdCode()));
-
+		// map eob type codes into FHIR
+		TransformerUtils.mapEobType(eob, ClaimType.HHA, Optional.of(claimGroup.getNearLineRecordIdCode()), 
+				Optional.of(claimGroup.getClaimTypeCode()));
+		
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
 		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 		eob.getInsurance()
@@ -73,8 +71,8 @@ final class HHAClaimTransformer {
 		TransformerUtils.setPeriodStart(eob.getBillablePeriod(), claimGroup.getDateFrom());
 		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
 
-		eob.setProvider(TransformerUtils.createIdentifierReference(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
-				claimGroup.getProviderNumber()));
+		// set the provider number which is common among several claim types
+		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getClaimNonPaymentReasonCode().isPresent()) {
 			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,

@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -65,8 +66,6 @@ public final class HospiceClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE, "" + claim.getNearLineRecordIdCode());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
 				claim.getClaimTypeCode(), eob.getType());
 		Assert.assertEquals(
@@ -77,8 +76,8 @@ public final class HospiceClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
-				claim.getProviderNumber(), eob.getProvider());
+		// test the common field provider number is set as expected in the EOB
+		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
 		TransformerTestUtils.assertExtensionCodingEquals(eob,
 				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
@@ -170,6 +169,12 @@ public final class HospiceClaimTransformerTest {
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
-
+		
+		// verify {@link
+		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.HOSPICE,
+				Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL),
+				Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
 	}
 }
