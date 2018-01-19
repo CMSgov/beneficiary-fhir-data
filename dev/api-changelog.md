@@ -12,10 +12,12 @@
            * carrier, outpatient: `professional`
            * inpatient, hospice, SNF: `institutional`
            * Part D: `pharmacy`
-           * HHA, DME: not mapped, as there are no equivalent FHIR [Claimtype]http://hl7.org/fhir/codesystem-claim-type.html() codes at the moment.
-    3. TODO: NCH claim type
+           * HHA, DME: not mapped, as there are no equivalent FHIR [Claimtype](http://hl7.org/fhir/codesystem-claim-type.html) codes at the moment.
+    3. `{ "system": "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt", "code": "<coded-value>" }`
         * Please note that this `Coding` had previously been mapped to an extension.
-    4. TODO: near line record ID
+        * This entry will not be present for all claim types. See the `NCH_CLM_TYPE_CD` variable in the [Medicare Fee-For-Service Claims codebook](https://www.ccwdata.org/documents/10280/19022436/codebook-ffs-claims.pdf) for details.
+    4. `{ "system": "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt", "code": "<coded-value>" }`
+        * This entry will not be present for all claim types. See the `NCH_NEAR_LINE_REC_IDENT_CD` variable in the [Medicare Fee-For-Service Claims codebook](https://www.ccwdata.org/documents/10280/19022436/codebook-ffs-claims.pdf) for details.
 
 ## CBBF-92 (Sprint 42, 2018-01)
 
