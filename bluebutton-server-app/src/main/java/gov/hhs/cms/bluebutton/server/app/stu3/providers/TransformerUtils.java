@@ -534,8 +534,6 @@ public final class TransformerUtils {
 		
 		// map blue button claim type code into a nch claim type
 		if(ccwClaimTypeCode.isPresent() ) {
-			eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-					ccwClaimTypeCode.get()));
 			eob.getType().addCoding().setSystem(TransformerConstants.CODING_NCH_CLAIM_TYPE).setCode(
 					ccwClaimTypeCode.get());
 		}
