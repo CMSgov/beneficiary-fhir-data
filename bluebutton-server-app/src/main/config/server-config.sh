@@ -178,7 +178,7 @@ batch
 # * https://kb.novaordis.com/index.php/Undertow_WildFly_Subsystem_Configuration_-_access-log
 # * https://stackoverflow.com/questions/34614874/wildfly-9-access-logging
 /subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=record-request-start-time,value=true)
-/subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l %u %t \\"%r\\" \\"?%q\\" %s %B %D", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
+/subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l %u %t \\"%r\\" \\"?%q\\" %s %B %D %{i,BlueButton-OriginalQueryId} %{i,BlueButton-OriginalQueryCounter} [%{i,BlueButton-OriginalQueryTimestamp}] %{i,BlueButton-DeveloperId} \\"%{i,BlueButton-Developer}\\" %{i,BlueButton-ApplicationId} \\"%{i,BlueButton-Application}\\" %{i,BlueButton-UserId} \\"%{i,BlueButton-User}\\" %{i,BlueButton-BeneficiaryId}", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
 
 # Commit the configuration transaction.
 run-batch
