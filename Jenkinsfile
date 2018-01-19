@@ -35,6 +35,7 @@ node {
 		fingerprint '**/target/*.jar'
 		fingerprint '**/target/*.x'
 		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
+		archiveArtifacts artifacts: '**/target/*-reports/*.txt', allowEmptyArchive: true
 	}
 }
 
