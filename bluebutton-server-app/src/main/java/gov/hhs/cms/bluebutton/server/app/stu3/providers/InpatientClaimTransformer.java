@@ -75,6 +75,9 @@ final class InpatientClaimTransformer {
 		TransformerUtils.addExtensionCoding(eob.getBillablePeriod(), TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
 				TransformerConstants.EXTENSION_CODING_CLAIM_QUERY, String.valueOf(claimGroup.getClaimQueryCode()));
 
+		// set the provider number which is common among several claim types
+		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
+		
 		if (claimGroup.getClaimNonPaymentReasonCode().isPresent()) {
 			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
 					TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,

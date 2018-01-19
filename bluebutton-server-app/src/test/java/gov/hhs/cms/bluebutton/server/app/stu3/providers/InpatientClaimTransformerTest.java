@@ -78,6 +78,9 @@ public final class InpatientClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
+		// test the common field provider number is set as expected in the EOB
+		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
+		
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getBillablePeriod(), TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
 				TransformerConstants.EXTENSION_CODING_CLAIM_QUERY, String.valueOf(claim.getClaimQueryCode()));
 

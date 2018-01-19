@@ -87,6 +87,9 @@ public final class OutpatientClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
 				claim.getClaimNonPaymentReasonCode().get());
 
+		// test the common field provider number is set as expected in the EOB
+		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
+		
 		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 
 		Assert.assertEquals(claim.getTotalChargeAmount(), eob.getTotalCost().getValue());

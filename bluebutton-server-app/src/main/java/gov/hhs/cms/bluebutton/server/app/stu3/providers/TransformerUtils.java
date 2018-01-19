@@ -919,5 +919,19 @@ public final class TransformerUtils {
 		return item;
 	}
 
+	/**
+	 * Sets the provider number field which is common among these claim types:
+	 * Inpatient, Outpatient, Hospice, HHA and SNF.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} this method will modify
+	 * @param providerNumber
+	 *            a {@link String} PRVDR_NUM: representing the provider number for
+	 *            the claim
+	 */
+	static void setProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+		eob.setProvider(TransformerUtils.createIdentifierReference(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
+				providerNumber));
+	}
 }
 
