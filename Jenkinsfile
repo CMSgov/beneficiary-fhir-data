@@ -34,6 +34,7 @@ node {
 		// deploys them to the local Maven repository.)
 		fingerprint '**/target/*.jar'
 		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
+		archiveArtifacts artifacts: '**/target/*-reports/*.txt', allowEmptyArchive: true
 	}
 }
 
