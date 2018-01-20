@@ -134,7 +134,15 @@ public final class RifLoaderIT {
 		AtomicInteger failureCount = new AtomicInteger(0);
 		AtomicInteger loadCount = new AtomicInteger(0);
 		for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
-			RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
+			RifFileRecords rifFileRecords;
+			try {
+				rifFileRecords = processor.produceRecords(rifFileEvent);
+			} catch (Throwable t) {
+				// FIXME remove this temp debug code
+				LOGGER.error("went kaboom!", t);
+				t.printStackTrace();
+				throw new IllegalStateException("went boom!", t);
+			}
 			loader.process(rifFileRecords, error -> {
 				failureCount.incrementAndGet();
 				LOGGER.warn("Record(s) failed to load.", error);
