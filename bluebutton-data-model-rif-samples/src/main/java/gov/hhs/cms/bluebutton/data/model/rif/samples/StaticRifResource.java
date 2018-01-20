@@ -334,7 +334,7 @@ public enum StaticRifResource {
 			outputStream = new FileOutputStream(localPath.toFile());
 			outputStream.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
 		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+			throw new UncheckedIOException("Unable to download URL: " + url, e);
 		} finally {
 			if (outputStream != null) {
 				try {
