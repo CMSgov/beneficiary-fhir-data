@@ -103,6 +103,9 @@
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<systemPropertyVariables>
+							<java.net.useSystemProxies>true</java.net.useSystemProxies>
+						</systemPropertyVariables>
 					</configuration>
 				</plugin>
 				<plugin>
