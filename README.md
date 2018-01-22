@@ -41,23 +41,23 @@ If it isn't already installed, install the `virtualenv` package. On Ubuntu, this
 
 Next, create a virtual environment for this project and install the project's dependencies into it:
 
-    $ cd bluebutton-sandbox.git
+    $ cd bluebutton-ansible-playbooks-data-sandbox.git
     $ virtualenv -p /usr/bin/python2.7 venv
     $ source venv/bin/activate
-    $ pip install -r requirements.txt
-    $ pip freeze > requirements.frozen.txt  # Memorialize the full list of version-resolved Python packages.
+    $ pip install --upgrade setuptools
+    $ pip install --requirement requirements.txt
 
 The `source` command above will need to be run every time you open a new terminal to work on this project.
 
-Be sure to update the `requirements.txt` file after `pip install`ing a new dependency for this project:
+Be sure to update the `requirements.frozen.txt` file after `pip install`ing a new dependency for this project:
 
-    $ pip freeze > requirements.txt
+    $ pip freeze > requirements.frozen.txt
 
 ### Ansible Roles
 
 Run the following command to download and install the roles required by this project into `~/.ansible/roles/`:
 
-    $ ansible-galaxy install -r install_roles.yml
+    $ ansible-galaxy install --role-file=install_roles.yml --force
 
 ### AWS Credentials
 
@@ -72,19 +72,30 @@ Ensure that the EC2 key to be used is loaded into SSH Agent:
 
     $ ssh-add foo.pem
 
-## Running the Playbooks
+### User Identity
+
+These plays need to know the identity of the user/system running them. Copy the identity template:
+
+    $ cp group_vars/all/management_user.yml.template group_vars/all/management_user.yml
+
+And then edit the resulting `group_vars/all/management_user.yml` file to fill in the required fields.
+
+### Running the Playbooks
 
 The playbooks can be run, as follows:
 
-    $ ansible-playbook sandbox.yml --extra-vars "TODO"
+    $ ansible-playbook-wrapper sandbox.yml --extra-vars "ec2_key_name=<key-name> maven_repo=<local-repo-path> bluebutton_server_version=<version> wildfly_version=<version> backend_etl_version=<version>"
 
 This project has an unfortunately large amount of variables that must be specified for each run. Each of the `extra-vars` should be set, as follows:
 
 * `deploy_id_custom`: Optional. An ID for the deployment to be run, which will be used to tag AMIs, etc. in AWS. By default, a UTC timestamp is used.
 * `ec2_key_name`: The name of the SSH key (as it's labeled in EC2) that all newly-created EC2 instances should be associated with.
 * `maven_repo`: Path to the local Maven repository directory, from which the deployment resources will be pulled.
-* `bluebutton_server_version`: The version of the `gov.hhs.cms.bluebutton.fhir:bluebutton-server-app:war` artifact (and related artifacts) to deploy as the Blue Button backend FHIR server.
+* `bluebutton_server_version`: The version of the Blue Button Data Server artifact (`gov.hhs.cms.bluebutton.fhir:bluebutton-server-app:war` artifact (and related artifacts) to deploy as the Blue Button backend FHIR server.
 * `wildfly_version`: The version of the `org.wildfly:wildfly-dist:tar.gz` artifact to deploy and use to host the Blue Button backend FHIR server.
+* `backend_etl_version`: The version of the Blue Button Data Pipeline artifact (`gov.hhs.cms.bluebutton.data.pipeline:bluebutton-data-pipeline-app:capsule-fat:jar`) to deploy.
+
+## Interacting with the Deployed Environment
 
 ### Querying the Data Server
 
@@ -92,17 +103,9 @@ Ad-hoc queries can be run against the Blue Button backend Data Server, as follow
 
     $ curl --silent --insecure --cert-type pem --cert files/client-test-keypair.pem "https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3/ExplanationOfBenefit?patient=3960&_format=application%2Fjson%2Bfhir"
 
-### Teardown
+### Ansible Inventory
 
-**WARNING!** This should only be used in development or test environments. This command will terminate **all** EC2 and RDS instances in AWS that match the specified `Environment` tag (not just those specified in `site.yml`; it will terminate everything in the account that matches):
-
-    $ ansible-playbook teardown.yml --extra-vars "env=test"
-
-## Running Ad-Hoc Commands
-
-Once the AWS resources have been provisioned, ad-hoc commands can be run against them, as follows:
-
-    $ ansible all -u ubuntu -m shell -a 'echo $TERM'
+Unlike most Ansible playbooks, this project does not use either a static inventory file or a scripted dynamic inventory. Instead, the inventory is generated at runtime, by the plays themselves.
 
 ## License
 
