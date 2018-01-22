@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,30 +81,15 @@ public final class HHAClaimTransformerTest {
 		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER, claim.getProviderNumber(),
 				eob.getProvider());
 
-		TransformerTestUtils.assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
-				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON, claim.getClaimNonPaymentReasonCode().get());
 		TransformerTestUtils.assertEquivalent(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
-		Assert.assertEquals(claim.getTotalChargeAmount(), eob.getTotalCost().getValue());
-		
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
-				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
-				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
-				String.valueOf(claim.getClaimServiceClassificationTypeCode()));
-		
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
-				claim.getPrimaryPayerPaidAmount(), eob.getBenefitBalanceFirstRep().getFinancial());
 
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, claim.getOrganizationNpi().get(),
-				eob.getOrganization());
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, claim.getOrganizationNpi().get(),
-				eob.getFacility());
-
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getFacility(), TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
-				TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE, String.valueOf(claim.getClaimFacilityTypeCode()));
-
-		TransformerTestUtils.assertCareTeamEquals(claim.getAttendingPhysicianNpi().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+		// Test to ensure common group fields between Inpatient, Outpatient HHA, Hospice
+		// and SNF match
+		TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(eob, claim.getOrganizationNpi(),
+				claim.getClaimFacilityTypeCode(), claim.getClaimFrequencyCode(), claim.getClaimNonPaymentReasonCode(),
+				claim.getPatientDischargeStatusCode(), claim.getClaimServiceClassificationTypeCode(),
+				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
+				claim.getPrimaryPayerPaidAmount());
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 
@@ -143,18 +127,16 @@ public final class HHAClaimTransformerTest {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT,
 				claimLine1.getPaymentAmount(),
 				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT,
-				claimLine1.getTotalChargeAmount(),
-				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_NONCOVERED_CHARGE,
-				claimLine1.getNonCoveredChargeAmount(), eobItem0.getAdjudication());
 		
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(), TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
 				TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
 				String.valueOf(claimLine1.getDeductibleCoinsuranceCd().get()));
-		
-		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
 
+		// Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
+		// and SNF match
+		TransformerTestUtils.assertEobCommonItemRevenueEquals(eobItem0, eob, claimLine1.getRevenueCenterCode(),
+				claimLine1.getRateAmount(), claimLine1.getTotalChargeAmount(), claimLine1.getNonCoveredChargeAmount(),
+				claimLine1.getUnitCount(), claimLine1.getNationalDrugCodeQuantity(),
+				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI());
 	}
 }

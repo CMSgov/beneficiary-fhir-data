@@ -1,11 +1,5 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
-import java.math.BigDecimal;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -13,15 +7,12 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Money;
-import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
-import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
  * Transforms CCW {@link OutpatientClaim} instances into FHIR
@@ -70,48 +61,17 @@ final class OutpatientClaimTransformer {
 		TransformerUtils.setPeriodStart(eob.getBillablePeriod(), claimGroup.getDateFrom());
 		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
 
-		TransformerUtils.addExtensionCoding(eob.getBillablePeriod(), TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
-				TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
-				String.valueOf(claimGroup.getClaimQueryCode()));
-
 		eob.setProvider(TransformerUtils.createIdentifierReference(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
 				claimGroup.getProviderNumber()));
 
-		if (claimGroup.getClaimNonPaymentReasonCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
-					TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
-					claimGroup.getClaimNonPaymentReasonCode().get());
-		}
 		eob.getPayment()
 				.setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 						.setValue(claimGroup.getPaymentAmount()));
-		eob.setTotalCost((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getTotalChargeAmount()));
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
 				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
 						BenefitCategory.MEDICAL.toCode()));
 		eob.getBenefitBalance().add(benefitBalances);
-
-		if (claimGroup.getPrimaryPayerPaidAmount() != null) {
-			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
-			primaryPayerPaidAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getPrimaryPayerPaidAmount()));
-			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
-		}
-
-		if (claimGroup.getBloodDeductibleLiabilityAmount() != null) {
-			BenefitComponent bloodDeductibleLiabilityAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY));
-			bloodDeductibleLiabilityAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getBloodDeductibleLiabilityAmount()));
-			benefitBalances.getFinancial().add(bloodDeductibleLiabilityAmount);
-		}
 
 		if (claimGroup.getProfessionalComponentCharge() != null) {
 			BenefitComponent benefitProfessionComponentAmt = new BenefitComponent(
@@ -163,59 +123,115 @@ final class OutpatientClaimTransformer {
 			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
 		}
 
-		if (claimGroup.getOrganizationNpi().isPresent()) {
-			eob.setOrganization(TransformerUtils.createIdentifierReference(TransformerConstants.CODING_NPI_US,
-					claimGroup.getOrganizationNpi().get()));
-			eob.setFacility(TransformerUtils.createIdentifierReference(TransformerConstants.CODING_NPI_US,
-					claimGroup.getOrganizationNpi().get()));
-			TransformerUtils.addExtensionCoding(eob.getFacility(),
-					TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
-					TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
-					String.valueOf(claimGroup.getClaimFacilityTypeCode()));
-		}
+		// Common group level fields between Inpatient, Outpatient and SNF
+		TransformerUtils.mapEobCommonGroupInpOutSNF(eob, claimGroup.getBloodDeductibleLiabilityAmount(),
+				claimGroup.getOperatingPhysicianNpi(), claimGroup.getOtherPhysicianNpi(),
+				claimGroup.getClaimQueryCode(), claimGroup.getMcoPaidSw());
 
-		TransformerUtils.addExtensionCoding(eob.getType(),
-				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
-				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
-				String.valueOf(claimGroup.getClaimServiceClassificationTypeCode()));
+		// Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
+		TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(eob, claimGroup.getOrganizationNpi(),
+				claimGroup.getClaimFacilityTypeCode(), claimGroup.getClaimFrequencyCode(),
+				claimGroup.getClaimNonPaymentReasonCode(), claimGroup.getPatientDischargeStatusCode().get(),
+				claimGroup.getClaimServiceClassificationTypeCode(), claimGroup.getClaimPrimaryPayerCode(),
+				claimGroup.getAttendingPhysicianNpi(), claimGroup.getTotalChargeAmount(),
+				claimGroup.getPrimaryPayerPaidAmount());
 
-		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_FREQUENCY,
-						String.valueOf(claimGroup.getClaimFrequencyCode())));
-
-		if (claimGroup.getClaimPrimaryPayerCode().isPresent()) {
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
-							String.valueOf(claimGroup.getClaimPrimaryPayerCode().get())));
-		}
-
-		if (claimGroup.getAttendingPhysicianNpi().isPresent()) {
-			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
-					claimGroup.getAttendingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY.toCode());
-		}
-
-		if (claimGroup.getOperatingPhysicianNpi().isPresent()) {
-			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
-					claimGroup.getOperatingPhysicianNpi().get(),
-					ClaimCareteamrole.ASSIST.toCode());
-		}
-
-		if (claimGroup.getOtherPhysicianNpi().isPresent()) {
-			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
-					claimGroup.getOtherPhysicianNpi().get(),
-					ClaimCareteamrole.OTHER.toCode());
-		}
-
-		if (claimGroup.getMcoPaidSw().isPresent()) {
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_MCO_PAID,
-							String.valueOf(claimGroup.getMcoPaidSw().get())));
-		}
-
-		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
+		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses1Thru12(claimGroup.getDiagnosisPrincipalCode(),
+				claimGroup.getDiagnosisPrincipalCodeVersion(), claimGroup.getDiagnosis1Code(),
+				claimGroup.getDiagnosis1CodeVersion(), claimGroup.getDiagnosis2Code(),
+				claimGroup.getDiagnosis2CodeVersion(), claimGroup.getDiagnosis3Code(),
+				claimGroup.getDiagnosis3CodeVersion(), claimGroup.getDiagnosis4Code(),
+				claimGroup.getDiagnosis4CodeVersion(), claimGroup.getDiagnosis5Code(),
+				claimGroup.getDiagnosis5CodeVersion(), claimGroup.getDiagnosis6Code(),
+				claimGroup.getDiagnosis6CodeVersion(), claimGroup.getDiagnosis7Code(),
+				claimGroup.getDiagnosis7CodeVersion(), claimGroup.getDiagnosis8Code(),
+				claimGroup.getDiagnosis8CodeVersion(), claimGroup.getDiagnosis9Code(),
+				claimGroup.getDiagnosis9CodeVersion(), claimGroup.getDiagnosis10Code(),
+				claimGroup.getDiagnosis10CodeVersion(), claimGroup.getDiagnosis11Code(),
+				claimGroup.getDiagnosis11CodeVersion(), claimGroup.getDiagnosis12Code(),
+				claimGroup.getDiagnosis12CodeVersion()))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
-		for (CCWProcedure procedure : extractCCWProcedures(claimGroup))
+		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses13Thru25(claimGroup.getDiagnosis13Code(),
+				claimGroup.getDiagnosis13CodeVersion(), claimGroup.getDiagnosis14Code(),
+				claimGroup.getDiagnosis14CodeVersion(), claimGroup.getDiagnosis15Code(),
+				claimGroup.getDiagnosis15CodeVersion(), claimGroup.getDiagnosis16Code(),
+				claimGroup.getDiagnosis16CodeVersion(), claimGroup.getDiagnosis17Code(),
+				claimGroup.getDiagnosis17CodeVersion(), claimGroup.getDiagnosis18Code(),
+				claimGroup.getDiagnosis18CodeVersion(), claimGroup.getDiagnosis19Code(),
+				claimGroup.getDiagnosis19CodeVersion(), claimGroup.getDiagnosis20Code(),
+				claimGroup.getDiagnosis20CodeVersion(), claimGroup.getDiagnosis21Code(),
+				claimGroup.getDiagnosis21CodeVersion(), claimGroup.getDiagnosis22Code(),
+				claimGroup.getDiagnosis22CodeVersion(), claimGroup.getDiagnosis23Code(),
+				claimGroup.getDiagnosis23CodeVersion(), claimGroup.getDiagnosis24Code(),
+				claimGroup.getDiagnosis24CodeVersion(), claimGroup.getDiagnosis25Code(),
+				claimGroup.getDiagnosis25CodeVersion()))
+			TransformerUtils.addDiagnosisCode(eob, diagnosis);
+
+		for (Diagnosis diagnosis : TransformerUtils.extractExternalDiagnoses1Thru12(
+				claimGroup.getDiagnosisExternalFirstCode(), claimGroup.getDiagnosisExternalFirstCodeVersion(),
+				claimGroup.getDiagnosisExternal1Code(), claimGroup.getDiagnosisExternal1CodeVersion(),
+				claimGroup.getDiagnosisExternal2Code(), claimGroup.getDiagnosisExternal2CodeVersion(),
+				claimGroup.getDiagnosisExternal3Code(), claimGroup.getDiagnosisExternal3CodeVersion(),
+				claimGroup.getDiagnosisExternal4Code(), claimGroup.getDiagnosisExternal4CodeVersion(),
+				claimGroup.getDiagnosisExternal5Code(), claimGroup.getDiagnosisExternal5CodeVersion(),
+				claimGroup.getDiagnosisExternal6Code(), claimGroup.getDiagnosisExternal6CodeVersion(),
+				claimGroup.getDiagnosisExternal7Code(), claimGroup.getDiagnosisExternal7CodeVersion(),
+				claimGroup.getDiagnosisExternal8Code(), claimGroup.getDiagnosisExternal8CodeVersion(),
+				claimGroup.getDiagnosisExternal9Code(), claimGroup.getDiagnosisExternal9CodeVersion(),
+				claimGroup.getDiagnosisExternal10Code(), claimGroup.getDiagnosisExternal10CodeVersion(),
+				claimGroup.getDiagnosisExternal11Code(), claimGroup.getDiagnosisExternal11CodeVersion(),
+				claimGroup.getDiagnosisExternal12Code(), claimGroup.getDiagnosisExternal12CodeVersion()))
+			TransformerUtils.addDiagnosisCode(eob, diagnosis);
+
+		if (claimGroup.getDiagnosisAdmission1Code().isPresent())
+			TransformerUtils.addDiagnosisCode(eob, Diagnosis
+					.from(claimGroup.getDiagnosisAdmission1Code(), claimGroup.getDiagnosisAdmission1CodeVersion())
+					.get());
+		if (claimGroup.getDiagnosisAdmission2Code().isPresent())
+			TransformerUtils.addDiagnosisCode(eob, Diagnosis
+					.from(claimGroup.getDiagnosisAdmission2Code(), claimGroup.getDiagnosisAdmission2CodeVersion())
+					.get());
+
+		if (claimGroup.getDiagnosisAdmission3Code().isPresent())
+			TransformerUtils.addDiagnosisCode(eob, Diagnosis
+					.from(claimGroup.getDiagnosisAdmission2Code(), claimGroup.getDiagnosisAdmission3CodeVersion())
+					.get());
+
+		for (CCWProcedure procedure : TransformerUtils.extractCCWProcedures(claimGroup.getProcedure1Code(),
+				claimGroup.getProcedure1CodeVersion(), claimGroup.getProcedure1Date(), claimGroup.getProcedure2Code(),
+				claimGroup.getProcedure2CodeVersion(), claimGroup.getProcedure2Date(), claimGroup.getProcedure3Code(),
+				claimGroup.getProcedure3CodeVersion(), claimGroup.getProcedure3Date(), claimGroup.getProcedure4Code(),
+				claimGroup.getProcedure4CodeVersion(), claimGroup.getProcedure4Date(), claimGroup.getProcedure5Code(),
+				claimGroup.getProcedure5CodeVersion(), claimGroup.getProcedure5Date(), claimGroup.getProcedure6Code(),
+				claimGroup.getProcedure6CodeVersion(), claimGroup.getProcedure6Date(), claimGroup.getProcedure7Code(),
+				claimGroup.getProcedure7CodeVersion(), claimGroup.getProcedure7Date(), claimGroup.getProcedure8Code(),
+				claimGroup.getProcedure8CodeVersion(), claimGroup.getProcedure8Date(), claimGroup.getProcedure9Code(),
+				claimGroup.getProcedure9CodeVersion(), claimGroup.getProcedure9Date(), claimGroup.getProcedure10Code(),
+				claimGroup.getProcedure10CodeVersion(), claimGroup.getProcedure10Date(),
+				claimGroup.getProcedure11Code(), claimGroup.getProcedure11CodeVersion(),
+				claimGroup.getProcedure11Date(), claimGroup.getProcedure12Code(),
+				claimGroup.getProcedure12CodeVersion(), claimGroup.getProcedure12Date(),
+				claimGroup.getProcedure13Code(), claimGroup.getProcedure13CodeVersion(),
+				claimGroup.getProcedure13Date(), claimGroup.getProcedure14Code(),
+				claimGroup.getProcedure14CodeVersion(), claimGroup.getProcedure14Date(),
+				claimGroup.getProcedure15Code(), claimGroup.getProcedure15CodeVersion(),
+				claimGroup.getProcedure15Date(), claimGroup.getProcedure16Code(),
+				claimGroup.getProcedure16CodeVersion(), claimGroup.getProcedure16Date(),
+				claimGroup.getProcedure17Code(), claimGroup.getProcedure17CodeVersion(),
+				claimGroup.getProcedure17Date(), claimGroup.getProcedure18Code(),
+				claimGroup.getProcedure18CodeVersion(), claimGroup.getProcedure18Date(),
+				claimGroup.getProcedure19Code(), claimGroup.getProcedure19CodeVersion(),
+				claimGroup.getProcedure19Date(), claimGroup.getProcedure20Code(),
+				claimGroup.getProcedure20CodeVersion(), claimGroup.getProcedure20Date(),
+				claimGroup.getProcedure21Code(), claimGroup.getProcedure21CodeVersion(),
+				claimGroup.getProcedure21Date(), claimGroup.getProcedure22Code(),
+				claimGroup.getProcedure22CodeVersion(), claimGroup.getProcedure22Date(),
+				claimGroup.getProcedure23Code(), claimGroup.getProcedure23CodeVersion(),
+				claimGroup.getProcedure23Date(), claimGroup.getProcedure24Code(),
+				claimGroup.getProcedure24CodeVersion(), claimGroup.getProcedure24Date(),
+				claimGroup.getProcedure25Code(), claimGroup.getProcedure25CodeVersion(),
+				claimGroup.getProcedure25Date()))
 			TransformerUtils.addProcedureCode(eob, procedure);
 
 		for (OutpatientClaimLine claimLine : claimGroup.getLines()) {
@@ -225,10 +241,6 @@ final class OutpatientClaimTransformer {
 			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			item.setRevenue(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_REVENUE_CENTER,
-							claimLine.getRevenueCenterCode()));
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
@@ -277,14 +289,6 @@ final class OutpatientClaimTransformer {
 								TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
 								claimLine.getRevCntr4thAnsiCd().get()));
 			}
-
-			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getRateAmount());
 
 			if (claimLine.getHcpcsCode().isPresent()) {
 				item.addModifier(
@@ -382,206 +386,14 @@ final class OutpatientClaimTransformer {
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPaymentAmount());
 
-			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getTotalChargeAmount());
-
-			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_NONCOVERED_CHARGE))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getNonCoveredChargeAmount());
-
-			/*
-			 * Set item quantity to Unit Count first if > 0; NDC quantity next
-			 * if present; otherwise set to 0
-			 */
-			SimpleQuantity qty = new SimpleQuantity();
-			if (!claimLine.getUnitCount().equals(new BigDecimal(0))) {
-				qty.setValue(claimLine.getUnitCount());
-			} else if (claimLine.getNationalDrugCodeQuantity().isPresent()) {
-				qty.setValue(claimLine.getNationalDrugCodeQuantity().get());
-			} else {
-				qty.setValue(0);
-			}
-			item.setQuantity(qty);
-
-			if (claimLine.getNationalDrugCodeQualifierCode().isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_NDC_UNIT,
-						claimLine.getNationalDrugCodeQualifierCode().get()));
-			}
-
-			if (claimLine.getRevenueCenterRenderingPhysicianNPI().isPresent()) {
-				TransformerUtils.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_NPI_US,
-						claimLine.getRevenueCenterRenderingPhysicianNPI().get(),
-						ClaimCareteamrole.PRIMARY.toCode());
-			}
+			// Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
+			TransformerUtils.mapEobCommonItemRevenue(item, eob, claimLine.getRevenueCenterCode(),
+					claimLine.getRateAmount(),
+					claimLine.getTotalChargeAmount(), claimLine.getNonCoveredChargeAmount(), claimLine.getUnitCount(),
+					claimLine.getNationalDrugCodeQuantity(), claimLine.getNationalDrugCodeQualifierCode(),
+					claimLine.getRevenueCenterRenderingPhysicianNPI());
 		}
 		return eob;
-	}
-
-	/**
-	 * @param claim
-	 *            the {@link OutpatientClaim} to extract the {@link Diagnosis}es
-	 *            from
-	 * @return the {@link Diagnosis}es that can be extracted from the specified
-	 *         {@link OutpatientClaim}
-	 */
-	private static List<Diagnosis> extractDiagnoses(OutpatientClaim claim) {
-		List<Diagnosis> diagnoses = new LinkedList<>();
-
-		/*
-		 * Seems silly, but allows the block below to be simple one-liners,
-		 * rather than requiring if-blocks.
-		 */
-		Consumer<Optional<Diagnosis>> diagnosisAdder = d -> {
-			if (d.isPresent())
-				diagnoses.add(d.get());
-		};
-
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisPrincipalCode(),
-				claim.getDiagnosisPrincipalCodeVersion(), DiagnosisLabel.PRINCIPAL));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis1Code(), claim.getDiagnosis1CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis2Code(), claim.getDiagnosis2CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis3Code(), claim.getDiagnosis3CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis4Code(), claim.getDiagnosis4CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis5Code(), claim.getDiagnosis5CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis6Code(), claim.getDiagnosis6CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis7Code(), claim.getDiagnosis7CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis8Code(), claim.getDiagnosis8CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis9Code(), claim.getDiagnosis9CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis10Code(), claim.getDiagnosis10CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis11Code(), claim.getDiagnosis11CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis12Code(), claim.getDiagnosis12CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis13Code(), claim.getDiagnosis13CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis14Code(), claim.getDiagnosis14CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis15Code(), claim.getDiagnosis15CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis16Code(), claim.getDiagnosis16CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis17Code(), claim.getDiagnosis17CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis18Code(), claim.getDiagnosis18CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis19Code(), claim.getDiagnosis19CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis20Code(), claim.getDiagnosis20CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis21Code(), claim.getDiagnosis21CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis22Code(), claim.getDiagnosis22CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis23Code(), claim.getDiagnosis23CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis24Code(), claim.getDiagnosis24CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis25Code(), claim.getDiagnosis25CodeVersion()));
-
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisExternalFirstCode(),
-				claim.getDiagnosisExternalFirstCodeVersion(), DiagnosisLabel.FIRSTEXTERNAL));
-
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal1Code(), claim.getDiagnosisExternal1CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal2Code(), claim.getDiagnosisExternal2CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal3Code(), claim.getDiagnosisExternal3CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal4Code(), claim.getDiagnosisExternal4CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal5Code(), claim.getDiagnosisExternal5CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal6Code(), claim.getDiagnosisExternal6CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal7Code(), claim.getDiagnosisExternal7CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal8Code(), claim.getDiagnosisExternal8CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal9Code(), claim.getDiagnosisExternal9CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal10Code(), claim.getDiagnosisExternal10CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal11Code(), claim.getDiagnosisExternal11CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisExternal12Code(), claim.getDiagnosisExternal12CodeVersion()));
-
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisAdmission1Code(), claim.getDiagnosisAdmission1CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisAdmission2Code(), claim.getDiagnosisAdmission2CodeVersion()));
-		diagnosisAdder
-				.accept(Diagnosis.from(claim.getDiagnosisAdmission3Code(), claim.getDiagnosisAdmission3CodeVersion()));
-
-		return diagnoses;
-	}
-
-	/**
-	 * @param claim
-	 *            the {@link OutpatientClaim} to extract the
-	 *            {@link CCWProcedure}es from
-	 * @return the {@link CCWProcedure}es that can be extracted from the
-	 *         specified {@link OutpatientClaim}
-	 */
-	private static List<CCWProcedure> extractCCWProcedures(OutpatientClaim claim) {
-		List<CCWProcedure> ccwProcedures = new LinkedList<>();
-
-		/*
-		 * Seems silly, but allows the block below to be simple one-liners,
-		 * rather than requiring if-blocks.
-		 */
-		Consumer<Optional<CCWProcedure>> ccwProcedureAdder = p -> {
-			if (p.isPresent())
-				ccwProcedures.add(p.get());
-		};
-
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
-				claim.getProcedure1Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure2Code(), claim.getProcedure2CodeVersion(),
-				claim.getProcedure2Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure3Code(), claim.getProcedure3CodeVersion(),
-				claim.getProcedure3Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure4Code(), claim.getProcedure4CodeVersion(),
-				claim.getProcedure4Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure5Code(), claim.getProcedure5CodeVersion(),
-				claim.getProcedure5Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure6Code(), claim.getProcedure6CodeVersion(),
-				claim.getProcedure6Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure7Code(), claim.getProcedure7CodeVersion(),
-				claim.getProcedure7Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure8Code(), claim.getProcedure8CodeVersion(),
-				claim.getProcedure8Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure9Code(), claim.getProcedure9CodeVersion(),
-				claim.getProcedure9Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure10Code(), claim.getProcedure10CodeVersion(),
-				claim.getProcedure10Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure11Code(), claim.getProcedure11CodeVersion(),
-				claim.getProcedure11Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure12Code(), claim.getProcedure12CodeVersion(),
-				claim.getProcedure12Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure13Code(), claim.getProcedure13CodeVersion(),
-				claim.getProcedure13Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure14Code(), claim.getProcedure14CodeVersion(),
-				claim.getProcedure14Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure15Code(), claim.getProcedure15CodeVersion(),
-				claim.getProcedure15Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure16Code(), claim.getProcedure16CodeVersion(),
-				claim.getProcedure16Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure17Code(), claim.getProcedure17CodeVersion(),
-				claim.getProcedure17Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure18Code(), claim.getProcedure18CodeVersion(),
-				claim.getProcedure18Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure19Code(), claim.getProcedure19CodeVersion(),
-				claim.getProcedure19Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure20Code(), claim.getProcedure20CodeVersion(),
-				claim.getProcedure20Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure21Code(), claim.getProcedure21CodeVersion(),
-				claim.getProcedure21Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure22Code(), claim.getProcedure22CodeVersion(),
-				claim.getProcedure22Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure23Code(), claim.getProcedure23CodeVersion(),
-				claim.getProcedure23Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure24Code(), claim.getProcedure24CodeVersion(),
-				claim.getProcedure24Date()));
-		ccwProcedureAdder.accept(CCWProcedure.from(claim.getProcedure25Code(), claim.getProcedure25CodeVersion(),
-				claim.getProcedure25Date()));
-
-		return ccwProcedures;
 	}
 
 }
