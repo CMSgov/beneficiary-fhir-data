@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
@@ -64,11 +65,6 @@ public final class HHAClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE, TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				"" + claim.getNearLineRecordIdCode());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE, claim.getClaimTypeCode(),
-				eob.getType());
 
 		Assert.assertEquals(
 				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_B).getReference(),
@@ -78,8 +74,8 @@ public final class HHAClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
-		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER, claim.getProviderNumber(),
-				eob.getProvider());
+		// test the common field provider number is set as expected in the EOB
+		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
 		TransformerTestUtils.assertEquivalent(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 
@@ -138,5 +134,15 @@ public final class HHAClaimTransformerTest {
 				claimLine1.getRateAmount(), claimLine1.getTotalChargeAmount(), claimLine1.getNonCoveredChargeAmount(),
 				claimLine1.getUnitCount(), claimLine1.getNationalDrugCodeQuantity(),
 				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI());
+
+		// verify {@link
+		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.HHA,
+				// FUTURE there currently is not an equivalent CODING_FHIR_CLAIM_TYPE mapping
+				// for this claim type. If added then the Optional empty parameter below should
+				// be updated to match expected result.
+				Optional.empty(), Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
 	}
 }
+

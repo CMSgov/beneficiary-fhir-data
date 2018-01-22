@@ -447,6 +447,41 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * @param eobType
+	 *            the eobType {@link CodeableConcept} we are testing against for
+	 *            expected values
+	 * @param blueButtonClaimType
+	 *            expected blue button {@link ClaimType} value
+	 * @param fhirClaimType
+	 *            optional expected fhir
+	 *            {@link org.hl7.fhir.dstu3.model.codesystems.ClaimType} value
+	 * @param ccwNearLineRecordIdCode
+	 *            optional expected ccw near line record id code
+	 *            {@link Optional}&lt;{@link Character}&gt;
+	 * @param ccwClaimTypeCode
+	 *            optional expected ccw claim type code
+	 *            {@link Optional}&lt;{@link String}&gt;
+	 */
+	static void assertMapEobType(CodeableConcept eobType, ClaimType blueButtonClaimType,
+			Optional<org.hl7.fhir.dstu3.model.codesystems.ClaimType> fhirClaimType,
+			Optional<Character> ccwNearLineRecordIdCode, Optional<String> ccwClaimTypeCode) {
+		assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE, blueButtonClaimType.name(), eobType);
+
+		if (fhirClaimType.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE, fhirClaimType.get().name(), eobType);
+		}
+
+		if (ccwNearLineRecordIdCode.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+					String.valueOf(ccwNearLineRecordIdCode.get()), eobType);
+		}
+
+		if (ccwClaimTypeCode.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE, ccwClaimTypeCode.get(), eobType);
+		}
+	}
+	
+	/**
 	 * @param expectedIdentifierSystem
 	 *            the expected {@link Identifier#getSystem()} to match
 	 * @param expectedIdentifierValue
@@ -949,4 +984,18 @@ final class TransformerTestUtils {
 
 	}
 
+	/**
+	 * Tests the provider number field is set as expected in the EOB. This field is
+	 * common among these claim types: Inpatient, Outpatient, Hospice, HHA and SNF.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} this method will test against
+	 * @param providerNumber
+	 *            a {@link String} PRVDR_NUM: representing the expected provider
+	 *            number for the claim
+	 */
+	static void assertProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+		assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
+				providerNumber, eob.getProvider());
+	}
 }

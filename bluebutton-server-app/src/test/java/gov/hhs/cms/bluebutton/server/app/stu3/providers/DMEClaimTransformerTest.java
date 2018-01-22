@@ -67,11 +67,6 @@ public final class DMEClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE, TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				"" + claim.getNearLineRecordIdCode());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claim.getClaimTypeCode(), eob.getType());
 		Assert.assertEquals(
 				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_B).getReference(),
 				eob.getInsurance().getCoverage().getReference());
@@ -80,6 +75,14 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
 
+		/*
+		 * TODO: DME does not have a provider number at the EOB level to map to but has
+		 * provider billing numbers at the claim line level. Need to do some research on
+		 * how this should be mapped, if it even can be, like the other claim types:
+		 * 
+		 * TransformerTestUtils.assertProviderNumber(eob, claimGroup.getProviderNumber());
+		 */
+		
 		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
 
 		// Test to ensure common group fields between Carrier and DME match
@@ -156,6 +159,18 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_MTUS_COUNT,
 				TransformerConstants.EXTENSION_MTUS_COUNT, String.valueOf(claimLine1.getMtusCount()));
 
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_NDC,
+				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
+		
+		// verify {@link
+		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
+		// method worked as expected for this claim type
+		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.DME,
+				// FUTURE there currently is not an equivalent CODING_FHIR_CLAIM_TYPE mapping
+				// for this claim type. If added then the Optional empty parameter below should
+				// be updated to match expected result.
+				Optional.empty(), Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
+		
 		// Test to ensure common item fields between Carrier and DME match
 		TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(eobItem0, eob, claimLine1.getServiceCount(),
 				claimLine1.getPlaceOfServiceCode(),
@@ -170,6 +185,5 @@ public final class DMEClaimTransformerTest {
 				claimLine1.getDiagnosisCodeVersion(), 
 				claimLine1.getHctHgbTestTypeCode(), claimLine1.getHctHgbTestResult(),
 				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode());
-
 	}
 }

@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.DateType;
@@ -53,12 +54,10 @@ final class SNFClaimTransformer {
 		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
 				.setValue(claimGroup.getClaimGroupId().toPlainString());
 
-		eob.setType(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claimGroup.getClaimTypeCode()));
-		TransformerUtils.addExtensionCoding(eob.getType(), TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-				String.valueOf(claimGroup.getNearLineRecordIdCode()));
-
+		// map eob type codes into FHIR
+		TransformerUtils.mapEobType(eob, ClaimType.SNF, Optional.of(claimGroup.getNearLineRecordIdCode()), 
+				Optional.of(claimGroup.getClaimTypeCode()));
+		
 		eob.getInsurance()
 				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_A));
 		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
@@ -68,8 +67,8 @@ final class SNFClaimTransformer {
 		TransformerUtils.setPeriodStart(eob.getBillablePeriod(), claimGroup.getDateFrom());
 		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
 
-		eob.setProvider(TransformerUtils.createIdentifierReference(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
-				claimGroup.getProviderNumber()));
+		// set the provider number which is common among several claim types
+		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		eob.getPayment()
 				.setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)

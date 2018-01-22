@@ -1,6 +1,25 @@
 # API Changelog
 
-## CBBF-92
+## CBBD-385 (Sprint 43, 2018-01)
+
+* Standardized the [ExplanationOfBenefit.type](http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.type) field across all 8 claim types. This field's `CodeableConcept` will now have some of these possible `Coding`s:
+    1. `{ "system": "https://bluebutton.cms.gov/developer/docs/reference/some-thing", "code": "<carrier,dme,hhs,hospice,inpatient,outpatient,pde,snf>" }`
+        * This entry will be present for all EOBs.
+        * Only one of the listed `code` values will be present on each EOB, designating the CMS claim type.
+        * The "`some-thing`" system suffix value there is temporary, pending other in-progress work.
+    2. `{ "system": "http://hl7.org/fhir/ex-claimtype", "code": "<institutional,pharmacy,professional>" }`
+       * This entry will only be present for carrier, outpatient, inpatient, hospice, SNF, and Part D claims:
+           * carrier, outpatient: `professional`
+           * inpatient, hospice, SNF: `institutional`
+           * Part D: `pharmacy`
+           * HHA, DME: not mapped, as there are no equivalent FHIR [Claimtype](http://hl7.org/fhir/codesystem-claim-type.html) codes at the moment.
+    3. `{ "system": "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt", "code": "<coded-value>" }`
+        * Please note that this `Coding` had previously been mapped to an extension.
+        * This entry will not be present for all claim types. See the `NCH_CLM_TYPE_CD` variable in the [Medicare Fee-For-Service Claims codebook](https://www.ccwdata.org/documents/10280/19022436/codebook-ffs-claims.pdf) for details.
+    4. `{ "system": "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt", "code": "<coded-value>" }`
+        * This entry will not be present for all claim types. See the `NCH_NEAR_LINE_REC_IDENT_CD` variable in the [Medicare Fee-For-Service Claims codebook](https://www.ccwdata.org/documents/10280/19022436/codebook-ffs-claims.pdf) for details.
+
+## CBBF-92 (Sprint 42, 2018-01)
 
 * A number of coding system URIs have been fixed:
     * The care team role coding system is now `http://hl7.org/fhir/claimcareteamrole`, where it had previously used `http://build.fhir.org/valueset-claim-careteamrole.html`.
