@@ -1,10 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.math.BigDecimal;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -18,7 +15,6 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
  * Transforms CCW {@link CarrierClaim} instances into FHIR
@@ -83,7 +79,20 @@ final class CarrierClaimTransformer {
 				claimGroup.getBeneficiaryPaymentAmount(), claimGroup.getSubmittedChargeAmount(),
 				claimGroup.getAllowedChargeAmount());
 
-		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
+		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses1Thru12(claimGroup.getDiagnosisPrincipalCode(),
+				claimGroup.getDiagnosisPrincipalCodeVersion(), 
+				claimGroup.getDiagnosis1Code(), claimGroup.getDiagnosis1CodeVersion(), claimGroup.getDiagnosis2Code(),
+				claimGroup.getDiagnosis2CodeVersion(), claimGroup.getDiagnosis3Code(),
+				claimGroup.getDiagnosis3CodeVersion(), claimGroup.getDiagnosis4Code(),
+				claimGroup.getDiagnosis4CodeVersion(), claimGroup.getDiagnosis5Code(),
+				claimGroup.getDiagnosis5CodeVersion(), claimGroup.getDiagnosis6Code(),
+				claimGroup.getDiagnosis6CodeVersion(), claimGroup.getDiagnosis7Code(),
+				claimGroup.getDiagnosis7CodeVersion(), claimGroup.getDiagnosis8Code(),
+				claimGroup.getDiagnosis8CodeVersion(), claimGroup.getDiagnosis9Code(),
+				claimGroup.getDiagnosis9CodeVersion(), claimGroup.getDiagnosis10Code(),
+				claimGroup.getDiagnosis10CodeVersion(), claimGroup.getDiagnosis11Code(),
+				claimGroup.getDiagnosis11CodeVersion(), claimGroup.getDiagnosis12Code(),
+				claimGroup.getDiagnosis12CodeVersion()))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
 		for (CarrierClaimLine claimLine : claimGroup.getLines()) {
@@ -211,43 +220,6 @@ final class CarrierClaimTransformer {
 		}
 
 		return eob;
-	}
-
-	/**
-	 * @param claim
-	 *            the {@link CarrierClaim} to extract the {@link Diagnosis}es
-	 *            from
-	 * @return the {@link Diagnosis}es that can be extracted from the specified
-	 *         {@link CarrierClaim}
-	 */
-	private static List<Diagnosis> extractDiagnoses(CarrierClaim claim) {
-		List<Diagnosis> diagnoses = new LinkedList<>();
-
-		/*
-		 * Seems silly, but allows the block below to be simple one-liners,
-		 * rather than requiring if-blocks.
-		 */
-		Consumer<Optional<Diagnosis>> diagnosisAdder = d -> {
-			if (d.isPresent())
-				diagnoses.add(d.get());
-		};
-
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisPrincipalCode(),
-				claim.getDiagnosisPrincipalCodeVersion(), DiagnosisLabel.PRINCIPAL));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis1Code(), claim.getDiagnosis1CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis2Code(), claim.getDiagnosis2CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis3Code(), claim.getDiagnosis3CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis4Code(), claim.getDiagnosis4CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis5Code(), claim.getDiagnosis5CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis6Code(), claim.getDiagnosis6CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis7Code(), claim.getDiagnosis7CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis8Code(), claim.getDiagnosis8CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis9Code(), claim.getDiagnosis9CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis10Code(), claim.getDiagnosis10CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis11Code(), claim.getDiagnosis11CodeVersion()));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis12Code(), claim.getDiagnosis12CodeVersion()));
-
-		return diagnoses;
 	}
 
 }
