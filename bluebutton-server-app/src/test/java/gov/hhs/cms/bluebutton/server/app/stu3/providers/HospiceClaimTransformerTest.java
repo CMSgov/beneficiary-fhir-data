@@ -66,8 +66,6 @@ public final class HospiceClaimTransformerTest {
 				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
 				eob.getPatient().getReference());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claim.getClaimTypeCode(), eob.getType());
 		Assert.assertEquals(
 				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_A).getReference(),
 				eob.getInsurance().getCoverage().getReference());
@@ -98,9 +96,6 @@ public final class HospiceClaimTransformerTest {
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claim.getClaimTypeCode(), eob.getType());
 
 		TransformerTestUtils.assertDateEquals(claim.getClaimHospiceStartDate().get(),
 				eob.getHospitalization().getStartElement());
