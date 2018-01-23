@@ -728,29 +728,6 @@ public final class TransformerUtils {
 	}
 
 	/**
-	 * Extracts diagnoses that are common between Inpatient and SNF claim types.
-	 * 
-	 * @param diagnosisAdder
-	 *            a {@link Consumer}&lt;{link Optional}&lt;{@link Diagnosis}&gt;&gt;
-	 *            object used to add the common diagnosis fields
-	 * @param diagnosisAdmittingCode
-	 *            ADMTG_DGNS_CD: an {@link Optional}&lt;{link String}&gt; shared
-	 *            field representing
-	 * @param diagnosisAdmittingCodeVersion
-	 *            ADMTG_DGNS_VRSN_CD: an {@link Optional}&lt;{link Character}&gt;
-	 *            shared field representing the diagnosis admitting code version for
-	 *            the claim
-	 * @param admittingLabel
-	 *            a {@link DiagnosisLabel} shared field representing the admitting
-	 *            label for the claim
-	 */
-	static void extractCommonDiagnosesInpatientSNF(Consumer<Optional<Diagnosis>> diagnosisAdder,
-			Optional<String> diagnosisAdmittingCode, Optional<Character> diagnosisAdmittingCodeVersion,
-			DiagnosisLabel admittingLabel) {
-		diagnosisAdder.accept(Diagnosis.from(diagnosisAdmittingCode, diagnosisAdmittingCodeVersion, admittingLabel));
-	}
-
-	/**
 	 * Adds EOB information to fields that are common between the Inpatient and SNF
 	 * claim types.
 	 * 

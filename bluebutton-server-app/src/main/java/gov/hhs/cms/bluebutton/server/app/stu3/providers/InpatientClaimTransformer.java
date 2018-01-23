@@ -346,10 +346,8 @@ final class InpatientClaimTransformer {
 				diagnoses.add(d.get());
 		};
 
-		// extract diagnoses that are common between Inpatient and SNF claim types
-		TransformerUtils.extractCommonDiagnosesInpatientSNF(diagnosisAdder,claim.getDiagnosisAdmittingCode(),
-				claim.getDiagnosisAdmittingCodeVersion(), DiagnosisLabel.ADMITTING);
-
+		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisAdmittingCode(),
+				claim.getDiagnosisAdmittingCodeVersion(), DiagnosisLabel.ADMITTING));
 		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisPrincipalCode(),
 				claim.getDiagnosisPrincipalCodeVersion(), DiagnosisLabel.PRINCIPAL));
 		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis1Code(), claim.getDiagnosis1CodeVersion(),
