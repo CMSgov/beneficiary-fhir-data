@@ -1013,7 +1013,7 @@ public final class TransformerUtils {
 		 * otherwise set to 0
 		 */
 		SimpleQuantity qty = new SimpleQuantity();
-		if (!unitCount.equals(new BigDecimal(0))) {
+		if (unitCount.compareTo(BigDecimal.ZERO) > 0) {
 			qty.setValue(unitCount);
 		} else if (nationalDrugCodeQuantity.isPresent()) {
 			qty.setValue(nationalDrugCodeQuantity.get());
