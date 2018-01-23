@@ -19,9 +19,8 @@ esac
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o h:s:k:t:w:u:n:p: \
-	--long serverhome:,httpsport:,keystore:,truststore:,war:,dburl:,dbusername:,dbpassword: \
-	-n 'bbonfir-server-app-server-config.sh' -- "$@"`
+	h:s:k:t:w:u:n:p: \
+	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
 # Note the quotes around `$TEMP': they are essential!
@@ -38,21 +37,21 @@ dbUsername=""
 dbPassword=""
 while true; do
 	case "$1" in
-		-h | --serverhome )
+		-h )
 			serverHome="$2"; shift 2 ;;
-		-s | --httpsport )
+		-s )
 			httpsPort="$2"; shift 2 ;;
-		-k | --keystore )
+		-k )
 			keyStore="$2"; shift 2 ;;
-		-t | --truststore )
+		-t )
 			trustStore="$2"; shift 2 ;;
-		-w | --war )
+		-w )
 			war="$2"; shift 2 ;;
-		-u | --dburl )
+		-u )
 			dbUrl="$2"; shift 2 ;;
-		-n | --dbusername )
+		-n )
 			dbUsername="$2"; shift 2 ;;
-		-p | --dbpassword )
+		-p )
 			dbPassword="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
@@ -239,7 +238,7 @@ jBossCli \
 	--connect \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	--file=${scriptDeployArg} \
-	&>> "${serverHome}/server-config.log"
+	>> "${serverHome}/server-config.log" 2>&1
 # Note: No need to watch log here, as the command blocks until deployment is 
 # completed, and returns a non-zero exit code if it fails.
 echo 'Application deployed.'
