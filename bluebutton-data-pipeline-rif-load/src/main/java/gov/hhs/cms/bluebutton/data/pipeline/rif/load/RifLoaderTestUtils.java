@@ -42,18 +42,27 @@ public final class RifLoaderTestUtils {
 	public static final byte[] HICN_HASH_PEPPER = "nottherealpepper".getBytes(StandardCharsets.UTF_8);
 
 	/**
+	 * <p>
 	 * The value to use for {@link LoadAppOptions#getDatabaseUrl()}. It's
 	 * occasionally useful for devs to manually change this to one of these
 	 * values:
+	 * </p>
 	 * <ul>
 	 * <li>In-memory HSQL DB (this is the default):
-	 * <code>jdbc:hsqldb:mem:test</code></li>
+	 * <code>jdbc:hsqldb:mem:test;hsqldb.tx=mvcc</code></li>
 	 * <li>On-disk HSQL DB (useful when the in-memory DB is running out of
 	 * memory):
-	 * <code>jdbc:hsqldb:file:target/hsql-db-for-its;hsqldb.tx=locks</code></li>
+	 * <code>jdbc:hsqldb:file:target/hsql-db-for-its;hsqldb.tx=mvcc</code></li>
 	 * </ul>
+	 * <p>
+	 * Note: The <code>hsqldb.tx=mvcc</code> option included in the URL is
+	 * needed to avoid locking problems with some concurrent tests that access
+	 * the DB. See
+	 * <a href="http://hsqldb.org/doc/guide/sessions-chapt.html#snc_tx_mvcc">
+	 * HSQL DB: MVCC</a> for details.
+	 * </p>
 	 */
-	public static final String DB_URL = "jdbc:hsqldb:mem:test;hsqldb.tx=locks";
+	public static final String DB_URL = "jdbc:hsqldb:mem:test;hsqldb.tx=mvcc";
 
 	/**
 	 * The value to use for {@link LoadAppOptions#getDatabaseUsername()}.
