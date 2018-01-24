@@ -284,8 +284,9 @@ final class TransformerConstants {
 
 	public static final String CODING_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
 
-	public static final String CODING_CCW_CLAIM_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt";
-
+	// FIXME: the following URL is currently just a placeholder for the final one
+	public static final String CODING_CCW_CLAIM_TYPE = "https://bluebutton.cms.gov/developer/docs/reference/some-thing";
+	
 	public static final String CODING_CCW_COINSURANCE_DAY_COUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coin_day.txt";
 
 	public static final String CODING_CCW_DIAGNOSIS_RELATED_GROUP = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drg_cd.txt";
@@ -297,7 +298,7 @@ final class TransformerConstants {
 	public static final String CODING_CCW_LOW_UTILIZATION_PAYMENT_ADJUSTMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lupaind.txt";
 
 	public static final String CODING_CCW_MCO_PAID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mcopdsw.txt";
-
+	
 	/*
 	 * FIXME: Is NDC count only ever present when line quantity isn't set?
 	 * Depending on that, it may be that we should stop using this as an
@@ -369,7 +370,7 @@ final class TransformerConstants {
 	static final String CODING_FHIR_CARE_TEAM_ROLE = ClaimCareteamrole.PRIMARY.getSystem();
 
 	static final String CODING_FHIR_CLAIM_TYPE = ClaimType.PROFESSIONAL.getSystem();
-
+	
 	/**
 	 * A CMS-controlled standard. More info here: <a href=
 	 * "https://en.wikipedia.org/wiki/Healthcare_Common_Procedure_Coding_System">
@@ -378,7 +379,9 @@ final class TransformerConstants {
 	static final String CODING_HCPCS = "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html";
 
 	static final String CODING_MONEY = "urn:std:iso:4217";
-
+	
+	public static final String CODING_NCH_CLAIM_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt";
+	
 	static final String CODING_NDC = "https://www.accessdata.fda.gov/scripts/cder/ndc";
 
 	/**

@@ -20,9 +20,8 @@ esac
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o j:m:v:d:k:t:u:n:p: \
-	--long javahome:,maxheaparg:,visualvm:,directory:,keystore:,truststore:,dburl:,dbusername:,dbpassword: \
-	-n 'bluebutton-fhir-server-start.sh' -- "$@"`
+	j:m:v:d:k:t:u:n:p: \
+	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
 # Note the quotes around `$TEMP': they are essential!
@@ -40,23 +39,23 @@ dbUsername=""
 dbPassword=""
 while true; do
 	case "$1" in
-		-j | --javahome )
+		-j )
 			javaHome="$2"; shift 2 ;;
-		-m | --maxheaparg )
+		-m )
 			maxHeapArg="$2"; shift 2 ;;
-		-v | --visualvm )
+		-v )
 			visualVm="$2"; shift 2 ;;
-		-d | --directory )
+		-d )
 			directory="$2"; shift 2 ;;
-		-k | --keystore )
+		-k )
 			keyStore="$2"; shift 2 ;;
-		-t | --truststore )
+		-t )
 			trustStore="$2"; shift 2 ;;
-		-u | --dburl )
+		-u )
 			dbUrl="$2"; shift 2 ;;
-		-n | --dbusername )
+		-n )
 			dbUsername="$2"; shift 2 ;;
-		-p | --dbpassword )
+		-p )
 			dbPassword="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
@@ -214,12 +213,12 @@ done
 echo "Configuring server..."
 chmod a+x "${directory}/${configArtifact}"
 "${directory}/${configArtifact}" \
-	--serverhome "${directory}/${serverInstall}" \
-	--httpsport "${serverPortHttps}" \
-	--keystore "${keyStore}" \
-	--truststore "${trustStore}" \
-	--war "${directory}/${warArtifact}" \
-	--dburl "${dbUrl}" \
-	--dbusername "${dbUsername}" \
-	--dbpassword "${dbPassword}"
+	-h "${directory}/${serverInstall}" \
+	-s "${serverPortHttps}" \
+	-k "${keyStore}" \
+	-t "${trustStore}" \
+	-w "${directory}/${warArtifact}" \
+	-u "${dbUrl}" \
+	-n "${dbUsername}" \
+	-p "${dbPassword}"
 

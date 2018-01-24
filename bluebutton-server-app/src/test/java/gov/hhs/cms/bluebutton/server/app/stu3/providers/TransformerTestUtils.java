@@ -26,6 +26,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -40,6 +41,20 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
+import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
 
 /**
  * Contains utility methods useful for testing the transformers (e.g.
@@ -432,6 +447,41 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * @param eobType
+	 *            the eobType {@link CodeableConcept} we are testing against for
+	 *            expected values
+	 * @param blueButtonClaimType
+	 *            expected blue button {@link ClaimType} value
+	 * @param fhirClaimType
+	 *            optional expected fhir
+	 *            {@link org.hl7.fhir.dstu3.model.codesystems.ClaimType} value
+	 * @param ccwNearLineRecordIdCode
+	 *            optional expected ccw near line record id code
+	 *            {@link Optional}&lt;{@link Character}&gt;
+	 * @param ccwClaimTypeCode
+	 *            optional expected ccw claim type code
+	 *            {@link Optional}&lt;{@link String}&gt;
+	 */
+	static void assertMapEobType(CodeableConcept eobType, ClaimType blueButtonClaimType,
+			Optional<org.hl7.fhir.dstu3.model.codesystems.ClaimType> fhirClaimType,
+			Optional<Character> ccwNearLineRecordIdCode, Optional<String> ccwClaimTypeCode) {
+		assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE, blueButtonClaimType.name(), eobType);
+
+		if (fhirClaimType.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE, fhirClaimType.get().name(), eobType);
+		}
+
+		if (ccwNearLineRecordIdCode.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
+					String.valueOf(ccwNearLineRecordIdCode.get()), eobType);
+		}
+
+		if (ccwClaimTypeCode.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE, ccwClaimTypeCode.get(), eobType);
+		}
+	}
+	
+	/**
 	 * @param expectedIdentifierSystem
 	 *            the expected {@link Identifier#getSystem()} to match
 	 * @param expectedIdentifierValue
@@ -553,6 +603,212 @@ final class TransformerTestUtils {
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+	
+	/**
+	 * Tests field values of an eob's benefit balance component that are common
+	 * between the Inpatient and SNF claim types.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that will be tested by this
+	 *            method
+	 * @param coinsuranceDayCount
+	 *            BENE_TOT_COINSRNC_DAYS_CNT: a {@link BigDecimal} shared field
+	 *            representing the coinsurance day count for the claim
+	 * @param nonUtilizationDayCount
+	 *            CLM_NON_UTLZTN_DAYS_CNT: a {@link BigDecimal} shared field
+	 *            representing the non-utilization day count for the claim
+	 * @param deductibleAmount
+	 *            NCH_BENE_IP_DDCTBL_AMT: a {@link BigDecimal} shared field
+	 *            representing the deductible amount for the claim
+	 * @param partACoinsuranceLiabilityAmount
+	 *            NCH_BENE_PTA_COINSRNC_LBLTY_AM: a {@link BigDecimal} shared field
+	 *            representing the part A coinsurance amount for the claim
+	 * @param bloodPintsFurnishedQty
+	 *            NCH_BLOOD_PNTS_FRNSHD_QTY: a {@link BigDecimal} shared field
+	 *            representing the blood pints furnished quantity for the claim
+	 * @param noncoveredCharge
+	 *            NCH_IP_NCVRD_CHRG_AMT: a {@link BigDecimal} shared field
+	 *            representing the non-covered charge for the claim
+	 * @param totalDeductionAmount
+	 *            NCH_IP_TOT_DDCTN_AMT: a {@link BigDecimal} shared field
+	 *            representing the total deduction amount for the claim
+	 * @param claimPPSCapitalDisproportionateShareAmt
+	 *            CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital disproportionate share amount
+	 *            for the claim
+	 * @param claimPPSCapitalExceptionAmount
+	 *            CLM_PPS_CPTL_EXCPTN_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital exception amount for the claim
+	 * @param claimPPSCapitalFSPAmount
+	 *            CLM_PPS_CPTL_FSP_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital FSP amount for the claim
+	 * @param claimPPSCapitalIMEAmount
+	 *            CLM_PPS_CPTL_IME_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital IME amount for the claim
+	 * @param claimPPSCapitalOutlierAmount
+	 *            CLM_PPS_CPTL_OUTLIER_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS capital outlier amount for the claim
+	 * @param claimPPSOldCapitalHoldHarmlessAmount
+	 *            CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT: an
+	 *            {@link Optional}&lt;{@link BigDecimal}&gt; shared field
+	 *            representing the claim PPS old capital hold harmless amount for
+	 *            the claim
+	 */
+	static void assertCommonBenefitComponentInpatientSNF(ExplanationOfBenefit eob, BigDecimal coinsuranceDayCount,
+			BigDecimal nonUtilizationDayCount, BigDecimal deductibleAmount, BigDecimal partACoinsuranceLiabilityAmount,
+			BigDecimal bloodPintsFurnishedQty, BigDecimal noncoveredCharge, BigDecimal totalDeductionAmount,
+			Optional<BigDecimal> claimPPSCapitalDisproportionateShareAmt,
+			Optional<BigDecimal> claimPPSCapitalExceptionAmount, Optional<BigDecimal> claimPPSCapitalFSPAmount,
+			Optional<BigDecimal> claimPPSCapitalIMEAmount, Optional<BigDecimal> claimPPSCapitalOutlierAmount,
+			Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount) {
+
+		// coinsuranceDayCount
+		assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODING_CCW_COINSURANCE_DAY_COUNT, coinsuranceDayCount.intValue(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// nonUtilizationDayCount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NON_UTILIZATION_DAY_COUNT,
+				nonUtilizationDayCount.intValue(), eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// deductibleAmount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE, deductibleAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// partACoinsuranceLiabilityAmount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY, partACoinsuranceLiabilityAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// bloodPintsFurnishedQty
+		assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_PINTS_FURNISHED,
+				bloodPintsFurnishedQty.intValue(), eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// noncoveredCharge
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE, noncoveredCharge,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// totalDeductionAmount
+		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION, totalDeductionAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// claimPPSCapitalDisproportionateShareAmt
+		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_DISPROPORTIONAL_SHARE,
+					claimPPSCapitalDisproportionateShareAmt.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalExceptionAmount
+		if (claimPPSCapitalExceptionAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_EXCEPTION,
+					claimPPSCapitalExceptionAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalFSPAmount
+		if (claimPPSCapitalFSPAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_FEDRERAL_PORTION,
+					claimPPSCapitalFSPAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalIMEAmount
+		if (claimPPSCapitalIMEAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_INDIRECT_MEDICAL_EDU,
+					claimPPSCapitalIMEAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSCapitalOutlierAmount
+		if (claimPPSCapitalOutlierAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_CAPITAL_OUTLIER,
+					claimPPSCapitalOutlierAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+		// claimPPSOldCapitalHoldHarmlessAmount
+		if (claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
+			assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PPS_OLD_CAPITAL_HOLD_HARMLESS,
+					claimPPSOldCapitalHoldHarmlessAmount.get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+	}
+	
+	/**
+	 * Tests EOB information fields that are common between the Inpatient and SNF
+	 * claim types.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that will be tested by this
+	 *            method
+	 * @param noncoveredStayFromDate
+	 *            NCH_VRFD_NCVRD_STAY_FROM_DT: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the non-covered stay from date for the claim
+	 * @param noncoveredStayThroughDate
+	 *            NCH_VRFD_NCVRD_STAY_THRU_DT: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the non-covered stay through date for the claim
+	 * @param coveredCareThroughDate
+	 *            NCH_ACTV_OR_CVRD_LVL_CARE_THRU: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the covered stay through date for the claim
+	 * @param medicareBenefitsExhaustedDate
+	 *            NCH_BENE_MDCR_BNFTS_EXHTD_DT_I: an
+	 *            {@link Optional}&lt;{@link LocalDate}&gt; shared field
+	 *            representing the medicare benefits exhausted date for the claim
+	 * @param diagnosisRelatedGroupCd
+	 *            CLM_DRG_CD: an {@link Optional}&lt;{@link String}&gt; shared field
+	 *            representing the non-covered stay from date for the claim
+	 */
+	static void assertCommonEobInformationInpatientSNF(ExplanationOfBenefit eob, Optional<LocalDate> noncoveredStayFromDate, 
+			Optional<LocalDate> noncoveredStayThroughDate, Optional<LocalDate> coveredCareThroughDate,
+			Optional<LocalDate> medicareBenefitsExhaustedDate, Optional<String> diagnosisRelatedGroupCd) {
+		
+		/*
+		 * TODO missing tests for: admissionTypeCd, sourceAdmissionCd,
+		 * diagnosisAdmittingCode, diagnosisAdmittingCodeVersion
+		 */
+		
+		// noncoveredStayFromDate & noncoveredStayThroughDate
+		if (noncoveredStayFromDate.isPresent() && noncoveredStayThroughDate.isPresent()) {
+			assertInformationPeriodEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+					TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_NONCOVERED, noncoveredStayFromDate.get(),
+					noncoveredStayThroughDate.get(), eob.getInformation());
+		}
+		
+		// coveredCareThroughDate
+		if (coveredCareThroughDate.isPresent()) {
+			assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+					TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_STAY, coveredCareThroughDate.get(),
+					eob.getInformation());
+		}
+		
+		// medicareBenefitsExhaustedDate
+		if(medicareBenefitsExhaustedDate.isPresent()) {
+		assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
+				TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_EXHAUSTED,
+				medicareBenefitsExhaustedDate.get(),
+				eob.getInformation());
+		}
+		
+		// diagnosisRelatedGroupCd
+		Assert.assertTrue(eob.getInformation().stream()
+				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
+						TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
+						String.valueOf(diagnosisRelatedGroupCd.get()))));
 	}
 
 	/**
@@ -762,5 +1018,190 @@ final class TransformerTestUtils {
 
 		assertExtensionCodingEquals(item, TransformerConstants.CODING_NDC, TransformerConstants.CODING_NDC,
 				nationalDrugCode.get());
+	}
+	
+	/**
+	 * Test the transformation of the item level data elements between the
+	 * {@link InpatientClaim} {@link OutpatientClaim} {@link HospiceClaim}
+	 * {@link HHAClaim}and {@link SNFClaim} claim types to FHIR. The method
+	 * parameter fields from {@link InpatientClaim} {@link OutpatientClaim}
+	 * {@link HospiceClaim} {@link HHAClaim}and {@link SNFClaim} are listed below
+	 * and their corresponding RIF CCW fields (denoted in all CAPS below from
+	 * {@link InpatientClaimColumn} {@link OutpatientClaimColumn}
+	 * {@link HopsiceClaimColumn} {@link HHAClaimColumn} and
+	 * {@link SNFClaimColumn}).
+	 * 
+	 * @param eob
+	 *            the {@ ExplanationOfBenefit} to test
+	 * 
+	 * @param organizationNpi
+	 *            ORG_NPI_NUM,
+	 * @param claimFacilityTypeCode
+	 *            CLM_FAC_TYPE_CD,
+	 * @param claimFrequencyCode
+	 *            CLM_FREQ_CD,
+	 * @param claimNonPaymentReasonCode
+	 *            CLM_MDCR_NON_PMT_RSN_CD,
+	 * @param patientDischargeStatusCode
+	 *            PTNT_DSCHRG_STUS_CD,
+	 * @param claimServiceClassificationTypeCode
+	 *            CLM_SRVC_CLSFCTN_TYPE_CD,
+	 * @param claimPrimaryPayerCode
+	 *            NCH_PRMRY_PYR_CD,
+	 * @param attendingPhysicianNpi
+	 *            AT_PHYSN_NPI,
+	 * @param totalChargeAmount
+	 *            CLM_TOT_CHRG_AMT,
+	 * @param primaryPayerPaidAmount
+	 *            NCH_PRMRY_PYR_CLM_PD_AMT
+	 */
+	static void assertEobCommonGroupInpOutHHAHospiceSNFEquals(ExplanationOfBenefit eob,
+			Optional<String> organizationNpi, char claimFacilityTypeCode, char claimFrequencyCode,
+			Optional<String> claimNonPaymentReasonCode, String patientDischargeStatusCode,
+			char claimServiceClassificationTypeCode, Optional<Character> claimPrimaryPayerCode,
+			Optional<String> attendingPhysicianNpi, BigDecimal totalChargeAmount, BigDecimal primaryPayerPaidAmount) {
+
+		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US,
+				organizationNpi.get(), eob.getOrganization());
+		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US,
+				organizationNpi.get(), eob.getFacility());
+
+		TransformerTestUtils.assertExtensionCodingEquals(eob.getFacility(),
+				TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
+				TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
+				String.valueOf(claimFacilityTypeCode));
+
+		// TODO add tests for claimFrequencyCode, patientDischargeStatusCode and
+		// claimPrimaryPayerCode
+
+		TransformerTestUtils.assertExtensionCodingEquals(eob,
+				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON,
+				TransformerConstants.EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON, claimNonPaymentReasonCode.get());
+
+		TransformerTestUtils.assertExtensionCodingEquals(eob.getType(),
+				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
+				TransformerConstants.EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION,
+				String.valueOf(claimServiceClassificationTypeCode));
+
+		TransformerTestUtils.assertCareTeamEquals(attendingPhysicianNpi.get(),
+				ClaimCareteamrole.PRIMARY.toCode(), eob);
+
+		Assert.assertEquals(totalChargeAmount, eob.getTotalCost().getValue());
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, primaryPayerPaidAmount,
+				eob.getBenefitBalanceFirstRep().getFinancial());
+	}
+
+	/**
+	 * Test the transformation of the item level data elements between the
+	 * {@link InpatientClaimLine} {@link OutpatientClaimLine}
+	 * {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine} claim
+	 * types to FHIR. The method parameter fields from {@link InpatientClaimLine}
+	 * {@link OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and
+	 * {@link SNFClaimLine} are listed below and their corresponding RIF CCW fields
+	 * (denoted in all CAPS below from {@link InpatientClaimColumn}
+	 * {@link OutpatientClaimColumn} {@link HopsiceClaimColumn}
+	 * {@link HHAClaimColumn} and {@link SNFClaimColumn}).
+	 * 
+	 * @param item
+	 *            the {@ ItemComponent} to test
+	 * @param eob
+	 *            the {@ ExplanationOfBenefit} to test
+	 * 
+	 * @param revenueCenterCode
+	 *            REV_CNTR,
+	 * 
+	 * @param rateAmount
+	 *            REV_CNTR_RATE_AMT,
+	 * 
+	 * @param totalChargeAmount
+	 *            REV_CNTR_TOT_CHRG_AMT,
+	 * 
+	 * @param nonCoveredChargeAmount
+	 *            REV_CNTR_NCVRD_CHRG_AMT,
+	 * 
+	 * @param unitCount
+	 *            REV_CNTR_UNIT_CNT,
+	 * 
+	 * @param nationalDrugCodeQuantity
+	 *            REV_CNTR_NDC_QTY,
+	 * 
+	 * @param nationalDrugCodeQualifierCode
+	 *            REV_CNTR_NDC_QTY_QLFR_CD,
+	 * 
+	 * @param revenueCenterRenderingPhysicianNPI
+	 *            RNDRNG_PHYSN_NPI
+	 */
+	static void assertEobCommonItemRevenueEquals(ItemComponent item, ExplanationOfBenefit eob, String revenueCenterCode,
+			BigDecimal rateAmount,
+			BigDecimal totalChargeAmount, BigDecimal nonCoveredChargeAmount, BigDecimal unitCount,
+			Optional<BigDecimal> nationalDrugCodeQuantity, Optional<String> nationalDrugCodeQualifierCode,
+			Optional<String> revenueCenterRenderingPhysicianNPI) {
+
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
+				revenueCenterCode, item.getRevenue());
+		
+		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT, rateAmount,
+				item.getAdjudication());
+
+		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_NONCOVERED_CHARGE,
+				nonCoveredChargeAmount, item.getAdjudication());
+		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT,
+				totalChargeAmount, item.getAdjudication());
+
+		// TODO add tests for unitCount, nationalDrugCodeQuantity and
+		// nationalDrugCodeQualifierCode
+
+		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(),
+				ClaimCareteamrole.PRIMARY.toCode(), eob);
+
+	}
+
+
+	/**
+	 * Test the transformation of the common group level data elements between the
+	 * {@link InpatientClaim} {@link OutpatientClaim} and {@link SNFClaim} claim
+	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
+	 * {@link OutpatientClaim} and {@link SNFClaim} are listed below and their
+	 * corresponding RIF CCW fields (denoted in all CAPS below from
+	 * {@link InpatientClaimColumn} {@link OutpatientClaimColumn} and
+	 * {@link SNFClaimColumn}).
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to test
+	 * 
+	 */
+	static void assertEobCommonGroupInpOutSNFEquals(ExplanationOfBenefit eob,
+			BigDecimal bloodDeductibleLiabilityAmount, Optional<String> operatingPhysicianNpi,
+			Optional<String> otherPhysicianNpi, char claimQueryCode, Optional<Character> mcoPaidSw) {
+
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY,
+				bloodDeductibleLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial());
+
+		TransformerTestUtils.assertCareTeamEquals(operatingPhysicianNpi.get(),
+				ClaimCareteamrole.ASSIST.toCode(), eob);
+		TransformerTestUtils.assertCareTeamEquals(otherPhysicianNpi.get(), ClaimCareteamrole.OTHER.toCode(),
+				eob);
+
+		TransformerTestUtils.assertExtensionCodingEquals(eob.getBillablePeriod(),
+				TransformerConstants.EXTENSION_CODING_CLAIM_QUERY, TransformerConstants.EXTENSION_CODING_CLAIM_QUERY,
+				String.valueOf(claimQueryCode));
+
+	}
+
+	/**
+	 * Tests the provider number field is set as expected in the EOB. This field is
+	 * common among these claim types: Inpatient, Outpatient, Hospice, HHA and SNF.
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} this method will test against
+	 * @param providerNumber
+	 *            a {@link String} PRVDR_NUM: representing the expected provider
+	 *            number for the claim
+	 */
+	static void assertProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+		assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
+				providerNumber, eob.getProvider());
 	}
 }
