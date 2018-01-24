@@ -76,6 +76,6 @@ if [[ -z "${serverPids}" ]]; then
 	exit 0
 else
 	>&2 echo "Server processes still found. Sending KILL signal to all 'bluebutton-server' processes."
-	pkill KILL -f ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*"
+	pkill -KILL -f ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*"
 	>&2 echo "Server processes sent KILL signal."
 fi
