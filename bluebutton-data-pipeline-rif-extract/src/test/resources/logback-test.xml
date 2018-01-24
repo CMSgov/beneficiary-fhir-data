@@ -9,6 +9,12 @@
 		</encoder>
 	</appender>
 
+	<!-- At 'debug', the AWS SDK will log HTTP/S request/response summaries. -->
+	<!-- <logger name="com.amazonaws.request" level="debug" /> -->
+
+	<!--  At 'debug', the AWS SDK (and possibly other libs) will log full HTTP/S requests and responses. -->
+	<!-- <logger name="org.apache.http.wire" level="debug" /> -->
+
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
 	<root level="info">
