@@ -253,6 +253,23 @@ under the License.
       </properties>
     </profile>
     -->
+    <profile>
+      <id>env-jenkins</id>
+      <properties>
+          <!--
+            Configure Surefire and Failsafe to:
+            1. Use a minimal amount of memory, as this system only has 4g total.
+	    2. use the proxy server.
+
+            The proxy exclusions here are as follows:
+            * `localhost`: A lot of the tests will start local services and try to connect to them. These requests shouldn't go through the proxy server (and it's not configured to allow them, regardless).
+            * `169.254.169.254`: The AWS Java SDK refers to this as "the EC2 Metadata Service URL". If `*.amazonaws.com` is excluded from the proxy, this must be, too, or all AWS API requests that rely on the EC2 instance profile for their permissions will fail.
+	    * `*.amazon.aws`: There's no need to route AWS API requests through the proxy, and Mike has requested that we don't anyways, for performance reasons.
+                * TODO: See <https://issues.hhsdevcloud.us/browse/CBBI-340> for an explanation as to why this isn't currently excluded.
+          -->
+	  <maven-test.jvm-args.env-specific>-Xmx1g -Dhttp.nonProxyHosts=localhost|169.254.169.254 -Dhttp.proxyHost={{ vault_proxy_host }} -Dhttp.proxyPort={{ vault_proxy_port }} -Dhttps.proxyHost={{ vault_proxy_host }} -Dhttps.proxyPort={{ vault_proxy_port }}</maven-test.jvm-args.env-specific>
+      </properties>
+    </profile>
   </profiles>
 
   <!-- activeProfiles
@@ -263,4 +280,7 @@ under the License.
     <activeProfile>anotherAlwaysActiveProfile</activeProfile>
   </activeProfiles>
   -->
+  <activeProfiles>
+    <activeProfile>env-jenkins</activeProfile>
+  </activeProfiles>
 </settings>
