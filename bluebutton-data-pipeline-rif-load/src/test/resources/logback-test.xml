@@ -19,7 +19,7 @@
 	<logger name="liquibase" level="info" />
 
 	<!-- At 'debug', the AWS SDK will log HTTP/S request/response summaries. -->
-	<logger name="software.amazon.awssdk.request" level="debug" />
+	<logger name="com.amazonaws.request" level="debug" />
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->
