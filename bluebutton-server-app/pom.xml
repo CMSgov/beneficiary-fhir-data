@@ -313,24 +313,24 @@
 						<configuration>
 							<executable>${project.build.directory}/bluebutton-server/${artifactId}-server-start.sh</executable>
 							<arguments>
-								<argument>--javahome</argument>
+								<argument>-j</argument>
 								<argument>${java.home}</argument>
-								<argument>--maxheaparg</argument>
+								<argument>-m</argument>
 								<argument>${its.bbfhir.server.jvmargs}</argument>
 								<!-- The script is smart enough to ignore this arg if an invalid 
 									directory is specified (e.g. because this Maven property isn't set). -->
-								<argument>--visualvm=${visualVm}</argument>
-								<argument>--directory</argument>
+								<argument>-v=${visualVm}</argument>
+								<argument>-d</argument>
 								<argument>${project.build.directory}/bluebutton-server</argument>
-								<argument>--keystore</argument>
+								<argument>-k</argument>
 								<argument>${project.build.directory}/../../dev/ssl-stores/server-keystore.jks</argument>
-								<argument>--truststore</argument>
+								<argument>-t</argument>
 								<argument>${project.build.directory}/../../dev/ssl-stores/server-truststore.jks</argument>
-								<argument>--dburl</argument>
+								<argument>-u</argument>
 								<argument>${its.bbfhir.db.url}</argument>
-								<argument>--dbusername</argument>
+								<argument>-n</argument>
 								<argument>${its.bbfhir.db.username}</argument>
-								<argument>--dbpassword</argument>
+								<argument>-p</argument>
 								<argument>${its.bbfhir.db.password}</argument>
 							</arguments>
 
@@ -347,7 +347,7 @@
 						<configuration>
 							<executable>${project.build.directory}/bluebutton-server/${artifactId}-server-stop.sh</executable>
 							<arguments>
-								<argument>--directory</argument>
+								<argument>-d</argument>
 								<argument>${project.build.directory}/bluebutton-server</argument>
 							</arguments>
 
