@@ -60,7 +60,6 @@ public final class DataSetMonitorIT {
 		Bucket bucket = null;
 		try {
 			// Create the (empty) bucket to run against.
-			LOGGER.info("http.nonProxyHosts={}", System.getProperty("http.nonProxyHosts"));
 			bucket = s3Client.createBucket(options.getS3BucketName());
 			LOGGER.info("Bucket created: '{}:{}'", s3Client.getS3AccountOwner().getDisplayName(), bucket.getName());
 
