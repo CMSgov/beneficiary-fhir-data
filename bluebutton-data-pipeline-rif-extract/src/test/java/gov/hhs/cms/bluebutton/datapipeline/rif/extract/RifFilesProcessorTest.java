@@ -336,7 +336,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals('3', claimGroup.getClaimQueryCode());
 		Assert.assertEquals("777776", claimGroup.getProviderNumber());
 		Assert.assertEquals('1', claimGroup.getClaimServiceClassificationTypeCode());
-		Assert.assertFalse(claimGroup.getClaimNonPaymentReasonCode().isPresent());
+		Assert.assertTrue(claimGroup.getClaimNonPaymentReasonCode().isPresent());
 		Assert.assertEquals(new BigDecimal("7699.48"), claimGroup.getPaymentAmount());
 		Assert.assertEquals(new BigDecimal("11.00"), claimGroup.getPrimaryPayerPaidAmount());
 		Assert.assertEquals("IA", claimGroup.getProviderStateCode());
@@ -447,7 +447,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("1111111111", claimGroup.getOrganizationNpi().get());
 		Assert.assertEquals("2222222222", claimGroup.getAttendingPhysicianNpi().get());
 		Assert.assertEquals("3333333333", claimGroup.getOperatingPhysicianNpi().get());
-		Assert.assertFalse(claimGroup.getOtherPhysicianNpi().isPresent());
+		Assert.assertTrue(claimGroup.getOtherPhysicianNpi().isPresent());
 		Assert.assertEquals("1", claimGroup.getPatientDischargeStatusCode().get());
 		Assert.assertEquals(new BigDecimal("8888.85"), claimGroup.getTotalChargeAmount());
 		Assert.assertEquals(new BigDecimal("6.00"), claimGroup.getBloodDeductibleLiabilityAmount());
