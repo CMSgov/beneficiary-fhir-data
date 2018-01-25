@@ -66,16 +66,16 @@ done
 #echo "javaHome: '${javaHome}', maxHeapArg: '${maxHeapArg}', visualVm: '${visualVm}', directory: '${directory}', keyStore: '${keyStore}', trustStore: '${trustStore}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
 
 # Verify that all required options were specified.
-if [[ -z "${directory}" ]]; then >&2 echo 'The --directory option is required.'; exit 1; fi
-if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; exit 1; fi
-if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
+if [[ -z "${directory}" ]]; then >&2 echo 'The -d option is required.'; exit 1; fi
+if [[ -z "${keyStore}" ]]; then >&2 echo 'The -k option is required.'; exit 1; fi
+if [[ -z "${trustStore}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
 
 # Verify that java was found.
 if [[ -z "${javaHome}" ]]; then
-	command -v java >/dev/null 2>&1 || { echo >&2 "Java not found. Specify --javahome option."; exit 1; }
+	command -v java >/dev/null 2>&1 || { echo >&2 "Java not found. Specify -j option."; exit 1; }
 else
 	if [[ "${cygwin}" = true ]]; then javaHome=$(cygpath --unix "${javaHome}"); fi
-	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in --javahome: '${javaHome}'"; exit 1; }
+	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in -j: '${javaHome}'"; exit 1; }
 fi
 
 # Munge paths for Cygwin.
@@ -95,7 +95,7 @@ error() {
 	
 	# Before bailing, always try to stop any running servers.
 	>&2 echo "Trying to stop any running servers before exiting..."
-	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
 
 	>&2 echo "Exiting with status ${code}."
 	exit "${code}"
@@ -203,7 +203,7 @@ while true; do
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to start within ${serverTimeoutSeconds} seconds. Trying to stop it..."
-		"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+		"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
 		exit 3
 	fi
 	sleep 1

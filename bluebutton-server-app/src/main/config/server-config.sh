@@ -61,11 +61,11 @@ done
 #echo "serverHome: '${serverHome}', httpsPort: '${httpsPort}', keyStore: '${keyStore}', trustStore: '${trustStore}', war: '${war}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
 
 # Verify that all required options were specified.
-if [[ -z "${serverHome}" ]]; then >&2 echo 'The --serverhome option is required.'; exit 1; fi
-if [[ -z "${httpsPort}" ]]; then >&2 echo 'The --httpsport option is required.'; exit 1; fi
-if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; exit 1; fi
-if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
-if [[ -z "${war}" ]]; then >&2 echo 'The --war option is required.'; exit 1; fi
+if [[ -z "${serverHome}" ]]; then >&2 echo 'The -h option is required.'; exit 1; fi
+if [[ -z "${httpsPort}" ]]; then >&2 echo 'The -s option is required.'; exit 1; fi
+if [[ -z "${keyStore}" ]]; then >&2 echo 'The -k option is required.'; exit 1; fi
+if [[ -z "${trustStore}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
+if [[ -z "${war}" ]]; then >&2 echo 'The -w option is required.'; exit 1; fi
 
 # Exit immediately if something fails.
 error() {
@@ -81,7 +81,7 @@ error() {
 	
 	# Before bailing, always try to stop any running servers.
 	>&2 echo "Trying to stop any running servers before exiting..."
-	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
 
 	>&2 echo "Exiting with status ${code}."
 	exit "${code}"
@@ -219,7 +219,7 @@ while true; do
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to reload within ${serverReadyTimeoutSeconds} seconds. Trying to stop it..."
-		"${scriptDirectory}/bluebutton-fhir-server-stop.sh" --directory "${directory}"
+		"${scriptDirectory}/bluebutton-fhir-server-stop.sh" -d "${directory}"
 		exit 3
 	fi
 	sleep 1
