@@ -295,16 +295,9 @@ final class OutpatientClaimTransformer {
 						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
 								claimLine.getHcpcsCode().get()));
 			}
-			if (claimLine.getHcpcsInitialModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								claimLine.getHcpcsInitialModifierCode().get()));
-			}
-			if (claimLine.getHcpcsSecondModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								claimLine.getHcpcsSecondModifierCode().get()));
-			}
+			// set hcpcs modifier codes for the claim
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
+					claimLine.getHcpcsSecondModifierCode(), Optional.empty());
 
 			item.addAdjudication()
 					.setCategory(

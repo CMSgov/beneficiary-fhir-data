@@ -1760,5 +1760,46 @@ public final class TransformerUtils {
 		eob.setProvider(TransformerUtils.createIdentifierReference(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
 				providerNumber));
 	}
+	
+	/**
+	 * Sets the hcpcs related fields which are common among these claim types:
+	 * Carrier, Outpatient, DME, Hospice and HHA
+	 *
+	 * @param item
+	 *            the {@link ItemComponent} this method will modify
+	 * @param hcpcsInitialModifierCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_1ST_MDFR_CD:
+	 *            representing the hcpcs initial modifier code for the claim
+	 * @param hcpcsSecondModifierCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_2ND_MDFR_CD:
+	 *            representing the hcpcs second modifier code for the claim
+	 * @param hcpcsYearCode
+	 *            the {@link Optional}&lt;{@link Character}&gt;
+	 *            CARR_CLM_HCPCS_YR_CD: representing the hcpcs year code for the
+	 *            claim
+	 */
+	static void setHcpcsModifierCodes(ItemComponent item, Optional<String> hcpcsInitialModifierCode,
+			Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode) {
+		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
+			if (hcpcsInitialModifierCode.isPresent()) {
+				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
+						"" + hcpcsYearCode.get(), hcpcsInitialModifierCode.get()));
+			}
+			if (hcpcsSecondModifierCode.isPresent()) {
+				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
+						"" + hcpcsYearCode.get(), hcpcsSecondModifierCode.get()));
+			}
+		}
+		else { // while others do not...
+			if (hcpcsInitialModifierCode.isPresent()) {
+				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
+						hcpcsInitialModifierCode.get()));
+			}
+			if (hcpcsSecondModifierCode.isPresent()) {
+				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
+						hcpcsSecondModifierCode.get()));
+			}
+		}
+	}
 }
 
