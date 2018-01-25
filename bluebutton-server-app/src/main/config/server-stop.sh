@@ -29,7 +29,7 @@ while true; do
 done
 
 # Verify that all required options were specified.
-if [[ -z "${directory}" ]]; then >&2 echo 'The --directory option is required.'; exit 1; fi
+if [[ -z "${directory}" ]]; then >&2 echo 'The -d option is required.'; exit 1; fi
 
 # If the server isn't actually running, just exit.
 serverPids=$(pgrep -f ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*")
