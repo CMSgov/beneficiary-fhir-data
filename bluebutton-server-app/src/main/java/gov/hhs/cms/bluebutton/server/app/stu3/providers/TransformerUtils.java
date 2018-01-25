@@ -1430,11 +1430,12 @@ public final class TransformerUtils {
 					organizationNpi.get()));
 			eob.setFacility(TransformerUtils.createIdentifierReference(TransformerConstants.CODING_NPI_US,
 					organizationNpi.get()));
-			TransformerUtils.addExtensionCoding(eob.getFacility(),
-					TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
-					TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE, String.valueOf(claimFacilityTypeCode));
 		}
 
+		TransformerUtils.addExtensionCoding(eob.getFacility(),
+				TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE,
+				TransformerConstants.EXTENSION_CODING_CCW_FACILITY_TYPE, String.valueOf(claimFacilityTypeCode));
+		
 		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(
 					TransformerConstants.CODING_CCW_CLAIM_FREQUENCY, String.valueOf(claimFrequencyCode)));
 
