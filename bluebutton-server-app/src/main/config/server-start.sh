@@ -139,7 +139,7 @@ if [[ -f "${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterfa
 	visualVmArgs="${visualVmArgs} -Xbootclasspath/p:${directory}/${serverInstall}/modules/system/layers/base/org/jboss/logmanager/main/jboss-logmanager-1.5.2.Final.jar" 
 	jbossModulesSystemPackages="org.netbeans.lib.profiler.server,org.jboss.logmanager"
 else
-	echo "VisualVM directory not found: '${visualVm}'"
+	echo "Warning: VisualVM directory not found: '${visualVm}'"
 	visualVmArgs=""
 fi
 
