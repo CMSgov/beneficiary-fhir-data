@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Makes debugging problems a lot easier if this is always logged.
+echo "Server start script is being run as follows:"
+echo -e "$0 $@\n"
+
 # Constants.
 serverVersion='8.1.0.Final'
 serverArtifact="wildfly-dist-${serverVersion}.tar.gz"
