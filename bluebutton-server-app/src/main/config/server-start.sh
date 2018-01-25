@@ -88,9 +88,9 @@ error() {
 	local code="${3:-1}"
 
 	if [[ -n "$message" ]] ; then
-		>&2 echo "Error on or near line ${parent_lineno}: ${message}."
+		>&2 echo "Error on or near line ${parent_lineno} of file `basename $0`: ${message}."
 	else
-		>&2 echo "Error on or near line ${parent_lineno}."
+		>&2 echo "Error on or near line ${parent_lineno} of file `basename $0`."
 	fi
 	
 	# Before bailing, always try to stop any running servers.
