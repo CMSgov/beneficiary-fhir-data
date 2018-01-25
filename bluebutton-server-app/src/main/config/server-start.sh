@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Makes debugging problems a lot easier if this is always logged.
+echo "Server start script is being run as follows:"
+echo -e "$0 $@\n"
+
 # Constants.
 serverVersion='8.1.0.Final'
 serverArtifact="wildfly-dist-${serverVersion}.tar.gz"
@@ -66,16 +70,16 @@ done
 #echo "javaHome: '${javaHome}', maxHeapArg: '${maxHeapArg}', visualVm: '${visualVm}', directory: '${directory}', keyStore: '${keyStore}', trustStore: '${trustStore}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
 
 # Verify that all required options were specified.
-if [[ -z "${directory}" ]]; then >&2 echo 'The --directory option is required.'; exit 1; fi
-if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; exit 1; fi
-if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
+if [[ -z "${directory}" ]]; then >&2 echo 'The -d option is required.'; exit 1; fi
+if [[ -z "${keyStore}" ]]; then >&2 echo 'The -k option is required.'; exit 1; fi
+if [[ -z "${trustStore}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
 
 # Verify that java was found.
 if [[ -z "${javaHome}" ]]; then
-	command -v java >/dev/null 2>&1 || { echo >&2 "Java not found. Specify --javahome option."; exit 1; }
+	command -v java >/dev/null 2>&1 || { echo >&2 "Java not found. Specify -j option."; exit 1; }
 else
 	if [[ "${cygwin}" = true ]]; then javaHome=$(cygpath --unix "${javaHome}"); fi
-	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in --javahome: '${javaHome}'"; exit 1; }
+	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in -j: '${javaHome}'"; exit 1; }
 fi
 
 # Munge paths for Cygwin.
@@ -88,14 +92,14 @@ error() {
 	local code="${3:-1}"
 
 	if [[ -n "$message" ]] ; then
-		>&2 echo "Error on or near line ${parent_lineno}: ${message}."
+		>&2 echo "Error on or near line ${parent_lineno} of file `basename $0`: ${message}."
 	else
-		>&2 echo "Error on or near line ${parent_lineno}."
+		>&2 echo "Error on or near line ${parent_lineno} of file `basename $0`."
 	fi
 	
 	# Before bailing, always try to stop any running servers.
 	>&2 echo "Trying to stop any running servers before exiting..."
-	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
 
 	>&2 echo "Exiting with status ${code}."
 	exit "${code}"
@@ -139,7 +143,7 @@ if [[ -f "${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterfa
 	visualVmArgs="${visualVmArgs} -Xbootclasspath/p:${directory}/${serverInstall}/modules/system/layers/base/org/jboss/logmanager/main/jboss-logmanager-1.5.2.Final.jar" 
 	jbossModulesSystemPackages="org.netbeans.lib.profiler.server,org.jboss.logmanager"
 else
-	echo "VisualVM directory not found: '${visualVm}'"
+	echo "Warning: VisualVM directory not found: '${visualVm}'"
 	visualVmArgs=""
 fi
 
@@ -203,7 +207,7 @@ while true; do
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to start within ${serverTimeoutSeconds} seconds. Trying to stop it..."
-		"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+		"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
 		exit 3
 	fi
 	sleep 1
