@@ -127,12 +127,9 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getLocation(),
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine1.getProviderStateCode());
-
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-				claimLine1.getHcpcsInitialModifierCode().get(),
-				eobItem0.getModifier().get(0));
-		Assert.assertFalse(claimLine1.getHcpcsSecondModifierCode().isPresent());
-
+		
+		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, claimLine1.getHcpcsInitialModifierCode(),
+				claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(), 0/*index*/);
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + claim.getHcpcsYearCode().get(),
 				claimLine1.getHcpcsCode().get(), eobItem0.getService());
 

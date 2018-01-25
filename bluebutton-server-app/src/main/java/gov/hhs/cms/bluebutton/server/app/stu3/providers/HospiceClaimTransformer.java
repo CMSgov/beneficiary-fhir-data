@@ -171,16 +171,9 @@ final class HospiceClaimTransformer {
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
-			if (claimLine.getHcpcsInitialModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								claimLine.getHcpcsInitialModifierCode().get()));
-			}
-			if (claimLine.getHcpcsSecondModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								claimLine.getHcpcsSecondModifierCode().get()));
-			}
+			// set hcpcs modifier codes for the claim
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
+					claimLine.getHcpcsSecondModifierCode(), Optional.empty());
 
 			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,

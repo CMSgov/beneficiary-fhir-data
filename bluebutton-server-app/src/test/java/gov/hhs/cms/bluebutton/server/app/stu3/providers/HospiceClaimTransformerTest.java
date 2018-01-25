@@ -116,9 +116,8 @@ public final class HospiceClaimTransformerTest {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, claimLine1.getHcpcsCode().get(),
 				eobItem0.getService());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-				claimLine1.getHcpcsInitialModifierCode().get(), eobItem0.getModifier().get(0));
-		Assert.assertFalse(claimLine1.getHcpcsSecondModifierCode().isPresent());
+		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, claimLine1.getHcpcsInitialModifierCode(),
+				claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/*index*/);
 
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				claimLine1.getProviderPaymentAmount(), eobItem0.getAdjudication());

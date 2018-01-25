@@ -158,14 +158,10 @@ final class CarrierClaimTransformer {
 				item.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
 						"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsCode().get()));
 			}
-			if (claimLine.getHcpcsInitialModifierCode().isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-						"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsInitialModifierCode().get()));
-			}
-			if (claimLine.getHcpcsSecondModifierCode().isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-						"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsSecondModifierCode().get()));
-			}
+			
+			// set hcpcs modifier codes for the claim
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
+					claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
 
 			if (claimLine.getMtusCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS,

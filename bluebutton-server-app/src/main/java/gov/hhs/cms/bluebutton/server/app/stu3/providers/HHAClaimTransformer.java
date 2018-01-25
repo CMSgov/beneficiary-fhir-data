@@ -189,17 +189,9 @@ final class HHAClaimTransformer {
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPaymentAmount());
 
-			if (claimLine.getHcpcsInitialModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								claimLine.getHcpcsInitialModifierCode().get()));
-			}
-
-			if (claimLine.getHcpcsSecondModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								claimLine.getHcpcsSecondModifierCode().get()));
-			}
+			// set hcpcs modifier codes for the claim
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
+					claimLine.getHcpcsSecondModifierCode(), Optional.empty());
 
 			// Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonItemRevenue(item, eob, claimLine.getRevenueCenterCode(),
