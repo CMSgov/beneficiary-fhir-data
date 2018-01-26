@@ -81,7 +81,7 @@ error() {
 	
 	# Before bailing, always try to stop any running servers.
 	>&2 echo "Trying to stop any running servers before exiting..."
-	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
+	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${serverHome}/.."
 
 	>&2 echo "Exiting with status ${code}."
 	exit "${code}"
