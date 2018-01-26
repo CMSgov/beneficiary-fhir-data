@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -14,6 +15,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -52,11 +54,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.RifFilesProcessor;
  * Contains test utilities.
  */
 public final class ServerTestUtils {
-	/**
-	 * The base URL for the test server used in integration tests.
-	 */
-	public static final String TEST_SERVER_URL_BASE = "https://localhost:9094/baseDstu3";
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServerTestUtils.class);
 
 	/**
@@ -74,6 +71,11 @@ public final class ServerTestUtils {
 	 * @return a new FHIR {@link IGenericClient} for use
 	 */
 	public static IGenericClient createFhirClient(Optional<ClientSslIdentity> clientSslIdentity) {
+		// Figure out where the test server is running.
+		Properties testServerPorts = readTestServerPortsProperties();
+		int httpsPort = Integer.parseInt(testServerPorts.getProperty("server.port.https"));
+		String serverBaseUrl = String.format("https://localhost:%d/baseDstu3", httpsPort);
+
 		/*
 		 * We need to override the FHIR client's SSLContext. Unfortunately, that
 		 * requires overriding the entire HttpClient that it uses. Otherwise,
@@ -123,7 +125,7 @@ public final class ServerTestUtils {
 				.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement().build();
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
 
-		IGenericClient client = ctx.newRestfulGenericClient(TEST_SERVER_URL_BASE);
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
 		/*
 		 * The FHIR client logging (for tests) can be managed via the
@@ -237,8 +239,55 @@ public final class ServerTestUtils {
 	 * @return the {@link LoadAppOptions} to use with {@link RifLoader}
 	 */
 	private static LoadAppOptions createRifLoaderOptions() {
+		Properties testDbProps = readTestDatabaseProperties();
+		String jdbcUrl = testDbProps.getProperty(SpringConfiguration.PROP_DB_URL);
+		String jdbcUsername = testDbProps.getProperty(SpringConfiguration.PROP_DB_USERNAME);
+		String jdbcPassword = testDbProps.getProperty(SpringConfiguration.PROP_DB_PASSWORD);
+
 		return new LoadAppOptions(RifLoaderTestUtils.HICN_HASH_ITERATIONS, RifLoaderTestUtils.HICN_HASH_PEPPER,
-				"jdbc:hsqldb:hsql://localhost/test-embedded", "test", "test".toCharArray(),
-				LoadAppOptions.DEFAULT_LOADER_THREADS);
+				jdbcUrl, jdbcUsername, jdbcPassword.toCharArray(), LoadAppOptions.DEFAULT_LOADER_THREADS);
+	}
+
+	/**
+	 * @return the {@link Properties} from the
+	 *         <code>server-ports.properties</code> that should have been
+	 *         written out by the integration tests'
+	 *         <code>server-start.sh</code> script
+	 */
+	private static Properties readTestServerPortsProperties() {
+		/*
+		 * The working directory for tests will either be the module directory
+		 * or their parent directory. With that knowledge, we're searching for
+		 * the target/bluebutton-server directory.
+		 */
+		Path serverRunDir = Paths.get("target", "bluebutton-server");
+		if (!Files.isDirectory(serverRunDir))
+			serverRunDir = Paths.get("bluebutton-data-server-app", "target", "bluebutton-server");
+		if (!Files.isDirectory(serverRunDir))
+			throw new IllegalStateException();
+
+		Properties serverPortsProps = new Properties();
+		try {
+			serverPortsProps.load(new FileReader(serverRunDir.resolve("server-ports.properties").toFile()));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+		return serverPortsProps;
+	}
+
+	/**
+	 * @return the {@link Properties} from the
+	 *         {@link SpringConfiguration#findTestDatabaseProperties()} file
+	 *         that should have been written out by {@link SpringConfiguration}
+	 *         when it created the test database
+	 */
+	private static Properties readTestDatabaseProperties() {
+		Properties testDbProps = new Properties();
+		try {
+			testDbProps.load(new FileReader(SpringConfiguration.findTestDatabaseProperties().toFile()));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+		return testDbProps;
 	}
 }

@@ -8,10 +8,11 @@ echo -e "$0 $@\n"
 serverVersion='8.1.0.Final'
 serverArtifact="wildfly-dist-${serverVersion}.tar.gz"
 serverInstall="wildfly-${serverVersion}"
-serverPortHttps=9094
 serverTimeoutSeconds=120
 warArtifact='bluebutton-server-app.war'
 configArtifact='bluebutton-server-app-server-config.sh'
+dbUsername=""
+dbPassword=""
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -24,7 +25,7 @@ esac
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	j:m:v:d:k:t:u:n:p: \
+	j:m:v:d:a:h:s:k:t:u: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -36,11 +37,12 @@ javaHome=""
 maxHeapArg="-Xmx4g"
 visualVm=""
 directory=
+serverPortManagement=
+serverPortHttp=
+serverPortHttps=
 keyStore=
 trustStore=
-dbUrl="jdbc:hsqldb:mem:test"
-dbUsername=""
-dbPassword=""
+dbUrl="jdbc:bluebutton-test:hsqldb:mem"
 while true; do
 	case "$1" in
 		-j )
@@ -51,26 +53,28 @@ while true; do
 			visualVm="$2"; shift 2 ;;
 		-d )
 			directory="$2"; shift 2 ;;
+		-a )
+			serverPortManagement="$2"; shift 2 ;;
+		-h )
+			serverPortHttp="$2"; shift 2 ;;
+		-s )
+			serverPortHttps="$2"; shift 2 ;;
 		-k )
 			keyStore="$2"; shift 2 ;;
 		-t )
 			trustStore="$2"; shift 2 ;;
 		-u )
 			dbUrl="$2"; shift 2 ;;
-		-n )
-			dbUsername="$2"; shift 2 ;;
-		-p )
-			dbPassword="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
 done
 
-#echo "pwd: $(pwd)"
-#echo "javaHome: '${javaHome}', maxHeapArg: '${maxHeapArg}', visualVm: '${visualVm}', directory: '${directory}', keyStore: '${keyStore}', trustStore: '${trustStore}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
-
 # Verify that all required options were specified.
 if [[ -z "${directory}" ]]; then >&2 echo 'The -d option is required.'; exit 1; fi
+if [[ -z "${serverPortManagement}" ]]; then >&2 echo 'The -a option is required.'; exit 1; fi
+if [[ -z "${serverPortHttp}" ]]; then >&2 echo 'The -h option is required.'; exit 1; fi
+if [[ -z "${serverPortHttps}" ]]; then >&2 echo 'The -s option is required.'; exit 1; fi
 if [[ -z "${keyStore}" ]]; then >&2 echo 'The -k option is required.'; exit 1; fi
 if [[ -z "${trustStore}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
 
@@ -147,6 +151,18 @@ else
 	visualVmArgs=""
 fi
 
+# Write out the server ports being used to a file, where the tests can look them up.
+echo "Configured server to run on HTTPS port '${serverPortHttps}', HTTP port '${serverPortHttp}', and management port '${serverPortManagement}'."
+cat <<EOF > "${directory}/server-ports.properties"
+server.port.management=${serverPortManagement}
+server.port.http=${serverPortHttp}
+server.port.https=${serverPortHttps}
+EOF
+
+# Generate a random server ID and write it to a file.
+bluebuttonServerId=$RANDOM
+echo -n "${bluebuttonServerId}" > "${directory}/bluebutton-server-id.txt"
+
 # Write a correct server conf file.
 javaHomeLine=''
 if [[ -z "${javaHome}" ]]; then
@@ -173,11 +189,11 @@ JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
 # These ports are only used until the server is configured, but need to be
 # set anyways, as the defaults on first launch conflict with Jenkins and other 
 # such services.
-JAVA_OPTS="\$JAVA_OPTS -Djboss.http.port=7780 -Djboss.https.port=${serverPortHttps}"
+JAVA_OPTS="\$JAVA_OPTS -Djboss.management.http.port=${serverPortManagement} -Djboss.http.port=${serverPortHttp} -Djboss.https.port=${serverPortHttps}"
 
 # This just adds a searchable bit of text to the command line, so we can 
 # determine which java processes were started by this script.
-JAVA_OPTS="\$JAVA_OPTS -Dbluebutton-server"
+JAVA_OPTS="\$JAVA_OPTS -Dbluebutton-server-${bluebuttonServerId}"
 EOF
 
 # Launch the server in the background.
@@ -218,6 +234,7 @@ echo "Configuring server..."
 chmod a+x "${directory}/${configArtifact}"
 "${directory}/${configArtifact}" \
 	-h "${directory}/${serverInstall}" \
+	-a "${serverPortManagement}" \
 	-s "${serverPortHttps}" \
 	-k "${keyStore}" \
 	-t "${trustStore}" \

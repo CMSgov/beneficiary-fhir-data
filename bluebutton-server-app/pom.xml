@@ -18,6 +18,13 @@
 	<properties>
 		<hapi-fhir.version>2.5</hapi-fhir.version>
 		<jersey.version>2.25.1</jersey.version>
+
+		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec
+			plugin. These settings are pulled out as POM properties so that they can
+			be adjusted via profiles. Note that the specific DB URL here is special-cased
+			by SpringConfiguration, which will launch an embedded HSQL DB to host it. -->
+		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
+		<its.bbfhir.db.url>jdbc:bluebutton-test:hsqldb:mem</its.bbfhir.db.url>
 	</properties>
 
 	<dependencies>
@@ -243,17 +250,35 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<!-- Attach the config files that should be used to run this project's 
-					WAR. This ensures that they are included in Maven install, deploy, etc. operations. -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<!-- Attach the config files that should be used to run this project's
+							WAR. This ensures that they are included in Maven install, deploy, etc. operations. -->
 						<id>attach-artifacts</id>
 						<phase>package</phase>
 						<goals>
 							<goal>attach-artifact</goal>
 						</goals>
+					</execution>
+					<execution>
+						<!-- Reserve random available ports for Wildfly/JBoss to run on. -->
+						<id>reserve-server-ports</id>
+						<goals>
+							<goal>reserve-network-port</goal>
+						</goals>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<minPortNumber>8000</minPortNumber>
+							<maxPortNumber>9999</maxPortNumber>
+							<randomPort>true</randomPort>
+							<portNames>
+								<portName>server.port.management</portName>
+								<portName>server.port.http</portName>
+								<portName>server.port.https</portName>
+							</portNames>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -317,21 +342,20 @@
 								<argument>${java.home}</argument>
 								<argument>-m</argument>
 								<argument>${its.bbfhir.server.jvmargs}</argument>
-								<!-- The script is smart enough to ignore this arg if an invalid 
-									directory is specified (e.g. because this Maven property isn't set). -->
-								<argument>-v=${visualVm}</argument>
 								<argument>-d</argument>
 								<argument>${project.build.directory}/bluebutton-server</argument>
+								<argument>-a</argument>
+								<argument>${server.port.management}</argument>
+								<argument>-h</argument>
+								<argument>${server.port.http}</argument>
+								<argument>-s</argument>
+								<argument>${server.port.https}</argument>
 								<argument>-k</argument>
 								<argument>${project.build.directory}/../../dev/ssl-stores/server-keystore.jks</argument>
 								<argument>-t</argument>
 								<argument>${project.build.directory}/../../dev/ssl-stores/server-truststore.jks</argument>
 								<argument>-u</argument>
 								<argument>${its.bbfhir.db.url}</argument>
-								<argument>-n</argument>
-								<argument>${its.bbfhir.db.username}</argument>
-								<argument>-p</argument>
-								<argument>${its.bbfhir.db.password}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
@@ -375,5 +399,50 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<!-- This profile will only be active for builds inside of Eclipse (managed
+				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
+			<id>m2e-manage-executions</id>
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<!--This plugin's configuration is used to store Eclipse m2e settings
+								only. It has no influence on the Maven build itself. -->
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.codehaus.mojo</groupId>
+												<artifactId>build-helper-maven-plugin</artifactId>
+												<versionRange>[1.12,)</versionRange>
+												<goals>
+													<goal>reserve-network-port</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<ignore></ignore>
+											</action>
+										</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
