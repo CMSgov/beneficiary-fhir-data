@@ -270,8 +270,8 @@
 						</goals>
 						<phase>pre-integration-test</phase>
 						<configuration>
-							<minPortNumber>5001</minPortNumber>
-							<maxPortNumber>32767</maxPortNumber>
+							<minPortNumber>8000</minPortNumber>
+							<maxPortNumber>9999</maxPortNumber>
 							<randomPort>true</randomPort>
 							<portNames>
 								<portName>server.port.management</portName>
