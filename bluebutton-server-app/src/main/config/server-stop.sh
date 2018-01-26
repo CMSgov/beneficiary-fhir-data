@@ -31,9 +31,17 @@ done
 # Verify that all required options were specified.
 if [[ -z "${directory}" ]]; then >&2 echo 'The -d option is required.'; exit 1; fi
 
+# Read bluebuttonServerId from a file.
+bluebuttonServerId=
+bluebuttonServerIdFile="${directory}/bluebutton-server-id.txt"
+if [[ -f "${bluebuttonServerIdFile}" ]]; then
+	bluebuttonServerId=$(cat "${bluebuttonServerIdFile}")
+fi
+if [[ -z "${bluebuttonServerId}" ]]; then >&2 echo "No server ID found in '${bluebuttonServerIdFile}'."; exit 1; fi
+
 # If the server isn't actually running, just exit.
-serverPids=$(pgrep -f ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*")
-if [[ -z "${serverPids}" ]]; then echo 'No 'bluebutton-server' processes found to stop.'; exit 0; fi
+serverPids=$(pgrep -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*")
+if [[ -z "${serverPids}" ]]; then echo "No '-Dbluebutton-server-${bluebuttonServerId}' processes found to stop."; exit 0; fi
 
 # Use the Wildfly CLI to stop the server.
 serverLogRun="${directory}/${serverInstall}/server-console.log"
@@ -70,12 +78,12 @@ done
 # _said_ it stopped, but really didn't (I've observed this happening). So here,
 # we just double check via the process list, and kill it the mean way if 
 # needed.
-serverPids=$(pgrep -f ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*")
+serverPids=$(pgrep -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*")
 if [[ -z "${serverPids}" ]]; then
 	echo "Server did actually stop."
 	exit 0
 else
-	>&2 echo "Server processes still found. Sending KILL signal to all 'bluebutton-server' processes."
-	pkill -KILL -f ".*java.*-Dbluebutton-server.*jboss-modules\.jar.*"
+	>&2 echo "Server processes still found. Sending KILL signal to all '-Dbluebutton-server-${bluebuttonServerId}' processes."
+	pkill -KILL -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*"
 	>&2 echo "Server processes sent KILL signal."
 fi

@@ -1,6 +1,12 @@
 package gov.hhs.cms.bluebutton.server.app;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -53,6 +59,13 @@ public class SpringConfiguration {
 	public static final String PROP_DB_CONNECTIONS_MAX = "bbfhir.db.connections.max";
 
 	/**
+	 * This fake JDBC URL prefix indicates to {@link SpringConfiguration} and
+	 * <code>ServerTestUtils</code> that a database should be created for the
+	 * integration tests being run.
+	 */
+	private static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bluebutton-test:";
+
+	/**
 	 * The {@link Bean#name()} for the {@link List} of STU3
 	 * {@link IResourceProvider} beans for the application.
 	 */
@@ -85,12 +98,155 @@ public class SpringConfiguration {
 			@Value("${" + PROP_DB_USERNAME + "}") String username,
 			@Value("${" + PROP_DB_PASSWORD + "}") String password,
 			@Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText, MetricRegistry metricRegistry) {
+		HikariDataSource poolingDataSource;
+		if (url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
+			poolingDataSource = createTestDatabaseIfNeeded(url, connectionsMaxText, metricRegistry);
+		} else {
+			poolingDataSource = new HikariDataSource();
+			poolingDataSource.setJdbcUrl(url);
+			poolingDataSource.setUsername(username);
+			poolingDataSource.setPassword(password);
+			configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
+		}
+
+		return poolingDataSource;
+	}
+
+	/**
+	 * <p>
+	 * When running this application for integration testing, this application
+	 * should provision its own database. In addition, it must ensure that the
+	 * database is accessible to other processes on this system, which allows
+	 * the test code to connect directly to the database and load/remove data.
+	 * </p>
+	 * <p>
+	 * To determine whether or not this is the case, the integration tests use
+	 * special fake JDBC URLs that are special-cased here and in the
+	 * <code>ServerTestUtils</code> class.
+	 * </p>
+	 * 
+	 * @param url
+	 *            the JDBC URL that the application was configured to use
+	 * @param connectionsMaxText
+	 *            the maximum number of database connections to use
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} for the application
+	 */
+	private static HikariDataSource createTestDatabaseIfNeeded(String url, String connectionsMaxText,
+			MetricRegistry metricRegistry) {
+		if (!url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
+			throw new IllegalArgumentException();
+		}
+
+		/*
+		 * Note: Eventually, we may add support for other test DB types, but
+		 * right now only in-memory HSQL DBs are supported.
+		 */
+		if (!url.endsWith(":hsqldb:mem")) {
+			throw new BadCodeMonkeyException("Unsupported test URL: " + url);
+		}
+
+		/*
+		 * Select a random local port to run the HSQL DB server on, so that one
+		 * test run doesn't conflict with another.
+		 */
+		int hsqldbPort = findFreePort();
+
+		HsqlProperties p = new HsqlProperties();
+		p.setProperty("server.database.0", "mem:test-embedded;user=test;password=test");
+		p.setProperty("server.dbname.0", "test-embedded");
+		p.setProperty("server.port", "" + hsqldbPort);
+		p.setProperty("hsqldb.tx", "mvcc");
+		org.hsqldb.server.Server server = new org.hsqldb.server.Server();
+
+		try {
+			server.setProperties(p);
+		} catch (IOException | AclFormatException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+
+		server.setLogWriter(null);
+		server.setErrWriter(null);
+		server.start();
+
+		// Create the DataSource to connect to that shiny new DB.
 		HikariDataSource poolingDataSource = new HikariDataSource();
+		poolingDataSource.setJdbcUrl(String.format("jdbc:hsqldb:hsql://localhost:%d/test-embedded", hsqldbPort));
+		poolingDataSource.setUsername("test");
+		poolingDataSource.setPassword("test");
+		configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
 
-		poolingDataSource.setJdbcUrl(url);
-		poolingDataSource.setUsername(username);
-		poolingDataSource.setPassword(password);
+		/*
+		 * Ensure the DataSource DB's schema is ready to use, because once
+		 * Spring starts, anything can try to use it.
+		 */
+		DatabaseSchemaManager.createOrUpdateSchema(poolingDataSource);
 
+		/*
+		 * Write out the DB properties for <code>ServerTestUtils</code> to use.
+		 */
+		Properties testDbProps = new Properties();
+		testDbProps.setProperty(PROP_DB_URL, poolingDataSource.getJdbcUrl());
+		testDbProps.setProperty(PROP_DB_USERNAME, poolingDataSource.getUsername());
+		testDbProps.setProperty(PROP_DB_PASSWORD, poolingDataSource.getPassword());
+		Path testDbPropsPath = findTestDatabaseProperties();
+		try {
+			testDbProps.store(new FileWriter(testDbPropsPath.toFile()), null);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+
+		return poolingDataSource;
+	}
+
+	/**
+	 * @return the {@link Path} to the {@link Properties} file in
+	 *         <code>target/bluebutton-server</code> that the test DB connection
+	 *         properties will be written out to
+	 */
+	public static Path findTestDatabaseProperties() {
+		Path serverRunDir = Paths.get("target", "bluebutton-server");
+		if (!Files.isDirectory(serverRunDir))
+			serverRunDir = Paths.get("bluebutton-data-server-app", "target", "bluebutton-server");
+		if (!Files.isDirectory(serverRunDir))
+			throw new IllegalStateException();
+
+		if (!Files.exists(serverRunDir))
+			throw new IllegalStateException("Unable to find 'bluebutton-server' working directory.");
+
+		Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");
+		return testDbPropertiesPath;
+	}
+
+	/**
+	 * Note: It's possible for this to result in race conditions, if the random
+	 * port selected enters use after this method returns and before whatever
+	 * called this method gets a chance to grab it. It's pretty unlikely,
+	 * though, and there's not much we can do about it, either. So.
+	 *
+	 * @return a free local port number
+	 */
+	private static int findFreePort() {
+		try (ServerSocket socket = new ServerSocket(0)) {
+			socket.setReuseAddress(true);
+			return socket.getLocalPort();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	/**
+	 * @param poolingDataSource
+	 *            the {@link HikariDataSource} to be configured, which must
+	 *            already have its basic connection properties (URL, username,
+	 *            password) configured
+	 * @param connectionsMaxText
+	 *            the maximum number of database connections to use
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} for the application
+	 */
+	private static void configureDataSource(HikariDataSource poolingDataSource,
+			String connectionsMaxText, MetricRegistry metricRegistry) {
 		int connectionsMax;
 		try {
 			connectionsMax = Integer.parseInt(connectionsMaxText);
@@ -106,49 +262,6 @@ public class SpringConfiguration {
 
 		poolingDataSource.setRegisterMbeans(true);
 		poolingDataSource.setMetricRegistry(metricRegistry);
-
-		createTestDatabaseIfNeeded(poolingDataSource);
-
-		return poolingDataSource;
-	}
-
-	/**
-	 * Needed by our integration tests: if we're configured to run against the
-	 * embedded HSQL DB, start a server for that database. The standalone
-	 * embedded HSQL server has to be used, in order to ensure that the tests
-	 * can connect directly to the database (to insert data, etc.).
-	 * 
-	 * @param dataSource
-	 *            the {@link DataSource} that will be used to connect to the
-	 *            database
-	 */
-	private void createTestDatabaseIfNeeded(HikariDataSource dataSource) {
-		String jdbcUrl = System.getProperty(SpringConfiguration.PROP_DB_URL, "");
-		if (!jdbcUrl.startsWith("jdbc:hsqldb:hsql://localhost/test-embedded"))
-			return;
-
-		HsqlProperties p = new HsqlProperties();
-		p.setProperty("server.database.0", "mem:test-embedded;user=test;password=test");
-		p.setProperty("server.dbname.0", "test-embedded");
-		p.setProperty("server.port", "9001");
-		p.setProperty("hsqldb.tx", "mvcc");
-		org.hsqldb.server.Server server = new org.hsqldb.server.Server();
-
-		try {
-			server.setProperties(p);
-		} catch (IOException | AclFormatException e) {
-			throw new BadCodeMonkeyException(e);
-		}
-
-		server.setLogWriter(null);
-		server.setErrWriter(null);
-		server.start();
-
-		/*
-		 * Ensure the DataSource DB's schema is ready to use, because once
-		 * Spring starts, anything can try to use it.
-		 */
-		DatabaseSchemaManager.createOrUpdateSchema(dataSource);
 	}
 
 	/**
