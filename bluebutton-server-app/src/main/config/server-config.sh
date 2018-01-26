@@ -19,7 +19,7 @@ esac
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	h:s:k:t:w:u:n:p: \
+	h:a:s:k:t:w:u:n:p: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -28,7 +28,8 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 serverHome=
-httpsPort=
+serverPortManagement=
+serverPortHttps=
 keyStore=
 trustStore=
 war=
@@ -39,8 +40,10 @@ while true; do
 	case "$1" in
 		-h )
 			serverHome="$2"; shift 2 ;;
+		-a )
+			serverPortManagement="$2"; shift 2 ;;
 		-s )
-			httpsPort="$2"; shift 2 ;;
+			serverPortHttps="$2"; shift 2 ;;
 		-k )
 			keyStore="$2"; shift 2 ;;
 		-t )
@@ -58,11 +61,10 @@ while true; do
 	esac
 done
 
-#echo "serverHome: '${serverHome}', httpsPort: '${httpsPort}', keyStore: '${keyStore}', trustStore: '${trustStore}', war: '${war}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
-
 # Verify that all required options were specified.
 if [[ -z "${serverHome}" ]]; then >&2 echo 'The -h option is required.'; exit 1; fi
-if [[ -z "${httpsPort}" ]]; then >&2 echo 'The -s option is required.'; exit 1; fi
+if [[ -z "${serverPortManagement}" ]]; then >&2 echo 'The -a option is required.'; exit 1; fi
+if [[ -z "${serverPortHttps}" ]]; then >&2 echo 'The -s option is required.'; exit 1; fi
 if [[ -z "${keyStore}" ]]; then >&2 echo 'The -k option is required.'; exit 1; fi
 if [[ -z "${trustStore}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
 if [[ -z "${war}" ]]; then >&2 echo 'The -w option is required.'; exit 1; fi
@@ -131,7 +133,7 @@ batch
 
 # Enable and configure HTTPS.
 /subsystem=undertow/server=default-server/https-listener=https/:add(socket-binding=https,security-realm=ApplicationRealm)
-/socket-binding-group=standard-sockets/socket-binding=https/:write-attribute(name=port,value="${httpsPort}")
+/socket-binding-group=standard-sockets/socket-binding=https/:write-attribute(name=port,value="${serverPortHttps}")
 /core-service=management/security-realm=ApplicationRealm/server-identity=ssl/:add(keystore-path="${keyStore//\\//}",keystore-password="changeit",key-password="changeit")
 
 # Per the recommendations on https://wiki.mozilla.org/Security/Server_Side_TLS,
@@ -204,6 +206,7 @@ jBossCli ()
 # Use the Wildfly CLI to configure the server.
 jBossCli \
 	--connect \
+	--controller=localhost:${serverPortManagement} \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	--file=${scriptConfigArg} \
 	&> "${serverHome}/server-config.log"
@@ -213,7 +216,7 @@ echo "Server configured. Waiting for it to finish reloading..."
 startSeconds=$SECONDS
 endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 while true; do
-	if jBossCli --connect --command="ls" &> /dev/null; then
+	if jBossCli --connect --controller=localhost:${serverPortManagement} --command="ls" &> /dev/null; then
 		echo "Server reloaded in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
@@ -236,6 +239,7 @@ EOF
 echo "Deploying application: '${war}'..."
 jBossCli \
 	--connect \
+	--controller=localhost:${serverPortManagement} \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	--file=${scriptDeployArg} \
 	>> "${serverHome}/server-config.log" 2>&1

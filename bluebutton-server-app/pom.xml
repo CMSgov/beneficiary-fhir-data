@@ -274,6 +274,7 @@
 							<maxPortNumber>32767</maxPortNumber>
 							<randomPort>true</randomPort>
 							<portNames>
+								<portName>server.port.management</portName>
 								<portName>server.port.http</portName>
 								<portName>server.port.https</portName>
 							</portNames>
@@ -343,6 +344,8 @@
 								<argument>${its.bbfhir.server.jvmargs}</argument>
 								<argument>-d</argument>
 								<argument>${project.build.directory}/bluebutton-server</argument>
+								<argument>-a</argument>
+								<argument>${server.port.management}</argument>
 								<argument>-h</argument>
 								<argument>${server.port.http}</argument>
 								<argument>-s</argument>

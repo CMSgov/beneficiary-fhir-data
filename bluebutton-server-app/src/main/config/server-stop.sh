@@ -10,7 +10,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	d: \
+	d:a: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -19,10 +19,13 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 directory=
+serverPortManagement=
 while true; do
 	case "$1" in
 		-d )
 			directory="$2"; shift 2 ;;
+		-a )
+			serverPortManagement="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -39,6 +42,15 @@ if [[ -f "${bluebuttonServerIdFile}" ]]; then
 fi
 if [[ -z "${bluebuttonServerId}" ]]; then >&2 echo "No server ID found in '${bluebuttonServerIdFile}'."; exit 1; fi
 
+# Also try to read serverPortManagement from a file.
+if [[ -z "${serverPortManagement}" ]]; then
+	serverPortManagementFile="${directory}/server-ports.properties"
+	if [[ -f "${serverPortManagementFile}" ]]; then
+		serverPortManagement=$(grep "^server.port.management=" "${serverPortManagementFile}" | cut -d'=' -f2 )
+	fi
+fi
+if [[ -z "${serverPortManagement}" ]]; then >&2 echo 'Unable to determine server management port.'; exit 1; fi
+
 # If the server isn't actually running, just exit.
 serverPids=$(pgrep -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*")
 if [[ -z "${serverPids}" ]]; then echo "No '-Dbluebutton-server-${bluebuttonServerId}' processes found to stop."; exit 0; fi
@@ -48,6 +60,7 @@ serverLogRun="${directory}/${serverInstall}/server-console.log"
 serverLogStop="${directory}/${serverInstall}/server-stop.log"
 "${directory}/${serverInstall}/bin/jboss-cli.sh" \
 	--connect \
+	--controller=localhost:${serverPortManagement} \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	--command=shutdown \
 	&> "${serverLogStop}"
