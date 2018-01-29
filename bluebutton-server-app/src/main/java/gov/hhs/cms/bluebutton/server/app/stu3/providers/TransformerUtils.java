@@ -453,9 +453,7 @@ public final class TransformerUtils {
 	 *         the specified parameters
 	 */
 	static Reference referencePatient(String patientId) {
-		// FIXME Should reference the Patient ID now (not an identifier)
-		return new Reference(
-				String.format("Patient?identifier=%s|%s", "CCW.BENE_ID", patientId));
+		return new Reference(String.format("Patient/%s", patientId));
 	}
 
 	/**
@@ -937,8 +935,18 @@ public final class TransformerUtils {
 		eob.getInsurance()
 				.setCoverage(referenceCoverage(beneficiaryId, coverageType));
 		eob.setPatient(referencePatient(beneficiaryId));
-		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
-
+		switch (finalAction) {
+		case 'F':
+			eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+			break;
+		case 'N':
+			eob.setStatus(ExplanationOfBenefitStatus.CANCELLED);
+			break;
+		default:
+			// unknown final action value
+			throw new BadCodeMonkeyException();
+		}
+		
 		if (dateFrom.isPresent()) {
 			validatePeriodDates(dateFrom, dateThrough);
 			setPeriodStart(eob.getBillablePeriod(), dateFrom.get());
