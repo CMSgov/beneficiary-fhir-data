@@ -43,6 +43,25 @@ public final class CarrierClaimTransformerTest {
 	}
 
 	/**
+	 * Verifies that {@link CarrierClaimTransformer#transform(Object)} works as
+	 * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER}
+	 * {@link CarrierClaim}.
+	 *
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void transformSampleURecord() throws FHIRException {
+		List<Object> parsedRecords = ServerTestUtils
+				.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+		CarrierClaim claim = parsedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
+				.findFirst().get();
+
+		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(claim);
+		assertMatches(claim, eob);
+	}
+	
+	/**
 	 * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if
 	 * it were produced from the specified {@link CarrierClaim}.
 	 * 

@@ -856,7 +856,17 @@ final class TransformerTestUtils {
 		Assert.assertEquals(TransformerUtils.referenceCoverage(beneficiaryId, coverageType).getReference(),
 				eob.getInsurance().getCoverage().getReference());
 
-		Assert.assertEquals("active", eob.getStatus().toCode());
+		switch (finalAction) {
+		case 'F':
+			Assert.assertEquals("active", eob.getStatus().toCode());
+			break;
+		case 'N':
+			Assert.assertEquals("cancelled", eob.getStatus().toCode());
+			break;
+		default:
+			throw new BadCodeMonkeyException();
+		}
+		
 		if (dateFrom.isPresent()) {
 			assertDateEquals(dateFrom.get(), eob.getBillablePeriod().getStartElement());
 			assertDateEquals(dateThrough.get(), eob.getBillablePeriod().getEndElement());
