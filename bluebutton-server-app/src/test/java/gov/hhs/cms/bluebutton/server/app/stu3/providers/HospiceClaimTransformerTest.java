@@ -99,8 +99,8 @@ public final class HospiceClaimTransformerTest {
 
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, claimLine1.getHcpcsInitialModifierCode(),
-				claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */, claimLine1.getHcpcsCode());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
+				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
 
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				claimLine1.getProviderPaymentAmount(), eobItem0.getAdjudication());

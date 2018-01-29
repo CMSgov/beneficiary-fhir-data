@@ -1263,12 +1263,17 @@ final class TransformerTestUtils {
 	}
 	
 	/**
-	 * Tests the hcpcs modifier codes are set as expected in the item component.
-	 * This field is common among these claim types: Carrier, Outpatient, DME,
-	 * Hospice and HHA.
+	 * Tests that the hcpcs code and hcpcs modifier codes are set as expected in the
+	 * item component. The hcpcsCode field is common among these claim types:
+	 * Carrier, Inpatient, Outpatient, DME, Hospice, HHA and SNF. The modifier
+	 * fields are common among these claim types: Carrier, Outpatient, DME, Hospice
+	 * and HHA.
 	 *
 	 * @param item
 	 *            the {@link ItemComponent} this method will test against
+	 * @param hcpcCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing
+	 *            the hcpcs code for the claim
 	 * @param hcpcsInitialModifierCode
 	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_1ST_MDFR_CD:
 	 *            representing the expected hcpcs initial modifier code for the
@@ -1283,13 +1288,10 @@ final class TransformerTestUtils {
 	 * @param index
 	 *            the {@link int} modifier index in the item containing the expected
 	 *            code
-	 * @param hcpcCode
-	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing
-	 *            the hcpcs code for the claim
 	 */
-	static void assertHcpcsModiferCodes(ItemComponent item, Optional<String> hcpcsInitialModifierCode,
-			Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode, int index,
-			Optional<String> hcpcsCode) {
+	static void assertHcpcsCodes(ItemComponent item, Optional<String> hcpcsCode,
+			Optional<String> hcpcsInitialModifierCode, Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode,
+			int index) {
 		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
 			assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(), hcpcsInitialModifierCode.get(),
 					item.getModifier().get(index));

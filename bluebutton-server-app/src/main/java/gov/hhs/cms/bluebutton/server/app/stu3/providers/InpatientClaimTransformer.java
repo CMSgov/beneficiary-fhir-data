@@ -208,8 +208,8 @@ final class InpatientClaimTransformer {
 					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
 
 			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, Optional.empty(), Optional.empty(), Optional.empty(),
-					claimLine.getHcpcsCode());
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(), Optional.empty(), Optional.empty(),
+					Optional.empty());
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 

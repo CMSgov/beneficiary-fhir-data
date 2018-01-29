@@ -114,9 +114,9 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
 				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(), eobItem0.getService());
 		Assert.assertEquals(1, eobItem0.getModifier().size());
-		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, claimLine1.getHcpcsInitialModifierCode(),
-				claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(), 0/* index */,
-				claimLine1.getHcpcsCode());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
+				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
+				0/* index */);
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_MTUS,
 				TransformerConstants.EXTENSION_CODING_MTUS, String.valueOf(claimLine1.getMtusCode().get()));

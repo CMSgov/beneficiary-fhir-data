@@ -1818,11 +1818,16 @@ public final class TransformerUtils {
 	}
 	
 	/**
-	 * Sets the hcpcs related fields which are common among these claim types:
-	 * Carrier, Outpatient, DME, Hospice and HHA
+	 * Sets the hcpcsCode field which is common among these claim types: Carrier,
+	 * Inpatient, Outpatient, DME, Hospice, HHA and SNF. Sets the hcpcs related
+	 * fields which are common among these claim types: Carrier, Outpatient, DME,
+	 * Hospice and HHA
 	 *
 	 * @param item
 	 *            the {@link ItemComponent} this method will modify
+	 * @param hcpcsCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing
+	 *            the hcpcs code for the claim
 	 * @param hcpcsInitialModifierCode
 	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_1ST_MDFR_CD:
 	 *            representing the hcpcs initial modifier code for the claim
@@ -1833,12 +1838,9 @@ public final class TransformerUtils {
 	 *            the {@link Optional}&lt;{@link Character}&gt;
 	 *            CARR_CLM_HCPCS_YR_CD: representing the hcpcs year code for the
 	 *            claim
-	 * @param hcpcsCode
-	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing
-	 *            the hcpcs code for the claim
 	 */
-	static void setHcpcsModifierCodes(ItemComponent item, Optional<String> hcpcsInitialModifierCode,
-			Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode, Optional<String> hcpcsCode) {
+	static void setHcpcsModifierCodes(ItemComponent item, Optional<String> hcpcsCode,
+			Optional<String> hcpcsInitialModifierCode, Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode) {
 		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
 			if (hcpcsInitialModifierCode.isPresent()) {
 				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,

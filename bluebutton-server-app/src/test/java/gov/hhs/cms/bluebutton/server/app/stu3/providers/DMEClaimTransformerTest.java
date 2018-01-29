@@ -108,9 +108,9 @@ public final class DMEClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine1.getProviderStateCode());
 		
-		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, claimLine1.getHcpcsInitialModifierCode(),
-				claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(), 0/* index */,
-				claimLine1.getHcpcsCode());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
+				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
+				0/* index */);
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + claim.getHcpcsYearCode().get(),
 				claimLine1.getHcpcsCode().get(), eobItem0.getService());
 

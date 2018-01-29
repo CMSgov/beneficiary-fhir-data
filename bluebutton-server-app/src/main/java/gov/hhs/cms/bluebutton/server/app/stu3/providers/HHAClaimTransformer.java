@@ -170,8 +170,8 @@ final class HHAClaimTransformer {
 					.setValue(claimLine.getPaymentAmount());
 
 			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
-					claimLine.getHcpcsSecondModifierCode(), Optional.empty(), claimLine.getHcpcsCode());
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
+					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), Optional.empty());
 
 			// Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonItemRevenue(item, eob, claimLine.getRevenueCenterCode(),

@@ -135,8 +135,8 @@ public final class InpatientClaimTransformerTest {
 
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, Optional.empty(), Optional.empty(), Optional.empty(),
-				0/* index */, claimLine1.getHcpcsCode());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(), Optional.empty(), Optional.empty(),
+				Optional.empty(), 0/* index */);
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(), TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
 				TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,

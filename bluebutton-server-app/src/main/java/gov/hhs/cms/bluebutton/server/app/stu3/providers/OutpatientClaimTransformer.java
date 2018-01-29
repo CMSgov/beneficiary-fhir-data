@@ -279,8 +279,8 @@ final class OutpatientClaimTransformer {
 			}
 
 			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
-					claimLine.getHcpcsSecondModifierCode(), Optional.empty(), claimLine.getHcpcsCode());
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
+					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), Optional.empty());
 
 			item.addAdjudication()
 					.setCategory(

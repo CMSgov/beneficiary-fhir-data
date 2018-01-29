@@ -141,8 +141,8 @@ final class CarrierClaimTransformer {
 									"" + claimLine.getReducedPaymentPhysicianAsstCode()));
 			
 			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
-					claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode(), claimLine.getHcpcsCode());
+			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
+					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
 
 			if (claimLine.getMtusCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS,

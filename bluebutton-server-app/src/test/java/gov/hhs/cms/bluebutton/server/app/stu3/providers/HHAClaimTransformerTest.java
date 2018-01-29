@@ -94,8 +94,8 @@ public final class HHAClaimTransformerTest {
 				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr1stAnsiCd().get(),
 				eobItem0.getAdjudication());
 
-		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, claimLine1.getHcpcsInitialModifierCode(),
-				claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */, claimLine1.getHcpcsCode());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
+				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT,
 				claimLine1.getRateAmount(),
 				eobItem0.getAdjudication());

@@ -130,8 +130,8 @@ public final class SNFClaimTransformerTest {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
 				claimLine1.getRevenueCenter(), eobItem0.getRevenue());
-		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, Optional.empty(), Optional.empty(), Optional.empty(),
-				0/* index */, claimLine1.getHcpcsCode());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(), Optional.empty(), Optional.empty(),
+				Optional.empty(), 0/* index */);
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(),
 				TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
