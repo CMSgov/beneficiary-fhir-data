@@ -56,30 +56,15 @@ public final class InpatientClaimTransformerTest {
 	 *             (indicates test failure)
 	 */
 	static void assertMatches(InpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-		TransformerTestUtils.assertNoEncodedOptionals(eob);
-
-		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.INPATIENT, claim.getClaimId()),
-				eob.getIdElement().getIdPart());
-
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_ID, claim.getClaimId(),
-				eob.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID,
-				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
-		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
-				eob.getPatient().getReference());
-		Assert.assertEquals(
-				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_A).getReference(),
-				eob.getInsurance().getCoverage().getReference());
-		Assert.assertEquals("active", eob.getStatus().toCode());
-
-		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
-		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
+		// Test to ensure group level fields between all claim types match
+		TransformerTestUtils.assertEobCommonClaimHeaderData(eob, claim.getClaimId(), claim.getBeneficiaryId(),
+				ClaimType.INPATIENT, claim.getClaimGroupId().toPlainString(), MedicareSegment.PART_A,
+				Optional.of(claim.getDateFrom()), Optional.of(claim.getDateThrough()),
+				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 		
-		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
-
 		TransformerTestUtils.assertDateEquals(claim.getClaimAdmissionDate().get(), eob.getHospitalization().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getBeneficiaryDischargeDate().get(), eob.getHospitalization().getEndElement());
 
@@ -150,8 +135,8 @@ public final class InpatientClaimTransformerTest {
 
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, claimLine1.getHcpcsCode().get(),
-				eobItem0.getService());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(), Optional.empty(), Optional.empty(),
+				Optional.empty(), 0/* index */);
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(), TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
 				TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,

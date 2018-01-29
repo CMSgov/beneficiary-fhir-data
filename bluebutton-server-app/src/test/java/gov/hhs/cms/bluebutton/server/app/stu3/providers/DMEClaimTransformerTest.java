@@ -56,24 +56,11 @@ public final class DMEClaimTransformerTest {
 	 *             (indicates test failure)
 	 */
 	static void assertMatches(DMEClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-		TransformerTestUtils.assertNoEncodedOptionals(eob);
-
-		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()),
-				eob.getIdElement().getIdPart());
-
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_ID, claim.getClaimId(),
-				eob.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID,
-				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
-		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
-				eob.getPatient().getReference());
-		Assert.assertEquals(
-				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_B).getReference(),
-				eob.getInsurance().getCoverage().getReference());
-		Assert.assertEquals("active", eob.getStatus().toCode());
-
-		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
-		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
+		// Test to ensure group level fields between all claim types match
+				TransformerTestUtils.assertEobCommonClaimHeaderData(eob, claim.getClaimId(), claim.getBeneficiaryId(),
+				ClaimType.DME, claim.getClaimGroupId().toPlainString(), MedicareSegment.PART_B,
+						Optional.of(claim.getDateFrom()), Optional.of(claim.getDateThrough()),
+				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
 		/*
 		 * TODO: DME does not have a provider number at the EOB level to map to but has
@@ -82,8 +69,6 @@ public final class DMEClaimTransformerTest {
 		 * 
 		 * TransformerTestUtils.assertProviderNumber(eob, claimGroup.getProviderNumber());
 		 */
-		
-		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
 
 		// Test to ensure common group fields between Carrier and DME match
 		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(),
@@ -92,11 +77,6 @@ public final class DMEClaimTransformerTest {
 				claim.getReferringPhysicianNpi(), Optional.of(claim.getProviderAssignmentIndicator()),
 				claim.getProviderPaymentAmount(), claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
-
-		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE,
-				claim.getClaimTypeCode(), eob.getType());
-		Assert.assertEquals("active", eob.getStatus().toCode());
 
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
@@ -128,8 +108,9 @@ public final class DMEClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine1.getProviderStateCode());
 		
-		TransformerTestUtils.assertHcpcsModiferCodes(eobItem0, claimLine1.getHcpcsInitialModifierCode(),
-				claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(), 0/*index*/);
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
+				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
+				0/* index */);
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + claim.getHcpcsYearCode().get(),
 				claimLine1.getHcpcsCode().get(), eobItem0.getService());
 
