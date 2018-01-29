@@ -5,9 +5,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
@@ -41,30 +39,18 @@ final class CarrierClaimTransformer {
 	 */
 	private static ExplanationOfBenefit transformClaim(CarrierClaim claimGroup) {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
-
-		eob.setId(TransformerUtils.buildEobId(ClaimType.CARRIER, claimGroup.getClaimId()));
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_ID).setValue(claimGroup.getClaimId());
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
-				.setValue(claimGroup.getClaimGroupId().toPlainString());
+		
+		// Common group level fields between all claim types
+		TransformerUtils.mapEobCommonClaimHeaderData(eob, claimGroup.getClaimId(), claimGroup.getBeneficiaryId(),
+				ClaimType.CARRIER, claimGroup.getClaimGroupId().toPlainString(), 
+				MedicareSegment.PART_B, Optional.of(claimGroup.getDateFrom()), 
+				Optional.of(claimGroup.getDateThrough()), Optional.of(claimGroup.getPaymentAmount()),
+				claimGroup.getFinalAction());
 		
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.CARRIER, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
 		
-		eob.getInsurance().setCoverage(
-				TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_B));
-		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
-		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);		
-
-		TransformerUtils.validatePeriodDates(claimGroup.getDateFrom(), claimGroup.getDateThrough());
-		TransformerUtils.setPeriodStart(eob.getBillablePeriod(), claimGroup.getDateFrom());
-		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
-
-		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
-
-		eob.getPayment().setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getPaymentAmount()));
-
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
 				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
 						BenefitCategory.MEDICAL.toCode()));
@@ -153,15 +139,10 @@ final class CarrierClaimTransformer {
 					.setReason(
 							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_PHYSICIAN_ASSISTANT_ADJUDICATION,
 									"" + claimLine.getReducedPaymentPhysicianAsstCode()));
-
-			if (claimLine.getHcpcsCode().isPresent()) {
-				item.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-						"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsCode().get()));
-			}
 			
 			// set hcpcs modifier codes for the claim
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
-					claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
+					claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode(), claimLine.getHcpcsCode());
 
 			if (claimLine.getMtusCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS,

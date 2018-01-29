@@ -18,11 +18,12 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
@@ -894,6 +895,65 @@ public final class TransformerUtils {
   }
 
 	/**
+	 * Transforms the common group level header fields between all claim types
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to modify
+	 * @param claimId
+	 *            CLM_ID
+	 * @param beneficiaryId
+	 *            BENE_ID
+	 * @param claimType
+	 *            {@link ClaimType} to process
+	 * @param claimGroupId
+	 *            CLM_GRP_ID
+	 * @param coverageType
+	 *            {@link MedicareSegment}
+	 * @param dateFrom
+	 *            CLM_FROM_DT
+	 * @param dateThrough
+	 *            CLM_THRU_DT
+	 * @param paymentAmount
+	 *            CLM_PMT_AMT
+	 * @param finalAction
+	 *            FINAL_ACTION
+	 * 
+	 */
+	static void mapEobCommonClaimHeaderData(ExplanationOfBenefit eob, String claimId,
+			String beneficiaryId, ClaimType claimType, String claimGroupId, MedicareSegment coverageType,
+			Optional<LocalDate> dateFrom, Optional<LocalDate> dateThrough, Optional<BigDecimal> paymentAmount,
+			char finalAction) {
+
+		eob.setId(buildEobId(claimType, claimId));
+
+		if (claimType.equals(ClaimType.PDE))
+			eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_PARTD_EVENT_ID).setValue(claimId);
+		else
+			eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_ID).setValue(claimId);
+
+		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
+				.setValue(claimGroupId);
+
+		eob.getInsurance()
+				.setCoverage(referenceCoverage(beneficiaryId, coverageType));
+		eob.setPatient(referencePatient(beneficiaryId));
+		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+
+		if (dateFrom.isPresent()) {
+			validatePeriodDates(dateFrom, dateThrough);
+			setPeriodStart(eob.getBillablePeriod(), dateFrom.get());
+			setPeriodEnd(eob.getBillablePeriod(), dateThrough.get());
+		}
+
+		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
+
+		if (paymentAmount.isPresent()) {
+			eob.getPayment().setAmount(
+					(Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(paymentAmount.get()));
+		}
+	}
+
+	/**
 	 * Transforms the common group level data elements between the
 	 * {@link CarrierClaim} and {@link DMEClaim} claim types to FHIR. The method
 	 * parameter fields from {@link CarrierClaim} and {@link DMEClaim} are listed
@@ -924,10 +984,9 @@ public final class TransformerUtils {
 	 *            NCH_CARR_CLM_SBMTD_CHRG_AMT,
 	 * @param allowedChargeAmount
 	 *            NCH_CARR_CLM_ALOWD_AMT,
-	 * 
-	 * @return the {@link ExplanationOfBenefit}
+	 *
 	 */
-	static ExplanationOfBenefit mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String beneficiaryId,
+	static void mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String beneficiaryId,
 			String carrierNumber, Optional<String> clinicalTrialNumber, BigDecimal beneficiaryPartBDeductAmount,
 			String paymentDenialCode, Optional<String> referringPhysicianNpi,
 			Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
@@ -1007,8 +1066,8 @@ public final class TransformerUtils {
 					new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(allowedChargeAmount));
 		eob.getBenefitBalanceFirstRep().getFinancial().add(allowedChargeAmt);
 
-		return eob;
 	}
+
 
 	/**
 	 * Transforms the common item level data elements between the
@@ -1348,9 +1407,8 @@ public final class TransformerUtils {
 	 * @param allowedChargeAmount
 	 *            NCH_CARR_CLM_ALOWD_AMT,
 	 * 
-	 * @return the {@link ExplanationOfBenefit}
 	 */
-	static ExplanationOfBenefit mapEobCommonGroupInpOutSNF(ExplanationOfBenefit eob,
+	static void mapEobCommonGroupInpOutSNF(ExplanationOfBenefit eob,
 			BigDecimal bloodDeductibleLiabilityAmount, Optional<String> operatingPhysicianNpi,
 			Optional<String> otherPhysicianNpi, char claimQueryCode, Optional<Character> mcoPaidSw) {
 
@@ -1379,7 +1437,6 @@ public final class TransformerUtils {
 					.createCodeableConcept(TransformerConstants.CODING_CCW_MCO_PAID, String.valueOf(mcoPaidSw.get())));
 		}
 
-		return eob;
 	}
 
 	/**
@@ -1417,9 +1474,8 @@ public final class TransformerUtils {
 	 * @param primaryPayerPaidAmount
 	 *            NCH_PRMRY_PYR_CLM_PD_AMT
 	 * 
-	 * @return the {@link ExplanationOfBenefit}
 	 */
-	static ExplanationOfBenefit mapEobCommonGroupInpOutHHAHospiceSNF(ExplanationOfBenefit eob,
+	static void mapEobCommonGroupInpOutHHAHospiceSNF(ExplanationOfBenefit eob,
 			Optional<String> organizationNpi, char claimFacilityTypeCode, char claimFrequencyCode,
 			Optional<String> claimNonPaymentReasonCode, String patientDischargeStatusCode,
 			char claimServiceClassificationTypeCode, Optional<Character> claimPrimaryPayerCode,
@@ -1474,7 +1530,6 @@ public final class TransformerUtils {
 				.setValue(primaryPayerPaidAmount));
 		eob.getBenefitBalanceFirstRep().getFinancial().add((benefitInpatientNchPrimaryPayerAmt));
 
-		return eob;
 	}
 
 	/**
@@ -1778,9 +1833,12 @@ public final class TransformerUtils {
 	 *            the {@link Optional}&lt;{@link Character}&gt;
 	 *            CARR_CLM_HCPCS_YR_CD: representing the hcpcs year code for the
 	 *            claim
+	 * @param hcpcsCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing
+	 *            the hcpcs code for the claim
 	 */
 	static void setHcpcsModifierCodes(ItemComponent item, Optional<String> hcpcsInitialModifierCode,
-			Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode) {
+			Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode, Optional<String> hcpcsCode) {
 		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
 			if (hcpcsInitialModifierCode.isPresent()) {
 				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
@@ -1789,6 +1847,10 @@ public final class TransformerUtils {
 			if (hcpcsSecondModifierCode.isPresent()) {
 				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
 						"" + hcpcsYearCode.get(), hcpcsSecondModifierCode.get()));
+			}
+			if (hcpcsCode.isPresent()) {
+				item.setService(createCodeableConcept(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(),
+						hcpcsCode.get()));
 			}
 		}
 		else { // while others do not...
@@ -1799,6 +1861,9 @@ public final class TransformerUtils {
 			if (hcpcsSecondModifierCode.isPresent()) {
 				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
 						hcpcsSecondModifierCode.get()));
+			}
+			if (hcpcsCode.isPresent()) {
+				item.setService(createCodeableConcept(TransformerConstants.CODING_HCPCS, hcpcsCode.get()));
 			}
 		}
 	}

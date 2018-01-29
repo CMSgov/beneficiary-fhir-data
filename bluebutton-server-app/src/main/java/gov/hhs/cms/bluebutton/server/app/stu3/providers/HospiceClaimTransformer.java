@@ -6,9 +6,7 @@ import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
@@ -45,31 +43,18 @@ final class HospiceClaimTransformer {
 	private static ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
-		eob.setId(TransformerUtils.buildEobId(ClaimType.HOSPICE, claimGroup.getClaimId()));
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_ID)
-				.setValue(claimGroup.getClaimId());
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
-				.setValue(claimGroup.getClaimGroupId().toPlainString());
+		// Common group level fields between all claim types
+		TransformerUtils.mapEobCommonClaimHeaderData(eob, claimGroup.getClaimId(), claimGroup.getBeneficiaryId(),
+				ClaimType.HOSPICE, claimGroup.getClaimGroupId().toPlainString(), MedicareSegment.PART_A,
+				Optional.of(claimGroup.getDateFrom()), Optional.of(claimGroup.getDateThrough()),
+				Optional.of(claimGroup.getPaymentAmount()), claimGroup.getFinalAction());
 
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.HOSPICE, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
-		
-		eob.getInsurance()
-				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_A));
-		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
-		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
-
-		TransformerUtils.validatePeriodDates(claimGroup.getDateFrom(), claimGroup.getDateThrough());
-		TransformerUtils.setPeriodStart(eob.getBillablePeriod(), claimGroup.getDateFrom());
-		TransformerUtils.setPeriodEnd(eob.getBillablePeriod(), claimGroup.getDateThrough());
 
 		// set the provider number which is common among several claim types
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
-
-		eob.getPayment()
-				.setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-						.setValue(claimGroup.getPaymentAmount()));
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
 			eob.addInformation().setCategory(
@@ -163,17 +148,11 @@ final class HospiceClaimTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.getLineNumber().intValue());
 
-			if (claimLine.getHcpcsCode().isPresent()) {
-				item.setService(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								claimLine.getHcpcsCode().get()));
-			}
-
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
 			// set hcpcs modifier codes for the claim
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsInitialModifierCode(),
-					claimLine.getHcpcsSecondModifierCode(), Optional.empty());
+					claimLine.getHcpcsSecondModifierCode(), Optional.empty(), claimLine.getHcpcsCode());
 
 			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
