@@ -1256,6 +1256,61 @@ final class TransformerTestUtils {
 				String.valueOf(claimQueryCode));
 
 	}
+	
+	/**
+	 * Test the transformation of the common group level data elements between the
+	 * {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim
+	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
+	 * {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} are listed below and their
+	 * corresponding RIF CCW fields (denoted in all CAPS below from
+	 * {@link InpatientClaimColumn} {@link HospiceClaimColumn} {@link HHAClaimColumn} and
+	 * {@link SNFClaimColumn}).
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to test
+	 * 
+	 */
+	
+	static void assertEobCommonGroupInpHHAHospiceSNFEquals(ExplanationOfBenefit eob,
+			Optional<LocalDate> claimAdmissionDate, Optional<LocalDate> beneficiaryDischargeDate,
+			Optional<BigDecimal> utilizedDays) {
+		
+		TransformerTestUtils.assertDateEquals(claimAdmissionDate.get(), eob.getHospitalization().getStartElement());
+		
+		if (beneficiaryDischargeDate.isPresent()) {
+			TransformerTestUtils.assertDateEquals(beneficiaryDischargeDate.get(), eob.getHospitalization().getEndElement());
+		}
+		
+		if (utilizedDays.isPresent()) {
+			TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, utilizedDays.get().intValue(),
+					eob.getBenefitBalanceFirstRep().getFinancial());
+		}
+		
+	}
+	
+	/**
+	 * Test the transformation of the common group level data elements between the
+	 * {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim
+	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
+	 * {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} are listed below and their
+	 * corresponding RIF CCW fields (denoted in all CAPS below from
+	 * {@link InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceColumn} and
+	 * {@link SNFClaimColumn}).
+	 * 
+	 * @param item
+	 *            the {@link ItemComponent} to test
+	 * 
+	 */
+	
+	static void assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(ItemComponent item,
+			Optional<Character> deductibleCoinsuranceCd) {
+		
+		TransformerTestUtils.assertExtensionCodingEquals(item.getRevenue(), TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
+				TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
+				String.valueOf(deductibleCoinsuranceCd.get()));
+		
+	}
 
 	/**
 	 * Tests the provider number field is set as expected in the EOB. This field is

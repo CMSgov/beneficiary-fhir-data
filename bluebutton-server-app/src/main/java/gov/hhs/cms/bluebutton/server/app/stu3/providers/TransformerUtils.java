@@ -1539,6 +1539,88 @@ public final class TransformerUtils {
 		eob.getBenefitBalanceFirstRep().getFinancial().add((benefitInpatientNchPrimaryPayerAmt));
 
 	}
+	
+	/**
+	 * Transforms the common group level data elements between the
+	 * {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim
+	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
+	 * {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} are listed below and their  
+	 * corresponding RIF CCW fields (denoted in all CAPS below from {@link InpatientClaimColumn}
+	 * {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to modify
+	 * 
+	 * @param claimAdmissionDate
+	 * 			CLM_ADMSN_DT,
+	 * 
+	 * @param benficiaryDischargeDate,
+	 * 
+	 * @param utilizedDays
+	 * 			CLM_UTLZTN_CNT,
+	 * 
+	 * @param benefitBalances
+	 * 
+	 * @return the {@link ExplanationOfBenefit}
+	 */
+	
+	static ExplanationOfBenefit mapEobCommonGroupInpHHAHospiceSNF(ExplanationOfBenefit eob,
+			Optional<LocalDate> claimAdmissionDate, Optional<LocalDate> beneficiaryDischargeDate,
+			Optional<BigDecimal> utilizedDays, BenefitBalanceComponent benefitBalances) {
+		
+		if (claimAdmissionDate.isPresent() || beneficiaryDischargeDate.isPresent()) {
+			TransformerUtils.validatePeriodDates(claimAdmissionDate,
+					beneficiaryDischargeDate);
+			Period period = new Period();
+			if (claimAdmissionDate.isPresent()) {
+				period.setStart(TransformerUtils.convertToDate(claimAdmissionDate.get()),
+						TemporalPrecisionEnum.DAY);
+			}
+			if (beneficiaryDischargeDate.isPresent()) {
+				period.setEnd(TransformerUtils.convertToDate(beneficiaryDischargeDate.get()),
+						TemporalPrecisionEnum.DAY);
+			}
+			eob.setHospitalization(period);
+		}
+		
+		if (utilizedDays.isPresent()) {
+			BenefitComponent utilizationDayCount = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT));
+			utilizationDayCount.setUsed(new UnsignedIntType(utilizedDays.get().intValue()));
+			benefitBalances.getFinancial().add(utilizationDayCount);
+		}
+	
+		return eob;
+	}
+	
+	/**
+	 * Transforms the common group level data elements between the
+	 * {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim
+	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
+	 * {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} are listed below and their  
+	 * corresponding RIF CCW fields (denoted in all CAPS below from {@link InpatientClaimColumn}
+	 * {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
+	 * 
+	 * @param item
+	 *            the {@link ItemComponent} to modify
+	 *            
+	 * @param deductibleCoinsruanceCd
+	 * 			REV_CNTR_DDCTBL_COINSRNC_CD
+	 */
+	
+	static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(ItemComponent item,
+			Optional<Character> deductibleCoinsuranceCd) {
+		
+		if (deductibleCoinsuranceCd.isPresent()) {
+			TransformerUtils.addExtensionCoding(item.getRevenue(),
+					TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
+					TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
+					String.valueOf(deductibleCoinsuranceCd.get()));
+		}
+		
+	}
+	
 
 	/**
 	 * Extract the Diagnosis values for codes 1-12

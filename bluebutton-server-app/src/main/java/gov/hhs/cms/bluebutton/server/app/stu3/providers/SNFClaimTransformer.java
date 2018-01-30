@@ -58,21 +58,6 @@ final class SNFClaimTransformer {
 		// set the provider number which is common among several claim types
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
-		if (claimGroup.getClaimAdmissionDate().isPresent() || claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-			TransformerUtils.validatePeriodDates(claimGroup.getClaimAdmissionDate(),
-					claimGroup.getBeneficiaryDischargeDate());
-			Period period = new Period();
-			if (claimGroup.getClaimAdmissionDate().isPresent()) {
-				period.setStart(TransformerUtils.convertToDate(claimGroup.getClaimAdmissionDate().get()),
-						TemporalPrecisionEnum.DAY);
-			}
-			if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-				period.setEnd(TransformerUtils.convertToDate(claimGroup.getBeneficiaryDischargeDate().get()),
-						TemporalPrecisionEnum.DAY);
-			}
-			eob.setHospitalization(period);
-		}
-
 		// add EOB information to fields that are common between the Inpatient and SNF claim types
 		TransformerUtils.addCommonEobInformationInpatientSNF(eob, claimGroup.getAdmissionTypeCd(),
 				claimGroup.getSourceAdmissionCd(), claimGroup.getNoncoveredStayFromDate(),
@@ -90,11 +75,10 @@ final class SNFClaimTransformer {
 							String.valueOf(claimGroup.getPatientStatusCd().get())));
 		}
 
-		BenefitComponent utilizationDayCount = new BenefitComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT));
-		utilizationDayCount.setUsed(new UnsignedIntType(claimGroup.getUtilizationDayCount().intValue()));
-		benefitBalances.getFinancial().add(utilizationDayCount);
+		// Common group level fields between Inpatient, HHA, Hospice and SNF
+		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimAdmissionDate(),
+				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
+				benefitBalances);
 		
 		/*
 		 * add field values to the benefit balances that are common between the
@@ -242,12 +226,8 @@ final class SNFClaimTransformer {
 					claimLine.getNationalDrugCodeQuantity(), claimLine.getNationalDrugCodeQualifierCode(),
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
 
-			if (claimLine.getDeductibleCoinsuranceCd().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getRevenue(),
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						String.valueOf(claimLine.getDeductibleCoinsuranceCd().get()));
-			}
+			// Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());
 
 		}
 		return eob;
