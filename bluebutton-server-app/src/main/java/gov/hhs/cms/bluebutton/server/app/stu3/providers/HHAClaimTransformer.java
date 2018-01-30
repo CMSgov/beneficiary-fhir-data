@@ -149,11 +149,9 @@ final class HHAClaimTransformer {
 		totalVisitCount.setUsed(new UnsignedIntType(claimGroup.getTotalVisitCount().intValue()));
 		benefitBalances.getFinancial().add(totalVisitCount);
 
-		if (claimGroup.getCareStartDate().isPresent()) {
-			eob.setHospitalization(
-					new Period().setStart(TransformerUtils.convertToDate(claimGroup.getCareStartDate().get()),
-							TemporalPrecisionEnum.DAY));
-		}
+		// Common group level fields between Inpatient, HHA, Hospice and SNF
+		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getCareStartDate(),
+				Optional.empty(), Optional.empty(), benefitBalances);
 
 		for (HHAClaimLine claimLine : claimGroup.getLines()) {
 			ItemComponent item = eob.addItem();
@@ -207,13 +205,9 @@ final class HHAClaimTransformer {
 					claimLine.getTotalChargeAmount(), claimLine.getNonCoveredChargeAmount(), claimLine.getUnitCount(),
 					claimLine.getNationalDrugCodeQuantity(), claimLine.getNationalDrugCodeQualifierCode(),
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
-
-			if (claimLine.getDeductibleCoinsuranceCd().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getRevenue(),
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						String.valueOf(claimLine.getDeductibleCoinsuranceCd().get()));
-			}
+			
+			// Common group level fields between Inpatient, HHA, Hospice and SNF
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item, claimLine.getDeductibleCoinsuranceCd());
 
 		}
 		return eob;

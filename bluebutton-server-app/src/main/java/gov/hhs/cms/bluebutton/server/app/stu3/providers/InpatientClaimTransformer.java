@@ -74,21 +74,6 @@ final class InpatientClaimTransformer {
 		eob.getPayment().setAmount((Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 				.setValue(claimGroup.getPaymentAmount()));
 
-		if (claimGroup.getClaimAdmissionDate().isPresent() || claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-			TransformerUtils.validatePeriodDates(claimGroup.getClaimAdmissionDate(),
-					claimGroup.getBeneficiaryDischargeDate());
-			Period period = new Period();
-			if (claimGroup.getClaimAdmissionDate().isPresent()) {
-				period.setStart(TransformerUtils.convertToDate(claimGroup.getClaimAdmissionDate().get()),
-						TemporalPrecisionEnum.DAY);
-			}
-			if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-				period.setEnd(TransformerUtils.convertToDate(claimGroup.getBeneficiaryDischargeDate().get()),
-						TemporalPrecisionEnum.DAY);
-			}
-			eob.setHospitalization(period);
-		}
-
 		if (claimGroup.getPatientStatusCd().isPresent()) {
 			TransformerUtils.addInformation(eob,
 					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_PATIENT_STATUS,
@@ -132,11 +117,6 @@ final class InpatientClaimTransformer {
 					.setValue(claimGroup.getClaimTotalPPSCapitalAmount().get()));
 			benefitBalances.getFinancial().add(claimTotalPPSAmt);
 		}
-
-		BenefitComponent utilizationDayCount = new BenefitComponent(TransformerUtils.createCodeableConcept(
-				TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE, TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT));
-		utilizationDayCount.setUsed(new UnsignedIntType(claimGroup.getUtilizationDayCount().intValue()));
-		benefitBalances.getFinancial().add(utilizationDayCount);
 	
 		/*
 		 * add field values to the benefit balances that are common between the
@@ -172,6 +152,11 @@ final class InpatientClaimTransformer {
 				claimGroup.getClaimServiceClassificationTypeCode(), claimGroup.getClaimPrimaryPayerCode(),
 				claimGroup.getAttendingPhysicianNpi(), claimGroup.getTotalChargeAmount(),
 				claimGroup.getPrimaryPayerPaidAmount());
+		
+		// Common group level fields between Inpatient, HHA, Hospice and SNF
+		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimAdmissionDate(),
+				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
+				benefitBalances);
 
 		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
@@ -232,13 +217,9 @@ final class InpatientClaimTransformer {
 					claimLine.getTotalChargeAmount(), claimLine.getNonCoveredChargeAmount(), claimLine.getUnitCount(),
 					claimLine.getNationalDrugCodeQuantity(), claimLine.getNationalDrugCodeQualifierCode(),
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
-
-			if (claimLine.getDeductibleCoinsuranceCd().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getRevenue(),
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						String.valueOf(claimLine.getDeductibleCoinsuranceCd().get()));
-			}
+			
+			// Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item, claimLine.getDeductibleCoinsuranceCd());
 
 		}
 		return eob;

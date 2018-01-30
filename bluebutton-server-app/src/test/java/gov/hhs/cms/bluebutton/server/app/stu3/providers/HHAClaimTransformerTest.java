@@ -93,8 +93,6 @@ public final class HHAClaimTransformerTest {
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_VISIT_COUNT, claim.getTotalVisitCount().intValue(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
 
-		TransformerTestUtils.assertDateEquals(claim.getCareStartDate().get(), eob.getHospitalization().getStartElement());
-
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		HHAClaimLine claimLine1 = claim.getLines().get(0);
@@ -124,9 +122,12 @@ public final class HHAClaimTransformerTest {
 				claimLine1.getPaymentAmount(),
 				eobItem0.getAdjudication());
 		
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(), TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-				TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-				String.valueOf(claimLine1.getDeductibleCoinsuranceCd().get()));
+		// test common eob information between Inpatient, HHA, Hospice and SNF claims are set as expected
+		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(eob, claim.getCareStartDate(),
+				Optional.empty(), Optional.empty());
+		
+		// Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
+		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 
 		// Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
 		// and SNF match

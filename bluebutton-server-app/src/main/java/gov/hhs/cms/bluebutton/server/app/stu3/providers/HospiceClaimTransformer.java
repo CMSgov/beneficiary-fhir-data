@@ -82,26 +82,31 @@ final class HospiceClaimTransformer {
 						TransformerConstants.CODING_FHIR_BENEFIT_BALANCE, BenefitCategory.MEDICAL.toCode()));
 		eob.getBenefitBalance().add(benefitBalances);
 
-		BenefitComponent utilizationDayCount = new BenefitComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT));
-		utilizationDayCount.setUsed(new UnsignedIntType(claimGroup.getUtilizationDayCount().intValue()));
-		benefitBalances.getFinancial().add(utilizationDayCount);
-
-		if (claimGroup.getClaimHospiceStartDate().isPresent() || claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-			TransformerUtils.validatePeriodDates(claimGroup.getClaimHospiceStartDate(),
-					claimGroup.getBeneficiaryDischargeDate());
-			Period period = new Period();
-			if (claimGroup.getClaimHospiceStartDate().isPresent()) {
-				period.setStart(TransformerUtils.convertToDate(claimGroup.getClaimHospiceStartDate().get()),
-						TemporalPrecisionEnum.DAY);
-			}
-			if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-				period.setEnd(TransformerUtils.convertToDate(claimGroup.getBeneficiaryDischargeDate().get()),
-						TemporalPrecisionEnum.DAY);
-			}
-			eob.setHospitalization(period);
-		}
+//		BenefitComponent utilizationDayCount = new BenefitComponent(
+//				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+//						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT));
+//		utilizationDayCount.setUsed(new UnsignedIntType(claimGroup.getUtilizationDayCount().intValue()));
+//		benefitBalances.getFinancial().add(utilizationDayCount);
+//
+//		if (claimGroup.getClaimHospiceStartDate().isPresent() || claimGroup.getBeneficiaryDischargeDate().isPresent()) {
+//			TransformerUtils.validatePeriodDates(claimGroup.getClaimHospiceStartDate(),
+//					claimGroup.getBeneficiaryDischargeDate());
+//			Period period = new Period();
+//			if (claimGroup.getClaimHospiceStartDate().isPresent()) {
+//				period.setStart(TransformerUtils.convertToDate(claimGroup.getClaimHospiceStartDate().get()),
+//						TemporalPrecisionEnum.DAY);
+//			}
+//			if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
+//				period.setEnd(TransformerUtils.convertToDate(claimGroup.getBeneficiaryDischargeDate().get()),
+//						TemporalPrecisionEnum.DAY);
+//			}
+//			eob.setHospitalization(period);
+//		}
+		
+		// Common group level fields between Inpatient, HHA, Hospice and SNF
+		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimHospiceStartDate(),
+				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
+				benefitBalances);
 
 		// Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
 		TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(eob, claimGroup.getOrganizationNpi(),
@@ -217,12 +222,9 @@ final class HospiceClaimTransformer {
 					claimLine.getUnitCount(), claimLine.getNationalDrugCodeQuantity(),
 					claimLine.getNationalDrugCodeQualifierCode(), claimLine.getRevenueCenterRenderingPhysicianNPI());
 
-			if (claimLine.getDeductibleCoinsuranceCd().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getRevenue(),
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-						String.valueOf(claimLine.getDeductibleCoinsuranceCd().get()));
-			}
+			// Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item, claimLine.getDeductibleCoinsuranceCd());
+
 		}
 		return eob;
 	}

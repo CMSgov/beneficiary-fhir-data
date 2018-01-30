@@ -80,9 +80,6 @@ public final class InpatientClaimTransformerTest {
 		
 		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 
-		TransformerTestUtils.assertDateEquals(claim.getClaimAdmissionDate().get(), eob.getHospitalization().getStartElement());
-		TransformerTestUtils.assertDateEquals(claim.getBeneficiaryDischargeDate().get(), eob.getHospitalization().getEndElement());
-
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PASS_THRU_PER_DIEM, claim.getPassThruPerDiemAmount(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
@@ -92,9 +89,10 @@ public final class InpatientClaimTransformerTest {
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_PPS_CAPITAL, claim.getClaimTotalPPSCapitalAmount().get(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, claim.getUtilizationDayCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+
+		// test common eob information between Inpatient, HHA, Hospice and SNF claims are set as expected
+		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(eob, claim.getClaimAdmissionDate(), 
+				claim.getBeneficiaryDischargeDate(), Optional.of(claim.getUtilizationDayCount()));
 		
 		// test common benefit components between SNF and Inpatient claims are set as expected
 		TransformerTestUtils.assertCommonBenefitComponentInpatientSNF(eob, claim.getCoinsuranceDayCount(),
@@ -153,10 +151,9 @@ public final class InpatientClaimTransformerTest {
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, claimLine1.getHcpcsCode().get(),
 				eobItem0.getService());
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(), TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-				TransformerConstants.EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE,
-				String.valueOf(claimLine1.getDeductibleCoinsuranceCd().get()));
-
+		// Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
+		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(eobItem0, claimLine1.getDeductibleCoinsuranceCd());
+		
 		// Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
 		// and SNF match
 		TransformerTestUtils.assertEobCommonItemRevenueEquals(eobItem0, eob, claimLine1.getRevenueCenter(),
