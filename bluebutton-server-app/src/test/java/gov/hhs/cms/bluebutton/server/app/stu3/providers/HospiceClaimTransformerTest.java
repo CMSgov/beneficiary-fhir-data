@@ -55,29 +55,14 @@ public final class HospiceClaimTransformerTest {
 	 *             (indicates test failure)
 	 */
 	static void assertMatches(HospiceClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-		TransformerTestUtils.assertNoEncodedOptionals(eob);
-
-		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.HOSPICE, claim.getClaimId()),
-				eob.getIdElement().getIdPart());
-
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_ID, claim.getClaimId(),
-				eob.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID,
-				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
-		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
-				eob.getPatient().getReference());
-		Assert.assertEquals(
-				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_A).getReference(),
-				eob.getInsurance().getCoverage().getReference());
-		Assert.assertEquals("active", eob.getStatus().toCode());
-
-		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
-		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
+		// Test to ensure group level fields between all claim types match
+		TransformerTestUtils.assertEobCommonClaimHeaderData(eob, claim.getClaimId(), claim.getBeneficiaryId(),
+				ClaimType.HOSPICE, claim.getClaimGroupId().toPlainString(), MedicareSegment.PART_A,
+				Optional.of(claim.getDateFrom()), Optional.of(claim.getDateThrough()),
+				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
-
-		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
 
 		Assert.assertTrue(eob.getInformation().stream()
 				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
@@ -118,11 +103,8 @@ public final class HospiceClaimTransformerTest {
 
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, claimLine1.getHcpcsCode().get(),
-				eobItem0.getService());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-				claimLine1.getHcpcsInitialModifierCode().get(), eobItem0.getModifier().get(0));
-		Assert.assertFalse(claimLine1.getHcpcsSecondModifierCode().isPresent());
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
+				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
 
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
 				claimLine1.getProviderPaymentAmount(), eobItem0.getAdjudication());

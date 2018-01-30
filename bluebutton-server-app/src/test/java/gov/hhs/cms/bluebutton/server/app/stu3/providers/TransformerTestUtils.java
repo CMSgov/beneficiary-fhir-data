@@ -812,6 +812,73 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * Test the transformation of common group level header fields between all claim
+	 * types
+	 * 
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to modify
+	 * @param claimId
+	 *            CLM_ID
+	 * @param beneficiaryId
+	 *            BENE_ID
+	 * @param claimType
+	 *            {@link ClaimType} to process
+	 * @param claimGroupId
+	 *            CLM_GRP_ID
+	 * @param coverageType
+	 *            {@link MedicareSegment}
+	 * @param dateFrom
+	 *            CLM_FROM_DT
+	 * @param dateThrough
+	 *            CLM_THRU_DT
+	 * @param paymentAmount
+	 *            CLM_PMT_AMT
+	 * @param finalAction
+	 *            FINAL_ACTION
+	 * 
+	 */
+	static void assertEobCommonClaimHeaderData(ExplanationOfBenefit eob, String claimId, String beneficiaryId,
+			ClaimType claimType, String claimGroupId, MedicareSegment coverageType, Optional<LocalDate> dateFrom,
+			Optional<LocalDate> dateThrough, Optional<BigDecimal> paymentAmount, char finalAction) {
+
+		assertNoEncodedOptionals(eob);
+
+		Assert.assertEquals(TransformerUtils.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
+
+		if (claimType.equals(ClaimType.PDE))
+			assertIdentifierExists(TransformerConstants.CODING_CCW_PARTD_EVENT_ID, claimId, eob.getIdentifier());
+		else
+			assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_ID, claimId, eob.getIdentifier());
+
+		assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID, claimGroupId, eob.getIdentifier());
+		Assert.assertEquals(TransformerUtils.referencePatient(beneficiaryId).getReference(),
+				eob.getPatient().getReference());
+		Assert.assertEquals(TransformerUtils.referenceCoverage(beneficiaryId, coverageType).getReference(),
+				eob.getInsurance().getCoverage().getReference());
+
+		switch (finalAction) {
+		case 'F':
+			Assert.assertEquals("active", eob.getStatus().toCode());
+			break;
+		case 'N':
+			Assert.assertEquals("cancelled", eob.getStatus().toCode());
+			break;
+		default:
+			throw new BadCodeMonkeyException();
+		}
+		
+		if (dateFrom.isPresent()) {
+			assertDateEquals(dateFrom.get(), eob.getBillablePeriod().getStartElement());
+			assertDateEquals(dateThrough.get(), eob.getBillablePeriod().getEndElement());
+		}
+		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
+
+		if (paymentAmount.isPresent()) {
+			Assert.assertEquals(paymentAmount.get(), eob.getPayment().getAmount().getValue());
+		}
+	}
+
+	/**
 	 * Test the transformation of the common group level data elements between the
 	 * {@link CarrierClaim} and {@link DMEClaim} claim types to FHIR. The method
 	 * parameter fields from {@link CarrierClaim} and {@link DMEClaim} are listed
@@ -1258,5 +1325,55 @@ final class TransformerTestUtils {
 	static void assertProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
 		assertReferenceIdentifierEquals(TransformerConstants.IDENTIFIER_CMS_PROVIDER_NUMBER,
 				providerNumber, eob.getProvider());
+	}
+	
+	/**
+	 * Tests that the hcpcs code and hcpcs modifier codes are set as expected in the
+	 * item component. The hcpcsCode field is common among these claim types:
+	 * Carrier, Inpatient, Outpatient, DME, Hospice, HHA and SNF. The modifier
+	 * fields are common among these claim types: Carrier, Outpatient, DME, Hospice
+	 * and HHA.
+	 *
+	 * @param item
+	 *            the {@link ItemComponent} this method will test against
+	 * @param hcpcCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing
+	 *            the hcpcs code for the claim
+	 * @param hcpcsInitialModifierCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_1ST_MDFR_CD:
+	 *            representing the expected hcpcs initial modifier code for the
+	 *            claim
+	 * @param hcpcsSecondModifierCode
+	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_2ND_MDFR_CD:
+	 *            representing the expected hcpcs second modifier code for the claim
+	 * @param hcpcsYearCode
+	 *            the {@link Optional}&lt;{@link Character}&gt;
+	 *            CARR_CLM_HCPCS_YR_CD: representing the hcpcs year code for the
+	 *            claim
+	 * @param index
+	 *            the {@link int} modifier index in the item containing the expected
+	 *            code
+	 */
+	static void assertHcpcsCodes(ItemComponent item, Optional<String> hcpcsCode,
+			Optional<String> hcpcsInitialModifierCode, Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode,
+			int index) {
+		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
+			assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(), hcpcsInitialModifierCode.get(),
+					item.getModifier().get(index));
+			TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(),
+					hcpcsCode.get(), item.getService());
+		} else { // while others do not...
+			if (hcpcsInitialModifierCode.isPresent()) {
+				assertHasCoding(TransformerConstants.CODING_HCPCS, hcpcsInitialModifierCode.get(),
+						item.getModifier().get(index));
+			}
+			if (hcpcsCode.isPresent()) {
+				TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
+						hcpcsCode.get(), item.getService());
+			}
+
+		}
+		Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
+
 	}
 }

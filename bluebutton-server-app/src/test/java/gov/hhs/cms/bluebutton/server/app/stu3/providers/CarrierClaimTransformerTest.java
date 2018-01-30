@@ -43,6 +43,25 @@ public final class CarrierClaimTransformerTest {
 	}
 
 	/**
+	 * Verifies that {@link CarrierClaimTransformer#transform(Object)} works as
+	 * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER}
+	 * {@link CarrierClaim}.
+	 *
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void transformSampleURecord() throws FHIRException {
+		List<Object> parsedRecords = ServerTestUtils
+				.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+		CarrierClaim claim = parsedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
+				.findFirst().get();
+
+		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(claim);
+		assertMatches(claim, eob);
+	}
+	
+	/**
 	 * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if
 	 * it were produced from the specified {@link CarrierClaim}.
 	 * 
@@ -56,22 +75,11 @@ public final class CarrierClaimTransformerTest {
 	 *             (indicates test failure)
 	 */
 	static void assertMatches(CarrierClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-		TransformerTestUtils.assertNoEncodedOptionals(eob);
-
-		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.CARRIER, claim.getClaimId()),
-				eob.getIdElement().getIdPart());
-
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_ID, claim.getClaimId(),
-				eob.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID,
-				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
-		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
-				eob.getPatient().getReference());
-		
-		Assert.assertEquals("active", eob.getStatus().toCode());
-		TransformerTestUtils.assertDateEquals(claim.getDateFrom(), eob.getBillablePeriod().getStartElement());
-		TransformerTestUtils.assertDateEquals(claim.getDateThrough(), eob.getBillablePeriod().getEndElement());
-		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
+		// Test to ensure group level fields between all claim types match
+		TransformerTestUtils.assertEobCommonClaimHeaderData(eob, claim.getClaimId(), claim.getBeneficiaryId(),
+				ClaimType.CARRIER, claim.getClaimGroupId().toPlainString(), MedicareSegment.PART_B,
+				Optional.of(claim.getDateFrom()), Optional.of(claim.getDateThrough()),
+				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
 		// Test to ensure common group fields between Carrier and DME match
 		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(),
@@ -80,12 +88,6 @@ public final class CarrierClaimTransformerTest {
 				claim.getReferringPhysicianNpi(), claim.getProviderAssignmentIndicator(),
 				claim.getProviderPaymentAmount(), claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
-
-		Assert.assertEquals(claim.getPaymentAmount(), eob.getPayment().getAmount().getValue());
-
-		Assert.assertEquals(
-				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_B).getReference(),
-				eob.getInsurance().getCoverage().getReference());
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
@@ -131,9 +133,9 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
 				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(), eobItem0.getService());
 		Assert.assertEquals(1, eobItem0.getModifier().size());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsInitialModifierCode().get(),
-				eobItem0.getModifier().get(0));
+		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
+				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
+				0/* index */);
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_MTUS,
 				TransformerConstants.EXTENSION_CODING_MTUS, String.valueOf(claimLine1.getMtusCode().get()));

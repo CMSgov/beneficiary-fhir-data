@@ -53,31 +53,17 @@ public final class PartDEventTransformerTest {
 	 *             (indicates test failure)
 	 */
 	static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob) throws FHIRException {
-		TransformerTestUtils.assertNoEncodedOptionals(eob);
+		// Test to ensure group level fields between all claim types match
+		TransformerTestUtils.assertEobCommonClaimHeaderData(eob, claim.getEventId(), claim.getBeneficiaryId(),
+				ClaimType.PDE, claim.getClaimGroupId().toPlainString(), MedicareSegment.PART_D,
+				Optional.empty(), Optional.empty(), Optional.empty(), claim.getFinalAction());
 
-		Assert.assertEquals(TransformerUtils.buildEobId(ClaimType.PDE, claim.getEventId()),
-				eob.getIdElement().getIdPart());
-
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_PARTD_EVENT_ID, claim.getEventId(),
-				eob.getIdentifier());
-		TransformerTestUtils.assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID,
-				claim.getClaimGroupId().toPlainString(), eob.getIdentifier());
-		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
-				eob.getPatient().getReference());
-		
-		Assert.assertEquals(TransformerUtils.referencePatient(claim.getBeneficiaryId()).getReference(),
-				eob.getPatient().getReference());
-		Assert.assertEquals(
-				TransformerUtils.referenceCoverage(claim.getBeneficiaryId(), MedicareSegment.PART_D).getReference(),
-				eob.getInsurance().getCoverage().getReference());
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID,
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID, claim.getPlanContractId());
 		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID,
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID, claim.getPlanBenefitPackageId());
-
-		Assert.assertEquals(Date.valueOf(claim.getPaymentDate().get()), eob.getPayment().getDate());
 
 		Assert.assertEquals("01", claim.getServiceProviderIdQualiferCode());
 		Assert.assertEquals("01", claim.getPrescriberIdQualifierCode());
