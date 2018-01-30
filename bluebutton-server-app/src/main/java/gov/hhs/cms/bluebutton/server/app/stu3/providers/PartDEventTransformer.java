@@ -7,7 +7,6 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
@@ -43,21 +42,20 @@ final class PartDEventTransformer {
 	private static ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
 		ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
-		eob.setId(TransformerUtils.buildEobId(ClaimType.PDE, claimGroup.getEventId()));
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_PARTD_EVENT_ID).setValue(claimGroup.getEventId());
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID)
-				.setValue(claimGroup.getClaimGroupId().toPlainString());
+		// Common group level fields between all claim types
+		TransformerUtils.mapEobCommonClaimHeaderData(eob, claimGroup.getEventId(), claimGroup.getBeneficiaryId(),
+				ClaimType.PDE, claimGroup.getClaimGroupId().toPlainString(), MedicareSegment.PART_D, Optional.empty(),
+				Optional.empty(), Optional.empty(), claimGroup.getFinalAction());
+
 		eob.addIdentifier().setSystem(TransformerConstants.IDENTIFIER_RX_SERVICE_REFERENCE_NUMBER)
 				.setValue(String.valueOf(claimGroup.getPrescriptionReferenceNumber()));
 
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
 		
-		eob.getInsurance()
-				.setCoverage(TransformerUtils.referenceCoverage(claimGroup.getBeneficiaryId(), MedicareSegment.PART_D));
 		/*
-		 * FIXME this should be mapped as an extension valueIdentifier instead
-		 * of as a valueCodeableConcept
+		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
+		 * valueCodeableConcept
 		 */
 		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID,
@@ -69,8 +67,6 @@ final class PartDEventTransformer {
 		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID,
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID, claimGroup.getPlanBenefitPackageId());
-		eob.setPatient(TransformerUtils.referencePatient(claimGroup.getBeneficiaryId()));
-		eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
 
 		if (claimGroup.getPaymentDate().isPresent()) {
 			eob.getPayment().setDate(TransformerUtils.convertToDate(claimGroup.getPaymentDate().get()));

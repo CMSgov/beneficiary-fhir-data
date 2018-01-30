@@ -19,7 +19,7 @@ esac
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	h:s:k:t:w:u:n:p: \
+	h:a:s:k:t:w:u:n:p: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -28,7 +28,8 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 serverHome=
-httpsPort=
+serverPortManagement=
+serverPortHttps=
 keyStore=
 trustStore=
 war=
@@ -39,8 +40,10 @@ while true; do
 	case "$1" in
 		-h )
 			serverHome="$2"; shift 2 ;;
+		-a )
+			serverPortManagement="$2"; shift 2 ;;
 		-s )
-			httpsPort="$2"; shift 2 ;;
+			serverPortHttps="$2"; shift 2 ;;
 		-k )
 			keyStore="$2"; shift 2 ;;
 		-t )
@@ -58,14 +61,13 @@ while true; do
 	esac
 done
 
-#echo "serverHome: '${serverHome}', httpsPort: '${httpsPort}', keyStore: '${keyStore}', trustStore: '${trustStore}', war: '${war}', dbUrl: '${dbUrl}', dbUsername: '${dbUsername}', dbPassword: '${dbPassword}'"
-
 # Verify that all required options were specified.
-if [[ -z "${serverHome}" ]]; then >&2 echo 'The --serverhome option is required.'; exit 1; fi
-if [[ -z "${httpsPort}" ]]; then >&2 echo 'The --httpsport option is required.'; exit 1; fi
-if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; exit 1; fi
-if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
-if [[ -z "${war}" ]]; then >&2 echo 'The --war option is required.'; exit 1; fi
+if [[ -z "${serverHome}" ]]; then >&2 echo 'The -h option is required.'; exit 1; fi
+if [[ -z "${serverPortManagement}" ]]; then >&2 echo 'The -a option is required.'; exit 1; fi
+if [[ -z "${serverPortHttps}" ]]; then >&2 echo 'The -s option is required.'; exit 1; fi
+if [[ -z "${keyStore}" ]]; then >&2 echo 'The -k option is required.'; exit 1; fi
+if [[ -z "${trustStore}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
+if [[ -z "${war}" ]]; then >&2 echo 'The -w option is required.'; exit 1; fi
 
 # Exit immediately if something fails.
 error() {
@@ -74,14 +76,14 @@ error() {
 	local code="${3:-1}"
 
 	if [[ -n "$message" ]] ; then
-		>&2 echo "Error on or near line ${parent_lineno}: ${message}."
+		>&2 echo "Error on or near line ${parent_lineno} of file `basename $0`: ${message}."
 	else
-		>&2 echo "Error on or near line ${parent_lineno}."
+		>&2 echo "Error on or near line ${parent_lineno} of file `basename $0`."
 	fi
 	
 	# Before bailing, always try to stop any running servers.
 	>&2 echo "Trying to stop any running servers before exiting..."
-	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" --directory "${directory}"
+	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${serverHome}/.."
 
 	>&2 echo "Exiting with status ${code}."
 	exit "${code}"
@@ -131,7 +133,7 @@ batch
 
 # Enable and configure HTTPS.
 /subsystem=undertow/server=default-server/https-listener=https/:add(socket-binding=https,security-realm=ApplicationRealm)
-/socket-binding-group=standard-sockets/socket-binding=https/:write-attribute(name=port,value="${httpsPort}")
+/socket-binding-group=standard-sockets/socket-binding=https/:write-attribute(name=port,value="${serverPortHttps}")
 /core-service=management/security-realm=ApplicationRealm/server-identity=ssl/:add(keystore-path="${keyStore//\\//}",keystore-password="changeit",key-password="changeit")
 
 # Per the recommendations on https://wiki.mozilla.org/Security/Server_Side_TLS,
@@ -159,7 +161,7 @@ batch
 # Note: Turns out that, for some unknown reason, the ChaCha20 algorithms aren't
 # supported in our HealthAPT AWS environments, which use JBoss EAP 7.0 (JBoss
 # fails to start if they're enabled, with an error). So we exclude them from
-# `enabled-cipher-suites`.
+# 'enabled-cipher-suites'.
 /subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=enabled-protocols,value="TLSv1.2")
 /subsystem=undertow/server=default-server/https-listener=https/:write-attribute(name=enabled-cipher-suites,value="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256")
 
@@ -204,6 +206,7 @@ jBossCli ()
 # Use the Wildfly CLI to configure the server.
 jBossCli \
 	--connect \
+	--controller=localhost:${serverPortManagement} \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	--file=${scriptConfigArg} \
 	&> "${serverHome}/server-config.log"
@@ -213,13 +216,13 @@ echo "Server configured. Waiting for it to finish reloading..."
 startSeconds=$SECONDS
 endSeconds=$(($startSeconds + $serverReadyTimeoutSeconds))
 while true; do
-	if jBossCli --connect --command="ls" &> /dev/null; then
+	if jBossCli --connect --controller=localhost:${serverPortManagement} --command="ls" &> /dev/null; then
 		echo "Server reloaded in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to reload within ${serverReadyTimeoutSeconds} seconds. Trying to stop it..."
-		"${scriptDirectory}/bluebutton-fhir-server-stop.sh" --directory "${directory}"
+		"${scriptDirectory}/bluebutton-fhir-server-stop.sh" -d "${directory}"
 		exit 3
 	fi
 	sleep 1
@@ -236,6 +239,7 @@ EOF
 echo "Deploying application: '${war}'..."
 jBossCli \
 	--connect \
+	--controller=localhost:${serverPortManagement} \
 	--timeout=${serverConnectTimeoutMilliseconds} \
 	--file=${scriptDeployArg} \
 	>> "${serverHome}/server-config.log" 2>&1
