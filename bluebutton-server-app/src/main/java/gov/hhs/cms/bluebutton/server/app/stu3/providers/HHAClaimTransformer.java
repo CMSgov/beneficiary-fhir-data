@@ -207,7 +207,7 @@ final class HHAClaimTransformer {
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
 			
 			// Common group level fields between Inpatient, HHA, Hospice and SNF
-			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item, claimLine.getDeductibleCoinsuranceCd());
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());
 
 		}
 		return eob;

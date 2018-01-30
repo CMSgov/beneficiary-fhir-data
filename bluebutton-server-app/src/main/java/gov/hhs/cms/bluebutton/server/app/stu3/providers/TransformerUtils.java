@@ -1478,11 +1478,11 @@ public final class TransformerUtils {
 	
 	/**
 	 * Transforms the common group level data elements between the
-	 * {@link InpatientClaim} {@link HHAClaim} and {@link SNFClaim} claim
+	 * {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim
 	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
-	 * {@link HHAClaim} and {@link SNFClaim} are listed below and their  
+	 * {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} are listed below and their  
 	 * corresponding RIF CCW fields (denoted in all CAPS below from {@link InpatientClaimColumn}
-	 * {@link HHAClaimColumn} and {@link SNFClaimColumn}).
+	 * {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
 	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to modify
@@ -1532,23 +1532,21 @@ public final class TransformerUtils {
 	
 	/**
 	 * Transforms the common group level data elements between the
-	 * {@link InpatientClaim} {@link HHAClaim} and {@link SNFClaim} claim
+	 * {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim
 	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
-	 * {@link HHAClaim} and {@link SNFClaim} are listed below and their  
+	 * {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} are listed below and their  
 	 * corresponding RIF CCW fields (denoted in all CAPS below from {@link InpatientClaimColumn}
-	 * {@link HHAClaimColumn} and {@link SNFClaimColumn}).
+	 * {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
 	 * 
-	 * @param eob
-	 *            the {@link ExplanationOfBenefit} to modify
+	 * @param item
+	 *            the {@link ItemComponent} to modify
 	 *            
 	 * @param deductibleCoinsruanceCd
 	 * 			REV_CNTR_DDCTBL_COINSRNC_CD
-	 * 
-	 * @return the {@link ExplanationOfBenefit}
 	 */
 	
-	static ExplanationOfBenefit mapEobCommonGroupInpHHAHospiceSNFCoinsurance(ExplanationOfBenefit eob,
-			ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
+	static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(ItemComponent item,
+			Optional<Character> deductibleCoinsuranceCd) {
 		
 		if (deductibleCoinsuranceCd.isPresent()) {
 			TransformerUtils.addExtensionCoding(item.getRevenue(),
@@ -1557,7 +1555,6 @@ public final class TransformerUtils {
 					String.valueOf(deductibleCoinsuranceCd.get()));
 		}
 		
-		return eob;
 	}
 	
 

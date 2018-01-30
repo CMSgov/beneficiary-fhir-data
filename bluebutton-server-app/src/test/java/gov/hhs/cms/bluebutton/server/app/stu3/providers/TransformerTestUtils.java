@@ -1192,11 +1192,11 @@ final class TransformerTestUtils {
 	
 	/**
 	 * Test the transformation of the common group level data elements between the
-	 * {@link InpatientClaim} {@link HHAClaim} and {@link SNFClaim} claim
+	 * {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim
 	 * types to FHIR. The method parameter fields from {@link InpatientClaim}
-	 * {@link HHAClaim} and {@link SNFClaim} are listed below and their
+	 * {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim} are listed below and their
 	 * corresponding RIF CCW fields (denoted in all CAPS below from
-	 * {@link InpatientClaimColumn} {@link HHAClaimColumn} and
+	 * {@link InpatientClaimColumn} {@link HospiceClaimColumn} {@link HHAClaimColumn} and
 	 * {@link SNFClaimColumn}).
 	 * 
 	 * @param eob
@@ -1231,8 +1231,8 @@ final class TransformerTestUtils {
 	 * {@link InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceColumn} and
 	 * {@link SNFClaimColumn}).
 	 * 
-	 * @param eob
-	 *            the {@link ExplanationOfBenefit} to test
+	 * @param item
+	 *            the {@link ItemComponent} to test
 	 * 
 	 */
 	
