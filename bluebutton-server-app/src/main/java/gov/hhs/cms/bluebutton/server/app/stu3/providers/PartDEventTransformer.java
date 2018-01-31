@@ -227,13 +227,14 @@ final class PartDEventTransformer {
 		SimpleQuantity quantityDispensed = new SimpleQuantity();
 		quantityDispensed.setValue(claimGroup.getQuantityDispensed());
 		rxItem.setQuantity(quantityDispensed);
-
-		/*
-		 * FIXME this should be mapped as an extension with a valueQuantity, not
-		 * as CodeableConcept
-		 */
-		rxItem.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.FIELD_PDE_DAYS_SUPPLY,
-				String.valueOf(claimGroup.getDaysSupply())));
+		
+		TransformerUtils.addExtensionCoding(rxItem.getQuantity(),
+				TransformerConstants.PDE_FILL_NUM,
+				TransformerConstants.PDE_FILL_NUM, String.valueOf(claimGroup.getFillNumber()));
+		
+		TransformerUtils.addExtensionCoding(rxItem.getQuantity(),
+				TransformerConstants.FIELD_PDE_DAYS_SUPPLY,
+				TransformerConstants.FIELD_PDE_DAYS_SUPPLY, String.valueOf(claimGroup.getDaysSupply()));
 
 		// TODO CBBD-241 - This code was commented out because values other than
 		// "01"
