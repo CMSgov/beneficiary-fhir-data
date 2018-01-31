@@ -9,7 +9,7 @@ import gov.hhs.cms.bluebutton.data.codebook.util.TxtToXMLUtil;
 /** 
  * @author Cassidy.Shay
  * @version 1.0.0
- * Descriptions:  Parses mbsf abcd codebook PDF that is save locally from 
+ * Descriptions:  Parses the pde codebook PDF that is save locally from 
  *                https://www.ccwdata.org/documents/10280/19022436/codebook-pde.pdf
  *                and generates an XML file from.  You need to set the PDF, TXT and XML
  *                variables and then run the main method to execute.
@@ -21,7 +21,7 @@ public class PdePdfToXmlUtil {
 	public static final String PDF = "C:/TEMP/fhir/codebook-pde.pdf";
 	// Path to working text file
 	public static final String TXT = "C:/TEMP/fhir/codebook-pde.txt";
-	// Path to XML file that will be generated from th PDF file
+	// Path to XML file that will be generated from the PDF file
 	public static final String XML = "C:/TEMP/fhir/codebook-pde.xml";
 
 	public static void main(String[] args) throws IOException {
