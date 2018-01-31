@@ -117,6 +117,14 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT,
 				claim.getGapDiscountAmount(),
 				rxItem.getAdjudication());
+		
+		TransformerTestUtils.assertExtensionCodingEquals(rxItem.getQuantity(),
+				TransformerConstants.PDE_FILL_NUM,
+				TransformerConstants.PDE_FILL_NUM, String.valueOf(claim.getFillNumber()));
+		
+		TransformerTestUtils.assertExtensionCodingEquals(rxItem.getQuantity(),
+				TransformerConstants.FIELD_PDE_DAYS_SUPPLY,
+				TransformerConstants.FIELD_PDE_DAYS_SUPPLY, String.valueOf(claim.getDaysSupply()));
 	
 		// verify {@link
 		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}

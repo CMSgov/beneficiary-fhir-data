@@ -475,6 +475,8 @@ final class TransformerConstants {
 
 	// FIXME this constant will go away once its usage sites are fixed
 	static final String FIELD_PDE_DAYS_SUPPLY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/days_suply_num.txt";
+	
+	static final String PDE_FILL_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fill_num.txt";
 
 	public static final String IDENTIFIER_CMS_PROVIDER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provider.txt";
 
