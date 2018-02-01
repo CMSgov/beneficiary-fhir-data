@@ -84,7 +84,7 @@ public final class HospiceClaimTransformerTest {
 				claim.getClaimFacilityTypeCode(), claim.getClaimFrequencyCode(), claim.getClaimNonPaymentReasonCode(),
 				claim.getPatientDischargeStatusCode(), claim.getClaimServiceClassificationTypeCode(),
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
-				claim.getPrimaryPayerPaidAmount());
+				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 		
 		// test common eob information between Inpatient, HHA, Hospice and SNF claims are set as expected
 		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(eob, claim.getClaimHospiceStartDate(), 

@@ -127,14 +127,18 @@ public final class DMEClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
 				String.valueOf(claimLine1.getSupplierTypeCode().get()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_MTUS,
-				TransformerConstants.EXTENSION_CODING_MTUS, String.valueOf(claimLine1.getMtusCode().get()));
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_UNIT_IND,
+				TransformerConstants.EXTENSION_CODING_UNIT_IND, String.valueOf(claimLine1.getMtusCode().get()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_MTUS_COUNT,
-				TransformerConstants.EXTENSION_MTUS_COUNT, String.valueOf(claimLine1.getMtusCount()));
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_DME_UNIT,
+				TransformerConstants.EXTENSION_DME_UNIT, String.valueOf(claimLine1.getMtusCount()));
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_NDC,
 				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
+		
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
+				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_NUMBER,
+				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_NUMBER, claimLine1.getProviderBillingNumber().get());
 		
 		// verify {@link
 		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}

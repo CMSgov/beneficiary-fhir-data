@@ -69,7 +69,7 @@ public final class HHAClaimTransformerTest {
 				claim.getClaimFacilityTypeCode(), claim.getClaimFrequencyCode(), claim.getClaimNonPaymentReasonCode(),
 				claim.getPatientDischargeStatusCode(), claim.getClaimServiceClassificationTypeCode(),
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
-				claim.getPrimaryPayerPaidAmount());
+				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 

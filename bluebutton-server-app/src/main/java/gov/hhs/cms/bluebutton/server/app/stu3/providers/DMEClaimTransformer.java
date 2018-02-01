@@ -54,16 +54,6 @@ final class DMEClaimTransformer {
 		TransformerUtils.mapEobType(eob, ClaimType.DME, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
 
-		if (claimGroup.getClinicalTrialNumber().isPresent()) {
-			/*
-			 * FIXME this should be mapped as an extension valueIdentifier
-			 * instead of as a valueCodeableConcept
-			 */
-			TransformerUtils.addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-					claimGroup.getClinicalTrialNumber().get());
-		}
-
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
 				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
 						BenefitCategory.MEDICAL.toCode()));
@@ -199,8 +189,8 @@ final class DMEClaimTransformer {
 			}
 
 			if (claimLine.getMtusCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS,
-						TransformerConstants.EXTENSION_CODING_MTUS,
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_UNIT_IND,
+						TransformerConstants.EXTENSION_CODING_UNIT_IND,
 						String.valueOf(claimLine.getMtusCode().get()));
 			}
 
@@ -209,8 +199,8 @@ final class DMEClaimTransformer {
 				 * FIXME this should be mapped as a valueQuantity, not a
 				 * valueCoding
 				 */
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_MTUS_COUNT,
-						TransformerConstants.EXTENSION_MTUS_COUNT,
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_DME_UNIT,
+						TransformerConstants.EXTENSION_DME_UNIT,
 						String.valueOf(claimLine.getMtusCount()));
 			}
 
