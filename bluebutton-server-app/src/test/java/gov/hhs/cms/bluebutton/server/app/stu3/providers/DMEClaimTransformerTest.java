@@ -136,10 +136,6 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_NDC,
 				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
 		
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_NUMBER,
-				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_NUMBER, claimLine1.getProviderBillingNumber().get());
-		
 		// verify {@link
 		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
 		// method worked as expected for this claim type
