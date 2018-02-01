@@ -91,7 +91,7 @@ public final class OutpatientClaimTransformerTest {
 				claim.getClaimFacilityTypeCode(), claim.getClaimFrequencyCode(), claim.getClaimNonPaymentReasonCode(),
 				claim.getPatientDischargeStatusCode().get(), claim.getClaimServiceClassificationTypeCode(),
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
-				claim.getPrimaryPayerPaidAmount());
+				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
 

@@ -1480,14 +1480,16 @@ public final class TransformerUtils {
 	 * @param totalChargeAmount
 	 *            CLM_TOT_CHRG_AMT,
 	 * @param primaryPayerPaidAmount
-	 *            NCH_PRMRY_PYR_CLM_PD_AMT
-	 * 
+	 *            NCH_PRMRY_PYR_CLM_PD_AMT,
+	 * @param fiscalIntermediaryNumber
+	 * 			  FI_NUM
 	 */
 	static void mapEobCommonGroupInpOutHHAHospiceSNF(ExplanationOfBenefit eob,
 			Optional<String> organizationNpi, char claimFacilityTypeCode, char claimFrequencyCode,
 			Optional<String> claimNonPaymentReasonCode, String patientDischargeStatusCode,
 			char claimServiceClassificationTypeCode, Optional<Character> claimPrimaryPayerCode,
-			Optional<String> attendingPhysicianNpi, BigDecimal totalChargeAmount, BigDecimal primaryPayerPaidAmount) {
+			Optional<String> attendingPhysicianNpi, BigDecimal totalChargeAmount, BigDecimal primaryPayerPaidAmount,
+			Optional<String> fiscalIntermediaryNumber) {
 
 		if (organizationNpi.isPresent()) {
 			eob.setOrganization(TransformerUtils.createIdentifierReference(TransformerConstants.CODING_NPI_US,
@@ -1537,7 +1539,12 @@ public final class TransformerUtils {
 		benefitInpatientNchPrimaryPayerAmt.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
 				.setValue(primaryPayerPaidAmount));
 		eob.getBenefitBalanceFirstRep().getFinancial().add((benefitInpatientNchPrimaryPayerAmt));
-
+		
+		if (fiscalIntermediaryNumber.isPresent()) {
+			addExtensionCoding(eob,
+					TransformerConstants.EXTENSION_CODING_CCW_FI_NUM,
+					TransformerConstants.EXTENSION_CODING_CCW_FI_NUM, String.valueOf(fiscalIntermediaryNumber.get()));
+		}
 	}
 	
 	/**

@@ -116,7 +116,7 @@ final class SNFClaimTransformer {
 				claimGroup.getClaimNonPaymentReasonCode(), claimGroup.getPatientDischargeStatusCode(),
 				claimGroup.getClaimServiceClassificationTypeCode(), claimGroup.getClaimPrimaryPayerCode(),
 				claimGroup.getAttendingPhysicianNpi(), claimGroup.getTotalChargeAmount(),
-				claimGroup.getPrimaryPayerPaidAmount());
+				claimGroup.getPrimaryPayerPaidAmount(), claimGroup.getFiscalIntermediaryNumber());
 
 		TransformerUtils.addDiagnosisCode(eob, Diagnosis.from(claimGroup.getDiagnosisAdmittingCode(),
 				claimGroup.getDiagnosisAdmittingCodeVersion(), DiagnosisLabel.ADMITTING).get());

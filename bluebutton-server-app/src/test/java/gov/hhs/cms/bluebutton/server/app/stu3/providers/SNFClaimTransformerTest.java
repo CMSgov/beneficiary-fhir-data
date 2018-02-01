@@ -107,7 +107,7 @@ public final class SNFClaimTransformerTest {
 				claim.getClaimFacilityTypeCode(), claim.getClaimFrequencyCode(), claim.getClaimNonPaymentReasonCode(),
 				claim.getPatientDischargeStatusCode(), claim.getClaimServiceClassificationTypeCode(),
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
-				claim.getPrimaryPayerPaidAmount());
+				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 
