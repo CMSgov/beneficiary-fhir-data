@@ -62,14 +62,6 @@ public final class DMEClaimTransformerTest {
 						Optional.of(claim.getDateFrom()), Optional.of(claim.getDateThrough()),
 				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
-		/*
-		 * TODO: DME does not have a provider number at the EOB level to map to but has
-		 * provider billing numbers at the claim line level. Need to do some research on
-		 * how this should be mapped, if it even can be, like the other claim types:
-		 * 
-		 * TransformerTestUtils.assertProviderNumber(eob, claimGroup.getProviderNumber());
-		 */
-
 		// Test to ensure common group fields between Carrier and DME match
 		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(),
 				claim.getCarrierNumber(),
@@ -87,6 +79,10 @@ public final class DMEClaimTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		DMEClaimLine claimLine1 = claim.getLines().get(0);
 		Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+
+		TransformerTestUtils.assertExtensionIdentifierEqualsString(
+				eobItem0.getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER),
+				claimLine1.getProviderBillingNumber().get());
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getProviderNPI().get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);

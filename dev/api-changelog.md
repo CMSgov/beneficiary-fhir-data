@@ -1,5 +1,9 @@
 # API Changelog
 
+## CBBF-126 (Sprint 44, 2018-02)
+* Added an extension coding for DME provider billing number at the item level
+	1. A temporary URL has been added https://bluebutton.cms.gov/resources/suplrnum
+
 ## CBBD-385 (Sprint 43, 2018-01)
 
 * Standardized the [ExplanationOfBenefit.type](http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.type) field across all 8 claim types. This field's `CodeableConcept` will now have some of these possible `Coding`s:
