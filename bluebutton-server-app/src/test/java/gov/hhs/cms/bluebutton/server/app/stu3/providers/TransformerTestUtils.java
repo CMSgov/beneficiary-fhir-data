@@ -1029,6 +1029,7 @@ final class TransformerTestUtils {
 			throws FHIRException {
 
 		Assert.assertEquals(serviceCount, item.getQuantity().getValue());
+		
 		assertHasCoding(TransformerConstants.CODING_CCW_TYPE_SERVICE,
 				"" + cmsServiceTypeCode, item.getCategory());
 		assertHasCoding(TransformerConstants.CODING_CCW_PLACE_OF_SERVICE, placeOfServiceCode,
@@ -1120,13 +1121,16 @@ final class TransformerTestUtils {
 	 * @param totalChargeAmount
 	 *            CLM_TOT_CHRG_AMT,
 	 * @param primaryPayerPaidAmount
-	 *            NCH_PRMRY_PYR_CLM_PD_AMT
+	 *            NCH_PRMRY_PYR_CLM_PD_AMT,
+	 * @param fiscalIntermediaryNumber
+	 * 			  FI_NUMBER
 	 */
 	static void assertEobCommonGroupInpOutHHAHospiceSNFEquals(ExplanationOfBenefit eob,
 			Optional<String> organizationNpi, char claimFacilityTypeCode, char claimFrequencyCode,
 			Optional<String> claimNonPaymentReasonCode, String patientDischargeStatusCode,
 			char claimServiceClassificationTypeCode, Optional<Character> claimPrimaryPayerCode,
-			Optional<String> attendingPhysicianNpi, BigDecimal totalChargeAmount, BigDecimal primaryPayerPaidAmount) {
+			Optional<String> attendingPhysicianNpi, BigDecimal totalChargeAmount, BigDecimal primaryPayerPaidAmount,
+			Optional<String> fiscalIntermediaryNumber) {
 
 		TransformerTestUtils.assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US,
 				organizationNpi.get(), eob.getOrganization());
@@ -1157,6 +1161,12 @@ final class TransformerTestUtils {
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, primaryPayerPaidAmount,
 				eob.getBenefitBalanceFirstRep().getFinancial());
+		
+		if (fiscalIntermediaryNumber.isPresent()) {
+			assertExtensionCodingEquals(eob,
+					TransformerConstants.EXTENSION_CODING_CCW_FI_NUM,
+					TransformerConstants.EXTENSION_CODING_CCW_FI_NUM, String.valueOf(fiscalIntermediaryNumber.get()));
+		}
 	}
 
 	/**

@@ -120,7 +120,7 @@ final class OutpatientClaimTransformer {
 				claimGroup.getClaimNonPaymentReasonCode(), claimGroup.getPatientDischargeStatusCode().get(),
 				claimGroup.getClaimServiceClassificationTypeCode(), claimGroup.getClaimPrimaryPayerCode(),
 				claimGroup.getAttendingPhysicianNpi(), claimGroup.getTotalChargeAmount(),
-				claimGroup.getPrimaryPayerPaidAmount());
+				claimGroup.getPrimaryPayerPaidAmount(), claimGroup.getFiscalIntermediaryNumber());
 
 		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses1Thru12(claimGroup.getDiagnosisPrincipalCode(),
 				claimGroup.getDiagnosisPrincipalCodeVersion(), claimGroup.getDiagnosis1Code(),

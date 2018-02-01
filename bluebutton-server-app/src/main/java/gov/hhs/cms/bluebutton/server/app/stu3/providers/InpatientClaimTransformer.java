@@ -138,7 +138,7 @@ final class InpatientClaimTransformer {
 				claimGroup.getClaimNonPaymentReasonCode(), claimGroup.getPatientDischargeStatusCode(),
 				claimGroup.getClaimServiceClassificationTypeCode(), claimGroup.getClaimPrimaryPayerCode(),
 				claimGroup.getAttendingPhysicianNpi(), claimGroup.getTotalChargeAmount(),
-				claimGroup.getPrimaryPayerPaidAmount());
+				claimGroup.getPrimaryPayerPaidAmount(), claimGroup.getFiscalIntermediaryNumber());
 		
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimAdmissionDate(),

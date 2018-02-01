@@ -109,7 +109,7 @@ public final class InpatientClaimTransformerTest {
 				claim.getClaimFacilityTypeCode(), claim.getClaimFrequencyCode(), claim.getClaimNonPaymentReasonCode(),
 				claim.getPatientDischargeStatusCode(), claim.getClaimServiceClassificationTypeCode(),
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
-				claim.getPrimaryPayerPaidAmount());
+				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 
 		Assert.assertEquals(9, eob.getDiagnosis().size());
 
