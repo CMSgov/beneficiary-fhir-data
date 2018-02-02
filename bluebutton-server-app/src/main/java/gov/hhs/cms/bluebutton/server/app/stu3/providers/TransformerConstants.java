@@ -471,6 +471,9 @@ final class TransformerConstants {
 
 	static final String EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
 
+	// FIXME: needs to link to an explanation of what this extension coding is
+	static final String EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER = "https://bluebutton.cms.gov/resources/suplrnum";
+
 	static final String EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
 
 	static final String EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
