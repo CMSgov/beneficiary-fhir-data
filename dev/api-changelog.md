@@ -59,6 +59,6 @@
 
 * Following FHIR Mapping changes were made:
 
-	* The REV_UNIT (Revenue Center unit Count) for Outpatient, Hospice, and HHA was not being mapped. Now it is mapped to ExplanationOfBenefit.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
+	* The REV_CNTR_DT (REV_DT) for Outpatient, Hospice, and HHA was not being mapped. Now it is mapped to ExplanationOfBenefit.item.serviced.date (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.serviced.date`).
 	* Updated System and URL for DME_UNIT in CarrierClaim to point to MTUS_CNT (undoing the change for Carrier from CBBF-110).
 	* Updated System and URL for MTUS_IND in CarrierClaim to point to UNIT_IND (undoing the change for Carrier from CBBF-110).
