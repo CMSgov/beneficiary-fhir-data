@@ -54,3 +54,11 @@
 	* The SUPLRNUM (DMERC Line Supplier Provider Number) for DME was not being mapped. Now it is mapped to ExplanationOfBenefit.item.extension (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.extension`).
 	* System and URL for MTUS_CNT now points to DME_UNIT link instead.
 	* System and URL for MTUS_IND now points to UNIT_IND link instead.
+	
+## CBBF-109 FHIR Mapping Change (HHA)
+
+* Following FHIR Mapping changes were made:
+
+	* The REV_UNIT (Revenue Center unit Count) for Outpatient, Hospice, and HHA was not being mapped. Now it is mapped to ExplanationOfBenefit.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
+	* Updated System and URL for DME_UNIT in CarrierClaim to point to MTUS_CNT (undoing the change for Carrier from CBBF-110).
+	* Updated System and URL for MTUS_IND in CarrierClaim to point to UNIT_IND (undoing the change for Carrier from CBBF-110).

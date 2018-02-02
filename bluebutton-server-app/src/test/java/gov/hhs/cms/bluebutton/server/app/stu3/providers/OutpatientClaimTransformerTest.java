@@ -165,8 +165,6 @@ public final class OutpatientClaimTransformerTest {
 		TransformerTestUtils.assertAdjudicationEquals(
 				TransformerConstants.CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT,
 				claimLine1.getPatientResponsibilityAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT,
-				claimLine1.getPaymentAmount(), eobItem0.getAdjudication());
 
 		// Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
 		// and SNF match
@@ -174,6 +172,10 @@ public final class OutpatientClaimTransformerTest {
 				claimLine1.getRateAmount(), claimLine1.getTotalChargeAmount(), claimLine1.getNonCoveredChargeAmount(),
 				claimLine1.getUnitCount(), claimLine1.getNationalDrugCodeQuantity(),
 				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI());
+		
+		// Test to ensure item level fields between Outpatient, HHA and Hospice match
+		TransformerTestUtils.assertEobCommonItemRevenueOutHHAHospice(eobItem0, claimLine1.getRevenueCenterDate(),
+				claimLine1.getPaymentAmount());
 
 		// verify {@link
 		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}
