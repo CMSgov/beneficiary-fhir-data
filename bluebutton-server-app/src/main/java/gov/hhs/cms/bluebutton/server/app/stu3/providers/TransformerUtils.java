@@ -1380,6 +1380,41 @@ public final class TransformerUtils {
 
 		return item;
 	}
+	
+	/**
+	 * Transforms the common item level data elements between the
+	 * {@link OutpatientClaimLine} {@link HospiceClaimLine} and
+	 * {@link HHAClaimLine} claim types to FHIR. The method parameter
+	 * fields from {@link OutpatientClaimLine} {@link HospiceClaimLine}
+	 * and {@link HHAClaimLine} are listed below and their corresponding
+	 * RIF CCW fields (denoted in all CAPS below from
+	 * {@link OutpatientClaimColumn} {@link HopsiceClaimColumn} and
+	 * {@link HHAClaimColumn}.
+	 * 
+	 * @param item
+	 *            the {@ ItemComponent} to modify
+	 * 
+	 * @param revenueCenterDate
+	 *            REV_CNTR_DT,
+	 * 
+	 * @param paymentAmount
+	 * 			  REV_CNTR_PMT_AMT_AMT
+	 */
+	static void mapEobCommonItemRevenueOutHHAHospice(ItemComponent item,
+			Optional<LocalDate> revenueCenterDate, BigDecimal paymentAmount) {
+		
+		if (revenueCenterDate.isPresent()) {
+			item.setServiced(new DateType().setValue(convertToDate(revenueCenterDate.get())));
+		}
+		
+		item.addAdjudication()
+		.setCategory(
+				createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+						TransformerConstants.CODED_ADJUDICATION_PAYMENT))
+		.getAmount().setSystem(TransformerConstants.CODING_MONEY)
+		.setCode(TransformerConstants.CODED_MONEY_USD)
+		.setValue(paymentAmount);
+	}
 
 	/**
 	 * Transforms the common group level data elements between the

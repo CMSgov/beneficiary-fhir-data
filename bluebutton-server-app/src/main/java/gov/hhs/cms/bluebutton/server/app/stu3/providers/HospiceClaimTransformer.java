@@ -179,20 +179,15 @@ final class HospiceClaimTransformer {
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getBenficiaryPaymentAmount());
 
-			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_PAYMENT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getPaymentAmount());
-
 			// Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonItemRevenue(item, eob, claimLine.getRevenueCenterCode(),
 					claimLine.getRateAmount(),
 					claimLine.getTotalChargeAmount(), claimLine.getNonCoveredChargeAmount().get(),
 					claimLine.getUnitCount(), claimLine.getNationalDrugCodeQuantity(),
 					claimLine.getNationalDrugCodeQualifierCode(), claimLine.getRevenueCenterRenderingPhysicianNPI());
+			
+			// Common item level fields between Outpatient, HHA and Hospice
+			TransformerUtils.mapEobCommonItemRevenueOutHHAHospice(item, claimLine.getRevenueCenterDate(), claimLine.getPaymentAmount());
 
 			// Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());

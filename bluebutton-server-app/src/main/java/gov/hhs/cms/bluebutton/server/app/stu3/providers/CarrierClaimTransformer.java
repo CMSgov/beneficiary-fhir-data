@@ -145,8 +145,8 @@ final class CarrierClaimTransformer {
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
 
 			if (claimLine.getMtusCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_UNIT_IND,
-						TransformerConstants.EXTENSION_CODING_UNIT_IND, String.valueOf(claimLine.getMtusCode().get()));
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS_IND,
+						TransformerConstants.EXTENSION_CODING_MTUS_IND, String.valueOf(claimLine.getMtusCode().get()));
 			}
 
 			if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
@@ -154,8 +154,8 @@ final class CarrierClaimTransformer {
 				 * FIXME this should be mapped as a valueQuantity, not a
 				 * valueCoding
 				 */
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_DME_UNIT,
-						TransformerConstants.EXTENSION_DME_UNIT, String.valueOf(claimLine.getMtusCount()));
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_MTUS_CNT,
+						TransformerConstants.EXTENSION_MTUS_CNT, String.valueOf(claimLine.getMtusCount()));
 			}
 
 			// Common item level fields between Carrier and DME

@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -97,9 +98,10 @@ public final class HHAClaimTransformerTest {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT,
 				claimLine1.getRateAmount(),
 				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT,
-				claimLine1.getPaymentAmount(),
-				eobItem0.getAdjudication());
+		
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(),
+				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
+				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE, claimLine1.getStatusCode().get());
 		
 		// test common eob information between Inpatient, HHA, Hospice and SNF claims are set as expected
 		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(eob, claim.getCareStartDate(),
@@ -114,6 +116,10 @@ public final class HHAClaimTransformerTest {
 				claimLine1.getRateAmount(), claimLine1.getTotalChargeAmount(), claimLine1.getNonCoveredChargeAmount(),
 				claimLine1.getUnitCount(), claimLine1.getNationalDrugCodeQuantity(),
 				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI());
+		
+		// Test to ensure item level fields between Outpatient, HHA and Hospice match
+		TransformerTestUtils.assertEobCommonItemRevenueOutHHAHospice(eobItem0, claimLine1.getRevenueCenterDate(),
+				claimLine1.getPaymentAmount());
 
 		// verify {@link
 		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}

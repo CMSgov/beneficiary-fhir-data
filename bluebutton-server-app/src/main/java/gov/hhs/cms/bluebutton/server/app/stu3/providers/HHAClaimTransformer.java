@@ -159,14 +159,6 @@ final class HHAClaimTransformer {
 								claimLine.getRevCntr1stAnsiCd().get()));
 			}
 
-			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_PAYMENT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getPaymentAmount());
-
 			// set hcpcs modifier codes for the claim
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), Optional.empty());
@@ -177,6 +169,14 @@ final class HHAClaimTransformer {
 					claimLine.getTotalChargeAmount(), claimLine.getNonCoveredChargeAmount(), claimLine.getUnitCount(),
 					claimLine.getNationalDrugCodeQuantity(), claimLine.getNationalDrugCodeQualifierCode(),
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
+			
+			// Common item level fields between Outpatient, HHA and Hospice
+			TransformerUtils.mapEobCommonItemRevenueOutHHAHospice(item, claimLine.getRevenueCenterDate(), claimLine.getPaymentAmount());
+			
+			// set revenue center status indicator codes for the claim
+			TransformerUtils.addExtensionCoding(item.getRevenue(),
+					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
+					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE, claimLine.getStatusCode().get());
 			
 			// Common group level fields between Inpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());

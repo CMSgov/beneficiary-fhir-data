@@ -338,6 +338,8 @@ final class TransformerConstants {
 	static final String CODING_CMS_DISPENSE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt";
 
 	static final String CODING_CMS_REVENUE_CENTER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt";
+	
+	static final String CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revstind.txt";
 
 	static final String CODING_CMS_RX_ADJUSTMENT_DELETION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt";
 
@@ -462,6 +464,8 @@ final class TransformerConstants {
 	public static final String EXTENSION_CODING_CMS_SUPPLIER_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt";
 
 	public static final String EXTENSION_CODING_UNIT_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/unit_ind.txt";
+	
+	public static final String EXTENSION_CODING_MTUS_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_ind.txt";
 
 	public static final String EXTENSION_CODING_PRIMARY_PAYER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt";
 
@@ -479,6 +483,8 @@ final class TransformerConstants {
 	static final String EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
 
 	public static final String EXTENSION_DME_UNIT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dme_unit.txt";
+	
+	public static final String EXTENSION_MTUS_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_cnt.txt";
 
 	public static final String EXTENSION_SCREEN_SAVINGS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/scrnsvgs.txt";
 

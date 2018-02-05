@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
@@ -1248,6 +1249,36 @@ final class TransformerTestUtils {
 		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
 
+	}
+	
+	/**
+	 * Test the transformation of the common group level data elements between the
+	 * {@link OutpatientClaim} {@link HospiceClaim} and {@link HHAClaim} claim
+	 * types to FHIR. The method parameter fields from {@link OutpatientClaim}
+	 * {@link HospiceClaim} and {@link HHAClaim} are listed below and their
+	 * corresponding RIF CCW fields (denoted in all CAPS below from
+	 * {@link OutpatientClaimColumn} {@link HospiceClaimColumn} and
+	 * {@link HHAClaimColumn}).
+	 * 
+	 * @param item
+	 *            the {@link ItemComponent} to test
+	 *            
+	 * @param revenueCenterDate
+	 * 			  REV_CNTR_DT,
+	 * 
+	 * @param paymentAmount
+	 * 			  REV_CNTR_PMT_AMT_AMT
+	 */
+	static void assertEobCommonItemRevenueOutHHAHospice(ItemComponent item,
+			Optional<LocalDate> revenueCenterDate, BigDecimal paymentAmount) throws FHIRException {
+		
+		if (revenueCenterDate.isPresent()) {
+			Assert.assertEquals(Date.valueOf(revenueCenterDate.get()), item.getServicedDateType().getValue());
+		}
+		
+		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT,
+				paymentAmount,
+				item.getAdjudication());
 	}
 
 

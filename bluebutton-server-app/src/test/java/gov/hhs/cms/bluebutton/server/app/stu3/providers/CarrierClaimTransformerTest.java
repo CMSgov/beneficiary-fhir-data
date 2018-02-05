@@ -137,11 +137,11 @@ public final class CarrierClaimTransformerTest {
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
 				0/* index */);
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_UNIT_IND,
-				TransformerConstants.EXTENSION_CODING_UNIT_IND, String.valueOf(claimLine1.getMtusCode().get()));
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_MTUS_IND,
+				TransformerConstants.EXTENSION_CODING_MTUS_IND, String.valueOf(claimLine1.getMtusCode().get()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_DME_UNIT,
-				TransformerConstants.EXTENSION_DME_UNIT, String.valueOf(claimLine1.getMtusCount()));
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_MTUS_CNT,
+				TransformerConstants.EXTENSION_MTUS_CNT, String.valueOf(claimLine1.getMtusCount()));
 
 		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_PHYSICIAN_ASSISTANT,
 				TransformerConstants.CODING_CCW_PHYSICIAN_ASSISTANT_ADJUDICATION,
