@@ -179,7 +179,7 @@ final class TransformerConstants {
 
 	static final String CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT = "Patient Responsibility Amount";
 
-	static final String CODED_ADJUDICATION_PAYMENT = "NCH Payment Amount";
+	static final String CODED_ADJUDICATION_PAYMENT = "Revenue Center Payment Amount";
 
 	static final String CODED_ADJUDICATION_PHYSICIAN_ASSISTANT = "Carrier Line Reduced Payment Physician Assistant Code";
 
