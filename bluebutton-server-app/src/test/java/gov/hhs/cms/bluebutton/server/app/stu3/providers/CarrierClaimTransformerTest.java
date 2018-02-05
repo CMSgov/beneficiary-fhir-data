@@ -147,8 +147,8 @@ public final class CarrierClaimTransformerTest {
 				TransformerConstants.CODING_CCW_PHYSICIAN_ASSISTANT_ADJUDICATION,
 				"" + claimLine1.getReducedPaymentPhysicianAsstCode(), eobItem0.getAdjudication());
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getLocation(),
-				TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM, TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM,
+		TransformerTestUtils.assertExtensionIdentifierEqualsString(
+				eobItem0.getLocation().getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM),
 				claimLine1.getCliaLabNumber().get());
 
 		// verify {@link
