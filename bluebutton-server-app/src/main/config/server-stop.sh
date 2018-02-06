@@ -10,7 +10,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	d:a: \
+	t: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -18,47 +18,58 @@ if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 
 # Parse the getopt results.
-directory=
+targetDirectory=
 serverPortManagement=
 while true; do
 	case "$1" in
-		-d )
-			directory="$2"; shift 2 ;;
-		-a )
-			serverPortManagement="$2"; shift 2 ;;
+		-t )
+			targetDirectory="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
 done
 
 # Verify that all required options were specified.
-if [[ -z "${directory}" ]]; then >&2 echo 'The -d option is required.'; exit 1; fi
+if [[ -z "${targetDirectory}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
+
+# In Cygwin, some of those paths will come in as Windows-formatted. Fix that.
+if [[ "${cygwin}" = true ]]; then targetDirectory=$(cygpath --unix "${targetDirectory}"); fi
+
+# Define all of the derived paths we'll need.
+workDirectory="${targetDirectory}/bluebutton-server"
+serverPortsFile="${workDirectory}/server-ports.properties"
+bluebuttonServerIdFile="${workDirectory}/bluebutton-server-id.txt"
+serverHome="${workDirectory}/${serverInstall}"
+serverLogRun="${workDirectory}/server-console.log"
+serverLogStop="${workDirectory}/server-stop.log"
+
+# Check for required files.
+for f in "${serverPortsFile}"; do
+	if [[ ! -f "${f}" ]]; then
+		>&2 echo "The following file is required but is missing: '${f}'."
+		exit 1
+	fi
+done
 
 # Read bluebuttonServerId from a file.
 bluebuttonServerId=
-bluebuttonServerIdFile="${directory}/bluebutton-server-id.txt"
 if [[ -f "${bluebuttonServerIdFile}" ]]; then
 	bluebuttonServerId=$(cat "${bluebuttonServerIdFile}")
 fi
 if [[ -z "${bluebuttonServerId}" ]]; then >&2 echo "No server ID found in '${bluebuttonServerIdFile}'."; exit 1; fi
 
 # Also try to read serverPortManagement from a file.
-if [[ -z "${serverPortManagement}" ]]; then
-	serverPortManagementFile="${directory}/server-ports.properties"
-	if [[ -f "${serverPortManagementFile}" ]]; then
-		serverPortManagement=$(grep "^server.port.management=" "${serverPortManagementFile}" | cut -d'=' -f2 )
-	fi
+if [[ -f "${serverPortsFile}" ]]; then
+	serverPortManagement=$(grep "^server.port.management=" "${serverPortsFile}" | cut -d'=' -f2 )
 fi
-if [[ -z "${serverPortManagement}" ]]; then >&2 echo 'Unable to determine server management port.'; exit 1; fi
+if [[ -z "${serverPortManagement}" ]]; then >&2 echo "Server management port not specified in '${serverPortsFile}'."; exit 1; fi
 
 # If the server isn't actually running, just exit.
 serverPids=$(pgrep -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*")
 if [[ -z "${serverPids}" ]]; then echo "No '-Dbluebutton-server-${bluebuttonServerId}' processes found to stop."; exit 0; fi
 
 # Use the Wildfly CLI to stop the server.
-serverLogRun="${directory}/${serverInstall}/server-console.log"
-serverLogStop="${directory}/${serverInstall}/server-stop.log"
-"${directory}/${serverInstall}/bin/jboss-cli.sh" \
+"${serverHome}/bin/jboss-cli.sh" \
 	--connect \
 	--controller=localhost:${serverPortManagement} \
 	--timeout=${serverConnectTimeoutMilliseconds} \
