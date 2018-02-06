@@ -439,6 +439,12 @@ final class TransformerConstants {
 
 	static final String EXTENSION_CODING_CCW_MEDICARE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt";
 
+	// FIXME: currently a placeholder for the extension code meaning
+	static final String EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sometextfile.txt";
+
+	// FIXME: currently a placeholder for the extension code meaning
+	static final String EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sometextfile.txt";
+
 	static final String EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
 
 	static final String EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt";
