@@ -2,7 +2,7 @@
 
 ## CBBF-123 (Sprint 45, 20128-02)
 * Added coverage extension codings for part A & B termination codes.
-	1. A temporary URL has been added for both extensions respectively: https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sometextfile.txt
+	1. A temporary URL has been added for both extensions respectively: https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt and https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt
 * The status for part D coverage transforms now defaults to active.
 
 ## CBBF-126 (Sprint 44, 2018-02)
