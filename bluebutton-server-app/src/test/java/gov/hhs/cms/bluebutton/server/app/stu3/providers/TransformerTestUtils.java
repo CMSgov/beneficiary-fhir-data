@@ -348,6 +348,22 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * Tests that the specified extension list contains a single Identifier with the
+	 * expected string value
+	 *
+	 * @param extension
+	 *            a {@link List}&lt;{@link Extension}&gt; containing an Identifier
+	 * @param expected
+	 *            a {@link String} containing the expected value of the Identifier
+	 */
+	static void assertExtensionIdentifierEqualsString(List<Extension> extension, String expected) {
+		Assert.assertEquals(1, extension.size());
+		Assert.assertTrue(extension.get(0).getValue() instanceof Identifier);
+		Identifier identifier = (Identifier) extension.get(0).getValue();
+		Assert.assertEquals(expected, identifier.getValue());
+	}
+
+	/**
 	 * @param expectedSystem
 	 *            the expected {@link Coding#getSystem()} of the
 	 *            {@link SupportingInformationComponent#getCategory()} to find

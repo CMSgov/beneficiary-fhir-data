@@ -179,7 +179,7 @@ final class TransformerConstants {
 
 	static final String CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT = "Patient Responsibility Amount";
 
-	static final String CODED_ADJUDICATION_PAYMENT = "NCH Payment Amount";
+	static final String CODED_ADJUDICATION_PAYMENT = "Revenue Center Payment Amount";
 
 	static final String CODED_ADJUDICATION_PHYSICIAN_ASSISTANT = "Carrier Line Reduced Payment Physician Assistant Code";
 
@@ -476,6 +476,9 @@ final class TransformerConstants {
 	static final String EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt";
 
 	static final String EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
+
+	// FIXME: needs to link to an explanation of what this extension coding is
+	static final String EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER = "https://bluebutton.cms.gov/resources/suplrnum";
 
 	static final String EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
 

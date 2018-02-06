@@ -1,5 +1,9 @@
 # API Changelog
 
+## CBBF-126 (Sprint 44, 2018-02)
+* Added an extension coding for DME provider billing number at the item level
+	1. A temporary URL has been added https://bluebutton.cms.gov/resources/suplrnum
+
 ## CBBD-385 (Sprint 43, 2018-01)
 
 * Standardized the [ExplanationOfBenefit.type](http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.type) field across all 8 claim types. This field's `CodeableConcept` will now have some of these possible `Coding`s:
@@ -63,4 +67,19 @@
 	* The REV_CNTR_PMT_AMT_AMT (Revenue Center Payment Amount Amount) was the same for Outpatient, Hospice, and HHA and has been abstracted to a method in the TransformerUtils.java class.
 	* Updated System and URL for DME_UNIT in CarrierClaim to point to MTUS_CNT (undoing the change for Carrier from CBBF-110).
 	* Updated System and URL for UNIT_IND in CarrierClaim to point to MTUS_IND (undoing the change for Carrier from CBBF-110).
+<<<<<<< HEAD
 	* Map REV_UNIT (Revenue Center Unit Count) for Outpatient, Hospice, and HHA to EOB.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
+=======
+	
+## CBBF-108 FHIR Mapping Change (Hospice)
+
+* Following FHIR Mapping changes were made:
+
+	* The REV_CNTR_PMT_AMT_AMT code value was changed to read "Revenue Center Payment Amount" in the XML for Hospice/HHA/DME/Outpatient.
+	
+## CBBF-135 Map Carrier CARR_LINE_CLIA_LAB_NUM
+
+* Following FHIR mapping changes were made:
+
+	* The field CARR_LINE_CLIA_LAB_NUM for Carrier was remapped as a valueIdentifier from a valueCodeableConcept.
+>>>>>>> 88051204e3317515ccab8355eb322fb3fcc5420b

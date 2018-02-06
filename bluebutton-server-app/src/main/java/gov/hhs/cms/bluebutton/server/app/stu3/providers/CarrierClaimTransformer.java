@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
@@ -187,12 +189,11 @@ final class CarrierClaimTransformer {
 					TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY,
 					TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY, claimLine.getLinePricingLocalityCode());
 			if (claimLine.getCliaLabNumber().isPresent()) {
-				/*
-				 * FIXME this should be mapped as an extension valueIdentifier
-				 * instead of as a valueCodeableConcept
-				 */
-				TransformerUtils.addExtensionCoding(item.getLocation(), TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM,
-						TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM, claimLine.getCliaLabNumber().get());
+				Extension cliaLabNumberExtension = item.getLocation().addExtension();
+				cliaLabNumberExtension.setUrl(TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM);
+				cliaLabNumberExtension.setValue(new Identifier()
+								.setSystem(TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM)
+								.setValue(claimLine.getCliaLabNumber().get()));
 			}
 		}
 

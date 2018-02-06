@@ -7,6 +7,8 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
@@ -51,14 +53,6 @@ final class DMEClaimTransformer {
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.DME, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
-		
-		/*
-		 * TODO: DME does not have a provider number at the EOB level to map to but has
-		 * provider billing numbers at the claim line level. Need to do some research on
-		 * how this should be mapped, if it even can be, like the other claim types:
-		 * 
-		 * TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
-		 */
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
 				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
@@ -104,13 +98,24 @@ final class DMEClaimTransformer {
 			item.setSequence(claimLine.getLineNumber().intValue());
 
 			/*
-			 * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing
-			 * provider _should_ always be present. However, we've found some
-			 * examples in production where it's not for some claim lines. (This
-			 * is annoying, as it's present on other lines in the same claim,
-			 * and the data indicates that the same NPI probably applies to the
-			 * lines where it's not specified. Still, it's not safe to guess at
-			 * this, so we'll leave it blank.)
+			 * add an extension for the provider billing number as there is not a good place
+			 * to map this in the existing FHIR specification
+			 */
+			if (claimLine.getProviderBillingNumber().isPresent()) {
+				Extension providerNumberExtension = item.addExtension();
+				providerNumberExtension.setUrl(TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER);
+				providerNumberExtension.setValue(new Identifier()
+						.setSystem(TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER)
+						.setValue(claimLine.getProviderBillingNumber().get()));
+			}
+
+			/*
+			 * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing provider
+			 * _should_ always be present. However, we've found some examples in production
+			 * where it's not for some claim lines. (This is annoying, as it's present on
+			 * other lines in the same claim, and the data indicates that the same NPI
+			 * probably applies to the lines where it's not specified. Still, it's not safe
+			 * to guess at this, so we'll leave it blank.)
 			 */
 			if (claimLine.getProviderNPI().isPresent()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils
@@ -141,10 +146,6 @@ final class DMEClaimTransformer {
 			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
-			
-			TransformerUtils.addExtensionCoding(item,
-					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_NUMBER,
-					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_NUMBER, claimLine.getProviderBillingNumber().get());
 
 			// set hcpcs modifier codes for the claim
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
