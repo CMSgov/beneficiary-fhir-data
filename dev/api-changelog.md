@@ -67,9 +67,7 @@
 	* The REV_CNTR_PMT_AMT_AMT (Revenue Center Payment Amount Amount) was the same for Outpatient, Hospice, and HHA and has been abstracted to a method in the TransformerUtils.java class.
 	* Updated System and URL for DME_UNIT in CarrierClaim to point to MTUS_CNT (undoing the change for Carrier from CBBF-110).
 	* Updated System and URL for UNIT_IND in CarrierClaim to point to MTUS_IND (undoing the change for Carrier from CBBF-110).
-<<<<<<< HEAD
 	* Map REV_UNIT (Revenue Center Unit Count) for Outpatient, Hospice, and HHA to EOB.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
-=======
 	
 ## CBBF-108 FHIR Mapping Change (Hospice)
 
@@ -82,4 +80,3 @@
 * Following FHIR mapping changes were made:
 
 	* The field CARR_LINE_CLIA_LAB_NUM for Carrier was remapped as a valueIdentifier from a valueCodeableConcept.
->>>>>>> 88051204e3317515ccab8355eb322fb3fcc5420b
