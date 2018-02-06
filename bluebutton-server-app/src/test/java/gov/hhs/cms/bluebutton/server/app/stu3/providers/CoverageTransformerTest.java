@@ -85,6 +85,11 @@ public final class CoverageTransformerTest {
 					TransformerConstants.EXTENSION_CODING_CCW_ESRD_INDICATOR,
 					TransformerConstants.EXTENSION_CODING_CCW_ESRD_INDICATOR,
 					String.valueOf(beneficiary.getEndStageRenalDiseaseCode().get()));
+		if (beneficiary.getPartATerminationCode().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(coverage,
+					TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
+					TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
+					String.valueOf(beneficiary.getPartATerminationCode().get()));
 	}
 
 	/**
@@ -112,6 +117,11 @@ public final class CoverageTransformerTest {
 					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
 					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
 					beneficiary.getMedicareEnrollmentStatusCode().get());
+		if (beneficiary.getPartBTerminationCode().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(coverage,
+					TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
+					TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
+					String.valueOf(beneficiary.getPartBTerminationCode().get()));
 	}
 
 	/**
@@ -138,5 +148,6 @@ public final class CoverageTransformerTest {
 					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
 					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
 					beneficiary.getMedicareEnrollmentStatusCode().get());
+		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
 	}
 }
