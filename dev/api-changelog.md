@@ -1,5 +1,10 @@
 # API Changelog
 
+## CBBF-123 (Sprint 45, 20128-02)
+* Added coverage extension codings for part A & B termination codes.
+	1. A temporary URL has been added for both extensions respectively: https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sometextfile.txt
+* The status for part D coverage transforms now defaults to active.
+
 ## CBBF-126 (Sprint 44, 2018-02)
 * Added an extension coding for DME provider billing number at the item level
 	1. A temporary URL has been added https://bluebutton.cms.gov/resources/suplrnum
