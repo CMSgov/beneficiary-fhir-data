@@ -74,3 +74,8 @@
 
 	* The REV_CNTR_PMT_AMT_AMT code value was changed to read "Revenue Center Payment Amount" in the XML for Hospice/HHA/DME/Outpatient.
 	
+## CBBF-135 Map Carrier CARR_LINE_CLIA_LAB_NUM
+
+* Following FHIR mapping changes were made:
+
+	* The field CARR_LINE_CLIA_LAB_NUM for Carrier was remapped as a valueIdentifier from a valueCodeableConcept.
