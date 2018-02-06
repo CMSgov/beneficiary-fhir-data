@@ -58,12 +58,11 @@ final class CarrierClaimTransformer {
 
 
 		// Common group level fields between Carrier and DME
-		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
+		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber(),
 				claimGroup.getClinicalTrialNumber(), claimGroup.getBeneficiaryPartBDeductAmount(),
-				claimGroup.getPaymentDenialCode(), claimGroup.getReferringPhysicianNpi(),
-				claimGroup.getProviderAssignmentIndicator(), claimGroup.getProviderPaymentAmount(),
-				claimGroup.getBeneficiaryPaymentAmount(), claimGroup.getSubmittedChargeAmount(),
-				claimGroup.getAllowedChargeAmount());
+				claimGroup.getPaymentDenialCode(), claimGroup.getProviderAssignmentIndicator(),
+				claimGroup.getProviderPaymentAmount(), claimGroup.getBeneficiaryPaymentAmount(),
+				claimGroup.getSubmittedChargeAmount(), claimGroup.getAllowedChargeAmount());
 
 		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses1Thru12(claimGroup.getDiagnosisPrincipalCode(),
 				claimGroup.getDiagnosisPrincipalCodeVersion(), 
@@ -170,7 +169,8 @@ final class CarrierClaimTransformer {
 					claimLine.getDiagnosisCode(),
 					claimLine.getDiagnosisCodeVersion(), 
 					claimLine.getHctHgbTestTypeCode(), claimLine.getHctHgbTestResult(),
-					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode());
+					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode(), claimGroup.getBeneficiaryId(),
+					claimGroup.getReferringPhysicianNpi(), claimLine.getPerformingPhysicianNpi());
 
 			if (claimLine.getProviderStateCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),

@@ -59,8 +59,10 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimColumn;
@@ -970,8 +972,6 @@ public final class TransformerUtils {
 	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to modify
-	 * @param beneficiaryId
-	 *            BENE_ID, *
 	 * @param carrierNumber
 	 *            CARR_NUM,
 	 * @param clinicalTrialNumber
@@ -994,12 +994,10 @@ public final class TransformerUtils {
 	 *            NCH_CARR_CLM_ALOWD_AMT,
 	 *
 	 */
-	static void mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String beneficiaryId,
+	static void mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob,
 			String carrierNumber, Optional<String> clinicalTrialNumber, BigDecimal beneficiaryPartBDeductAmount,
-			String paymentDenialCode, Optional<String> referringPhysicianNpi,
-			Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
-			BigDecimal beneficiaryPaymentAmount, BigDecimal submittedChargeAmount,
-			BigDecimal allowedChargeAmount) {
+			String paymentDenialCode, Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
+			BigDecimal beneficiaryPaymentAmount, BigDecimal submittedChargeAmount, BigDecimal allowedChargeAmount) {
 		/*
 		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
 		 * valueCodeableConcept
@@ -1008,21 +1006,6 @@ public final class TransformerUtils {
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
 		addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
-
-		/*
-		 * Referrals are represented as contained resources, since they share the
-		 * lifecycle and identity of their containing EOB.
-		 */
-		if (referringPhysicianNpi.isPresent()) {
-			ReferralRequest referral = new ReferralRequest();
-			referral.setStatus(ReferralRequestStatus.COMPLETED);
-			referral.setSubject(referencePatient(beneficiaryId));
-			referral.setRequester(new ReferralRequestRequesterComponent(
-					referencePractitioner(referringPhysicianNpi.get())));
-			referral.addRecipient(referencePractitioner(referringPhysicianNpi.get()));
-			// Set the ReferralRequest as a contained resource in the EOB:
-			eob.setReferral(new Reference(referral));
-		}
 
 		if (providerAssignmentIndicator.isPresent()) {
 			addExtensionCoding(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
@@ -1136,7 +1119,13 @@ public final class TransformerUtils {
 	 * @param cmsServiceTypeCode
 	 *            LINE_CMS_TYPE_SRVC_CD,
 	 * @param nationalDrugCode
-	 *            LINE_NDC_CD
+	 *            LINE_NDC_CD,
+	 * @param beneficiaryId
+	 *            BENE_ID,
+	 * @param referringPhysicianNpi
+	 *            RFR_PHYSN_NPI,
+	 * @param referralRecipient
+	 *            PFR_PHYSN_NPI (Carrier) \ PRVDR_NPI (DME)
 	 * 
 	 * @return the {@link ItemComponent}
 	 */
@@ -1150,7 +1139,25 @@ public final class TransformerUtils {
 			Optional<Character> serviceDeductibleCode, Optional<String> diagnosisCode,
 			Optional<Character> diagnosisCodeVersion,
 			Optional<String> hctHgbTestTypeCode, BigDecimal hctHgbTestResult,
-			char cmsServiceTypeCode, Optional<String> nationalDrugCode) {
+			char cmsServiceTypeCode, Optional<String> nationalDrugCode, String beneficiaryId,
+			Optional<String> referringPhysicianNpi, Optional<String> referralRecipient) {
+
+		/*
+		 * Referrals are represented as contained resources, since they share the
+		 * lifecycle and identity of their containing EOB.
+		 */
+		if (referringPhysicianNpi.isPresent()) {
+			ReferralRequest referral = new ReferralRequest();
+			referral.setStatus(ReferralRequestStatus.COMPLETED);
+			referral.setSubject(referencePatient(beneficiaryId));
+			referral.setRequester(
+					new ReferralRequestRequesterComponent(referencePractitioner(referringPhysicianNpi.get())));
+			if (referralRecipient.isPresent()) {
+				referral.addRecipient(referencePractitioner(referralRecipient.get()));
+			}
+			// Set the ReferralRequest as a contained resource in the EOB:
+			eob.setReferral(new Reference(referral));
+		}
 
 		SimpleQuantity serviceCnt = new SimpleQuantity();
 		serviceCnt.setValue(serviceCount);
@@ -1210,8 +1217,8 @@ public final class TransformerUtils {
 				.setValue(beneficiaryPartBDeductAmount);
 
 		if (primaryPayerCode.isPresent()) {
-			addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
-					TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
+			addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_CARRIER_PRIMARY_PAYER,
+					TransformerConstants.EXTENSION_CODING_CARRIER_PRIMARY_PAYER,
 					String.valueOf(primaryPayerCode.get()));
 		}
 

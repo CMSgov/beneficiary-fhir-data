@@ -63,11 +63,10 @@ public final class DMEClaimTransformerTest {
 				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
 		// Test to ensure common group fields between Carrier and DME match
-		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(),
-				claim.getCarrierNumber(),
+		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getCarrierNumber(),
 				claim.getClinicalTrialNumber(), claim.getBeneficiaryPartBDeductAmount(), claim.getPaymentDenialCode(),
-				claim.getReferringPhysicianNpi(), Optional.of(claim.getProviderAssignmentIndicator()),
-				claim.getProviderPaymentAmount(), claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
+				Optional.of(claim.getProviderAssignmentIndicator()), claim.getProviderPaymentAmount(),
+				claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
 
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
@@ -146,8 +145,8 @@ public final class DMEClaimTransformerTest {
 				Optional.empty(), Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
 		
 		// Test to ensure common item fields between Carrier and DME match
-		TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(eobItem0, eob, claimLine1.getServiceCount(),
-				claimLine1.getPlaceOfServiceCode(),
+		TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(eobItem0, eob, claim.getBeneficiaryId(),
+				claimLine1.getServiceCount(), claimLine1.getPlaceOfServiceCode(),
 				claimLine1.getFirstExpenseDate(),
 				claimLine1.getLastExpenseDate(), claimLine1.getBeneficiaryPaymentAmount(),
 				claimLine1.getProviderPaymentAmount(), claimLine1.getBeneficiaryPartBDeductAmount(),
@@ -158,6 +157,7 @@ public final class DMEClaimTransformerTest {
 				claimLine1.getDiagnosisCode(),
 				claimLine1.getDiagnosisCodeVersion(), 
 				claimLine1.getHctHgbTestTypeCode(), claimLine1.getHctHgbTestResult(),
-				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode());
+				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode(),
+				Optional.of(claim.getReferringPhysicianNpi().get()), claimLine1.getProviderNPI());
 	}
 }

@@ -82,11 +82,10 @@ public final class CarrierClaimTransformerTest {
 				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
 		// Test to ensure common group fields between Carrier and DME match
-		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(),
-				claim.getCarrierNumber(),
+		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getCarrierNumber(),
 				claim.getClinicalTrialNumber(), claim.getBeneficiaryPartBDeductAmount(), claim.getPaymentDenialCode(),
-				claim.getReferringPhysicianNpi(), claim.getProviderAssignmentIndicator(),
-				claim.getProviderPaymentAmount(), claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
+				claim.getProviderAssignmentIndicator(), claim.getProviderPaymentAmount(),
+				claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
 
 		Assert.assertEquals(6, eob.getDiagnosis().size());
@@ -159,7 +158,8 @@ public final class CarrierClaimTransformerTest {
 				Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
 
     // Test to ensure common item fields between Carrier and DME match
-		TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(eobItem0, eob, claimLine1.getServiceCount(),
+		TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(eobItem0, eob, claim.getBeneficiaryId(),
+				claimLine1.getServiceCount(),
 				claimLine1.getPlaceOfServiceCode(),
 				claimLine1.getFirstExpenseDate(),
 				claimLine1.getLastExpenseDate(), claimLine1.getBeneficiaryPaymentAmount(),
@@ -171,6 +171,7 @@ public final class CarrierClaimTransformerTest {
 				claimLine1.getDiagnosisCode(),
 				claimLine1.getDiagnosisCodeVersion(), 
 				claimLine1.getHctHgbTestTypeCode(), claimLine1.getHctHgbTestResult(),
-				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode());
+				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode(),
+				Optional.of(claim.getReferringPhysicianNpi().get()), claimLine1.getPerformingPhysicianNpi());
 	}
 }

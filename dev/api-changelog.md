@@ -74,3 +74,10 @@
 
 	* The REV_CNTR_PMT_AMT_AMT code value was changed to read "Revenue Center Payment Amount" in the XML for Hospice/HHA/DME/Outpatient.
 	
+## CBBF-106 FHIR Mapping Change (Carrier)
+
+* Following FHIR Mapping changes were made:
+
+	* Referral Request recipient was remapped to PFR_PHYSN_NPI (Carrier Line Performing NPI Number) for Carrier and PRVDR_NPI (DMERC Line Item Supplier NPI Number) for DME.
+	* Carrier LPRPAYCD (Line Beneficiary Primary Payer Code) had extension URL and system value changed to point to LPRPAYCD.txt.
+	
