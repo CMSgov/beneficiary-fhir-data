@@ -12,7 +12,6 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
@@ -46,6 +45,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimColumn;
@@ -1227,8 +1227,16 @@ final class TransformerTestUtils {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT,
 				totalChargeAmount, item.getAdjudication());
 
-		// TODO add tests for unitCount, nationalDrugCodeQuantity and
-		// nationalDrugCodeQualifierCode
+		Assert.assertEquals(unitCount, item.getQuantity().getValue());
+
+		if (nationalDrugCodeQualifierCode.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_CCW_NDC_UNIT, nationalDrugCodeQualifierCode.get(),
+					item.getModifier().get(1));
+
+			TransformerTestUtils.assertExtensionCodingEquals(item.getModifier().get(1).getExtension().get(0),
+					TransformerConstants.CODING_CCW_NDC_QTY, TransformerConstants.CODING_CCW_NDC_QTY,
+					String.valueOf(nationalDrugCodeQuantity.get()));
+		}
 
 		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
