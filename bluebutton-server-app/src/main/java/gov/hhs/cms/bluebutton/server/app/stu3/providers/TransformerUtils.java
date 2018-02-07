@@ -1362,15 +1362,6 @@ public final class TransformerUtils {
 		item.setQuantity(qty);
 
 		if (nationalDrugCodeQualifierCode.isPresent()) {
-			// ItemComponent drugCodeQualifierMod = item
-			// .addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_NDC_UNIT,
-			// nationalDrugCodeQualifierCode.get()));
-
-			// TransformerUtils.addExtensionCoding(item.getModifier().get(1).addExtension(),
-			// TransformerConstants.CODING_CCW_NDC_QTY,
-			// TransformerConstants.CODING_CCW_NDC_QTY,
-			// String.valueOf(nationalDrugCodeQuantity.get()));
-
 			CodeableConcept cc = item.addModifier();
 			cc.addCoding().setSystem(TransformerConstants.CODING_CCW_NDC_UNIT)
 					.setCode(nationalDrugCodeQualifierCode.get());
