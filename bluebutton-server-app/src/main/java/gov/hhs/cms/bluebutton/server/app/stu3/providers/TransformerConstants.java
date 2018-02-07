@@ -306,6 +306,8 @@ final class TransformerConstants {
 	 */
 	static final String CODING_CCW_NDC_UNIT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt";
 
+	static final String CODING_CCW_NDC_QTY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt";
+
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
