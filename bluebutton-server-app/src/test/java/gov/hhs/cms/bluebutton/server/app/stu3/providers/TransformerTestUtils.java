@@ -1230,7 +1230,7 @@ final class TransformerTestUtils {
 			BigDecimal rateAmount,
 			BigDecimal totalChargeAmount, BigDecimal nonCoveredChargeAmount, BigDecimal unitCount,
 			Optional<BigDecimal> nationalDrugCodeQuantity, Optional<String> nationalDrugCodeQualifierCode,
-			Optional<String> revenueCenterRenderingPhysicianNPI) {
+			Optional<String> revenueCenterRenderingPhysicianNPI, int index) {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
 				revenueCenterCode, item.getRevenue());
@@ -1247,9 +1247,9 @@ final class TransformerTestUtils {
 
 		if (nationalDrugCodeQualifierCode.isPresent()) {
 			assertHasCoding(TransformerConstants.CODING_CCW_NDC_UNIT, nationalDrugCodeQualifierCode.get(),
-					item.getModifier().get(1));
+					item.getModifier().get(index));
 
-			TransformerTestUtils.assertExtensionCodingEquals(item.getModifier().get(1).getExtension().get(0),
+			assertExtensionCodingEquals(item.getModifier().get(index),
 					TransformerConstants.CODING_CCW_NDC_QTY, TransformerConstants.CODING_CCW_NDC_QTY,
 					String.valueOf(nationalDrugCodeQuantity.get()));
 		}

@@ -171,7 +171,8 @@ public final class OutpatientClaimTransformerTest {
 		TransformerTestUtils.assertEobCommonItemRevenueEquals(eobItem0, eob, claimLine1.getRevenueCenterCode(),
 				claimLine1.getRateAmount(), claimLine1.getTotalChargeAmount(), claimLine1.getNonCoveredChargeAmount(),
 				claimLine1.getUnitCount(), claimLine1.getNationalDrugCodeQuantity(),
-				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI());
+				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI(),
+				1/* index */);
 		
 		// Test to ensure item level fields between Outpatient, HHA and Hospice match
 		TransformerTestUtils.assertEobCommonItemRevenueOutHHAHospice(eobItem0, claimLine1.getRevenueCenterDate(),

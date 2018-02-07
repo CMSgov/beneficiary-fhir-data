@@ -122,7 +122,7 @@ public final class HospiceClaimTransformerTest {
 				claimLine1.getRateAmount(), claimLine1.getTotalChargeAmount(),
 				claimLine1.getNonCoveredChargeAmount().get(), claimLine1.getUnitCount(),
 				claimLine1.getNationalDrugCodeQuantity(), claimLine1.getNationalDrugCodeQualifierCode(),
-				claimLine1.getRevenueCenterRenderingPhysicianNPI());
+				claimLine1.getRevenueCenterRenderingPhysicianNPI(), 1/* index */);
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
