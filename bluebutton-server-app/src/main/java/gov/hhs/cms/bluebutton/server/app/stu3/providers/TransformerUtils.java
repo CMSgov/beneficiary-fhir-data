@@ -27,6 +27,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -59,8 +60,10 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimColumn;
@@ -1354,23 +1357,17 @@ public final class TransformerUtils {
 				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
 				.setValue(nonCoveredChargeAmount);
 
-		/*
-		 * Set item quantity to Unit Count first if > 0; NDC quantity next if present;
-		 * otherwise set to 0
-		 */
 		SimpleQuantity qty = new SimpleQuantity();
-		if (unitCount.compareTo(BigDecimal.ZERO) > 0) {
-			qty.setValue(unitCount);
-		} else if (nationalDrugCodeQuantity.isPresent()) {
-			qty.setValue(nationalDrugCodeQuantity.get());
-		} else {
-			qty.setValue(0);
-		}
+		qty.setValue(unitCount);
 		item.setQuantity(qty);
 
 		if (nationalDrugCodeQualifierCode.isPresent()) {
-			item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_NDC_UNIT,
-					nationalDrugCodeQualifierCode.get()));
+			CodeableConcept cc = item.addModifier();
+			cc.addCoding().setSystem(TransformerConstants.CODING_CCW_NDC_UNIT)
+					.setCode(nationalDrugCodeQualifierCode.get());
+
+			TransformerUtils.addExtensionCoding(cc, TransformerConstants.CODING_CCW_NDC_QTY,
+					TransformerConstants.CODING_CCW_NDC_QTY, String.valueOf(nationalDrugCodeQuantity.get()));
 		}
 
 		if (revenueCenterRenderingPhysicianNPI.isPresent()) {
