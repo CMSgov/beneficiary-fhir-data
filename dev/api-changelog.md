@@ -80,4 +80,9 @@
 
 	* Referral Request recipient was remapped to PFR_PHYSN_NPI (Carrier Line Performing NPI Number) for Carrier and PRVDR_NPI (DMERC Line Item Supplier NPI Number) for DME.
 	* Carrier LPRPAYCD (Line Beneficiary Primary Payer Code) had extension URL and system value changed to point to LPRPAYCD.txt.
-	
+
+## CBBF-135 Map Carrier CARR_LINE_CLIA_LAB_NUM
+
+* Following FHIR mapping changes were made:
+
+	* The field CARR_LINE_CLIA_LAB_NUM for Carrier was remapped as a valueIdentifier from a valueCodeableConcept.
