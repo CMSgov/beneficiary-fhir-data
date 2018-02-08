@@ -81,3 +81,9 @@
 * Following FHIR mapping changes were made:
 
 	* The field CARR_LINE_CLIA_LAB_NUM for Carrier was remapped as a valueIdentifier from a valueCodeableConcept.
+	
+## CBBF-134 Map Carrier CARR_LINE_ANSTHSA_UNIT_CNT
+
+* Following FHIR mapping changes were made:
+
+	* The field CARR_ANSTHSA_UNIT_CNT (Carrier Line Anesthesia Unit Count) has been mapped to item.service.extension (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.service.extension`) only when the value is greater than zero.
