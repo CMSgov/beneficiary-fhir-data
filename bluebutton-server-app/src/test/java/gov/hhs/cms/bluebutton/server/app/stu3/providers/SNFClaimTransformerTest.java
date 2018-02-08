@@ -109,7 +109,7 @@ public final class SNFClaimTransformerTest {
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
 				claim.getPrimaryPayerPaidAmount());
 
-		Assert.assertEquals(5, eob.getDiagnosis().size());
+		Assert.assertEquals(6, eob.getDiagnosis().size());
 
 		CCWProcedure ccwProcedure = new CCWProcedure(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
 				claim.getProcedure1Date());

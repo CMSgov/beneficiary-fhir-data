@@ -14,6 +14,7 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
  * Transforms CCW {@link OutpatientClaim} instances into FHIR
@@ -172,17 +173,17 @@ final class OutpatientClaimTransformer {
 
 		if (claimGroup.getDiagnosisAdmission1Code().isPresent())
 			TransformerUtils.addDiagnosisCode(eob, Diagnosis
-					.from(claimGroup.getDiagnosisAdmission1Code(), claimGroup.getDiagnosisAdmission1CodeVersion())
-					.get());
+					.from(claimGroup.getDiagnosisAdmission1Code(), claimGroup.getDiagnosisAdmission1CodeVersion(),
+							DiagnosisLabel.REASONFORVISIT).get());
 		if (claimGroup.getDiagnosisAdmission2Code().isPresent())
 			TransformerUtils.addDiagnosisCode(eob, Diagnosis
-					.from(claimGroup.getDiagnosisAdmission2Code(), claimGroup.getDiagnosisAdmission2CodeVersion())
-					.get());
+					.from(claimGroup.getDiagnosisAdmission2Code(), claimGroup.getDiagnosisAdmission2CodeVersion()
+					, DiagnosisLabel.REASONFORVISIT).get());
 
 		if (claimGroup.getDiagnosisAdmission3Code().isPresent())
 			TransformerUtils.addDiagnosisCode(eob, Diagnosis
-					.from(claimGroup.getDiagnosisAdmission2Code(), claimGroup.getDiagnosisAdmission3CodeVersion())
-					.get());
+					.from(claimGroup.getDiagnosisAdmission2Code(), claimGroup.getDiagnosisAdmission3CodeVersion()
+					, DiagnosisLabel.REASONFORVISIT).get());
 
 		for (CCWProcedure procedure : TransformerUtils.extractCCWProcedures(claimGroup.getProcedure1Code(),
 				claimGroup.getProcedure1CodeVersion(), claimGroup.getProcedure1Date(), claimGroup.getProcedure2Code(),
@@ -230,13 +231,6 @@ final class OutpatientClaimTransformer {
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
-			// TODO re-map as described in CBBF-111
-			/*
-			 * if (claimLine.getNationalDrugCode().isPresent()) {
-			 * item.setService(TransformerUtils.createCodeableConcept(TransformerConstants.
-			 * CODING_NDC, claimLine.getNationalDrugCode().get())); }
-			 */
-
 			if (claimLine.getRevCntr1stAnsiCd().isPresent()) {
 				item.addAdjudication()
 						.setCategory(
@@ -281,6 +275,11 @@ final class OutpatientClaimTransformer {
 			// set hcpcs modifier codes for the claim
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), Optional.empty());
+
+			if (claimLine.getNationalDrugCode().isPresent()) {
+				TransformerUtils.addExtensionCoding(item.getService(), TransformerConstants.CODING_NDC,
+						TransformerConstants.CODING_NDC, claimLine.getNationalDrugCode().get());
+			}
 
 			item.addAdjudication()
 					.setCategory(
@@ -368,6 +367,13 @@ final class OutpatientClaimTransformer {
 					claimLine.getTotalChargeAmount(), claimLine.getNonCoveredChargeAmount(), claimLine.getUnitCount(),
 					claimLine.getNationalDrugCodeQuantity(), claimLine.getNationalDrugCodeQualifierCode(),
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
+
+			// set revenue center status indicator codes for the claim
+			TransformerUtils.addExtensionCoding(item.getRevenue(),
+					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
+					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
+					claimLine.getStatusCode().get());
+
 		}
 		return eob;
 	}

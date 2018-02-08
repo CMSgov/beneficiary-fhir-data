@@ -89,7 +89,7 @@ public final class CarrierClaimTransformerTest {
 				claim.getProviderPaymentAmount(), claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
 
-		Assert.assertEquals(6, eob.getDiagnosis().size());
+		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 
 

@@ -45,6 +45,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimColumn;
@@ -805,10 +806,8 @@ final class TransformerTestUtils {
 		}
 		
 		// diagnosisRelatedGroupCd
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
-						TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
-						String.valueOf(diagnosisRelatedGroupCd.get()))));
+		assertCodingEquals(TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
+				diagnosisRelatedGroupCd.get(), eob.getDiagnosisFirstRep().getPackageCode().getCodingFirstRep());
 	}
 
 	/**

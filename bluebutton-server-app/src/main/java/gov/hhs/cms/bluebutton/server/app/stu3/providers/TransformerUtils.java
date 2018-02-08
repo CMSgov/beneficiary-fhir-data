@@ -59,8 +59,10 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimColumn;
@@ -149,10 +151,17 @@ public final class TransformerUtils {
 	
 		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
 		diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
-		if (diagnosis.getPresentOnAdmission().isPresent()) {
-			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
-					String.valueOf(diagnosis.getPresentOnAdmission().get())));
+
+		if (!diagnosis.getLabels().isEmpty()) {
+			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_FHIR_DIAGNOSIS_TYPE,
+					String.valueOf(diagnosis.getLabels())));
 		}
+	    if (diagnosis.getPresentOnAdmission().isPresent()) {
+	    	addExtensionCoding(diagnosisComponent, TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
+					TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
+					String.valueOf(diagnosis.getPresentOnAdmission().get()));
+	    }
+
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequenceElement().getValue();
 	}
@@ -823,7 +832,7 @@ public final class TransformerUtils {
 		
 		// diagnosisRelatedGroupCd
 		if (diagnosisRelatedGroupCd.isPresent()) {
-			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(
+			eob.addDiagnosis().setPackageCode(TransformerUtils.createCodeableConcept(
 					TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
 					diagnosisRelatedGroupCd.get()));
 		}
@@ -1662,7 +1671,7 @@ public final class TransformerUtils {
 
 		diagnosisAdder.accept(
 				Diagnosis.from(diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
-		diagnosisAdder.accept(Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion));
+		diagnosisAdder.accept(Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
@@ -1771,31 +1780,34 @@ public final class TransformerUtils {
 
 		diagnosisAdder.accept(Diagnosis.from(diagnosisExternalFirstCode, diagnosisExternalFirstCodeVersion,
 				DiagnosisLabel.FIRSTEXTERNAL));
-
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal1Code, diagnosisExternal1CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal1Code, diagnosisExternal1CodeVersion,
+						DiagnosisLabel.FIRSTEXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal2Code, diagnosisExternal2CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal2Code, diagnosisExternal2CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal3Code, diagnosisExternal3CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal3Code, diagnosisExternal3CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal4Code, diagnosisExternal4CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal4Code, diagnosisExternal4CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal5Code, diagnosisExternal5CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal5Code, diagnosisExternal5CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal6Code, diagnosisExternal6CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal6Code, diagnosisExternal6CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal7Code, diagnosisExternal7CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal7Code, diagnosisExternal7CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal8Code, diagnosisExternal8CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal8Code, diagnosisExternal8CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal9Code, diagnosisExternal9CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal9Code, diagnosisExternal9CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal10Code, diagnosisExternal10CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal10Code, diagnosisExternal10CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal11Code, diagnosisExternal11CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal11Code, diagnosisExternal11CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal12Code, diagnosisExternal12CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal12Code, diagnosisExternal12CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 
 		return diagnoses;
 	}
