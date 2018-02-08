@@ -81,3 +81,10 @@
 * Following FHIR mapping changes were made:
 
 	* The field CARR_LINE_CLIA_LAB_NUM for Carrier was remapped as a valueIdentifier from a valueCodeableConcept.
+
+## CBBF-142 ICD codes have invalid Coding.system
+
+* Following changes have been made:
+
+	* IcdCode.getFhirSystem() had a condition comparing a string "" to a character '' resulting in the incorrect Coding.system. This was changed to compare a character '' to a character ''.
+	* Test classes were created for Diagnosis and CCWProcedure, both of which extend IcdCode, to ensure that the two classes are functioning properly.
