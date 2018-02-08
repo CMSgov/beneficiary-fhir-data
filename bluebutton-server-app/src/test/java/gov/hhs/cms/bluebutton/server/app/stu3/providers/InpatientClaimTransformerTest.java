@@ -74,7 +74,13 @@ public final class InpatientClaimTransformerTest {
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_PPS_CAPITAL, claim.getClaimTotalPPSCapitalAmount().get(),
 				eob.getBenefitBalanceFirstRep().getFinancial());
-
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT, claim.getIndirectMedicalEducationAmount().get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT, claim.getDisproportionateShareAmount().get(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		
 		// test common eob information between Inpatient, HHA, Hospice and SNF claims are set as expected
 		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(eob, claim.getClaimAdmissionDate(), 
 				claim.getBeneficiaryDischargeDate(), Optional.of(claim.getUtilizationDayCount()));

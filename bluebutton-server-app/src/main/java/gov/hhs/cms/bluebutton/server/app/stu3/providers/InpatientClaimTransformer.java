@@ -78,6 +78,26 @@ final class InpatientClaimTransformer {
 						TransformerConstants.CODING_FHIR_BENEFIT_BALANCE, BenefitCategory.MEDICAL.toCode()));
 		eob.getBenefitBalance().add(benefitBalances);
 
+		// map indirectMedicalEducationAmount to eob.benefitbalance.financial
+		if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
+			BenefitComponent bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimGroup.getIndirectMedicalEducationAmount().get()));
+			eob.getBenefitBalanceFirstRep().getFinancial().add(bc);
+		}
+
+		// map disproportionateShareAmount to eob.benefitbalance.financial
+		if (claimGroup.getDisproportionateShareAmount().isPresent()) {
+			BenefitComponent bc = new BenefitComponent(
+					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+							TransformerConstants.CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT));
+			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+					.setValue(claimGroup.getDisproportionateShareAmount().get()));
+			eob.getBenefitBalanceFirstRep().getFinancial().add(bc);
+		}
+
 		if (claimGroup.getPassThruPerDiemAmount() != null) {
 			BenefitComponent benefitPerDiem = new BenefitComponent(
 					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
