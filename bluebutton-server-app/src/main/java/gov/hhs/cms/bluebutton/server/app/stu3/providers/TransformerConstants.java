@@ -475,6 +475,8 @@ final class TransformerConstants {
 
 	static final String EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt";
 
+	static final String EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_ansthsa_unit_cnt.txt";
+
 	static final String EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
 
 	// FIXME: needs to link to an explanation of what this extension coding is
