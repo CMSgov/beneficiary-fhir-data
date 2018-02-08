@@ -101,6 +101,11 @@ public final class HospiceClaimTransformerTest {
 				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
 
+		TransformerTestUtils.assertExtensionCodingEquals(eob.getHospitalization(),
+				TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
+				TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
+				String.valueOf(claim.getHospicePeriodCount().get()));
+
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),

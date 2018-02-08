@@ -175,6 +175,10 @@ final class TransformerConstants {
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt">
 	 * CCW Data Dictionary: PTNT_PAY_AMT</a>.
 	 */
+	static final String CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT = "Disproportionate Share Amount";
+
+	static final String CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT = "Indirect Medical Education Amount";
+
 	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
 
 	static final String CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT = "Patient Responsibility Amount";
@@ -464,6 +468,9 @@ final class TransformerConstants {
 	static final String EXTENSION_CODING_CMS_RX_PHARMACY_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
 
 	public static final String EXTENSION_CODING_CMS_SUPPLIER_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt";
+
+	// FIXME: verify this link is correct for this extension coding
+	public static final String EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT = "https://bluebutton.cms.gov/resources/hospcprd";
 
 	public static final String EXTENSION_CODING_UNIT_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/unit_ind.txt";
 	

@@ -88,6 +88,13 @@ final class HospiceClaimTransformer {
 //			eob.setHospitalization(period);
 //		}
 		
+		if (claimGroup.getHospicePeriodCount().isPresent()) {
+			TransformerUtils.addExtensionCoding(eob.getHospitalization(),
+					TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
+					TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
+					String.valueOf(claimGroup.getHospicePeriodCount().get()));
+		}
+
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimHospiceStartDate(),
 				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
