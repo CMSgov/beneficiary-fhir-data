@@ -58,7 +58,6 @@ final class CarrierClaimTransformer {
 						BenefitCategory.MEDICAL.toCode()));
 		eob.getBenefitBalance().add(benefitBalances);
 
-
 		// Common group level fields between Carrier and DME
 		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
 				claimGroup.getClinicalTrialNumber(), claimGroup.getBeneficiaryPartBDeductAmount(),
@@ -145,6 +144,13 @@ final class CarrierClaimTransformer {
 			// set hcpcs modifier codes for the claim
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
+
+			if (claimLine.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
+				TransformerUtils.addExtensionCoding(item.getService(),
+						TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
+						TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
+						String.valueOf(claimLine.getAnesthesiaUnitCount()));
+			}
 
 			if (claimLine.getMtusCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS_IND,
