@@ -113,14 +113,14 @@ public final class DataSetMonitorWorker implements Runnable {
 	 */
 	@Override
 	public void run() {
-		LOGGER.info("Scanning for data sets to process...");
+		LOGGER.debug("Scanning for data sets to process...");
 
 		// Update the queue from S3.
 		dataSetQueue.updatePendingDataSets();
 
 		// If no manifest was found, we're done (until next time).
 		if (dataSetQueue.isEmpty()) {
-			LOGGER.info(LOG_MESSAGE_NO_DATA_SETS);
+			LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
 			listener.noDataAvailable();
 			return;
 		}
