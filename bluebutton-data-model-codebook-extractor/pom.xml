@@ -1,9 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>bluebutton-data-model-codebook-extractor</groupId>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+		<artifactId>bluebutton-data-model</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
 	<artifactId>bluebutton-data-model-codebook-extractor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	
+	<description>
+		Converts the CCW Data Dictionary codebook PDFs to XML.
+	</description>
 
 	<dependencies>
 
@@ -24,21 +34,6 @@
 		    <artifactId>commons-lang3</artifactId>
 		    <version>3.7</version>
 		</dependency>
-		
 
 	</dependencies>
-
-	<build>
-		<sourceDirectory>src</sourceDirectory>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>
