@@ -59,6 +59,12 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
  * </p>
  */
 public final class DataSetMonitor {
+	/**
+	 * The {@link Logger} message that will be recorded if/when the
+	 * {@link DataSetMonitor} starts scanning for data sets.
+	 */
+	public static final String LOG_MESSAGE_STARTING_WORKER = "Starting data set monitor: watching for data sets to process...";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitor.class);
 
 	/**
@@ -129,6 +135,7 @@ public final class DataSetMonitor {
 		 * this method does not block, and should return normally almost
 		 * immediately.)
 		 */
+		LOGGER.info(LOG_MESSAGE_STARTING_WORKER);
 		this.dataSetWatcherFuture = dataSetWatcherService.scheduleWithFixedDelay(errorNotifyingDataSetWatcher, 0,
 				scanRepeatDelay, TimeUnit.MILLISECONDS);
 	}

@@ -30,6 +30,7 @@ import gov.hhs.cms.bluebutton.data.pipeline.rif.load.LoadAppOptions;
 import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoaderTestUtils;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitor;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetMonitorWorker;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetTestUtilities;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.S3Utilities;
@@ -151,8 +152,8 @@ public final class S3ToDatabaseLoadAppIT {
 			Thread appRunConsumerThread = new Thread(appRunConsumer);
 			appRunConsumerThread.start();
 
-			// Wait for it to complete a scan.
-			Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> hasAScanFoundNothing(appRunConsumer));
+			// Wait for it to start scanning.
+			Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> hasScanningStarted(appRunConsumer));
 
 			// Stop the application.
 			sendSigterm(appProcess);
@@ -216,9 +217,6 @@ public final class S3ToDatabaseLoadAppIT {
 			// Wait for it to process a data set.
 			Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> hasADataSetBeenProcessed(appRunConsumer));
 
-			// Wait for it to have a scan that finds nothing.
-			Awaitility.await().atMost(Duration.ONE_MINUTE).until(() -> hasAScanFoundNothing(appRunConsumer));
-
 			// Stop the application.
 			sendSigterm(appProcess);
 			appProcess.waitFor(1, TimeUnit.MINUTES);
@@ -256,14 +254,12 @@ public final class S3ToDatabaseLoadAppIT {
 
 	/**
 	 * @param appRunConsumer
-	 *            the {@link ProcessOutputConsumer} whose output should be
-	 *            checked
-	 * @return <code>true</code> if the application output indicates that a data
-	 *         set scan has completed and found nothing, <code>false</code> if
-	 *         not
+	 *            the {@link ProcessOutputConsumer} whose output should be checked
+	 * @return <code>true</code> if the application output indicates that data set
+	 *         scanning has started, <code>false</code> if not
 	 */
-	private static boolean hasAScanFoundNothing(ProcessOutputConsumer appRunConsumer) {
-		return appRunConsumer.getStdoutContents().toString().contains(DataSetMonitorWorker.LOG_MESSAGE_NO_DATA_SETS);
+	private static boolean hasScanningStarted(ProcessOutputConsumer appRunConsumer) {
+		return appRunConsumer.getStdoutContents().toString().contains(DataSetMonitor.LOG_MESSAGE_STARTING_WORKER);
 	}
 
 	/**
