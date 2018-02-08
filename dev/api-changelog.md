@@ -1,5 +1,10 @@
 # API Changelog
 
+## CBBF-138 (Sprint 45, 2018-02)
+* Mapped CARR_CLM_PRMRY_PYR_PD_AMT for Carrier claims to EOB.benefitbalance.financial as "Primary Payer Paid Amount"
+* Mapped IME_OP_CLM_VAL_AMT & DSH_OP_CLM_VAL_AMT for Inpatient claims to EOB.benefitbalance.financial as "Indirect Medical Education Amount" and "Disproportionate Share Amount" respectively.
+* Mapped BENE_HOSPC_PRD_CNT for Hospice claims as an extension to EOB.hospitalization as https://bluebutton.cms.gov/resources/hospcprd
+
 ## CBBF-126 (Sprint 44, 2018-02)
 * Added an extension coding for DME provider billing number at the item level
 	1. A temporary URL has been added https://bluebutton.cms.gov/resources/suplrnum
