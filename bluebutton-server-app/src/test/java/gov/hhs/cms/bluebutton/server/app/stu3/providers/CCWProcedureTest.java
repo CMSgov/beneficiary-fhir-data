@@ -24,17 +24,17 @@ public class CCWProcedureTest {
 	@Test
 	public void testCCWProcedure() throws FHIRException {
 
-		Character v9 = '9';
-		String sys9 = "http://hl7.org/fhir/sid/icd-9-cm";
-		assertMatches(v9, sys9);
+		Character versionIcd9 = '9';
+		String systemIcd9 = "http://hl7.org/fhir/sid/icd-9-cm";
+		assertMatches(versionIcd9, systemIcd9);
 
-		Character v0 = '0';
-		String sys0 = "http://hl7.org/fhir/sid/icd-10";
-		assertMatches(v0, sys0);
+		Character versionIcd10 = '0';
+		String systemIcd10 = "http://hl7.org/fhir/sid/icd-10";
+		assertMatches(versionIcd10, systemIcd10);
 
-		Character vUnk = 'U';
-		String sysUnk = String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", vUnk);
-		assertMatches(vUnk, sysUnk);
+		Character versionIcdUnknown = 'U';
+		String systemIcdUnknown = String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", versionIcdUnknown);
+		assertMatches(versionIcdUnknown, systemIcdUnknown);
 	}
 
 	static void assertMatches(Character version, String system) {
@@ -42,17 +42,17 @@ public class CCWProcedureTest {
 		Optional<String> code = Optional.of("code");
 		Optional<LocalDate> procDate = Optional.of(LocalDate.now());
 
-		Optional<CCWProcedure> diag = CCWProcedure.from(code, Optional.of(version), procDate);
+		Optional<CCWProcedure> diagnosis = CCWProcedure.from(code, Optional.of(version), procDate);
 
-		Assert.assertEquals(procDate.get(), diag.get().getProcedureDate());
-		Assert.assertEquals(system, diag.get().getFhirSystem());
+		Assert.assertEquals(procDate.get(), diagnosis.get().getProcedureDate());
+		Assert.assertEquals(system, diagnosis.get().getFhirSystem());
 
-		TransformerTestUtils.assertHasCoding(system, code.get(), diag.get().toCodeableConcept());
+		TransformerTestUtils.assertHasCoding(system, code.get(), diagnosis.get().toCodeableConcept());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = codeableConcept.addCoding();
 		coding.setSystem(system).setCode(code.get());
 
-		Assert.assertTrue(diag.get().isContainedIn(codeableConcept));
+		Assert.assertTrue(diagnosis.get().isContainedIn(codeableConcept));
 	}
 }
