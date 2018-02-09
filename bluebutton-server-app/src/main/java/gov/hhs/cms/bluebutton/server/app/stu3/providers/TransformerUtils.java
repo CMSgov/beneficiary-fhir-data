@@ -201,13 +201,7 @@ public final class TransformerUtils {
 			String codingCode) {
 		IBaseExtension<?, ?> extension = fhirElement.addExtension();
 		extension.setUrl(extensionUrl);
-		extension.setValue(new Coding());
-	
-		CodeableConcept codeableConcept = new CodeableConcept();
-		extension.setValue(codeableConcept);
-	
-		Coding coding = codeableConcept.addCoding();
-		coding.setSystem(codingSystem).setCode(codingCode);
+		extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
 	}
 
 	/**

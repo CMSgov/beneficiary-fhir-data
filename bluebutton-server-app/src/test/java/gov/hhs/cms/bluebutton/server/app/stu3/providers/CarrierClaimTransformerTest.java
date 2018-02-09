@@ -110,7 +110,7 @@ public final class CarrierClaimTransformerTest {
 		CareTeamComponent performingCareTeamEntry = TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
 				claimLine1.getPerformingPhysicianNpi().get(), eob.getCareTeam());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_PROVIDER_SPECIALTY,
-				claimLine1.getProviderSpecialityCode().get(), performingCareTeamEntry.getQualification());
+				claimLine1.getProviderSpecialityCode().get(), performingCareTeamEntry.getQualification().getCoding());
 		TransformerTestUtils.assertExtensionCodingEquals(performingCareTeamEntry,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_TYPE,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_TYPE, "" + claimLine1.getProviderTypeCode());
@@ -134,7 +134,7 @@ public final class CarrierClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY, "15");
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(), eobItem0.getService());
+				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(), eobItem0.getService().getCoding());
 		Assert.assertEquals(1, eobItem0.getModifier().size());
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),

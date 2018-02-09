@@ -89,7 +89,7 @@ public final class DMEClaimTransformerTest {
 		CareTeamComponent performingCareTeamEntry = TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
 				claimLine1.getProviderNPI().get(), eob.getCareTeam());
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_PROVIDER_SPECIALTY,
-				claimLine1.getProviderSpecialityCode().get(), performingCareTeamEntry.getQualification());
+				claimLine1.getProviderSpecialityCode().get(), performingCareTeamEntry.getQualification().getCoding());
 		TransformerTestUtils.assertExtensionCodingEquals(performingCareTeamEntry,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
 				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
@@ -108,7 +108,7 @@ public final class DMEClaimTransformerTest {
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
 				0/* index */);
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + claim.getHcpcsYearCode().get(),
-				claimLine1.getHcpcsCode().get(), eobItem0.getService());
+				claimLine1.getHcpcsCode().get(), eobItem0.getService().getCoding());
 
 		TransformerTestUtils.assertAdjudicationEquals(
 				TransformerConstants.CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE,

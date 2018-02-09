@@ -114,7 +114,7 @@ public final class SNFClaimTransformerTest {
 		CCWProcedure ccwProcedure = new CCWProcedure(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
 				claim.getProcedure1Date());
 		TransformerTestUtils.assertHasCoding(ccwProcedure.getFhirSystem().toString(), claim.getProcedure1Code().get(),
-				eob.getProcedure().get(0).getProcedureCodeableConcept());
+				eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
 		Assert.assertEquals(Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(0).getDate());
 
@@ -133,7 +133,7 @@ public final class SNFClaimTransformerTest {
 				eobItem0.getLocationAddress().getState());
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
-				claimLine1.getRevenueCenter(), eobItem0.getRevenue());
+				claimLine1.getRevenueCenter(), eobItem0.getRevenue().getCoding());
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(), Optional.empty(), Optional.empty(),
 				Optional.empty(), 0/* index */);
 

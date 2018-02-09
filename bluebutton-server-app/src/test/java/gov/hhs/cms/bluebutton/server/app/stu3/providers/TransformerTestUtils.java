@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -111,7 +112,7 @@ final class TransformerTestUtils {
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
 				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
 		Assert.assertTrue(adjudication.isPresent());
-		assertHasCoding(expectedReasonSystem, expectedReasonCode, adjudication.get().getReason());
+		assertHasCoding(expectedReasonSystem, expectedReasonCode, adjudication.get().getReason().getCoding());
 	}
 
 	/**
@@ -303,7 +304,7 @@ final class TransformerTestUtils {
 			String expectedCodingSystem, String expectedCode) {
 		IBaseExtension<?, ?> extensionForUrl = fhirElement.getExtension().stream()
 				.filter(e -> e.getUrl().equals(expectedExtensionUrl)).findFirst().get();
-		assertHasCoding(expectedCodingSystem, expectedCode, (CodeableConcept) extensionForUrl.getValue());
+		assertHasCoding(expectedCodingSystem, expectedCode, (Coding) extensionForUrl.getValue());
 	}
 
 	/**
@@ -311,11 +312,23 @@ final class TransformerTestUtils {
 	 *            the expected {@link Coding#getSystem()} value
 	 * @param expectedCode
 	 *            the expected {@link Coding#getCode()} value
-	 * @param actualConcept
-	 *            the actual {@link CodeableConcept} to verify
+	 * @param actualCode
+	 *            the actual {@link Coding} to verify
 	 */
-	static void assertHasCoding(String expectedSystem, String expectedCode, CodeableConcept actualConcept) {
-		assertHasCoding(expectedSystem, null, expectedCode, actualConcept);
+	static void assertHasCoding(String expectedSystem, String expectedCode, Coding actualCode) {
+		assertHasCoding(expectedSystem, null, expectedCode, Arrays.asList(actualCode));
+	}
+
+	/**
+	 * @param expectedSystem
+	 *            the expected {@link Coding#getSystem()} value
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()} value
+	 * @param actualCode
+	 *            the actual {@link List}&lt;{@link Coding}&gt; to verify
+	 */
+	static void assertHasCoding(String expectedSystem, String expectedCode, List<Coding> actualCode) {
+		assertHasCoding(expectedSystem, null, expectedCode, actualCode);
 	}
 
 	/**
@@ -325,13 +338,19 @@ final class TransformerTestUtils {
 	 *            the expected {@link Coding#getVersion()} value
 	 * @param expectedCode
 	 *            the expected {@link Coding#getCode()} value
-	 * @param actualConcept
-	 *            the actual {@link CodeableConcept} to verify
+	 * @param actualCode
+	 *            the actual {@link List}&lt;{@link Coding}&gt; to verify
 	 */
 	static void assertHasCoding(String expectedSystem, String expectedVersion, String expectedCode,
-			CodeableConcept actualConcept) {
-		Assert.assertTrue("No matching Coding found: " + actualConcept.toString(),
-				isCodeInConcept(actualConcept, expectedSystem, expectedVersion, expectedCode));
+			List<Coding> actualCode) {
+		Assert.assertTrue("No matching Coding found: " + actualCode.toString(), actualCode.stream().anyMatch(c -> {
+			if (!expectedSystem.equals(c.getSystem())
+					|| (expectedVersion != null && !expectedVersion.equals(c.getVersion()))
+					|| !expectedCode.equals(c.getCode())) {
+				return false;
+			}
+			return true;
+		}));
 	}
 
 	/**
@@ -482,19 +501,19 @@ final class TransformerTestUtils {
 	static void assertMapEobType(CodeableConcept eobType, ClaimType blueButtonClaimType,
 			Optional<org.hl7.fhir.dstu3.model.codesystems.ClaimType> fhirClaimType,
 			Optional<Character> ccwNearLineRecordIdCode, Optional<String> ccwClaimTypeCode) {
-		assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE, blueButtonClaimType.name(), eobType);
+		assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE, blueButtonClaimType.name(), eobType.getCoding());
 
 		if (fhirClaimType.isPresent()) {
-			assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE, fhirClaimType.get().name(), eobType);
+			assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE, fhirClaimType.get().name(), eobType.getCoding());
 		}
 
 		if (ccwNearLineRecordIdCode.isPresent()) {
 			assertHasCoding(TransformerConstants.CODING_CCW_RECORD_ID_CODE,
-					String.valueOf(ccwNearLineRecordIdCode.get()), eobType);
+					String.valueOf(ccwNearLineRecordIdCode.get()), eobType.getCoding());
 		}
 
 		if (ccwClaimTypeCode.isPresent()) {
-			assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE, ccwClaimTypeCode.get(), eobType);
+			assertHasCoding(TransformerConstants.CODING_NCH_CLAIM_TYPE, ccwClaimTypeCode.get(), eobType.getCoding());
 		}
 	}
 	
@@ -1048,9 +1067,9 @@ final class TransformerTestUtils {
 		Assert.assertEquals(serviceCount, item.getQuantity().getValue());
 		
 		assertHasCoding(TransformerConstants.CODING_CCW_TYPE_SERVICE,
-				"" + cmsServiceTypeCode, item.getCategory());
+				"" + cmsServiceTypeCode, item.getCategory().getCoding());
 		assertHasCoding(TransformerConstants.CODING_CCW_PLACE_OF_SERVICE, placeOfServiceCode,
-				item.getLocationCodeableConcept());
+				item.getLocationCodeableConcept().getCoding());
 		assertExtensionCodingEquals(item, TransformerConstants.CODING_BETOS, TransformerConstants.CODING_BETOS,
 				betosCode.get());
 		assertDateEquals(firstExpenseDate.get(), item.getServicedPeriod().getStartElement());
@@ -1233,7 +1252,7 @@ final class TransformerTestUtils {
 			Optional<String> revenueCenterRenderingPhysicianNPI, int index) {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
-				revenueCenterCode, item.getRevenue());
+				revenueCenterCode, item.getRevenue().getCoding());
 		
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT, rateAmount,
 				item.getAdjudication());
@@ -1247,7 +1266,7 @@ final class TransformerTestUtils {
 
 		if (nationalDrugCodeQualifierCode.isPresent()) {
 			assertHasCoding(TransformerConstants.CODING_CCW_NDC_UNIT, nationalDrugCodeQualifierCode.get(),
-					item.getModifier().get(index));
+					item.getModifier().get(index).getCoding());
 
 			assertExtensionCodingEquals(item.getModifier().get(index),
 					TransformerConstants.CODING_CCW_NDC_QTY, TransformerConstants.CODING_CCW_NDC_QTY,
@@ -1424,17 +1443,17 @@ final class TransformerTestUtils {
 			int index) {
 		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
 			assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(), hcpcsInitialModifierCode.get(),
-					item.getModifier().get(index));
+					item.getModifier().get(index).getCoding());
 			TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(),
-					hcpcsCode.get(), item.getService());
+					hcpcsCode.get(), item.getService().getCoding());
 		} else { // while others do not...
 			if (hcpcsInitialModifierCode.isPresent()) {
 				assertHasCoding(TransformerConstants.CODING_HCPCS, hcpcsInitialModifierCode.get(),
-						item.getModifier().get(index));
+						item.getModifier().get(index).getCoding());
 			}
 			if (hcpcsCode.isPresent()) {
 				TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-						hcpcsCode.get(), item.getService());
+						hcpcsCode.get(), item.getService().getCoding());
 			}
 
 		}
