@@ -1,5 +1,15 @@
 # API Changelog
 
+## CBBF-138 (Sprint 45, 2018-02)
+* Mapped CARR_CLM_PRMRY_PYR_PD_AMT for Carrier claims to EOB.benefitbalance.financial as "Primary Payer Paid Amount"
+* Mapped IME_OP_CLM_VAL_AMT & DSH_OP_CLM_VAL_AMT for Inpatient claims to EOB.benefitbalance.financial as "Indirect Medical Education Amount" and "Disproportionate Share Amount" respectively.
+* Mapped BENE_HOSPC_PRD_CNT for Hospice claims as an extension to EOB.hospitalization as https://bluebutton.cms.gov/resources/hospcprd
+
+## CBBF-123 (Sprint 45, 20128-02)
+* Added coverage extension codings for part A & B termination codes.
+	1. TransformerConstant URLs have been added for both extensions respectively: https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt and https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt
+* The status for part D coverage transforms now defaults to active.
+
 ## CBBF-126 (Sprint 44, 2018-02)
 * Added an extension coding for DME provider billing number at the item level
 	1. A temporary URL has been added https://bluebutton.cms.gov/resources/suplrnum
@@ -41,6 +51,47 @@
 * Following FHIR Mapping changes were made:
     * The NDC (National Drug Code) for Part D claims wasn't being mapped to FHIR.  Now it is mapped to ExplanatonOfBenefit.item.service (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.service`).
     * The `https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt` RIF Part D field was being mapped to ExplanationOfBenefit.item.service. Changed to now be mapped to ExplanationOfBenefit.information.
+    
+## CBBF-111 FHIR Mapping Change (Outpatient)
+
+* Following FHIR Mapping changes were made:
+
+		*  Changes to the diagnosis section (The following was done for ALL claim types that contain diagnosis codes)
+			◦ Tie diagnosis.type “PRINCIPAL” to PRNCPAL_DGNS_CD or ICD_DGNS_CD1
+			◦ Include PRNCPAL_DGNS_CD or ICD_DGNS_CD1, but not both since both variables store the same value and is considered primary/principal
+			◦ For FST_DGNS_E_CD or ICD_DGNS_E_CD1, and ICD_DGNS_E_CD2-12, make diagnosis.type to be “FIRSTEXTERNAL”
+			◦ For ICD_DGNS_E_CD2-12, make diagnosis.type to be “EXTERNAL”
+			◦ Include FST_DGNS_E_CD or ICD_DGNS_E_CD1, but not both since both variables store the same value
+			◦ For RSN_VISIT_CD1-3, make diagnosis.type to be “REASONFORVISIT”
+
+		* The REV_CNTR_DT (Revenue Center Date) for Outpatient, Hospice, and HHA was not being mapped. Now it is mapped to ExplanationOfBenefit.item.serviced.date (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.serviced.date`).
+		* The REV_CNTR_PMT_AMT_AMT (Revenue Center Payment Amount Amount) was the same for Outpatient, Hospice, and HHA and has been abstracted to a method in the TransformerUtils.java class.
+		* Map REV_UNIT (Revenue Center Unit Count) for Outpatient, Hospice, Inpatient, SNF, and HHA to EOB.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
+		* Map REV_CNTR_NDC_QTY (Revenue Center NDC Quantity) for Outpatient, Hospice, Inpatient, SNF, and HHA as an extension of the item.modifier REV_CNTR_NDC_QTY_QLFR_CD.
+		* Map HCPCS_CD (Revenue Center Healthcare Common Procedure Coding System) to ExplanationOfBenefit.item.service
+		* Map REV_CNTR_IDE_NDC_UPC_NUM (Revenue Center IDE, NDC, UPC Number) to an extension of ExplanationOfBenefit.item.service
+		* Change code value from NCH Payment Amount to Revenue Payment Amount - description change
+		* Map REV_CNTR_STUS_IND_CD (Revenue Center Status Indicator Code) to an extension of ExplanationOfBenefit.item.revenue
+		
+	
+## CBBF-112 FHIR Mapping Change (Inpatient)
+
+* Following FHIR Mapping changes were made:
+	
+		*  Changes to the diagnosis section
+			◦ Tie diagnosis.type “ADMITTING” to ADMTG_DGNS_CD
+			◦ Tie diagnosis.type “PRINCIPAL” to PRNCPAL_DGNS_CD or ICD_DGNS_CD1
+			◦ Include PRNCPAL_DGNS_CD or ICD_DGNS_CD1, but not both since both variables store the same value and is considered primary/principal
+			◦ For CLM_POA_IND_SW1-25, make extension to diagnosis
+			◦ For FST_DGNS_E_CD or ICD_DGNS_E_CD1, and ICD_DGNS_E_CD2-12, make diagnosis.type to be “FIRSTEXTERNAL”
+			◦ For ICD_DGNS_E_CD2-12, make diagnosis.type to be “EXTERNAL”
+			◦ Include FST_DGNS_E_CD or ICD_DGNS_E_CD1, but not both since both variables store the same value
+		
+	* Map REV_UNIT (Revenue Center Unit Count) for Outpatient, Hospice, Inpatient, SNF, and HHA to EOB.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
+	* Map REV_CNTR_NDC_QTY (Revenue Center NDC Quantity) for Outpatient, Hospice, Inpatient, SNF, and HHA as an extension of the item.modifier REV_CNTR_NDC_QTY_QLFR_CD.
+	* Map CLM_DRG_CD (Claim Diagnosis Related Group Code) to ExplanationOfBenefit.diagnosis.packageCode
+	* Map PRVDR_NUM (Provider Number) to ExplanationOfBenefit.provider
+    
 
 ## CBBF-128 Add FILL_NUM to PDE data
 
@@ -67,6 +118,8 @@
 	* The REV_CNTR_PMT_AMT_AMT (Revenue Center Payment Amount Amount) was the same for Outpatient, Hospice, and HHA and has been abstracted to a method in the TransformerUtils.java class.
 	* Updated System and URL for DME_UNIT in CarrierClaim to point to MTUS_CNT (undoing the change for Carrier from CBBF-110).
 	* Updated System and URL for UNIT_IND in CarrierClaim to point to MTUS_IND (undoing the change for Carrier from CBBF-110).
+	* Map REV_UNIT (Revenue Center Unit Count) for Outpatient, Hospice, Inpatient, SNF, and HHA to EOB.item.quantity (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.quantity`).
+	* Map REV_CNTR_NDC_QTY (Revenue Center NDC Quantity) for Outpatient, Hospice, Inpatient, SNF, and HHA as an extension of the item.modifier REV_CNTR_NDC_QTY_QLFR_CD.
 	
 ## CBBF-108 FHIR Mapping Change (Hospice)
 
@@ -85,3 +138,16 @@
 * Following FHIR mapping changes were made:
 
 	* The field CARR_LINE_CLIA_LAB_NUM for Carrier was remapped as a valueIdentifier from a valueCodeableConcept.
+
+## CBBF-142 ICD codes have invalid Coding.system
+
+* Following changes have been made:
+
+	* IcdCode.getFhirSystem() had a condition comparing a string "" to a character '' resulting in the incorrect Coding.system. This was changed to compare a character '' to a character ''.
+	* Test classes were created for Diagnosis and CCWProcedure, both of which extend IcdCode, to ensure that the two classes are functioning properly.
+	
+## CBBF-134 Map Carrier CARR_LINE_ANSTHSA_UNIT_CNT
+
+* Following FHIR mapping changes were made:
+
+	* The field CARR_ANSTHSA_UNIT_CNT (Carrier Line Anesthesia Unit Count) has been mapped to item.service.extension (`http://hl7.org/fhir/explanationofbenefit-definitions.html#ExplanationOfBenefit.item.service.extension`) only when the value is greater than zero.

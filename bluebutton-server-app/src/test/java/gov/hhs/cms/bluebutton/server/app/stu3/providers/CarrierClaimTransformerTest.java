@@ -88,10 +88,13 @@ public final class CarrierClaimTransformerTest {
 				claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
 
-		Assert.assertEquals(6, eob.getDiagnosis().size());
+		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 
-
+		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
+				eob.getBenefitBalanceFirstRep().getFinancial());
+		
 		CarrierClaimLine claimLine1 = claim.getLines().get(0);
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
@@ -135,6 +138,13 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
 				0/* index */);
+
+		if (claimLine1.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
+			TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getService(),
+					TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
+					TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
+					String.valueOf(claimLine1.getAnesthesiaUnitCount()));
+		}
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_MTUS_IND,
 				TransformerConstants.EXTENSION_CODING_MTUS_IND, String.valueOf(claimLine1.getMtusCode().get()));

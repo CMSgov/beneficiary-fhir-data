@@ -27,6 +27,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -151,10 +152,17 @@ public final class TransformerUtils {
 	
 		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
 		diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
-		if (diagnosis.getPresentOnAdmission().isPresent()) {
-			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
-					String.valueOf(diagnosis.getPresentOnAdmission().get())));
+
+		if (!diagnosis.getLabels().isEmpty()) {
+			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_FHIR_DIAGNOSIS_TYPE,
+					String.valueOf(diagnosis.getLabels())));
 		}
+	    if (diagnosis.getPresentOnAdmission().isPresent()) {
+	    	addExtensionCoding(diagnosisComponent, TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
+					TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
+					String.valueOf(diagnosis.getPresentOnAdmission().get()));
+	    }
+
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequenceElement().getValue();
 	}
@@ -825,7 +833,7 @@ public final class TransformerUtils {
 		
 		// diagnosisRelatedGroupCd
 		if (diagnosisRelatedGroupCd.isPresent()) {
-			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(
+			eob.addDiagnosis().setPackageCode(TransformerUtils.createCodeableConcept(
 					TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
 					diagnosisRelatedGroupCd.get()));
 		}
@@ -1357,23 +1365,17 @@ public final class TransformerUtils {
 				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
 				.setValue(nonCoveredChargeAmount);
 
-		/*
-		 * Set item quantity to Unit Count first if > 0; NDC quantity next if present;
-		 * otherwise set to 0
-		 */
 		SimpleQuantity qty = new SimpleQuantity();
-		if (unitCount.compareTo(BigDecimal.ZERO) > 0) {
-			qty.setValue(unitCount);
-		} else if (nationalDrugCodeQuantity.isPresent()) {
-			qty.setValue(nationalDrugCodeQuantity.get());
-		} else {
-			qty.setValue(0);
-		}
+		qty.setValue(unitCount);
 		item.setQuantity(qty);
 
 		if (nationalDrugCodeQualifierCode.isPresent()) {
-			item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_NDC_UNIT,
-					nationalDrugCodeQualifierCode.get()));
+			CodeableConcept cc = item.addModifier();
+			cc.addCoding().setSystem(TransformerConstants.CODING_CCW_NDC_UNIT)
+					.setCode(nationalDrugCodeQualifierCode.get());
+
+			TransformerUtils.addExtensionCoding(cc, TransformerConstants.CODING_CCW_NDC_QTY,
+					TransformerConstants.CODING_CCW_NDC_QTY, String.valueOf(nationalDrugCodeQuantity.get()));
 		}
 
 		if (revenueCenterRenderingPhysicianNPI.isPresent()) {
@@ -1707,7 +1709,7 @@ public final class TransformerUtils {
 
 		diagnosisAdder.accept(
 				Diagnosis.from(diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
-		diagnosisAdder.accept(Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion));
+		diagnosisAdder.accept(Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
@@ -1816,31 +1818,34 @@ public final class TransformerUtils {
 
 		diagnosisAdder.accept(Diagnosis.from(diagnosisExternalFirstCode, diagnosisExternalFirstCodeVersion,
 				DiagnosisLabel.FIRSTEXTERNAL));
-
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal1Code, diagnosisExternal1CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal1Code, diagnosisExternal1CodeVersion,
+						DiagnosisLabel.FIRSTEXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal2Code, diagnosisExternal2CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal2Code, diagnosisExternal2CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal3Code, diagnosisExternal3CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal3Code, diagnosisExternal3CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal4Code, diagnosisExternal4CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal4Code, diagnosisExternal4CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal5Code, diagnosisExternal5CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal5Code, diagnosisExternal5CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal6Code, diagnosisExternal6CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal6Code, diagnosisExternal6CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal7Code, diagnosisExternal7CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal7Code, diagnosisExternal7CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal8Code, diagnosisExternal8CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal8Code, diagnosisExternal8CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal9Code, diagnosisExternal9CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal9Code, diagnosisExternal9CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal10Code, diagnosisExternal10CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal10Code, diagnosisExternal10CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal11Code, diagnosisExternal11CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal11Code, diagnosisExternal11CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal12Code, diagnosisExternal12CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal12Code, diagnosisExternal12CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 
 		return diagnoses;
 	}

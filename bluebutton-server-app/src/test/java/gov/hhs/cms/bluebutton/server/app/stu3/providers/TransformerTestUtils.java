@@ -822,10 +822,8 @@ final class TransformerTestUtils {
 		}
 		
 		// diagnosisRelatedGroupCd
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
-						TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
-						String.valueOf(diagnosisRelatedGroupCd.get()))));
+		assertCodingEquals(TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
+				diagnosisRelatedGroupCd.get(), eob.getDiagnosisFirstRep().getPackageCode().getCodingFirstRep());
 	}
 
 	/**
@@ -1230,7 +1228,7 @@ final class TransformerTestUtils {
 			BigDecimal rateAmount,
 			BigDecimal totalChargeAmount, BigDecimal nonCoveredChargeAmount, BigDecimal unitCount,
 			Optional<BigDecimal> nationalDrugCodeQuantity, Optional<String> nationalDrugCodeQualifierCode,
-			Optional<String> revenueCenterRenderingPhysicianNPI) {
+			Optional<String> revenueCenterRenderingPhysicianNPI, int index) {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
 				revenueCenterCode, item.getRevenue());
@@ -1243,8 +1241,16 @@ final class TransformerTestUtils {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT,
 				totalChargeAmount, item.getAdjudication());
 
-		// TODO add tests for unitCount, nationalDrugCodeQuantity and
-		// nationalDrugCodeQualifierCode
+		Assert.assertEquals(unitCount, item.getQuantity().getValue());
+
+		if (nationalDrugCodeQualifierCode.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_CCW_NDC_UNIT, nationalDrugCodeQualifierCode.get(),
+					item.getModifier().get(index));
+
+			assertExtensionCodingEquals(item.getModifier().get(index),
+					TransformerConstants.CODING_CCW_NDC_QTY, TransformerConstants.CODING_CCW_NDC_QTY,
+					String.valueOf(nationalDrugCodeQuantity.get()));
+		}
 
 		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);

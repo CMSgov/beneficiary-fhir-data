@@ -23,10 +23,12 @@ final class Diagnosis extends IcdCode {
 	 * @param icdVersionCode
 	 *            the CCW encoding (per <a href=
 	 *            "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
-	 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other
-	 *            similar fields) of the code's ICD version, if any
+	 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar
+	 *            fields) of the code's ICD version, if any
 	 * @param labels
 	 *            the value to use for {@link #getLabels()}
+	 * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no
+	 *         <code>icdCode</code> was present
 	 */
 	private Diagnosis(Optional<String> icdCode, Optional<Character> icdVersionCode, DiagnosisLabel... labels) {
 		super(icdCode, icdVersionCode);
@@ -46,21 +48,25 @@ final class Diagnosis extends IcdCode {
 	 * @param icdVersionCode
 	 *            the CCW encoding (per <a href=
 	 *            "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
-	 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other
-	 *            similar fields) of the code's ICD version, if any
-	 * @param present
+	 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar
+	 *            fields) of the code's ICD version, if any
+	 * @param presentOnAdmission
+	 *            the value to use for {@link #getPresentOnAdmission}
+	 * @param labels
 	 *            the value to use for {@link #getLabels()}
+	 * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no
+	 *         <code>icdCode</code> was present
 	 */
 	private Diagnosis(Optional<String> icdCode, Optional<Character> icdVersionCode,
-			Optional<Character> presentOnAdmission) {
+			Optional<Character> presentOnAdmission, DiagnosisLabel... labels) {
 		super(icdCode, icdVersionCode);
 		Objects.requireNonNull(icdCode);
 		Objects.requireNonNull(icdVersionCode);
 		Objects.requireNonNull(presentOnAdmission);
+		Objects.requireNonNull(labels);
 
 		this.presentOnAdmission = presentOnAdmission.orElse(null);
-		this.labels = null;
-
+		this.labels = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(labels)));
 
 	}
 
@@ -110,18 +116,20 @@ final class Diagnosis extends IcdCode {
 	 * @param icdVersionCode
 	 *            the CCW encoding (per <a href=
 	 *            "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
-	 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other
-	 *            similar fields) of the code's ICD version, if any
+	 *            CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar
+	 *            fields) of the code's ICD version, if any
 	 * @param presentOnAdmission
 	 *            the value to use for {@link #getPresentOnAdmission}
+	 * @param labels
+	 *            the value to use for {@link #getLabels()}
 	 * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no
 	 *         <code>code</code> was present
 	 */
 	static Optional<Diagnosis> from(Optional<String> icdCode, Optional<Character> icdVersionCode,
-			Optional<Character> presentOnAdmission) {
+			Optional<Character> presentOnAdmission, DiagnosisLabel... labels) {
 		if (!icdCode.isPresent())
 			return Optional.empty();
-		return Optional.of(new Diagnosis(icdCode, icdVersionCode, presentOnAdmission));
+		return Optional.of(new Diagnosis(icdCode, icdVersionCode, presentOnAdmission, labels));
 	}
 
 	/**
@@ -129,6 +137,6 @@ final class Diagnosis extends IcdCode {
 	 * the various diagnoses in a claim.
 	 */
 	static enum DiagnosisLabel {
-		PRINCIPAL, ADMITTING, FIRSTEXTERNAL;
+		PRINCIPAL, ADMITTING, FIRSTEXTERNAL, EXTERNAL, REASONFORVISIT;
 	}
 }

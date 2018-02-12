@@ -175,6 +175,10 @@ final class TransformerConstants {
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt">
 	 * CCW Data Dictionary: PTNT_PAY_AMT</a>.
 	 */
+	static final String CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT = "Disproportionate Share Amount";
+
+	static final String CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT = "Indirect Medical Education Amount";
+
 	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
 
 	static final String CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT = "Patient Responsibility Amount";
@@ -306,6 +310,8 @@ final class TransformerConstants {
 	 */
 	static final String CODING_CCW_NDC_UNIT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt";
 
+	static final String CODING_CCW_NDC_QTY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt";
+
 	/**
 	 * See <a href=
 	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pde_id.txt">
@@ -366,6 +372,8 @@ final class TransformerConstants {
 
 	// FIXME Switch to HAPI enum for this system, once one is available
 	static final String CODING_FHIR_ACT_INVOICE_GROUP = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
+
+	static final String CODING_FHIR_DIAGNOSIS_TYPE = "http://hl7.org/fhir/ex-diagnosistype";
 
 	static final String CODING_FHIR_BENEFIT_BALANCE = BenefitCategory.MEDICAL.getSystem();
 
@@ -439,6 +447,10 @@ final class TransformerConstants {
 
 	static final String EXTENSION_CODING_CCW_MEDICARE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt";
 
+	static final String EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt";
+
+	static final String EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt";
+
 	static final String EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
 
 	static final String EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt";
@@ -463,6 +475,9 @@ final class TransformerConstants {
 
 	public static final String EXTENSION_CODING_CMS_SUPPLIER_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt";
 
+	// FIXME: verify this link is correct for this extension coding
+	public static final String EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT = "https://bluebutton.cms.gov/resources/hospcprd";
+
 	public static final String EXTENSION_CODING_UNIT_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/unit_ind.txt";
 	
 	public static final String EXTENSION_CODING_MTUS_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_ind.txt";
@@ -474,6 +489,8 @@ final class TransformerConstants {
 	static final String EXTENSION_IDENTIFIER_CARRIER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt";
 
 	static final String EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt";
+
+	static final String EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_ansthsa_unit_cnt.txt";
 
 	static final String EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
 
