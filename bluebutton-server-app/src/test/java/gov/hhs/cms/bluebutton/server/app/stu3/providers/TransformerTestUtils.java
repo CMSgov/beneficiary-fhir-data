@@ -822,10 +822,8 @@ final class TransformerTestUtils {
 		}
 		
 		// diagnosisRelatedGroupCd
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
-						TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
-						String.valueOf(diagnosisRelatedGroupCd.get()))));
+		assertCodingEquals(TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
+				diagnosisRelatedGroupCd.get(), eob.getDiagnosisFirstRep().getPackageCode().getCodingFirstRep());
 	}
 
 	/**

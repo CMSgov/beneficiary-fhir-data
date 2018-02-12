@@ -347,6 +347,8 @@ final class TransformerConstants {
 	
 	static final String CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revstind.txt";
 
+	static final String CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revstind.txt";
+
 	static final String CODING_CMS_RX_ADJUSTMENT_DELETION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt";
 
 	static final String CODING_CMS_RX_CATASTROPHIC_COVERAGE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt";
@@ -372,6 +374,8 @@ final class TransformerConstants {
 
 	// FIXME Switch to HAPI enum for this system, once one is available
 	static final String CODING_FHIR_ACT_INVOICE_GROUP = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
+
+	static final String CODING_FHIR_DIAGNOSIS_TYPE = "http://hl7.org/fhir/ex-diagnosistype";
 
 	static final String CODING_FHIR_BENEFIT_BALANCE = BenefitCategory.MEDICAL.getSystem();
 
