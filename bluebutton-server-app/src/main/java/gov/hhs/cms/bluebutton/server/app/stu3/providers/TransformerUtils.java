@@ -211,6 +211,62 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * <p>
+	 * Adds an {@link Extension} to the specified {@link DomainResource}.
+	 * {@link Extension#getValue()} will be set to a {@link Quantity} with the
+	 * specified system and value.
+	 * </p>
+	 * 
+	 * @param fhirElement
+	 *            the FHIR element to add the {@link Extension} to
+	 * @param extensionUrl
+	 *            the {@link Extension#getUrl()} to use
+	 * @param quantitySystem
+	 *            the {@link Quantity#getSystem()} to use
+	 * @param quantityValue
+	 *            the {@link Quantity#getValue()} to use
+	 */
+	static void addExtensionValueQuantity(IBaseHasExtensions fhirElement, String extensionUrl, String quantitySystem,
+			BigDecimal quantityValue) {
+		IBaseExtension<?, ?> extension = fhirElement.addExtension();
+		extension.setUrl(extensionUrl);
+		extension.setValue(new Quantity().setSystem(extensionUrl).setValue(quantityValue));
+
+		// CodeableConcept codeableConcept = new CodeableConcept();
+		// extension.setValue(codeableConcept);
+		//
+		// Coding coding = codeableConcept.addCoding();
+		// coding.setSystem(codingSystem).setCode(codingCode);
+	}
+
+	/**
+	 * <p>
+	 * Adds an {@link Extension} to the specified {@link DomainResource}.
+	 * {@link Extension#getValue()} will be set to a {@link Identifier} with the
+	 * specified url, system, and value.
+	 * </p>
+	 * 
+	 * @param fhirElement
+	 *            the FHIR element to add the {@link Extension} to
+	 * @param extensionUrl
+	 *            the {@link Extension#getUrl()} to use
+	 * @param extensionSystem
+	 *            the {@link Identifier#getSystem()} to use
+	 * @param extensionValue
+	 *            the {@link Identifier#getValue()} to use
+	 */
+	static void addExtensionValueIdentifier(IBaseHasExtensions fhirElement, String extensionUrl, String extensionSystem,
+			String extensionValue) {
+		IBaseExtension<?, ?> extension = fhirElement.addExtension();
+		extension.setUrl(extensionUrl);
+
+		Identifier valueIdentifier = new Identifier();
+		valueIdentifier.setSystem(extensionSystem).setValue(extensionValue);
+
+		extension.setValue(valueIdentifier);
+	}
+
+	/**
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to (possibly) modify
 	 * @param infoCategory
@@ -635,25 +691,19 @@ public final class TransformerUtils {
 		benefitBalances.getFinancial().add(bc);
 
 		// deductibleAmount
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (deductibleAmount != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(deductibleAmount));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(deductibleAmount));
+		benefitBalances.getFinancial().add(bc);
 
 		// partACoinsuranceLiabilityAmount
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (partACoinsuranceLiabilityAmount != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(partACoinsuranceLiabilityAmount));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+				.setValue(partACoinsuranceLiabilityAmount));
+		benefitBalances.getFinancial().add(bc);
 
 		// bloodPintsFurnishedQty
 		bc = new BenefitComponent(
@@ -663,24 +713,18 @@ public final class TransformerUtils {
 		benefitBalances.getFinancial().add(bc);
 
 		// noncoveredCharge
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (noncoveredCharge != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(noncoveredCharge));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(noncoveredCharge));
+		benefitBalances.getFinancial().add(bc);
 
 		// totalDeductionAmount
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (totalDeductionAmount != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalDeductionAmount));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalDeductionAmount));
+		benefitBalances.getFinancial().add(bc);
 
 		// claimPPSCapitalDisproportionateShareAmt
 		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
@@ -1003,11 +1047,8 @@ public final class TransformerUtils {
 			Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
 			BigDecimal beneficiaryPaymentAmount, BigDecimal submittedChargeAmount,
 			BigDecimal allowedChargeAmount) {
-		/*
-		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
-		 * valueCodeableConcept
-		 */
-		addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
+
+		addExtensionValueIdentifier(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
 		addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
@@ -1034,11 +1075,7 @@ public final class TransformerUtils {
 		}
 
 		if (clinicalTrialNumber.isPresent()) {
-			/*
-			 * FIXME this should be mapped as an extension valueIdentifier instead of as a
-			 * valueCodeableConcept
-			 */
-			addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
+			addExtensionValueIdentifier(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
 					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
 		}
 

@@ -53,18 +53,11 @@ final class PartDEventTransformer {
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
 		
-		/*
-		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
-		 * valueCodeableConcept
-		 */
-		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
+		TransformerUtils.addExtensionValueIdentifier(eob.getInsurance().getCoverage(),
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID,
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID, claimGroup.getPlanContractId());
-		/*
-		 * FIXME this should be mapped as an extension valueIdentifier instead
-		 * of as a valueCodeableConcept
-		 */
-		TransformerUtils.addExtensionCoding(eob.getInsurance().getCoverage(),
+
+		TransformerUtils.addExtensionValueIdentifier(eob.getInsurance().getCoverage(),
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID,
 				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID, claimGroup.getPlanBenefitPackageId());
 
