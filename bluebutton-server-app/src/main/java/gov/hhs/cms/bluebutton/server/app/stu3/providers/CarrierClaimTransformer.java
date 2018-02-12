@@ -168,12 +168,8 @@ final class CarrierClaimTransformer {
 			}
 
 			if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
-				/*
-				 * FIXME this should be mapped as a valueQuantity, not a
-				 * valueCoding
-				 */
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_MTUS_CNT,
-						TransformerConstants.EXTENSION_MTUS_CNT, String.valueOf(claimLine.getMtusCount()));
+				TransformerUtils.addExtensionValueQuantity(item, TransformerConstants.EXTENSION_MTUS_CNT,
+						TransformerConstants.EXTENSION_MTUS_CNT, claimLine.getMtusCount());
 			}
 
 			// Common item level fields between Carrier and DME

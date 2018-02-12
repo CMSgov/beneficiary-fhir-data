@@ -150,8 +150,10 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_MTUS_IND,
 				TransformerConstants.EXTENSION_CODING_MTUS_IND, String.valueOf(claimLine1.getMtusCode().get()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_MTUS_CNT,
-				TransformerConstants.EXTENSION_MTUS_CNT, String.valueOf(claimLine1.getMtusCount()));
+		TransformerTestUtils.assertExtensionValueQuantityEquals(
+				eobItem0.getExtensionsByUrl(TransformerConstants.EXTENSION_MTUS_CNT),
+				TransformerConstants.EXTENSION_MTUS_CNT, TransformerConstants.EXTENSION_MTUS_CNT,
+				claimLine1.getMtusCount());
 
 		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_PHYSICIAN_ASSISTANT,
 				TransformerConstants.CODING_CCW_PHYSICIAN_ASSISTANT_ADJUDICATION,
