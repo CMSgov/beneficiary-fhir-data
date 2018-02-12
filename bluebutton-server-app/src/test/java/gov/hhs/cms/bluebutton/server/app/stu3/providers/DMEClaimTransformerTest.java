@@ -127,10 +127,9 @@ public final class DMEClaimTransformerTest {
 				TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
 				String.valueOf(claimLine1.getSupplierTypeCode().get()));
 
-		TransformerTestUtils.assertExtensionValueQuantityEquals(
-				eobItem0.getExtensionsByUrl(TransformerConstants.EXTENSION_SCREEN_SAVINGS),
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
 				TransformerConstants.EXTENSION_SCREEN_SAVINGS, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
-				claimLine1.getScreenSavingsAmount().get());
+				String.valueOf(claimLine1.getScreenSavingsAmount().get()));
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_UNIT_IND,
 				TransformerConstants.EXTENSION_CODING_UNIT_IND, String.valueOf(claimLine1.getMtusCode().get()));

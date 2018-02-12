@@ -176,9 +176,9 @@ final class DMEClaimTransformer {
 			}
 
 			if (!claimLine.getScreenSavingsAmount().equals(BigDecimal.ZERO)) {
-				TransformerUtils.addExtensionValueQuantity(item, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
+				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
 						TransformerConstants.EXTENSION_SCREEN_SAVINGS,
-						claimLine.getScreenSavingsAmount().get());
+						String.valueOf(claimLine.getScreenSavingsAmount().get()));
 			}
 
 			if (claimLine.getMtusCode().isPresent()) {
