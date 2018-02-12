@@ -172,6 +172,6 @@ public final class CarrierClaimTransformerTest {
 				claimLine1.getDiagnosisCodeVersion(), 
 				claimLine1.getHctHgbTestTypeCode(), claimLine1.getHctHgbTestResult(),
 				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode(),
-				Optional.of(claim.getReferringPhysicianNpi().get()), claimLine1.getPerformingPhysicianNpi());
+				Optional.of(claim.getReferringPhysicianNpi().get()));
 	}
 }

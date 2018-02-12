@@ -158,6 +158,6 @@ public final class DMEClaimTransformerTest {
 				claimLine1.getDiagnosisCodeVersion(), 
 				claimLine1.getHctHgbTestTypeCode(), claimLine1.getHctHgbTestResult(),
 				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode(),
-				Optional.of(claim.getReferringPhysicianNpi().get()), claimLine1.getProviderNPI());
+				Optional.of(claim.getReferringPhysicianNpi().get()));
 	}
 }

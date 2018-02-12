@@ -1123,9 +1123,7 @@ public final class TransformerUtils {
 	 * @param beneficiaryId
 	 *            BENE_ID,
 	 * @param referringPhysicianNpi
-	 *            RFR_PHYSN_NPI,
-	 * @param referralRecipient
-	 *            PFR_PHYSN_NPI (Carrier) \ PRVDR_NPI (DME)
+	 *            RFR_PHYSN_NPI
 	 * 
 	 * @return the {@link ItemComponent}
 	 */
@@ -1140,7 +1138,7 @@ public final class TransformerUtils {
 			Optional<Character> diagnosisCodeVersion,
 			Optional<String> hctHgbTestTypeCode, BigDecimal hctHgbTestResult,
 			char cmsServiceTypeCode, Optional<String> nationalDrugCode, String beneficiaryId,
-			Optional<String> referringPhysicianNpi, Optional<String> referralRecipient) {
+			Optional<String> referringPhysicianNpi) {
 
 		/*
 		 * Referrals are represented as contained resources, since they share the
@@ -1152,9 +1150,7 @@ public final class TransformerUtils {
 			referral.setSubject(referencePatient(beneficiaryId));
 			referral.setRequester(
 					new ReferralRequestRequesterComponent(referencePractitioner(referringPhysicianNpi.get())));
-			if (referralRecipient.isPresent()) {
-				referral.addRecipient(referencePractitioner(referralRecipient.get()));
-			}
+			referral.addRecipient(referencePractitioner(referringPhysicianNpi.get()));
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
 		}

@@ -172,7 +172,7 @@ final class CarrierClaimTransformer {
 					claimLine.getDiagnosisCodeVersion(), 
 					claimLine.getHctHgbTestTypeCode(), claimLine.getHctHgbTestResult(),
 					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode(), claimGroup.getBeneficiaryId(),
-					claimGroup.getReferringPhysicianNpi(), claimLine.getPerformingPhysicianNpi());
+					claimGroup.getReferringPhysicianNpi());
 
 			if (claimLine.getProviderStateCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),

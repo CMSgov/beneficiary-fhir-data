@@ -216,7 +216,7 @@ final class DMEClaimTransformer {
 					claimLine.getDiagnosisCode(), claimLine.getDiagnosisCodeVersion(),
 					claimLine.getHctHgbTestTypeCode(), claimLine.getHctHgbTestResult(),
 					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode(), claimGroup.getBeneficiaryId(),
-					claimGroup.getReferringPhysicianNpi(), claimLine.getProviderNPI());
+					claimGroup.getReferringPhysicianNpi());
 
 			if (!claimLine.getProviderStateCode().isEmpty()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),

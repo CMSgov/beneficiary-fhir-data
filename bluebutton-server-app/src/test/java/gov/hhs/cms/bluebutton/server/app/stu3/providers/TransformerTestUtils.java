@@ -1019,9 +1019,7 @@ final class TransformerTestUtils {
 	 * @param nationalDrugCode
 	 *            LINE_NDC_CD,
 	 * @param referringPhysicianNpi
-	 *            RFR_PHYSN_NPI,
-	 * @param referralRecipient
-	 *            PFR_PHYSN_NPI (Carrier) \ PRVDR_NPI (DME)
+	 *            RFR_PHYSN_NPI
 	 * 
 	 * @throws FHIRException
 	 */
@@ -1035,8 +1033,7 @@ final class TransformerTestUtils {
 			Optional<Character> serviceDeductibleCode, Optional<String> diagnosisCode,
 			Optional<Character> diagnosisCodeVersion,
 			Optional<String> hctHgbTestTypeCode, BigDecimal hctHgbTestResult,
-			char cmsServiceTypeCode, Optional<String> nationalDrugCode, Optional<String> referringPhysicianNpi,
-			Optional<String> referralRecipient)
+			char cmsServiceTypeCode, Optional<String> nationalDrugCode, Optional<String> referringPhysicianNpi)
 			throws FHIRException {
 
 		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
@@ -1045,7 +1042,7 @@ final class TransformerTestUtils {
 		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
 				referral.getRequester().getAgent());
 		Assert.assertEquals(1, referral.getRecipient().size());
-		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referralRecipient.get(),
+		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
 				referral.getRecipientFirstRep());
 
 		Assert.assertEquals(serviceCount, item.getQuantity().getValue());
