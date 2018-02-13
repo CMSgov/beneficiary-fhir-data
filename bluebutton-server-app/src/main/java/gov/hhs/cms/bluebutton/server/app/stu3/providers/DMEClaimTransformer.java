@@ -175,7 +175,7 @@ final class DMEClaimTransformer {
 						claimLine.getHcpcsFourthModifierCode().get()));
 			}
 
-			if (!claimLine.getScreenSavingsAmount().equals(BigDecimal.ZERO)) {
+			if (claimLine.getScreenSavingsAmount().isPresent()) {
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
 						TransformerConstants.EXTENSION_SCREEN_SAVINGS,
 						String.valueOf(claimLine.getScreenSavingsAmount().get()));
