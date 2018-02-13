@@ -823,7 +823,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("AL", claimLine.getPricingStateCode().get());
 		Assert.assertEquals("MO", claimLine.getProviderStateCode());
 		Assert.assertEquals(new Character('3'), claimLine.getSupplierTypeCode().get());
-		Assert.assertEquals(new BigDecimal("0"), claimLine.getScreenSavingsAmount().get());
+		Assert.assertEquals(new BigDecimal("0.00"), claimLine.getScreenSavingsAmount().get());
 		Assert.assertEquals(new BigDecimal("60"), claimLine.getMtusCount());
 		Assert.assertEquals('3', claimLine.getMtusCode().get().charValue());
 		Assert.assertEquals(new BigDecimal("44.4"), claimLine.getHctHgbTestResult());
