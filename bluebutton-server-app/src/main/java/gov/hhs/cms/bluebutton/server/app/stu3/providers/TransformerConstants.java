@@ -373,6 +373,8 @@ final class TransformerConstants {
 	// FIXME Switch to HAPI enum for this system, once one is available
 	static final String CODING_FHIR_ACT_INVOICE_GROUP = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
 
+	static final String CODING_FHIR_DIAGNOSIS_TYPE = "http://hl7.org/fhir/ex-diagnosistype";
+
 	static final String CODING_FHIR_BENEFIT_BALANCE = BenefitCategory.MEDICAL.getSystem();
 
 	static final String CODING_FHIR_CARE_TEAM_ROLE = ClaimCareteamrole.PRIMARY.getSystem();

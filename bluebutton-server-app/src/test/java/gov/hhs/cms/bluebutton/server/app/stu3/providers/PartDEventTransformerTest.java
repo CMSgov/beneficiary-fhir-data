@@ -58,12 +58,12 @@ public final class PartDEventTransformerTest {
 				ClaimType.PDE, claim.getClaimGroupId().toPlainString(), MedicareSegment.PART_D,
 				Optional.empty(), Optional.empty(), Optional.empty(), claim.getFinalAction());
 
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID,
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID, claim.getPlanContractId());
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getInsurance().getCoverage(),
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID,
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID, claim.getPlanBenefitPackageId());
+		TransformerTestUtils.assertExtensionIdentifierEqualsString(eob.getInsurance().getCoverage().getExtensionsByUrl(
+				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID), claim.getPlanContractId());
+		TransformerTestUtils.assertExtensionIdentifierEqualsString(
+				eob.getInsurance().getCoverage()
+						.getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID),
+				claim.getPlanBenefitPackageId());
 
 		Assert.assertEquals("01", claim.getServiceProviderIdQualiferCode());
 		Assert.assertEquals("01", claim.getPrescriberIdQualifierCode());

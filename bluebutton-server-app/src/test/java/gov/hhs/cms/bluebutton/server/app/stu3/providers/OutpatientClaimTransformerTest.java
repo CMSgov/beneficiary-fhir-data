@@ -93,7 +93,7 @@ public final class OutpatientClaimTransformerTest {
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
 				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 
-		Assert.assertEquals(6, eob.getDiagnosis().size());
+		Assert.assertEquals(5, eob.getDiagnosis().size());
 
 		Assert.assertEquals(1, eob.getProcedure().size());
 		CCWProcedure ccwProcedure = new CCWProcedure(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
@@ -121,6 +121,9 @@ public final class OutpatientClaimTransformerTest {
 		 * TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC,
 		 * claimLine1.getNationalDrugCode().get(), eobItem0.getService());
 		 */
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
+				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
+				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
 
 		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD,
 				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr1stAnsiCd().get(),
@@ -133,13 +136,11 @@ public final class OutpatientClaimTransformerTest {
 		TransformerTestUtils.assertAdjudicationNotPresent(TransformerConstants.CODED_ADJUDICATION_4TH_ANSI_CD,
 				eobItem0.getAdjudication());
 
-		// TODO re-map as described in CBBF-111
-		/*
-		 * TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-		 * claimLine1.getHcpcsCode().get(), eobItem0.getModifier().get(0));
-		 */
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
+
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getService(), TransformerConstants.CODING_NDC,
+				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
 
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE,
 				claimLine1.getBloodDeductibleAmount(), eobItem0.getAdjudication());
@@ -184,6 +185,11 @@ public final class OutpatientClaimTransformerTest {
 		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.OUTPATIENT,
 				Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL),
 				Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
+
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(),
+				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
+				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE, claimLine1.getStatusCode().get());
+
 	}
 
 }

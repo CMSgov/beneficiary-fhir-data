@@ -11,9 +11,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Money;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -252,10 +249,10 @@ final class InpatientClaimTransformer {
 
 		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisAdmittingCode(),
 				claim.getDiagnosisAdmittingCodeVersion(), DiagnosisLabel.ADMITTING));
+		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis1Code(), claim.getDiagnosis1CodeVersion(),
+				claim.getDiagnosis1PresentOnAdmissionCode(), DiagnosisLabel.PRINCIPAL));
 		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisPrincipalCode(),
 				claim.getDiagnosisPrincipalCodeVersion(), DiagnosisLabel.PRINCIPAL));
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis1Code(), claim.getDiagnosis1CodeVersion(),
-				claim.getDiagnosis1PresentOnAdmissionCode()));
 		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis2Code(), claim.getDiagnosis2CodeVersion(),
 				claim.getDiagnosis2PresentOnAdmissionCode()));
 		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis3Code(), claim.getDiagnosis3CodeVersion(),
@@ -305,45 +302,44 @@ final class InpatientClaimTransformer {
 		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosis25Code(), claim.getDiagnosis25CodeVersion(),
 				claim.getDiagnosis25PresentOnAdmissionCode()));
 
-		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisExternalFirstCode(),
-				claim.getDiagnosisExternalFirstCodeVersion(), DiagnosisLabel.FIRSTEXTERNAL));
-
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal1Code(), claim.getDiagnosisExternal1CodeVersion(),
-						claim.getDiagnosisExternal1PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal1PresentOnAdmissionCode(), DiagnosisLabel.FIRSTEXTERNAL));
+		diagnosisAdder.accept(Diagnosis.from(claim.getDiagnosisExternalFirstCode(),
+				claim.getDiagnosisExternalFirstCodeVersion(), DiagnosisLabel.FIRSTEXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal2Code(), claim.getDiagnosisExternal2CodeVersion(),
-						claim.getDiagnosisExternal2PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal2PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal3Code(), claim.getDiagnosisExternal3CodeVersion(),
-						claim.getDiagnosisExternal3PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal3PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal4Code(), claim.getDiagnosisExternal4CodeVersion(),
-						claim.getDiagnosisExternal4PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal4PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal5Code(), claim.getDiagnosisExternal5CodeVersion(),
-						claim.getDiagnosisExternal5PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal5PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal6Code(), claim.getDiagnosisExternal6CodeVersion(),
-						claim.getDiagnosisExternal6PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal6PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal7Code(), claim.getDiagnosisExternal7CodeVersion(),
-						claim.getDiagnosisExternal7PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal7PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal8Code(), claim.getDiagnosisExternal8CodeVersion(),
-						claim.getDiagnosisExternal8PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal8PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal9Code(), claim.getDiagnosisExternal9CodeVersion(),
-						claim.getDiagnosisExternal9PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal9PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal10Code(), claim.getDiagnosisExternal10CodeVersion(),
-						claim.getDiagnosisExternal10PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal10PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal11Code(), claim.getDiagnosisExternal11CodeVersion(),
-						claim.getDiagnosisExternal11PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal11PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
 				.accept(Diagnosis.from(claim.getDiagnosisExternal12Code(), claim.getDiagnosisExternal12CodeVersion(),
-						claim.getDiagnosisExternal12PresentOnAdmissionCode()));
+						claim.getDiagnosisExternal12PresentOnAdmissionCode(), DiagnosisLabel.EXTERNAL));
 
 		return diagnoses;
 	}

@@ -7,8 +7,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
@@ -102,11 +100,10 @@ final class DMEClaimTransformer {
 			 * to map this in the existing FHIR specification
 			 */
 			if (claimLine.getProviderBillingNumber().isPresent()) {
-				Extension providerNumberExtension = item.addExtension();
-				providerNumberExtension.setUrl(TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER);
-				providerNumberExtension.setValue(new Identifier()
-						.setSystem(TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER)
-						.setValue(claimLine.getProviderBillingNumber().get()));
+				TransformerUtils.addExtensionValueIdentifier(item,
+						TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER,
+						TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER,
+						claimLine.getProviderBillingNumber().get());
 			}
 
 			/*
@@ -179,10 +176,6 @@ final class DMEClaimTransformer {
 			}
 
 			if (!claimLine.getScreenSavingsAmount().equals(BigDecimal.ZERO)) {
-				/*
-				 * FIXME this should be mapped as an extension valueQuantity
-				 * instead of as a valueCodeableConcept
-				 */
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
 						TransformerConstants.EXTENSION_SCREEN_SAVINGS,
 						String.valueOf(claimLine.getScreenSavingsAmount().get()));
@@ -195,13 +188,9 @@ final class DMEClaimTransformer {
 			}
 
 			if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
-				/*
-				 * FIXME this should be mapped as a valueQuantity, not a
-				 * valueCoding
-				 */
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_DME_UNIT,
+				TransformerUtils.addExtensionValueQuantity(item, TransformerConstants.EXTENSION_DME_UNIT,
 						TransformerConstants.EXTENSION_DME_UNIT,
-						String.valueOf(claimLine.getMtusCount()));
+						claimLine.getMtusCount());
 			}
 
 			// Common item level fields between Carrier and DME

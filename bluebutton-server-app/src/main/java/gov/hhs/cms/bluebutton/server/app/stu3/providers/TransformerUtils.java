@@ -152,10 +152,17 @@ public final class TransformerUtils {
 	
 		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
 		diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
-		if (diagnosis.getPresentOnAdmission().isPresent()) {
-			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
-					String.valueOf(diagnosis.getPresentOnAdmission().get())));
+
+		if (!diagnosis.getLabels().isEmpty()) {
+			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_FHIR_DIAGNOSIS_TYPE,
+					String.valueOf(diagnosis.getLabels())));
 		}
+	    if (diagnosis.getPresentOnAdmission().isPresent()) {
+	    	addExtensionCoding(diagnosisComponent, TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
+					TransformerConstants.CODING_CCW_PRESENT_ON_ARRIVAL,
+					String.valueOf(diagnosis.getPresentOnAdmission().get()));
+	    }
+
 		eob.getDiagnosis().add(diagnosisComponent);
 		return diagnosisComponent.getSequenceElement().getValue();
 	}
@@ -202,6 +209,62 @@ public final class TransformerUtils {
 		IBaseExtension<?, ?> extension = fhirElement.addExtension();
 		extension.setUrl(extensionUrl);
 		extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
+	}
+
+	/**
+	 * <p>
+	 * Adds an {@link Extension} to the specified {@link DomainResource}.
+	 * {@link Extension#getValue()} will be set to a {@link Quantity} with the
+	 * specified system and value.
+	 * </p>
+	 * 
+	 * @param fhirElement
+	 *            the FHIR element to add the {@link Extension} to
+	 * @param extensionUrl
+	 *            the {@link Extension#getUrl()} to use
+	 * @param quantitySystem
+	 *            the {@link Quantity#getSystem()} to use
+	 * @param quantityValue
+	 *            the {@link Quantity#getValue()} to use
+	 */
+	static void addExtensionValueQuantity(IBaseHasExtensions fhirElement, String extensionUrl, String quantitySystem,
+			BigDecimal quantityValue) {
+		IBaseExtension<?, ?> extension = fhirElement.addExtension();
+		extension.setUrl(extensionUrl);
+		extension.setValue(new Quantity().setSystem(extensionUrl).setValue(quantityValue));
+
+		// CodeableConcept codeableConcept = new CodeableConcept();
+		// extension.setValue(codeableConcept);
+		//
+		// Coding coding = codeableConcept.addCoding();
+		// coding.setSystem(codingSystem).setCode(codingCode);
+	}
+
+	/**
+	 * <p>
+	 * Adds an {@link Extension} to the specified {@link DomainResource}.
+	 * {@link Extension#getValue()} will be set to a {@link Identifier} with the
+	 * specified url, system, and value.
+	 * </p>
+	 * 
+	 * @param fhirElement
+	 *            the FHIR element to add the {@link Extension} to
+	 * @param extensionUrl
+	 *            the {@link Extension#getUrl()} to use
+	 * @param extensionSystem
+	 *            the {@link Identifier#getSystem()} to use
+	 * @param extensionValue
+	 *            the {@link Identifier#getValue()} to use
+	 */
+	static void addExtensionValueIdentifier(IBaseHasExtensions fhirElement, String extensionUrl, String extensionSystem,
+			String extensionValue) {
+		IBaseExtension<?, ?> extension = fhirElement.addExtension();
+		extension.setUrl(extensionUrl);
+
+		Identifier valueIdentifier = new Identifier();
+		valueIdentifier.setSystem(extensionSystem).setValue(extensionValue);
+
+		extension.setValue(valueIdentifier);
 	}
 
 	/**
@@ -629,25 +692,19 @@ public final class TransformerUtils {
 		benefitBalances.getFinancial().add(bc);
 
 		// deductibleAmount
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (deductibleAmount != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(deductibleAmount));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DEDUCTIBLE));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(deductibleAmount));
+		benefitBalances.getFinancial().add(bc);
 
 		// partACoinsuranceLiabilityAmount
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (partACoinsuranceLiabilityAmount != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(partACoinsuranceLiabilityAmount));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_COINSURANCE_LIABILITY));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+				.setValue(partACoinsuranceLiabilityAmount));
+		benefitBalances.getFinancial().add(bc);
 
 		// bloodPintsFurnishedQty
 		bc = new BenefitComponent(
@@ -657,24 +714,18 @@ public final class TransformerUtils {
 		benefitBalances.getFinancial().add(bc);
 
 		// noncoveredCharge
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (noncoveredCharge != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(noncoveredCharge));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_NONCOVERED_CHARGE));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(noncoveredCharge));
+		benefitBalances.getFinancial().add(bc);
 
 		// totalDeductionAmount
-		// FIXME: check if this field is non-nullable and if not remove the "if" check 
-		if (totalDeductionAmount != null) {
-			bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalDeductionAmount));
-			benefitBalances.getFinancial().add(bc);
-		}
+		bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_DEDUCTION));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalDeductionAmount));
+		benefitBalances.getFinancial().add(bc);
 
 		// claimPPSCapitalDisproportionateShareAmt
 		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
@@ -820,7 +871,7 @@ public final class TransformerUtils {
 		
 		// diagnosisRelatedGroupCd
 		if (diagnosisRelatedGroupCd.isPresent()) {
-			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(
+			eob.addDiagnosis().setPackageCode(TransformerUtils.createCodeableConcept(
 					TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
 					diagnosisRelatedGroupCd.get()));
 		}
@@ -997,11 +1048,8 @@ public final class TransformerUtils {
 			Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
 			BigDecimal beneficiaryPaymentAmount, BigDecimal submittedChargeAmount,
 			BigDecimal allowedChargeAmount) {
-		/*
-		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
-		 * valueCodeableConcept
-		 */
-		addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
+
+		addExtensionValueIdentifier(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
 		addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
@@ -1028,11 +1076,7 @@ public final class TransformerUtils {
 		}
 
 		if (clinicalTrialNumber.isPresent()) {
-			/*
-			 * FIXME this should be mapped as an extension valueIdentifier instead of as a
-			 * valueCodeableConcept
-			 */
-			addExtensionCoding(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
+			addExtensionValueIdentifier(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
 					TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
 		}
 
@@ -1695,7 +1739,7 @@ public final class TransformerUtils {
 
 		diagnosisAdder.accept(
 				Diagnosis.from(diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
-		diagnosisAdder.accept(Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion));
+		diagnosisAdder.accept(Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
 		diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
@@ -1804,31 +1848,34 @@ public final class TransformerUtils {
 
 		diagnosisAdder.accept(Diagnosis.from(diagnosisExternalFirstCode, diagnosisExternalFirstCodeVersion,
 				DiagnosisLabel.FIRSTEXTERNAL));
-
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal1Code, diagnosisExternal1CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal1Code, diagnosisExternal1CodeVersion,
+						DiagnosisLabel.FIRSTEXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal2Code, diagnosisExternal2CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal2Code, diagnosisExternal2CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal3Code, diagnosisExternal3CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal3Code, diagnosisExternal3CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal4Code, diagnosisExternal4CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal4Code, diagnosisExternal4CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal5Code, diagnosisExternal5CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal5Code, diagnosisExternal5CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal6Code, diagnosisExternal6CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal6Code, diagnosisExternal6CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal7Code, diagnosisExternal7CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal7Code, diagnosisExternal7CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal8Code, diagnosisExternal8CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal8Code, diagnosisExternal8CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal9Code, diagnosisExternal9CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal9Code, diagnosisExternal9CodeVersion, DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal10Code, diagnosisExternal10CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal10Code, diagnosisExternal10CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal11Code, diagnosisExternal11CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal11Code, diagnosisExternal11CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 		diagnosisAdder
-				.accept(Diagnosis.from(diagnosisExternal12Code, diagnosisExternal12CodeVersion));
+				.accept(Diagnosis.from(diagnosisExternal12Code, diagnosisExternal12CodeVersion,
+						DiagnosisLabel.EXTERNAL));
 
 		return diagnoses;
 	}
