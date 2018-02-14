@@ -71,9 +71,9 @@ public final class PartDEventTransformerTest {
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC, claim.getNationalDrugCode(),
-				rxItem.getService());
+				rxItem.getService().getCoding());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType().getCoding());
 
 		Assert.assertEquals(Date.valueOf(claim.getPrescriptionFillDate()), rxItem.getServicedDateType().getValue());
 

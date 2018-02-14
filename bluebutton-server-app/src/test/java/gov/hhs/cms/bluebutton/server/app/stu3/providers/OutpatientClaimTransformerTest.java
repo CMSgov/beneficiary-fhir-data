@@ -99,7 +99,7 @@ public final class OutpatientClaimTransformerTest {
 		CCWProcedure ccwProcedure = new CCWProcedure(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
 				claim.getProcedure1Date());
 		TransformerTestUtils.assertHasCoding(ccwProcedure.getFhirSystem().toString(), claim.getProcedure1Code().get(),
-				eob.getProcedure().get(0).getProcedureCodeableConcept());
+				eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
 		Assert.assertEquals(Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(0).getDate());
 
