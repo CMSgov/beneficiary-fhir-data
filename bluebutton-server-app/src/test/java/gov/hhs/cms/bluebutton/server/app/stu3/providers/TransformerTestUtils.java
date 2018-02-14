@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationCompon
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -361,6 +362,20 @@ final class TransformerTestUtils {
 		Assert.assertTrue(extension.get(0).getValue() instanceof Identifier);
 		Identifier identifier = (Identifier) extension.get(0).getValue();
 		Assert.assertEquals(expected, identifier.getValue());
+	}
+
+	/**
+	 * Test
+	 *
+	 */
+	static void assertExtensionValueQuantityEquals(List<Extension> extension, String expectedExtensionUrl,
+			String expectedSystem, BigDecimal expectedValue) {
+		Assert.assertEquals(1, extension.size());
+		Assert.assertEquals(extension.get(0).getUrl(), expectedExtensionUrl);
+		Assert.assertTrue(extension.get(0).getValue() instanceof Quantity);
+		Quantity quantity = (Quantity) extension.get(0).getValue();
+		Assert.assertEquals(expectedValue, quantity.getValue());
+		Assert.assertEquals(expectedSystem, quantity.getSystem());
 	}
 
 	/**
@@ -934,10 +949,11 @@ final class TransformerTestUtils {
 		assertExtensionCodingEquals(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
 				TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT, String.valueOf(providerAssignmentIndicator.get()));
 
-		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
-		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
+		assertExtensionIdentifierEqualsString(
+				eob.getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER), carrierNumber);
+		assertExtensionIdentifierEqualsString(
+				eob.getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER),
+				clinicalTrialNumber.get());
 		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE, beneficiaryPartBDeductAmount,
 				eob.getBenefitBalanceFirstRep().getFinancial());
