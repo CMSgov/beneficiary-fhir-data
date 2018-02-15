@@ -67,31 +67,17 @@ final class HospiceClaimTransformer {
 						TransformerConstants.CODING_FHIR_BENEFIT_BALANCE, BenefitCategory.MEDICAL.toCode()));
 		eob.getBenefitBalance().add(benefitBalances);
 
-//		BenefitComponent utilizationDayCount = new BenefitComponent(
-//				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-//						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT));
-//		utilizationDayCount.setUsed(new UnsignedIntType(claimGroup.getUtilizationDayCount().intValue()));
-//		benefitBalances.getFinancial().add(utilizationDayCount);
-//
-//		if (claimGroup.getClaimHospiceStartDate().isPresent() || claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-//			TransformerUtils.validatePeriodDates(claimGroup.getClaimHospiceStartDate(),
-//					claimGroup.getBeneficiaryDischargeDate());
-//			Period period = new Period();
-//			if (claimGroup.getClaimHospiceStartDate().isPresent()) {
-//				period.setStart(TransformerUtils.convertToDate(claimGroup.getClaimHospiceStartDate().get()),
-//						TemporalPrecisionEnum.DAY);
-//			}
-//			if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-//				period.setEnd(TransformerUtils.convertToDate(claimGroup.getBeneficiaryDischargeDate().get()),
-//						TemporalPrecisionEnum.DAY);
-//			}
-//			eob.setHospitalization(period);
-//		}
-		
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimHospiceStartDate(),
 				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
 				benefitBalances);
+
+		if (claimGroup.getHospicePeriodCount().isPresent()) {
+			TransformerUtils.addExtensionCoding(eob.getHospitalization(),
+					TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
+					TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
+					String.valueOf(claimGroup.getHospicePeriodCount().get()));
+		}
 
 		// Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
 		TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(eob, claimGroup.getOrganizationNpi(),

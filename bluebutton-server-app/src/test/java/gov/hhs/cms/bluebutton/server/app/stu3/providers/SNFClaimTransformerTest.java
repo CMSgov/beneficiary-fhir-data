@@ -109,7 +109,7 @@ public final class SNFClaimTransformerTest {
 				claim.getClaimPrimaryPayerCode(), claim.getAttendingPhysicianNpi(), claim.getTotalChargeAmount(),
 				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 
-		Assert.assertEquals(5, eob.getDiagnosis().size());
+		Assert.assertEquals(6, eob.getDiagnosis().size());
 
 		CCWProcedure ccwProcedure = new CCWProcedure(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
 				claim.getProcedure1Date());
@@ -145,7 +145,8 @@ public final class SNFClaimTransformerTest {
 		TransformerTestUtils.assertEobCommonItemRevenueEquals(eobItem0, eob, claimLine1.getRevenueCenter(),
 				claimLine1.getRateAmount(), claimLine1.getTotalChargeAmount(), claimLine1.getNonCoveredChargeAmount(),
 				BigDecimal.valueOf(claimLine1.getUnitCount()), claimLine1.getNationalDrugCodeQuantity(),
-				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI());
+				claimLine1.getNationalDrugCodeQualifierCode(), claimLine1.getRevenueCenterRenderingPhysicianNPI(),
+				1/* index */);
 
 		// verify {@link
 		// TransformerUtils#mapEobType(CodeableConcept,ClaimType,Optional,Optional)}

@@ -5,9 +5,11 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
@@ -58,6 +60,13 @@ final class CarrierClaimTransformer {
 						BenefitCategory.MEDICAL.toCode()));
 		eob.getBenefitBalance().add(benefitBalances);
 
+		// map primaryPayerPaidAmount to eob.benefitbalance.financial
+		BenefitComponent bc = new BenefitComponent(
+				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
+		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
+				.setValue(claimGroup.getPrimaryPayerPaidAmount()));
+		eob.getBenefitBalanceFirstRep().getFinancial().add(bc);
 
 		// Common group level fields between Carrier and DME
 		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
@@ -146,18 +155,21 @@ final class CarrierClaimTransformer {
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
 
+			if (claimLine.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
+				TransformerUtils.addExtensionCoding(item.getService(),
+						TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
+						TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
+						String.valueOf(claimLine.getAnesthesiaUnitCount()));
+			}
+
 			if (claimLine.getMtusCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS_IND,
 						TransformerConstants.EXTENSION_CODING_MTUS_IND, String.valueOf(claimLine.getMtusCode().get()));
 			}
 
 			if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
-				/*
-				 * FIXME this should be mapped as a valueQuantity, not a
-				 * valueCoding
-				 */
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_MTUS_CNT,
-						TransformerConstants.EXTENSION_MTUS_CNT, String.valueOf(claimLine.getMtusCount()));
+				TransformerUtils.addExtensionValueQuantity(item, TransformerConstants.EXTENSION_MTUS_CNT,
+						TransformerConstants.EXTENSION_MTUS_CNT, claimLine.getMtusCount());
 			}
 
 			// Common item level fields between Carrier and DME

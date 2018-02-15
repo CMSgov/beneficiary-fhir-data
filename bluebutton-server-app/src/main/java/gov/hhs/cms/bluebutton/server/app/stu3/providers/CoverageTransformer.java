@@ -96,6 +96,11 @@ final class CoverageTransformer {
 					TransformerConstants.EXTENSION_CODING_CCW_ESRD_INDICATOR,
 					"" + beneficiary.getEndStageRenalDiseaseCode().get());
 		}
+		if (beneficiary.getPartATerminationCode().isPresent()) {
+			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
+					TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
+					"" + beneficiary.getPartATerminationCode().get());
+		}
 
 		return coverage;
 	}
@@ -127,6 +132,11 @@ final class CoverageTransformer {
 					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
 					"" + beneficiary.getMedicareEnrollmentStatusCode().get());
 		}
+		if (beneficiary.getPartBTerminationCode().isPresent()) {
+			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
+					TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
+					"" + beneficiary.getPartBTerminationCode().get());
+		}
 
 		return coverage;
 	}
@@ -147,6 +157,7 @@ final class CoverageTransformer {
 				.setSubPlan(TransformerConstants.COVERAGE_PLAN_PART_D);
 		coverage.setType(TransformerUtils.createCodeableConcept(TransformerConstants.COVERAGE_PLAN,
 				TransformerConstants.COVERAGE_PLAN_PART_D));
+		coverage.setStatus(CoverageStatus.ACTIVE);
 		coverage.setBeneficiary(TransformerUtils.referencePatient(beneficiary));
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent()) {
 			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,

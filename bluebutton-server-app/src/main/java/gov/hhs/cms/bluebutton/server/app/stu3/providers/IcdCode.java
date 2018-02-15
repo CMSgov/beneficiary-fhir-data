@@ -82,9 +82,9 @@ abstract class IcdCode {
 	 */
 	protected String getFhirSystem() {
 		String system;
-		if (icdVersionCode == null || icdVersionCode.equals("9"))
+		if (icdVersionCode == null || icdVersionCode.equals('9'))
 			system = "http://hl7.org/fhir/sid/icd-9-cm";
-		else if (icdVersionCode.equals("0"))
+		else if (icdVersionCode.equals('0'))
 			system = "http://hl7.org/fhir/sid/icd-10";
 		else
 			system = String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", icdVersionCode);

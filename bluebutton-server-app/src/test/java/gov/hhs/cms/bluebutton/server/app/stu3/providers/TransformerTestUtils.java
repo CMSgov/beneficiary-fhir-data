@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationCompon
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -361,6 +362,20 @@ final class TransformerTestUtils {
 		Assert.assertTrue(extension.get(0).getValue() instanceof Identifier);
 		Identifier identifier = (Identifier) extension.get(0).getValue();
 		Assert.assertEquals(expected, identifier.getValue());
+	}
+
+	/**
+	 * Test
+	 *
+	 */
+	static void assertExtensionValueQuantityEquals(List<Extension> extension, String expectedExtensionUrl,
+			String expectedSystem, BigDecimal expectedValue) {
+		Assert.assertEquals(1, extension.size());
+		Assert.assertEquals(extension.get(0).getUrl(), expectedExtensionUrl);
+		Assert.assertTrue(extension.get(0).getValue() instanceof Quantity);
+		Quantity quantity = (Quantity) extension.get(0).getValue();
+		Assert.assertEquals(expectedValue, quantity.getValue());
+		Assert.assertEquals(expectedSystem, quantity.getSystem());
 	}
 
 	/**
@@ -822,10 +837,8 @@ final class TransformerTestUtils {
 		}
 		
 		// diagnosisRelatedGroupCd
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
-						TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
-						String.valueOf(diagnosisRelatedGroupCd.get()))));
+		assertCodingEquals(TransformerConstants.CODING_CCW_DIAGNOSIS_RELATED_GROUP,
+				diagnosisRelatedGroupCd.get(), eob.getDiagnosisFirstRep().getPackageCode().getCodingFirstRep());
 	}
 
 	/**
@@ -949,10 +962,11 @@ final class TransformerTestUtils {
 		assertExtensionCodingEquals(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
 				TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT, String.valueOf(providerAssignmentIndicator.get()));
 
-		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
-		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER,
-				TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER, clinicalTrialNumber.get());
+		assertExtensionIdentifierEqualsString(
+				eob.getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER), carrierNumber);
+		assertExtensionIdentifierEqualsString(
+				eob.getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER),
+				clinicalTrialNumber.get());
 		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE, beneficiaryPartBDeductAmount,
 				eob.getBenefitBalanceFirstRep().getFinancial());
@@ -1230,7 +1244,7 @@ final class TransformerTestUtils {
 			BigDecimal rateAmount,
 			BigDecimal totalChargeAmount, BigDecimal nonCoveredChargeAmount, BigDecimal unitCount,
 			Optional<BigDecimal> nationalDrugCodeQuantity, Optional<String> nationalDrugCodeQualifierCode,
-			Optional<String> revenueCenterRenderingPhysicianNPI) {
+			Optional<String> revenueCenterRenderingPhysicianNPI, int index) {
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
 				revenueCenterCode, item.getRevenue());
@@ -1243,8 +1257,16 @@ final class TransformerTestUtils {
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT,
 				totalChargeAmount, item.getAdjudication());
 
-		// TODO add tests for unitCount, nationalDrugCodeQuantity and
-		// nationalDrugCodeQualifierCode
+		Assert.assertEquals(unitCount, item.getQuantity().getValue());
+
+		if (nationalDrugCodeQualifierCode.isPresent()) {
+			assertHasCoding(TransformerConstants.CODING_CCW_NDC_UNIT, nationalDrugCodeQualifierCode.get(),
+					item.getModifier().get(index));
+
+			assertExtensionCodingEquals(item.getModifier().get(index),
+					TransformerConstants.CODING_CCW_NDC_QTY, TransformerConstants.CODING_CCW_NDC_QTY,
+					String.valueOf(nationalDrugCodeQuantity.get()));
+		}
 
 		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);

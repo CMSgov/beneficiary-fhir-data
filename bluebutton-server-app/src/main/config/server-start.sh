@@ -6,11 +6,9 @@ echo -e "$0 $@\n"
 
 # Constants.
 serverVersion='8.1.0.Final'
-serverArtifact="wildfly-dist-${serverVersion}.tar.gz"
 serverInstall="wildfly-${serverVersion}"
 serverTimeoutSeconds=120
-warArtifact='bluebutton-server-app.war'
-configArtifact='bluebutton-server-app-server-config.sh'
+serverConnectTimeoutMilliseconds=$((30 * 1000))
 dbUsername=""
 dbPassword=""
 
@@ -25,7 +23,7 @@ esac
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	j:m:v:d:a:h:s:k:t:u: \
+	j:m:v:t:u: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -36,12 +34,7 @@ eval set -- "$TEMP"
 javaHome=""
 maxHeapArg="-Xmx4g"
 visualVm=""
-directory=
-serverPortManagement=
-serverPortHttp=
-serverPortHttps=
-keyStore=
-trustStore=
+targetDirectory=
 dbUrl="jdbc:bluebutton-test:hsqldb:mem"
 while true; do
 	case "$1" in
@@ -51,18 +44,8 @@ while true; do
 			maxHeapArg="$2"; shift 2 ;;
 		-v )
 			visualVm="$2"; shift 2 ;;
-		-d )
-			directory="$2"; shift 2 ;;
-		-a )
-			serverPortManagement="$2"; shift 2 ;;
-		-h )
-			serverPortHttp="$2"; shift 2 ;;
-		-s )
-			serverPortHttps="$2"; shift 2 ;;
-		-k )
-			keyStore="$2"; shift 2 ;;
 		-t )
-			trustStore="$2"; shift 2 ;;
+			targetDirectory="$2"; shift 2 ;;
 		-u )
 			dbUrl="$2"; shift 2 ;;
 		-- ) shift; break ;;
@@ -71,12 +54,10 @@ while true; do
 done
 
 # Verify that all required options were specified.
-if [[ -z "${directory}" ]]; then >&2 echo 'The -d option is required.'; exit 1; fi
-if [[ -z "${serverPortManagement}" ]]; then >&2 echo 'The -a option is required.'; exit 1; fi
-if [[ -z "${serverPortHttp}" ]]; then >&2 echo 'The -h option is required.'; exit 1; fi
-if [[ -z "${serverPortHttps}" ]]; then >&2 echo 'The -s option is required.'; exit 1; fi
-if [[ -z "${keyStore}" ]]; then >&2 echo 'The -k option is required.'; exit 1; fi
-if [[ -z "${trustStore}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
+if [[ -z "${targetDirectory}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
+
+# In Cygwin, some of those paths will come in as Windows-formatted. Fix that.
+if [[ "${cygwin}" = true ]]; then targetDirectory=$(cygpath --unix "${targetDirectory}"); fi
 
 # Verify that java was found.
 if [[ -z "${javaHome}" ]]; then
@@ -85,9 +66,6 @@ else
 	if [[ "${cygwin}" = true ]]; then javaHome=$(cygpath --unix "${javaHome}"); fi
 	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in -j: '${javaHome}'"; exit 1; }
 fi
-
-# Munge paths for Cygwin.
-if [[ "${cygwin}" = true ]]; then directory=$(cygpath --unix "${directory}"); fi
 
 # Exit immediately if something fails.
 error() {
@@ -103,40 +81,63 @@ error() {
 	
 	# Before bailing, always try to stop any running servers.
 	>&2 echo "Trying to stop any running servers before exiting..."
-	"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
+	"${scriptDirectory}/server-stop.sh" -t "${targetDirectory}"
 
 	>&2 echo "Exiting with status ${code}."
 	exit "${code}"
 }
 trap 'error ${LINENO}' ERR
 
+# Define all of the derived paths we'll need.
+workDirectory="${targetDirectory}/bluebutton-server"
+serverArtifact="${workDirectory}/wildfly-dist-${serverVersion}.tar.gz"
+serverPortsFile="${workDirectory}/server-ports.properties"
+warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bluebutton-server-app-.*\.war$')"
+keyStore="${scriptDirectory}/../../../../dev/ssl-stores/server-keystore.jks"
+trustStore="${scriptDirectory}/../../../../dev/ssl-stores/server-truststore.jks"
+serverHome="${workDirectory}/${serverInstall}"
+serverLog="${workDirectory}/server-console.log"
+
 # Check for required files.
-for f in "${directory}/${serverArtifact}" "${directory}/${warArtifact}" "${directory}/${configArtifact}" "${keyStore}" "${trustStore}"; do
+for f in "${serverArtifact}" "${serverPortsFile}" "${warArtifact}" "${keyStore}" "${trustStore}"; do
 	if [[ ! -f "${f}" ]]; then
 		>&2 echo "The following file is required but is missing: '${f}'."
 		exit 1
 	fi
 done
 
+# In Cygwin, some of those paths need to be Windows-formatted. Do that.
+if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact}"); fi
+if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --windows "${keyStore}"); fi
+if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --windows "${trustStore}"); fi
+
 # If the server install already exists, clean it out to start fresh.
-if [[ -d "${directory}/${serverInstall}" ]]; then
+if [[ -d "${serverHome}" ]]; then
 	echo "Previous server install found. Removing..."
-	rm -rf "${directory}/${serverInstall}"
+	rm -rf "${serverHome}"
 	echo "Previous server install removed."
 fi
 
 # Unzip the server.
-if [[ ! -d "${directory}/${serverInstall}" ]]; then
+if [[ ! -d "${serverHome}" ]]; then
 	tar --extract \
-		--file "${directory}/${serverArtifact}" \
-		--directory "${directory}"
-	echo "Unpacked server dist: '${directory}/${serverInstall}'"
+		--file "${serverArtifact}" \
+		--directory "${workDirectory}"
+	echo "Unpacked server dist: '${serverHome}'"
 fi
 
-# Rename the original server conf file.
-if [[ ! -f "${directory}/${serverInstall}/bin/standalone.conf.original" ]]; then
-	mv "${directory}/${serverInstall}/bin/standalone.conf" "${directory}/${serverInstall}/bin/standalone.conf.original"
-fi
+# Read the server ports to be used from the ports file.
+serverPortManagement=$(grep "^server.port.management=" "${serverPortsFile}" | cut -d'=' -f2 )
+serverPortHttp=$(grep "^server.port.http=" "${serverPortsFile}" | cut -d'=' -f2 )
+serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | cut -d'=' -f2 )
+if [[ -z "${serverPortManagement}" ]]; then >&2 echo "Server management port not specified in '${serverPortsFile}'."; exit 1; fi
+if [[ -z "${serverPortHttp}" ]]; then >&2 echo "Server HTTP port not specified in '${serverPortsFile}'."; exit 1; fi
+if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
+echo "Configured server to run on HTTPS port '${serverPortHttps}', HTTP port '${serverPortHttp}', and management port '${serverPortManagement}'."
+
+# Generate a random server ID and write it to a file.
+bluebuttonServerId=$RANDOM
+echo -n "${bluebuttonServerId}" > "${workDirectory}/bluebutton-server-id.txt"
 
 # Build the args to pass to the server for VisualVM (if any).
 if [[ -f "${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so" ]]; then
@@ -144,24 +145,17 @@ if [[ -f "${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterfa
 	visualVmArgs="-agentpath:${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so=${visualVm}/profiler/lib,5140"
 	visualVmArgs="${visualVmArgs} -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler.server,org.netbeans.lib.profiler.server.*"
 	visualVmArgs="${visualVmArgs} -Djava.util.logging.manager=org.jboss.logmanager.LogManager" 
-	visualVmArgs="${visualVmArgs} -Xbootclasspath/p:${directory}/${serverInstall}/modules/system/layers/base/org/jboss/logmanager/main/jboss-logmanager-1.5.2.Final.jar" 
+	visualVmArgs="${visualVmArgs} -Xbootclasspath/p:${serverHome}/modules/system/layers/base/org/jboss/logmanager/main/jboss-logmanager-1.5.2.Final.jar" 
 	jbossModulesSystemPackages="org.netbeans.lib.profiler.server,org.jboss.logmanager"
 else
 	echo "Warning: VisualVM directory not found: '${visualVm}'"
 	visualVmArgs=""
 fi
 
-# Write out the server ports being used to a file, where the tests can look them up.
-echo "Configured server to run on HTTPS port '${serverPortHttps}', HTTP port '${serverPortHttp}', and management port '${serverPortManagement}'."
-cat <<EOF > "${directory}/server-ports.properties"
-server.port.management=${serverPortManagement}
-server.port.http=${serverPortHttp}
-server.port.https=${serverPortHttps}
-EOF
-
-# Generate a random server ID and write it to a file.
-bluebuttonServerId=$RANDOM
-echo -n "${bluebuttonServerId}" > "${directory}/bluebutton-server-id.txt"
+# Rename the original server conf file.
+if [[ ! -f "${serverHome}/bin/standalone.conf.original" ]]; then
+	mv "${serverHome}/bin/standalone.conf" "${serverHome}/bin/standalone.conf.original"
+fi
 
 # Write a correct server conf file.
 javaHomeLine=''
@@ -170,7 +164,7 @@ if [[ -z "${javaHome}" ]]; then
 else
 	javaHomeLine="JAVA_HOME=${javaHome}"
 fi
-cat <<EOF > "${directory}/${serverInstall}/bin/standalone.conf"
+cat <<EOF > "${serverHome}/bin/standalone.conf"
 ## -*- shell-script -*- ######################################################
 ##                                                                          ##
 ##  JBoss Bootstrap Script Configuration                                    ##
@@ -191,10 +185,23 @@ JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
 # such services.
 JAVA_OPTS="\$JAVA_OPTS -Djboss.management.http.port=${serverPortManagement} -Djboss.http.port=${serverPortHttp} -Djboss.https.port=${serverPortHttps}"
 
+# These properties are all referenced within the standalone.xml we'll be using.
+JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.db.url=${dbUrl}"
+JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.ssl.keystore.path=${keyStore} -Dbbfhir.ssl.truststore.path=${trustStore}"
+
 # This just adds a searchable bit of text to the command line, so we can 
 # determine which java processes were started by this script.
 JAVA_OPTS="\$JAVA_OPTS -Dbluebutton-server-${bluebuttonServerId}"
 EOF
+
+# Swap out the original standalone.xml file for our customized one.
+if [[ ! -f "${serverHome}/standalone/configuration/standalone.xml.original" ]]; then
+	mv "${serverHome}/standalone/configuration/standalone.xml" "${serverHome}/standalone/configuration/standalone.xml.original"
+fi
+cp "${scriptDirectory}/standalone.xml" "${serverHome}/standalone/configuration/standalone.xml"
+
+# Config is all done now.
+echo "Configured server."
 
 # Launch the server in the background.
 #
@@ -207,8 +214,7 @@ EOF
 # does.
 # Debugging: Add `--debug 8787` to the command here to enable normal Java 
 # remote debugging of the apps running in Wildfly on port 8787.
-serverLog="${directory}/${serverInstall}/server-console.log"
-"${directory}/${serverInstall}/bin/standalone.sh" \
+"${serverHome}/bin/standalone.sh" \
 	&> "${serverLog}" \
 	&
 
@@ -223,23 +229,27 @@ while true; do
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
 		>&2 echo "Error: Server failed to start within ${serverTimeoutSeconds} seconds. Trying to stop it..."
-		"${scriptDirectory}/bluebutton-server-app-server-stop.sh" -d "${directory}"
+		"${scriptDirectory}/server-stop.sh" -t "${targetDirectory}"
 		exit 3
 	fi
 	sleep 1
 done
 
-# Configure the server.
-echo "Configuring server..."
-chmod a+x "${directory}/${configArtifact}"
-"${directory}/${configArtifact}" \
-	-h "${directory}/${serverInstall}" \
-	-a "${serverPortManagement}" \
-	-s "${serverPortHttps}" \
-	-k "${keyStore}" \
-	-t "${trustStore}" \
-	-w "${directory}/${warArtifact}" \
-	-u "${dbUrl}" \
-	-n "${dbUsername}" \
-	-p "${dbPassword}"
+# Write the JBoss CLI script that will deploy the WAR.
+scriptDeploy="${serverHome}/jboss-cli-script-deploy.txt"
+if [[ "${cygwin}" = true ]]; then scriptDeployArg=$(cygpath --windows "${scriptDeploy}"); else scriptDeployArg="${scriptDeploy}"; fi
+cat <<EOF > "${scriptDeploy}"
+deploy "${warArtifact}" --name=ROOT.war
+EOF
 
+# Deploy the application to the now-configured server.
+echo "Deploying application: '${warArtifact}'..."
+"${serverHome}/bin/jboss-cli.sh" \
+	--connect \
+	--controller=localhost:${serverPortManagement} \
+	--timeout=${serverConnectTimeoutMilliseconds} \
+	--file=${scriptDeployArg} \
+	>> "${workDirectory}/server-config.log" 2>&1
+# Note: No need to watch log here, as the command blocks until deployment is
+# completed, and returns a non-zero exit code if it fails.
+echo 'Application deployed.'

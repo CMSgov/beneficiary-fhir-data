@@ -161,30 +161,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
 					<version>1.12</version>
-					<configuration>
-						<artifacts>
-							<artifact>
-								<file>src/main/config/server-config.sh</file>
-								<type>sh</type>
-								<classifier>server-config</classifier>
-							</artifact>
-							<artifact>
-								<file>src/main/config/server-config-healthapt.sh</file>
-								<type>sh</type>
-								<classifier>server-config-healthapt</classifier>
-							</artifact>
-							<artifact>
-								<file>src/main/config/server-start.sh</file>
-								<type>sh</type>
-								<classifier>server-start</classifier>
-							</artifact>
-							<artifact>
-								<file>src/main/config/server-stop.sh</file>
-								<type>sh</type>
-								<classifier>server-stop</classifier>
-							</artifact>
-						</artifacts>
-					</configuration>
 				</plugin>
 				<plugin>
 					<!-- Configure the dependency plugin such that it can be used to grab 
@@ -212,34 +188,7 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- When its `run` goal is run, this plugin will copy the files in 
-						`src/main/config` and the WAR to the `target/bluebutton-server` directory. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.8</version>
-					<configuration>
-						<target>
-							<mkdir dir="${project.build.directory}/bluebutton-server" />
-							<copy file="${project.build.directory}/${project.build.finalName}.war"
-								tofile="${project.build.directory}/bluebutton-server/${artifactId}.war" />
-							<copy todir="${project.build.directory}/bluebutton-server">
-								<resources>
-									<file file="src/main/config/server-config.sh" />
-									<file file="src/main/config/server-start.sh" />
-									<file file="src/main/config/server-stop.sh" />
-								</resources>
-								<globmapper from="*.sh" to="${artifactId}-*.sh" />
-							</copy>
-							<chmod perm="a+x">
-								<fileset dir="${project.build.directory}/bluebutton-server">
-									<include name="*.sh" />
-								</fileset>
-							</chmod>
-						</target>
-					</configuration>
-				</plugin>
-				<plugin>
-					<!-- The exec plugin can be used in child modules to run the 'dev/bluebutton-fhir-server-*.sh' 
+					<!-- The exec plugin can be used in child modules to run the 'src/main/config/server-*.sh'
 						scripts, which will start and stop the Blue Button API FHIR server for use 
 						in testing. -->
 					<groupId>org.codehaus.mojo</groupId>
@@ -249,39 +198,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Attach the config files that should be used to run this project's
-							WAR. This ensures that they are included in Maven install, deploy, etc. operations. -->
-						<id>attach-artifacts</id>
-						<phase>package</phase>
-						<goals>
-							<goal>attach-artifact</goal>
-						</goals>
-					</execution>
-					<execution>
-						<!-- Reserve random available ports for Wildfly/JBoss to run on. -->
-						<id>reserve-server-ports</id>
-						<goals>
-							<goal>reserve-network-port</goal>
-						</goals>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<minPortNumber>8000</minPortNumber>
-							<maxPortNumber>9999</maxPortNumber>
-							<randomPort>true</randomPort>
-							<portNames>
-								<portName>server.port.management</portName>
-								<portName>server.port.http</portName>
-								<portName>server.port.https</portName>
-							</portNames>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -305,17 +221,27 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Copy the files in `src/main/config` and the WAR to the `target/bluebutton-server` 
-					directory. This will be used by the exec plugin execution below. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>server-copy-files</id>
-						<phase>pre-integration-test</phase>
+						<!-- Reserve random available ports for Wildfly/JBoss to run on. -->
+						<id>reserve-server-ports</id>
 						<goals>
-							<goal>run</goal>
+							<goal>reserve-network-port</goal>
 						</goals>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<outputFile>${project.build.directory}/bluebutton-server/server-ports.properties</outputFile>
+							<minPortNumber>8000</minPortNumber>
+							<maxPortNumber>9999</maxPortNumber>
+							<randomPort>true</randomPort>
+							<portNames>
+								<portName>server.port.management</portName>
+								<portName>server.port.http</portName>
+								<portName>server.port.https</portName>
+							</portNames>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -336,24 +262,14 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.build.directory}/bluebutton-server/${artifactId}-server-start.sh</executable>
+							<executable>${project.basedir}/src/main/config/server-start.sh</executable>
 							<arguments>
 								<argument>-j</argument>
 								<argument>${java.home}</argument>
 								<argument>-m</argument>
 								<argument>${its.bbfhir.server.jvmargs}</argument>
-								<argument>-d</argument>
-								<argument>${project.build.directory}/bluebutton-server</argument>
-								<argument>-a</argument>
-								<argument>${server.port.management}</argument>
-								<argument>-h</argument>
-								<argument>${server.port.http}</argument>
-								<argument>-s</argument>
-								<argument>${server.port.https}</argument>
-								<argument>-k</argument>
-								<argument>${project.build.directory}/../../dev/ssl-stores/server-keystore.jks</argument>
 								<argument>-t</argument>
-								<argument>${project.build.directory}/../../dev/ssl-stores/server-truststore.jks</argument>
+								<argument>${project.build.directory}</argument>
 								<argument>-u</argument>
 								<argument>${its.bbfhir.db.url}</argument>
 							</arguments>
@@ -369,10 +285,10 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.build.directory}/bluebutton-server/${artifactId}-server-stop.sh</executable>
+							<executable>${project.basedir}/src/main/config/server-stop.sh</executable>
 							<arguments>
-								<argument>-d</argument>
-								<argument>${project.build.directory}/bluebutton-server</argument>
+								<argument>-t</argument>
+								<argument>${project.build.directory}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
