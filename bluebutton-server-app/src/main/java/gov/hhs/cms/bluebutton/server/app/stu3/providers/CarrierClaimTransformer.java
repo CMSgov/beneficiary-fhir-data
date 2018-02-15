@@ -60,9 +60,10 @@ final class CarrierClaimTransformer {
 
 
 		// Common group level fields between Carrier and DME
-		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber(),
+		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
 				claimGroup.getClinicalTrialNumber(), claimGroup.getBeneficiaryPartBDeductAmount(),
-				claimGroup.getPaymentDenialCode(), claimGroup.getProviderAssignmentIndicator(),
+				claimGroup.getPaymentDenialCode(), claimGroup.getReferringPhysicianNpi(),
+				claimGroup.getProviderAssignmentIndicator(),
 				claimGroup.getProviderPaymentAmount(), claimGroup.getBeneficiaryPaymentAmount(),
 				claimGroup.getSubmittedChargeAmount(), claimGroup.getAllowedChargeAmount());
 
@@ -171,8 +172,7 @@ final class CarrierClaimTransformer {
 					claimLine.getDiagnosisCode(),
 					claimLine.getDiagnosisCodeVersion(), 
 					claimLine.getHctHgbTestTypeCode(), claimLine.getHctHgbTestResult(),
-					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode(), claimGroup.getBeneficiaryId(),
-					claimGroup.getReferringPhysicianNpi());
+					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode());
 
 			if (claimLine.getProviderStateCode().isPresent()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),

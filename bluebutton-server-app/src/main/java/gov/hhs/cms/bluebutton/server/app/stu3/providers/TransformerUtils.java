@@ -972,6 +972,8 @@ public final class TransformerUtils {
 	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to modify
+	 * @param benficiaryId
+	 *            BEME_ID, *
 	 * @param carrierNumber
 	 *            CARR_NUM,
 	 * @param clinicalTrialNumber
@@ -994,9 +996,10 @@ public final class TransformerUtils {
 	 *            NCH_CARR_CLM_ALOWD_AMT,
 	 *
 	 */
-	static void mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob,
+	static void mapEobCommonGroupCarrierDME(ExplanationOfBenefit eob, String beneficiaryId,
 			String carrierNumber, Optional<String> clinicalTrialNumber, BigDecimal beneficiaryPartBDeductAmount,
-			String paymentDenialCode, Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
+			String paymentDenialCode, Optional<String> referringPhysicianNpi,
+			Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
 			BigDecimal beneficiaryPaymentAmount, BigDecimal submittedChargeAmount, BigDecimal allowedChargeAmount) {
 		/*
 		 * FIXME this should be mapped as an extension valueIdentifier instead of as a
@@ -1006,6 +1009,21 @@ public final class TransformerUtils {
 				TransformerConstants.EXTENSION_IDENTIFIER_CARRIER_NUMBER, carrierNumber);
 		addExtensionCoding(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
+
+		/*
+		 * Referrals are represented as contained resources, since they share the
+		 * lifecycle and identity of their containing EOB.
+		 */
+		if (referringPhysicianNpi.isPresent()) {
+			ReferralRequest referral = new ReferralRequest();
+			referral.setStatus(ReferralRequestStatus.COMPLETED);
+			referral.setSubject(referencePatient(beneficiaryId));
+			referral.setRequester(
+					new ReferralRequestRequesterComponent(referencePractitioner(referringPhysicianNpi.get())));
+			referral.addRecipient(referencePractitioner(referringPhysicianNpi.get()));
+			// Set the ReferralRequest as a contained resource in the EOB:
+			eob.setReferral(new Reference(referral));
+		}
 
 		if (providerAssignmentIndicator.isPresent()) {
 			addExtensionCoding(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
@@ -1137,23 +1155,7 @@ public final class TransformerUtils {
 			Optional<Character> serviceDeductibleCode, Optional<String> diagnosisCode,
 			Optional<Character> diagnosisCodeVersion,
 			Optional<String> hctHgbTestTypeCode, BigDecimal hctHgbTestResult,
-			char cmsServiceTypeCode, Optional<String> nationalDrugCode, String beneficiaryId,
-			Optional<String> referringPhysicianNpi) {
-
-		/*
-		 * Referrals are represented as contained resources, since they share the
-		 * lifecycle and identity of their containing EOB.
-		 */
-		if (referringPhysicianNpi.isPresent()) {
-			ReferralRequest referral = new ReferralRequest();
-			referral.setStatus(ReferralRequestStatus.COMPLETED);
-			referral.setSubject(referencePatient(beneficiaryId));
-			referral.setRequester(
-					new ReferralRequestRequesterComponent(referencePractitioner(referringPhysicianNpi.get())));
-			referral.addRecipient(referencePractitioner(referringPhysicianNpi.get()));
-			// Set the ReferralRequest as a contained resource in the EOB:
-			eob.setReferral(new Reference(referral));
-		}
+			char cmsServiceTypeCode, Optional<String> nationalDrugCode) {
 
 		SimpleQuantity serviceCnt = new SimpleQuantity();
 		serviceCnt.setValue(serviceCount);

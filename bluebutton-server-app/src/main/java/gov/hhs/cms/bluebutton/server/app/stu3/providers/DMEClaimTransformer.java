@@ -70,11 +70,12 @@ final class DMEClaimTransformer {
 		}
 
 		// Common group level fields between Carrier and DME
-		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getCarrierNumber(),
+		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
 				claimGroup.getClinicalTrialNumber(), claimGroup.getBeneficiaryPartBDeductAmount(),
-				claimGroup.getPaymentDenialCode(), Optional.of(claimGroup.getProviderAssignmentIndicator()),
-				claimGroup.getProviderPaymentAmount(), claimGroup.getBeneficiaryPaymentAmount(),
-				claimGroup.getSubmittedChargeAmount(), claimGroup.getAllowedChargeAmount());
+				claimGroup.getPaymentDenialCode(), claimGroup.getReferringPhysicianNpi(),
+				Optional.of(claimGroup.getProviderAssignmentIndicator()), claimGroup.getProviderPaymentAmount(),
+				claimGroup.getBeneficiaryPaymentAmount(), claimGroup.getSubmittedChargeAmount(),
+				claimGroup.getAllowedChargeAmount());
 
 		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses1Thru12(claimGroup.getDiagnosisPrincipalCode(),
 				claimGroup.getDiagnosisPrincipalCodeVersion(), claimGroup.getDiagnosis1Code(),
@@ -215,8 +216,7 @@ final class DMEClaimTransformer {
 					claimLine.getProcessingIndicatorCode(), claimLine.getServiceDeductibleCode(),
 					claimLine.getDiagnosisCode(), claimLine.getDiagnosisCodeVersion(),
 					claimLine.getHctHgbTestTypeCode(), claimLine.getHctHgbTestResult(),
-					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode(), claimGroup.getBeneficiaryId(),
-					claimGroup.getReferringPhysicianNpi());
+					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode());
 
 			if (!claimLine.getProviderStateCode().isEmpty()) {
 				TransformerUtils.addExtensionCoding(item.getLocation(),

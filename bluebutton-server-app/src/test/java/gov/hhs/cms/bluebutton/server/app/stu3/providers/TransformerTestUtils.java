@@ -904,6 +904,8 @@ final class TransformerTestUtils {
 	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to test
+	 * @param benficiaryId
+	 *            BENE_ID, *
 	 * @param carrierNumber
 	 *            CARR_NUM,
 	 * @param clinicalTrialNumber
@@ -911,7 +913,9 @@ final class TransformerTestUtils {
 	 * @param beneficiaryPartBDeductAmount
 	 *            CARR_CLM_CASH_DDCTBL_APLD_AMT,
 	 * @param paymentDenialCode
-	 *            CARR_CLM_PMT_DNL_CD
+	 *            CARR_CLM_PMT_DNL_CD,
+	 * @param referringPhysicianNpi
+	 *            RFR_PHYSN_NPI,
 	 * @param providerAssignmentIndicator
 	 *            CARR_CLM_PRVDR_ASGNMT_IND_SW,
 	 * @param providerPaymentAmount
@@ -924,14 +928,23 @@ final class TransformerTestUtils {
 	 *            NCH_CARR_CLM_ALOWD_AMT,
 	 * 
 	 */
-	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob,
+	static void assertEobCommonGroupCarrierDMEEquals(ExplanationOfBenefit eob, String beneficiaryId,
 			String carrierNumber, Optional<String> clinicalTrialNumber, BigDecimal beneficiaryPartBDeductAmount,
-			String paymentDenialCode,
+			String paymentDenialCode, Optional<String> referringPhysicianNpi,
 			Optional<Character> providerAssignmentIndicator, BigDecimal providerPaymentAmount,
 			BigDecimal beneficiaryPaymentAmount, BigDecimal submittedChargeAmount, BigDecimal allowedChargeAmount) {
 
 		assertExtensionCodingEquals(eob, TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL,
 				TransformerConstants.EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL, paymentDenialCode);
+
+		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+		Assert.assertEquals(TransformerUtils.referencePatient(beneficiaryId).getReference(),
+				referral.getSubject().getReference());
+		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
+				referral.getRequester().getAgent());
+		Assert.assertEquals(1, referral.getRecipient().size());
+		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
+				referral.getRecipientFirstRep());
 
 		assertExtensionCodingEquals(eob, TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT,
 				TransformerConstants.CODING_CCW_PROVIDER_ASSIGNMENT, String.valueOf(providerAssignmentIndicator.get()));
@@ -970,8 +983,6 @@ final class TransformerTestUtils {
 	 *            the {@ ItemComponent} to test
 	 * @param eob
 	 *            the {@ ExplanationOfBenefit} to test
-	 * @param beneficiaryId
-	 *            BENE_ID, *
 	 * @param serviceCount
 	 *            LINE_SRVC_CNT,
 	 * @param placeOfServiceCode
@@ -1017,13 +1028,11 @@ final class TransformerTestUtils {
 	 * @param cmsServiceTypeCode
 	 *            LINE_CMS_TYPE_SRVC_CD,
 	 * @param nationalDrugCode
-	 *            LINE_NDC_CD,
-	 * @param referringPhysicianNpi
-	 *            RFR_PHYSN_NPI
+	 *            LINE_NDC_CD
 	 * 
 	 * @throws FHIRException
 	 */
-	static void assertEobCommonItemCarrierDMEEquals(ItemComponent item, ExplanationOfBenefit eob, String beneficiaryId,
+	static void assertEobCommonItemCarrierDMEEquals(ItemComponent item, ExplanationOfBenefit eob,
 			BigDecimal serviceCount, String placeOfServiceCode, Optional<LocalDate> firstExpenseDate,
 			Optional<LocalDate> lastExpenseDate, BigDecimal beneficiaryPaymentAmount, BigDecimal providerPaymentAmount,
 			BigDecimal beneficiaryPartBDeductAmount, Optional<Character> primaryPayerCode,
@@ -1033,17 +1042,8 @@ final class TransformerTestUtils {
 			Optional<Character> serviceDeductibleCode, Optional<String> diagnosisCode,
 			Optional<Character> diagnosisCodeVersion,
 			Optional<String> hctHgbTestTypeCode, BigDecimal hctHgbTestResult,
-			char cmsServiceTypeCode, Optional<String> nationalDrugCode, Optional<String> referringPhysicianNpi)
+			char cmsServiceTypeCode, Optional<String> nationalDrugCode)
 			throws FHIRException {
-
-		ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-		Assert.assertEquals(TransformerUtils.referencePatient(beneficiaryId).getReference(),
-				referral.getSubject().getReference());
-		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
-				referral.getRequester().getAgent());
-		Assert.assertEquals(1, referral.getRecipient().size());
-		assertReferenceIdentifierEquals(TransformerConstants.CODING_NPI_US, referringPhysicianNpi.get(),
-				referral.getRecipientFirstRep());
 
 		Assert.assertEquals(serviceCount, item.getQuantity().getValue());
 		
