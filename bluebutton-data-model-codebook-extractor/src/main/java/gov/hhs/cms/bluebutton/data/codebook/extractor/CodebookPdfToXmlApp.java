@@ -54,9 +54,7 @@ public final class CodebookPdfToXmlApp {
 		for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
 			Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
 
-			String outputFileName = supportedCodebook.getCodebookPdfResourceName().replaceAll("\\.pdf", ".xml");
-			Path outputFile = outputPath.resolve(outputFileName);
-
+			Path outputFile = outputPath.resolve(supportedCodebook.getCodebookXmlResourceName());
 			writeCodebookXmlToFile(codebook, outputFile);
 			System.out.printf("Extracted codebook PDF to XML: %s\n", outputFile.toAbsolutePath());
 		}

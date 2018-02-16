@@ -22,7 +22,8 @@ public enum SupportedCodebook {
 	 * Enum constant constructor.
 	 * 
 	 * @param codebookPdfResourceName
-	 *            the value to use for {@link #getCodebookPdfResourceName()}
+	 *            the name of the input/unparsed codebook PDF resource on this
+	 *            project's classpath
 	 * @param displayName
 	 *            the value to use for {@link #getDisplayName()}
 	 * @param version
@@ -35,10 +36,11 @@ public enum SupportedCodebook {
 	}
 
 	/**
-	 * @return the file/resource name of the {@link SupportedCodebook} PDF resource
+	 * @return the file/resource name of the {@link SupportedCodebook} XML resource
+	 *         produced by {@link CodebookPdfToXmlApp}
 	 */
-	public String getCodebookPdfResourceName() {
-		return codebookPdfResourceName;
+	public String getCodebookXmlResourceName() {
+		return codebookPdfResourceName.replace(".pdf", ".xml");
 	}
 
 	/**
