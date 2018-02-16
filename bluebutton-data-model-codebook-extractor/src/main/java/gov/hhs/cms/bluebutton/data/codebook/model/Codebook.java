@@ -2,10 +2,10 @@ package gov.hhs.cms.bluebutton.data.codebook.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -59,6 +59,7 @@ public final class Codebook {
 	/**
 	 * @return the descriptive English name for this {@link Codebook}
 	 */
+	@XmlAttribute
 	public String getName() {
 		return name;
 	}
@@ -68,6 +69,7 @@ public final class Codebook {
 	 *         data is represented by this {@link Codebook}, typically something
 	 *         like "<code>December 2042, Version 42.0</code>"
 	 */
+	@XmlAttribute
 	public String getVersion() {
 		return version;
 	}
