@@ -936,7 +936,7 @@ final class TransformerTestUtils {
 	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to test
-	 * @param beneficiaryId
+	 * @param benficiaryId
 	 *            BENE_ID, *
 	 * @param carrierNumber
 	 *            CARR_NUM,
@@ -947,7 +947,7 @@ final class TransformerTestUtils {
 	 * @param paymentDenialCode
 	 *            CARR_CLM_PMT_DNL_CD,
 	 * @param referringPhysicianNpi
-	 *            RFR_PHYSN_NPI
+	 *            RFR_PHYSN_NPI,
 	 * @param providerAssignmentIndicator
 	 *            CARR_CLM_PRVDR_ASGNMT_IND_SW,
 	 * @param providerPaymentAmount
@@ -1105,8 +1105,8 @@ final class TransformerTestUtils {
 				providerPaymentAmount, item.getAdjudication());
 		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE,
 				beneficiaryPartBDeductAmount, item.getAdjudication());
-		assertExtensionCodingEquals(item, TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
-				TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER, "" + primaryPayerCode.get());
+		assertExtensionCodingEquals(item, TransformerConstants.EXTENSION_CODING_CARRIER_PRIMARY_PAYER,
+				TransformerConstants.EXTENSION_CODING_CARRIER_PRIMARY_PAYER, "" + primaryPayerCode.get());
 		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
 				primaryPayerPaidAmount, item.getAdjudication());
 		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT, coinsuranceAmount,

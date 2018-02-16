@@ -484,6 +484,8 @@ final class TransformerConstants {
 
 	public static final String EXTENSION_CODING_PRIMARY_PAYER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt";
 
+	public static final String EXTENSION_CODING_CARRIER_PRIMARY_PAYER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpaycd.txt";
+
 	static final String EXTENSION_IDENTIFIER_CARRIER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt";
 
 	static final String EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt";

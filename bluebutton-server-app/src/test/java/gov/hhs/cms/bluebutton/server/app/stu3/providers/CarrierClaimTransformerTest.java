@@ -82,11 +82,10 @@ public final class CarrierClaimTransformerTest {
 				Optional.of(claim.getPaymentAmount()), claim.getFinalAction());
 
 		// Test to ensure common group fields between Carrier and DME match
-		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(),
-				claim.getCarrierNumber(),
+		TransformerTestUtils.assertEobCommonGroupCarrierDMEEquals(eob, claim.getBeneficiaryId(), claim.getCarrierNumber(),
 				claim.getClinicalTrialNumber(), claim.getBeneficiaryPartBDeductAmount(), claim.getPaymentDenialCode(),
-				claim.getReferringPhysicianNpi(), claim.getProviderAssignmentIndicator(),
-				claim.getProviderPaymentAmount(), claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
+				claim.getReferringPhysicianNpi(), claim.getProviderAssignmentIndicator(), claim.getProviderPaymentAmount(),
+				claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
 
 		Assert.assertEquals(5, eob.getDiagnosis().size());
@@ -183,6 +182,7 @@ public final class CarrierClaimTransformerTest {
 				claimLine1.getDiagnosisCode(),
 				claimLine1.getDiagnosisCodeVersion(), 
 				claimLine1.getHctHgbTestTypeCode(), claimLine1.getHctHgbTestResult(),
-				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode());
+				claimLine1.getCmsServiceTypeCode(), claimLine1.getNationalDrugCode()
+				);
 	}
 }

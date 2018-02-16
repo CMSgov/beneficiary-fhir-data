@@ -72,9 +72,9 @@ final class CarrierClaimTransformer {
 		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
 				claimGroup.getClinicalTrialNumber(), claimGroup.getBeneficiaryPartBDeductAmount(),
 				claimGroup.getPaymentDenialCode(), claimGroup.getReferringPhysicianNpi(),
-				claimGroup.getProviderAssignmentIndicator(), claimGroup.getProviderPaymentAmount(),
-				claimGroup.getBeneficiaryPaymentAmount(), claimGroup.getSubmittedChargeAmount(),
-				claimGroup.getAllowedChargeAmount());
+				claimGroup.getProviderAssignmentIndicator(),
+				claimGroup.getProviderPaymentAmount(), claimGroup.getBeneficiaryPaymentAmount(),
+				claimGroup.getSubmittedChargeAmount(), claimGroup.getAllowedChargeAmount());
 
 		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses1Thru12(claimGroup.getDiagnosisPrincipalCode(),
 				claimGroup.getDiagnosisPrincipalCodeVersion(), 

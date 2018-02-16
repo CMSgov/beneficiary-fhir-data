@@ -1018,8 +1018,8 @@ public final class TransformerUtils {
 	 * 
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to modify
-	 * @param beneficiaryId
-	 *            BENE_ID, *
+	 * @param benficiaryId
+	 *            BEME_ID, *
 	 * @param carrierNumber
 	 *            CARR_NUM,
 	 * @param clinicalTrialNumber
@@ -1062,8 +1062,8 @@ public final class TransformerUtils {
 			ReferralRequest referral = new ReferralRequest();
 			referral.setStatus(ReferralRequestStatus.COMPLETED);
 			referral.setSubject(referencePatient(beneficiaryId));
-			referral.setRequester(new ReferralRequestRequesterComponent(
-					referencePractitioner(referringPhysicianNpi.get())));
+			referral.setRequester(
+					new ReferralRequestRequesterComponent(referencePractitioner(referringPhysicianNpi.get())));
 			referral.addRecipient(referencePractitioner(referringPhysicianNpi.get()));
 			// Set the ReferralRequest as a contained resource in the EOB:
 			eob.setReferral(new Reference(referral));
@@ -1177,7 +1177,11 @@ public final class TransformerUtils {
 	 * @param cmsServiceTypeCode
 	 *            LINE_CMS_TYPE_SRVC_CD,
 	 * @param nationalDrugCode
-	 *            LINE_NDC_CD
+	 *            LINE_NDC_CD,
+	 * @param beneficiaryId
+	 *            BENE_ID,
+	 * @param referringPhysicianNpi
+	 *            RFR_PHYSN_NPI
 	 * 
 	 * @return the {@link ItemComponent}
 	 */
@@ -1251,8 +1255,8 @@ public final class TransformerUtils {
 				.setValue(beneficiaryPartBDeductAmount);
 
 		if (primaryPayerCode.isPresent()) {
-			addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
-					TransformerConstants.EXTENSION_CODING_PRIMARY_PAYER,
+			addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_CARRIER_PRIMARY_PAYER,
+					TransformerConstants.EXTENSION_CODING_CARRIER_PRIMARY_PAYER,
 					String.valueOf(primaryPayerCode.get()));
 		}
 
