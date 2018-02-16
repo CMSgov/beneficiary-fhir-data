@@ -75,15 +75,6 @@ public final class Codebook {
 	}
 
 	/**
-	 * @param variableId
-	 *            the {@link Variable#getId()} value to match
-	 * @return the {@link Variable} with the specified {@link Variable#getId()}
-	 */
-	public Optional<Variable> getVariable(String variableId) {
-		return variables.stream().filter(v -> variableId.equals(v.getId())).findAny();
-	}
-
-	/**
 	 * @return the mutable {@link List} of {@link Variable}s in the {@link Codebook}
 	 */
 	@XmlElement(name = "variable")
