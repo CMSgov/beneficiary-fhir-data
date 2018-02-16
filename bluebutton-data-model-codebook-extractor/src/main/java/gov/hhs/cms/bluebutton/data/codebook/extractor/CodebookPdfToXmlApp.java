@@ -80,7 +80,6 @@ public final class CodebookPdfToXmlApp {
 			throw new UncheckedJaxbException(e);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
-		} finally {
 		}
 	}
 }
