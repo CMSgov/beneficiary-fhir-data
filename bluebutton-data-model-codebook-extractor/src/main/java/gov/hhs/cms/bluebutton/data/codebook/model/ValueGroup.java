@@ -6,6 +6,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 
 /**
  * <p>
@@ -44,6 +45,7 @@ public final class ValueGroup {
 	 *         or <code>null</code> if there is no such description (which will only
 	 *         be the case for {@link Variable}s with a single {@link ValueGroup})
 	 */
+	@XmlElementWrapper(required = false)
 	@XmlElement(name = "p")
 	public List<String> getDescription() {
 		return description;
