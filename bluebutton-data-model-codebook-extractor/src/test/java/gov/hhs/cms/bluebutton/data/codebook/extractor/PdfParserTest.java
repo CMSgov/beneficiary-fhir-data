@@ -70,9 +70,9 @@ public final class PdfParserTest {
 				 */
 
 				List<String> codebookTextLines = PdfParser.extractTextLinesFromPdf(codebookPdfStream);
-				printTextLinesToConsole(codebookTextLines);
+				// printTextLinesToConsole(codebookTextLines);
 				List<List<String>> variableSections = PdfParser.findVariableSections(codebookTextLines);
-				printSectionsToConsole(variableSections);
+				// printSectionsToConsole(variableSections);
 
 				for (List<String> variableSection : variableSections) {
 					Assert.assertNotNull(variableSection);
