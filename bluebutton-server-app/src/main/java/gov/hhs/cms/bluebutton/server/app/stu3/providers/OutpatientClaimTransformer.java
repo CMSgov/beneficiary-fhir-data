@@ -277,8 +277,10 @@ final class OutpatientClaimTransformer {
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), Optional.empty());
 
 			if (claimLine.getNationalDrugCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getService(), TransformerConstants.CODING_NDC,
-						TransformerConstants.CODING_NDC, claimLine.getNationalDrugCode().get());
+				TransformerUtils.addExtensionCoding(item.getService(),
+						TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
+						TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
+						claimLine.getNationalDrugCode().get());
 			}
 
 			item.addAdjudication()
