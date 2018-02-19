@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,12 @@ import gov.hhs.cms.bluebutton.data.model.codegen.annotations.RifLayoutsGenerator
  */
 @AutoService(Processor.class)
 public class CodebookVariablesEnumProcessor extends AbstractProcessor {
+	/**
+	 * The value to stick in the enum constants' JavaDoc for {@link Variable} fields
+	 * that aren't defined.
+	 */
+	private static final String MISSING_VARIABLE_FIELD = "(N/A)";
+
 	/**
 	 * Both Maven and Eclipse hide compiler messages, so setting this constant to
 	 * <code>true</code> will also log messages out to a new source file.
@@ -147,32 +154,27 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
 			variableEnumBuilder.addJavadoc("<li><strong>Codebook:</strong> $L ($L)</li>\n",
 					variable.getCodebook().getName(), variable.getCodebook().getVersion());
 			variableEnumBuilder.addJavadoc("<li><strong>Label:</strong> $L</li>\n", variable.getLabel());
-			if (variable.getDescription() != null) {
-				variableEnumBuilder.addJavadoc("<li><strong>Description:</strong>\n");
-				for (String paragraph : variable.getDescription())
-					variableEnumBuilder.addJavadoc("<p>$L</p>\n", HtmlEscapers.htmlEscaper().escape(paragraph));
-				variableEnumBuilder.addJavadoc("</li>\n");
-			}
-			if (variable.getShortName() != null)
-				variableEnumBuilder.addJavadoc("<li><strong>Short Name:</strong> $L</li>\n", variable.getShortName());
+			variableEnumBuilder.addJavadoc("<li><strong>Description:</strong>\n");
+			for (String paragraph : variable.getDescription().orElse(Arrays.asList(MISSING_VARIABLE_FIELD)))
+				variableEnumBuilder.addJavadoc("<p>$L</p>\n", HtmlEscapers.htmlEscaper().escape(paragraph));
+			variableEnumBuilder.addJavadoc("</li>\n");
+			variableEnumBuilder.addJavadoc("<li><strong>Short Name:</strong> $L</li>\n",
+					variable.getShortName().orElse(MISSING_VARIABLE_FIELD));
 			variableEnumBuilder.addJavadoc("<li><strong>Long Name:</strong> $L</li>\n", variable.getLongName());
-			if (variable.getType() != null)
-				variableEnumBuilder.addJavadoc("<li><strong>Type:</strong> $L</li>\n", variable.getType());
+			variableEnumBuilder.addJavadoc("<li><strong>Type:</strong> $L</li>\n",
+					variable.getType().isPresent() ? variable.getType().get().toString() : MISSING_VARIABLE_FIELD);
 			variableEnumBuilder.addJavadoc("<li><strong>Length:</strong> $L</li>\n", variable.getLength());
-			if (variable.getSource() != null)
-				variableEnumBuilder.addJavadoc("<li><strong>Source:</strong> $L</li>\n", variable.getSource());
-			if (variable.getValueFormat() != null)
-				variableEnumBuilder.addJavadoc("<li><strong>Value Format:</strong> $L</li>\n",
-						variable.getValueFormat());
+			variableEnumBuilder.addJavadoc("<li><strong>Source:</strong> $L</li>\n",
+					variable.getSource().orElse(MISSING_VARIABLE_FIELD));
+			variableEnumBuilder.addJavadoc("<li><strong>Value Format:</strong> $L</li>\n",
+					variable.getValueFormat().orElse(MISSING_VARIABLE_FIELD));
 			if (variable.getValueGroups() != null)
 				variableEnumBuilder.addJavadoc("<li><strong>Coded Values?:</strong> $L</li>\n",
-						variable.getValueGroups() != null);
-			if (variable.getComment() != null) {
-				variableEnumBuilder.addJavadoc("<li><strong>Comment:</strong>\n");
-				for (String paragraph : variable.getComment())
-					variableEnumBuilder.addJavadoc("<p>$L</p>\n", HtmlEscapers.htmlEscaper().escape(paragraph));
-				variableEnumBuilder.addJavadoc("</li>\n");
-			}
+						variable.getValueGroups().isPresent());
+			variableEnumBuilder.addJavadoc("<li><strong>Comment:</strong>\n");
+			for (String paragraph : variable.getComment().orElse(Arrays.asList(MISSING_VARIABLE_FIELD)))
+				variableEnumBuilder.addJavadoc("<p>$L</p>\n", HtmlEscapers.htmlEscaper().escape(paragraph));
+			variableEnumBuilder.addJavadoc("</li>\n");
 			variableEnumBuilder.addJavadoc("</ul>\n");
 			variablesEnumType.addEnumConstant(variable.getId(), variableEnumBuilder.build());
 		}

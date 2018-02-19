@@ -84,12 +84,12 @@ public class SupportedCodebookTest {
 		for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
 			Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
 			for (Variable variable : codebook.getVariables()) {
-				if (variable.getValueGroups() == null)
+				if (!variable.getValueGroups().isPresent())
 					continue;
 
 				// Build a multimap of all the Values by their codes.
 				Map<String, List<Value>> valuesByCode = new LinkedHashMap<>();
-				for (ValueGroup valueGroup : variable.getValueGroups()) {
+				for (ValueGroup valueGroup : variable.getValueGroups().get()) {
 					for (Value value : valueGroup.getValues()) {
 						if (!valuesByCode.containsKey(value.getCode()))
 							valuesByCode.put(value.getCode(), new ArrayList<>());
