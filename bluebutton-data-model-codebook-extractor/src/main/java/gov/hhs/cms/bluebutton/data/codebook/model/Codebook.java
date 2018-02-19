@@ -17,11 +17,18 @@ import gov.hhs.cms.bluebutton.data.codebook.extractor.SupportedCodebook;
  * Conditions Warehouse (CCW) data dictionary</a> codebook.
  */
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlAccessorType(XmlAccessType.FIELD)
 public final class Codebook {
-	private String id;
-	private String name;
-	private String version;
+	@XmlAttribute
+	private final String id;
+
+	@XmlAttribute
+	private final String name;
+
+	@XmlAttribute
+	private final String version;
+
+	@XmlElement(name = "variable")
 	private final List<Variable> variables;
 
 	/**
@@ -59,7 +66,6 @@ public final class Codebook {
 	/**
 	 * @return the descriptive English name for this {@link Codebook}
 	 */
-	@XmlAttribute
 	public String getName() {
 		return name;
 	}
@@ -69,7 +75,6 @@ public final class Codebook {
 	 *         data is represented by this {@link Codebook}, typically something
 	 *         like "<code>December 2042, Version 42.0</code>"
 	 */
-	@XmlAttribute
 	public String getVersion() {
 		return version;
 	}
@@ -77,7 +82,6 @@ public final class Codebook {
 	/**
 	 * @return the mutable {@link List} of {@link Variable}s in the {@link Codebook}
 	 */
-	@XmlElement(name = "variable")
 	public List<Variable> getVariables() {
 		return variables;
 	}

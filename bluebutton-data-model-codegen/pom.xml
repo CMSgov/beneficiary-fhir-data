@@ -33,6 +33,13 @@
 		</dependency>
 
 		<dependency>
+			<!-- Provides the Codebook XML and unmarshalling code for reading it. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-codebook-extractor</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
 			<!-- Just useful. -->
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
