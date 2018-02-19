@@ -139,8 +139,10 @@ public final class OutpatientClaimTransformerTest {
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getService(), TransformerConstants.CODING_NDC,
-				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());
+		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getService(),
+				TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
+				TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
+				claimLine1.getNationalDrugCode().get());
 
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE,
 				claimLine1.getBloodDeductibleAmount(), eobItem0.getAdjudication());
