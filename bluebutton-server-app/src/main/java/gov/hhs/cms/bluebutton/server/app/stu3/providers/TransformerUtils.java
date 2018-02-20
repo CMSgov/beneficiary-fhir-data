@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -45,6 +46,7 @@ import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.slf4j.Logger;
@@ -53,6 +55,8 @@ import org.slf4j.LoggerFactory;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
+import gov.hhs.cms.bluebutton.data.codebook.model.Value;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
@@ -489,6 +493,157 @@ public final class TransformerUtils {
 
 			return true;
 		});
+	}
+
+	/**
+	 * @param rootResource
+	 *            the root FHIR {@link IAnyResource} that the resultant
+	 *            {@link Extension} will be contained in
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being coded
+	 * @param code
+	 *            the value to use for {@link Coding#getCode()} for the resulting
+	 *            {@link Coding}
+	 * @return the output {@link Extension}, with {@link Extension#getValue()} set
+	 *         to a new {@link Coding} to represent the specified input values
+	 */
+	static Extension createExtensionCoding(IAnyResource rootResource, CcwCodebookVariable ccwVariable, Character code) {
+		return createExtensionCoding(rootResource, ccwVariable, code.toString());
+	}
+
+	/**
+	 * @param rootResource
+	 *            the root FHIR {@link IAnyResource} that the resultant
+	 *            {@link Extension} will be contained in
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being coded
+	 * @param code
+	 *            the value to use for {@link Coding#getCode()} for the resulting
+	 *            {@link Coding}
+	 * @return the output {@link Extension}, with {@link Extension#getValue()} set
+	 *         to a new {@link Coding} to represent the specified input values
+	 */
+	static Extension createExtensionCoding(IAnyResource rootResource, CcwCodebookVariable ccwVariable, String code) {
+		Coding coding = createCoding(rootResource, ccwVariable, code);
+
+		String extensionUrl = calculateCodingSystem(ccwVariable);
+		Extension extension = new Extension(extensionUrl, coding);
+
+		return extension;
+	}
+
+	/**
+	 * @param rootResource
+	 *            the root FHIR {@link IAnyResource} that the resultant
+	 *            {@link CodeableConcept} will be contained in
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being coded
+	 * @param code
+	 *            the value to use for {@link Coding#getCode()} for the resulting
+	 *            (single) {@link Coding}, wrapped within the resulting
+	 *            {@link CodeableConcept}
+	 * @return the output {@link CodeableConcept} for the specified input values
+	 */
+	static CodeableConcept createCodeableConcept(IAnyResource rootResource, CcwCodebookVariable ccwVariable,
+			String code) {
+		Coding coding = createCoding(rootResource, ccwVariable, code);
+
+		CodeableConcept concept = new CodeableConcept();
+		concept.addCoding(coding);
+
+		return concept;
+	}
+
+	/**
+	 * @param rootResource
+	 *            the root FHIR {@link IAnyResource} that the resultant
+	 *            {@link Coding} will be contained in
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being coded
+	 * @param code
+	 *            the value to use for {@link Coding#getCode()}
+	 * @return the output {@link Coding} for the specified input values
+	 */
+	private static Coding createCoding(IAnyResource rootResource, CcwCodebookVariable ccwVariable, String code) {
+		String system = calculateCodingSystem(ccwVariable);
+		String display = calculateCodingDisplay(rootResource, ccwVariable, code).orElse(null);
+		return new Coding(system, code, display);
+	}
+
+	/**
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being mapped to a {@link Coding}
+	 * @return the {@link Coding#getSystem()} value to use for the specified
+	 *         {@link CcwCodebookVariable}
+	 */
+	static String calculateCodingSystem(CcwCodebookVariable ccwVariable) {
+		return String.format("%s/%s", TransformerConstants.BASE_URL_CCW_VARIABLES,
+				ccwVariable.getVariable().getId().toLowerCase());
+	}
+
+	/**
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being mapped to an
+	 *            {@link Extension}
+	 * @return the {@link Extension#getUrl()} value to use for the specified
+	 *         {@link CcwCodebookVariable}
+	 */
+	static String calculateExtensionUrl(CcwCodebookVariable ccwVariable) {
+		// Cheating here, since they use the same URL.
+		return calculateCodingSystem(ccwVariable);
+	}
+
+	/**
+	 * @param rootResource
+	 *            the root FHIR {@link IAnyResource} that the resultant
+	 *            {@link Coding} will be contained in
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being coded
+	 * @param code
+	 *            the FHIR {@link Coding#getCode()} value to determine a
+	 *            corresponding {@link Coding#getDisplay()} value for
+	 * @return the {@link Coding#getDisplay()} value to use for the specified
+	 *         {@link CcwCodebookVariable} and {@link Coding#getCode()}, or
+	 *         {@link Optional#empty()} if no matching display value could be
+	 *         determined
+	 */
+	private static Optional<String> calculateCodingDisplay(IAnyResource rootResource, CcwCodebookVariable ccwVariable,
+			String code) {
+		if (rootResource == null)
+			throw new IllegalArgumentException();
+		if (ccwVariable == null)
+			throw new IllegalArgumentException();
+		if (code == null)
+			throw new IllegalArgumentException();
+		if (!ccwVariable.getVariable().getValueGroups().isPresent())
+			throw new BadCodeMonkeyException("No display values for this Variable.");
+
+		/*
+		 * We know that the specified CCW Variable is coded, but there's no guarantee
+		 * that the Coding's code matches one of the known/allowed Variable values: data
+		 * is messy. When that happens, we log the event and return normally. The log
+		 * event will at least allow for further investigation, if warranted. Also,
+		 * there's a chance that the CCW Variable data itself is messy, and that the
+		 * Coding's code matches more than one value -- we just log those events, too.
+		 */
+		List<Value> matchingVariableValues = ccwVariable.getVariable().getValueGroups().get().stream()
+				.flatMap(g -> g.getValues().stream()).filter(v -> v.getCode().equals(code))
+				.collect(Collectors.toList());
+		if (matchingVariableValues.size() == 1) {
+			return Optional.of(matchingVariableValues.get(0).getDescription());
+		} else if (matchingVariableValues.isEmpty()) {
+			LOGGER.info("No display value match found for {}.{} in resource '{}/{}'.",
+					CcwCodebookVariable.class.getSimpleName(), ccwVariable.name(),
+					rootResource.getClass().getSimpleName(), rootResource.getId());
+			return Optional.empty();
+		} else if (matchingVariableValues.size() > 1) {
+			LOGGER.info("Multiple display value matches found for {}.{} in resource '{}/{}'.",
+					CcwCodebookVariable.class.getSimpleName(), ccwVariable.name(),
+					rootResource.getClass().getSimpleName(), rootResource.getId());
+			return Optional.empty();
+		} else {
+			throw new BadCodeMonkeyException();
+		}
 	}
 
 	/**

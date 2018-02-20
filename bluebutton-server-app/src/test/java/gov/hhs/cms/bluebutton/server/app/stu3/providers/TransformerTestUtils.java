@@ -37,6 +37,7 @@ import org.junit.Assert;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
@@ -221,7 +222,7 @@ final class TransformerTestUtils {
 	 * @param actual
 	 *            the actual {@link Coding} to verify
 	 */
-	static void assertCodingEquals(String expectedSystem, String expectedCode, Coding actual) {
+	static void assertCodingEquals(String expectedSystem, Object expectedCode, Coding actual) {
 		assertCodingEquals(expectedSystem, null, expectedCode, actual);
 	}
 
@@ -235,11 +236,21 @@ final class TransformerTestUtils {
 	 * @param actual
 	 *            the actual {@link Coding} to verify
 	 */
-	private static void assertCodingEquals(String expectedSystem, String expectedVersion, String expectedCode,
+	private static void assertCodingEquals(String expectedSystem, String expectedVersion, Object expectedCode,
 			Coding actual) {
 		Assert.assertEquals(expectedSystem, actual.getSystem());
 		Assert.assertEquals(expectedVersion, actual.getVersion());
-		Assert.assertEquals(expectedCode, actual.getCode());
+
+		/*
+		 * The code parameter is an Object to avoid needing multiple copies of this and
+		 * related methods. This if-else block is the price to be paid for that, though.
+		 */
+		if(expectedCode instanceof Character)
+			Assert.assertEquals(((Character) expectedCode).toString(), actual.getCode());
+		else if (expectedCode instanceof String)
+			Assert.assertEquals(expectedCode, actual.getCode());
+		else
+			throw new BadCodeMonkeyException();
 	}
 
 	/**
@@ -288,6 +299,44 @@ final class TransformerTestUtils {
 		Assert.assertTrue(actual.precision() >= expected.precision());
 		Assert.assertTrue(actual.scale() >= expected.scale());
 		Assert.assertEquals(0, expected.compareTo(actual));
+	}
+
+	/**
+	 * @param fhirElement
+	 *            the FHIR element to find and verify the {@link Extension} of
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} that the expected
+	 *            {@link Extension} / {@link Coding} are for
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()}
+	 */
+	static void assertExtensionCodingEquals(IBaseHasExtensions fhirElement, CcwCodebookVariable ccwVariable,
+			Object expectedCode) {
+		// Jumping through hoops to cope with overloaded method:
+		Optional<?> expectedCodeCast = expectedCode instanceof Optional ? (Optional<?>) expectedCode
+				: Optional.of(expectedCode);
+		assertExtensionCodingEquals(fhirElement, ccwVariable, expectedCodeCast);
+	}
+
+	/**
+	 * @param fhirElement
+	 *            the FHIR element to find and verify the {@link Extension} of
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} that the expected
+	 *            {@link Extension} / {@link Coding} are for
+	 * @param expectedCode
+	 *            the expected {@link Coding#getCode()}
+	 */
+	static void assertExtensionCodingEquals(IBaseHasExtensions fhirElement, CcwCodebookVariable ccwVariable,
+			Optional<?> expectedCode) {
+		String expectedExtensionUrl = TransformerUtils.calculateExtensionUrl(ccwVariable);
+		String expectedCodingSystem = expectedExtensionUrl;
+		Optional<? extends IBaseExtension<?, ?>> extensionForUrl = fhirElement.getExtension().stream()
+				.filter(e -> e.getUrl().equals(expectedExtensionUrl)).findFirst();
+
+		Assert.assertEquals(expectedCode.isPresent(), extensionForUrl.isPresent());
+		if (expectedCode.isPresent())
+			assertCodingEquals(expectedCodingSystem, expectedCode.get(), (Coding) extensionForUrl.get().getValue());
 	}
 
 	/**

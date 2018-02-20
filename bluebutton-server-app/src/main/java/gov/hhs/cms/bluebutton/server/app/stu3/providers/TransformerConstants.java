@@ -11,6 +11,8 @@ import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimType;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
+import gov.hhs.cms.bluebutton.data.codebook.model.Variable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
 /**
@@ -70,6 +72,24 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
  * </ol>
  */
 final class TransformerConstants {
+	/**
+	 * <p>
+	 * The base URL/URI/system for FHIR output related to
+	 * {@link CcwCodebookVariable}:
+	 * </p>
+	 * <ul>
+	 * <li>{@link Extension#getUrl()}</li>
+	 * <li>{@link Coding#getSystem()}</li>
+	 * <li>{@link Identifier#getSystem()}</li>
+	 * </ul>
+	 * <p>
+	 * This URL will never be used by itself; it will always be suffixed with the
+	 * (lower-cased) {@link CcwCodebookVariable#getVariable()}'s
+	 * {@link Variable#getId()}.
+	 * </p>
+	 */
+	static final String BASE_URL_CCW_VARIABLES = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary";
+
 	static final String CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS = "CSPINV";
 
 	static final String CODED_ADJUDICATION_1ST_ANSI_CD = "Revenue Center 1st ANSI Code";

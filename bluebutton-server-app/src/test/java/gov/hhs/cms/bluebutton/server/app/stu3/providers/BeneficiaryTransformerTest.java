@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
@@ -75,9 +76,7 @@ public final class BeneficiaryTransformerTest {
 			Assert.assertEquals("MALE", patient.getGender().toString().trim());
 		else if (beneficiary.getSex() == 'F')
 			Assert.assertEquals("FEMALE", patient.getGender().toString().trim());
-		if (beneficiary.getRace().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(patient, BeneficiaryTransformer.EXTENSION_US_CORE_RACE,
-					BeneficiaryTransformer.CODING_CCW_RACE, "" + beneficiary.getRace().get());
+		TransformerTestUtils.assertExtensionCodingEquals(patient, CcwCodebookVariable.RACE, beneficiary.getRace());
 		Assert.assertEquals(beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
 		if (beneficiary.getNameMiddleInitial().isPresent())
 			Assert.assertEquals(beneficiary.getNameMiddleInitial().get().toString(),

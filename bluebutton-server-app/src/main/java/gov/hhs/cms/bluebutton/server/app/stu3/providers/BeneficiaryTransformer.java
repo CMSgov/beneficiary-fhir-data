@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
 /**
@@ -29,10 +30,6 @@ final class BeneficiaryTransformer {
 	 * now.
 	 */
 	public static final String CODING_CCW_BENE_HICN_HASH = "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
-
-	static final String EXTENSION_US_CORE_RACE = "http://hl7.org/fhir/StructureDefinition/us-core-race";
-
-	static final String CODING_CCW_RACE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/race.txt";
 
 	/**
 	 * @param beneficiary
@@ -69,8 +66,8 @@ final class BeneficiaryTransformer {
 		}
 
 		if (beneficiary.getRace().isPresent()) {
-			TransformerUtils.addExtensionCoding(patient, EXTENSION_US_CORE_RACE, CODING_CCW_RACE,
-					"" + beneficiary.getRace().get());
+			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.RACE,
+					beneficiary.getRace().get()));
 		}
 
 		HumanName name = patient.addName().addGiven(beneficiary.getNameGiven()).setFamily(beneficiary.getNameSurname())
