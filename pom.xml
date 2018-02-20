@@ -46,11 +46,12 @@
 	</scm>
 
 	<modules>
+		<module>bluebutton-data-model-codebook-extractor</module>
+		<module>bluebutton-data-model-codebook-data</module>
 		<module>bluebutton-data-model-codegen-annotations</module>
 		<module>bluebutton-data-model-codegen</module>
 		<module>bluebutton-data-model-rif</module>
 		<module>bluebutton-data-model-rif-samples</module>
-		<module>bluebutton-data-model-codebook-extractor</module>
 	</modules>
 
 	<properties>

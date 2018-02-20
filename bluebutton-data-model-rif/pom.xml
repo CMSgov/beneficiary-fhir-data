@@ -25,6 +25,12 @@
 
 	<dependencies>
 		<dependency>
+			<!-- Provides an enum of all the CCW variables. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-codebook-data</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the 
 				model classes in the gov.hhs.cms.bluebutton.data.model.rif package. -->
 			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>

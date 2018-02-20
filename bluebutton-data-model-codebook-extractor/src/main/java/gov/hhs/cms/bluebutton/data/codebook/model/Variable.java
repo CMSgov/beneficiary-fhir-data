@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.data.codebook.model;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,19 +15,45 @@ import javax.xml.bind.annotation.XmlTransient;
  * Each {@link Variable} instance represents one of the CCW variables/fields
  * documented in a {@link Codebook}.
  */
-@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlAccessorType(XmlAccessType.FIELD)
 public final class Variable {
+	@XmlTransient
 	private Codebook codebook;
+
+	@XmlAttribute(required = true)
 	private String id;
+
+	@XmlAttribute(required = true)
 	private String label;
+
+	@XmlElementWrapper(required = false)
+	@XmlElement(name = "p")
 	private List<String> description;
+
+	@XmlAttribute(required = false)
 	private String shortName;
+
+	@XmlAttribute(required = true)
 	private String longName;
+
+	@XmlAttribute(required = false)
 	private VariableType type;
+
+	@XmlAttribute(required = true)
 	private Integer length;
+
+	@XmlAttribute(required = false)
 	private String source;
+
+	@XmlAttribute(required = false)
 	private String valueFormat;
+
+	@XmlElementWrapper(required = false)
+	@XmlElement(name = "valueGroup")
 	private List<ValueGroup> valueGroups;
+
+	@XmlElementWrapper(required = false)
+	@XmlElement(name = "p")
 	private List<String> comment;
 
 	/**
@@ -96,7 +123,6 @@ public final class Variable {
 	/**
 	 * @return the parent {@link Codebook} that this {@link Variable} is part of
 	 */
-	@XmlTransient
 	public Codebook getCodebook() {
 		return codebook;
 	}
@@ -105,7 +131,6 @@ public final class Variable {
 	 * @return the unique-within-a-{@link Codebook} identifier for this
 	 *         {@link Variable}
 	 */
-	@XmlAttribute(required = true)
 	public String getId() {
 		return id;
 	}
@@ -122,7 +147,6 @@ public final class Variable {
 	 * @return a short description for this {@link Variable}, typically no more than
 	 *         a few (English) words long
 	 */
-	@XmlAttribute(required = true)
 	public String getLabel() {
 		return label;
 	}
@@ -139,10 +163,8 @@ public final class Variable {
 	 * @return a longer description for this {@link Variable}, typically one or more
 	 *         (English) paragraphs long, with one {@link List} entry per paragraph
 	 */
-	@XmlElementWrapper(required = false)
-	@XmlElement(name = "p")
-	public List<String> getDescription() {
-		return description;
+	public Optional<List<String>> getDescription() {
+		return Optional.ofNullable(description);
 	}
 
 	/**
@@ -159,9 +181,8 @@ public final class Variable {
 	 *         systems, or <code>null</code> if that information is unknown for this
 	 *         {@link Variable}
 	 */
-	@XmlAttribute(required = false)
-	public String getShortName() {
-		return shortName;
+	public Optional<String> getShortName() {
+		return Optional.ofNullable(shortName);
 	}
 
 	/**
@@ -177,7 +198,6 @@ public final class Variable {
 	 *         unique-within-this-{@link Codebook} and to identify it by some
 	 *         systems
 	 */
-	@XmlAttribute(required = true)
 	public String getLongName() {
 		return longName;
 	}
@@ -195,9 +215,8 @@ public final class Variable {
 	 *         {@link Variable}, or <code>null</code> if that information is unknown
 	 *         for this {@link Variable}
 	 */
-	@XmlAttribute(required = false)
-	public VariableType getType() {
-		return type;
+	public Optional<VariableType> getType() {
+		return Optional.ofNullable(type);
 	}
 
 	/**
@@ -211,7 +230,6 @@ public final class Variable {
 	/**
 	 * @return the maximum length that constrains values of this {@link Variable}
 	 */
-	@XmlAttribute(required = true)
 	public Integer getLength() {
 		return length;
 	}
@@ -229,9 +247,8 @@ public final class Variable {
 	 *         and/or derived from, or <code>null</code> if that information is
 	 *         unknown for this {@link Variable}
 	 */
-	@XmlAttribute(required = false)
-	public String getSource() {
-		return source;
+	public Optional<String> getSource() {
+		return Optional.ofNullable(source);
 	}
 
 	/**
@@ -248,9 +265,8 @@ public final class Variable {
 	 *         is between '00' through '12'.", or <code>null</code> if no such
 	 *         description is available
 	 */
-	@XmlAttribute(required = false)
-	public String getValueFormat() {
-		return valueFormat;
+	public Optional<String> getValueFormat() {
+		return Optional.ofNullable(valueFormat);
 	}
 
 	/**
@@ -266,10 +282,8 @@ public final class Variable {
 	 *         coded values of this {@link Variable}, or <code>null</code> if this
 	 *         {@link Variable}'s values aren't constrained in that way
 	 */
-	@XmlElementWrapper(required = false)
-	@XmlElement(name = "valueGroup")
-	public List<ValueGroup> getValueGroups() {
-		return valueGroups;
+	public Optional<List<ValueGroup>> getValueGroups() {
+		return Optional.ofNullable(valueGroups);
 	}
 
 	/**
@@ -286,10 +300,8 @@ public final class Variable {
 	 *         {@link List} entry per paragraph, or <code>null</code> if that
 	 *         information is unknown for this {@link Variable}
 	 */
-	@XmlElementWrapper(required = false)
-	@XmlElement(name = "p")
-	public List<String> getComment() {
-		return comment;
+	public Optional<List<String>> getComment() {
+		return Optional.ofNullable(comment);
 	}
 
 	/**

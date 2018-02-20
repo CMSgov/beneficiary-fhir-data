@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -169,13 +170,13 @@ public final class PdfParserTest {
 
 		Assert.assertEquals("Months of Dual Eligibility", variable.getLabel());
 		assertParagraphsEquals(Arrays.asList(expectedDescription1), variable.getDescription());
-		Assert.assertEquals("DUAL_MO", variable.getShortName());
+		Assert.assertEquals("DUAL_MO", variable.getShortName().get());
 		Assert.assertEquals("DUAL_ELGBL_MONS", variable.getLongName());
-		Assert.assertEquals(VariableType.NUM, variable.getType());
+		Assert.assertEquals(VariableType.NUM, variable.getType().get());
 		Assert.assertEquals(new Integer(3), variable.getLength());
-		Assert.assertEquals("CMS Common Medicare Environment (CME) (derived)", variable.getSource());
-		Assert.assertEquals("The value in this field is between '00' through '12'.", variable.getValueFormat());
-		Assert.assertNull(variable.getValueGroups());
+		Assert.assertEquals("CMS Common Medicare Environment (CME) (derived)", variable.getSource().get());
+		Assert.assertEquals("The value in this field is between '00' through '12'.", variable.getValueFormat().get());
+		Assert.assertFalse(variable.getValueGroups().isPresent());
 		assertParagraphsEquals(Arrays.asList(expectedComment1, expectedComment2), variable.getComment());
 	}
 
@@ -223,13 +224,13 @@ public final class PdfParserTest {
 		Assert.assertEquals("Operating Disproportionate Share (DSH) Amount", variable.getLabel());
 		assertParagraphsEquals(Arrays.asList(expectedDescription1, expectedDescription2, expectedDescription3),
 				variable.getDescription());
-		Assert.assertEquals("DSH_OP", variable.getShortName());
+		Assert.assertEquals("DSH_OP", variable.getShortName().get());
 		Assert.assertEquals("DSH_OP_CLM_VAL_AMT", variable.getLongName());
-		Assert.assertEquals(VariableType.NUM, variable.getType());
+		Assert.assertEquals(VariableType.NUM, variable.getType().get());
 		Assert.assertEquals(new Integer(12), variable.getLength());
-		Assert.assertEquals("NCH", variable.getSource());
-		Assert.assertEquals("XXX.XX", variable.getValueFormat());
-		Assert.assertNull(variable.getValueGroups());
+		Assert.assertEquals("NCH", variable.getSource().get());
+		Assert.assertEquals("XXX.XX", variable.getValueFormat().get());
+		Assert.assertFalse(variable.getValueGroups().isPresent());
 		assertParagraphsEquals(Arrays.asList(expectedComment1, expectedComment2, expectedComment3),
 				variable.getComment());
 	}
@@ -260,31 +261,32 @@ public final class PdfParserTest {
 
 		Assert.assertEquals("Carrier Line Provider Type Code", variable.getLabel());
 		assertParagraphsEquals(Arrays.asList(expectedDescription1), variable.getDescription());
-		Assert.assertEquals("PRV_TYPE", variable.getShortName());
+		Assert.assertEquals("PRV_TYPE", variable.getShortName().get());
 		Assert.assertEquals("CARR_LINE_PRVDR_TYPE_CD", variable.getLongName());
-		Assert.assertEquals(VariableType.CHAR, variable.getType());
+		Assert.assertEquals(VariableType.CHAR, variable.getType().get());
 		Assert.assertEquals(new Integer(1), variable.getLength());
-		Assert.assertEquals("NCH", variable.getSource());
-		Assert.assertNull(variable.getValueFormat());
-		Assert.assertEquals(2, variable.getValueGroups().size());
-		Assert.assertEquals(8, variable.getValueGroups().get(0).getValues().size());
+		Assert.assertEquals("NCH", variable.getSource().get());
+		Assert.assertFalse(variable.getValueFormat().isPresent());
+		Assert.assertEquals(2, variable.getValueGroups().get().size());
+		Assert.assertEquals(8, variable.getValueGroups().get().get(0).getValues().size());
 		assertParagraphsEquals(Arrays.asList("For Physician/Supplier Claims:"),
-				variable.getValueGroups().get(0).getDescription());
-		Assert.assertEquals(9, variable.getValueGroups().get(1).getValues().size());
-		assertParagraphsEquals(Arrays.asList(
-				"NOTE: PRIOR TO VERSION H, DME claims also used this code; the" + " following were valid code VALUES:"),
-				variable.getValueGroups().get(1).getDescription());
+				variable.getValueGroups().get().get(0).getDescription());
+		Assert.assertEquals(9, variable.getValueGroups().get().get(1).getValues().size());
+		assertParagraphsEquals(
+				Arrays.asList("NOTE: PRIOR TO VERSION H, DME claims also used this code; the"
+						+ " following were valid code VALUES:"),
+				variable.getValueGroups().get().get(1).getDescription());
 
 		// Spot-check some of the values:
-		Value value_0_3 = variable.getValueGroups().get(0).getValues().get(3);
+		Value value_0_3 = variable.getValueGroups().get().get(0).getValues().get(3);
 		Assert.assertEquals("3", value_0_3.getCode());
 		Assert.assertEquals("Institutional provider", value_0_3.getDescription());
-		Value value_1_8 = variable.getValueGroups().get(1).getValues().get(8);
+		Value value_1_8 = variable.getValueGroups().get().get(1).getValues().get(8);
 		Assert.assertEquals("8", value_1_8.getCode());
 		Assert.assertEquals("Other entities for whom EI numbers are used in coding the ID field or proprietorship"
 				+ " for whom EI numbers are used in coding the ID field.", value_1_8.getDescription());
 
-		Assert.assertNull(variable.getComment());
+		Assert.assertFalse(variable.getComment().isPresent());
 	}
 
 	/**
@@ -312,7 +314,20 @@ public final class PdfParserTest {
 	 * @param actualParagraphs
 	 *            the actual {@link List} of paragraphs to verify
 	 */
-	private void assertParagraphsEquals(List<String> expectedParagraphs, List<String> actualParagraphs) {
+	private static void assertParagraphsEquals(List<String> expectedParagraphs,
+			Optional<List<String>> actualParagraphs) {
+		Assert.assertEquals(expectedParagraphs != null, actualParagraphs.isPresent());
+		if (actualParagraphs.isPresent())
+			assertParagraphsEquals(expectedParagraphs, actualParagraphs.get());
+	}
+
+	/**
+	 * @param expectedParagraphs
+	 *            the expected {@link List} of paragraphs
+	 * @param actualParagraphs
+	 *            the actual {@link List} of paragraphs to verify
+	 */
+	private static void assertParagraphsEquals(List<String> expectedParagraphs, List<String> actualParagraphs) {
 		if (expectedParagraphs != null)
 			Assert.assertNotNull(actualParagraphs);
 		else
@@ -397,40 +412,42 @@ public final class PdfParserTest {
 	private static void assertVariableIsValid(Variable variable) {
 		Assert.assertNotNull(variable);
 
-		// getId() should always be present.
 		Assert.assertTrue(variable.getId() != null && !variable.getId().isEmpty());
 
 		String assertionMessage = String.format("Invalid parse result for variable '%s'.", variable.getId());
 
-		// getDescription() should always be present.
-		Assert.assertTrue(assertionMessage, variable.getDescription() != null && !variable.getDescription().isEmpty());
-		for (String descriptionParagraph : variable.getDescription())
-			// Shouldn't be any empty paragraphs.
-			Assert.assertTrue(assertionMessage, descriptionParagraph != null && !descriptionParagraph.isEmpty());
+		Assert.assertNotNull(assertionMessage, variable.getCodebook());
 
-		// getShortName() should either be null or have content.
-		Assert.assertTrue(assertionMessage, variable.getShortName() == null || !variable.getShortName().isEmpty());
+		if (variable.getDescription().isPresent()) {
+			Assert.assertFalse(assertionMessage, variable.getDescription().get().isEmpty());
+			for (String paragraph : variable.getDescription().get())
+				Assert.assertTrue(assertionMessage, paragraph != null && !paragraph.isEmpty());
+		}
 
-		// getLongName() should always be present.
+		if (variable.getShortName().isPresent())
+			Assert.assertFalse(assertionMessage, variable.getShortName().get().isEmpty());
+
 		Assert.assertTrue(assertionMessage, variable.getLongName() != null && !variable.getLongName().isEmpty());
 
 		// Note: getLongName() is _usually_ the same as getId(), but not always.
 
 		// Note: getType() isn't always present.
 
-		// getLength() should always be present and valid.
 		Assert.assertTrue(assertionMessage, variable.getLength() != null && variable.getLength() > 0);
 
-		// getSource() should either be null or have content.
-		Assert.assertTrue(assertionMessage, variable.getSource() == null || !variable.getSource().isEmpty());
+		if (variable.getSource().isPresent())
+			Assert.assertFalse(assertionMessage, variable.getSource().get().isEmpty());
 
-		// getValueFormat() should either be null or have content.
-		Assert.assertTrue(assertionMessage, variable.getValueFormat() == null || !variable.getValueFormat().isEmpty());
+		if (variable.getValueFormat().isPresent())
+			Assert.assertFalse(assertionMessage, variable.getValueFormat().get().isEmpty());
 
-		// getValueGroups() should either be null or have content.
-		Assert.assertTrue(assertionMessage, variable.getValueGroups() == null || !variable.getValueGroups().isEmpty());
+		if (variable.getValueGroups().isPresent())
+			Assert.assertFalse(assertionMessage, variable.getValueGroups().get().isEmpty());
 
-		// getComment() should either be null or have content.
-		Assert.assertTrue(assertionMessage, variable.getComment() == null || !variable.getComment().isEmpty());
+		if (variable.getComment().isPresent()) {
+			Assert.assertFalse(assertionMessage, variable.getComment().get().isEmpty());
+			for (String paragraph : variable.getComment().get())
+				Assert.assertTrue(assertionMessage, paragraph != null && !paragraph.isEmpty());
+		}
 	}
 }
