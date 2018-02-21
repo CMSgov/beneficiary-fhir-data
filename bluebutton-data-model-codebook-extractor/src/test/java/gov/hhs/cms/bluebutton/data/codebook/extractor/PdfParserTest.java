@@ -161,23 +161,23 @@ public final class PdfParserTest {
 
 		String expectedDescription1 = "This variable is the number of months during the year that the beneficiary"
 				+ " was dually eligible (i.e., he/she was also eligible for Medicaid benefits).";
-		String expectedComment1 = "CCW derived this variable by counting the number of months where the"
-				+ " beneficiary had dual eligibility (DUAL_STUS_CD_XX not equal to '00' or '**').";
-		String expectedComment2 = "There are different ways to classify dually eligible beneficiaries - in terms of"
-				+ " whether he/she is enrolled in full or partial benefits. Additional information regarding"
-				+ " various ways to identify dually enrolled populations, refer to a CCW Technical Guidance"
-				+ " document entitled: \"Options in Determining Dual Eligibles\"";
+		String expectedComment1 = "CCW derived this variable by counting the number of months where the beneficiary"
+				+ " had dual eligibility (DUAL_STUS_CD_XX not equal to '00' or '**'). There are different ways to"
+				+ " classify dually eligible beneficiaries - in terms of whether he/she is enrolled in full or"
+				+ " partial benefits. Additional information regarding various ways to identify dually enrolled"
+				+ " populations, refer to a CCW Technical Guidance document entitled: \"Options in Determining Dual"
+				+ " Eligibles\"";
 
 		Assert.assertEquals("Months of Dual Eligibility", variable.getLabel());
 		assertParagraphsEquals(Arrays.asList(expectedDescription1), variable.getDescription());
 		Assert.assertEquals("DUAL_MO", variable.getShortName().get());
-		Assert.assertEquals("DUAL_ELGBL_MONS", variable.getLongName());
-		Assert.assertEquals(VariableType.NUM, variable.getType().get());
-		Assert.assertEquals(new Integer(3), variable.getLength());
-		Assert.assertEquals("CMS Common Medicare Environment (CME) (derived)", variable.getSource().get());
+		Assert.assertEquals("DUAL_ELGBL_MOS_NUM", variable.getLongName());
+		Assert.assertEquals(VariableType.CHAR, variable.getType().get());
+		Assert.assertEquals(new Integer(2), variable.getLength());
+		Assert.assertEquals("CMS Enrollment Database (EDB) (derived)", variable.getSource().get());
 		Assert.assertEquals("The value in this field is between '00' through '12'.", variable.getValueFormat().get());
 		Assert.assertFalse(variable.getValueGroups().isPresent());
-		assertParagraphsEquals(Arrays.asList(expectedComment1, expectedComment2), variable.getComment());
+		assertParagraphsEquals(Arrays.asList(expectedComment1), variable.getComment());
 	}
 
 	/**
