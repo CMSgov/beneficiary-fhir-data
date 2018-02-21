@@ -5,15 +5,12 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 
@@ -57,9 +54,8 @@ final class HospiceClaimTransformer {
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			eob.addInformation().setCategory(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_PATIENT_STATUS,
-							String.valueOf(claimGroup.getPatientStatusCd().get())));
+			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
 		}
 
 		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
@@ -73,10 +69,9 @@ final class HospiceClaimTransformer {
 				benefitBalances);
 
 		if (claimGroup.getHospicePeriodCount().isPresent()) {
-			TransformerUtils.addExtensionCoding(eob.getHospitalization(),
-					TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
-					TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
-					String.valueOf(claimGroup.getHospicePeriodCount().get()));
+			// TODO should this be benefitBalance?
+			eob.getHospitalization().addExtension(TransformerUtils.createExtensionQuantity(
+					CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
 		}
 
 		// Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
@@ -176,7 +171,8 @@ final class HospiceClaimTransformer {
 			TransformerUtils.mapEobCommonItemRevenueOutHHAHospice(item, claimLine.getRevenueCenterDate(), claimLine.getPaymentAmount());
 
 			// Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
-			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item,
+					claimLine.getDeductibleCoinsuranceCd());
 
 		}
 		return eob;

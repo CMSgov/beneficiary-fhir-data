@@ -74,6 +74,21 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 final class TransformerConstants {
 	/**
 	 * <p>
+	 * The base URL/URI/system for FHIR output when the domain concept in question
+	 * is owned by (or at least documented by) the Blue Button API team. Please note
+	 * that the documentation on this site is generated from the following project:
+	 * <a href=
+	 * "https://github.com/CMSgov/bluebutton-site-static">bluebutton-site-static</a>.
+	 * </p>
+	 * <p>
+	 * This URL will never be used by itself; it will always be suffixed with a more
+	 * specific path.
+	 * </p>
+	 */
+	static final String BASE_URL_BBAPI_RESOURCES = "https://bluebutton.cms.gov/resources";
+
+	/**
+	 * <p>
 	 * The base URL/URI/system for FHIR output related to
 	 * {@link CcwCodebookVariable}:
 	 * </p>
@@ -88,7 +103,7 @@ final class TransformerConstants {
 	 * {@link Variable#getId()}.
 	 * </p>
 	 */
-	static final String BASE_URL_CCW_VARIABLES = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary";
+	static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
 
 	static final String CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS = "CSPINV";
 
@@ -292,7 +307,7 @@ final class TransformerConstants {
 
 	static final String CODING_BBAPI_BENEFIT_COVERAGE_DATE = "Benefit Coverage Date";
 
-	static final String CODING_BETOS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt";
+	private static final String CODING_BETOS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/betos.txt";
 
 	/**
 	 * The CMS-custom {@link Coding#getSystem()} value for Medicare
@@ -300,37 +315,38 @@ final class TransformerConstants {
 	 */
 	static final String CODING_CCW_ADJUDICATION_CATEGORY = "CMS Adjudications";
 
-	public static final String CODING_CCW_ADMISSION_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/type_adm.txt";
+	private static final String CODING_CCW_ADMISSION_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/type_adm.txt";
 
-	public static final String CODING_CCW_CLAIM_FREQUENCY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt";
+	private static final String CODING_CCW_CLAIM_FREQUENCY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/freq_cd.txt";
 
-	public static final String CODING_CCW_CLAIM_GROUP_ID = "http://bluebutton.cms.hhs.gov/identifier#claimGroup";
+	static final String CODING_CCW_CLAIM_GROUP_ID = "http://bluebutton.cms.hhs.gov/identifier#claimGroup";
 
-	public static final String CODING_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
+	private static final String CODING_CCW_CLAIM_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_id.txt";
 
 	// FIXME: the following URL is currently just a placeholder for the final one
-	public static final String CODING_CCW_CLAIM_TYPE = "https://bluebutton.cms.gov/developer/docs/reference/some-thing";
+	// FIXME the constant name shouldn't have CCW in it
+	static final String CODING_CCW_CLAIM_TYPE = "https://bluebutton.cms.gov/developer/docs/reference/some-thing";
 	
-	public static final String CODING_CCW_COINSURANCE_DAY_COUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coin_day.txt";
+	private static final String CODING_CCW_COINSURANCE_DAY_COUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/coin_day.txt";
 
-	public static final String CODING_CCW_DIAGNOSIS_RELATED_GROUP = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drg_cd.txt";
+	private static final String CODING_CCW_DIAGNOSIS_RELATED_GROUP = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drg_cd.txt";
 
-	static final String CODING_CCW_HCT_OR_HGB_TEST_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt";
+	private static final String CODING_CCW_HCT_OR_HGB_TEST_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbtp.txt";
 
-	public static final String CODING_CCW_HHA_REFERRAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hha_rfrl.txt";
+	private static final String CODING_CCW_HHA_REFERRAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hha_rfrl.txt";
 
-	public static final String CODING_CCW_LOW_UTILIZATION_PAYMENT_ADJUSTMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lupaind.txt";
+	private static final String CODING_CCW_LOW_UTILIZATION_PAYMENT_ADJUSTMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lupaind.txt";
 
-	public static final String CODING_CCW_MCO_PAID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mcopdsw.txt";
+	private static final String CODING_CCW_MCO_PAID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mcopdsw.txt";
 	
 	/*
 	 * FIXME: Is NDC count only ever present when line quantity isn't set?
 	 * Depending on that, it may be that we should stop using this as an
 	 * extension and instead set the code & system on the FHIR quantity field.
 	 */
-	static final String CODING_CCW_NDC_UNIT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt";
+	private static final String CODING_CCW_NDC_UNIT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty_qlfr_cd.txt";
 
-	static final String CODING_CCW_NDC_QTY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt";
+	private static final String CODING_CCW_NDC_QTY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr_ndc_qty.txt";
 
 	/**
 	 * See <a href=
@@ -339,55 +355,56 @@ final class TransformerConstants {
 	 */
 	public static final String CODING_CCW_PARTD_EVENT_ID = "CCW.PDE_ID";
 
-	public static final String CODING_CCW_PATIENT_DISCHARGE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/stus_cd.txt";
+	private static final String CODING_CCW_PATIENT_DISCHARGE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/stus_cd.txt";
 
-	public static final String CODING_CCW_PATIENT_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt";
+	private static final String CODING_CCW_PATIENT_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptntstus.txt";
 
-	static final String CODING_CCW_PHYSICIAN_ASSISTANT_ADJUDICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/astnt_cd.txt";
+	private static final String CODING_CCW_PHYSICIAN_ASSISTANT_ADJUDICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/astnt_cd.txt";
 
-	static final String CODING_CCW_PLACE_OF_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt";
+	private static final String CODING_CCW_PLACE_OF_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plcsrvc.txt";
 
-	static final String CODING_CCW_PRESENT_ON_ARRIVAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw1.txt";
+	private static final String CODING_CCW_PRESENT_ON_ARRIVAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_poa_ind_sw1.txt";
 
-	static final String CODING_CCW_PROCESSING_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt";
+	private static final String CODING_CCW_PROCESSING_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcngind.txt";
 
-	static final String CODING_CCW_PROVIDER_ASSIGNMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt";
+	private static final String CODING_CCW_PROVIDER_ASSIGNMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/asgmntcd.txt";
 
-	static final String CODING_CCW_PROVIDER_SPECIALTY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt";
+	private static final String CODING_CCW_PROVIDER_SPECIALTY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcfaspcl.txt";
 
-	static final String CODING_CCW_RECORD_ID_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt";
+	private static final String CODING_CCW_RECORD_ID_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ric_cd.txt";
 
-	static final String CODING_CCW_RX_BRAND_GENERIC = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt";
+	private static final String CODING_CCW_RX_BRAND_GENERIC = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/brnd_gnrc_cd.txt";
 
-	static final String CODING_CCW_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
+	// FIXME this URL had a typo -- first 'c' shouldn't have been there
+	private static final String CODING_CCW_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
-	static final String CODING_CMS_DISPENSE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt";
+	private static final String CODING_CMS_DISPENSE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dspnsng_stus_cd.txt";
 
-	static final String CODING_CMS_REVENUE_CENTER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt";
+	private static final String CODING_CMS_REVENUE_CENTER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rev_cntr.txt";
 	
-	static final String CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revstind.txt";
+	private static final String CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revstind.txt";
 
-	static final String CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/idendc.txt";
+	private static final String CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/idendc.txt";
 
-	static final String CODING_CMS_RX_ADJUSTMENT_DELETION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt";
+	private static final String CODING_CMS_RX_ADJUSTMENT_DELETION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/adjstmt_dltn_cd.txt";
 
-	static final String CODING_CMS_RX_CATASTROPHIC_COVERAGE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt";
+	private static final String CODING_CMS_RX_CATASTROPHIC_COVERAGE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ctstrphc_cvrg_cd.txt";
 
-	static final String CODING_CMS_RX_COVERAGE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt";
+	private static final String CODING_CMS_RX_COVERAGE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt";
 
-	static final String CODING_CMS_RX_DISPENSE_AS_WRITTEN = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt";
+	private static final String CODING_CMS_RX_DISPENSE_AS_WRITTEN = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/daw_prod_slctn_cd.txt";
 
-	static final String CODING_CMS_RX_NON_STANDARD_FORMAT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nstd_frmt_cd.txt";
+	private static final String CODING_CMS_RX_NON_STANDARD_FORMAT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nstd_frmt_cd.txt";
 
-	static final String CODING_CMS_RX_PATIENT_RESIDENCE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_rsdnc_cd.txt";
+	private static final String CODING_CMS_RX_PATIENT_RESIDENCE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_rsdnc_cd.txt";
 
-	static final String CODING_CMS_RX_PRESCRIPTION_ORIGIN = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt";
+	private static final String CODING_CMS_RX_PRESCRIPTION_ORIGIN = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_orgn_cd.txt";
 
-	static final String CODING_CMS_RX_PRICING_EXCEPTION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_excptn_cd.txt";
+	private static final String CODING_CMS_RX_PRICING_EXCEPTION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_excptn_cd.txt";
 
-	static final String CODING_CMS_RX_SUBMISSION_CLARIFICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt";
+	private static final String CODING_CMS_RX_SUBMISSION_CLARIFICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/submsn_clr_cd.txt";
 
-	public static final String CODING_CMS_SOURCE_ADMISSION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/src_adms.txt";
+	private static final String CODING_CMS_SOURCE_ADMISSION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/src_adms.txt";
 
 	// FIXME Switch to HAPI enum for this system, once one is available
 	static final String CODING_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
@@ -412,7 +429,7 @@ final class TransformerConstants {
 
 	static final String CODING_MONEY = "urn:std:iso:4217";
 	
-	public static final String CODING_NCH_CLAIM_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt";
+	private static final String CODING_NCH_CLAIM_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/clm_type.txt";
 	
 	static final String CODING_NDC = "https://www.accessdata.fda.gov/scripts/cder/ndc";
 
@@ -445,96 +462,96 @@ final class TransformerConstants {
 	 */
 	public static final String COVERAGE_PLAN_PART_D = "Part D";
 
-	static final String EXTENSION_CMS_HCT_OR_HGB_RESULTS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbrs.txt";
+	private static final String EXTENSION_CMS_HCT_OR_HGB_RESULTS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/hcthgbrs.txt";
 
-	static final String EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt";
+	private static final String EXTENSION_CODING_CCW_CARR_PAYMENT_DENIAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt";
 
-	static final String EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrvc.txt";
+	private static final String EXTENSION_CODING_CCW_CLAIM_SERVICE_CLASSIFICATION = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typesrvc.txt";
 
-	public static final String EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt";
+	private static final String EXTENSION_CODING_CCW_DEDUCTIBLE_COINSURANCE_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/revdedcd.txt";
 
-	static final String EXTENSION_CODING_CCW_ESRD_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
+	private static final String EXTENSION_CODING_CCW_ESRD_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/esrd_ind.txt";
 
-	static final String EXTENSION_CODING_CCW_FACILITY_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fac_type.txt";
+	private static final String EXTENSION_CODING_CCW_FACILITY_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fac_type.txt";
 	
-	static final String EXTENSION_CODING_CCW_FI_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fi_num.txt";
+	private static final String EXTENSION_CODING_CCW_FI_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fi_num.txt";
 
-	static final String EXTENSION_CODING_CCW_LINE_DEDUCTIBLE_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt";
+	private static final String EXTENSION_CODING_CCW_LINE_DEDUCTIBLE_SWITCH = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ded_sw.txt";
 	
-	static final String EXTENSION_CODING_CCW_LINE_SRVC_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_cnt.txt";
+	private static final String EXTENSION_CODING_CCW_LINE_SRVC_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/srvc_cnt.txt";
 
-	static final String EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_CURRENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
+	private static final String EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_CURRENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/crec.txt";
 
-	static final String EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_ORIGINAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
+	private static final String EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_ORIGINAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/orec.txt";
 
-	static final String EXTENSION_CODING_CCW_MEDICARE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt";
+	private static final String EXTENSION_CODING_CCW_MEDICARE_STATUS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ms_cd.txt";
 
-	static final String EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt";
+	private static final String EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/a_trm_cd.txt";
 
-	static final String EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt";
+	private static final String EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/b_trm_cd.txt";
 
-	static final String EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
+	private static final String EXTENSION_CODING_CCW_PAYMENT_80_100_INDICATOR = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtindsw.txt";
 
-	static final String EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt";
+	private static final String EXTENSION_CODING_CCW_PAYMENT_DENIAL_REASON = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/nopay_cd.txt";
 
-	static final String EXTENSION_CODING_CCW_PRICING_LOCALITY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lclty_cd.txt";
+	private static final String EXTENSION_CODING_CCW_PRICING_LOCALITY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lclty_cd.txt";
 
-	public static final String EXTENSION_CODING_CCW_PRICING_STATE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_st.txt";
+	private static final String EXTENSION_CODING_CCW_PRICING_STATE_CD = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prcng_st.txt";
 	
-	static final String EXTENSION_CODING_CCW_PROVIDER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/suplrnum.txt";
+	private static final String EXTENSION_CODING_CCW_PROVIDER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/suplrnum.txt";
 
-	static final String EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
+	private static final String EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prtcptg.txt";
 
-	static final String EXTENSION_CODING_CCW_PROVIDER_STATE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvstate.txt";
+	private static final String EXTENSION_CODING_CCW_PROVIDER_STATE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prvstate.txt";
 
-	static final String EXTENSION_CODING_CCW_PROVIDER_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prv_type.txt";
+	private static final String EXTENSION_CODING_CCW_PROVIDER_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prv_type.txt";
 
-	static final String EXTENSION_CODING_CCW_PROVIDER_ZIP = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provzip.txt";
+	private static final String EXTENSION_CODING_CCW_PROVIDER_ZIP = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provzip.txt";
 
-	public static final String EXTENSION_CODING_CLAIM_QUERY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/query_cd.txt";
+	private static final String EXTENSION_CODING_CLAIM_QUERY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/query_cd.txt";
 
-	static final String EXTENSION_CODING_CMS_RX_PHARMACY_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
+	private static final String EXTENSION_CODING_CMS_RX_PHARMACY_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/phrmcy_srvc_type_cd.txt";
 
-	public static final String EXTENSION_CODING_CMS_SUPPLIER_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt";
+	private static final String EXTENSION_CODING_CMS_SUPPLIER_TYPE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/sup_type.txt";
 
 	// FIXME: verify this link is correct for this extension coding
-	public static final String EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT = "https://bluebutton.cms.gov/resources/hospcprd";
+	private static final String EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT = "https://bluebutton.cms.gov/resources/hospcprd";
 
-	public static final String EXTENSION_CODING_UNIT_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/unit_ind.txt";
+	private static final String EXTENSION_CODING_UNIT_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/unit_ind.txt";
 	
-	public static final String EXTENSION_CODING_MTUS_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_ind.txt";
+	private static final String EXTENSION_CODING_MTUS_IND = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_ind.txt";
 
-	public static final String EXTENSION_CODING_PRIMARY_PAYER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt";
+	private static final String EXTENSION_CODING_PRIMARY_PAYER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prpay_cd.txt";
 
-	public static final String EXTENSION_CODING_CARRIER_PRIMARY_PAYER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpaycd.txt";
+	private static final String EXTENSION_CODING_CARRIER_PRIMARY_PAYER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lprpaycd.txt";
 
-	static final String EXTENSION_IDENTIFIER_CARRIER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt";
+	private static final String EXTENSION_IDENTIFIER_CARRIER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_num.txt";
 
-	static final String EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt";
+	private static final String EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_clia_lab_num.txt";
 
-	static final String EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_ansthsa_unit_cnt.txt";
+	private static final String EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/carr_line_ansthsa_unit_cnt.txt";
 
-	static final String EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
+	private static final String EXTENSION_IDENTIFIER_CLINICAL_TRIAL_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ccltrnum.txt";
 
 	// FIXME: needs to link to an explanation of what this extension coding is
-	static final String EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER = "https://bluebutton.cms.gov/resources/suplrnum";
+	private static final String EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER = "https://bluebutton.cms.gov/resources/suplrnum";
 
-	static final String EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
+	private static final String EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_pbp_rec_num.txt";
 
-	static final String EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
+	private static final String EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plan_cntrct_rec_id.txt";
 
-	public static final String EXTENSION_DME_UNIT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dme_unit.txt";
+	private static final String EXTENSION_DME_UNIT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/dme_unit.txt";
 	
-	public static final String EXTENSION_MTUS_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_cnt.txt";
+	private static final String EXTENSION_MTUS_CNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/mtus_cnt.txt";
 
-	public static final String EXTENSION_SCREEN_SAVINGS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/scrnsvgs.txt";
+	private static final String EXTENSION_SCREEN_SAVINGS = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/scrnsvgs.txt";
 
 	// FIXME this constant will go away once its usage sites are fixed
-	static final String FIELD_PDE_DAYS_SUPPLY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/days_suply_num.txt";
+	private static final String FIELD_PDE_DAYS_SUPPLY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/days_suply_num.txt";
 	
-	static final String PDE_FILL_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fill_num.txt";
+	private static final String PDE_FILL_NUM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/fill_num.txt";
 
-	public static final String IDENTIFIER_CMS_PROVIDER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provider.txt";
+	private static final String IDENTIFIER_CMS_PROVIDER_NUMBER = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/provider.txt";
 
 	/**
 	 * See <a href=

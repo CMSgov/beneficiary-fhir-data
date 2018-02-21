@@ -6,15 +6,14 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
@@ -70,9 +69,8 @@ final class SNFClaimTransformer {
 		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_PATIENT_STATUS,
-							String.valueOf(claimGroup.getPatientStatusCd().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
 		}
 
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
@@ -227,8 +225,8 @@ final class SNFClaimTransformer {
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
 
 			// Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
-			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());
-
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item,
+					claimLine.getDeductibleCoinsuranceCd());
 		}
 		return eob;
 	}

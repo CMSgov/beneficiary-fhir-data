@@ -7,13 +7,12 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
 
@@ -118,14 +117,12 @@ final class HHAClaimTransformer {
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
 		if (claimGroup.getClaimLUPACode().isPresent()) {
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_LOW_UTILIZATION_PAYMENT_ADJUSTMENT,
-							String.valueOf(claimGroup.getClaimLUPACode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.CLM_HHA_LUPA_IND_CD, claimGroup.getClaimLUPACode()));
 		}
 		if (claimGroup.getClaimReferralCode().isPresent()) {
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_HHA_REFERRAL,
-							String.valueOf(claimGroup.getClaimReferralCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.CLM_HHA_RFRL_CD, claimGroup.getClaimReferralCode()));
 		}
 
 		BenefitComponent totalVisitCount = new BenefitComponent(
@@ -174,12 +171,12 @@ final class HHAClaimTransformer {
 			TransformerUtils.mapEobCommonItemRevenueOutHHAHospice(item, claimLine.getRevenueCenterDate(), claimLine.getPaymentAmount());
 			
 			// set revenue center status indicator codes for the claim
-			TransformerUtils.addExtensionCoding(item.getRevenue(),
-					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
-					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE, claimLine.getStatusCode().get());
+			item.getRevenue().addExtension(TransformerUtils.createExtensionCoding(eob,
+					CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
 			
 			// Common group level fields between Inpatient, HHA, Hospice and SNF
-			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item,
+					claimLine.getDeductibleCoinsuranceCd());
 
 		}
 		return eob;

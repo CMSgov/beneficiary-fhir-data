@@ -132,8 +132,8 @@ public final class SNFClaimTransformerTest {
 		Assert.assertEquals(claim.getProviderStateCode(),
 				eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
-				claimLine1.getRevenueCenter(), eobItem0.getRevenue().getCoding());
+		TransformerTestUtils.assertHasCoding(eobItem0.getRevenue().getCoding(),
+				TransformerConstants.CODING_CMS_REVENUE_CENTER, claimLine1.getRevenueCenter());
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(), Optional.empty(), Optional.empty(),
 				Optional.empty(), 0/* index */);
 

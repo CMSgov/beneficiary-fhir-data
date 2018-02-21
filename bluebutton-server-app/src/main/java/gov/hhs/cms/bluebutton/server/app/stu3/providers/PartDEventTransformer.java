@@ -13,6 +13,7 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 
@@ -53,13 +54,11 @@ final class PartDEventTransformer {
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
 		
-		TransformerUtils.addExtensionValueIdentifier(eob.getInsurance().getCoverage(),
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID,
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_CONTRACT_ID, claimGroup.getPlanContractId());
+		eob.getInsurance().getCoverage().addExtension(TransformerUtils
+				.createExtensionIdentifier(CcwCodebookVariable.PLAN_CNTRCT_REC_ID, claimGroup.getPlanContractId()));
 
-		TransformerUtils.addExtensionValueIdentifier(eob.getInsurance().getCoverage(),
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID,
-				TransformerConstants.EXTENSION_IDENTIFIER_PDE_PLAN_BENEFIT_PACKAGE_ID, claimGroup.getPlanBenefitPackageId());
+		eob.getInsurance().getCoverage().addExtension(TransformerUtils
+				.createExtensionIdentifier(CcwCodebookVariable.PLAN_PBP_REC_NUM, claimGroup.getPlanBenefitPackageId()));
 
 		if (claimGroup.getPaymentDate().isPresent()) {
 			eob.getPayment().setDate(TransformerUtils.convertToDate(claimGroup.getPaymentDate().get()));
@@ -221,13 +220,11 @@ final class PartDEventTransformer {
 		quantityDispensed.setValue(claimGroup.getQuantityDispensed());
 		rxItem.setQuantity(quantityDispensed);
 		
-		TransformerUtils.addExtensionCoding(rxItem.getQuantity(),
-				TransformerConstants.PDE_FILL_NUM,
-				TransformerConstants.PDE_FILL_NUM, String.valueOf(claimGroup.getFillNumber()));
+		rxItem.getQuantity().addExtension(
+				TransformerUtils.createExtensionQuantity(CcwCodebookVariable.FILL_NUM, claimGroup.getFillNumber()));
 		
-		TransformerUtils.addExtensionCoding(rxItem.getQuantity(),
-				TransformerConstants.FIELD_PDE_DAYS_SUPPLY,
-				TransformerConstants.FIELD_PDE_DAYS_SUPPLY, String.valueOf(claimGroup.getDaysSupply()));
+		rxItem.getQuantity().addExtension(TransformerUtils.createExtensionQuantity(CcwCodebookVariable.DAYS_SUPLY_NUM,
+				claimGroup.getDaysSupply()));
 
 		// TODO CBBD-241 - This code was commented out because values other than
 		// "01"
@@ -250,71 +247,57 @@ final class PartDEventTransformer {
 			eob.setFacility(
 					TransformerUtils.createIdentifierReference(TransformerConstants.CODING_NPI_US,
 							claimGroup.getServiceProviderId()));
-			TransformerUtils.addExtensionCoding(eob.getFacility(),
-					TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE,
-					TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE, claimGroup.getPharmacyTypeCode());
+			eob.getFacility().addExtension(TransformerUtils.createExtensionCoding(eob,
+					CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD, claimGroup.getPharmacyTypeCode()));
 		}
 
 		/*
 		 * Storing code values in EOB.information below
 		 */
 
-		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_DISPENSE_AS_WRITTEN,
-						String.valueOf(claimGroup.getDispenseAsWrittenProductSelectionCode())));
+		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+				CcwCodebookVariable.DAW_PROD_SLCTN_CD, claimGroup.getDispenseAsWrittenProductSelectionCode()));
 
 		if (claimGroup.getDispensingStatusCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_DISPENSE_STATUS,
-							String.valueOf(claimGroup.getDispensingStatusCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.DSPNSNG_STUS_CD, claimGroup.getDispensingStatusCode()));
 
-		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_COVERAGE_STATUS,
-						String.valueOf(claimGroup.getDrugCoverageStatusCode())));
+		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+				CcwCodebookVariable.DRUG_CVRG_STUS_CD, claimGroup.getDrugCoverageStatusCode()));
 
 		if (claimGroup.getAdjustmentDeletionCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_ADJUSTMENT_DELETION,
-							String.valueOf(claimGroup.getAdjustmentDeletionCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.ADJSTMT_DLTN_CD, claimGroup.getAdjustmentDeletionCode()));
 
 		if (claimGroup.getNonstandardFormatCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_NON_STANDARD_FORMAT,
-							String.valueOf(claimGroup.getNonstandardFormatCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.NSTD_FRMT_CD, claimGroup.getNonstandardFormatCode()));
 
 		if (claimGroup.getPricingExceptionCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_PRICING_EXCEPTION,
-							String.valueOf(claimGroup.getPricingExceptionCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.PRCNG_EXCPTN_CD, claimGroup.getPricingExceptionCode()));
 
 		if (claimGroup.getCatastrophicCoverageCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_CATASTROPHIC_COVERAGE,
-							String.valueOf(claimGroup.getCatastrophicCoverageCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.CTSTRPHC_CVRG_CD, claimGroup.getCatastrophicCoverageCode()));
 
 		if (claimGroup.getPrescriptionOriginationCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_PRESCRIPTION_ORIGIN,
-							String.valueOf(claimGroup.getPrescriptionOriginationCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.RX_ORGN_CD, claimGroup.getPrescriptionOriginationCode()));
 
 		if (claimGroup.getBrandGenericCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_RX_BRAND_GENERIC,
-							String.valueOf(claimGroup.getBrandGenericCode().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.BRND_GNRC_CD, claimGroup.getBrandGenericCode()));
 
-		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.EXTENSION_CODING_CMS_RX_PHARMACY_TYPE,
-						claimGroup.getPharmacyTypeCode()));
+		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+				CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD, claimGroup.getPharmacyTypeCode()));
 
-		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CMS_RX_PATIENT_RESIDENCE,
-						claimGroup.getPatientResidenceCode()));
+		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+				CcwCodebookVariable.PTNT_RSDNC_CD, claimGroup.getPatientResidenceCode()));
 
 		if (claimGroup.getSubmissionClarificationCode().isPresent())
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(
-							TransformerConstants.CODING_CMS_RX_SUBMISSION_CLARIFICATION,
-							claimGroup.getSubmissionClarificationCode().get()));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.SUBMSN_CLR_CD, claimGroup.getSubmissionClarificationCode()));
 
 		return eob;
 	}

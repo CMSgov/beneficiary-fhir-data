@@ -7,14 +7,13 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 
@@ -127,49 +126,40 @@ final class CarrierClaimTransformer {
 				 */
 
 				performingCareTeamMember.setQualification(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_PROVIDER_SPECIALTY,
-								"" + claimLine.getProviderSpecialityCode().get()));
-				TransformerUtils.addExtensionCoding(performingCareTeamMember,
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_TYPE,
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_TYPE,
-						"" + claimLine.getProviderTypeCode());
+						TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.PRVDR_SPCLTY,
+								claimLine.getProviderSpecialityCode()));
+				performingCareTeamMember.addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode()));
 
-				TransformerUtils.addExtensionCoding(performingCareTeamMember,
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
-						"" + claimLine.getProviderParticipatingIndCode().get());
+				performingCareTeamMember.addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode()));
 				if (claimLine.getOrganizationNpi().isPresent()) {
 					TransformerUtils.addExtensionCoding(performingCareTeamMember, TransformerConstants.CODING_NPI_US,
 							TransformerConstants.CODING_NPI_US, "" + claimLine.getOrganizationNpi().get());
 				}
 			}
 
-			item.addAdjudication()
-					.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_PHYSICIAN_ASSISTANT))
-					.setReason(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_PHYSICIAN_ASSISTANT_ADJUDICATION,
-									"" + claimLine.getReducedPaymentPhysicianAsstCode()));
+			item.addAdjudication(TransformerUtils.createAdjudicationWithReason(eob,
+					CcwCodebookVariable.CARR_LINE_RDCD_PMT_PHYS_ASTN_C,
+					claimLine.getReducedPaymentPhysicianAsstCode()));
 			
 			// set hcpcs modifier codes for the claim
 			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
 
 			if (claimLine.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
-				TransformerUtils.addExtensionCoding(item.getService(),
-						TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
-						TransformerConstants.EXTENSION_IDENTIFIER_CARR_LINE_ANSTHSA_UNIT_CNT,
-						String.valueOf(claimLine.getAnesthesiaUnitCount()));
+				item.getService().addExtension(TransformerUtils.createExtensionQuantity(
+						CcwCodebookVariable.CARR_LINE_ANSTHSA_UNIT_CNT, claimLine.getAnesthesiaUnitCount()));
 			}
 
 			if (claimLine.getMtusCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_MTUS_IND,
-						TransformerConstants.EXTENSION_CODING_MTUS_IND, String.valueOf(claimLine.getMtusCode().get()));
+				item.addExtension(TransformerUtils.createExtensionCoding(eob, CcwCodebookVariable.CARR_LINE_MTUS_CD,
+						claimLine.getMtusCode()));
 			}
 
 			if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
-				TransformerUtils.addExtensionValueQuantity(item, TransformerConstants.EXTENSION_MTUS_CNT,
-						TransformerConstants.EXTENSION_MTUS_CNT, claimLine.getMtusCount());
+				item.addExtension(TransformerUtils.createExtensionQuantity(CcwCodebookVariable.CARR_LINE_MTUS_CNT,
+						claimLine.getMtusCount()));
 			}
 
 			// Common item level fields between Carrier and DME
@@ -187,25 +177,19 @@ final class CarrierClaimTransformer {
 					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode());
 
 			if (claimLine.getProviderStateCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getLocation(),
-					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
-					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine.getProviderStateCode().get());
+				item.getLocation().addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.PRVDR_STATE_CD, claimLine.getProviderStateCode()));
 			}
 
 			if (claimLine.getProviderZipCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getLocation(),
-					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_ZIP,
-					TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_ZIP, claimLine.getProviderZipCode().get());
+				item.getLocation().addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.PRVDR_ZIP, claimLine.getProviderZipCode()));
 			}
-			TransformerUtils.addExtensionCoding(item.getLocation(),
-					TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY,
-					TransformerConstants.EXTENSION_CODING_CCW_PRICING_LOCALITY, claimLine.getLinePricingLocalityCode());
+			item.getLocation().addExtension(TransformerUtils.createExtensionCoding(eob,
+					CcwCodebookVariable.CARR_LINE_PRCNG_LCLTY_CD, claimLine.getLinePricingLocalityCode()));
 			if (claimLine.getCliaLabNumber().isPresent()) {
-				Extension cliaLabNumberExtension = item.getLocation().addExtension();
-				cliaLabNumberExtension.setUrl(TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM);
-				cliaLabNumberExtension.setValue(new Identifier()
-								.setSystem(TransformerConstants.EXTENSION_IDENTIFIER_CCW_CLIA_LAB_NUM)
-								.setValue(claimLine.getCliaLabNumber().get()));
+				item.getLocation().addExtension(TransformerUtils.createExtensionIdentifier(
+						CcwCodebookVariable.CARR_LINE_CLIA_LAB_NUM, claimLine.getCliaLabNumber()));
 			}
 		}
 

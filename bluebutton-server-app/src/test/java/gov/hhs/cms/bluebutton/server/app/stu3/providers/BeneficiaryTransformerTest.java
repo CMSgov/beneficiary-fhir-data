@@ -76,7 +76,7 @@ public final class BeneficiaryTransformerTest {
 			Assert.assertEquals("MALE", patient.getGender().toString().trim());
 		else if (beneficiary.getSex() == 'F')
 			Assert.assertEquals("FEMALE", patient.getGender().toString().trim());
-		TransformerTestUtils.assertExtensionCodingEquals(patient, CcwCodebookVariable.RACE, beneficiary.getRace());
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
 		Assert.assertEquals(beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
 		if (beneficiary.getNameMiddleInitial().isPresent())
 			Assert.assertEquals(beneficiary.getNameMiddleInitial().get().toString(),

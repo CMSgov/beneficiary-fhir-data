@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimLine;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
@@ -59,9 +60,8 @@ final class InpatientClaimTransformer {
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_PATIENT_STATUS,
-							String.valueOf(claimGroup.getPatientStatusCd().get())));
+			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
 		}
 		
 		// add EOB information to fields that are common between the Inpatient and SNF claim types
@@ -222,7 +222,8 @@ final class InpatientClaimTransformer {
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
 			
 			// Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
-			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(item, claimLine.getDeductibleCoinsuranceCd());
+			TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(eob, item,
+					claimLine.getDeductibleCoinsuranceCd());
 
 		}
 		return eob;

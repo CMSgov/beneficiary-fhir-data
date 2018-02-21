@@ -1,18 +1,20 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
 
@@ -100,10 +102,8 @@ final class DMEClaimTransformer {
 			 * to map this in the existing FHIR specification
 			 */
 			if (claimLine.getProviderBillingNumber().isPresent()) {
-				TransformerUtils.addExtensionValueIdentifier(item,
-						TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER,
-						TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER,
-						claimLine.getProviderBillingNumber().get());
+				item.addExtension(TransformerUtils.createExtensionIdentifier(CcwCodebookVariable.SUPLRNUM,
+						claimLine.getProviderBillingNumber()));
 			}
 
 			/*
@@ -130,14 +130,11 @@ final class DMEClaimTransformer {
 				 * extension. TODO: suggest that the spec allows more than one
 				 * `qualification` entry.
 				 */
-				performingCareTeamMember.setQualification(TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_CCW_PROVIDER_SPECIALTY,
-						"" + claimLine.getProviderSpecialityCode().get()));
+				performingCareTeamMember.setQualification(TransformerUtils.createCodeableConcept(eob,
+						CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
 
-				TransformerUtils.addExtensionCoding(performingCareTeamMember,
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
-						"" + claimLine.getProviderParticipatingIndCode().get());
+				performingCareTeamMember.addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode()));
 			}
 
 			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
@@ -176,21 +173,18 @@ final class DMEClaimTransformer {
 			}
 
 			if (claimLine.getScreenSavingsAmount().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
-						TransformerConstants.EXTENSION_SCREEN_SAVINGS,
-						String.valueOf(claimLine.getScreenSavingsAmount().get()));
+				// TODO should this be an adjudication?
+				item.addExtension(TransformerUtils.createExtensionQuantity(CcwCodebookVariable.DMERC_LINE_SCRN_SVGS_AMT,
+						claimLine.getScreenSavingsAmount()));
 			}
 
+			Extension mtusQuantityExtension = TransformerUtils
+					.createExtensionQuantity(CcwCodebookVariable.DMERC_LINE_MTUS_CNT, claimLine.getMtusCount());
+			item.addExtension(mtusQuantityExtension);
 			if (claimLine.getMtusCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item, TransformerConstants.EXTENSION_CODING_UNIT_IND,
-						TransformerConstants.EXTENSION_CODING_UNIT_IND,
-						String.valueOf(claimLine.getMtusCode().get()));
-			}
-
-			if (!claimLine.getMtusCount().equals(BigDecimal.ZERO)) {
-				TransformerUtils.addExtensionValueQuantity(item, TransformerConstants.EXTENSION_DME_UNIT,
-						TransformerConstants.EXTENSION_DME_UNIT,
-						claimLine.getMtusCount());
+				Quantity mtusQuantity = (Quantity) mtusQuantityExtension.getValue();
+				TransformerUtils.setQuantityUnitInfo(CcwCodebookVariable.DMERC_LINE_MTUS_CD, claimLine.getMtusCode(),
+						eob, mtusQuantity);
 			}
 
 			// Common item level fields between Carrier and DME
@@ -208,22 +202,19 @@ final class DMEClaimTransformer {
 					claimLine.getCmsServiceTypeCode(), claimLine.getNationalDrugCode());
 
 			if (!claimLine.getProviderStateCode().isEmpty()) {
-				TransformerUtils.addExtensionCoding(item.getLocation(),
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
-						TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine.getProviderStateCode());
+				// FIXME Should this be pulled to a common mapping method?
+				item.getLocation().addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.PRVDR_STATE_CD, claimLine.getProviderStateCode()));
 			}
 			if (claimLine.getPricingStateCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getLocation(),
-						TransformerConstants.EXTENSION_CODING_CCW_PRICING_STATE_CD,
-						TransformerConstants.EXTENSION_CODING_CCW_PRICING_STATE_CD,
-						claimLine.getPricingStateCode().get());
+				item.getLocation().addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.DMERC_LINE_PRCNG_STATE_CD, claimLine.getPricingStateCode()));
 			}
 
 			if (claimLine.getSupplierTypeCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getLocation(),
-						TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
-						TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
-						String.valueOf(claimLine.getSupplierTypeCode().get()));
+				// TODO should this be elsewhere; does it item.location make sense?
+				item.getLocation().addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.DMERC_LINE_SUPPLR_TYPE_CD, claimLine.getSupplierTypeCode()));
 			}
 		}
 		return eob;

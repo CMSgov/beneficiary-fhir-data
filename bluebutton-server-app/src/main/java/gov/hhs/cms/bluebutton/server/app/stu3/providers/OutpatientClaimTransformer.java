@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
@@ -277,10 +278,8 @@ final class OutpatientClaimTransformer {
 					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), Optional.empty());
 
 			if (claimLine.getNationalDrugCode().isPresent()) {
-				TransformerUtils.addExtensionCoding(item.getService(),
-						TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
-						TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
-						claimLine.getNationalDrugCode().get());
+				item.getService().addExtension(TransformerUtils.createExtensionCoding(eob,
+						CcwCodebookVariable.REV_CNTR_IDE_NDC_UPC_NUM, claimLine.getNationalDrugCode()));
 			}
 
 			item.addAdjudication()
@@ -366,11 +365,8 @@ final class OutpatientClaimTransformer {
 					claimLine.getRevenueCenterRenderingPhysicianNPI());
 
 			// set revenue center status indicator codes for the claim
-			TransformerUtils.addExtensionCoding(item.getRevenue(),
-					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
-					TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
-					claimLine.getStatusCode().get());
-
+			item.getRevenue().addExtension(TransformerUtils.createExtensionCoding(eob,
+					CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
 		}
 		return eob;
 	}
