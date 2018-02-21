@@ -6,7 +6,7 @@ import java.io.InputStream;
  * Enumerates the codebooks that are expected to be converted.
  */
 public enum SupportedCodebook {
-	BENEFICIARY_SUMMARY("codebook-mbsf-abcd.pdf", "Master Beneficiary Summary File - Base with Medicare Part A/B/C/D",
+	BENEFICIARY_SUMMARY("codebook-mbsf-abd.pdf", "Master Beneficiary Summary File - Base With Medicare Part A/B/D",
 			"May 2017, Version 1.0"),
 
 	FFS_CLAIMS("codebook-ffs-claims.pdf", "Medicare Fee-For-Service Claims (for Version K)",
