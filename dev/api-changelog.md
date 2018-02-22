@@ -1,5 +1,41 @@
 # API Changelog
 
+## CBBF-97: Update URIs from "`ccwdata.org`" to "`bluebutton.cms.gov`"
+
+The API's responses included many once-working-but-now-invalid URLs for the `ccwdata.org` domain, e.g. "`https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt`". Most of these URLs have now been updated to instead point to the "`bluebutton.cms.gov`" domain, e.g. "`https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd/`" (note that the path suffix has also changed for many fields to a longer, more expressive field name). These new URLs should all resolve to HTML pages containing the documentation that had previously only been available in the [Data Dictionary PDF codebooks](https://www.ccwdata.org/web/guest/data-dictionaries). In making this documentation more accessible, we hope the API is now easier to use.
+
+Please note some caveats:
+
+* This first big update fixed most of the old, broken URLs used in the API—but not all. We hope to complete the transition for the remaining URLs shortly.
+* The new `bluebutton.cms.gov` pages were automatically parsed from the PDF codebooks and we're not quite done stamping out all of the bugs in that parsing. Our apologies for any oddities you encounter while we're working on that.
+* The new pages haven't yet received any design love and are looking a bit rough, though the content is there. We hope to have them all shined up for you shortly.
+
+## CBBF-139/CBBF-140: `Coding.display` Values (Sprint 46, 2018-02)
+
+Many fields in the API now include `Coding.display` values: brief, descriptive English text that explains the meaning of the coded value. For example, see the new "`display`" value in the following sample `Patient` resource:
+
+```
+{
+  "resourceType": "Patient",
+  "id": "567834",
+  "extension": [
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/race",
+      "valueCoding": {
+        "system": "https://bluebutton.cms.gov/resources/variables/race",
+        "code": "1",
+        "display": "White"
+      }
+    }
+  ],
+  ...
+}
+```
+
+Please note that these values have been automatically parsed out of the [Data Dictionary PDF codebooks](https://www.ccwdata.org/web/guest/data-dictionaries) and not yet fully QA'd, so some of them will have parsing problems. That QA work is ongoing at the moment, so the problems should be resolved in the future. 
+
+Future updates may add `Coding.display` values for additional fields.
+
 ## CBBF-138 (Sprint 45, 2018-02)
 * Mapped CARR_CLM_PRMRY_PYR_PD_AMT for Carrier claims to EOB.benefitbalance.financial as "Primary Payer Paid Amount"
 * Mapped IME_OP_CLM_VAL_AMT & DSH_OP_CLM_VAL_AMT for Inpatient claims to EOB.benefitbalance.financial as "Indirect Medical Education Amount" and "Disproportionate Share Amount" respectively.
