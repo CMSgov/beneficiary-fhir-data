@@ -1151,12 +1151,12 @@ final class TransformerTestUtils {
 		// deductibleAmount
 		BenefitComponent benefit_NCH_BENE_IP_DDCTBL_AMT = assertHasBenefitComponent(
 				CcwCodebookVariable.NCH_BENE_IP_DDCTBL_AMT, eob);
-		Assert.assertEquals(deductibleAmount, benefit_NCH_BENE_IP_DDCTBL_AMT.getAllowedMoney().getValue());
+		assertEquivalent(deductibleAmount, benefit_NCH_BENE_IP_DDCTBL_AMT.getAllowedMoney().getValue());
 
 		// partACoinsuranceLiabilityAmount
 		BenefitComponent benefit_NCH_BENE_PTA_COINSRNC_LBLTY_AMT = assertHasBenefitComponent(
 				CcwCodebookVariable.NCH_BENE_PTA_COINSRNC_LBLTY_AMT, eob);
-		Assert.assertEquals(partACoinsuranceLiabilityAmount,
+		assertEquivalent(partACoinsuranceLiabilityAmount,
 				benefit_NCH_BENE_PTA_COINSRNC_LBLTY_AMT.getAllowedMoney().getValue());
 
 		// bloodPintsFurnishedQty
@@ -1168,18 +1168,18 @@ final class TransformerTestUtils {
 		// noncoveredCharge
 		BenefitComponent benefit_NCH_IP_NCVRD_CHRG_AMT = assertHasBenefitComponent(
 				CcwCodebookVariable.NCH_IP_NCVRD_CHRG_AMT, eob);
-		Assert.assertEquals(noncoveredCharge, benefit_NCH_IP_NCVRD_CHRG_AMT.getAllowedMoney().getValue());
+		assertEquivalent(noncoveredCharge, benefit_NCH_IP_NCVRD_CHRG_AMT.getAllowedMoney().getValue());
 
 		// totalDeductionAmount
 		BenefitComponent benefit_NCH_IP_TOT_DDCTN_AMT = assertHasBenefitComponent(
 				CcwCodebookVariable.NCH_IP_TOT_DDCTN_AMT, eob);
-		Assert.assertEquals(totalDeductionAmount, benefit_NCH_IP_TOT_DDCTN_AMT.getAllowedMoney().getValue());
+		assertEquivalent(totalDeductionAmount, benefit_NCH_IP_TOT_DDCTN_AMT.getAllowedMoney().getValue());
 
 		// claimPPSCapitalDisproportionateShareAmt
 		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
 			BenefitComponent benefit_CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT = assertHasBenefitComponent(
 					CcwCodebookVariable.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT, eob);
-			Assert.assertEquals(claimPPSCapitalDisproportionateShareAmt.get(),
+			assertEquivalent(claimPPSCapitalDisproportionateShareAmt.get(),
 					benefit_CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT.getAllowedMoney().getValue());
 		}
 
@@ -1187,7 +1187,7 @@ final class TransformerTestUtils {
 		if (claimPPSCapitalExceptionAmount.isPresent()) {
 			BenefitComponent benefit_CLM_PPS_CPTL_EXCPTN_AMT = assertHasBenefitComponent(
 					CcwCodebookVariable.CLM_PPS_CPTL_EXCPTN_AMT, eob);
-			Assert.assertEquals(claimPPSCapitalExceptionAmount.get(),
+			assertEquivalent(claimPPSCapitalExceptionAmount.get(),
 					benefit_CLM_PPS_CPTL_EXCPTN_AMT.getAllowedMoney().getValue());
 		}
 
@@ -1195,7 +1195,7 @@ final class TransformerTestUtils {
 		if (claimPPSCapitalFSPAmount.isPresent()) {
 			BenefitComponent benefit_CLM_PPS_CPTL_FSP_AMT = assertHasBenefitComponent(
 					CcwCodebookVariable.CLM_PPS_CPTL_FSP_AMT, eob);
-			Assert.assertEquals(claimPPSCapitalFSPAmount.get(),
+			assertEquivalent(claimPPSCapitalFSPAmount.get(),
 					benefit_CLM_PPS_CPTL_FSP_AMT.getAllowedMoney().getValue());
 		}
 
@@ -1203,7 +1203,7 @@ final class TransformerTestUtils {
 		if (claimPPSCapitalIMEAmount.isPresent()) {
 			BenefitComponent benefit_CLM_PPS_CPTL_IME_AMT = assertHasBenefitComponent(
 					CcwCodebookVariable.CLM_PPS_CPTL_IME_AMT, eob);
-			Assert.assertEquals(claimPPSCapitalIMEAmount.get(),
+			assertEquivalent(claimPPSCapitalIMEAmount.get(),
 					benefit_CLM_PPS_CPTL_IME_AMT.getAllowedMoney().getValue());
 		}
 
@@ -1211,7 +1211,7 @@ final class TransformerTestUtils {
 		if (claimPPSCapitalOutlierAmount.isPresent()) {
 			BenefitComponent benefit_CLM_PPS_CPTL_OUTLIER_AMT = assertHasBenefitComponent(
 					CcwCodebookVariable.CLM_PPS_CPTL_OUTLIER_AMT, eob);
-			Assert.assertEquals(claimPPSCapitalOutlierAmount.get(),
+			assertEquivalent(claimPPSCapitalOutlierAmount.get(),
 					benefit_CLM_PPS_CPTL_OUTLIER_AMT.getAllowedMoney().getValue());
 		}
 
@@ -1219,7 +1219,7 @@ final class TransformerTestUtils {
 		if (claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
 			BenefitComponent benefit_CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT = assertHasBenefitComponent(
 					CcwCodebookVariable.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT, eob);
-			Assert.assertEquals(claimPPSOldCapitalHoldHarmlessAmount.get(),
+			assertEquivalent(claimPPSOldCapitalHoldHarmlessAmount.get(),
 					benefit_CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT.getAllowedMoney().getValue());
 		}
 	}
