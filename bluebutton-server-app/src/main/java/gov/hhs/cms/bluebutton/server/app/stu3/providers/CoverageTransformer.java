@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
 /**
@@ -17,8 +18,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
  * resources.
  */
 final class CoverageTransformer {
-	// TODO move constants and methods into here, where approp.
-
 	/**
 	 * @param medicareSegment
 	 *            the {@link MedicareSegment} to generate a {@link Coverage}
@@ -75,31 +74,24 @@ final class CoverageTransformer {
 						TransformerConstants.COVERAGE_PLAN_PART_A));
 		coverage.setBeneficiary(TransformerUtils.referencePatient(beneficiary));
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					"" + beneficiary.getMedicareEnrollmentStatusCode().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.MS_CD,
+					beneficiary.getMedicareEnrollmentStatusCode()));
 		}
 		if (beneficiary.getEntitlementCodeOriginal().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
-					"" + beneficiary.getEntitlementCodeOriginal().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.OREC,
+					beneficiary.getEntitlementCodeOriginal()));
 		}
 		if (beneficiary.getEntitlementCodeCurrent().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_CURRENT,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_CURRENT,
-					"" + beneficiary.getEntitlementCodeCurrent().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.CREC,
+					beneficiary.getEntitlementCodeCurrent()));
 		}
 		if (beneficiary.getEndStageRenalDiseaseCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_ESRD_INDICATOR,
-					TransformerConstants.EXTENSION_CODING_CCW_ESRD_INDICATOR,
-					"" + beneficiary.getEndStageRenalDiseaseCode().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.ESRD_IND,
+					beneficiary.getEndStageRenalDiseaseCode()));
 		}
 		if (beneficiary.getPartATerminationCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
-					TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
-					"" + beneficiary.getPartATerminationCode().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.A_TRM_CD,
+					beneficiary.getPartATerminationCode()));
 		}
 
 		return coverage;
@@ -128,14 +120,12 @@ final class CoverageTransformer {
 				TransformerConstants.COVERAGE_PLAN_PART_B));
 		coverage.setBeneficiary(TransformerUtils.referencePatient(beneficiary));
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					"" + beneficiary.getMedicareEnrollmentStatusCode().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.MS_CD,
+					beneficiary.getMedicareEnrollmentStatusCode()));
 		}
 		if (beneficiary.getPartBTerminationCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
-					TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
-					"" + beneficiary.getPartBTerminationCode().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.B_TRM_CD,
+					beneficiary.getPartBTerminationCode()));
 		}
 
 		return coverage;
@@ -160,9 +150,8 @@ final class CoverageTransformer {
 		coverage.setStatus(CoverageStatus.ACTIVE);
 		coverage.setBeneficiary(TransformerUtils.referencePatient(beneficiary));
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent()) {
-			TransformerUtils.addExtensionCoding(coverage, TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					"" + beneficiary.getMedicareEnrollmentStatusCode().get());
+			coverage.addExtension(TransformerUtils.createExtensionCoding(coverage, CcwCodebookVariable.MS_CD,
+					beneficiary.getMedicareEnrollmentStatusCode()));
 		}
 
 		return coverage;

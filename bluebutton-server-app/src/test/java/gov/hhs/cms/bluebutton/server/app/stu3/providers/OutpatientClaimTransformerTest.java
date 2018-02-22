@@ -12,6 +12,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -139,10 +140,8 @@ public final class OutpatientClaimTransformerTest {
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getService(),
-				TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
-				TransformerConstants.CODING_CMS_REVENUE_CENTER_IDE_NDC_UPC_NUMBER,
-				claimLine1.getNationalDrugCode().get());
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.REV_CNTR_IDE_NDC_UPC_NUM,
+				claimLine1.getNationalDrugCode(), eobItem0.getService());
 
 		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE,
 				claimLine1.getBloodDeductibleAmount(), eobItem0.getAdjudication());
@@ -188,10 +187,7 @@ public final class OutpatientClaimTransformerTest {
 				Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL),
 				Optional.of(claim.getNearLineRecordIdCode()), Optional.of(claim.getClaimTypeCode()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(),
-				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
-				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE, claimLine1.getStatusCode().get());
-
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.REV_CNTR_STUS_IND_CD,
+				claimLine1.getStatusCode(), eobItem0.getRevenue());
 	}
-
 }

@@ -12,6 +12,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -65,9 +66,8 @@ public final class HospiceClaimTransformerTest {
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
 		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(i.getCategory(),
-						TransformerConstants.CODING_CCW_PATIENT_STATUS,
-						String.valueOf(claim.getPatientStatusCd().get()))));
+				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+						claim.getPatientStatusCd(), i.getCategory())));
 
 		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, claim.getUtilizationDayCount().intValue(),
@@ -101,10 +101,8 @@ public final class HospiceClaimTransformerTest {
 				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eob.getHospitalization(),
-				TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
-				TransformerConstants.EXTENSION_CODING_HOSPITALIZATION_PERIOD_COUNT,
-				String.valueOf(claim.getHospicePeriodCount().get()));
+		TransformerTestUtils.assertExtensionQuantityEquals(CcwCodebookVariable.BENE_HOSPC_PRD_CNT,
+				claim.getHospicePeriodCount(), eob.getHospitalization());
 
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 

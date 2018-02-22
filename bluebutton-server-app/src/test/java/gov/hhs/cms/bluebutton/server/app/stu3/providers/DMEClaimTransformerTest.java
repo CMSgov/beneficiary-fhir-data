@@ -13,6 +13,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -79,29 +80,25 @@ public final class DMEClaimTransformerTest {
 		DMEClaimLine claimLine1 = claim.getLines().get(0);
 		Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
-		TransformerTestUtils.assertExtensionIdentifierEqualsString(
-				eobItem0.getExtensionsByUrl(TransformerConstants.EXTENSION_IDENTIFIER_DME_PROVIDER_BILLING_NUMBER),
-				claimLine1.getProviderBillingNumber().get());
+		TransformerTestUtils.assertExtensionIdentifierEquals(CcwCodebookVariable.SUPLRNUM,
+				claimLine1.getProviderBillingNumber(), eobItem0);
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getProviderNPI().get(),
 				ClaimCareteamrole.PRIMARY.toCode(), eob);
 		CareTeamComponent performingCareTeamEntry = TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
 				claimLine1.getProviderNPI().get(), eob.getCareTeam());
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CCW_PROVIDER_SPECIALTY,
-				claimLine1.getProviderSpecialityCode().get(), performingCareTeamEntry.getQualification().getCoding());
-		TransformerTestUtils.assertExtensionCodingEquals(performingCareTeamEntry,
-				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
-				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_PARTICIPATING,
-				"" + claimLine1.getProviderParticipatingIndCode().get());
+		TransformerTestUtils.assertHasCoding(CcwCodebookVariable.PRVDR_SPCLTY, claimLine1.getProviderSpecialityCode(),
+				performingCareTeamEntry.getQualification());
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PRTCPTNG_IND_CD,
+				claimLine1.getProviderParticipatingIndCode(), performingCareTeamEntry);
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
 				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
 				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getLocation(),
-				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE,
-				TransformerConstants.EXTENSION_CODING_CCW_PROVIDER_STATE, claimLine1.getProviderStateCode());
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PRVDR_STATE_CD,
+				claimLine1.getProviderStateCode(), eobItem0.getLocation());
 		
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
@@ -117,26 +114,20 @@ public final class DMEClaimTransformerTest {
 				TransformerConstants.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT, claimLine1.getPurchasePriceAmount(),
 				eobItem0.getAdjudication());
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getLocation(),
-				TransformerConstants.EXTENSION_CODING_CCW_PRICING_STATE_CD,
-				TransformerConstants.EXTENSION_CODING_CCW_PRICING_STATE_CD, claimLine1.getPricingStateCode().get());
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.DMERC_LINE_PRCNG_STATE_CD,
+				claimLine1.getPricingStateCode(), eobItem0.getLocation());
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getLocation(),
-				TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
-				TransformerConstants.EXTENSION_CODING_CMS_SUPPLIER_TYPE,
-				String.valueOf(claimLine1.getSupplierTypeCode().get()));
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.DMERC_LINE_SUPPLR_TYPE_CD,
+				claimLine1.getSupplierTypeCode(), eobItem0.getLocation());
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.EXTENSION_SCREEN_SAVINGS, TransformerConstants.EXTENSION_SCREEN_SAVINGS,
-				String.valueOf(claimLine1.getScreenSavingsAmount().get()));
+		TransformerTestUtils.assertExtensionQuantityEquals(CcwCodebookVariable.DMERC_LINE_SCRN_SVGS_AMT,
+				claimLine1.getScreenSavingsAmount(), eobItem0);
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.EXTENSION_CODING_UNIT_IND,
-				TransformerConstants.EXTENSION_CODING_UNIT_IND, String.valueOf(claimLine1.getMtusCode().get()));
+		TransformerTestUtils.assertQuantityUnitInfoEquals(CcwCodebookVariable.DMERC_LINE_MTUS_CNT,
+				CcwCodebookVariable.DMERC_LINE_MTUS_CD, claimLine1.getMtusCode(), eobItem0);
 
-		TransformerTestUtils.assertExtensionValueQuantityEquals(
-				eobItem0.getExtensionsByUrl(TransformerConstants.EXTENSION_DME_UNIT),
-				TransformerConstants.EXTENSION_DME_UNIT, TransformerConstants.EXTENSION_DME_UNIT,
-				claimLine1.getMtusCount());
+		TransformerTestUtils.assertExtensionQuantityEquals(CcwCodebookVariable.DMERC_LINE_MTUS_CNT,
+				claimLine1.getMtusCount(), eobItem0);
 
 		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_NDC,
 				TransformerConstants.CODING_NDC, claimLine1.getNationalDrugCode().get());

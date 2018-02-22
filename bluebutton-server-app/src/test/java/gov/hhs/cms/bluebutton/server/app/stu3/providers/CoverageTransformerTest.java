@@ -9,6 +9,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
@@ -65,31 +66,20 @@ public final class CoverageTransformerTest {
 		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
 
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					beneficiary.getMedicareEnrollmentStatusCode().get());
-
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(),
+					coverage);
 		if (beneficiary.getEntitlementCodeOriginal().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_ORIGINAL,
-					String.valueOf(beneficiary.getEntitlementCodeOriginal().get()));
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.OREC, beneficiary.getEntitlementCodeOriginal(),
+					coverage);
 		if (beneficiary.getEntitlementCodeCurrent().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_CURRENT,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_ENTITLEMENT_CURRENT,
-					String.valueOf(beneficiary.getEntitlementCodeCurrent().get()));
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.CREC, beneficiary.getEntitlementCodeCurrent(),
+					coverage);
 		if (beneficiary.getEndStageRenalDiseaseCode().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_ESRD_INDICATOR,
-					TransformerConstants.EXTENSION_CODING_CCW_ESRD_INDICATOR,
-					String.valueOf(beneficiary.getEndStageRenalDiseaseCode().get()));
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.ESRD_IND, beneficiary.getEndStageRenalDiseaseCode(),
+					coverage);
 		if (beneficiary.getPartATerminationCode().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
-					TransformerConstants.EXTENSION_CODING_CCW_PARTA_TERMINATION_CODE,
-					String.valueOf(beneficiary.getPartATerminationCode().get()));
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.A_TRM_CD, beneficiary.getPartATerminationCode(),
+					coverage);
 	}
 
 	/**
@@ -113,15 +103,11 @@ public final class CoverageTransformerTest {
 		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
 
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					beneficiary.getMedicareEnrollmentStatusCode().get());
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(),
+					coverage);
 		if (beneficiary.getPartBTerminationCode().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
-					TransformerConstants.EXTENSION_CODING_CCW_PARTB_TERMINATION_CODE,
-					String.valueOf(beneficiary.getPartBTerminationCode().get()));
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.B_TRM_CD, beneficiary.getPartBTerminationCode(),
+					coverage);
 	}
 
 	/**
@@ -144,10 +130,8 @@ public final class CoverageTransformerTest {
 		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN_PART_D, coverage.getGrouping().getSubPlan());
 
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(coverage,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					TransformerConstants.EXTENSION_CODING_CCW_MEDICARE_STATUS,
-					beneficiary.getMedicareEnrollmentStatusCode().get());
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(),
+					coverage);
 		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
 	}
 }

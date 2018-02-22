@@ -13,6 +13,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -132,8 +133,8 @@ public final class SNFClaimTransformerTest {
 		Assert.assertEquals(claim.getProviderStateCode(),
 				eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_CMS_REVENUE_CENTER,
-				claimLine1.getRevenueCenter(), eobItem0.getRevenue().getCoding());
+		TransformerTestUtils.assertHasCoding(CcwCodebookVariable.REV_CNTR, claimLine1.getRevenueCenter(),
+				eobItem0.getRevenue());
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(), Optional.empty(), Optional.empty(),
 				Optional.empty(), 0/* index */);
 
