@@ -744,11 +744,31 @@ public final class TransformerUtils {
 		else if (code instanceof String)
 			codeString = (String) code;
 		else
-			throw new BadCodeMonkeyException();
+			throw new BadCodeMonkeyException("Unsupported: " + code);
 
 		String system = calculateVariableReferenceUrl(ccwVariable);
-		String display = calculateCodingDisplay(rootResource, ccwVariable, codeString).orElse(null);
+
+		String display;
+		if (ccwVariable.getVariable().getValueGroups().isPresent())
+			display = calculateCodingDisplay(rootResource, ccwVariable, codeString).orElse(null);
+		else
+			display = null;
+
 		return new Coding(system, codeString, display);
+	}
+
+	/**
+	 * @param rootResource
+	 *            the root FHIR {@link IAnyResource} that the resultant
+	 *            {@link Coding} will be contained in
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being coded
+	 * @param code
+	 *            the value to use for {@link Coding#getCode()}
+	 * @return the output {@link Coding} for the specified input values
+	 */
+	private static Coding createCoding(IAnyResource rootResource, CcwCodebookVariable ccwVariable, Optional<?> code) {
+		return createCoding(rootResource, ccwVariable, code.get());
 	}
 
 	/**
@@ -845,7 +865,7 @@ public final class TransformerUtils {
 		if (code == null)
 			throw new IllegalArgumentException();
 		if (!ccwVariable.getVariable().getValueGroups().isPresent())
-			throw new BadCodeMonkeyException("No display values for this Variable.");
+			throw new BadCodeMonkeyException("No display values for Variable: " + ccwVariable);
 
 		/*
 		 * We know that the specified CCW Variable is coded, but there's no guarantee
@@ -1740,7 +1760,12 @@ public final class TransformerUtils {
 		item.setQuantity(qty);
 
 		if (nationalDrugCodeQualifierCode.isPresent()) {
-			// Shouldn't this be part of the same Extension with the NDC code itself?
+			/*
+			 * TODO: Is NDC count only ever present when line quantity isn't set? Depending
+			 * on that, it may be that we should stop using this as an extension and instead
+			 * set the code & system on the FHIR quantity field.
+			 */
+			// TODO Shouldn't this be part of the same Extension with the NDC code itself?
 			Extension drugQuantityExtension = createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY,
 					nationalDrugCodeQuantity);
 			Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();

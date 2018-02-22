@@ -11,6 +11,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -98,9 +99,8 @@ public final class HHAClaimTransformerTest {
 				claimLine1.getRateAmount(),
 				eobItem0.getAdjudication());
 		
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0.getRevenue(),
-				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE,
-				TransformerConstants.CODING_CMS_REVENUE_CENTER_STATUS_INDICATOR_CODE, claimLine1.getStatusCode().get());
+		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.REV_CNTR_STUS_IND_CD,
+				claimLine1.getStatusCode().get(), eobItem0.getRevenue());
 		
 		// test common eob information between Inpatient, HHA, Hospice and SNF claims are set as expected
 		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(eob, claim.getCareStartDate(),
