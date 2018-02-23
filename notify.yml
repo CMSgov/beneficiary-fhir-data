@@ -56,7 +56,7 @@
         username: "{{ vault_aws_ses_username }}"
         password: "{{ vault_aws_ses_password }}"
         to: "{{ notify_email_external_recipients | join(',') }}"
-        from: "{{ management_user.cn}} <karl.davis@cms.hhs.gov>" # FIXME Switch to BlueButtonAPI@cms.hhs.gov, once I have access to it.
+        from: "{{ management_user.cn}} <BlueButtonAPI@cms.hhs.gov>"
         subject: "Blue Button API Deployment at {{ deploy_timestamp }}"
         subtype: html
         body: |
