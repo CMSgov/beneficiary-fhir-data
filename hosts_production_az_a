@@ -12,8 +12,8 @@
 # system.
 ##
 
-#[data_pipeline_systems]
-#bluebutton-healthapt-prod-data-pipeline
+[data_pipeline_systems]
+bluebutton-healthapt-prod-az-a-data-pipeline
 
 [data_server_systems]
 bluebutton-healthapt-prod-az-a-data-server
@@ -24,5 +24,5 @@ bluebutton-healthapt-prod-az-a-data-server
 #
 #     $ ansible-vault edit group_vars/env_production_az_a/vault.yml
 [env_production_az_a:children]
-#data_pipeline_systems
+data_pipeline_systems
 data_server_systems
