@@ -72,21 +72,15 @@
         state: present
         policy_json: "{{ lookup('template','bluebutton_backend_data_pipeline_s3_policy.json.j2') | to_json }}"
     
-    - name: "Provision EC2 Security Group 'default'"
-      ec2_group:
-        name: 'default'
-        description: 'default VPC security group'
+    - name: "Lookup EC2 Security Group 'default'"
+      ec2_group_facts:
         region: "{{ aws_region }}"
-        vpc_id: "{{ aws_vpc }}"
-        rules:
-          - proto: 'all'
-            group_name: 'default'
-        rules_egress:
-          - proto: all
-            cidr_ip: 0.0.0.0/0
+        filters:
+          group-name: 'default'
+          vpc-id: "{{ aws_vpc }}"
       register: ec2_group_default
     - set_fact:
-        ec2_group_default_id: "{{ ec2_group_default.group_id }}"
+        ec2_group_default_id: "{{ ec2_group_default.security_groups[0].group_id }}"
     
     - name: Provision EC2 Security Group 'ssh-all'
       ec2_group:
