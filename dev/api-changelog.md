@@ -1,5 +1,11 @@
 # API Changelog
 
+## CBBF-97 (again): Finish fixes to code systems, etc.
+
+### Remove `ExplanationOfBenefit.disposition`
+
+This field was included in all `ExplanationOfBenefit` responses, with a static/constant value. Since it's not a required field, this wasn't providing any value and has accordingly been removed.
+
 ## CBBF-97: Update URIs from "`ccwdata.org`" to "`bluebutton.cms.gov`"
 
 The API's responses included many once-working-but-now-invalid URLs for the `ccwdata.org` domain, e.g. "`https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt`". Most of these URLs have now been updated to instead point to the "`bluebutton.cms.gov`" domain, e.g. "`https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd/`" (note that the path suffix has also changed for many fields to a longer, more expressive field name). These new URLs should all resolve to HTML pages containing the documentation that had previously only been available in the [Data Dictionary PDF codebooks](https://www.ccwdata.org/web/guest/data-dictionaries). In making this documentation more accessible, we hope the API is now easier to use.

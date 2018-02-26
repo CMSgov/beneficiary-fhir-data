@@ -1386,8 +1386,6 @@ public final class TransformerUtils {
 			setPeriodEnd(eob.getBillablePeriod(), dateThrough.get());
 		}
 
-		eob.setDisposition(TransformerConstants.CODED_EOB_DISPOSITION);
-
 		if (paymentAmount.isPresent()) {
 			eob.getPayment().setAmount(
 					(Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(paymentAmount.get()));

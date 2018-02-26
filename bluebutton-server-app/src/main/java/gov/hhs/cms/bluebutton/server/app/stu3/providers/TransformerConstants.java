@@ -245,8 +245,6 @@ final class TransformerConstants {
 
 	public static final String CODED_BENEFIT_COVERAGE_DATE_QUALIFIED = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qlfrfrom.txt";
 
-	static final String CODED_EOB_DISPOSITION = "Debit accepted";
-
 	static final String CODED_MONEY_USD = "USD";
 
 	static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE = "http://bluebutton.cms.hhs.gov/coding#benefitBalanceType";

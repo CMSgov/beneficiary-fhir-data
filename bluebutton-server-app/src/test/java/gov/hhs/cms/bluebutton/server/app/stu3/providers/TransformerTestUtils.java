@@ -1371,7 +1371,6 @@ final class TransformerTestUtils {
 			assertDateEquals(dateFrom.get(), eob.getBillablePeriod().getStartElement());
 			assertDateEquals(dateThrough.get(), eob.getBillablePeriod().getEndElement());
 		}
-		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
 
 		if (paymentAmount.isPresent()) {
 			Assert.assertEquals(paymentAmount.get(), eob.getPayment().getAmount().getValue());
