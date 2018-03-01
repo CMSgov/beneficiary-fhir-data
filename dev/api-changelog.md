@@ -2,6 +2,15 @@
 
 ## CBBF-97 (again): Finish fixes to code systems, etc.
 
+### Fix `ExplanationOfBenefit.identifier` "Claim Group ID" System
+
+The `Identifier.system` values used here were incorrect and have been fixed:
+
+* Previously: `http://bluebutton.cms.hhs.gov/identifier#claimGroup`
+* Corrected/Current: `https://bluebutton.cms.gov/resources/identifier/claim-group`
+
+Documentation for this field is now available at its corrected URL.
+
 ### Include `ExplanationOfBenefit.item.detail.type` `Coding.display` Values
 
 The `Coding.display` values for this field are now included in responses, for convenience. (Note: This field is only included for Part D Events.)

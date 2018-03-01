@@ -14,6 +14,7 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimType;
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.codebook.model.Variable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
 
 /**
  * <p>
@@ -255,7 +256,12 @@ final class TransformerConstants {
 	 */
 	static final String CODING_CCW_ADJUDICATION_CATEGORY = "CMS Adjudications";
 
-	static final String CODING_CCW_CLAIM_GROUP_ID = "http://bluebutton.cms.hhs.gov/identifier#claimGroup";
+	/**
+	 * Used as the {@link Identifier#getSystem()} that the RIF
+	 * <code>CLM_GROUP_ID</code> fields (e.g. {@link CarrierClaimColumn#CLM_GRP_ID})
+	 * are mapped to.
+	 */
+	static final String IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID = BASE_URL_BBAPI_RESOURCES + "/identifier/claim-group";
 
 	// FIXME: the following URL is currently just a placeholder for the final one
 	// FIXME the constant name shouldn't have CCW in it

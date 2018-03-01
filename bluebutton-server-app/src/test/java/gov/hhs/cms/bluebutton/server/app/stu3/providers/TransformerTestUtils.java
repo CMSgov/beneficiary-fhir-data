@@ -1350,7 +1350,8 @@ final class TransformerTestUtils {
 		else
 			assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId, eob.getIdentifier());
 
-		assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID, claimGroupId, eob.getIdentifier());
+		assertIdentifierExists(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID, claimGroupId,
+				eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(beneficiaryId).getReference(),
 				eob.getPatient().getReference());
 		Assert.assertEquals(TransformerUtils.referenceCoverage(beneficiaryId, coverageType).getReference(),

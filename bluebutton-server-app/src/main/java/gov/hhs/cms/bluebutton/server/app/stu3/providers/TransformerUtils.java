@@ -1364,7 +1364,8 @@ public final class TransformerUtils {
 		else
 			eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
 
-		eob.addIdentifier().setSystem(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID).setValue(claimGroupId);
+		eob.addIdentifier().setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
+				.setValue(claimGroupId);
 
 		eob.getInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
 		eob.setPatient(referencePatient(beneficiaryId));
