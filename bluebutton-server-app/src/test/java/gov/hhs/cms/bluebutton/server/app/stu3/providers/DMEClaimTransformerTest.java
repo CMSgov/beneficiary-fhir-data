@@ -92,11 +92,6 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PRTCPTNG_IND_CD,
 				claimLine1.getProviderParticipatingIndCode(), performingCareTeamEntry);
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
-
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PRVDR_STATE_CD,
 				claimLine1.getProviderStateCode(), eobItem0.getLocation());
 		

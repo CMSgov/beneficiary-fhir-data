@@ -110,11 +110,6 @@ public final class OutpatientClaimTransformerTest {
 		Assert.assertEquals(new Integer(claimLine1.getLineNumber().intValue()),
 				new Integer(eobItem0.getSequence()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
-
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
 		// TODO re-map as described in CBBF-111
@@ -122,9 +117,6 @@ public final class OutpatientClaimTransformerTest {
 		 * TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC,
 		 * claimLine1.getNationalDrugCode().get(), eobItem0.getService());
 		 */
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
 
 		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD,
 				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr1stAnsiCd().get(),

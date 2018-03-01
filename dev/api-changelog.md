@@ -2,6 +2,14 @@
 
 ## CBBF-97 (again): Finish fixes to code systems, etc.
 
+### Include `ExplanationOfBenefit.item.detail.type` `Coding.display` Values
+
+The `Coding.display` values for this field are now included in responses, for convenience. (Note: This field is only included for Part D Events.)
+
+### Remove `http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode` Extension
+
+This extension was included in all `ExplanationOfBenefit` responses (except for Part D Events), with a static/constant value. This wasn't providing any value and has accordingly been removed.
+
 ### Remove `ExplanationOfBenefit.disposition`
 
 This field was included in all `ExplanationOfBenefit` responses, with a static/constant value. Since it's not a required field, this wasn't providing any value and has accordingly been removed.

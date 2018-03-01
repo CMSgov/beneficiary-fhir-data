@@ -95,10 +95,6 @@ final class CarrierClaimTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.getLineNumber().intValue());
 
-			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
-
 			/*
 			 * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing
 			 * provider _should_ always be present. However, we've found some

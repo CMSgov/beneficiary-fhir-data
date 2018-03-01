@@ -125,11 +125,6 @@ public final class SNFClaimTransformerTest {
 		Assert.assertEquals(claimLine1.getLineNumber(),
 				new BigDecimal(eobItem0.getSequence()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
-
 		Assert.assertEquals(claim.getProviderStateCode(),
 				eobItem0.getLocationAddress().getState());
 

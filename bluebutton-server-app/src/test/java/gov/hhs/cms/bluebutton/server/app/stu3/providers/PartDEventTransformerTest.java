@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -72,7 +73,8 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC, claim.getNationalDrugCode(),
 				rxItem.getService().getCoding());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_FHIR_ACT, "RXDINV", rxItem.getDetail().get(0).getType().getCoding());
+		TransformerTestUtils.assertHasCoding(V3ActCode.RXDINV.getSystem(),
+				V3ActCode.RXDINV.toCode(), rxItem.getDetail().get(0).getType().getCoding());
 
 		Assert.assertEquals(Date.valueOf(claim.getPrescriptionFillDate()), rxItem.getServicedDateType().getValue());
 

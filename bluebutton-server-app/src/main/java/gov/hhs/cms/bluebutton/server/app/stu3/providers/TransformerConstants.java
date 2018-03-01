@@ -105,8 +105,6 @@ final class TransformerConstants {
 	 */
 	static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
 
-	static final String CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS = "CSPINV";
-
 	static final String CODED_ADJUDICATION_1ST_ANSI_CD = "Revenue Center 1st ANSI Code";
 
 	static final String CODED_ADJUDICATION_1ST_MSP_AMOUNT = "Revenue Center 1st Medicare Secondary Payer (MSP) Paid Amount";
@@ -265,12 +263,6 @@ final class TransformerConstants {
 
 	// FIXME this URL has a typo -- first 'c' shouldn't have been there
 	private static final String CODING_CCW_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
-
-	// FIXME Switch to HAPI enum for this system, once one is available
-	static final String CODING_FHIR_ACT = "http://hl7.org/fhir/v3/ActCode";
-
-	// FIXME Switch to HAPI enum for this system, once one is available
-	static final String CODING_FHIR_ACT_INVOICE_GROUP = "http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode";
 
 	static final String CODING_FHIR_DIAGNOSIS_TYPE = "http://hl7.org/fhir/ex-diagnosistype";
 

@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
+import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -72,16 +73,16 @@ final class PartDEventTransformer {
 		// COMPOUNDED
 		case 2:
 			/* Pharmacy dispense invoice for a compound */
-			detail.getType()
-					.addCoding(new Coding().setSystem(TransformerConstants.CODING_FHIR_ACT).setCode("RXCINV"));
+			detail.getType().addCoding(new Coding().setSystem(V3ActCode.RXCINV.getSystem())
+					.setCode(V3ActCode.RXCINV.toCode()).setDisplay(V3ActCode.RXCINV.getDisplay()));
 			break;
 		// NOT_COMPOUNDED
 		case 1:
 			/*
 			 * Pharmacy dispense invoice not involving a compound
 			 */
-			detail.getType()
-					.addCoding(new Coding().setSystem(TransformerConstants.CODING_FHIR_ACT).setCode("RXDINV"));
+			detail.getType().addCoding(new Coding().setSystem(V3ActCode.RXCINV.getSystem())
+					.setCode(V3ActCode.RXDINV.toCode()).setDisplay(V3ActCode.RXDINV.getDisplay()));
 			break;
 		// NOT_SPECIFIED
 		case 0:
