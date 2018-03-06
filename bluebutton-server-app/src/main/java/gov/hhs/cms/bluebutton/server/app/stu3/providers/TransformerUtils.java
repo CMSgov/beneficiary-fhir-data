@@ -1285,7 +1285,7 @@ public final class TransformerUtils {
 
 		// This Coding MUST always be present as it's the only one we can definitely map
 		// for all 8 of our claim types.
-		eob.getType().addCoding().setSystem(TransformerConstants.CODING_CCW_CLAIM_TYPE)
+		eob.getType().addCoding().setSystem(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
 				.setCode(blueButtonClaimType.name());
 
 		// Map a Coding for FHIR's ClaimType coding system, if we can.

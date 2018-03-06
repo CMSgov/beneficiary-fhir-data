@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -263,9 +264,12 @@ final class TransformerConstants {
 	 */
 	static final String IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID = BASE_URL_BBAPI_RESOURCES + "/identifier/claim-group";
 
-	// FIXME: the following URL is currently just a placeholder for the final one
-	// FIXME the constant name shouldn't have CCW in it
-	static final String CODING_CCW_CLAIM_TYPE = "https://bluebutton.cms.gov/developer/docs/reference/some-thing";
+	/**
+	 * Used as the {@link Coding#getSystem()} for the
+	 * {@link ExplanationOfBenefit#getType()} entry that each EOB's ClaimType is
+	 * mapped to.
+	 */
+	static final String CODING_SYSTEM_BBAPI_EOB_TYPE = BASE_URL_BBAPI_RESOURCES + "/codesystem/eob-type";
 
 	// FIXME this URL has a typo -- first 'c' shouldn't have been there
 	private static final String CODING_CCW_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";

@@ -885,7 +885,8 @@ final class TransformerTestUtils {
 	static void assertMapEobType(CodeableConcept eobType, ClaimType blueButtonClaimType,
 			Optional<org.hl7.fhir.dstu3.model.codesystems.ClaimType> fhirClaimType,
 			Optional<Character> ccwNearLineRecordIdCode, Optional<String> ccwClaimTypeCode) {
-		assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE, blueButtonClaimType.name(), eobType.getCoding());
+		assertHasCoding(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, blueButtonClaimType.name(),
+				eobType.getCoding());
 
 		if (fhirClaimType.isPresent()) {
 			assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE, fhirClaimType.get().name(), eobType.getCoding());

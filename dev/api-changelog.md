@@ -2,6 +2,15 @@
 
 ## CBBF-97 (again): Finish fixes to code systems, etc.
 
+### Fix `ExplanationOfBenefit.type` "Blue Button EOB Type" Code System
+
+The `Coding.system` values used here were incorrect and have been fixed:
+
+* Previously: `https://bluebutton.cms.gov/developer/docs/reference/some-thing`
+* Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/eob-type`
+
+Documentation for this field is now available at its corrected URL.
+
 ### Fix `ExplanationOfBenefit.identifier` "Claim Group ID" System
 
 The `Identifier.system` values used here were incorrect and have been fixed:
