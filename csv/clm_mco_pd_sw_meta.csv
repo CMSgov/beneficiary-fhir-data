@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_mco_pd_sw,CLM_MCO_PD_SW,Claim MCO Paid Switch,MCOPDSW,CLM_MCO_PD_SW,CHAR,1,NCH,

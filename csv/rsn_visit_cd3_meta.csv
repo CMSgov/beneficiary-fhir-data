@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rsn_visit_cd3,RSN_VISIT_CD3,Reason for Visit Diagnosis Code III,RSN_VISIT_CD3,RSN_VISIT_CD3,CHAR,7,NCH,

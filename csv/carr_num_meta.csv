@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_num,CARR_NUM,Carrier or MAC Number,CARR_NUM,CARR_NUM,CHAR,5,NCH,

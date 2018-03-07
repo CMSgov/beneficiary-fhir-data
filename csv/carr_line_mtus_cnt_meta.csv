@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_line_mtus_cnt,CARR_LINE_MTUS_CNT,Carrier Line Miles/Time/Units/Services (MTUS) Count,MTUS_CNT,CARR_LINE_MTUS_CNT,NUM,5,NCH,

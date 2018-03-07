@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+srvc_prvdr_id,SRVC_PRVDR_ID,Service provider identification number,SRVC_PRVDR_ID,SRVC_PRVDR_ID,CHAR,15,PDE,Up to 10-digit numeric value (example - 1235247610)

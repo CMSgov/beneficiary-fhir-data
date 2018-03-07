@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_bene_mdcr_bnfts_exhtd_dt_i,NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,NCH Beneficiary Medicare Benefits Exhausted Date,EXHST_DT,NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,DATE,8,NCH QA Process,

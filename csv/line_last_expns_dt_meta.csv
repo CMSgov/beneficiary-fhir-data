@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+line_last_expns_dt,LINE_LAST_EXPNS_DT,Line Last Expense Date,EXPNSDT2,LINE_LAST_EXPNS_DT,DATE,8,NCH,

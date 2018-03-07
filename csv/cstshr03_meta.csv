@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+cstshr03,CSTSHR03,Monthly cost sharing group under Part D low-income subsidy - March,CSTSHR03,CST_SHR_GRP_CD_03,CHAR,2,CMS Enrollment Database (EDB),

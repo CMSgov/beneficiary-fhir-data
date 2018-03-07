@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_drg_cd,CLM_DRG_CD,Claim Diagnosis Related Group Code (or MS-DRG Code),DRG_CD,CLM_DRG_CD,CHAR,3,NCH,

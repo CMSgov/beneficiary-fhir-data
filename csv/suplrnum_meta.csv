@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+suplrnum,SUPLRNUM,DMERC Line Supplier Provider Number,SUPLRNUM,PRVDR_NUM,CHAR,10,NCH,

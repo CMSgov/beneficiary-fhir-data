@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+betos_cd,BETOS_CD,Line Berenson-Eggers Type of Service (BETOS) Code,BETOS,BETOS_CD,CHAR,3,NCH,

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+icd_dgns_e_cd4,ICD_DGNS_E_CD4,Claim Diagnosis E Code IV,ICD_DGNS_E_CD4,ICD_DGNS_E_CD4,CHAR,7,NCH,

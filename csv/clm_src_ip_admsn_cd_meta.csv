@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_src_ip_admsn_cd,CLM_SRC_IP_ADMSN_CD,Claim Source Inpatient Admission Code,SRC_ADMS,CLM_SRC_IP_ADMSN_CD,CHAR,1,NCH,

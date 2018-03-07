@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+thrpy_cap_ind_cd1,THRPY_CAP_IND_CD1,Therapy Cap Indicator 1 Code,THRPY_CAP_IND_CD1,THRPY_CAP_IND_CD1,CHAR,1,NCH,

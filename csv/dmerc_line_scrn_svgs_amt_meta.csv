@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+dmerc_line_scrn_svgs_amt,DMERC_LINE_SCRN_SVGS_AMT,DMERC Line Screen Savings Amount,SCRNSVGS,DMERC_LINE_SCRN_SVGS_AMT,NUM,12,NCH,XXX.XX

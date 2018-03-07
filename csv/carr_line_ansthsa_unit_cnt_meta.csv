@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_line_ansthsa_unit_cnt,CARR_LINE_ANSTHSA_UNIT_CNT,Carrier Line Anesthesia Unit Count,CARR_LINE_ANSTHSA_UNIT_CNT,CARR_LINE_ANSTHSA_UNIT_CNT,NUM,2,NCH,

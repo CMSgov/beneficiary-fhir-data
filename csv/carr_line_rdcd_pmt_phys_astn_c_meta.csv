@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_line_rdcd_pmt_phys_astn_c,CARR_LINE_RDCD_PMT_PHYS_ASTN_C,Carrier Line Reduced Payment Physician Assistant Code,ASTNT_CD,CARR_LINE_RDCD_PMT_PHYS_ASTN_C,CHAR,1,NCH,

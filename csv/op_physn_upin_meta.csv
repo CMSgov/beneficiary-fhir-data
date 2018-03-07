@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+op_physn_upin,OP_PHYSN_UPIN,Claim Operating Physician UPIN Number,OP_UPIN,OP_PHYSN_UPIN,CHAR,6,NCH,

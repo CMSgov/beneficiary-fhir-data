@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+tax_num,TAX_NUM,Line Provider Tax Number,TAX_NUM,TAX_NUM,CHAR,10,NCH,

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+v_dod_sw,V_DOD_SW,Valid Date of Death Switch,V_DOD_SW,BENE_VALID_DEATH_DT_SW,CHAR,1,CMS Enrollment Database (EDB),

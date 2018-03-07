@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+buyin01,BUYIN01,Medicare Entitlement/Buy-In Indicator – January,BUYIN01,BENE_MDCR_ENTLMT_BUYIN_IND_01,CHAR,1,CMS Enrollment Database (EDB) CODE,

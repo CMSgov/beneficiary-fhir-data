@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+dmerc_line_prcng_state_cd,DMERC_LINE_PRCNG_STATE_CD,DMERC Line Pricing State Code (SSA),PRCNG_ST,DMERC_LINE_PRCNG_STATE_CD,CHAR,2,NCH,

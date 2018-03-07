@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_ptnt_stus_ind_cd,NCH_PTNT_STUS_IND_CD,NCH Patient Status Indicator Code,PTNTSTUS,NCH_PTNT_STUS_IND_CD,CHAR,1,NCH QA Process,

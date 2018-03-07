@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+prcdr_dt18,PRCDR_DT18,Claim Procedure Code XVIII Date,PRCDR_DT18,PRCDR_DT18,DATE,8,NCH,

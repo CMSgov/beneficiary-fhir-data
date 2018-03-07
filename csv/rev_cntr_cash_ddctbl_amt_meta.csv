@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rev_cntr_cash_ddctbl_amt,REV_CNTR_CASH_DDCTBL_AMT,Revenue Center Cash Deductible Amount,REVDCTBL,REV_CNTR_CASH_DDCTBL_AMT,NUM,12,NCH,XXX.XX

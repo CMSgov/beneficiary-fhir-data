@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+icd_prcdr_vrsn_cd10,ICD_PRCDR_VRSN_CD10,Claim Procedure Code X Claim Procedure Version Code (ICD-9 or ICD-10),ICD_PRCDR_VRSN_CD10,ICD_PRCDR_VRSN_CD10,CHAR,1,NCH,

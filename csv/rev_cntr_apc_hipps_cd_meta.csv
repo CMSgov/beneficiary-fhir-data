@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rev_cntr_apc_hipps_cd,REV_CNTR_APC_HIPPS_CD,Revenue Center APC or HIPPS Code,APCHIPPS,REV_CNTR_APC_HIPPS_CD,CHAR,5,NCH,

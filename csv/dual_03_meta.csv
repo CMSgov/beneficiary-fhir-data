@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+dual_03,DUAL_03,Monthly Medicare-Medicaid dual eligibility code - March,DUAL_03,DUAL_STUS_CD_03,CHAR,2,CMS Enrollment Database (EDB),

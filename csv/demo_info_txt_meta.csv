@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+demo_info_txt,DEMO_INFO_TXT,Demonstration information text,DEMO_INFO_TXT,DEMO_INFO_TXT,CHAR,15,NCH,

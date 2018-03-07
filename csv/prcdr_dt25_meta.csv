@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+prcdr_dt25,PRCDR_DT25,Claim Procedure Code XXV Date,PRCDR_DT25,PRCDR_DT25,DATE,8,NCH,

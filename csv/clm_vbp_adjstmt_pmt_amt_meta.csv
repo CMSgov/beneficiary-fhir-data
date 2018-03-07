@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_vbp_adjstmt_pmt_amt,CLM_VBP_ADJSTMT_PMT_AMT,Claim Value-Based Purchasing Adjustment Payment Amount,CLM_VBP_ADJSTMT_PMT_AMT,CLM_VBP_ADJSTMT_PMT_AMT,NUM,12,NCH,XXX.XX (may be a negative value)

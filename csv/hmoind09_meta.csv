@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+hmoind09,HMOIND09,HMO Indicator - September,HMOIND09,BENE_HMO_IND_09,CHAR,1,CMS Enrollment Database (EDB),

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_poa_ind_sw7,CLM_POA_IND_SW7,Claim Diagnosis Code VII Diagnosis Present on Admission (POA) Indicator Code,CLM_POA_IND_SW7,CLM_POA_IND_SW7,CHAR,1,NCH,

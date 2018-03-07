@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rev_cntr_1st_ansi_cd,REV_CNTR_1ST_ANSI_CD,Revenue Center 1st ANSI Code,REVANSI1,REV_CNTR_1ST_ANSI_CD,CHAR,5,NCH,

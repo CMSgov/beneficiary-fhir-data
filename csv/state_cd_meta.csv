@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+state_cd,STATE_CD,State code for beneficiary (SSA code),STATE_CD,STATE_CODE,CHAR,2,CMS Enrollment Database (EDB),

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+hmoind04,HMOIND04,HMO Indicator - April,HMOIND04,BENE_HMO_IND_04,CHAR,1,CMS Enrollment Database (EDB),
