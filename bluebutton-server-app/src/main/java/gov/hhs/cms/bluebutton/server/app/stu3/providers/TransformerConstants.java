@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
-import org.hl7.fhir.dstu3.model.codesystems.ClaimType;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.codebook.model.Variable;
@@ -280,8 +279,6 @@ final class TransformerConstants {
 	static final String CODING_FHIR_BENEFIT_BALANCE = BenefitCategory.MEDICAL.getSystem();
 
 	static final String CODING_FHIR_CARE_TEAM_ROLE = ClaimCareteamrole.PRIMARY.getSystem();
-
-	static final String CODING_FHIR_CLAIM_TYPE = ClaimType.PROFESSIONAL.getSystem();
 
 	/**
 	 * Used as the {@link Coding#getSystem()} for {@link ItemComponent#getService()}

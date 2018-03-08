@@ -2,6 +2,12 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Fix `ExplanationOfBenefit.type` "FHIR Claim Type" Coding
+
+This fix only applies to `ExplanationOfBenefit.type` `Coding`s where the `Coding.system` is `http://hl7.org/fhir/ex-claimtype`.
+
+The `Coding.code` values used here were incorrectly uppercased and have been fixed (to lowercase). In addition, `Coding.display` values are now included for this `Coding`.
+
 ### Fix `ExplanationOfBenefit.identifier` "Prescription Reference Number" System
 
 The `Identifier.system` values used here were incorrect and have been fixed:

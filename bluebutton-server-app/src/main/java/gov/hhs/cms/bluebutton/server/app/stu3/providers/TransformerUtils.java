@@ -1295,29 +1295,26 @@ public final class TransformerUtils {
 				.setCode(blueButtonClaimType.name());
 
 		// Map a Coding for FHIR's ClaimType coding system, if we can.
+		org.hl7.fhir.dstu3.model.codesystems.ClaimType fhirClaimType;
 		switch (blueButtonClaimType) {
 		case CARRIER:
 		case OUTPATIENT:
-			// map these blue button claim types to PROFESSIONAL
-			eob.getType().addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE)
-					.setCode(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL.name());
+			fhirClaimType = org.hl7.fhir.dstu3.model.codesystems.ClaimType.PROFESSIONAL;
 			break;
 
 		case INPATIENT:
 		case HOSPICE:
 		case SNF:
-			// map these blue button claim types to INSTITUTIONAL
-			eob.getType().addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE)
-					.setCode(org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL.name());
+			fhirClaimType = org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL;
 			break;
+
 		case PDE:
-			// map these blue button claim types to PHARMACY
-			eob.getType().addCoding().setSystem(TransformerConstants.CODING_FHIR_CLAIM_TYPE)
-					.setCode(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY.name());
+			fhirClaimType = org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY;
 			break;
 
 		case HHA:
 		case DME:
+			fhirClaimType = null;
 			// FUTURE these blue button claim types currently have no equivalent
 			// CODING_FHIR_CLAIM_TYPE mapping
 			break;
@@ -1326,6 +1323,9 @@ public final class TransformerUtils {
 			// unknown claim type
 			throw new BadCodeMonkeyException();
 		}
+		if (fhirClaimType != null)
+			eob.getType().addCoding(
+					new Coding(fhirClaimType.getSystem(), fhirClaimType.toCode(), fhirClaimType.getDisplay()));
 
 		// map blue button near line record id to a ccw record id code
 		if (ccwNearLineRecordIdCode.isPresent()) {

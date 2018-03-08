@@ -889,7 +889,8 @@ final class TransformerTestUtils {
 				eobType.getCoding());
 
 		if (fhirClaimType.isPresent()) {
-			assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE, fhirClaimType.get().name(), eobType.getCoding());
+			assertHasCoding(org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL.getSystem(),
+					fhirClaimType.get().toCode(), eobType.getCoding());
 		}
 
 		if (ccwNearLineRecordIdCode.isPresent()) {
