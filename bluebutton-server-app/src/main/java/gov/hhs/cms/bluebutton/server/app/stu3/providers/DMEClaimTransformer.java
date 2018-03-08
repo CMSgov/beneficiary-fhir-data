@@ -118,7 +118,7 @@ final class DMEClaimTransformer {
 			if (claimLine.getProviderNPI().isPresent()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils
 						.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_NPI_US,
-								claimLine.getProviderNPI().get(), ClaimCareteamrole.PRIMARY.toCode());
+								claimLine.getProviderNPI().get(), ClaimCareteamrole.PRIMARY);
 				performingCareTeamMember.setResponsible(true);
 
 				/*

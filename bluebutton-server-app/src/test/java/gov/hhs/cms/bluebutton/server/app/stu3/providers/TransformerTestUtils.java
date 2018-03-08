@@ -226,18 +226,18 @@ final class TransformerTestUtils {
 	 * @param expectedPractitioner
 	 *            {@link CareTeamComponent#getProviderIdentifier)} to find and
 	 *            verify
-	 * @param expectedPractitionerRole
+	 * @param expectedCareTeamRole
+	 *            the {@link ClaimCareteamrole} for
 	 *            {@link CareTeamComponent#getRole)} to find and verify
 	 * @param eob
 	 *            the actual {@link ExplanationOfBenefit}s to verify
 	 */
-
-	static void assertCareTeamEquals(String expectedPractitioner, String expectedPractitionerRole,
+	static void assertCareTeamEquals(String expectedPractitioner, ClaimCareteamrole expectedCareTeamRole,
 			ExplanationOfBenefit eob) {
-		CareTeamComponent careTeamEntry = findCareTeamEntryForProviderIdentifier(
-				TransformerConstants.CODING_NPI_US, expectedPractitioner, eob.getCareTeam());
+		CareTeamComponent careTeamEntry = findCareTeamEntryForProviderIdentifier(TransformerConstants.CODING_NPI_US,
+				expectedPractitioner, eob.getCareTeam());
 		Assert.assertNotNull(careTeamEntry);
-		assertCodingEquals(TransformerConstants.CODING_FHIR_CARE_TEAM_ROLE, expectedPractitionerRole,
+		assertCodingEquals(expectedCareTeamRole.getSystem(), expectedCareTeamRole.toCode(),
 				careTeamEntry.getRole().getCodingFirstRep());
 	}
 
@@ -1637,8 +1637,7 @@ final class TransformerTestUtils {
 		assertHasCoding(CcwCodebookVariable.CLM_SRVC_CLSFCTN_TYPE_CD, claimServiceClassificationTypeCode,
 				eob.getType());
 
-		TransformerTestUtils.assertCareTeamEquals(attendingPhysicianNpi.get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+		TransformerTestUtils.assertCareTeamEquals(attendingPhysicianNpi.get(), ClaimCareteamrole.PRIMARY, eob);
 
 		Assert.assertEquals(totalChargeAmount, eob.getTotalCost().getValue());
 		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
@@ -1713,9 +1712,8 @@ final class TransformerTestUtils {
 					item);
 		}
 
-		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
-
+		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(), ClaimCareteamrole.PRIMARY,
+				eob);
 	}
 	
 	/**
@@ -1770,10 +1768,8 @@ final class TransformerTestUtils {
 				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY,
 				bloodDeductibleLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial());
 
-		TransformerTestUtils.assertCareTeamEquals(operatingPhysicianNpi.get(),
-				ClaimCareteamrole.ASSIST.toCode(), eob);
-		TransformerTestUtils.assertCareTeamEquals(otherPhysicianNpi.get(), ClaimCareteamrole.OTHER.toCode(),
-				eob);
+		TransformerTestUtils.assertCareTeamEquals(operatingPhysicianNpi.get(), ClaimCareteamrole.ASSIST, eob);
+		TransformerTestUtils.assertCareTeamEquals(otherPhysicianNpi.get(), ClaimCareteamrole.OTHER, eob);
 
 		assertExtensionCodingEquals(CcwCodebookVariable.CLAIM_QUERY_CD, claimQueryCode, eob.getBillablePeriod());
 	}

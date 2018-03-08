@@ -83,8 +83,7 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionIdentifierEquals(CcwCodebookVariable.SUPLRNUM,
 				claimLine1.getProviderBillingNumber(), eobItem0);
 
-		TransformerTestUtils.assertCareTeamEquals(claimLine1.getProviderNPI().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+		TransformerTestUtils.assertCareTeamEquals(claimLine1.getProviderNPI().get(), ClaimCareteamrole.PRIMARY, eob);
 		CareTeamComponent performingCareTeamEntry = TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
 				claimLine1.getProviderNPI().get(), eob.getCareTeam());
 		TransformerTestUtils.assertHasCoding(CcwCodebookVariable.PRVDR_SPCLTY, claimLine1.getProviderSpecialityCode(),

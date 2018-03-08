@@ -2,6 +2,10 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Include `ExplanationOfBenefit.careTeam.role` `Coding.display` Values
+
+The `Coding.display` values for this field are now included in responses, for convenience.
+
 ### Fix `ExplanationOfBenefit.type` "FHIR Claim Type" Coding
 
 This fix only applies to `ExplanationOfBenefit.type` `Coding`s where the `Coding.system` is `http://hl7.org/fhir/ex-claimtype`.

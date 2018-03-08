@@ -106,9 +106,9 @@ final class CarrierClaimTransformer {
 			 * this, so we'll leave it blank.)
 			 */
 			if (claimLine.getPerformingPhysicianNpi().isPresent()) {
-				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils.addCareTeamPractitioner(eob, item,
-						TransformerConstants.CODING_NPI_US, claimLine.getPerformingPhysicianNpi().get(),
-								ClaimCareteamrole.PRIMARY.toCode());
+				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils
+						.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_NPI_US,
+								claimLine.getPerformingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY);
 				performingCareTeamMember.setResponsible(true);
 
 				/*

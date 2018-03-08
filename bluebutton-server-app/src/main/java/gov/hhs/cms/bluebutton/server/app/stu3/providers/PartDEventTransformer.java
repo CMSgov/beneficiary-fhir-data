@@ -210,8 +210,7 @@ final class PartDEventTransformer {
 
 		if (claimGroup.getPrescriberId() != null) {
 			TransformerUtils.addCareTeamPractitioner(eob, rxItem, TransformerConstants.CODING_NPI_US,
-					claimGroup.getPrescriberId(),
-					ClaimCareteamrole.PRIMARY.toCode());
+					claimGroup.getPrescriberId(), ClaimCareteamrole.PRIMARY);
 		}
 
 		rxItem.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_NDC,

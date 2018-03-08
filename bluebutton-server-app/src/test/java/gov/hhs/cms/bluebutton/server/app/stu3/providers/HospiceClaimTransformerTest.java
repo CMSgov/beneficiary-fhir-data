@@ -123,7 +123,7 @@ public final class HospiceClaimTransformerTest {
 				claimLine1.getRevenueCenterRenderingPhysicianNPI(), 1/* index */);
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+				ClaimCareteamrole.PRIMARY, eob);
 		
 		// Test to ensure item level fields between Outpatient, HHA and Hospice match
 		TransformerTestUtils.assertEobCommonItemRevenueOutHHAHospice(eobItem0, claimLine1.getRevenueCenterDate(),

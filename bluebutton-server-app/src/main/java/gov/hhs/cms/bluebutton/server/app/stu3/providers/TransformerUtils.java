@@ -110,10 +110,13 @@ public final class TransformerUtils {
 	 * @param practitionerIdValue
 	 *            the {@link Identifier#getValue()} of the practitioner to reference
 	 *            in {@link CareTeamComponent#getProvider()}
+	 * @param careTeamRole
+	 *            the {@link ClaimCareteamrole} to use for the
+	 *            {@link CareTeamComponent#getRole()}
 	 * @return the {@link CareTeamComponent} that was created/linked
 	 */
 	static CareTeamComponent addCareTeamPractitioner(ExplanationOfBenefit eob, ItemComponent eobItem,
-			String practitionerIdSystem, String practitionerIdValue, String practitionerRole) {
+			String practitionerIdSystem, String practitionerIdValue, ClaimCareteamrole careTeamRole) {
 		// Try to find a matching pre-existing entry.
 		CareTeamComponent careTeamEntry = eob.getCareTeam().stream().filter(ctc -> ctc.getProvider().hasIdentifier())
 				.filter(ctc -> practitionerIdSystem.equals(ctc.getProvider().getIdentifier().getSystem())
@@ -126,8 +129,11 @@ public final class TransformerUtils {
 			careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
 			careTeamEntry.setProvider(new Reference()
 					.setIdentifier(new Identifier().setSystem(practitionerIdSystem).setValue(practitionerIdValue)));
-			careTeamEntry
-					.setRole(createCodeableConcept(TransformerConstants.CODING_FHIR_CARE_TEAM_ROLE, practitionerRole));
+
+			CodeableConcept careTeamRoleConcept = createCodeableConcept(ClaimCareteamrole.OTHER.getSystem(),
+					careTeamRole.toCode());
+			careTeamRoleConcept.getCodingFirstRep().setDisplay(careTeamRole.getDisplay());
+			careTeamEntry.setRole(careTeamRoleConcept);
 		}
 
 		// care team entry is at eob level so no need to create item link id
@@ -1782,7 +1788,7 @@ public final class TransformerUtils {
 
 		if (revenueCenterRenderingPhysicianNPI.isPresent()) {
 			TransformerUtils.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_NPI_US,
-					revenueCenterRenderingPhysicianNPI.get(), ClaimCareteamrole.PRIMARY.toCode());
+					revenueCenterRenderingPhysicianNPI.get(), ClaimCareteamrole.PRIMARY);
 		}
 
 		return item;
@@ -1868,12 +1874,12 @@ public final class TransformerUtils {
 
 		if (operatingPhysicianNpi.isPresent()) {
 			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
-					operatingPhysicianNpi.get(), ClaimCareteamrole.ASSIST.toCode());
+					operatingPhysicianNpi.get(), ClaimCareteamrole.ASSIST);
 		}
 
 		if (otherPhysicianNpi.isPresent()) {
 			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
-					otherPhysicianNpi.get(), ClaimCareteamrole.OTHER.toCode());
+					otherPhysicianNpi.get(), ClaimCareteamrole.OTHER);
 		}
 
 		eob.getBillablePeriod()
@@ -1963,7 +1969,7 @@ public final class TransformerUtils {
 
 		if (attendingPhysicianNpi.isPresent()) {
 			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
-					attendingPhysicianNpi.get(), ClaimCareteamrole.PRIMARY.toCode());
+					attendingPhysicianNpi.get(), ClaimCareteamrole.PRIMARY);
 		}
 		eob.setTotalCost(
 				(Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalChargeAmount));

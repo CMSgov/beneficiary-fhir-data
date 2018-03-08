@@ -101,7 +101,7 @@ public final class CarrierClaimTransformerTest {
 		Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getPerformingPhysicianNpi().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+				ClaimCareteamrole.PRIMARY, eob);
 		CareTeamComponent performingCareTeamEntry = TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
 				claimLine1.getPerformingPhysicianNpi().get(), eob.getCareTeam());
 		TransformerTestUtils.assertHasCoding(CcwCodebookVariable.PRVDR_SPCLTY,
