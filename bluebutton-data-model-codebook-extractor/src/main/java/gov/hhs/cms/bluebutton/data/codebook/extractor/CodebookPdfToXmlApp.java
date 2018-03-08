@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.data.codebook.extractor;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,7 +72,8 @@ public final class CodebookPdfToXmlApp {
 		try (FileWriter outputWriter = new FileWriter(outputFile.toFile());) {
 			JAXBContext jaxbContext = JAXBContext.newInstance(Codebook.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			jaxbMarshaller.setProperty("jaxb.formatted.output", true);
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 
 			jaxbMarshaller.marshal(codebook, outputWriter);
 		} catch (JAXBException e) {

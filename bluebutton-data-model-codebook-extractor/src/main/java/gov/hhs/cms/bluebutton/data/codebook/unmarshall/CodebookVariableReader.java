@@ -2,9 +2,12 @@ package gov.hhs.cms.bluebutton.data.codebook.unmarshall;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -103,12 +106,16 @@ public final class CodebookVariableReader {
 			JAXBContext jaxbContext = JAXBContext.newInstance(Codebook.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-			Codebook codebook = (Codebook) jaxbUnmarshaller.unmarshal(codebookXmlStream);
+			InputStreamReader codebookXmlReader = new InputStreamReader(codebookXmlStream,
+					StandardCharsets.UTF_8.name());
+			Codebook codebook = (Codebook) jaxbUnmarshaller.unmarshal(codebookXmlReader);
 			return codebook;
 		} catch (JAXBException e) {
 			throw new UncheckedJaxbException(e);
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Null input stream", e);
+		} catch (UnsupportedEncodingException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 }
