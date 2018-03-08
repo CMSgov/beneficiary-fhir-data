@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Address;
@@ -209,9 +210,7 @@ final class SNFClaimTransformer {
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 			
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(), Optional.empty(), Optional.empty(),
-					Optional.empty());
+			TransformerUtils.mapHcpcs(eob, item, Optional.empty(), claimLine.getHcpcsCode(), Collections.emptyList());
 
 			// Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonItemRevenue(item, eob, claimLine.getRevenueCenter(), claimLine.getRateAmount(),

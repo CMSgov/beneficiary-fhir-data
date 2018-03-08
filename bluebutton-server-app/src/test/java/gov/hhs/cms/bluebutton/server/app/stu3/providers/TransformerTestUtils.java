@@ -1874,22 +1874,21 @@ final class TransformerTestUtils {
 			Optional<String> hcpcsInitialModifierCode, Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode,
 			int index) {
 		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
-			assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(), hcpcsInitialModifierCode.get(),
-					item.getModifier().get(index).getCoding());
-			TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(),
+			assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, "" + hcpcsYearCode.get(),
+					hcpcsInitialModifierCode.get(), item.getModifier().get(index).getCoding());
+			TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, "" + hcpcsYearCode.get(),
 					hcpcsCode.get(), item.getService().getCoding());
 		} else { // while others do not...
 			if (hcpcsInitialModifierCode.isPresent()) {
-				assertHasCoding(TransformerConstants.CODING_HCPCS, hcpcsInitialModifierCode.get(),
+				assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsInitialModifierCode.get(),
 						item.getModifier().get(index).getCoding());
 			}
 			if (hcpcsCode.isPresent()) {
-				TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-						hcpcsCode.get(), item.getService().getCoding());
+				TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsCode.get(),
+						item.getService().getCoding());
 			}
-
 		}
-		Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
 
+		Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
 	}
 }

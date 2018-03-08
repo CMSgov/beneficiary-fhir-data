@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -205,9 +206,7 @@ final class InpatientClaimTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.getLineNumber().intValue());
 
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(), Optional.empty(), Optional.empty(),
-					Optional.empty());
+			TransformerUtils.mapHcpcs(eob, item, Optional.empty(), claimLine.getHcpcsCode(), Collections.emptyList());
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 

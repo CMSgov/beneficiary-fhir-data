@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -137,9 +138,9 @@ final class DMEClaimTransformer {
 						CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode()));
 			}
 
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
-					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
+			TransformerUtils.mapHcpcs(eob, item, claimGroup.getHcpcsYearCode(), claimLine.getHcpcsCode(),
+					Arrays.asList(claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(),
+							claimLine.getHcpcsThirdModifierCode(), claimLine.getHcpcsFourthModifierCode()));
 
 			item.addAdjudication()
 					.setCategory(
@@ -156,17 +157,6 @@ final class DMEClaimTransformer {
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPurchasePriceAmount());
-
-			if (claimLine.getHcpcsThirdModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsThirdModifierCode().get()));
-			}
-			if (claimLine.getHcpcsFourthModifierCode().isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_HCPCS, "" + claimGroup.getHcpcsYearCode().get(),
-						claimLine.getHcpcsFourthModifierCode().get()));
-			}
 
 			if (claimLine.getScreenSavingsAmount().isPresent()) {
 				// TODO should this be an adjudication?

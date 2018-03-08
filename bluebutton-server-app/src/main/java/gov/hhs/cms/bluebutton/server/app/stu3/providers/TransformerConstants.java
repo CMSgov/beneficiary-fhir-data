@@ -4,6 +4,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -281,13 +282,14 @@ final class TransformerConstants {
 	static final String CODING_FHIR_CARE_TEAM_ROLE = ClaimCareteamrole.PRIMARY.getSystem();
 
 	static final String CODING_FHIR_CLAIM_TYPE = ClaimType.PROFESSIONAL.getSystem();
-	
+
 	/**
-	 * A CMS-controlled standard. More info here: <a href=
-	 * "https://en.wikipedia.org/wiki/Healthcare_Common_Procedure_Coding_System">
-	 * Healthcare Common Procedure Coding System</a>.
+	 * Used as the {@link Coding#getSystem()} for {@link ItemComponent#getService()}
+	 * and {@link ItemComponent#getModifier()}. (This is used instead of
+	 * {@link CcwCodebookVariable#HCPCS_CD} so that we can provide some extra
+	 * helpful documentation at the URL.)
 	 */
-	static final String CODING_HCPCS = "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html";
+	static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
 	static final String CODING_MONEY = "urn:std:iso:4217";
 	

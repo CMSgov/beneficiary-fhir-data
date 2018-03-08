@@ -1,6 +1,13 @@
 # API Changelog
 
-## CBBF-97 (again): Finish fixes to code systems, etc.
+## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
+
+### Change `ExplanationOfBenefit.item.service` and `ExplanationOfBenefit.item.modifier` Code System
+
+The HCPCS `Coding.system` values used here have been changed to point to better documentation:
+
+* Previously: `https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html`
+* Improved/Current: `https://bluebutton.cms.gov/resources/codesystem/hcpcs`
 
 ### Fix `ExplanationOfBenefit.type` "Blue Button EOB Type" Code System
 

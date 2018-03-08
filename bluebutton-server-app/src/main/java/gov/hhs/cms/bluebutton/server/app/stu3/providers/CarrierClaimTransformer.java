@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -139,9 +140,8 @@ final class CarrierClaimTransformer {
 					CcwCodebookVariable.CARR_LINE_RDCD_PMT_PHYS_ASTN_C,
 					claimLine.getReducedPaymentPhysicianAsstCode()));
 			
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
-					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
+			TransformerUtils.mapHcpcs(eob, item, claimGroup.getHcpcsYearCode(), claimLine.getHcpcsCode(),
+					Arrays.asList(claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode()));
 
 			if (claimLine.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
 				item.getService().addExtension(TransformerUtils.createExtensionQuantity(

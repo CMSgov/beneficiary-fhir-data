@@ -6,12 +6,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -2342,55 +2345,48 @@ public final class TransformerUtils {
 	}
 
 	/**
-	 * Sets the hcpcsCode field which is common among these claim types: Carrier,
-	 * Inpatient, Outpatient, DME, Hospice, HHA and SNF. Sets the hcpcs related
-	 * fields which are common among these claim types: Carrier, Outpatient, DME,
-	 * Hospice and HHA
-	 *
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that the HCPCS code is being
+	 *            mapped into
 	 * @param item
-	 *            the {@link ItemComponent} this method will modify
-	 * @param hcpcsCode
-	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing
-	 *            the hcpcs code for the claim
-	 * @param hcpcsInitialModifierCode
-	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_1ST_MDFR_CD:
-	 *            representing the hcpcs initial modifier code for the claim
-	 * @param hcpcsSecondModifierCode
-	 *            the {@link Optional}&lt;{@link String}&gt; HCPCS_2ND_MDFR_CD:
-	 *            representing the hcpcs second modifier code for the claim
-	 * @param hcpcsYearCode
-	 *            the {@link Optional}&lt;{@link Character}&gt;
-	 *            CARR_CLM_HCPCS_YR_CD: representing the hcpcs year code for the
-	 *            claim
+	 *            the {@link ItemComponent} that the HCPCS code is being mapped into
+	 * @param hcpcsYear
+	 *            the {@link CcwCodebookVariable#CARR_CLM_HCPCS_YR_CD} identifying
+	 *            the HCPCS code version in use
+	 * @param hcpcs
+	 *            the {@link CcwCodebookVariable#HCPCS_CD} to be mapped
+	 * @param hcpcsModifiers
+	 *            the {@link CcwCodebookVariable#HCPCS_1ST_MDFR_CD}, etc. values to
+	 *            be mapped (if any)
 	 */
-	static void setHcpcsModifierCodes(ItemComponent item, Optional<String> hcpcsCode,
-			Optional<String> hcpcsInitialModifierCode, Optional<String> hcpcsSecondModifierCode,
-			Optional<Character> hcpcsYearCode) {
-		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
-			if (hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-						"" + hcpcsYearCode.get(), hcpcsInitialModifierCode.get()));
-			}
-			if (hcpcsSecondModifierCode.isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-						"" + hcpcsYearCode.get(), hcpcsSecondModifierCode.get()));
-			}
-			if (hcpcsCode.isPresent()) {
-				item.setService(createCodeableConcept(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(),
-						hcpcsCode.get()));
-			}
-		} else { // while others do not...
-			if (hcpcsInitialModifierCode.isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-						hcpcsInitialModifierCode.get()));
-			}
-			if (hcpcsSecondModifierCode.isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-						hcpcsSecondModifierCode.get()));
-			}
-			if (hcpcsCode.isPresent()) {
-				item.setService(createCodeableConcept(TransformerConstants.CODING_HCPCS, hcpcsCode.get()));
-			}
+	static void mapHcpcs(ExplanationOfBenefit eob, ItemComponent item, Optional<Character> hcpcsYear,
+			Optional<String> hcpcs, List<Optional<String>> hcpcsModifiers) {
+		// Create and map all of the possible CodeableConcepts.
+		CodeableConcept hcpcsConcept = hcpcs.isPresent()
+				? createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcs.get())
+				: null;
+		if (hcpcsConcept != null)
+			item.setService(hcpcsConcept);
+		List<CodeableConcept> hcpcsModifierConcepts = new ArrayList<>(4);
+		for (Optional<String> hcpcsModifier : hcpcsModifiers) {
+			if (!hcpcsModifier.isPresent())
+				continue;
+
+			CodeableConcept hcpcsModifierConcept = createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS,
+					hcpcsModifier.get());
+			hcpcsModifierConcepts.add(hcpcsModifierConcept);
+			item.addModifier(hcpcsModifierConcept);
 		}
+
+		// Set Coding.version for all of the mappings, if it's available.
+		Stream.concat(Arrays.asList(hcpcsConcept).stream(), hcpcsModifierConcepts.stream()).forEach(concept -> {
+			if (concept == null)
+				return;
+			if (!hcpcsYear.isPresent())
+				return;
+
+			// Note: Only CARRIER and DME claims have the year/version field.
+			concept.getCodingFirstRep().setVersion(hcpcsYear.get().toString());
+		});
 	}
 }
