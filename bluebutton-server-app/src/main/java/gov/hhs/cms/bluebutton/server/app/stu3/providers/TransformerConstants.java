@@ -329,11 +329,4 @@ final class TransformerConstants {
 	 * value for Part D.
 	 */
 	public static final String COVERAGE_PLAN_PART_D = "Part D";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/rx_srvc_rfrnc_num.txt">
-	 * CCW Data Dictionary: RX_SRVC_RFRNC_NUM</a>.
-	 */
-	static final String IDENTIFIER_RX_SERVICE_REFERENCE_NUMBER = "CCW.RX_SRVC_RFRNC_NUM";
 }

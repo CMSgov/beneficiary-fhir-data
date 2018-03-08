@@ -528,10 +528,13 @@ public final class TransformerUtils {
 
 	/**
 	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being mapped
 	 * @param identifierValue
-	 * @return
+	 *            the value to use for {@link Identifier#getValue()} for the
+	 *            resulting {@link Identifier}
+	 * @return the output {@link Identifier}
 	 */
-	private static Identifier createIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
+	static Identifier createIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
 		if (identifierValue == null)
 			throw new IllegalArgumentException();
 

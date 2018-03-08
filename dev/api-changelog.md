@@ -2,6 +2,15 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Fix `ExplanationOfBenefit.identifier` "Prescription Reference Number" System
+
+The `Identifier.system` values used here were incorrect and have been fixed:
+
+* Previously: `CCW.RX_SRVC_RFRNC_NUM`
+* Corrected/Current: `https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num`
+
+Documentation for this field is now available at its corrected URL.
+
 ### Change NDC Code System
 
 The NDC `Coding.system` values used have been changed to the ones recommended by the FHIR community:

@@ -49,8 +49,8 @@ final class PartDEventTransformer {
 				ClaimType.PDE, claimGroup.getClaimGroupId().toPlainString(), MedicareSegment.PART_D, Optional.empty(),
 				Optional.empty(), Optional.empty(), claimGroup.getFinalAction());
 
-		eob.addIdentifier().setSystem(TransformerConstants.IDENTIFIER_RX_SERVICE_REFERENCE_NUMBER)
-				.setValue(String.valueOf(claimGroup.getPrescriptionReferenceNumber()));
+		eob.addIdentifier(TransformerUtils.createIdentifier(CcwCodebookVariable.RX_SRVC_RFRNC_NUM,
+				claimGroup.getPrescriptionReferenceNumber().toPlainString()));
 
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
