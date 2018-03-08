@@ -293,7 +293,13 @@ final class TransformerConstants {
 
 	static final String CODING_MONEY = "urn:std:iso:4217";
 	
-	static final String CODING_NDC = "https://www.accessdata.fda.gov/scripts/cder/ndc";
+	/**
+	 * Used to identify the drugs that were purchased as part of Part D, Carrier,
+	 * and DME claims. See here for more information on using NDC codes with FHIR:
+	 * <a href="http://hl7.org/fhir/ndc.html">10 Using NDC and NHRIC Codes with
+	 * FHIR</a>.
+	 */
+	static final String CODING_NDC = "http://hl7.org/fhir/sid/ndc";
 
 	/**
 	 * The United States National Provider Identifier, as available at

@@ -2,6 +2,13 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Change NDC Code System
+
+The NDC `Coding.system` values used have been changed to the ones recommended by the FHIR community:
+
+* Previously: `https://www.accessdata.fda.gov/scripts/cder/ndc`
+* Improved/Current: `http://hl7.org/fhir/sid/ndc`
+
 ### Change `ExplanationOfBenefit.item.service` and `ExplanationOfBenefit.item.modifier` Code System
 
 The HCPCS `Coding.system` values used here have been changed to point to better documentation:
