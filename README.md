@@ -31,19 +31,18 @@ Most Popular Codes
 These are the most common CMS variables/codes seen in  API responses. 
 
 
-# Claim ID: https://bluebutton.cms.gov/resources/variables/clm_id/
-# Claim Source Inpatient Admission Code: https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd/ 
-# Claim Source Inpatient Admission Code: http://bluebutton.cms.gov/resources/variables/clm_id/
-# Claim Attending Physician Specialty Code: https://bluebutton.cms.gov/resources/variables/at_physn_spclty_cd/
-# Carrier Claim Provider Assignment Indicator Switch: https://bluebutton.cms.gov/resources/variables/asgmntcd/
-# Medicare Status Code: https://bluebutton.cms.gov/resources/variables/ms_cd/
-# Carrier Claim Payment Denial: Code https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd/
-# NCH Near Line Record Identification Code (RIC): https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd/
-# Carrier Line Provider Type Code: https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd
-# Carrier or MAC Number: https://bluebutton.cms.gov/resources/variables/carr_num/
-# Line CMS Type Service Code: https://bluebutton.cms.gov/resources/variables/line_cms_type_srvc_cd/
-# Line Berenson-Eggers Type of Service (BETOS) Code: https://bluebutton.cms.gov/resources/variables/betos_cd/
-# Claim Healthcare Common Procedure Coding System (HCPCS) Year Code: https://bluebutton.cms.gov/resources/variables/carr_clm_hcpcs_yr_cd/
+1. Claim ID: https://bluebutton.cms.gov/resources/variables/clm_id/
+2. Claim Source Inpatient Admission Code: https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd/ 
+3. Claim Attending Physician Specialty Code: https://bluebutton.cms.gov/resources/variables/at_physn_spclty_cd/
+4. Carrier Claim Provider Assignment Indicator Switch: https://bluebutton.cms.gov/resources/variables/asgmntcd/
+5. Medicare Status Code: https://bluebutton.cms.gov/resources/variables/ms_cd/
+6. Carrier Claim Payment Denial: Code https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd/
+7. NCH Near Line Record Identification Code (RIC): https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd/
+8. Carrier Line Provider Type Code: https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd
+9. Carrier or MAC Number: https://bluebutton.cms.gov/resources/variables/carr_num/
+10. Line CMS Type Service Code: https://bluebutton.cms.gov/resources/variables/line_cms_type_srvc_cd/
+11. Line Berenson-Eggers Type of Service (BETOS) Code: https://bluebutton.cms.gov/resources/variables/betos_cd/
+12. Claim Healthcare Common Procedure Coding System (HCPCS) Year Code: https://bluebutton.cms.gov/resources/variables/carr_clm_hcpcs_yr_cd/
 
 
 
