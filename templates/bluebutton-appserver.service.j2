@@ -1,5 +1,7 @@
 [Unit]
 Description=Blue Button Data Server
+Wants=network-online.target
+After=network.target network-online.target
 
 [Service]
 WorkingDirectory={{ data_server_dir }}
