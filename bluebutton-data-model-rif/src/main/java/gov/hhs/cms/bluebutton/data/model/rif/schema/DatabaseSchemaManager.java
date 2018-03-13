@@ -95,10 +95,12 @@ public final class DatabaseSchemaManager {
 				placeholders.put("type.int4", "integer");
 				placeholders.put("logic.tablespaces-escape", "--");
 				placeholders.put("logic.alter-column-type", "");
+				placeholders.put("logic.index-create-concurrently", "");
 			} else {
 				placeholders.put("type.int4", "int4");
 				placeholders.put("logic.tablespaces-escape", "--");
 				placeholders.put("logic.alter-column-type", "type");
+				placeholders.put("logic.index-create-concurrently", "concurrently");
 			}
 		} catch (SQLException e) {
 			throw new UncheckedSqlException(e);
