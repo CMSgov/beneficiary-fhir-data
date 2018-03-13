@@ -26,6 +26,15 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
+# Create the temp directory iff it's missing. (Don't want to accidentally
+# change the permissions on /tmp.)
+- name: Check for Custom Temp Directory
+  stat:
+    path: "{{ data_pipeline_tmp_dir }}"
+  become: true
+  register: stat_tmp
+  when: data_pipeline_tmp_dir is defined
+
 - name: Create Custom Temp Directory
   file:
     path: "{{ data_pipeline_tmp_dir }}"
@@ -34,7 +43,7 @@
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
-  when: data_pipeline_tmp_dir is defined
+  when: data_pipeline_tmp_dir is defined and stat_tmp.exists == false
 
 # If the app's JAR is in S3, grab it from there.
 - block:
