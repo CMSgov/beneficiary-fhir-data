@@ -68,43 +68,53 @@ import junit.framework.AssertionFailedError;
  */
 final class TransformerTestUtils {
 	/**
-	 * @param expectedCategoryCode
-	 *            the expected {@link Coding#getCode()} of the
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} for the
 	 *            {@link AdjudicationComponent#getCategory()} to find and verify
 	 * @param expectedAmount
 	 *            the expected {@link AdjudicationComponent#getAmount()}
 	 * @param actuals
 	 *            the actual {@link AdjudicationComponent}s to verify
+	 * @return the {@link AdjudicationComponent} that was found and verified
 	 */
-	static void assertAdjudicationEquals(String expectedCategoryCode, BigDecimal expectedAmount,
-			List<AdjudicationComponent> actuals) {
+	static AdjudicationComponent assertAdjudicationAmountEquals(CcwCodebookVariable ccwVariable,
+			BigDecimal expectedAmount, List<AdjudicationComponent> actuals) {
+		CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
+				expectedCategory.getCodingFirstRep().getSystem(), expectedCategory.getCodingFirstRep().getCode()))
+				.findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		assertEquivalent(expectedAmount, adjudication.get().getAmount().getValue());
+
+		return adjudication.get();
 	}
 
 	/**
 	 * @param expectedCategoryCode
+	 *            the {@link CcwCodebookVariable} for the
+	 *            {@link AdjudicationComponent#getCategory()} to find and verify
+	 * @param expectedReasonCode
 	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link AdjudicationComponent#getCategory()} to verify is not
-	 *            present
+	 *            {@link AdjudicationComponent#getReason()} to find and verify
 	 * @param actuals
 	 *            the actual {@link AdjudicationComponent}s to verify
 	 */
-	static void assertAdjudicationNotPresent(String expectedCategoryCode, List<AdjudicationComponent> actuals) {
+	static void assertAdjudicationReasonEquals(CcwCodebookVariable ccwVariable, Optional<?> expectedReasonCode,
+			List<AdjudicationComponent> actuals) {
+		CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
-		Assert.assertFalse(adjudication.isPresent());
+				expectedCategory.getCodingFirstRep().getSystem(), expectedCategory.getCodingFirstRep().getCode()))
+				.findAny();
+		Assert.assertEquals(expectedReasonCode.isPresent(), adjudication.isPresent());
+
+		if (expectedReasonCode.isPresent())
+			assertHasCoding(ccwVariable, expectedReasonCode, adjudication.get().getReason());
 	}
 
 	/**
 	 * @param expectedCategoryCode
-	 *            the expected {@link Coding#getCode()} of the
+	 *            the {@link CcwCodebookVariable} for the
 	 *            {@link AdjudicationComponent#getCategory()} to find and verify
-	 * @param expectedReasonSystem
-	 *            the expected {@link Coding#getSystem()} of the
-	 *            {@link AdjudicationComponent#getReason()} to find and verify
 	 * @param expectedReasonCode
 	 *            the expected {@link Coding#getCode()} of the
 	 *            {@link AdjudicationComponent#getReason()} to find and verify
@@ -113,33 +123,10 @@ final class TransformerTestUtils {
 	 */
 	static void assertAdjudicationReasonEquals(CcwCodebookVariable ccwVariable, Object expectedReasonCode,
 			List<AdjudicationComponent> actuals) {
-		CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
-		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				expectedCategory.getCodingFirstRep().getSystem(), expectedCategory.getCodingFirstRep().getCode()))
-				.findAny();
-		Assert.assertTrue(adjudication.isPresent());
-		assertHasCoding(ccwVariable, expectedReasonCode, adjudication.get().getReason());
-	}
-
-	/**
-	 * @param expectedCategoryCode
-	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link AdjudicationComponent#getCategory()} to find and verify
-	 * @param expectedReasonSystem
-	 *            the expected {@link Coding#getSystem()} of the
-	 *            {@link AdjudicationComponent#getReason()} to find and verify
-	 * @param expectedReasonCode
-	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link AdjudicationComponent#getReason()} to find and verify
-	 * @param actuals
-	 *            the actual {@link AdjudicationComponent}s to verify
-	 */
-	static void assertAdjudicationReasonEquals(String expectedCategoryCode, String expectedReasonSystem,
-			String expectedReasonCode, List<AdjudicationComponent> actuals) {
-		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
-		Assert.assertTrue(adjudication.isPresent());
-		assertHasCoding(expectedReasonSystem, expectedReasonCode, adjudication.get().getReason().getCoding());
+		// Jumping through hoops to cope with overloaded method:
+		Optional<?> expectedReasonCodeCast = expectedReasonCode instanceof Optional ? (Optional<?>) expectedReasonCode
+				: Optional.of(expectedReasonCode);
+		assertAdjudicationReasonEquals(ccwVariable, expectedReasonCodeCast, actuals);
 	}
 
 	/**
@@ -1535,28 +1522,23 @@ final class TransformerTestUtils {
 		assertDateEquals(firstExpenseDate.get(), item.getServicedPeriod().getStartElement());
 		assertDateEquals(lastExpenseDate.get(), item.getServicedPeriod().getEndElement());
 
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT, paymentAmount,
-				item.getAdjudication());
-		AdjudicationComponent adjudicationForPayment = item.getAdjudication().stream()
-				.filter(a -> isCodeInConcept(a.getCategory(),
-						TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-						TransformerConstants.CODED_ADJUDICATION_PAYMENT))
-				.findAny().get();
+		AdjudicationComponent adjudicationForPayment = assertAdjudicationAmountEquals(
+				CcwCodebookVariable.LINE_NCH_PMT_AMT, paymentAmount, item.getAdjudication());
 		assertExtensionCodingEquals(CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode, adjudicationForPayment);
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
-				beneficiaryPaymentAmount, item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
-				providerPaymentAmount, item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE,
-				beneficiaryPartBDeductAmount, item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_BENE_PMT_AMT, beneficiaryPaymentAmount,
+				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_PRVDR_PMT_AMT, providerPaymentAmount,
+				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT, beneficiaryPartBDeductAmount,
+				item.getAdjudication());
 		assertExtensionCodingEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, primaryPayerCode, item);
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
-				primaryPayerPaidAmount, item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT, coinsuranceAmount,
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT, primaryPayerPaidAmount,
 				item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, submittedChargeAmount,
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_COINSRNC_AMT, coinsuranceAmount,
 				item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE, allowedChargeAmount,
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_SBMTD_CHRG_AMT, submittedChargeAmount,
+				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_ALOWD_CHRG_AMT, allowedChargeAmount,
 				item.getAdjudication());
 		assertAdjudicationReasonEquals(CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode,
 				item.getAdjudication());
@@ -1697,12 +1679,12 @@ final class TransformerTestUtils {
 
 		assertHasCoding(CcwCodebookVariable.REV_CNTR, revenueCenterCode, item.getRevenue());
 		
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT, rateAmount,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_RATE_AMT, rateAmount,
 				item.getAdjudication());
 
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_NONCOVERED_CHARGE,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT,
 				nonCoveredChargeAmount, item.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT,
 				totalChargeAmount, item.getAdjudication());
 
 		Assert.assertEquals(unitCount, item.getQuantity().getValue());
@@ -1741,9 +1723,7 @@ final class TransformerTestUtils {
 			Assert.assertEquals(Date.valueOf(revenueCenterDate.get()), item.getServicedDateType().getValue());
 		}
 		
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT,
-				paymentAmount,
-				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT, paymentAmount, item.getAdjudication());
 	}
 
 

@@ -104,12 +104,10 @@ public final class HospiceClaimTransformerTest {
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
 
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT,
 				claimLine1.getProviderPaymentAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
-				claimLine1.getBenficiaryPaymentAmount(),
-				eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT,
+				claimLine1.getBenficiaryPaymentAmount(), eobItem0.getAdjudication());
 
 		// Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
 		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(eobItem0, claimLine1.getDeductibleCoinsuranceCd());

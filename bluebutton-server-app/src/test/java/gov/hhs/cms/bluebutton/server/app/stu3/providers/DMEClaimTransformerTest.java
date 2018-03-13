@@ -101,13 +101,11 @@ public final class DMEClaimTransformerTest {
 				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(),
 				eobItem0.getService().getCoding());
 
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT,
 				claimLine1.getPrimaryPayerAllowedChargeAmount(), eobItem0.getAdjudication());
 
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT, claimLine1.getPurchasePriceAmount(),
-				eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT,
+				claimLine1.getPurchasePriceAmount(), eobItem0.getAdjudication());
 
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.DMERC_LINE_PRCNG_STATE_CD,
 				claimLine1.getPricingStateCode(), eobItem0.getLocation());

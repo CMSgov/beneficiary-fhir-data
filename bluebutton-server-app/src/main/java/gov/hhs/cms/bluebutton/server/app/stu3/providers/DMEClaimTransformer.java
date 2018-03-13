@@ -144,19 +144,16 @@ final class DMEClaimTransformer {
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPrimaryPayerAllowedChargeAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getPurchasePriceAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getPurchasePriceAmount());
 
 			if (claimLine.getScreenSavingsAmount().isPresent()) {
 				// TODO should this be an adjudication?

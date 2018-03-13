@@ -85,15 +85,11 @@ public final class HHAClaimTransformerTest {
 
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD,
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr1stAnsiCd().get(),
-				eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationReasonEquals(CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,
+				claimLine1.getRevCntr1stAnsiCd(), eobItem0.getAdjudication());
 
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT,
-				claimLine1.getRateAmount(),
-				eobItem0.getAdjudication());
 		
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.REV_CNTR_STUS_IND_CD,
 				claimLine1.getStatusCode().get(), eobItem0.getRevenue());

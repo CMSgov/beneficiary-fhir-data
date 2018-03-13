@@ -145,12 +145,9 @@ final class HHAClaimTransformer {
 			if (claimLine.getRevCntr1stAnsiCd().isPresent()) {
 				item.addAdjudication()
 						.setCategory(
-								TransformerUtils.createCodeableConcept(
-										TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-										TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD))
-						.setReason(TransformerUtils.createCodeableConcept(
-								TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-								claimLine.getRevCntr1stAnsiCd().get()));
+								TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD))
+						.setReason(TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,
+								claimLine.getRevCntr1stAnsiCd()));
 			}
 
 			TransformerUtils.mapHcpcs(eob, item, Optional.empty(), claimLine.getHcpcsCode(),

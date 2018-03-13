@@ -118,16 +118,14 @@ public final class OutpatientClaimTransformerTest {
 		 * claimLine1.getNationalDrugCode().get(), eobItem0.getService());
 		 */
 
-		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD,
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr1stAnsiCd().get(),
-				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_2ND_ANSI_CD,
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr2ndAnsiCd().get(),
-				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationNotPresent(TransformerConstants.CODED_ADJUDICATION_3RD_ANSI_CD,
-				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationNotPresent(TransformerConstants.CODED_ADJUDICATION_4TH_ANSI_CD,
-				eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationReasonEquals(CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,
+				claimLine1.getRevCntr1stAnsiCd(), eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationReasonEquals(CcwCodebookVariable.REV_CNTR_2ND_ANSI_CD,
+				claimLine1.getRevCntr2ndAnsiCd(), eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationReasonEquals(CcwCodebookVariable.REV_CNTR_3RD_ANSI_CD,
+				claimLine1.getRevCntr3rdAnsiCd(), eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationReasonEquals(CcwCodebookVariable.REV_CNTR_4TH_ANSI_CD,
+				claimLine1.getRevCntr4thAnsiCd(), eobItem0.getAdjudication());
 
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
@@ -135,29 +133,23 @@ public final class OutpatientClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.REV_CNTR_IDE_NDC_UPC_NUM,
 				claimLine1.getNationalDrugCode(), eobItem0.getService());
 
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_BLOOD_DDCTBL_AMT,
 				claimLine1.getBloodDeductibleAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_CASH_DEDUCTIBLE,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_CASH_DDCTBL_AMT,
 				claimLine1.getCashDeductibleAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_WAGE_ADJ_COINSURANCE_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_COINSRNC_WGE_ADJSTD_C,
 				claimLine1.getWageAdjustedCoinsuranceAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT,
-				claimLine1.getReducedCoinsuranceAmount(),
-				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_1ST_MSP_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_RDCD_COINSRNC_AMT,
+				claimLine1.getReducedCoinsuranceAmount(), eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_1ST_MSP_PD_AMT,
 				claimLine1.getFirstMspPaidAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_2ND_MSP_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_1ST_MSP_PD_AMT,
 				claimLine1.getSecondMspPaidAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT,
 				claimLine1.getProviderPaymentAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
-				claimLine1.getBenficiaryPaymentAmount(),
-				eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT,
+				claimLine1.getBenficiaryPaymentAmount(), eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_PTNT_RSPNSBLTY_PMT,
 				claimLine1.getPatientResponsibilityAmount(), eobItem0.getAdjudication());
 
 		// Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice

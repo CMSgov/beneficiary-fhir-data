@@ -87,35 +87,29 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD,
 				claim.getPharmacyTypeCode(), eob.getFacility());
 
-		// Default case has drug coverage status code as Covered
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PART_D_COVERED,
-				claim.getPartDPlanCoveredPaidAmount(), rxItem.getAdjudication());
-		TransformerTestUtils.assertAdjudicationNotPresent(
-				TransformerConstants.CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT,
-				rxItem.getAdjudication());
-		TransformerTestUtils.assertAdjudicationNotPresent(TransformerConstants.CODED_ADJUDICATION_PART_D_NONCOVERED_OTC,
-				rxItem.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PATIENT_PAY,
-				claim.getPatientPaidAmount(),
-				rxItem.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_OTHER_TROOP_AMOUNT,
+		if (claim.getDrugCoverageStatusCode() == 'C')
+			TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.CVRD_D_PLAN_PD_AMT,
+					claim.getPartDPlanCoveredPaidAmount(), rxItem.getAdjudication());
+		else
+			TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.NCVRD_PLAN_PD_AMT,
+					claim.getPartDPlanCoveredPaidAmount(), rxItem.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.PTNT_PAY_AMT,
+				claim.getPatientPaidAmount(), rxItem.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.OTHR_TROOP_AMT,
 				claim.getOtherTrueOutOfPocketPaidAmount(), rxItem.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.LICS_AMT,
 				claim.getLowIncomeSubsidyPaidAmount(), rxItem.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.PLRO_AMT,
 				claim.getPatientLiabilityReductionOtherPaidAmount(), rxItem.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_COST,
-				claim.getTotalPrescriptionCost(),
-				rxItem.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.TOT_RX_CST_AMT,
+				claim.getTotalPrescriptionCost(), rxItem.getAdjudication());
 
 		Assert.assertTrue(eob.getInformation().stream()
 				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(CcwCodebookVariable.RX_ORGN_CD,
 						claim.getPrescriptionOriginationCode(), i.getCategory())));
 
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT,
-				claim.getGapDiscountAmount(),
-				rxItem.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.RPTD_GAP_DSCNT_NUM,
+				claim.getGapDiscountAmount(), rxItem.getAdjudication());
 		
 		TransformerTestUtils.assertExtensionQuantityEquals(CcwCodebookVariable.FILL_NUM, claim.getFillNumber(),
 				rxItem.getQuantity());

@@ -232,42 +232,30 @@ final class OutpatientClaimTransformer {
 			if (claimLine.getRevCntr1stAnsiCd().isPresent()) {
 				item.addAdjudication()
 						.setCategory(
-								TransformerUtils.createCodeableConcept(
-										TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-										TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD))
-						.setReason(TransformerUtils.createCodeableConcept(
-								TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-								claimLine.getRevCntr1stAnsiCd().get()));
+								TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD))
+						.setReason(TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,
+								claimLine.getRevCntr1stAnsiCd()));
 			}
 			if (claimLine.getRevCntr2ndAnsiCd().isPresent()) {
 				item.addAdjudication()
 						.setCategory(
-								TransformerUtils.createCodeableConcept(
-										TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-										TransformerConstants.CODED_ADJUDICATION_2ND_ANSI_CD))
-						.setReason(TransformerUtils.createCodeableConcept(
-								TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-								claimLine.getRevCntr2ndAnsiCd().get()));
+								TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_2ND_ANSI_CD))
+						.setReason(TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR_2ND_ANSI_CD,
+								claimLine.getRevCntr2ndAnsiCd()));
 			}
 			if (claimLine.getRevCntr3rdAnsiCd().isPresent()) {
 				item.addAdjudication()
 						.setCategory(
-								TransformerUtils.createCodeableConcept(
-										TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-										TransformerConstants.CODED_ADJUDICATION_3RD_ANSI_CD))
-						.setReason(TransformerUtils.createCodeableConcept(
-								TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-								claimLine.getRevCntr3rdAnsiCd().get()));
+								TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_3RD_ANSI_CD))
+						.setReason(TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR_3RD_ANSI_CD,
+								claimLine.getRevCntr3rdAnsiCd()));
 			}
 			if (claimLine.getRevCntr4thAnsiCd().isPresent()) {
 				item.addAdjudication()
 						.setCategory(
-								TransformerUtils.createCodeableConcept(
-										TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-										TransformerConstants.CODED_ADJUDICATION_4TH_ANSI_CD))
-						.setReason(TransformerUtils.createCodeableConcept(
-								TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-								claimLine.getRevCntr4thAnsiCd().get()));
+								TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_4TH_ANSI_CD))
+						.setReason(TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR_4TH_ANSI_CD,
+								claimLine.getRevCntr4thAnsiCd()));
 			}
 
 			TransformerUtils.mapHcpcs(eob, item, Optional.empty(), claimLine.getHcpcsCode(),
@@ -280,75 +268,57 @@ final class OutpatientClaimTransformer {
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_BLOOD_DEDUCTIBLE))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_BLOOD_DDCTBL_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getBloodDeductibleAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getBloodDeductibleAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_CASH_DEDUCTIBLE))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_CASH_DDCTBL_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getCashDeductibleAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getCashDeductibleAmount());
 
 			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_WAGE_ADJ_COINSURANCE_AMOUNT))
+					.setCategory(TransformerUtils
+							.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_COINSRNC_WGE_ADJSTD_C))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getWageAdjustedCoinsuranceAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_RDCD_COINSRNC_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getReducedCoinsuranceAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getReducedCoinsuranceAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_1ST_MSP_AMOUNT))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_1ST_MSP_PD_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getFirstMspPaidAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getFirstMspPaidAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_2ND_MSP_AMOUNT))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_2ND_MSP_PD_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getSecondMspPaidAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getSecondMspPaidAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getProviderPaymentAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getProviderPaymentAmount());
 
 			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getBenficiaryPaymentAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getBenficiaryPaymentAmount());
 
 			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT))
+					.setCategory(TransformerUtils
+							.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_PTNT_RSPNSBLTY_PMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getPatientResponsibilityAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getPatientResponsibilityAmount());
 			
 			// Common item level fields between Outpatient, HHA and Hospice
 			TransformerUtils.mapEobCommonItemRevenueOutHHAHospice(item, claimLine.getRevenueCenterDate(), claimLine.getPaymentAmount());

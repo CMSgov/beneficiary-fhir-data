@@ -2,6 +2,18 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Change `ExplanataionOfBenefit.item.adjudication` Entries
+
+Several changes have been made to these entries:
+
+1. The `Coding.system` values used for `ExplanataionOfBenefit.item.adjudication.category` were incorrect and have been fixed:
+    * Previously: "`CMS Adjudications`"
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/adjudication`
+2. The `Coding.code` values used for `ExplanataionOfBenefit.item.adjudication.category` were incorrect and have been fixed:
+    * Previously, these had been set to what should have been the `Coding.display` values.
+    * Now, they've all been switched to reference URLs. Those URLs uniquely identify the `adjudication` fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful.
+3. The `Coding.display` values for `ExplanataionOfBenefit.item.adjudication.category` are now included.
+
 ### Include `ExplanationOfBenefit.careTeam.role` `Coding.display` Values
 
 The `Coding.display` values for this field are now included in responses, for convenience.

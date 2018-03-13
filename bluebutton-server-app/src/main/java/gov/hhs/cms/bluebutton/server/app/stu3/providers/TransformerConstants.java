@@ -106,121 +106,29 @@ final class TransformerConstants {
 	 */
 	static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
 
-	static final String CODED_ADJUDICATION_1ST_ANSI_CD = "Revenue Center 1st ANSI Code";
-
-	static final String CODED_ADJUDICATION_1ST_MSP_AMOUNT = "Revenue Center 1st Medicare Secondary Payer (MSP) Paid Amount";
-
-	static final String CODED_ADJUDICATION_2ND_ANSI_CD = "Revenue Center 2nd ANSI Code";
-
-	static final String CODED_ADJUDICATION_2ND_MSP_AMOUNT = "Revenue Center 2nd Medicare Secondary Payer (MSP) Paid Amount";
-
-	static final String CODED_ADJUDICATION_3RD_ANSI_CD = "Revenue Center 3rd ANSI Code";
-
-	static final String CODED_ADJUDICATION_4TH_ANSI_CD = "Revenue Center 4th ANSI Code";
-
+	// FIXME also used as a benefit balance
 	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Allowed Charge Amount";
 
+	// FIXME also used as a benefit balance
 	static final String CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT = "Payment Amount to Beneficiary";
 
-	static final String CODED_ADJUDICATION_BLOOD_DEDUCTIBLE = "Blood Deductible Amount";
-
-	static final String CODED_ADJUDICATION_CASH_DEDUCTIBLE = "Cash Deductible Amount";
-
-	static final String CODED_ADJUDICATION_DEDUCTIBLE = "Beneficiary Deductible Amount";
-
-	static final String CODED_ADJUDICATION_GAP_DISCOUNT_AMOUNT = "Medicare Coverage Gap Discount Amount";
-
-	static final String CODED_ADJUDICATION_GDCA = "Gross Drug Cost Above Out-of-Pocket Threshold (GDCA)";
-
-	static final String CODED_ADJUDICATION_GDCB = "Gross Drug Cost Below Out-of-Pocket Threshold (GDCB)";
-
-	static final String CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT = "Coinsurance Amount";
-
-	static final String CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE = "Primary Payer Allowed Charge Amount";
-
-	static final String CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT = "Purchase Price Amount";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/lics_amt.txt">
-	 * CCW Data Dictionary: LICS_AMT</a>.
-	 */
-	static final String CODED_ADJUDICATION_LOW_INCOME_SUBSIDY_AMOUNT = "Part D Low Income Subsidy (LICS) Amount";
-
+	// FIXME only used as a benefit balance
 	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE = "NCH Beneficiary Part B Deductible Amount";
 
-	static final String CODED_ADJUDICATION_NONCOVERED_CHARGE = "Noncovered Charge";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/othr_troop_amt.txt">
-	 * CCW Data Dictionary: OTHR_TROOP_AMT</a>.
-	 */
-	static final String CODED_ADJUDICATION_OTHER_TROOP_AMOUNT = "Other True Out-of-Pocket (TrOOP) Amount";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
-	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
-	 */
-	static final String CODED_ADJUDICATION_PART_D_COVERED = "Part D Covered";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
-	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
-	 */
-	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_OTC = "Part D Over-the-counter drugs";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/drug_cvrg_stus_cd.txt">
-	 * CCW Data Dictionary: DRUG_CVRG_STUS_CD</a>.
-	 */
-	static final String CODED_ADJUDICATION_PART_D_NONCOVERED_SUPPLEMENT = "Part D Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/plro_amt.txt">
-	 * CCW Data Dictionary: PLRO_AMT</a>.
-	 */
-	static final String CODED_ADJUDICATION_PATIENT_LIABILITY_REDUCED_AMOUNT = "Reduction in patient liability due to payments by other payers (PLRO) Amount";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptnt_pay_amt.txt">
-	 * CCW Data Dictionary: PTNT_PAY_AMT</a>.
-	 */
+	// FIXME only used as a benefit balance
 	static final String CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT = "Disproportionate Share Amount";
 
+	// FIXME only used as a benefit balance
 	static final String CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT = "Indirect Medical Education Amount";
 
-	static final String CODED_ADJUDICATION_PATIENT_PAY = "Patient Pay Amount";
-
-	static final String CODED_ADJUDICATION_PATIENT_RESPONSIBILITY_AMOUNT = "Patient Responsibility Amount";
-
-	static final String CODED_ADJUDICATION_PAYMENT = "Revenue Center Payment Amount";
-
+	// FIXME also used as a benefit balance
 	static final String CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT = "Primary Payer Paid Amount";
 
+	// FIXME also used as a benefit balance
 	static final String CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT = "Provider Payment Amount";
 
-	static final String CODED_ADJUDICATION_RATE_AMOUNT = "Revenue Center Rate Amount";
-
-	static final String CODED_ADJUDICATION_REDUCED_COINSURANCE_AMOUNT = "Reduced Coinsurance Amount";
-
+	// FIXME also used as a benefit balance
 	static final String CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT = "Submitted Charge Amount";
-
-	static final String CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT = "Line Total Charge Amount";
-
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/tot_rx_cst_amt.txt">
-	 * CCW Data Dictionary: TOT_RX_CST_AMT</a>.
-	 */
-	static final String CODED_ADJUDICATION_TOTAL_COST = "Total Prescription Cost";
-
-	static final String CODED_ADJUDICATION_WAGE_ADJ_COINSURANCE_AMOUNT = "Wage Adj Coinsurance Amount";
 
 	static final String CODED_BENEFIT_BALANCE_TYPE_BENE_PAYMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/benepmt.txt";
 
@@ -254,7 +162,7 @@ final class TransformerConstants {
 	 * The CMS-custom {@link Coding#getSystem()} value for Medicare
 	 * {@link Adjudication}s.
 	 */
-	static final String CODING_CCW_ADJUDICATION_CATEGORY = "CMS Adjudications";
+	static final String CODING_CCW_ADJUDICATION_CATEGORY = BASE_URL_BBAPI_RESOURCES + "/codesystem/adjudication";
 
 	/**
 	 * Used as the {@link Identifier#getSystem()} that the RIF
