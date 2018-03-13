@@ -1,5 +1,7 @@
 [Unit]
 Description=Blue Button Data Pipeline Service
+Wants=network-online.target
+After=network.target network-online.target
 
 [Service]
 WorkingDirectory={{ data_pipeline_dir }}
