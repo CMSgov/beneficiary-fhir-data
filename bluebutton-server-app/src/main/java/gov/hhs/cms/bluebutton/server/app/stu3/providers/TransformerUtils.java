@@ -48,6 +48,7 @@ import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
+import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -91,6 +92,62 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel
  */
 public final class TransformerUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that the {@link BenefitComponent}
+	 *            should be part of
+	 * @param benefitCategory
+	 *            the {@link BenefitCategory} (see
+	 *            {@link BenefitBalanceComponent#getCategory()}) for the
+	 *            {@link BenefitBalanceComponent} that the new
+	 *            {@link BenefitComponent} should be part of
+	 * @param financialType
+	 *            the {@link CcwCodebookVariable} to map to
+	 *            {@link BenefitComponent#getType()}
+	 * @return the new {@link BenefitBalanceComponent}, which will have already been
+	 *         added to the appropriate
+	 *         {@link ExplanationOfBenefit#getBenefitBalance()} entry
+	 */
+	static BenefitComponent addBenefitBalanceFinancial(ExplanationOfBenefit eob, BenefitCategory benefitCategory,
+			CcwCodebookVariable financialType) {
+		BenefitBalanceComponent eobPrimaryBenefitBalance = findOrAddBenefitBalance(eob, benefitCategory);
+
+		CodeableConcept financialTypeConcept = TransformerUtils.createCodeableConcept(
+				TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE, calculateVariableReferenceUrl(financialType));
+		financialTypeConcept.getCodingFirstRep().setDisplay(financialType.getVariable().getLabel());
+
+		BenefitComponent financialEntry = new BenefitComponent(financialTypeConcept);
+		eobPrimaryBenefitBalance.getFinancial().add(financialEntry);
+
+		return financialEntry;
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that the {@link BenefitComponent}
+	 *            should be part of
+	 * @param benefitCategory
+	 *            the {@link BenefitCategory} to map to
+	 *            {@link BenefitBalanceComponent#getCategory()}
+	 * @return the already-existing {@link BenefitBalanceComponent} that matches the
+	 *         specified parameters, or a new one
+	 */
+	private static BenefitBalanceComponent findOrAddBenefitBalance(ExplanationOfBenefit eob,
+			BenefitCategory benefitCategory) {
+		Optional<BenefitBalanceComponent> matchingBenefitBalance = eob.getBenefitBalance().stream()
+				.filter(bb -> isCodeInConcept(bb.getCategory(), benefitCategory.getSystem(), benefitCategory.toCode()))
+				.findAny();
+		if (matchingBenefitBalance.isPresent())
+			return matchingBenefitBalance.get();
+
+		CodeableConcept benefitCategoryConcept = new CodeableConcept();
+		benefitCategoryConcept.addCoding().setSystem(benefitCategory.getSystem()).setCode(benefitCategory.toCode())
+				.setDisplay(benefitCategory.getDisplay());
+		BenefitBalanceComponent newBenefitBalance = new BenefitBalanceComponent(benefitCategoryConcept);
+		eob.addBenefitBalance(newBenefitBalance);
+		return newBenefitBalance;
+	}
 
 	/**
 	 * Ensures that the specified {@link ExplanationOfBenefit} has the specified
@@ -2019,11 +2076,9 @@ public final class TransformerUtils {
 		}
 
 		if (utilizedDays.isPresent()) {
-			BenefitComponent utilizationDayCount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT));
-			utilizationDayCount.setUsed(new UnsignedIntType(utilizedDays.get().intValue()));
-			benefitBalances.getFinancial().add(utilizationDayCount);
+			BenefitComponent clmUtlztnDayCntFinancial = TransformerUtils.addBenefitBalanceFinancial(eob,
+					BenefitCategory.MEDICAL, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT);
+			clmUtlztnDayCntFinancial.setUsed(new UnsignedIntType(utilizedDays.get().intValue()));
 		}
 
 		return eob;

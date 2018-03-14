@@ -2,6 +2,19 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Change `ExplanataionOfBenefit.benefitBalance` Entries
+
+Several changes have been made to these entries:
+
+1. The `Coding.display` values for `ExplanataionOfBenefit.benefitBalance.category` are now included.
+2. The `Coding.system` values used for `ExplanataionOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
+    * Previously: `http://bluebutton.cms.hhs.gov/coding#benefitBalanceType`
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/benefit-balance`
+3. The `Coding.code` values used for `ExplanataionOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
+    * Previously, these had been set to what should have been the `Coding.display` values.
+    * Now, they've all been switched to reference URLs. Those URLs uniquely identify the `benefitBalance` financial type fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful in this case.
+4. The `Coding.display` values for `ExplanataionOfBenefit.benefitBalance.financial.type` are now included.
+
 ### Change `ExplanataionOfBenefit.item.adjudication` Entries
 
 Several changes have been made to these entries:

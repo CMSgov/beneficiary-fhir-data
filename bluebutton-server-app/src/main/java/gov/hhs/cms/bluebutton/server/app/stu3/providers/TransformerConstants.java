@@ -144,17 +144,13 @@ final class TransformerConstants {
 
 	static final String CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pcchgamt.txt";
 
-	public static final String CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/util_day.txt";
-
 	static final String CODED_BENEFIT_BALANCE_TYPE_TOTAL_PPS_CAPITAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pps_cptl.txt";
-
-	public static final String CODED_BENEFIT_BALANCE_TYPE_VISIT_COUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/visitcnt.txt";
 
 	public static final String CODED_BENEFIT_COVERAGE_DATE_QUALIFIED = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qlfrfrom.txt";
 
 	static final String CODED_MONEY_USD = "USD";
 
-	static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE = "http://bluebutton.cms.hhs.gov/coding#benefitBalanceType";
+	static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE = BASE_URL_BBAPI_RESOURCES + "/codesystem/benefit-balance";
 
 	static final String CODING_BBAPI_BENEFIT_COVERAGE_DATE = "Benefit Coverage Date";
 

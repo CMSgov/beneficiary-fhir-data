@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -74,9 +75,8 @@ public final class HHAClaimTransformerTest {
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_VISIT_COUNT, claim.getTotalVisitCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertBenefitBalanceUsedIntEquals(BenefitCategory.MEDICAL,
+				CcwCodebookVariable.CLM_HHA_TOT_VISIT_CNT, claim.getTotalVisitCount().intValue(), eob);
 
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemComponent eobItem0 = eob.getItem().get(0);

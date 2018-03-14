@@ -69,10 +69,6 @@ public final class HospiceClaimTransformerTest {
 				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
 						claim.getPatientStatusCd(), i.getCategory())));
 
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, claim.getUtilizationDayCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-
 		TransformerTestUtils.assertDateEquals(claim.getClaimHospiceStartDate().get(),
 				eob.getHospitalization().getStartElement());
 		TransformerTestUtils.assertDateEquals(claim.getBeneficiaryDischargeDate().get(),

@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -204,6 +205,42 @@ final class TransformerTestUtils {
 		Assert.assertTrue(benefitComponent.isPresent());
 		try {
 			Assert.assertEquals(expectedAmount, benefitComponent.get().getUsedUnsignedIntType().getValue());
+		} catch (FHIRException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+	}
+
+	/**
+	 * @param expectedBenefitCategory
+	 *            the {@link BenefitCategory} for the expected
+	 *            {@link BenefitBalanceComponent#getCategory()}
+	 * @param expectedFinancialType
+	 *            the {@link CcwCodebookVariable} for the expected
+	 *            {@link BenefitComponent#getType()}
+	 * @param expectedUsedInt
+	 *            the expected {@link BenefitComponent#getUsedUnsignedIntType()}
+	 *            value
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to verify the actual
+	 *            {@link BenefitComponent} within
+	 */
+	static void assertBenefitBalanceUsedIntEquals(BenefitCategory expectedBenefitCategory,
+			CcwCodebookVariable expectedFinancialType, Integer expectedUsedInt, ExplanationOfBenefit eob) {
+		Optional<BenefitBalanceComponent> benefitBalanceComponent = eob.getBenefitBalance().stream()
+				.filter(bb -> isCodeInConcept(bb.getCategory(), expectedBenefitCategory.getSystem(),
+						expectedBenefitCategory.toCode()))
+				.findAny();
+		Assert.assertTrue(benefitBalanceComponent.isPresent());
+
+		Optional<BenefitComponent> benefitBalanceFinancialEntry = benefitBalanceComponent.get().getFinancial().stream()
+				.filter(f -> isCodeInConcept(f.getType(), TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerUtils.calculateVariableReferenceUrl(expectedFinancialType)))
+				.findAny();
+		Assert.assertTrue(benefitBalanceFinancialEntry.isPresent());
+
+		try {
+			Assert.assertEquals(expectedUsedInt,
+					benefitBalanceFinancialEntry.get().getUsedUnsignedIntType().getValue());
 		} catch (FHIRException e) {
 			throw new BadCodeMonkeyException(e);
 		}
@@ -1779,11 +1816,9 @@ final class TransformerTestUtils {
 		}
 		
 		if (utilizedDays.isPresent()) {
-			TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, utilizedDays.get().intValue(),
-					eob.getBenefitBalanceFirstRep().getFinancial());
+			TransformerTestUtils.assertBenefitBalanceUsedIntEquals(BenefitCategory.MEDICAL,
+					CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, utilizedDays.get().intValue(), eob);
 		}
-		
 	}
 	
 	/**

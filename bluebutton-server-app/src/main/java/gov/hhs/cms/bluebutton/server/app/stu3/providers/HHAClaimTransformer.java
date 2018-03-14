@@ -126,11 +126,9 @@ final class HHAClaimTransformer {
 					CcwCodebookVariable.CLM_HHA_RFRL_CD, claimGroup.getClaimReferralCode()));
 		}
 
-		BenefitComponent totalVisitCount = new BenefitComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_VISIT_COUNT));
-		totalVisitCount.setUsed(new UnsignedIntType(claimGroup.getTotalVisitCount().intValue()));
-		benefitBalances.getFinancial().add(totalVisitCount);
+		BenefitComponent clmHhaTotVisitCntFinancial = TransformerUtils.addBenefitBalanceFinancial(eob,
+				BenefitCategory.MEDICAL, CcwCodebookVariable.CLM_HHA_TOT_VISIT_CNT);
+		clmHhaTotVisitCntFinancial.setUsed(new UnsignedIntType(claimGroup.getTotalVisitCount().intValue()));
 
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getCareStartDate(),

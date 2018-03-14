@@ -66,10 +66,6 @@ public final class SNFClaimTransformerTest {
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, claim.getUtilizationDayCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		
 		// test common benefit components between SNF and Inpatient claims are set as expected
 		TransformerTestUtils.assertCommonBenefitComponentInpatientSNF(eob, claim.getCoinsuranceDayCount(),
 				claim.getNonUtilizationDayCount(), claim.getDeductibleAmount(),
