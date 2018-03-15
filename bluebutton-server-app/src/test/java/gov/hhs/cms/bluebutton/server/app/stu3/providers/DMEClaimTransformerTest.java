@@ -70,9 +70,8 @@ public final class DMEClaimTransformerTest {
 				claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.PRPAYAMT,
+				claim.getPrimaryPayerPaidAmount(), eob);
 
 		Assert.assertEquals(3, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());

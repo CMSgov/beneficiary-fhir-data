@@ -5,9 +5,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -59,15 +57,9 @@ final class HospiceClaimTransformer {
 					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
 		}
 
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_FHIR_BENEFIT_BALANCE, BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
-
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimHospiceStartDate(),
-				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
-				benefitBalances);
+				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()));
 
 		if (claimGroup.getHospicePeriodCount().isPresent()) {
 			// TODO should this be benefitBalance?

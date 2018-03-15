@@ -5,11 +5,11 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.codebook.model.Variable;
@@ -106,52 +106,14 @@ final class TransformerConstants {
 	 */
 	static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
 
-	// FIXME also used as a benefit balance
-	static final String CODED_ADJUDICATION_ALLOWED_CHARGE = "Allowed Charge Amount";
-
-	// FIXME also used as a benefit balance
-	static final String CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT = "Payment Amount to Beneficiary";
-
-	// FIXME only used as a benefit balance
-	static final String CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE = "NCH Beneficiary Part B Deductible Amount";
-
-	// FIXME only used as a benefit balance
-	static final String CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT = "Disproportionate Share Amount";
-
-	// FIXME only used as a benefit balance
-	static final String CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT = "Indirect Medical Education Amount";
-
-	// FIXME also used as a benefit balance
-	static final String CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT = "Primary Payer Paid Amount";
-
-	// FIXME also used as a benefit balance
-	static final String CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT = "Provider Payment Amount";
-
-	// FIXME also used as a benefit balance
-	static final String CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT = "Submitted Charge Amount";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_BENE_PAYMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/benepmt.txt";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/blddedam.txt";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_DRUG_OUTLIER_APPROVED_PAYMENT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/outlrpmt.txt";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_PARTB_COINSURANCE_AMOUNT = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptb_coin.txt";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_PARTB_DEDUCTIBLE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/ptb_ded.txt";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_PASS_THRU_PER_DIEM = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/per_diem.txt";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pcchgamt.txt";
-
-	static final String CODED_BENEFIT_BALANCE_TYPE_TOTAL_PPS_CAPITAL = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pps_cptl.txt";
-
+	// FIXME actually an information entry
 	public static final String CODED_BENEFIT_COVERAGE_DATE_QUALIFIED = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qlfrfrom.txt";
 
 	static final String CODED_MONEY_USD = "USD";
 
 	static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE = BASE_URL_BBAPI_RESOURCES + "/codesystem/benefit-balance";
 
+	// FIXME actually an information entry
 	static final String CODING_BBAPI_BENEFIT_COVERAGE_DATE = "Benefit Coverage Date";
 
 	/**
@@ -159,6 +121,12 @@ final class TransformerConstants {
 	 * {@link Adjudication}s.
 	 */
 	static final String CODING_CCW_ADJUDICATION_CATEGORY = BASE_URL_BBAPI_RESOURCES + "/codesystem/adjudication";
+
+	/**
+	 * The CMS-custom {@link Coding#getSystem()} value for Medicare
+	 * {@link SupportingInformationComponent#getCategory()}s.
+	 */
+	static final String CODING_BBAPI_INFORMATION_CATEGORY = BASE_URL_BBAPI_RESOURCES + "/codesystem/information";
 
 	/**
 	 * Used as the {@link Identifier#getSystem()} that the RIF
@@ -178,8 +146,6 @@ final class TransformerConstants {
 	private static final String CODING_CCW_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
 	static final String CODING_FHIR_DIAGNOSIS_TYPE = "http://hl7.org/fhir/ex-diagnosistype";
-
-	static final String CODING_FHIR_BENEFIT_BALANCE = BenefitCategory.MEDICAL.getSystem();
 
 	/**
 	 * Used as the {@link Coding#getSystem()} for {@link ItemComponent#getService()}
@@ -205,6 +171,22 @@ final class TransformerConstants {
 	 * .
 	 */
 	static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
+
+	/**
+	 * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure
+	 * (UCUM)", a standardized coding system for basic units of measure.
+	 */
+	static final String CODING_SYSTEM_UCUM = "http://unitsofmeasure.org";
+
+	/**
+	 * The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "pint".
+	 */
+	static final String CODING_SYSTEM_UCUM_PINT_CODE = "[pt_us]";
+
+	/**
+	 * The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "pint".
+	 */
+	static final String CODING_SYSTEM_UCUM_PINT_DISPLAY = "pint";
 
 	static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
 

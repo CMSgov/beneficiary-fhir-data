@@ -65,21 +65,16 @@ public final class OutpatientClaimTransformerTest {
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PARTB_DEDUCTIBLE, claim.getDeductibleAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE, claim.getProfessionalComponentCharge(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PARTB_COINSURANCE_AMOUNT, claim.getCoinsuranceAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT, claim.getProviderPaymentAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BENE_PAYMENT, claim.getBeneficiaryPaymentAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_BENE_PTB_DDCTBL_AMT,
+				claim.getDeductibleAmount(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_PROFNL_CMPNT_CHRG_AMT,
+				claim.getProfessionalComponentCharge(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_BENE_PTB_COINSRNC_AMT,
+				claim.getCoinsuranceAmount(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_OP_PRVDR_PMT_AMT,
+				claim.getProviderPaymentAmount(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_OP_BENE_PMT_AMT,
+				claim.getBeneficiaryPaymentAmount(), eob);
 
 		// Test to ensure common group fields between Inpatient, Outpatient and SNF
 		TransformerTestUtils.assertEobCommonGroupInpOutSNFEquals(eob, claim.getBloodDeductibleLiabilityAmount(),

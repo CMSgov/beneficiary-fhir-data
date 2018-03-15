@@ -5,11 +5,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Money;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -54,19 +50,9 @@ final class CarrierClaimTransformer {
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.CARRIER, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
-		
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
-						BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
 
-		// map primaryPayerPaidAmount to eob.benefitbalance.financial
-		BenefitComponent bc = new BenefitComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
-		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getPrimaryPayerPaidAmount()));
-		eob.getBenefitBalanceFirstRep().getFinancial().add(bc);
+		TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.PRPAYAMT,
+				claimGroup.getPrimaryPayerPaidAmount());
 
 		// Common group level fields between Carrier and DME
 		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),

@@ -6,11 +6,9 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -63,11 +61,6 @@ final class SNFClaimTransformer {
 				claimGroup.getSourceAdmissionCd(), claimGroup.getNoncoveredStayFromDate(),
 				claimGroup.getNoncoveredStayThroughDate(), claimGroup.getCoveredCareThroughDate(),
 				claimGroup.getMedicareBenefitsExhaustedDate(), claimGroup.getDiagnosisRelatedGroupCd());
-		
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_FHIR_BENEFIT_BALANCE, BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
 			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
@@ -76,14 +69,13 @@ final class SNFClaimTransformer {
 
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimAdmissionDate(),
-				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
-				benefitBalances);
+				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()));
 		
 		/*
 		 * add field values to the benefit balances that are common between the
 		 * Inpatient and SNF claim types
 		 */
-		TransformerUtils.addCommonBenefitComponentInpatientSNF(benefitBalances, claimGroup.getCoinsuranceDayCount(),
+		TransformerUtils.addCommonGroupInpatientSNF(eob, claimGroup.getCoinsuranceDayCount(),
 				claimGroup.getNonUtilizationDayCount(), claimGroup.getDeductibleAmount(),
 				claimGroup.getPartACoinsuranceLiabilityAmount(), claimGroup.getBloodPintsFurnishedQty(),
 				claimGroup.getNoncoveredCharge(), claimGroup.getTotalDeductionAmount(),

@@ -5,11 +5,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Money;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -57,59 +53,34 @@ final class OutpatientClaimTransformer {
 		// set the provider number which is common among several claim types
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
-						BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
-
+		// TODO If this is actually nullable, should be Optional.
 		if (claimGroup.getProfessionalComponentCharge() != null) {
-			BenefitComponent benefitProfessionComponentAmt = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE));
-			benefitProfessionComponentAmt.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getProfessionalComponentCharge()));
-			benefitBalances.getFinancial().add(benefitProfessionComponentAmt);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.NCH_PROFNL_CMPNT_CHRG_AMT,
+					claimGroup.getProfessionalComponentCharge());
 		}
 
+		// TODO If this is actually nullable, should be Optional.
 		if (claimGroup.getDeductibleAmount() != null) {
-			BenefitComponent deductibleAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PARTB_DEDUCTIBLE));
-			deductibleAmount
-					.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getDeductibleAmount()));
-			benefitBalances.getFinancial().add(deductibleAmount);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.NCH_BENE_PTB_DDCTBL_AMT,
+					claimGroup.getDeductibleAmount());
 		}
 
+		// TODO If this is actually nullable, should be Optional.
 		if (claimGroup.getCoinsuranceAmount() != null) {
-			BenefitComponent coninsuranceAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PARTB_COINSURANCE_AMOUNT));
-			coninsuranceAmount
-					.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getCoinsuranceAmount()));
-			benefitBalances.getFinancial().add(coninsuranceAmount);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.NCH_BENE_PTB_COINSRNC_AMT,
+					claimGroup.getCoinsuranceAmount());
 		}
 
+		// TODO If this is actually nullable, should be Optional.
 		if (claimGroup.getProviderPaymentAmount() != null) {
-			BenefitComponent providerPaymentAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT));
-			providerPaymentAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getProviderPaymentAmount()));
-			benefitBalances.getFinancial().add(providerPaymentAmount);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.CLM_OP_PRVDR_PMT_AMT,
+					claimGroup.getProviderPaymentAmount());
 		}
 
+		// TODO If this is actually nullable, should be Optional.
 		if (claimGroup.getBeneficiaryPaymentAmount() != null) {
-			BenefitComponent beneficiaryPaymentAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BENE_PAYMENT));
-			beneficiaryPaymentAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getBeneficiaryPaymentAmount()));
-			benefitBalances.getFinancial().add(beneficiaryPaymentAmount);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.CLM_OP_BENE_PMT_AMT,
+					claimGroup.getBeneficiaryPaymentAmount());
 		}
 
 		// Common group level fields between Inpatient, Outpatient and SNF

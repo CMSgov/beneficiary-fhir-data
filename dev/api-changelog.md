@@ -2,6 +2,16 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Switch Most `ExplanationOfBenefit.benefitBalance` Entries to "Adjudication Total" Extensions
+
+Most of the former `ExplanationOfBenefit.benefitBalance` entries were not actually _benefit balances_, and so were improperly mapped. These values are instead better thought of as overall-claim-level analogues of the `ExplanationOfBenefit.item.adjudication` field.
+
+The upcoming STU4 release of FHIR will likely include a new `ExplanationOfBenefit.total` field to accommodate this kind of information. Until then, we are representing those fields as extensions on the `ExplanationOfBenefit` resources.
+
+The <https://bluebutton.cms.gov/resources/codesystem/adjudication-total> reference page provides a list of all these fields.
+
+As part of this change, one of the former `ExplanationOfBenefit.benefitBalance` entries, <https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty>, was actually changed to an `ExplanationOfBenefit.information` entry, as that was most appropriate.
+
 ### Change `ExplanataionOfBenefit.benefitBalance` Entries
 
 Several changes have been made to these entries:

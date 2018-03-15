@@ -67,7 +67,7 @@ public final class SNFClaimTransformerTest {
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
 		// test common benefit components between SNF and Inpatient claims are set as expected
-		TransformerTestUtils.assertCommonBenefitComponentInpatientSNF(eob, claim.getCoinsuranceDayCount(),
+		TransformerTestUtils.assertCommonGroupInpatientSNF(eob, claim.getCoinsuranceDayCount(),
 				claim.getNonUtilizationDayCount(), claim.getDeductibleAmount(),
 				claim.getPartACoinsuranceLiabilityAmount(), claim.getBloodPintsFurnishedQty(),
 				claim.getNoncoveredCharge(), claim.getTotalDeductionAmount(),

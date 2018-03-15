@@ -92,9 +92,8 @@ public final class CarrierClaimTransformerTest {
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.PRPAYAMT,
+				claim.getPrimaryPayerPaidAmount(), eob);
 		
 		CarrierClaimLine claimLine1 = claim.getLines().get(0);
 		ItemComponent eobItem0 = eob.getItem().get(0);

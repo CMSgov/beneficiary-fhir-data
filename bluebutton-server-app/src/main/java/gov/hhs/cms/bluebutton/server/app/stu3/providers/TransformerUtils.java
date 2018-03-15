@@ -95,6 +95,76 @@ public final class TransformerUtils {
 
 	/**
 	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that the adjudication total
+	 *            should be part of
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} to map to the adjudication's
+	 *            <code>category</code>
+	 * @param amountValue
+	 *            the {@link Money#getValue()} for the adjudication total
+	 * @return the new {@link BenefitBalanceComponent}, which will have already been
+	 *         added to the appropriate
+	 *         {@link ExplanationOfBenefit#getBenefitBalance()} entry
+	 */
+	static void addAdjudicationTotal(ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable,
+			Optional<? extends Number> amountValue) {
+		/*
+		 * TODO Once we switch to STU4 (expected >= Q3 2018), remap these to the new
+		 * `ExplanationOfBenefit.total` field. In anticipation of that, the
+		 * CcwCodebookVariable param here is named `category`: right now it's used for
+		 * the `Extension.url` but can be changed to
+		 * `ExplanationOfBenefit.total.category` once this mapping is moved to STU4.
+		 */
+
+		String extensionUrl = calculateVariableReferenceUrl(categoryVariable);
+		Money adjudicationTotalAmount = createMoney(amountValue);
+		Extension adjudicationTotalEextension = new Extension(extensionUrl, adjudicationTotalAmount);
+
+		eob.addExtension(adjudicationTotalEextension);
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} that the adjudication total
+	 *            should be part of
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} to map to the adjudication's
+	 *            <code>category</code>
+	 * @param totalAmountValue
+	 *            the {@link Money#getValue()} for the adjudication total
+	 * @return the new {@link BenefitBalanceComponent}, which will have already been
+	 *         added to the appropriate
+	 *         {@link ExplanationOfBenefit#getBenefitBalance()} entry
+	 */
+	static void addAdjudicationTotal(ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable,
+			Number totalAmountValue) {
+		addAdjudicationTotal(eob, categoryVariable, Optional.of(totalAmountValue));
+	}
+
+	/**
+	 * @param amountValue
+	 *            the value to use for {@link Money#getValue()}
+	 * @return a new {@link Money} instance, with the specified
+	 *         {@link Money#getValue()}
+	 */
+	static Money createMoney(Optional<? extends Number> amountValue) {
+		if (!amountValue.isPresent())
+			throw new IllegalArgumentException();
+
+		Money money = new Money();
+		money.setSystem(TransformerConstants.CODING_MONEY);
+		money.setCode(TransformerConstants.CODED_MONEY_USD);
+
+		if (amountValue.get() instanceof BigDecimal)
+			money.setValue((BigDecimal) amountValue.get());
+		else
+			throw new BadCodeMonkeyException();
+
+		return money;
+	}
+
+	/**
+	 * @param eob
 	 *            the {@link ExplanationOfBenefit} that the {@link BenefitComponent}
 	 *            should be part of
 	 * @param benefitCategory
@@ -335,6 +405,27 @@ public final class TransformerUtils {
 		valueIdentifier.setSystem(extensionSystem).setValue(extensionValue);
 
 		extension.setValue(valueIdentifier);
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to modify
+	 * @param categoryVariable
+	 *            {@link CcwCodebookVariable} to map to
+	 *            {@link SupportingInformationComponent#getCategory()}
+	 * @return the newly-added {@link SupportingInformationComponent} entry
+	 */
+	static SupportingInformationComponent addInformation(ExplanationOfBenefit eob,
+			CcwCodebookVariable categoryVariable) {
+		int maxSequence = eob.getInformation().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
+
+		SupportingInformationComponent infoComponent = new SupportingInformationComponent();
+		infoComponent.setSequence(maxSequence + 1);
+		infoComponent.setCategory(createCodeableConceptForFieldId(eob,
+				TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY, categoryVariable));
+		eob.getInformation().add(infoComponent);
+
+		return infoComponent;
 	}
 
 	/**
@@ -903,26 +994,6 @@ public final class TransformerUtils {
 	}
 
 	/**
-	 * @param ccwVariable
-	 *            the {@link CcwCodebookVariable} to create a
-	 *            {@link BenefitComponent} for
-	 * @return a new {@link BenefitComponent} with
-	 *         {@link BenefitComponent#getType()} set for the specified
-	 *         {@link CcwCodebookVariable}
-	 */
-	static BenefitComponent createBenefitComponent(CcwCodebookVariable ccwVariable) {
-		// Cheating here, since they use the same URL.
-		String benefitTypeCode = calculateVariableReferenceUrl(ccwVariable);
-
-		CodeableConcept type = TransformerUtils
-				.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE, benefitTypeCode);
-		type.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
-
-		BenefitComponent benefit = new BenefitComponent(type);
-		return benefit;
-	}
-
-	/**
 	 * @param rootResource
 	 *            the root FHIR {@link IAnyResource} that the resultant
 	 *            {@link Coding} will be contained in
@@ -1101,9 +1172,8 @@ public final class TransformerUtils {
 	 * Adds field values to the benefit balance component that are common between
 	 * the Inpatient and SNF claim types.
 	 * 
-	 * @param benefitBalances
-	 *            the {@link BenefitBalanceComponent} that will be updated by this
-	 *            method
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to map the fields into
 	 * @param coinsuranceDayCount
 	 *            BENE_TOT_COINSRNC_DAYS_CNT: a {@link BigDecimal} shared field
 	 *            representing the coinsurance day count for the claim
@@ -1152,100 +1222,61 @@ public final class TransformerUtils {
 	 *            representing the claim PPS old capital hold harmless amount for
 	 *            the claim
 	 */
-	static void addCommonBenefitComponentInpatientSNF(BenefitBalanceComponent benefitBalances,
-			BigDecimal coinsuranceDayCount, BigDecimal nonUtilizationDayCount, BigDecimal deductibleAmount,
-			BigDecimal partACoinsuranceLiabilityAmount, BigDecimal bloodPintsFurnishedQty, BigDecimal noncoveredCharge,
-			BigDecimal totalDeductionAmount, Optional<BigDecimal> claimPPSCapitalDisproportionateShareAmt,
+	static void addCommonGroupInpatientSNF(ExplanationOfBenefit eob, BigDecimal coinsuranceDayCount,
+			BigDecimal nonUtilizationDayCount, BigDecimal deductibleAmount, BigDecimal partACoinsuranceLiabilityAmount,
+			BigDecimal bloodPintsFurnishedQty, BigDecimal noncoveredCharge, BigDecimal totalDeductionAmount,
+			Optional<BigDecimal> claimPPSCapitalDisproportionateShareAmt,
 			Optional<BigDecimal> claimPPSCapitalExceptionAmount, Optional<BigDecimal> claimPPSCapitalFSPAmount,
 			Optional<BigDecimal> claimPPSCapitalIMEAmount, Optional<BigDecimal> claimPPSCapitalOutlierAmount,
 			Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount) {
-		BenefitComponent bc;
+		BenefitComponent beneTotCoinsrncDaysCntFinancial = addBenefitBalanceFinancial(eob, BenefitCategory.MEDICAL,
+				CcwCodebookVariable.BENE_TOT_COINSRNC_DAYS_CNT);
+		beneTotCoinsrncDaysCntFinancial.setUsed(new UnsignedIntType(coinsuranceDayCount.intValueExact()));
 
-		// coinsuranceDayCount
-		bc = createBenefitComponent(CcwCodebookVariable.BENE_TOT_COINSRNC_DAYS_CNT);
-		bc.setUsed(new UnsignedIntType(coinsuranceDayCount.intValue()));
-		benefitBalances.getFinancial().add(bc);
+		BenefitComponent clmNonUtlztnDaysCntFinancial = addBenefitBalanceFinancial(eob, BenefitCategory.MEDICAL,
+				CcwCodebookVariable.CLM_NON_UTLZTN_DAYS_CNT);
+		clmNonUtlztnDaysCntFinancial.setUsed(new UnsignedIntType(nonUtilizationDayCount.intValueExact()));
 
-		// nonUtilizationDayCount
-		bc = createBenefitComponent(CcwCodebookVariable.CLM_NON_UTLZTN_DAYS_CNT);
-		bc.setAllowed(new UnsignedIntType(nonUtilizationDayCount.intValue()));
-		benefitBalances.getFinancial().add(bc);
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_BENE_IP_DDCTBL_AMT, deductibleAmount);
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_BENE_PTA_COINSRNC_LBLTY_AMT, partACoinsuranceLiabilityAmount);
 
-		// deductibleAmount
-		bc = createBenefitComponent(CcwCodebookVariable.NCH_BENE_IP_DDCTBL_AMT);
-		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(deductibleAmount));
-		benefitBalances.getFinancial().add(bc);
+		SupportingInformationComponent nchBloodPntsFrnshdQtyInfo = addInformation(eob,
+				CcwCodebookVariable.NCH_BLOOD_PNTS_FRNSHD_QTY);
+		Quantity bloodPintsQuantity = new Quantity();
+		bloodPintsQuantity.setValue(bloodPintsFurnishedQty);
+		bloodPintsQuantity.setSystem(TransformerConstants.CODING_SYSTEM_UCUM)
+				.setCode(TransformerConstants.CODING_SYSTEM_UCUM_PINT_CODE)
+				.setUnit(TransformerConstants.CODING_SYSTEM_UCUM_PINT_DISPLAY);
+		nchBloodPntsFrnshdQtyInfo.setValue(bloodPintsQuantity);
 
-		// partACoinsuranceLiabilityAmount
-		bc = createBenefitComponent(CcwCodebookVariable.NCH_BENE_PTA_COINSRNC_LBLTY_AMT);
-		bc.setAllowed(
-				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(partACoinsuranceLiabilityAmount));
-		benefitBalances.getFinancial().add(bc);
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_IP_NCVRD_CHRG_AMT, noncoveredCharge);
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_IP_TOT_DDCTN_AMT, totalDeductionAmount);
 
-		// bloodPintsFurnishedQty
-		// FIXME this should not be a benefit balance; it's a good that was sold
-		bc = createBenefitComponent(CcwCodebookVariable.NCH_BLOOD_PNTS_FRNSHD_QTY);
-		bc.setUsed(new UnsignedIntType(bloodPintsFurnishedQty.intValue()));
-		benefitBalances.getFinancial().add(bc);
-
-		// noncoveredCharge
-		bc = createBenefitComponent(CcwCodebookVariable.NCH_IP_NCVRD_CHRG_AMT);
-		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(noncoveredCharge));
-		benefitBalances.getFinancial().add(bc);
-
-		// totalDeductionAmount
-		bc = createBenefitComponent(CcwCodebookVariable.NCH_IP_TOT_DDCTN_AMT);
-		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalDeductionAmount));
-		benefitBalances.getFinancial().add(bc);
-
-		// claimPPSCapitalDisproportionateShareAmt
 		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
-			bc = createBenefitComponent(CcwCodebookVariable.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT);
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimPPSCapitalDisproportionateShareAmt.get()));
-			benefitBalances.getFinancial().add(bc);
+			addAdjudicationTotal(eob, CcwCodebookVariable.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT,
+					claimPPSCapitalDisproportionateShareAmt);
 		}
 
-		// claimPPSCapitalExceptionAmount
 		if (claimPPSCapitalExceptionAmount.isPresent()) {
-			bc = createBenefitComponent(CcwCodebookVariable.CLM_PPS_CPTL_EXCPTN_AMT);
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimPPSCapitalExceptionAmount.get()));
-			benefitBalances.getFinancial().add(bc);
+			addAdjudicationTotal(eob, CcwCodebookVariable.CLM_PPS_CPTL_EXCPTN_AMT, claimPPSCapitalExceptionAmount);
 		}
 
-		// claimPPSCapitalFSPAmount
 		if (claimPPSCapitalFSPAmount.isPresent()) {
-			bc = createBenefitComponent(CcwCodebookVariable.CLM_PPS_CPTL_FSP_AMT);
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimPPSCapitalFSPAmount.get()));
-			benefitBalances.getFinancial().add(bc);
+			addAdjudicationTotal(eob, CcwCodebookVariable.CLM_PPS_CPTL_FSP_AMT, claimPPSCapitalFSPAmount);
 		}
 
-		// claimPPSCapitalIMEAmount
 		if (claimPPSCapitalIMEAmount.isPresent()) {
-			bc = createBenefitComponent(CcwCodebookVariable.CLM_PPS_CPTL_IME_AMT);
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimPPSCapitalIMEAmount.get()));
-			benefitBalances.getFinancial().add(bc);
+			addAdjudicationTotal(eob, CcwCodebookVariable.CLM_PPS_CPTL_IME_AMT, claimPPSCapitalIMEAmount);
 		}
 
-		// claimPPSCapitalOutlierAmount
 		if (claimPPSCapitalOutlierAmount.isPresent()) {
-			bc = createBenefitComponent(CcwCodebookVariable.CLM_PPS_CPTL_OUTLIER_AMT);
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimPPSCapitalOutlierAmount.get()));
-			benefitBalances.getFinancial().add(bc);
+			addAdjudicationTotal(eob, CcwCodebookVariable.CLM_PPS_CPTL_OUTLIER_AMT, claimPPSCapitalOutlierAmount);
 		}
 
-		// claimPPSOldCapitalHoldHarmlessAmount
 		if (claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
-			bc = createBenefitComponent(CcwCodebookVariable.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT);
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimPPSOldCapitalHoldHarmlessAmount.get()));
-			benefitBalances.getFinancial().add(bc);
+			addAdjudicationTotal(eob, CcwCodebookVariable.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT,
+					claimPPSOldCapitalHoldHarmlessAmount);
 		}
-
 	}
 
 	/**
@@ -1538,41 +1569,14 @@ public final class TransformerUtils {
 			eob.addExtension(createExtensionIdentifier(CcwCodebookVariable.CLM_CLNCL_TRIL_NUM, clinicalTrialNumber));
 		}
 
-		BenefitComponent beneficiaryPartBDeductAmt = new BenefitComponent(
-				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE));
-		beneficiaryPartBDeductAmt.setAllowed(
-				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(beneficiaryPartBDeductAmount));
-		eob.getBenefitBalanceFirstRep().getFinancial().add((beneficiaryPartBDeductAmt));
+		addAdjudicationTotal(eob, CcwCodebookVariable.CARR_CLM_CASH_DDCTBL_APLD_AMT, beneficiaryPartBDeductAmount);
 
-		BenefitComponent providerPaymentAmt = new BenefitComponent(
-				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT));
-		providerPaymentAmt.setAllowed(
-				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(providerPaymentAmount));
-		eob.getBenefitBalanceFirstRep().getFinancial().add(providerPaymentAmt);
+		// FIXME the codebook PDF has a typo for this variable name!
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CLM_PRVDT_PMT_AMT, providerPaymentAmount);
 
-		BenefitComponent beneficiaryPaymentAmt = new BenefitComponent(
-				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT));
-		beneficiaryPaymentAmt.setAllowed(
-				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(beneficiaryPaymentAmount));
-		eob.getBenefitBalanceFirstRep().getFinancial().add(beneficiaryPaymentAmt);
-
-		BenefitComponent submittedChargeAmt = new BenefitComponent(
-				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT));
-		submittedChargeAmt.setAllowed(
-				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(submittedChargeAmount));
-		eob.getBenefitBalanceFirstRep().getFinancial().add(submittedChargeAmt);
-
-		BenefitComponent allowedChargeAmt = new BenefitComponent(
-				createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE));
-		allowedChargeAmt
-				.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(allowedChargeAmount));
-		eob.getBenefitBalanceFirstRep().getFinancial().add(allowedChargeAmt);
-
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CLM_BENE_PMT_AMT, beneficiaryPaymentAmount);
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CARR_CLM_SBMTD_CHRG_AMT, submittedChargeAmount);
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CARR_CLM_ALOWD_AMT, allowedChargeAmount);
 	}
 
 	/**
@@ -1911,13 +1915,7 @@ public final class TransformerUtils {
 	static void mapEobCommonGroupInpOutSNF(ExplanationOfBenefit eob, BigDecimal bloodDeductibleLiabilityAmount,
 			Optional<String> operatingPhysicianNpi, Optional<String> otherPhysicianNpi, char claimQueryCode,
 			Optional<Character> mcoPaidSw) {
-
-		BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY));
-		benefitInpatientNchPrimaryPayerAmt.setAllowed(
-				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(bloodDeductibleLiabilityAmount));
-		eob.getBenefitBalanceFirstRep().getFinancial().add((benefitInpatientNchPrimaryPayerAmt));
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM, bloodDeductibleLiabilityAmount);
 
 		if (operatingPhysicianNpi.isPresent()) {
 			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
@@ -2021,12 +2019,7 @@ public final class TransformerUtils {
 		eob.setTotalCost(
 				(Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalChargeAmount));
 
-		BenefitComponent benefitInpatientNchPrimaryPayerAmt = new BenefitComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
-		benefitInpatientNchPrimaryPayerAmt.setAllowed(
-				new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(primaryPayerPaidAmount));
-		eob.getBenefitBalanceFirstRep().getFinancial().add((benefitInpatientNchPrimaryPayerAmt));
+		addAdjudicationTotal(eob, CcwCodebookVariable.PRPAYAMT, primaryPayerPaidAmount);
 
 		if (fiscalIntermediaryNumber.isPresent()) {
 			eob.addExtension(createExtensionIdentifier(CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber));
@@ -2052,15 +2045,12 @@ public final class TransformerUtils {
 	 * 
 	 * @param utilizedDays
 	 *            CLM_UTLZTN_CNT,
-	 * 
-	 * @param benefitBalances
-	 * 
 	 * @return the {@link ExplanationOfBenefit}
 	 */
 
 	static ExplanationOfBenefit mapEobCommonGroupInpHHAHospiceSNF(ExplanationOfBenefit eob,
 			Optional<LocalDate> claimAdmissionDate, Optional<LocalDate> beneficiaryDischargeDate,
-			Optional<BigDecimal> utilizedDays, BenefitBalanceComponent benefitBalances) {
+			Optional<BigDecimal> utilizedDays) {
 
 		if (claimAdmissionDate.isPresent() || beneficiaryDischargeDate.isPresent()) {
 			TransformerUtils.validatePeriodDates(claimAdmissionDate, beneficiaryDischargeDate);

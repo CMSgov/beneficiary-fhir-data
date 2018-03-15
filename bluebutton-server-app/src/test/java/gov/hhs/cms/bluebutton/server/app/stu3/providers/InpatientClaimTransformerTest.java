@@ -13,6 +13,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -65,28 +66,23 @@ public final class InpatientClaimTransformerTest {
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PASS_THRU_PER_DIEM, claim.getPassThruPerDiemAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE, claim.getProfessionalComponentCharge(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_PPS_CAPITAL, claim.getClaimTotalPPSCapitalAmount().get(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT, claim.getIndirectMedicalEducationAmount().get(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT, claim.getDisproportionateShareAmount().get(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PASS_THRU_PER_DIEM_AMT,
+				claim.getPassThruPerDiemAmount(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_PROFNL_CMPNT_CHRG_AMT,
+				claim.getProfessionalComponentCharge(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
+				claim.getClaimTotalPPSCapitalAmount(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
+				claim.getIndirectMedicalEducationAmount(), eob);
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.DSH_OP_CLM_VAL_AMT,
+				claim.getDisproportionateShareAmount(), eob);
 		
 		// test common eob information between Inpatient, HHA, Hospice and SNF claims are set as expected
 		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(eob, claim.getClaimAdmissionDate(), 
 				claim.getBeneficiaryDischargeDate(), Optional.of(claim.getUtilizationDayCount()));
 		
 		// test common benefit components between SNF and Inpatient claims are set as expected
-		TransformerTestUtils.assertCommonBenefitComponentInpatientSNF(eob, claim.getCoinsuranceDayCount(),
+		TransformerTestUtils.assertCommonGroupInpatientSNF(eob, claim.getCoinsuranceDayCount(),
 				claim.getNonUtilizationDayCount(), claim.getDeductibleAmount(),
 				claim.getPartACoinsuranceLiabilityAmount(), claim.getBloodPintsFurnishedQty(),
 				claim.getNoncoveredCharge(), claim.getTotalDeductionAmount(),
@@ -99,9 +95,8 @@ public final class InpatientClaimTransformerTest {
 				claim.getNoncoveredStayThroughDate(), claim.getCoveredCareThoughDate(),
 				claim.getMedicareBenefitsExhaustedDate(), claim.getDiagnosisRelatedGroupCd());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DRUG_OUTLIER_APPROVED_PAYMENT,
-				claim.getDrgOutlierApprovedPaymentAmount().get(), eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_DRG_OUTLIER_APRVD_PMT_AMT,
+				claim.getDrgOutlierApprovedPaymentAmount(), eob);
 
 		// Test to ensure common group fields between Inpatient, Outpatient and SNF
 		// match

@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
@@ -55,11 +54,6 @@ final class HHAClaimTransformer {
 
 		// set the provider number which is common among several claim types
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
-
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
-						BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
 
 		// Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
 		TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(eob, claimGroup.getOrganizationNpi(),
@@ -131,8 +125,8 @@ final class HHAClaimTransformer {
 		clmHhaTotVisitCntFinancial.setUsed(new UnsignedIntType(claimGroup.getTotalVisitCount().intValue()));
 
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
-		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getCareStartDate(),
-				Optional.empty(), Optional.empty(), benefitBalances);
+		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getCareStartDate(), Optional.empty(),
+				Optional.empty());
 
 		for (HHAClaimLine claimLine : claimGroup.getLines()) {
 			ItemComponent item = eob.addItem();
