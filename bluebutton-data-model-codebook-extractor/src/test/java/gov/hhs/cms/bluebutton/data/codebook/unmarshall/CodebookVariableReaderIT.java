@@ -22,6 +22,9 @@ public final class CodebookVariableReaderIT {
 		Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
 		Assert.assertNotNull(variablesById);
 		Assert.assertFalse(variablesById.isEmpty());
+
+		for (Variable variable : variablesById.values())
+			assertVariableIsFixed(variable);
 	}
 
 	/**
@@ -37,5 +40,29 @@ public final class CodebookVariableReaderIT {
 			Assert.assertNotNull(variable.getCodebook().getName());
 			Assert.assertNotNull(variable.getCodebook().getVersion());
 		}
+	}
+
+	/**
+	 * Asserts that the specified {@link Variable} has been fixed (if it needed to
+	 * be).
+	 *
+	 * @param variable
+	 *            the {@link Variable} to validate
+	 */
+	private static void assertVariableIsFixed(Variable variable) {
+		/*
+		 * As fixes are added to CodebookPdfToXmlApp, an assertion method for each fix
+		 * should be added here.
+		 */
+
+		assertTypoFixForNchClmPrvdtPmtAmt(variable);
+	}
+
+	/**
+	 * @param variable
+	 *            the {@link Variable} to check
+	 */
+	private static void assertTypoFixForNchClmPrvdtPmtAmt(Variable variable) {
+		Assert.assertNotEquals("NCH_CLM_PRVDT_PMT_AMT", variable.getId());
 	}
 }

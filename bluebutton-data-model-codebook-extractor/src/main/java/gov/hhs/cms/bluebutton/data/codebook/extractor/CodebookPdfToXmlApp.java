@@ -7,6 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.function.Function;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -15,6 +19,7 @@ import javax.xml.bind.Marshaller;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 
 import gov.hhs.cms.bluebutton.data.codebook.model.Codebook;
+import gov.hhs.cms.bluebutton.data.codebook.model.Variable;
 
 /**
  * A simple application that calls {@link PdfParser} for each of the
@@ -52,13 +57,54 @@ public final class CodebookPdfToXmlApp {
 			System.exit(3);
 		}
 
+		// Define the Variable fixers/modifiers
+		List<Function<Variable, Variable>> variableFixers = buildVariableFixers();
+
 		for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
+			// First, parse the PDF to model objects.
 			Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
 
+			// Then, fix/modify those model objects as needed.
+			ListIterator<Variable> variablesIter = codebook.getVariables().listIterator();
+			while (variablesIter.hasNext()) {
+				Variable variable = variablesIter.next();
+				for (Function<Variable, Variable> variableFixer : variableFixers) {
+					variable = variableFixer.apply(variable);
+					if (variable == null)
+						throw new IllegalStateException();
+				}
+				variablesIter.set(variable);
+			}
+
+			// Finally, write out the final model objects to XML.
 			Path outputFile = outputPath.resolve(supportedCodebook.getCodebookXmlResourceName());
 			writeCodebookXmlToFile(codebook, outputFile);
 			System.out.printf("Extracted codebook PDF to XML: %s\n", outputFile.toAbsolutePath());
 		}
+	}
+
+	/**
+	 * @return the {@link List} of "variable fixer" {@link Function}s, each of which
+	 *         will be given an opportunity to modify or replace each
+	 *         {@link Variable}
+	 */
+	private static List<Function<Variable, Variable>> buildVariableFixers() {
+		List<Function<Variable, Variable>> variableFixers = new LinkedList<>();
+
+		/*
+		 * Fix a typo in one of the Variable IDs. Appears in the
+		 * "December 2017, Version 1.4" PDF.
+		 */
+		variableFixers.add(v -> {
+			if (v.getCodebook().getId() != SupportedCodebook.FFS_CLAIMS.name()
+					|| !v.getId().equals("NCH_CLM_PRVDT_PMT_AMT"))
+				return v;
+
+			v.setId("NCH_CLM_PRVDR_PMT_AMT");
+			return v;
+		});
+
+		return variableFixers;
 	}
 
 	/**
