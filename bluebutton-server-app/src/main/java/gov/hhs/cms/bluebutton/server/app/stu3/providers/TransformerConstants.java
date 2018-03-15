@@ -149,6 +149,7 @@ final class TransformerConstants {
 	 */
 	static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
+	// FIXME should be "urn:iso:std:iso:4217"
 	static final String CODING_MONEY = "urn:std:iso:4217";
 	
 	/**
