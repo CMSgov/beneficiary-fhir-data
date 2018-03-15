@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 
@@ -63,8 +64,8 @@ final class SNFClaimTransformer {
 				claimGroup.getMedicareBenefitsExhaustedDate(), claimGroup.getDiagnosisRelatedGroupCd());
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get());
 		}
 
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
@@ -83,17 +84,21 @@ final class SNFClaimTransformer {
 				claimGroup.getClaimPPSCapitalFSPAmount(), claimGroup.getClaimPPSCapitalIMEAmount(),
 				claimGroup.getClaimPPSCapitalOutlierAmount(), claimGroup.getClaimPPSOldCapitalHoldHarmlessAmount());
 		
-		if (claimGroup.getQualifiedStayFromDate().isPresent() && claimGroup.getQualifiedStayThroughDate().isPresent()) {
+		if (claimGroup.getQualifiedStayFromDate().isPresent() || claimGroup.getQualifiedStayThroughDate().isPresent()) {
 			TransformerUtils.validatePeriodDates(claimGroup.getQualifiedStayFromDate(),
 					claimGroup.getQualifiedStayThroughDate());
-			eob.addInformation()
-					.setCategory(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-							TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_QUALIFIED))
-					.setTiming(new Period()
-							.setStart(TransformerUtils.convertToDate((claimGroup.getQualifiedStayFromDate().get())),
-									TemporalPrecisionEnum.DAY)
-							.setEnd(TransformerUtils.convertToDate((claimGroup.getQualifiedStayThroughDate().get())),
-									TemporalPrecisionEnum.DAY));
+			SupportingInformationComponent nchQlfydStayInfo = TransformerUtils.addInformation(eob,
+					CcwCodebookVariable.NCH_QLFYD_STAY_FROM_DT);
+			Period nchQlfydStayPeriod = new Period();
+			if (claimGroup.getQualifiedStayFromDate().isPresent())
+				nchQlfydStayPeriod.setStart(
+						TransformerUtils.convertToDate((claimGroup.getQualifiedStayFromDate().get())),
+						TemporalPrecisionEnum.DAY);
+			if (claimGroup.getQualifiedStayThroughDate().isPresent())
+				nchQlfydStayPeriod.setEnd(
+						TransformerUtils.convertToDate((claimGroup.getQualifiedStayThroughDate().get())),
+						TemporalPrecisionEnum.DAY);
+			nchQlfydStayInfo.setTiming(nchQlfydStayPeriod);
 		}
 
 		// Common group level fields between Inpatient, Outpatient and SNF

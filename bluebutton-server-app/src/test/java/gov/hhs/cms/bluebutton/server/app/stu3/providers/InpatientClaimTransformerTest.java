@@ -66,6 +66,10 @@ public final class InpatientClaimTransformerTest {
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
+		if (claim.getPatientStatusCd().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claim.getPatientStatusCd(), eob);
+
 		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PASS_THRU_PER_DIEM_AMT,
 				claim.getPassThruPerDiemAmount(), eob);
 		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_PROFNL_CMPNT_CHRG_AMT,

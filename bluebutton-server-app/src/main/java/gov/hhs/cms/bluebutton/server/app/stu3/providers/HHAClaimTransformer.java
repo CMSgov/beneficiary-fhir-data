@@ -112,12 +112,12 @@ final class HHAClaimTransformer {
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
 		if (claimGroup.getClaimLUPACode().isPresent()) {
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.CLM_HHA_LUPA_IND_CD, claimGroup.getClaimLUPACode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.CLM_HHA_LUPA_IND_CD,
+					CcwCodebookVariable.CLM_HHA_LUPA_IND_CD, claimGroup.getClaimLUPACode());
 		}
 		if (claimGroup.getClaimReferralCode().isPresent()) {
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.CLM_HHA_RFRL_CD, claimGroup.getClaimReferralCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.CLM_HHA_RFRL_CD,
+					CcwCodebookVariable.CLM_HHA_RFRL_CD, claimGroup.getClaimReferralCode());
 		}
 
 		BenefitComponent clmHhaTotVisitCntFinancial = TransformerUtils.addBenefitBalanceFinancial(eob,

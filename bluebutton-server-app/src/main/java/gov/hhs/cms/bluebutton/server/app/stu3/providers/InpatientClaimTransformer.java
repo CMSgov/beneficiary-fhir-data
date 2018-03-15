@@ -57,8 +57,8 @@ final class InpatientClaimTransformer {
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd());
 		}
 		
 		// add EOB information to fields that are common between the Inpatient and SNF claim types

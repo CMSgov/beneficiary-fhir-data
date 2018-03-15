@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.hl7.fhir.dstu3.model.BaseDateTimeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -25,6 +26,7 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
@@ -376,9 +378,9 @@ final class TransformerTestUtils {
 	 * @param expected
 	 *            the expected {@link LocalDate}
 	 * @param actual
-	 *            the actual {@link DateTimeType} to verify
+	 *            the actual {@link BaseDateTimeType} to verify
 	 */
-	static void assertDateEquals(LocalDate expected, DateTimeType actual) {
+	static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
 		Assert.assertEquals(Date.from(expected.atStartOfDay(ZoneId.systemDefault()).toInstant()), actual.getValue());
 		Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
 	}
@@ -1306,7 +1308,7 @@ final class TransformerTestUtils {
 	 *         wasn't, the method will instead fail with an
 	 *         {@link AssertionFailedError})
 	 */
-	private static SupportingInformationComponent assertHasInfo(CcwCodebookVariable categoryVariable,
+	static SupportingInformationComponent assertHasInfo(CcwCodebookVariable categoryVariable,
 			ExplanationOfBenefit eob) {
 		Optional<SupportingInformationComponent> info = eob.getInformation().stream()
 				.filter(i -> isCodeInConcept(i.getCategory(), TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
@@ -1315,6 +1317,47 @@ final class TransformerTestUtils {
 		Assert.assertTrue(info.isPresent());
 
 		return info.get();
+	}
+
+	/**
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} matching the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 * @param codeSystemVariable
+	 *            the {@link CcwCodebookVariable} that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getSystem()}
+	 * @param codeValue
+	 *            the value that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getCode()}
+	 * @param eob
+	 *            the actual {@link ExplanationOfBenefit} to search
+	 */
+	static void assertInfoWithCodeEquals(CcwCodebookVariable categoryVariable, CcwCodebookVariable codeSystemVariable,
+			Optional<?> codeValue, ExplanationOfBenefit eob) {
+		SupportingInformationComponent info = assertHasInfo(categoryVariable, eob);
+		assertHasCoding(codeSystemVariable, codeValue, info.getCode());
+	}
+
+	/**
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} matching the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 * @param codeSystemVariable
+	 *            the {@link CcwCodebookVariable} that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getSystem()}
+	 * @param codeValue
+	 *            the value that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getCode()}
+	 * @param eob
+	 *            the actual {@link ExplanationOfBenefit} to search
+	 */
+	static void assertInfoWithCodeEquals(CcwCodebookVariable categoryVariable, CcwCodebookVariable codeSystemVariable,
+			Object codeValue, ExplanationOfBenefit eob) {
+		assertInfoWithCodeEquals(categoryVariable, codeSystemVariable, Optional.of(codeValue), eob);
 	}
 
 	/**
@@ -1347,34 +1390,35 @@ final class TransformerTestUtils {
 	static void assertCommonEobInformationInpatientSNF(ExplanationOfBenefit eob, Optional<LocalDate> noncoveredStayFromDate, 
 			Optional<LocalDate> noncoveredStayThroughDate, Optional<LocalDate> coveredCareThroughDate,
 			Optional<LocalDate> medicareBenefitsExhaustedDate, Optional<String> diagnosisRelatedGroupCd) {
-		
 		/*
 		 * TODO missing tests for: admissionTypeCd, sourceAdmissionCd,
 		 * diagnosisAdmittingCode, diagnosisAdmittingCodeVersion
 		 */
-		
+
 		// noncoveredStayFromDate & noncoveredStayThroughDate
-		if (noncoveredStayFromDate.isPresent() && noncoveredStayThroughDate.isPresent()) {
-			assertInformationPeriodEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-					CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT, noncoveredStayFromDate.get(),
-					noncoveredStayThroughDate.get(), eob.getInformation());
+		if (noncoveredStayFromDate.isPresent() || noncoveredStayThroughDate.isPresent()) {
+			SupportingInformationComponent nchVrfdNcvrdStayInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT, eob);
+			TransformerTestUtils.assertPeriodEquals(noncoveredStayFromDate, noncoveredStayThroughDate,
+					(Period) nchVrfdNcvrdStayInfo.getTiming());
 		}
-		
+
 		// coveredCareThroughDate
 		if (coveredCareThroughDate.isPresent()) {
-			assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-					CcwCodebookVariable.NCH_ACTV_OR_CVRD_LVL_CARE_THRU, coveredCareThroughDate.get(),
-					eob.getInformation());
+			SupportingInformationComponent nchActvOrCvrdLvlCareThruInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_ACTV_OR_CVRD_LVL_CARE_THRU, eob);
+			TransformerTestUtils.assertDateEquals(coveredCareThroughDate.get(),
+					(DateTimeType) nchActvOrCvrdLvlCareThruInfo.getTiming());
 		}
-		
+
 		// medicareBenefitsExhaustedDate
-		if(medicareBenefitsExhaustedDate.isPresent()) {
-		assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-					CcwCodebookVariable.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,
-				medicareBenefitsExhaustedDate.get(),
-				eob.getInformation());
+		if (medicareBenefitsExhaustedDate.isPresent()) {
+			SupportingInformationComponent nchBeneMdcrBnftsExhtdDtIInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I, eob);
+			TransformerTestUtils.assertDateEquals(medicareBenefitsExhaustedDate.get(),
+					(BaseDateTimeType) nchBeneMdcrBnftsExhtdDtIInfo.getTiming());
 		}
-		
+
 		// diagnosisRelatedGroupCd
 		assertHasCoding(CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd,
 				eob.getDiagnosisFirstRep().getPackageCode());
@@ -1933,5 +1977,22 @@ final class TransformerTestUtils {
 		}
 
 		Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
+	}
+
+	/**
+	 * @param expectedStartDate
+	 *            the expected value for {@link Period#getStart()}
+	 * @param expectedEndDate
+	 *            the expected value for {@link Period#getEnd()}
+	 * @param actualPeriod
+	 *            the {@link Period} to verify
+	 */
+	static void assertPeriodEquals(Optional<LocalDate> expectedStartDate, Optional<LocalDate> expectedEndDate,
+			Period actualPeriod) {
+		Assert.assertTrue(expectedStartDate.isPresent() || expectedEndDate.isPresent());
+		if (expectedStartDate.isPresent())
+			assertDateEquals(expectedStartDate.get(), actualPeriod.getStartElement());
+		if (expectedEndDate.isPresent())
+			assertDateEquals(expectedEndDate.get(), actualPeriod.getEndElement());
 	}
 }

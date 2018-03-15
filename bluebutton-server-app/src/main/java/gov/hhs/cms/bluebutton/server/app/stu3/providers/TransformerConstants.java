@@ -106,15 +106,9 @@ final class TransformerConstants {
 	 */
 	static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
 
-	// FIXME actually an information entry
-	public static final String CODED_BENEFIT_COVERAGE_DATE_QUALIFIED = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/qlfrfrom.txt";
-
 	static final String CODED_MONEY_USD = "USD";
 
 	static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE = BASE_URL_BBAPI_RESOURCES + "/codesystem/benefit-balance";
-
-	// FIXME actually an information entry
-	static final String CODING_BBAPI_BENEFIT_COVERAGE_DATE = "Benefit Coverage Date";
 
 	/**
 	 * The CMS-custom {@link Coding#getSystem()} value for Medicare

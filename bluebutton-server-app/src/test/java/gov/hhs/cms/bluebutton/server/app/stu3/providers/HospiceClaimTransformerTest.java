@@ -65,9 +65,8 @@ public final class HospiceClaimTransformerTest {
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-						claim.getPatientStatusCd(), i.getCategory())));
+		TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+				CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claim.getPatientStatusCd(), eob);
 
 		TransformerTestUtils.assertDateEquals(claim.getClaimHospiceStartDate().get(),
 				eob.getHospitalization().getStartElement());

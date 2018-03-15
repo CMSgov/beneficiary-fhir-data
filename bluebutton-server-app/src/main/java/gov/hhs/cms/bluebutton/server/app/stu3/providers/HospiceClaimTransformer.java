@@ -53,8 +53,8 @@ final class HospiceClaimTransformer {
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd());
 		}
 
 		// Common group level fields between Inpatient, HHA, Hospice and SNF

@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -75,10 +77,13 @@ public final class SNFClaimTransformerTest {
 				claim.getClaimPPSCapitalFSPAmount(), claim.getClaimPPSCapitalIMEAmount(),
 				claim.getClaimPPSCapitalOutlierAmount(), claim.getClaimPPSOldCapitalHoldHarmlessAmount());
 
-		TransformerTestUtils.assertInformationPeriodEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-				TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_QUALIFIED, claim.getQualifiedStayFromDate().get(),
-				claim.getQualifiedStayThroughDate().get(), eob.getInformation());
-		
+		if (claim.getQualifiedStayFromDate().isPresent() || claim.getQualifiedStayThroughDate().isPresent()) {
+			SupportingInformationComponent nchQlyfdStayInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_QLFYD_STAY_FROM_DT, eob);
+			TransformerTestUtils.assertPeriodEquals(claim.getQualifiedStayFromDate(),
+					claim.getQualifiedStayThroughDate(), (Period) nchQlyfdStayInfo.getTiming());
+		}
+
 		// test common eob information between SNF and Inpatient claims are set as expected
 		TransformerTestUtils.assertCommonEobInformationInpatientSNF(eob, claim.getNoncoveredStayFromDate(),
 				claim.getNoncoveredStayThroughDate(), claim.getCoveredCareThroughDate(),

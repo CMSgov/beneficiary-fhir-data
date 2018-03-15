@@ -408,6 +408,9 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * Returns a new {@link SupportingInformationComponent} that has been added to
+	 * the specified {@link ExplanationOfBenefit}.
+	 *
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} to modify
 	 * @param categoryVariable
@@ -429,27 +432,60 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * Returns a new {@link SupportingInformationComponent} that has been added to
+	 * the specified {@link ExplanationOfBenefit}. Unlike
+	 * {@link #addInformation(ExplanationOfBenefit, CcwCodebookVariable)}, this also
+	 * sets the {@link SupportingInformationComponent#getCode()} based on the values
+	 * provided.
+	 *
 	 * @param eob
-	 *            the {@link ExplanationOfBenefit} to (possibly) modify
-	 * @param infoCategory
-	 *            the {@link CodeableConcept} to use as a
-	 *            {@link SupportingInformationComponent#getCategory()} value, if
-	 *            such an entry is not already present
-	 * @return the {@link SupportingInformationComponent#getSequence()} of the
-	 *         existing or newly-added entry
+	 *            the {@link ExplanationOfBenefit} to modify
+	 * @param categoryVariable
+	 *            {@link CcwCodebookVariable} to map to
+	 *            {@link SupportingInformationComponent#getCategory()}
+	 * @param codeSystemVariable
+	 *            the {@link CcwCodebookVariable} to map to the
+	 *            {@link Coding#getSystem()} used in the
+	 *            {@link SupportingInformationComponent#getCode()}
+	 * @param codeValue
+	 *            the value to map to the {@link Coding#getCode()} used in the
+	 *            {@link SupportingInformationComponent#getCode()}
+	 * @return the newly-added {@link SupportingInformationComponent} entry
 	 */
-	static int addInformation(ExplanationOfBenefit eob, CodeableConcept infoCategory) {
-		Optional<SupportingInformationComponent> existingInfo = eob.getInformation().stream()
-				.filter(d -> infoCategory.equalsDeep(d.getCategory())).findAny();
-		if (existingInfo.isPresent())
-			return existingInfo.get().getSequenceElement().getValue();
+	static SupportingInformationComponent addInformationWithCode(ExplanationOfBenefit eob,
+			CcwCodebookVariable categoryVariable, CcwCodebookVariable codeSystemVariable, Optional<?> codeValue) {
+		SupportingInformationComponent infoComponent = addInformation(eob, categoryVariable);
 
-		SupportingInformationComponent infoComponent = new SupportingInformationComponent()
-				.setSequence(eob.getInformation().size() + 1);
-		infoComponent.setCategory(infoCategory);
-		eob.getInformation().add(infoComponent);
+		CodeableConcept infoCode = new CodeableConcept().addCoding(createCoding(eob, codeSystemVariable, codeValue));
+		infoComponent.setCode(infoCode);
 
-		return infoComponent.getSequenceElement().getValue();
+		return infoComponent;
+	}
+
+	/**
+	 * Returns a new {@link SupportingInformationComponent} that has been added to
+	 * the specified {@link ExplanationOfBenefit}. Unlike
+	 * {@link #addInformation(ExplanationOfBenefit, CcwCodebookVariable)}, this also
+	 * sets the {@link SupportingInformationComponent#getCode()} based on the values
+	 * provided.
+	 *
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to modify
+	 * @param categoryVariable
+	 *            {@link CcwCodebookVariable} to map to
+	 *            {@link SupportingInformationComponent#getCategory()}
+	 * @param codeSystemVariable
+	 *            the {@link CcwCodebookVariable} to map to the
+	 *            {@link Coding#getSystem()} used in the
+	 *            {@link SupportingInformationComponent#getCode()}
+	 * @param codeValue
+	 *            the value to map to the {@link Coding#getCode()} used in the
+	 *            {@link SupportingInformationComponent#getCode()}
+	 * @return the newly-added {@link SupportingInformationComponent} entry
+	 */
+	static SupportingInformationComponent addInformationWithCode(ExplanationOfBenefit eob,
+			CcwCodebookVariable categoryVariable, CcwCodebookVariable codeSystemVariable, Object codeValue) {
+		return addInformationWithCode(eob, categoryVariable, codeSystemVariable, Optional.of(codeValue));
 	}
 
 	/**
@@ -1318,44 +1354,43 @@ public final class TransformerUtils {
 			Optional<LocalDate> medicareBenefitsExhaustedDate, Optional<String> diagnosisRelatedGroupCd) {
 
 		// admissionTypeCd
-		eob.addInformation()
-				.setCategory(createCodeableConcept(eob, CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD, admissionTypeCd));
+		addInformationWithCode(eob, CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD, CcwCodebookVariable.CLM_IP_ADMSN_TYPE_CD,
+				admissionTypeCd);
 
 		// sourceAdmissionCd
 		if (sourceAdmissionCd.isPresent()) {
-			eob.addInformation().setCategory(
-					createCodeableConcept(eob, CcwCodebookVariable.CLM_SRC_IP_ADMSN_CD, sourceAdmissionCd));
+			addInformationWithCode(eob, CcwCodebookVariable.CLM_SRC_IP_ADMSN_CD,
+					CcwCodebookVariable.CLM_SRC_IP_ADMSN_CD, sourceAdmissionCd);
 		}
 
 		// noncoveredStayFromDate & noncoveredStayThroughDate
-		if (noncoveredStayFromDate.isPresent() && noncoveredStayThroughDate.isPresent()) {
+		if (noncoveredStayFromDate.isPresent() || noncoveredStayThroughDate.isPresent()) {
 			TransformerUtils.validatePeriodDates(noncoveredStayFromDate, noncoveredStayThroughDate);
-			eob.addInformation()
-					.setCategory(createCodeableConceptForFieldId(eob,
-							TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-							CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT))
-					.setTiming(new Period()
-							.setStart(TransformerUtils.convertToDate((noncoveredStayFromDate.get())),
-									TemporalPrecisionEnum.DAY)
-							.setEnd(TransformerUtils.convertToDate((noncoveredStayThroughDate.get())),
-									TemporalPrecisionEnum.DAY));
+			SupportingInformationComponent nchVrfdNcvrdStayInfo = TransformerUtils.addInformation(eob,
+					CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT);
+			Period nchVrfdNcvrdStayPeriod = new Period();
+			if (noncoveredStayFromDate.isPresent())
+				nchVrfdNcvrdStayPeriod.setStart(TransformerUtils.convertToDate((noncoveredStayFromDate.get())),
+						TemporalPrecisionEnum.DAY);
+			if (noncoveredStayThroughDate.isPresent())
+				nchVrfdNcvrdStayPeriod.setEnd(TransformerUtils.convertToDate((noncoveredStayThroughDate.get())),
+						TemporalPrecisionEnum.DAY);
+			nchVrfdNcvrdStayInfo.setTiming(nchVrfdNcvrdStayPeriod);
 		}
 
 		// coveredCareThroughDate
 		if (coveredCareThroughDate.isPresent()) {
-			eob.addInformation()
-					.setCategory(createCodeableConceptForFieldId(eob,
-							TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-							CcwCodebookVariable.NCH_ACTV_OR_CVRD_LVL_CARE_THRU))
+			SupportingInformationComponent nchActvOrCvrdLvlCareThruInfo = TransformerUtils.addInformation(eob,
+					CcwCodebookVariable.NCH_ACTV_OR_CVRD_LVL_CARE_THRU);
+			nchActvOrCvrdLvlCareThruInfo
 					.setTiming(new DateType(TransformerUtils.convertToDate(coveredCareThroughDate.get())));
 		}
 
 		// medicareBenefitsExhaustedDate
 		if (medicareBenefitsExhaustedDate.isPresent()) {
-			eob.addInformation()
-					.setCategory(createCodeableConceptForFieldId(eob,
-							TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-							CcwCodebookVariable.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I))
+			SupportingInformationComponent nchBeneMdcrBnftsExhtdDtIInfo = TransformerUtils.addInformation(eob,
+					CcwCodebookVariable.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I);
+			nchBeneMdcrBnftsExhtdDtIInfo
 					.setTiming(new DateType(TransformerUtils.convertToDate(medicareBenefitsExhaustedDate.get())));
 		}
 
@@ -1931,10 +1966,9 @@ public final class TransformerUtils {
 				.addExtension(createExtensionCoding(eob, CcwCodebookVariable.CLAIM_QUERY_CD, claimQueryCode));
 
 		if (mcoPaidSw.isPresent()) {
-			TransformerUtils.addInformation(eob,
-					TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.CLM_MCO_PD_SW, mcoPaidSw));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.CLM_MCO_PD_SW,
+					CcwCodebookVariable.CLM_MCO_PD_SW, mcoPaidSw);
 		}
-
 	}
 
 	/**
@@ -1991,8 +2025,8 @@ public final class TransformerUtils {
 		eob.getFacility()
 				.addExtension(createExtensionCoding(eob, CcwCodebookVariable.CLM_FAC_TYPE_CD, claimFacilityTypeCode));
 
-		TransformerUtils.addInformation(eob,
-				TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.CLM_FREQ_CD, claimFrequencyCode));
+		TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.CLM_FREQ_CD, CcwCodebookVariable.CLM_FREQ_CD,
+				claimFrequencyCode);
 
 		if (claimNonPaymentReasonCode.isPresent()) {
 			eob.addExtension(
@@ -2000,16 +2034,17 @@ public final class TransformerUtils {
 		}
 
 		if (!patientDischargeStatusCode.isEmpty()) {
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.PTNT_DSCHRG_STUS_CD, patientDischargeStatusCode));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.PTNT_DSCHRG_STUS_CD,
+					CcwCodebookVariable.PTNT_DSCHRG_STUS_CD, patientDischargeStatusCode);
 		}
 
 		// FIXME move into the mapType(...) method
 		eob.getType().addCoding(
 				createCoding(eob, CcwCodebookVariable.CLM_SRVC_CLSFCTN_TYPE_CD, claimServiceClassificationTypeCode));
+
 		if (claimPrimaryPayerCode.isPresent()) {
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.NCH_PRMRY_PYR_CD, claimPrimaryPayerCode.get()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.NCH_PRMRY_PYR_CD,
+					CcwCodebookVariable.NCH_PRMRY_PYR_CD, claimPrimaryPayerCode.get());
 		}
 
 		if (attendingPhysicianNpi.isPresent()) {

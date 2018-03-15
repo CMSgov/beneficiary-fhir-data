@@ -217,52 +217,51 @@ final class PartDEventTransformer {
 		 * Storing code values in EOB.information below
 		 */
 
-		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-				CcwCodebookVariable.DAW_PROD_SLCTN_CD, claimGroup.getDispenseAsWrittenProductSelectionCode()));
+		TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.DAW_PROD_SLCTN_CD,
+				CcwCodebookVariable.DAW_PROD_SLCTN_CD, claimGroup.getDispenseAsWrittenProductSelectionCode());
 
 		if (claimGroup.getDispensingStatusCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.DSPNSNG_STUS_CD, claimGroup.getDispensingStatusCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.DSPNSNG_STUS_CD,
+					CcwCodebookVariable.DSPNSNG_STUS_CD, claimGroup.getDispensingStatusCode());
 
-		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-				CcwCodebookVariable.DRUG_CVRG_STUS_CD, claimGroup.getDrugCoverageStatusCode()));
+		TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.DRUG_CVRG_STUS_CD,
+				CcwCodebookVariable.DRUG_CVRG_STUS_CD, claimGroup.getDrugCoverageStatusCode());
 
 		if (claimGroup.getAdjustmentDeletionCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.ADJSTMT_DLTN_CD, claimGroup.getAdjustmentDeletionCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.ADJSTMT_DLTN_CD,
+					CcwCodebookVariable.ADJSTMT_DLTN_CD, claimGroup.getAdjustmentDeletionCode());
 
 		if (claimGroup.getNonstandardFormatCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.NSTD_FRMT_CD, claimGroup.getNonstandardFormatCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.NSTD_FRMT_CD,
+					CcwCodebookVariable.NSTD_FRMT_CD, claimGroup.getNonstandardFormatCode());
 
 		if (claimGroup.getPricingExceptionCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.PRCNG_EXCPTN_CD, claimGroup.getPricingExceptionCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.PRCNG_EXCPTN_CD,
+					CcwCodebookVariable.PRCNG_EXCPTN_CD, claimGroup.getPricingExceptionCode());
 
 		if (claimGroup.getCatastrophicCoverageCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.CTSTRPHC_CVRG_CD, claimGroup.getCatastrophicCoverageCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.CTSTRPHC_CVRG_CD,
+					CcwCodebookVariable.CTSTRPHC_CVRG_CD, claimGroup.getCatastrophicCoverageCode());
 
 		if (claimGroup.getPrescriptionOriginationCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.RX_ORGN_CD, claimGroup.getPrescriptionOriginationCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.RX_ORGN_CD, CcwCodebookVariable.RX_ORGN_CD,
+					claimGroup.getPrescriptionOriginationCode());
 
 		if (claimGroup.getBrandGenericCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.BRND_GNRC_CD, claimGroup.getBrandGenericCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.BRND_GNRC_CD,
+					CcwCodebookVariable.BRND_GNRC_CD, claimGroup.getBrandGenericCode());
 
-		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-				CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD, claimGroup.getPharmacyTypeCode()));
+		TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD,
+				CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD, claimGroup.getPharmacyTypeCode());
 
-		TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-				CcwCodebookVariable.PTNT_RSDNC_CD, claimGroup.getPatientResidenceCode()));
+		TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.PTNT_RSDNC_CD,
+				CcwCodebookVariable.PTNT_RSDNC_CD, claimGroup.getPatientResidenceCode());
 
 		if (claimGroup.getSubmissionClarificationCode().isPresent())
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.SUBMSN_CLR_CD, claimGroup.getSubmissionClarificationCode()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.SUBMSN_CLR_CD,
+					CcwCodebookVariable.SUBMSN_CLR_CD, claimGroup.getSubmissionClarificationCode());
 
 		return eob;
 	}
-
 }
 

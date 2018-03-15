@@ -2,6 +2,16 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Change `ExplanationOfBenefit.information` Entries
+
+Several changes have been made to these entries:
+
+1. The `ExplanationOfBenefit.information.category` codings have changed:
+    a. The `Coding.system` for all of these is now `https://bluebutton.cms.gov/resources/codesystem/information`.
+    b. The `Coding.code` have all been switched to reference URLs. Those URLs uniquely identify the `information` fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful in this case.
+    c. The `Coding.display` values are included.
+2. For `ExplanationOfBenefit.information` entries that are just used to convey a coding (which is most of them), the coded data has been moved to the `ExplanationOfBenefit.information.code` field.
+
 ### Switch Most `ExplanationOfBenefit.benefitBalance` Entries to "Adjudication Total" Extensions
 
 Most of the former `ExplanationOfBenefit.benefitBalance` entries were not actually _benefit balances_, and so were improperly mapped. These values are instead better thought of as overall-claim-level analogues of the `ExplanationOfBenefit.item.adjudication` field.

@@ -75,6 +75,13 @@ public final class HHAClaimTransformerTest {
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 
+		if (claim.getClaimLUPACode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.CLM_HHA_LUPA_IND_CD,
+					CcwCodebookVariable.CLM_HHA_LUPA_IND_CD, claim.getClaimLUPACode(), eob);
+		if (claim.getClaimReferralCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.CLM_HHA_RFRL_CD,
+					CcwCodebookVariable.CLM_HHA_RFRL_CD, claim.getClaimReferralCode(), eob);
+
 		TransformerTestUtils.assertBenefitBalanceUsedIntEquals(BenefitCategory.MEDICAL,
 				CcwCodebookVariable.CLM_HHA_TOT_VISIT_CNT, claim.getTotalVisitCount().intValue(), eob);
 

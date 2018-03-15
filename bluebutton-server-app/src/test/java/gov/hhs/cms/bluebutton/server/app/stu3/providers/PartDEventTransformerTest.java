@@ -104,10 +104,6 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.TOT_RX_CST_AMT,
 				claim.getTotalPrescriptionCost(), rxItem.getAdjudication());
 
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(CcwCodebookVariable.RX_ORGN_CD,
-						claim.getPrescriptionOriginationCode(), i.getCategory())));
-
 		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.RPTD_GAP_DSCNT_NUM,
 				claim.getGapDiscountAmount(), rxItem.getAdjudication());
 		
@@ -123,6 +119,39 @@ public final class PartDEventTransformerTest {
 		TransformerTestUtils.assertMapEobType(eob.getType(), ClaimType.PDE,
 				Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.PHARMACY), Optional.empty(),
 				Optional.empty());
+
+		TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.DAW_PROD_SLCTN_CD,
+				CcwCodebookVariable.DAW_PROD_SLCTN_CD, claim.getDispenseAsWrittenProductSelectionCode(), eob);
+		if (claim.getDispensingStatusCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.DSPNSNG_STUS_CD,
+					CcwCodebookVariable.DSPNSNG_STUS_CD, claim.getDispensingStatusCode(), eob);
+		TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.DRUG_CVRG_STUS_CD,
+				CcwCodebookVariable.DRUG_CVRG_STUS_CD, claim.getDrugCoverageStatusCode(), eob);
+		if (claim.getAdjustmentDeletionCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.ADJSTMT_DLTN_CD,
+					CcwCodebookVariable.ADJSTMT_DLTN_CD, claim.getAdjustmentDeletionCode(), eob);
+		if (claim.getNonstandardFormatCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.NSTD_FRMT_CD,
+					CcwCodebookVariable.NSTD_FRMT_CD, claim.getNonstandardFormatCode(), eob);
+		if (claim.getPricingExceptionCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.PRCNG_EXCPTN_CD,
+					CcwCodebookVariable.PRCNG_EXCPTN_CD, claim.getPricingExceptionCode(), eob);
+		if (claim.getCatastrophicCoverageCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.CTSTRPHC_CVRG_CD,
+					CcwCodebookVariable.CTSTRPHC_CVRG_CD, claim.getCatastrophicCoverageCode(), eob);
+		if (claim.getPrescriptionOriginationCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.RX_ORGN_CD,
+					CcwCodebookVariable.RX_ORGN_CD, claim.getPrescriptionOriginationCode(), eob);
+		if (claim.getBrandGenericCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.BRND_GNRC_CD,
+					CcwCodebookVariable.BRND_GNRC_CD, claim.getBrandGenericCode(), eob);
+		TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD,
+				CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD, claim.getPharmacyTypeCode(), eob);
+		TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.PTNT_RSDNC_CD,
+				CcwCodebookVariable.PTNT_RSDNC_CD, claim.getPatientResidenceCode(), eob);
+		if (claim.getSubmissionClarificationCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.SUBMSN_CLR_CD,
+					CcwCodebookVariable.SUBMSN_CLR_CD, claim.getSubmissionClarificationCode(), eob);
 	}
 }
 
