@@ -1547,7 +1547,7 @@ final class TransformerTestUtils {
 		assertExtensionIdentifierEquals(CcwCodebookVariable.CLM_CLNCL_TRIL_NUM, clinicalTrialNumber, eob);
 		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CARR_CLM_CASH_DDCTBL_APLD_AMT,
 				beneficiaryPartBDeductAmount, eob);
-		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CLM_PRVDT_PMT_AMT, providerPaymentAmount, eob);
+		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CLM_PRVDR_PMT_AMT, providerPaymentAmount, eob);
 		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CLM_BENE_PMT_AMT, beneficiaryPaymentAmount, eob);
 		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CARR_CLM_SBMTD_CHRG_AMT, submittedChargeAmount,
 				eob);

@@ -1605,10 +1605,7 @@ public final class TransformerUtils {
 		}
 
 		addAdjudicationTotal(eob, CcwCodebookVariable.CARR_CLM_CASH_DDCTBL_APLD_AMT, beneficiaryPartBDeductAmount);
-
-		// FIXME the codebook PDF has a typo for this variable name!
-		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CLM_PRVDT_PMT_AMT, providerPaymentAmount);
-
+		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CLM_PRVDR_PMT_AMT, providerPaymentAmount);
 		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CLM_BENE_PMT_AMT, beneficiaryPaymentAmount);
 		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CARR_CLM_SBMTD_CHRG_AMT, submittedChargeAmount);
 		addAdjudicationTotal(eob, CcwCodebookVariable.NCH_CARR_CLM_ALOWD_AMT, allowedChargeAmount);
