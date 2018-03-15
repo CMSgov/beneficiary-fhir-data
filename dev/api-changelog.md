@@ -22,30 +22,30 @@ The <https://bluebutton.cms.gov/resources/codesystem/adjudication-total> referen
 
 As part of this change, one of the former `ExplanationOfBenefit.benefitBalance` entries, <https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty>, was actually changed to an `ExplanationOfBenefit.information` entry, as that was most appropriate.
 
-### Change `ExplanataionOfBenefit.benefitBalance` Entries
+### Change `ExplanationOfBenefit.benefitBalance` Entries
 
 Several changes have been made to these entries:
 
-1. The `Coding.display` values for `ExplanataionOfBenefit.benefitBalance.category` are now included.
-2. The `Coding.system` values used for `ExplanataionOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
+1. The `Coding.display` values for `ExplanationOfBenefit.benefitBalance.category` are now included.
+2. The `Coding.system` values used for `ExplanationOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
     * Previously: `http://bluebutton.cms.hhs.gov/coding#benefitBalanceType`
     * Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/benefit-balance`
-3. The `Coding.code` values used for `ExplanataionOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
+3. The `Coding.code` values used for `ExplanationOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
     * Previously, these had been set to what should have been the `Coding.display` values.
     * Now, they've all been switched to reference URLs. Those URLs uniquely identify the `benefitBalance` financial type fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful in this case.
-4. The `Coding.display` values for `ExplanataionOfBenefit.benefitBalance.financial.type` are now included.
+4. The `Coding.display` values for `ExplanationOfBenefit.benefitBalance.financial.type` are now included.
 
-### Change `ExplanataionOfBenefit.item.adjudication` Entries
+### Change `ExplanationOfBenefit.item.adjudication` Entries
 
 Several changes have been made to these entries:
 
-1. The `Coding.system` values used for `ExplanataionOfBenefit.item.adjudication.category` were incorrect and have been fixed:
+1. The `Coding.system` values used for `ExplanationOfBenefit.item.adjudication.category` were incorrect and have been fixed:
     * Previously: "`CMS Adjudications`"
     * Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/adjudication`
-2. The `Coding.code` values used for `ExplanataionOfBenefit.item.adjudication.category` were incorrect and have been fixed:
+2. The `Coding.code` values used for `ExplanationOfBenefit.item.adjudication.category` were incorrect and have been fixed:
     * Previously, these had been set to what should have been the `Coding.display` values.
     * Now, they've all been switched to reference URLs. Those URLs uniquely identify the `adjudication` fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful.
-3. The `Coding.display` values for `ExplanataionOfBenefit.item.adjudication.category` are now included.
+3. The `Coding.display` values for `ExplanationOfBenefit.item.adjudication.category` are now included.
 
 ### Include `ExplanationOfBenefit.careTeam.role` `Coding.display` Values
 
