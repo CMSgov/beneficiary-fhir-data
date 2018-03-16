@@ -2,6 +2,19 @@
 
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
+### Change `Patient.identifier` Systems
+
+The `Identifier.system` values used here were incorrect and have been fixed:
+
+* Beneficiary ID
+    * Previously: `http://bluebutton.cms.hhs.gov/identifier#bene_id`
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/variables/bene_id`
+* HICN Hash
+    * Previously: `http://bluebutton.cms.hhs.gov/identifier#hicnHash`
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/identifier/hicn-hash`
+
+Documentation for these fields is now available at the corrected URLs.
+
 ### Change `ExplanationOfBenefit.information` Entries
 
 Several changes have been made to these entries:

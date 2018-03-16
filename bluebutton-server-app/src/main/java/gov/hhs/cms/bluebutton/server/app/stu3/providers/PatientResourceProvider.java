@@ -35,6 +35,13 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary_;
  */
 @Component
 public final class PatientResourceProvider implements IResourceProvider {
+	/**
+	 * The {@link Identifier#getSystem()} values that are supported by
+	 * {@link #searchByIdentifier(TokenParam)}.
+	 */
+	private static final List<String> SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS = Arrays.asList(
+			TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
+
 	private EntityManager entityManager;
 
 	/**
@@ -144,8 +151,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 * </p>
 	 * <ul>
 	 * <li>Matching a {@link Beneficiary#getHicn()} hash value: when
-	 * {@link TokenParam#getSystem()} matches
-	 * {@link BeneficiaryTransformer#CODING_CCW_BENE_HICN_HASH}.</li>
+	 * {@link TokenParam#getSystem()} matches one of the
+	 * {@link #SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS} entries.</li>
 	 * </ul>
 	 * <p>
 	 * Searches that don't match one of the above forms are not supported.
@@ -169,7 +176,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
 
-		if (!BeneficiaryTransformer.CODING_CCW_BENE_HICN_HASH.equals(identifier.getSystem()))
+		if (!SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
 			throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
 		try {

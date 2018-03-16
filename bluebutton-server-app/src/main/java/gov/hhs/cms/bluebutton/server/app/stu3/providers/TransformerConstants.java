@@ -204,4 +204,20 @@ final class TransformerConstants {
 	 * value for Part D.
 	 */
 	public static final String COVERAGE_PLAN_PART_D = "Part D";
+
+	/**
+	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
+	 * store a one-way cryptographic hash of each Medicare beneficiaries' HICN.
+	 * Note that, with the SSNRI initiative, CMS is planning to move away from
+	 * HICNs. However, HICNs are still the primary/only Medicare identifier for
+	 * now.
+	 */
+	static final String CODING_BBAPI_BENE_HICN_HASH = BASE_URL_BBAPI_RESOURCES + "/identifier/hicn-hash";
+
+	/**
+	 * The {@link #CODING_BBAPI_BENE_HICN_HASH} used in earlier versions of the API,
+	 * which is still supported by {@link PatientResourceProvider} for backwards
+	 * compatibility reasons.
+	 */
+	static final String CODING_BBAPI_BENE_HICN_HASH_OLD = "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
 }
