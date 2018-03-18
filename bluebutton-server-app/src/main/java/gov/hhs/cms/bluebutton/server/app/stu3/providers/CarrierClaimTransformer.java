@@ -1,14 +1,11 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Money;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -53,19 +50,9 @@ final class CarrierClaimTransformer {
 		// map eob type codes into FHIR
 		TransformerUtils.mapEobType(eob, ClaimType.CARRIER, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
-		
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
-						BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
 
-		// map primaryPayerPaidAmount to eob.benefitbalance.financial
-		BenefitComponent bc = new BenefitComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-						TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
-		bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getPrimaryPayerPaidAmount()));
-		eob.getBenefitBalanceFirstRep().getFinancial().add(bc);
+		TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.PRPAYAMT,
+				claimGroup.getPrimaryPayerPaidAmount());
 
 		// Common group level fields between Carrier and DME
 		TransformerUtils.mapEobCommonGroupCarrierDME(eob, claimGroup.getBeneficiaryId(), claimGroup.getCarrierNumber(),
@@ -95,10 +82,6 @@ final class CarrierClaimTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.getLineNumber().intValue());
 
-			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
-
 			/*
 			 * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing
 			 * provider _should_ always be present. However, we've found some
@@ -109,9 +92,9 @@ final class CarrierClaimTransformer {
 			 * this, so we'll leave it blank.)
 			 */
 			if (claimLine.getPerformingPhysicianNpi().isPresent()) {
-				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils.addCareTeamPractitioner(eob, item,
-						TransformerConstants.CODING_NPI_US, claimLine.getPerformingPhysicianNpi().get(),
-								ClaimCareteamrole.PRIMARY.toCode());
+				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils
+						.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_NPI_US,
+								claimLine.getPerformingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY);
 				performingCareTeamMember.setResponsible(true);
 
 				/*
@@ -143,9 +126,8 @@ final class CarrierClaimTransformer {
 					CcwCodebookVariable.CARR_LINE_RDCD_PMT_PHYS_ASTN_C,
 					claimLine.getReducedPaymentPhysicianAsstCode()));
 			
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
-					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
+			TransformerUtils.mapHcpcs(eob, item, claimGroup.getHcpcsYearCode(), claimLine.getHcpcsCode(),
+					Arrays.asList(claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode()));
 
 			if (claimLine.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
 				item.getService().addExtension(TransformerUtils.createExtensionQuantity(

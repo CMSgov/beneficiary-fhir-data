@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.hl7.fhir.dstu3.model.BaseDateTimeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -23,12 +24,15 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
+import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -68,43 +72,105 @@ import junit.framework.AssertionFailedError;
  */
 final class TransformerTestUtils {
 	/**
-	 * @param expectedCategoryCode
-	 *            the expected {@link Coding#getCode()} of the
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} for the {@link Extension#getUrl()}
+	 *            to find and verify
+	 * @param expectedAmountValue
+	 *            the expected {@link Extension#getValue()} {@link Money#getValue()}
+	 *            value to verify
+	 * @param eob
+	 *            the actual {@link ExplanationOfBenefit} to verify the adjudication
+	 *            total in
+	 */
+	static void assertAdjudicationTotalAmountEquals(CcwCodebookVariable categoryVariable,
+			Optional<BigDecimal> expectedAmountValue, ExplanationOfBenefit eob) {
+		String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(categoryVariable);
+		Optional<Extension> adjudicationTotalExtension = eob.getExtension().stream()
+				.filter(e -> expectedExtensionUrl.equals(e.getUrl())).findAny();
+		Assert.assertEquals(expectedAmountValue.isPresent(), adjudicationTotalExtension.isPresent());
+
+		if (expectedAmountValue.isPresent()) {
+			Assert.assertNotNull(adjudicationTotalExtension.get().getValue());
+			assertMoneyValue(expectedAmountValue.get(), (Money) adjudicationTotalExtension.get().getValue());
+		}
+	}
+
+	/**
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} for the {@link Extension#getUrl()}
+	 *            to find and verify
+	 * @param expectedAmountValue
+	 *            the expected {@link Extension#getValue()} {@link Money#getValue()}
+	 *            value to verify
+	 * @param eob
+	 *            the actual {@link ExplanationOfBenefit} to verify the adjudication
+	 *            total in
+	 */
+	static void assertAdjudicationTotalAmountEquals(CcwCodebookVariable categoryVariable,
+			BigDecimal expectedAmountValue, ExplanationOfBenefit eob) {
+		assertAdjudicationTotalAmountEquals(categoryVariable, Optional.of(expectedAmountValue), eob);
+	}
+
+	/**
+	 * @param expectedAmountValue
+	 *            the expected {@link Money#getValue()}
+	 * @param actualValue
+	 *            the actual {@link Money} to verify
+	 */
+	private static void assertMoneyValue(BigDecimal expectedAmountValue, Money actualValue) {
+		Assert.assertEquals(TransformerConstants.CODING_MONEY, actualValue.getSystem());
+		Assert.assertEquals(TransformerConstants.CODED_MONEY_USD, actualValue.getCode());
+		assertEquivalent(expectedAmountValue, actualValue.getValue());
+	}
+
+	/**
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} for the
 	 *            {@link AdjudicationComponent#getCategory()} to find and verify
 	 * @param expectedAmount
 	 *            the expected {@link AdjudicationComponent#getAmount()}
 	 * @param actuals
 	 *            the actual {@link AdjudicationComponent}s to verify
+	 * @return the {@link AdjudicationComponent} that was found and verified
 	 */
-	static void assertAdjudicationEquals(String expectedCategoryCode, BigDecimal expectedAmount,
-			List<AdjudicationComponent> actuals) {
+	static AdjudicationComponent assertAdjudicationAmountEquals(CcwCodebookVariable ccwVariable,
+			BigDecimal expectedAmount, List<AdjudicationComponent> actuals) {
+		CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
+				expectedCategory.getCodingFirstRep().getSystem(), expectedCategory.getCodingFirstRep().getCode()))
+				.findAny();
 		Assert.assertTrue(adjudication.isPresent());
 		assertEquivalent(expectedAmount, adjudication.get().getAmount().getValue());
+
+		return adjudication.get();
 	}
 
 	/**
 	 * @param expectedCategoryCode
+	 *            the {@link CcwCodebookVariable} for the
+	 *            {@link AdjudicationComponent#getCategory()} to find and verify
+	 * @param expectedReasonCode
 	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link AdjudicationComponent#getCategory()} to verify is not
-	 *            present
+	 *            {@link AdjudicationComponent#getReason()} to find and verify
 	 * @param actuals
 	 *            the actual {@link AdjudicationComponent}s to verify
 	 */
-	static void assertAdjudicationNotPresent(String expectedCategoryCode, List<AdjudicationComponent> actuals) {
+	static void assertAdjudicationReasonEquals(CcwCodebookVariable ccwVariable, Optional<?> expectedReasonCode,
+			List<AdjudicationComponent> actuals) {
+		CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
 		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
-		Assert.assertFalse(adjudication.isPresent());
+				expectedCategory.getCodingFirstRep().getSystem(), expectedCategory.getCodingFirstRep().getCode()))
+				.findAny();
+		Assert.assertEquals(expectedReasonCode.isPresent(), adjudication.isPresent());
+
+		if (expectedReasonCode.isPresent())
+			assertHasCoding(ccwVariable, expectedReasonCode, adjudication.get().getReason());
 	}
 
 	/**
 	 * @param expectedCategoryCode
-	 *            the expected {@link Coding#getCode()} of the
+	 *            the {@link CcwCodebookVariable} for the
 	 *            {@link AdjudicationComponent#getCategory()} to find and verify
-	 * @param expectedReasonSystem
-	 *            the expected {@link Coding#getSystem()} of the
-	 *            {@link AdjudicationComponent#getReason()} to find and verify
 	 * @param expectedReasonCode
 	 *            the expected {@link Coding#getCode()} of the
 	 *            {@link AdjudicationComponent#getReason()} to find and verify
@@ -113,33 +179,10 @@ final class TransformerTestUtils {
 	 */
 	static void assertAdjudicationReasonEquals(CcwCodebookVariable ccwVariable, Object expectedReasonCode,
 			List<AdjudicationComponent> actuals) {
-		CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
-		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				expectedCategory.getCodingFirstRep().getSystem(), expectedCategory.getCodingFirstRep().getCode()))
-				.findAny();
-		Assert.assertTrue(adjudication.isPresent());
-		assertHasCoding(ccwVariable, expectedReasonCode, adjudication.get().getReason());
-	}
-
-	/**
-	 * @param expectedCategoryCode
-	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link AdjudicationComponent#getCategory()} to find and verify
-	 * @param expectedReasonSystem
-	 *            the expected {@link Coding#getSystem()} of the
-	 *            {@link AdjudicationComponent#getReason()} to find and verify
-	 * @param expectedReasonCode
-	 *            the expected {@link Coding#getCode()} of the
-	 *            {@link AdjudicationComponent#getReason()} to find and verify
-	 * @param actuals
-	 *            the actual {@link AdjudicationComponent}s to verify
-	 */
-	static void assertAdjudicationReasonEquals(String expectedCategoryCode, String expectedReasonSystem,
-			String expectedReasonCode, List<AdjudicationComponent> actuals) {
-		Optional<AdjudicationComponent> adjudication = actuals.stream().filter(a -> isCodeInConcept(a.getCategory(),
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, expectedCategoryCode)).findAny();
-		Assert.assertTrue(adjudication.isPresent());
-		assertHasCoding(expectedReasonSystem, expectedReasonCode, adjudication.get().getReason().getCoding());
+		// Jumping through hoops to cope with overloaded method:
+		Optional<?> expectedReasonCodeCast = expectedReasonCode instanceof Optional ? (Optional<?>) expectedReasonCode
+				: Optional.of(expectedReasonCode);
+		assertAdjudicationReasonEquals(ccwVariable, expectedReasonCodeCast, actuals);
 	}
 
 	/**
@@ -223,21 +266,57 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * @param expectedBenefitCategory
+	 *            the {@link BenefitCategory} for the expected
+	 *            {@link BenefitBalanceComponent#getCategory()}
+	 * @param expectedFinancialType
+	 *            the {@link CcwCodebookVariable} for the expected
+	 *            {@link BenefitComponent#getType()}
+	 * @param expectedUsedInt
+	 *            the expected {@link BenefitComponent#getUsedUnsignedIntType()}
+	 *            value
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to verify the actual
+	 *            {@link BenefitComponent} within
+	 */
+	static void assertBenefitBalanceUsedIntEquals(BenefitCategory expectedBenefitCategory,
+			CcwCodebookVariable expectedFinancialType, Integer expectedUsedInt, ExplanationOfBenefit eob) {
+		Optional<BenefitBalanceComponent> benefitBalanceComponent = eob.getBenefitBalance().stream()
+				.filter(bb -> isCodeInConcept(bb.getCategory(), expectedBenefitCategory.getSystem(),
+						expectedBenefitCategory.toCode()))
+				.findAny();
+		Assert.assertTrue(benefitBalanceComponent.isPresent());
+
+		Optional<BenefitComponent> benefitBalanceFinancialEntry = benefitBalanceComponent.get().getFinancial().stream()
+				.filter(f -> isCodeInConcept(f.getType(), TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
+						TransformerUtils.calculateVariableReferenceUrl(expectedFinancialType)))
+				.findAny();
+		Assert.assertTrue(benefitBalanceFinancialEntry.isPresent());
+
+		try {
+			Assert.assertEquals(expectedUsedInt,
+					benefitBalanceFinancialEntry.get().getUsedUnsignedIntType().getValue());
+		} catch (FHIRException e) {
+			throw new BadCodeMonkeyException(e);
+		}
+	}
+
+	/**
 	 * @param expectedPractitioner
 	 *            {@link CareTeamComponent#getProviderIdentifier)} to find and
 	 *            verify
-	 * @param expectedPractitionerRole
+	 * @param expectedCareTeamRole
+	 *            the {@link ClaimCareteamrole} for
 	 *            {@link CareTeamComponent#getRole)} to find and verify
 	 * @param eob
 	 *            the actual {@link ExplanationOfBenefit}s to verify
 	 */
-
-	static void assertCareTeamEquals(String expectedPractitioner, String expectedPractitionerRole,
+	static void assertCareTeamEquals(String expectedPractitioner, ClaimCareteamrole expectedCareTeamRole,
 			ExplanationOfBenefit eob) {
-		CareTeamComponent careTeamEntry = findCareTeamEntryForProviderIdentifier(
-				TransformerConstants.CODING_NPI_US, expectedPractitioner, eob.getCareTeam());
+		CareTeamComponent careTeamEntry = findCareTeamEntryForProviderIdentifier(TransformerConstants.CODING_NPI_US,
+				expectedPractitioner, eob.getCareTeam());
 		Assert.assertNotNull(careTeamEntry);
-		assertCodingEquals(TransformerConstants.CODING_FHIR_CARE_TEAM_ROLE, expectedPractitionerRole,
+		assertCodingEquals(expectedCareTeamRole.getSystem(), expectedCareTeamRole.toCode(),
 				careTeamEntry.getRole().getCodingFirstRep());
 	}
 
@@ -299,9 +378,9 @@ final class TransformerTestUtils {
 	 * @param expected
 	 *            the expected {@link LocalDate}
 	 * @param actual
-	 *            the actual {@link DateTimeType} to verify
+	 *            the actual {@link BaseDateTimeType} to verify
 	 */
-	static void assertDateEquals(LocalDate expected, DateTimeType actual) {
+	static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
 		Assert.assertEquals(Date.from(expected.atStartOfDay(ZoneId.systemDefault()).toInstant()), actual.getValue());
 		Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
 	}
@@ -885,10 +964,12 @@ final class TransformerTestUtils {
 	static void assertMapEobType(CodeableConcept eobType, ClaimType blueButtonClaimType,
 			Optional<org.hl7.fhir.dstu3.model.codesystems.ClaimType> fhirClaimType,
 			Optional<Character> ccwNearLineRecordIdCode, Optional<String> ccwClaimTypeCode) {
-		assertHasCoding(TransformerConstants.CODING_CCW_CLAIM_TYPE, blueButtonClaimType.name(), eobType.getCoding());
+		assertHasCoding(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, blueButtonClaimType.name(),
+				eobType.getCoding());
 
 		if (fhirClaimType.isPresent()) {
-			assertHasCoding(TransformerConstants.CODING_FHIR_CLAIM_TYPE, fhirClaimType.get().name(), eobType.getCoding());
+			assertHasCoding(org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL.getSystem(),
+					fhirClaimType.get().toCode(), eobType.getCoding());
 		}
 
 		if (ccwNearLineRecordIdCode.isPresent()) {
@@ -1128,99 +1209,68 @@ final class TransformerTestUtils {
 	 * @throws FHIRException
 	 *             Indicates a test failure.
 	 */
-	static void assertCommonBenefitComponentInpatientSNF(ExplanationOfBenefit eob, BigDecimal coinsuranceDayCount,
+	static void assertCommonGroupInpatientSNF(ExplanationOfBenefit eob, BigDecimal coinsuranceDayCount,
 			BigDecimal nonUtilizationDayCount, BigDecimal deductibleAmount, BigDecimal partACoinsuranceLiabilityAmount,
 			BigDecimal bloodPintsFurnishedQty, BigDecimal noncoveredCharge, BigDecimal totalDeductionAmount,
 			Optional<BigDecimal> claimPPSCapitalDisproportionateShareAmt,
 			Optional<BigDecimal> claimPPSCapitalExceptionAmount, Optional<BigDecimal> claimPPSCapitalFSPAmount,
 			Optional<BigDecimal> claimPPSCapitalIMEAmount, Optional<BigDecimal> claimPPSCapitalOutlierAmount,
 			Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount) throws FHIRException {
-
-		// coinsuranceDayCount
 		BenefitComponent benefit_BENE_TOT_COINSRNC_DAYS_CNT = assertHasBenefitComponent(
 				CcwCodebookVariable.BENE_TOT_COINSRNC_DAYS_CNT, eob);
 		Assert.assertEquals(coinsuranceDayCount.intValue(),
 				benefit_BENE_TOT_COINSRNC_DAYS_CNT.getUsedUnsignedIntType().getValue().intValue());
 
-		// nonUtilizationDayCount
 		BenefitComponent benefit_CLM_NON_UTLZTN_DAYS_CNT = assertHasBenefitComponent(
 				CcwCodebookVariable.CLM_NON_UTLZTN_DAYS_CNT, eob);
 		Assert.assertEquals(nonUtilizationDayCount.intValue(),
-				benefit_CLM_NON_UTLZTN_DAYS_CNT.getAllowedUnsignedIntType().getValue().intValue());
+				benefit_CLM_NON_UTLZTN_DAYS_CNT.getUsedUnsignedIntType().getValue().intValue());
 
-		// deductibleAmount
-		BenefitComponent benefit_NCH_BENE_IP_DDCTBL_AMT = assertHasBenefitComponent(
-				CcwCodebookVariable.NCH_BENE_IP_DDCTBL_AMT, eob);
-		assertEquivalent(deductibleAmount, benefit_NCH_BENE_IP_DDCTBL_AMT.getAllowedMoney().getValue());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_BENE_IP_DDCTBL_AMT,
+				deductibleAmount, eob);
 
-		// partACoinsuranceLiabilityAmount
-		BenefitComponent benefit_NCH_BENE_PTA_COINSRNC_LBLTY_AMT = assertHasBenefitComponent(
-				CcwCodebookVariable.NCH_BENE_PTA_COINSRNC_LBLTY_AMT, eob);
-		assertEquivalent(partACoinsuranceLiabilityAmount,
-				benefit_NCH_BENE_PTA_COINSRNC_LBLTY_AMT.getAllowedMoney().getValue());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_BENE_PTA_COINSRNC_LBLTY_AMT,
+				partACoinsuranceLiabilityAmount, eob);
 
-		// bloodPintsFurnishedQty
-		BenefitComponent benefit_NCH_BLOOD_PNTS_FRNSHD_QTY = assertHasBenefitComponent(
-				CcwCodebookVariable.NCH_BLOOD_PNTS_FRNSHD_QTY, eob);
-		Assert.assertEquals(bloodPintsFurnishedQty.intValue(),
-				benefit_NCH_BLOOD_PNTS_FRNSHD_QTY.getUsedUnsignedIntType().getValue().intValue());
+		SupportingInformationComponent nchBloodPntsFrnshdQtyInfo = TransformerTestUtils
+				.assertHasInfo(CcwCodebookVariable.NCH_BLOOD_PNTS_FRNSHD_QTY, eob);
+		Assert.assertEquals(bloodPintsFurnishedQty.intValueExact(),
+				nchBloodPntsFrnshdQtyInfo.getValueQuantity().getValue().intValueExact());
 
-		// noncoveredCharge
-		BenefitComponent benefit_NCH_IP_NCVRD_CHRG_AMT = assertHasBenefitComponent(
-				CcwCodebookVariable.NCH_IP_NCVRD_CHRG_AMT, eob);
-		assertEquivalent(noncoveredCharge, benefit_NCH_IP_NCVRD_CHRG_AMT.getAllowedMoney().getValue());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_IP_NCVRD_CHRG_AMT,
+				noncoveredCharge, eob);
 
-		// totalDeductionAmount
-		BenefitComponent benefit_NCH_IP_TOT_DDCTN_AMT = assertHasBenefitComponent(
-				CcwCodebookVariable.NCH_IP_TOT_DDCTN_AMT, eob);
-		assertEquivalent(totalDeductionAmount, benefit_NCH_IP_TOT_DDCTN_AMT.getAllowedMoney().getValue());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_IP_TOT_DDCTN_AMT,
+				totalDeductionAmount, eob);
 
-		// claimPPSCapitalDisproportionateShareAmt
 		if (claimPPSCapitalDisproportionateShareAmt.isPresent()) {
-			BenefitComponent benefit_CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT = assertHasBenefitComponent(
-					CcwCodebookVariable.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT, eob);
-			assertEquivalent(claimPPSCapitalDisproportionateShareAmt.get(),
-					benefit_CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT.getAllowedMoney().getValue());
+			TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT,
+					claimPPSCapitalDisproportionateShareAmt, eob);
 		}
 
-		// claimPPSCapitalExceptionAmount
 		if (claimPPSCapitalExceptionAmount.isPresent()) {
-			BenefitComponent benefit_CLM_PPS_CPTL_EXCPTN_AMT = assertHasBenefitComponent(
-					CcwCodebookVariable.CLM_PPS_CPTL_EXCPTN_AMT, eob);
-			assertEquivalent(claimPPSCapitalExceptionAmount.get(),
-					benefit_CLM_PPS_CPTL_EXCPTN_AMT.getAllowedMoney().getValue());
+			TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PPS_CPTL_EXCPTN_AMT,
+					claimPPSCapitalExceptionAmount, eob);
 		}
 
-		// claimPPSCapitalFSPAmount
 		if (claimPPSCapitalFSPAmount.isPresent()) {
-			BenefitComponent benefit_CLM_PPS_CPTL_FSP_AMT = assertHasBenefitComponent(
-					CcwCodebookVariable.CLM_PPS_CPTL_FSP_AMT, eob);
-			assertEquivalent(claimPPSCapitalFSPAmount.get(),
-					benefit_CLM_PPS_CPTL_FSP_AMT.getAllowedMoney().getValue());
+			TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PPS_CPTL_FSP_AMT,
+					claimPPSCapitalFSPAmount, eob);
 		}
 
-		// claimPPSCapitalIMEAmount
 		if (claimPPSCapitalIMEAmount.isPresent()) {
-			BenefitComponent benefit_CLM_PPS_CPTL_IME_AMT = assertHasBenefitComponent(
-					CcwCodebookVariable.CLM_PPS_CPTL_IME_AMT, eob);
-			assertEquivalent(claimPPSCapitalIMEAmount.get(),
-					benefit_CLM_PPS_CPTL_IME_AMT.getAllowedMoney().getValue());
+			TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PPS_CPTL_IME_AMT,
+					claimPPSCapitalIMEAmount, eob);
 		}
 
-		// claimPPSCapitalOutlierAmount
 		if (claimPPSCapitalOutlierAmount.isPresent()) {
-			BenefitComponent benefit_CLM_PPS_CPTL_OUTLIER_AMT = assertHasBenefitComponent(
-					CcwCodebookVariable.CLM_PPS_CPTL_OUTLIER_AMT, eob);
-			assertEquivalent(claimPPSCapitalOutlierAmount.get(),
-					benefit_CLM_PPS_CPTL_OUTLIER_AMT.getAllowedMoney().getValue());
+			TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PPS_CPTL_OUTLIER_AMT,
+					claimPPSCapitalOutlierAmount, eob);
 		}
 
-		// claimPPSOldCapitalHoldHarmlessAmount
 		if (claimPPSOldCapitalHoldHarmlessAmount.isPresent()) {
-			BenefitComponent benefit_CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT = assertHasBenefitComponent(
-					CcwCodebookVariable.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT, eob);
-			assertEquivalent(claimPPSOldCapitalHoldHarmlessAmount.get(),
-					benefit_CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT.getAllowedMoney().getValue());
+			TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT,
+					claimPPSOldCapitalHoldHarmlessAmount, eob);
 		}
 	}
 	
@@ -1246,6 +1296,68 @@ final class TransformerTestUtils {
 		Assert.assertTrue(benefitOptional.isPresent());
 
 		return benefitOptional.get();
+	}
+
+	/**
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} matching the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to search
+	 * @return the {@link SupportingInformationComponent} that was found (if one
+	 *         wasn't, the method will instead fail with an
+	 *         {@link AssertionFailedError})
+	 */
+	static SupportingInformationComponent assertHasInfo(CcwCodebookVariable categoryVariable,
+			ExplanationOfBenefit eob) {
+		Optional<SupportingInformationComponent> info = eob.getInformation().stream()
+				.filter(i -> isCodeInConcept(i.getCategory(), TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
+						TransformerUtils.calculateVariableReferenceUrl(categoryVariable)))
+				.findFirst();
+		Assert.assertTrue(info.isPresent());
+
+		return info.get();
+	}
+
+	/**
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} matching the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 * @param codeSystemVariable
+	 *            the {@link CcwCodebookVariable} that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getSystem()}
+	 * @param codeValue
+	 *            the value that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getCode()}
+	 * @param eob
+	 *            the actual {@link ExplanationOfBenefit} to search
+	 */
+	static void assertInfoWithCodeEquals(CcwCodebookVariable categoryVariable, CcwCodebookVariable codeSystemVariable,
+			Optional<?> codeValue, ExplanationOfBenefit eob) {
+		SupportingInformationComponent info = assertHasInfo(categoryVariable, eob);
+		assertHasCoding(codeSystemVariable, codeValue, info.getCode());
+	}
+
+	/**
+	 * @param categoryVariable
+	 *            the {@link CcwCodebookVariable} matching the
+	 *            {@link SupportingInformationComponent#getCategory()} to find
+	 * @param codeSystemVariable
+	 *            the {@link CcwCodebookVariable} that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getSystem()}
+	 * @param codeValue
+	 *            the value that should have been mapped to
+	 *            {@link SupportingInformationComponent#getCode()}'s
+	 *            {@link Coding#getCode()}
+	 * @param eob
+	 *            the actual {@link ExplanationOfBenefit} to search
+	 */
+	static void assertInfoWithCodeEquals(CcwCodebookVariable categoryVariable, CcwCodebookVariable codeSystemVariable,
+			Object codeValue, ExplanationOfBenefit eob) {
+		assertInfoWithCodeEquals(categoryVariable, codeSystemVariable, Optional.of(codeValue), eob);
 	}
 
 	/**
@@ -1278,34 +1390,35 @@ final class TransformerTestUtils {
 	static void assertCommonEobInformationInpatientSNF(ExplanationOfBenefit eob, Optional<LocalDate> noncoveredStayFromDate, 
 			Optional<LocalDate> noncoveredStayThroughDate, Optional<LocalDate> coveredCareThroughDate,
 			Optional<LocalDate> medicareBenefitsExhaustedDate, Optional<String> diagnosisRelatedGroupCd) {
-		
 		/*
 		 * TODO missing tests for: admissionTypeCd, sourceAdmissionCd,
 		 * diagnosisAdmittingCode, diagnosisAdmittingCodeVersion
 		 */
-		
+
 		// noncoveredStayFromDate & noncoveredStayThroughDate
-		if (noncoveredStayFromDate.isPresent() && noncoveredStayThroughDate.isPresent()) {
-			assertInformationPeriodEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-					CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT, noncoveredStayFromDate.get(),
-					noncoveredStayThroughDate.get(), eob.getInformation());
+		if (noncoveredStayFromDate.isPresent() || noncoveredStayThroughDate.isPresent()) {
+			SupportingInformationComponent nchVrfdNcvrdStayInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT, eob);
+			TransformerTestUtils.assertPeriodEquals(noncoveredStayFromDate, noncoveredStayThroughDate,
+					(Period) nchVrfdNcvrdStayInfo.getTiming());
 		}
-		
+
 		// coveredCareThroughDate
 		if (coveredCareThroughDate.isPresent()) {
-			assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-					CcwCodebookVariable.NCH_ACTV_OR_CVRD_LVL_CARE_THRU, coveredCareThroughDate.get(),
-					eob.getInformation());
+			SupportingInformationComponent nchActvOrCvrdLvlCareThruInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_ACTV_OR_CVRD_LVL_CARE_THRU, eob);
+			TransformerTestUtils.assertDateEquals(coveredCareThroughDate.get(),
+					(DateTimeType) nchActvOrCvrdLvlCareThruInfo.getTiming());
 		}
-		
+
 		// medicareBenefitsExhaustedDate
-		if(medicareBenefitsExhaustedDate.isPresent()) {
-		assertInformationDateEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-					CcwCodebookVariable.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I,
-				medicareBenefitsExhaustedDate.get(),
-				eob.getInformation());
+		if (medicareBenefitsExhaustedDate.isPresent()) {
+			SupportingInformationComponent nchBeneMdcrBnftsExhtdDtIInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_BENE_MDCR_BNFTS_EXHTD_DT_I, eob);
+			TransformerTestUtils.assertDateEquals(medicareBenefitsExhaustedDate.get(),
+					(BaseDateTimeType) nchBeneMdcrBnftsExhtdDtIInfo.getTiming());
 		}
-		
+
 		// diagnosisRelatedGroupCd
 		assertHasCoding(CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd,
 				eob.getDiagnosisFirstRep().getPackageCode());
@@ -1350,7 +1463,8 @@ final class TransformerTestUtils {
 		else
 			assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId, eob.getIdentifier());
 
-		assertIdentifierExists(TransformerConstants.CODING_CCW_CLAIM_GROUP_ID, claimGroupId, eob.getIdentifier());
+		assertIdentifierExists(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID, claimGroupId,
+				eob.getIdentifier());
 		Assert.assertEquals(TransformerUtils.referencePatient(beneficiaryId).getReference(),
 				eob.getPatient().getReference());
 		Assert.assertEquals(TransformerUtils.referenceCoverage(beneficiaryId, coverageType).getReference(),
@@ -1371,7 +1485,6 @@ final class TransformerTestUtils {
 			assertDateEquals(dateFrom.get(), eob.getBillablePeriod().getStartElement());
 			assertDateEquals(dateThrough.get(), eob.getBillablePeriod().getEndElement());
 		}
-		Assert.assertEquals(TransformerConstants.CODED_EOB_DISPOSITION, eob.getDisposition());
 
 		if (paymentAmount.isPresent()) {
 			Assert.assertEquals(paymentAmount.get(), eob.getPayment().getAmount().getValue());
@@ -1432,22 +1545,13 @@ final class TransformerTestUtils {
 
 		assertExtensionIdentifierEquals(CcwCodebookVariable.CARR_NUM, carrierNumber, eob);
 		assertExtensionIdentifierEquals(CcwCodebookVariable.CLM_CLNCL_TRIL_NUM, clinicalTrialNumber, eob);
-		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_NCH_BENEFICIARY_PART_B_DEDUCTIBLE, beneficiaryPartBDeductAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT, providerPaymentAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT, beneficiaryPaymentAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, submittedChargeAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE, allowedChargeAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial());
-
+		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.CARR_CLM_CASH_DDCTBL_APLD_AMT,
+				beneficiaryPartBDeductAmount, eob);
+		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CLM_PRVDR_PMT_AMT, providerPaymentAmount, eob);
+		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CLM_BENE_PMT_AMT, beneficiaryPaymentAmount, eob);
+		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CARR_CLM_SBMTD_CHRG_AMT, submittedChargeAmount,
+				eob);
+		assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_CARR_CLM_ALOWD_AMT, allowedChargeAmount, eob);
 	}
 
 	/**
@@ -1533,28 +1637,23 @@ final class TransformerTestUtils {
 		assertDateEquals(firstExpenseDate.get(), item.getServicedPeriod().getStartElement());
 		assertDateEquals(lastExpenseDate.get(), item.getServicedPeriod().getEndElement());
 
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT, paymentAmount,
-				item.getAdjudication());
-		AdjudicationComponent adjudicationForPayment = item.getAdjudication().stream()
-				.filter(a -> isCodeInConcept(a.getCategory(),
-						TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-						TransformerConstants.CODED_ADJUDICATION_PAYMENT))
-				.findAny().get();
+		AdjudicationComponent adjudicationForPayment = assertAdjudicationAmountEquals(
+				CcwCodebookVariable.LINE_NCH_PMT_AMT, paymentAmount, item.getAdjudication());
 		assertExtensionCodingEquals(CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode, adjudicationForPayment);
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
-				beneficiaryPaymentAmount, item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
-				providerPaymentAmount, item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_DEDUCTIBLE,
-				beneficiaryPartBDeductAmount, item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_BENE_PMT_AMT, beneficiaryPaymentAmount,
+				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_PRVDR_PMT_AMT, providerPaymentAmount,
+				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT, beneficiaryPartBDeductAmount,
+				item.getAdjudication());
 		assertExtensionCodingEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, primaryPayerCode, item);
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT,
-				primaryPayerPaidAmount, item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_LINE_COINSURANCE_AMOUNT, coinsuranceAmount,
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT, primaryPayerPaidAmount,
 				item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_SUBMITTED_CHARGE_AMOUNT, submittedChargeAmount,
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_COINSRNC_AMT, coinsuranceAmount,
 				item.getAdjudication());
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_ALLOWED_CHARGE, allowedChargeAmount,
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_SBMTD_CHRG_AMT, submittedChargeAmount,
+				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_ALOWD_CHRG_AMT, allowedChargeAmount,
 				item.getAdjudication());
 		assertAdjudicationReasonEquals(CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode,
 				item.getAdjudication());
@@ -1635,13 +1734,11 @@ final class TransformerTestUtils {
 		assertHasCoding(CcwCodebookVariable.CLM_SRVC_CLSFCTN_TYPE_CD, claimServiceClassificationTypeCode,
 				eob.getType());
 
-		TransformerTestUtils.assertCareTeamEquals(attendingPhysicianNpi.get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+		TransformerTestUtils.assertCareTeamEquals(attendingPhysicianNpi.get(), ClaimCareteamrole.PRIMARY, eob);
 
 		Assert.assertEquals(totalChargeAmount, eob.getTotalCost().getValue());
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, primaryPayerPaidAmount,
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.PRPAYAMT, primaryPayerPaidAmount,
+				eob);
 		
 		if (fiscalIntermediaryNumber.isPresent()) {
 			assertExtensionIdentifierEquals(CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber, eob);
@@ -1696,12 +1793,12 @@ final class TransformerTestUtils {
 
 		assertHasCoding(CcwCodebookVariable.REV_CNTR, revenueCenterCode, item.getRevenue());
 		
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT, rateAmount,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_RATE_AMT, rateAmount,
 				item.getAdjudication());
 
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_NONCOVERED_CHARGE,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT,
 				nonCoveredChargeAmount, item.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_TOTAL_CHARGE_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT,
 				totalChargeAmount, item.getAdjudication());
 
 		Assert.assertEquals(unitCount, item.getQuantity().getValue());
@@ -1711,9 +1808,8 @@ final class TransformerTestUtils {
 					item);
 		}
 
-		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
-
+		TransformerTestUtils.assertCareTeamEquals(revenueCenterRenderingPhysicianNPI.get(), ClaimCareteamrole.PRIMARY,
+				eob);
 	}
 	
 	/**
@@ -1741,9 +1837,7 @@ final class TransformerTestUtils {
 			Assert.assertEquals(Date.valueOf(revenueCenterDate.get()), item.getServicedDateType().getValue());
 		}
 		
-		assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PAYMENT,
-				paymentAmount,
-				item.getAdjudication());
+		assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT, paymentAmount, item.getAdjudication());
 	}
 
 
@@ -1763,15 +1857,11 @@ final class TransformerTestUtils {
 	static void assertEobCommonGroupInpOutSNFEquals(ExplanationOfBenefit eob,
 			BigDecimal bloodDeductibleLiabilityAmount, Optional<String> operatingPhysicianNpi,
 			Optional<String> otherPhysicianNpi, char claimQueryCode, Optional<Character> mcoPaidSw) {
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM,
+				bloodDeductibleLiabilityAmount, eob);
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_BLOOD_DEDUCTIBLE_LIABILITY,
-				bloodDeductibleLiabilityAmount, eob.getBenefitBalanceFirstRep().getFinancial());
-
-		TransformerTestUtils.assertCareTeamEquals(operatingPhysicianNpi.get(),
-				ClaimCareteamrole.ASSIST.toCode(), eob);
-		TransformerTestUtils.assertCareTeamEquals(otherPhysicianNpi.get(), ClaimCareteamrole.OTHER.toCode(),
-				eob);
+		TransformerTestUtils.assertCareTeamEquals(operatingPhysicianNpi.get(), ClaimCareteamrole.ASSIST, eob);
+		TransformerTestUtils.assertCareTeamEquals(otherPhysicianNpi.get(), ClaimCareteamrole.OTHER, eob);
 
 		assertExtensionCodingEquals(CcwCodebookVariable.CLAIM_QUERY_CD, claimQueryCode, eob.getBillablePeriod());
 	}
@@ -1801,11 +1891,9 @@ final class TransformerTestUtils {
 		}
 		
 		if (utilizedDays.isPresent()) {
-			TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-					TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, utilizedDays.get().intValue(),
-					eob.getBenefitBalanceFirstRep().getFinancial());
+			TransformerTestUtils.assertBenefitBalanceUsedIntEquals(BenefitCategory.MEDICAL,
+					CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, utilizedDays.get().intValue(), eob);
 		}
-		
 	}
 	
 	/**
@@ -1873,22 +1961,38 @@ final class TransformerTestUtils {
 			Optional<String> hcpcsInitialModifierCode, Optional<String> hcpcsSecondModifierCode, Optional<Character> hcpcsYearCode,
 			int index) {
 		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
-			assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(), hcpcsInitialModifierCode.get(),
-					item.getModifier().get(index).getCoding());
-			TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + hcpcsYearCode.get(),
+			assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, "" + hcpcsYearCode.get(),
+					hcpcsInitialModifierCode.get(), item.getModifier().get(index).getCoding());
+			TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, "" + hcpcsYearCode.get(),
 					hcpcsCode.get(), item.getService().getCoding());
 		} else { // while others do not...
 			if (hcpcsInitialModifierCode.isPresent()) {
-				assertHasCoding(TransformerConstants.CODING_HCPCS, hcpcsInitialModifierCode.get(),
+				assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsInitialModifierCode.get(),
 						item.getModifier().get(index).getCoding());
 			}
 			if (hcpcsCode.isPresent()) {
-				TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-						hcpcsCode.get(), item.getService().getCoding());
+				TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsCode.get(),
+						item.getService().getCoding());
 			}
-
 		}
-		Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
 
+		Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
+	}
+
+	/**
+	 * @param expectedStartDate
+	 *            the expected value for {@link Period#getStart()}
+	 * @param expectedEndDate
+	 *            the expected value for {@link Period#getEnd()}
+	 * @param actualPeriod
+	 *            the {@link Period} to verify
+	 */
+	static void assertPeriodEquals(Optional<LocalDate> expectedStartDate, Optional<LocalDate> expectedEndDate,
+			Period actualPeriod) {
+		Assert.assertTrue(expectedStartDate.isPresent() || expectedEndDate.isPresent());
+		if (expectedStartDate.isPresent())
+			assertDateEquals(expectedStartDate.get(), actualPeriod.getStartElement());
+		if (expectedEndDate.isPresent())
+			assertDateEquals(expectedEndDate.get(), actualPeriod.getEndElement());
 	}
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -74,30 +75,28 @@ public final class HHAClaimTransformerTest {
 
 		Assert.assertEquals(4, eob.getDiagnosis().size());
 
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_VISIT_COUNT, claim.getTotalVisitCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		if (claim.getClaimLUPACode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.CLM_HHA_LUPA_IND_CD,
+					CcwCodebookVariable.CLM_HHA_LUPA_IND_CD, claim.getClaimLUPACode(), eob);
+		if (claim.getClaimReferralCode().isPresent())
+			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.CLM_HHA_RFRL_CD,
+					CcwCodebookVariable.CLM_HHA_RFRL_CD, claim.getClaimReferralCode(), eob);
+
+		TransformerTestUtils.assertBenefitBalanceUsedIntEquals(BenefitCategory.MEDICAL,
+				CcwCodebookVariable.CLM_HHA_TOT_VISIT_CNT, claim.getTotalVisitCount().intValue(), eob);
 
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		HHAClaimLine claimLine1 = claim.getLines().get(0);
 		Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
-
 		Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
-		TransformerTestUtils.assertAdjudicationReasonEquals(TransformerConstants.CODED_ADJUDICATION_1ST_ANSI_CD,
-				TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, claimLine1.getRevCntr1stAnsiCd().get(),
-				eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationReasonEquals(CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,
+				claimLine1.getRevCntr1stAnsiCd(), eobItem0.getAdjudication());
 
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_RATE_AMOUNT,
-				claimLine1.getRateAmount(),
-				eobItem0.getAdjudication());
 		
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.REV_CNTR_STUS_IND_CD,
 				claimLine1.getStatusCode().get(), eobItem0.getRevenue());

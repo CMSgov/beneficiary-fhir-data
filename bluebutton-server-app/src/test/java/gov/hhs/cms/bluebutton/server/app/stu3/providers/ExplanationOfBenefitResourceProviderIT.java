@@ -367,7 +367,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE, ClaimType.CARRIER.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.CARRIER.name()))
 				.findFirst().get();
 		CarrierClaimTransformerTest.assertMatches(carrierClaim, carrierClaimFromSearchResult);
 
@@ -377,7 +377,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE, ClaimType.DME.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.DME.name()))
 				.findFirst().get();
 		DMEClaimTransformerTest.assertMatches(dmeClaim, dmeClaimFromSearchResult);
 
@@ -387,7 +387,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE, ClaimType.HHA.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.HHA.name()))
 				.findFirst().get();
 		HHAClaimTransformerTest.assertMatches(hhaClaim, hhaClaimFromSearchResult);
 
@@ -397,7 +397,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE, ClaimType.HOSPICE.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.HOSPICE.name()))
 				.findFirst().get();
 		HospiceClaimTransformerTest.assertMatches(hospiceClaim, hospiceClaimFromSearchResult);
 
@@ -407,7 +407,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE, ClaimType.INPATIENT.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.INPATIENT.name()))
 				.findFirst().get();
 		InpatientClaimTransformerTest.assertMatches(inpatientClaim, inpatientClaimFromSearchResult);
 
@@ -417,7 +417,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE, ClaimType.OUTPATIENT.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.OUTPATIENT.name()))
 				.findFirst().get();
 		OutpatientClaimTransformerTest.assertMatches(outpatientClaim, outpatientClaimFromSearchResult);
 
@@ -427,8 +427,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE,
-						ClaimType.PDE.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.PDE.name()))
 				.findFirst().get();
 		PartDEventTransformerTest.assertMatches(partDEvent, partDEventFromSearchResult);
 
@@ -438,7 +437,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource())
 				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_CCW_CLAIM_TYPE, ClaimType.SNF.name()))
+						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.SNF.name()))
 				.findFirst().get();
 		SNFClaimTransformerTest.assertMatches(snfClaim, snfClaimFromSearchResult);
 	}

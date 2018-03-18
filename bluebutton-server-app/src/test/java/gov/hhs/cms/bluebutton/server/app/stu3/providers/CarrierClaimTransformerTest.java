@@ -92,21 +92,15 @@ public final class CarrierClaimTransformerTest {
 		Assert.assertEquals(5, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.PRPAYAMT,
+				claim.getPrimaryPayerPaidAmount(), eob);
 		
 		CarrierClaimLine claimLine1 = claim.getLines().get(0);
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
-
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getPerformingPhysicianNpi().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+				ClaimCareteamrole.PRIMARY, eob);
 		CareTeamComponent performingCareTeamEntry = TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
 				claimLine1.getPerformingPhysicianNpi().get(), eob.getCareTeam());
 		TransformerTestUtils.assertHasCoding(CcwCodebookVariable.PRVDR_SPCLTY,
@@ -127,8 +121,9 @@ public final class CarrierClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.CARR_LINE_PRCNG_LCLTY_CD,
 				claimLine1.getLinePricingLocalityCode(), eobItem0.getLocation());
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS,
-				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(), eobItem0.getService().getCoding());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS,
+				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(),
+				eobItem0.getService().getCoding());
 		Assert.assertEquals(1, eobItem0.getModifier().size());
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),

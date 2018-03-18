@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -15,22 +14,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
  * resources.
  */
 final class BeneficiaryTransformer {
-	/**
-	 * See <a href=
-	 * "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/bene_id.txt">
-	 * CCW Data Dictionary: BENE_ID</a>.
-	 */
-	public static final String CODING_CCW_BENE_ID = "http://bluebutton.cms.hhs.gov/identifier#bene_id";
-
-	/**
-	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
-	 * store a one-way cryptographic hash of each Medicare beneficiaries' HICN.
-	 * Note that, with the SSNRI initiative, CMS is planning to move away from
-	 * HICNs. However, HICNs are still the primary/only Medicare identifier for
-	 * now.
-	 */
-	public static final String CODING_CCW_BENE_HICN_HASH = "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
-
 	/**
 	 * @param beneficiary
 	 *            the CCW {@link Beneficiary} to transform
@@ -43,8 +26,10 @@ final class BeneficiaryTransformer {
 		Patient patient = new Patient();
 
 		patient.setId(beneficiary.getBeneficiaryId());
-		patient.addIdentifier().setSystem(CODING_CCW_BENE_ID).setValue(beneficiary.getBeneficiaryId());
-		patient.addIdentifier().setSystem(CODING_CCW_BENE_HICN_HASH).setValue(beneficiary.getHicn());
+		patient.addIdentifier(
+				TransformerUtils.createIdentifier(CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
+		patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
+				.setValue(beneficiary.getHicn());
 
 		patient.addAddress().setState(beneficiary.getStateCode()).setDistrict(beneficiary.getCountyCode())
 				.setPostalCode(beneficiary.getPostalCode());

@@ -459,6 +459,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	private CriteriaQuery createSearchCriteria(CriteriaQuery criteria, ReferenceParam patient, Root root,
 			CriteriaBuilder builder, Path beneficiaryIdPath, Path dateFromPath, Optional<DateRangeParam> dateRange) {
 		
+		// FIXME completely ignores the patient param's system
+
 		// no search dates were supplied in the url
 		if (!dateRange.isPresent()) {
 			criteria.where(builder.equal(beneficiaryIdPath, patient.getIdPart()));

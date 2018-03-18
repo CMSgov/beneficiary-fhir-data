@@ -1,12 +1,11 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -54,19 +53,13 @@ final class HospiceClaimTransformer {
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			eob.addInformation().setCategory(TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd());
 		}
-
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_FHIR_BENEFIT_BALANCE, BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
 
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimHospiceStartDate(),
-				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
-				benefitBalances);
+				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()));
 
 		if (claimGroup.getHospicePeriodCount().isPresent()) {
 			// TODO should this be benefitBalance?
@@ -136,29 +129,19 @@ final class HospiceClaimTransformer {
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
-					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), Optional.empty());
-
-			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
+			TransformerUtils.mapHcpcs(eob, item, Optional.empty(), claimLine.getHcpcsCode(),
+					Arrays.asList(claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode()));
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getProviderPaymentAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getProviderPaymentAmount());
 
 			item.addAdjudication()
-					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-							TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT))
+					.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getBenficiaryPaymentAmount());
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getBenficiaryPaymentAmount());
 
 			// Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonItemRevenue(item, eob, claimLine.getRevenueCenterCode(),

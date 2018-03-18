@@ -1,15 +1,12 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -54,19 +51,10 @@ final class DMEClaimTransformer {
 		TransformerUtils.mapEobType(eob, ClaimType.DME, Optional.of(claimGroup.getNearLineRecordIdCode()), 
 				Optional.of(claimGroup.getClaimTypeCode()));
 
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(TransformerConstants.CODING_FHIR_BENEFIT_BALANCE,
-						BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
-
+		// TODO is this column nullable? If so, why isn't it Optional?
 		if (claimGroup.getPrimaryPayerPaidAmount() != null) {
-			BenefitComponent primaryPayerPaidAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT));
-			primaryPayerPaidAmount.setAllowed(
-					new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getPrimaryPayerPaidAmount()));
-			benefitBalances.getFinancial().add(primaryPayerPaidAmount);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.PRPAYAMT,
+					claimGroup.getPrimaryPayerPaidAmount());
 		}
 
 		// Common group level fields between Carrier and DME
@@ -117,7 +105,7 @@ final class DMEClaimTransformer {
 			if (claimLine.getProviderNPI().isPresent()) {
 				ExplanationOfBenefit.CareTeamComponent performingCareTeamMember = TransformerUtils
 						.addCareTeamPractitioner(eob, item, TransformerConstants.CODING_NPI_US,
-								claimLine.getProviderNPI().get(), ClaimCareteamrole.PRIMARY.toCode());
+								claimLine.getProviderNPI().get(), ClaimCareteamrole.PRIMARY);
 				performingCareTeamMember.setResponsible(true);
 
 				/*
@@ -137,40 +125,22 @@ final class DMEClaimTransformer {
 						CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode()));
 			}
 
-			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(),
-					claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(), claimGroup.getHcpcsYearCode());
+			TransformerUtils.mapHcpcs(eob, item, claimGroup.getHcpcsYearCode(), claimLine.getHcpcsCode(),
+					Arrays.asList(claimLine.getHcpcsInitialModifierCode(), claimLine.getHcpcsSecondModifierCode(),
+							claimLine.getHcpcsThirdModifierCode(), claimLine.getHcpcsFourthModifierCode()));
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
 					.setCode(TransformerConstants.CODED_MONEY_USD)
 					.setValue(claimLine.getPrimaryPayerAllowedChargeAmount());
 
 			item.addAdjudication()
 					.setCategory(
-							TransformerUtils.createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-									TransformerConstants.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT))
+							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT))
 					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getPurchasePriceAmount());
-
-			if (claimLine.getHcpcsThirdModifierCode().isPresent()) {
-				item.addModifier(
-						TransformerUtils.createCodeableConcept(TransformerConstants.CODING_HCPCS,
-								"" + claimGroup.getHcpcsYearCode().get(), claimLine.getHcpcsThirdModifierCode().get()));
-			}
-			if (claimLine.getHcpcsFourthModifierCode().isPresent()) {
-				item.addModifier(TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_HCPCS, "" + claimGroup.getHcpcsYearCode().get(),
-						claimLine.getHcpcsFourthModifierCode().get()));
-			}
+					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getPurchasePriceAmount());
 
 			if (claimLine.getScreenSavingsAmount().isPresent()) {
 				// TODO should this be an adjudication?

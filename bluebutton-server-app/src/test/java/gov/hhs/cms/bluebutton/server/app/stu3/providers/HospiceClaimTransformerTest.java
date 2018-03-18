@@ -65,13 +65,8 @@ public final class HospiceClaimTransformerTest {
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
-		Assert.assertTrue(eob.getInformation().stream()
-				.anyMatch(i -> TransformerTestUtils.isCodeInConcept(CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-						claim.getPatientStatusCd(), i.getCategory())));
-
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, claim.getUtilizationDayCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+				CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claim.getPatientStatusCd(), eob);
 
 		TransformerTestUtils.assertDateEquals(claim.getClaimHospiceStartDate().get(),
 				eob.getHospitalization().getStartElement());
@@ -96,11 +91,6 @@ public final class HospiceClaimTransformerTest {
 		HospiceClaimLine claimLine1 = claim.getLines().get(0);
 		Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
-
 		TransformerTestUtils.assertExtensionQuantityEquals(CcwCodebookVariable.BENE_HOSPC_PRD_CNT,
 				claim.getHospicePeriodCount(), eob.getHospitalization());
 
@@ -109,12 +99,10 @@ public final class HospiceClaimTransformerTest {
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), Optional.empty(), 0/* index */);
 
-		TransformerTestUtils.assertAdjudicationEquals(TransformerConstants.CODED_ADJUDICATION_PROVIDER_PAYMENT_AMOUNT,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT,
 				claimLine1.getProviderPaymentAmount(), eobItem0.getAdjudication());
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_BENEFICIARY_PAYMENT_AMOUNT,
-				claimLine1.getBenficiaryPaymentAmount(),
-				eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT,
+				claimLine1.getBenficiaryPaymentAmount(), eobItem0.getAdjudication());
 
 		// Test to ensure common group field coinsurance between Inpatient, HHA, Hospice and SNF match
 		TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(eobItem0, claimLine1.getDeductibleCoinsuranceCd());
@@ -128,7 +116,7 @@ public final class HospiceClaimTransformerTest {
 				claimLine1.getRevenueCenterRenderingPhysicianNPI(), 1/* index */);
 
 		TransformerTestUtils.assertCareTeamEquals(claimLine1.getRevenueCenterRenderingPhysicianNPI().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+				ClaimCareteamrole.PRIMARY, eob);
 		
 		// Test to ensure item level fields between Outpatient, HHA and Hospice match
 		TransformerTestUtils.assertEobCommonItemRevenueOutHHAHospice(eobItem0, claimLine1.getRevenueCenterDate(),

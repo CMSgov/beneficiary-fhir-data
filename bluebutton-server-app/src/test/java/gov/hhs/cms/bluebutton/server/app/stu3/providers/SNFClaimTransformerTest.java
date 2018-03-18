@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -66,12 +68,8 @@ public final class SNFClaimTransformerTest {
 		// test the common field provider number is set as expected in the EOB
 		TransformerTestUtils.assertProviderNumber(eob, claim.getProviderNumber());
 
-		TransformerTestUtils.assertBenefitBalanceUsedEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_SYSTEM_UTILIZATION_DAY_COUNT, claim.getUtilizationDayCount().intValue(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
-		
 		// test common benefit components between SNF and Inpatient claims are set as expected
-		TransformerTestUtils.assertCommonBenefitComponentInpatientSNF(eob, claim.getCoinsuranceDayCount(),
+		TransformerTestUtils.assertCommonGroupInpatientSNF(eob, claim.getCoinsuranceDayCount(),
 				claim.getNonUtilizationDayCount(), claim.getDeductibleAmount(),
 				claim.getPartACoinsuranceLiabilityAmount(), claim.getBloodPintsFurnishedQty(),
 				claim.getNoncoveredCharge(), claim.getTotalDeductionAmount(),
@@ -79,10 +77,13 @@ public final class SNFClaimTransformerTest {
 				claim.getClaimPPSCapitalFSPAmount(), claim.getClaimPPSCapitalIMEAmount(),
 				claim.getClaimPPSCapitalOutlierAmount(), claim.getClaimPPSOldCapitalHoldHarmlessAmount());
 
-		TransformerTestUtils.assertInformationPeriodEquals(TransformerConstants.CODING_BBAPI_BENEFIT_COVERAGE_DATE,
-				TransformerConstants.CODED_BENEFIT_COVERAGE_DATE_QUALIFIED, claim.getQualifiedStayFromDate().get(),
-				claim.getQualifiedStayThroughDate().get(), eob.getInformation());
-		
+		if (claim.getQualifiedStayFromDate().isPresent() || claim.getQualifiedStayThroughDate().isPresent()) {
+			SupportingInformationComponent nchQlyfdStayInfo = TransformerTestUtils
+					.assertHasInfo(CcwCodebookVariable.NCH_QLFYD_STAY_FROM_DT, eob);
+			TransformerTestUtils.assertPeriodEquals(claim.getQualifiedStayFromDate(),
+					claim.getQualifiedStayThroughDate(), (Period) nchQlyfdStayInfo.getTiming());
+		}
+
 		// test common eob information between SNF and Inpatient claims are set as expected
 		TransformerTestUtils.assertCommonEobInformationInpatientSNF(eob, claim.getNoncoveredStayFromDate(),
 				claim.getNoncoveredStayThroughDate(), claim.getCoveredCareThroughDate(),
@@ -124,11 +125,6 @@ public final class SNFClaimTransformerTest {
 		ItemComponent eobItem0 = eob.getItem().get(0);
 		Assert.assertEquals(claimLine1.getLineNumber(),
 				new BigDecimal(eobItem0.getSequence()));
-
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
 
 		Assert.assertEquals(claim.getProviderStateCode(),
 				eobItem0.getLocationAddress().getState());

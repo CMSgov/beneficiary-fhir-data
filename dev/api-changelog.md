@@ -1,5 +1,128 @@
 # API Changelog
 
+## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
+
+### Change `Patient.identifier` Systems
+
+The `Identifier.system` values used here were incorrect and have been fixed:
+
+* Beneficiary ID
+    * Previously: `http://bluebutton.cms.hhs.gov/identifier#bene_id`
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/variables/bene_id`
+* HICN Hash
+    * Previously: `http://bluebutton.cms.hhs.gov/identifier#hicnHash`
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/identifier/hicn-hash`
+
+Documentation for these fields is now available at the corrected URLs.
+
+### Change `ExplanationOfBenefit.information` Entries
+
+Several changes have been made to these entries:
+
+1. The `ExplanationOfBenefit.information.category` codings have changed:
+    a. The `Coding.system` for all of these is now `https://bluebutton.cms.gov/resources/codesystem/information`.
+    b. The `Coding.code` have all been switched to reference URLs. Those URLs uniquely identify the `information` fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful in this case.
+    c. The `Coding.display` values are included.
+2. For `ExplanationOfBenefit.information` entries that are just used to convey a coding (which is most of them), the coded data has been moved to the `ExplanationOfBenefit.information.code` field.
+
+### Switch Most `ExplanationOfBenefit.benefitBalance` Entries to "Adjudication Total" Extensions
+
+Most of the former `ExplanationOfBenefit.benefitBalance` entries were not actually _benefit balances_, and so were improperly mapped. These values are instead better thought of as overall-claim-level analogues of the `ExplanationOfBenefit.item.adjudication` field.
+
+The upcoming STU4 release of FHIR will likely include a new `ExplanationOfBenefit.total` field to accommodate this kind of information. Until then, we are representing those fields as extensions on the `ExplanationOfBenefit` resources.
+
+The <https://bluebutton.cms.gov/resources/codesystem/adjudication-total> reference page provides a list of all these fields.
+
+As part of this change, one of the former `ExplanationOfBenefit.benefitBalance` entries, <https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty>, was actually changed to an `ExplanationOfBenefit.information` entry, as that was most appropriate.
+
+### Change `ExplanationOfBenefit.benefitBalance` Entries
+
+Several changes have been made to these entries:
+
+1. The `Coding.display` values for `ExplanationOfBenefit.benefitBalance.category` are now included.
+2. The `Coding.system` values used for `ExplanationOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
+    * Previously: `http://bluebutton.cms.hhs.gov/coding#benefitBalanceType`
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/benefit-balance`
+3. The `Coding.code` values used for `ExplanationOfBenefit.benefitBalance.financial.type` were incorrect and have been fixed:
+    * Previously, these had been set to what should have been the `Coding.display` values.
+    * Now, they've all been switched to reference URLs. Those URLs uniquely identify the `benefitBalance` financial type fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful in this case.
+4. The `Coding.display` values for `ExplanationOfBenefit.benefitBalance.financial.type` are now included.
+
+### Change `ExplanationOfBenefit.item.adjudication` Entries
+
+Several changes have been made to these entries:
+
+1. The `Coding.system` values used for `ExplanationOfBenefit.item.adjudication.category` were incorrect and have been fixed:
+    * Previously: "`CMS Adjudications`"
+    * Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/adjudication`
+2. The `Coding.code` values used for `ExplanationOfBenefit.item.adjudication.category` were incorrect and have been fixed:
+    * Previously, these had been set to what should have been the `Coding.display` values.
+    * Now, they've all been switched to reference URLs. Those URLs uniquely identify the `adjudication` fields and can also be accessed for documentation on those fields. This is a bit unusual for a FHIR `Coding`, but should be useful.
+3. The `Coding.display` values for `ExplanationOfBenefit.item.adjudication.category` are now included.
+
+### Include `ExplanationOfBenefit.careTeam.role` `Coding.display` Values
+
+The `Coding.display` values for this field are now included in responses, for convenience.
+
+### Fix `ExplanationOfBenefit.type` "FHIR Claim Type" Coding
+
+This fix only applies to `ExplanationOfBenefit.type` `Coding`s where the `Coding.system` is `http://hl7.org/fhir/ex-claimtype`.
+
+The `Coding.code` values used here were incorrectly uppercased and have been fixed (to lowercase). In addition, `Coding.display` values are now included for this `Coding`.
+
+### Fix `ExplanationOfBenefit.identifier` "Prescription Reference Number" System
+
+The `Identifier.system` values used here were incorrect and have been fixed:
+
+* Previously: `CCW.RX_SRVC_RFRNC_NUM`
+* Corrected/Current: `https://bluebutton.cms.gov/resources/variables/rx_srvc_rfrnc_num`
+
+Documentation for this field is now available at its corrected URL.
+
+### Change NDC Code System
+
+The NDC `Coding.system` values used have been changed to the ones recommended by the FHIR community:
+
+* Previously: `https://www.accessdata.fda.gov/scripts/cder/ndc`
+* Improved/Current: `http://hl7.org/fhir/sid/ndc`
+
+### Change `ExplanationOfBenefit.item.service` and `ExplanationOfBenefit.item.modifier` Code System
+
+The HCPCS `Coding.system` values used here have been changed to point to better documentation:
+
+* Previously: `https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html`
+* Improved/Current: `https://bluebutton.cms.gov/resources/codesystem/hcpcs`
+
+### Fix `ExplanationOfBenefit.type` "Blue Button EOB Type" Code System
+
+The `Coding.system` values used here were incorrect and have been fixed:
+
+* Previously: `https://bluebutton.cms.gov/developer/docs/reference/some-thing`
+* Corrected/Current: `https://bluebutton.cms.gov/resources/codesystem/eob-type`
+
+Documentation for this field is now available at its corrected URL.
+
+### Fix `ExplanationOfBenefit.identifier` "Claim Group ID" System
+
+The `Identifier.system` values used here were incorrect and have been fixed:
+
+* Previously: `http://bluebutton.cms.hhs.gov/identifier#claimGroup`
+* Corrected/Current: `https://bluebutton.cms.gov/resources/identifier/claim-group`
+
+Documentation for this field is now available at its corrected URL.
+
+### Include `ExplanationOfBenefit.item.detail.type` `Coding.display` Values
+
+The `Coding.display` values for this field are now included in responses, for convenience. (Note: This field is only included for Part D Events.)
+
+### Remove `http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode` Extension
+
+This extension was included in all `ExplanationOfBenefit` responses (except for Part D Events), with a static/constant value. This wasn't providing any value and has accordingly been removed.
+
+### Remove `ExplanationOfBenefit.disposition`
+
+This field was included in all `ExplanationOfBenefit` responses, with a static/constant value. Since it's not a required field, this wasn't providing any value and has accordingly been removed.
+
 ## CBBF-97: Update URIs from "`ccwdata.org`" to "`bluebutton.cms.gov`"
 
 The API's responses included many once-working-but-now-invalid URLs for the `ccwdata.org` domain, e.g. "`https://www.ccwdata.org/cs/groups/public/documents/datadictionary/pmtdnlcd.txt`". Most of these URLs have now been updated to instead point to the "`bluebutton.cms.gov`" domain, e.g. "`https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd/`" (note that the path suffix has also changed for many fields to a longer, more expressive field name). These new URLs should all resolve to HTML pages containing the documentation that had previously only been available in the [Data Dictionary PDF codebooks](https://www.ccwdata.org/web/guest/data-dictionaries). In making this documentation more accessible, we hope the API is now easier to use.

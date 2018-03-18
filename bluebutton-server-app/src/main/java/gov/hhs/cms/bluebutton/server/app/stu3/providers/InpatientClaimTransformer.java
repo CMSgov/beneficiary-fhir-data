@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -7,11 +8,7 @@ import java.util.function.Consumer;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitBalanceComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Money;
-import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
@@ -60,8 +57,8 @@ final class InpatientClaimTransformer {
 		TransformerUtils.setProviderNumber(eob, claimGroup.getProviderNumber());
 
 		if (claimGroup.getPatientStatusCd().isPresent()) {
-			TransformerUtils.addInformation(eob, TransformerUtils.createCodeableConcept(eob,
-					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd().get()));
+			TransformerUtils.addInformationWithCode(eob, CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+					CcwCodebookVariable.NCH_PTNT_STUS_IND_CD, claimGroup.getPatientStatusCd());
 		}
 		
 		// add EOB information to fields that are common between the Inpatient and SNF claim types
@@ -69,64 +66,40 @@ final class InpatientClaimTransformer {
 				claimGroup.getSourceAdmissionCd(), claimGroup.getNoncoveredStayFromDate(),
 				claimGroup.getNoncoveredStayThroughDate(), claimGroup.getCoveredCareThoughDate(),
 				claimGroup.getMedicareBenefitsExhaustedDate(), claimGroup.getDiagnosisRelatedGroupCd());
-		
-		BenefitBalanceComponent benefitBalances = new BenefitBalanceComponent(
-				TransformerUtils.createCodeableConcept(
-						TransformerConstants.CODING_FHIR_BENEFIT_BALANCE, BenefitCategory.MEDICAL.toCode()));
-		eob.getBenefitBalance().add(benefitBalances);
 
-		// map indirectMedicalEducationAmount to eob.benefitbalance.financial
 		if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
-			BenefitComponent bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_INDIRECT_MEDICAL_EDUCATION_AMOUNT));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimGroup.getIndirectMedicalEducationAmount().get()));
-			eob.getBenefitBalanceFirstRep().getFinancial().add(bc);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
+					claimGroup.getIndirectMedicalEducationAmount());
 		}
 
-		// map disproportionateShareAmount to eob.benefitbalance.financial
 		if (claimGroup.getDisproportionateShareAmount().isPresent()) {
-			BenefitComponent bc = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_ADJUDICATION_DISPROPORTIONATE_SHARE_AMOUNT));
-			bc.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimGroup.getDisproportionateShareAmount().get()));
-			eob.getBenefitBalanceFirstRep().getFinancial().add(bc);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.DSH_OP_CLM_VAL_AMT,
+					claimGroup.getDisproportionateShareAmount());
 		}
 
+		// TODO If actually nullable, should be Optional.
 		if (claimGroup.getPassThruPerDiemAmount() != null) {
-			BenefitComponent benefitPerDiem = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PASS_THRU_PER_DIEM));
-			benefitPerDiem.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimGroup.getPassThruPerDiemAmount()));
-			benefitBalances.getFinancial().add(benefitPerDiem);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.CLM_PASS_THRU_PER_DIEM_AMT,
+					claimGroup.getPassThruPerDiemAmount());
 		}
 
+		// TODO If actually nullable, should be Optional.
 		if (claimGroup.getProfessionalComponentCharge() != null) {
-			BenefitComponent benefitProfessionComponentAmt = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_PROFFESIONAL_COMPONENT_CHARGE));
-			benefitProfessionComponentAmt.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimGroup.getProfessionalComponentCharge()));
-			benefitBalances.getFinancial().add(benefitProfessionComponentAmt);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.NCH_PROFNL_CMPNT_CHRG_AMT,
+					claimGroup.getProfessionalComponentCharge());
 		}
 
+		// TODO If actually nullable, should be Optional.
 		if (claimGroup.getClaimTotalPPSCapitalAmount() != null) {
-			BenefitComponent claimTotalPPSAmt = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_TOTAL_PPS_CAPITAL));
-			claimTotalPPSAmt.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimGroup.getClaimTotalPPSCapitalAmount().get()));
-			benefitBalances.getFinancial().add(claimTotalPPSAmt);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
+					claimGroup.getClaimTotalPPSCapitalAmount());
 		}
 	
 		/*
 		 * add field values to the benefit balances that are common between the
 		 * Inpatient and SNF claim types
 		 */
-		TransformerUtils.addCommonBenefitComponentInpatientSNF(benefitBalances, claimGroup.getCoinsuranceDayCount(),
+		TransformerUtils.addCommonGroupInpatientSNF(eob, claimGroup.getCoinsuranceDayCount(),
 				claimGroup.getNonUtilizationDayCount(), claimGroup.getDeductibleAmount(),
 				claimGroup.getPartACoinsuranceLiabilityAmount(), claimGroup.getBloodPintsFurnishedQty(),
 				claimGroup.getNoncoveredCharge(), claimGroup.getTotalDeductionAmount(),
@@ -134,14 +107,10 @@ final class InpatientClaimTransformer {
 				claimGroup.getClaimPPSCapitalFSPAmount(), claimGroup.getClaimPPSCapitalIMEAmount(),
 				claimGroup.getClaimPPSCapitalOutlierAmount(), claimGroup.getClaimPPSOldCapitalHoldHarmlessAmount());
 
+		// TODO If this is actually nullable, should be Optional.
 		if (claimGroup.getDrgOutlierApprovedPaymentAmount() != null) {
-			BenefitComponent nchDrugOutlierApprovedPaymentAmount = new BenefitComponent(
-					TransformerUtils.createCodeableConcept(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-							TransformerConstants.CODED_BENEFIT_BALANCE_TYPE_DRUG_OUTLIER_APPROVED_PAYMENT));
-			nchDrugOutlierApprovedPaymentAmount
-					.setAllowed(new Money().setSystem(TransformerConstants.CODED_MONEY_USD)
-							.setValue(claimGroup.getDrgOutlierApprovedPaymentAmount().get()));
-			benefitBalances.getFinancial().add(nchDrugOutlierApprovedPaymentAmount);
+			TransformerUtils.addAdjudicationTotal(eob, CcwCodebookVariable.NCH_DRG_OUTLIER_APRVD_PMT_AMT,
+					claimGroup.getDrgOutlierApprovedPaymentAmount());
 		}
 
 		// Common group level fields between Inpatient, Outpatient and SNF
@@ -159,8 +128,7 @@ final class InpatientClaimTransformer {
 		
 		// Common group level fields between Inpatient, HHA, Hospice and SNF
 		TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(eob, claimGroup.getClaimAdmissionDate(),
-				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()),
-				benefitBalances);
+				claimGroup.getBeneficiaryDischargeDate(), Optional.of(claimGroup.getUtilizationDayCount()));
 
 		for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
 			TransformerUtils.addDiagnosisCode(eob, diagnosis);
@@ -205,13 +173,7 @@ final class InpatientClaimTransformer {
 			ItemComponent item = eob.addItem();
 			item.setSequence(claimLine.getLineNumber().intValue());
 
-			TransformerUtils.addExtensionCoding(item, TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-					TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS);
-
-			// set hcpcs modifier codes for the claim
-			TransformerUtils.setHcpcsModifierCodes(item, claimLine.getHcpcsCode(), Optional.empty(), Optional.empty(),
-					Optional.empty());
+			TransformerUtils.mapHcpcs(eob, item, Optional.empty(), claimLine.getHcpcsCode(), Collections.emptyList());
 
 			item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 

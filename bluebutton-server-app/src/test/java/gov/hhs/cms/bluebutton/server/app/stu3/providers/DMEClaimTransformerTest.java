@@ -70,9 +70,8 @@ public final class DMEClaimTransformerTest {
 				claim.getBeneficiaryPaymentAmount(), claim.getSubmittedChargeAmount(),
 				claim.getAllowedChargeAmount());
 
-		TransformerTestUtils.assertBenefitBalanceEquals(TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-				TransformerConstants.CODED_ADJUDICATION_PRIMARY_PAYER_PAID_AMOUNT, claim.getPrimaryPayerPaidAmount(),
-				eob.getBenefitBalanceFirstRep().getFinancial());
+		TransformerTestUtils.assertAdjudicationTotalAmountEquals(CcwCodebookVariable.PRPAYAMT,
+				claim.getPrimaryPayerPaidAmount(), eob);
 
 		Assert.assertEquals(3, eob.getDiagnosis().size());
 		Assert.assertEquals(1, eob.getItem().size());
@@ -83,8 +82,7 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionIdentifierEquals(CcwCodebookVariable.SUPLRNUM,
 				claimLine1.getProviderBillingNumber(), eobItem0);
 
-		TransformerTestUtils.assertCareTeamEquals(claimLine1.getProviderNPI().get(),
-				ClaimCareteamrole.PRIMARY.toCode(), eob);
+		TransformerTestUtils.assertCareTeamEquals(claimLine1.getProviderNPI().get(), ClaimCareteamrole.PRIMARY, eob);
 		CareTeamComponent performingCareTeamEntry = TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
 				claimLine1.getProviderNPI().get(), eob.getCareTeam());
 		TransformerTestUtils.assertHasCoding(CcwCodebookVariable.PRVDR_SPCLTY, claimLine1.getProviderSpecialityCode(),
@@ -92,27 +90,21 @@ public final class DMEClaimTransformerTest {
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PRTCPTNG_IND_CD,
 				claimLine1.getProviderParticipatingIndCode(), performingCareTeamEntry);
 
-		TransformerTestUtils.assertExtensionCodingEquals(eobItem0,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				TransformerConstants.CODING_FHIR_ACT_INVOICE_GROUP,
-				(TransformerConstants.CODED_ACT_INVOICE_GROUP_CLINICAL_SERVICES_AND_PRODUCTS));
-
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PRVDR_STATE_CD,
 				claimLine1.getProviderStateCode(), eobItem0.getLocation());
 		
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
 				0/* index */);
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_HCPCS, "" + claim.getHcpcsYearCode().get(),
-				claimLine1.getHcpcsCode().get(), eobItem0.getService().getCoding());
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS,
+				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(),
+				eobItem0.getService().getCoding());
 
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_LINE_PRIMARY_PAYER_ALLOWED_CHARGE,
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT,
 				claimLine1.getPrimaryPayerAllowedChargeAmount(), eobItem0.getAdjudication());
 
-		TransformerTestUtils.assertAdjudicationEquals(
-				TransformerConstants.CODED_ADJUDICATION_LINE_PURCHASE_PRICE_AMOUNT, claimLine1.getPurchasePriceAmount(),
-				eobItem0.getAdjudication());
+		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT,
+				claimLine1.getPurchasePriceAmount(), eobItem0.getAdjudication());
 
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.DMERC_LINE_PRCNG_STATE_CD,
 				claimLine1.getPricingStateCode(), eobItem0.getLocation());
