@@ -135,13 +135,11 @@ final class HospiceClaimTransformer {
 			item.addAdjudication()
 					.setCategory(
 							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getProviderPaymentAmount());
+					.setAmount(TransformerUtils.createMoney(claimLine.getProviderPaymentAmount()));
 
 			item.addAdjudication()
 					.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getBenficiaryPaymentAmount());
+					.setAmount(TransformerUtils.createMoney(claimLine.getBenficiaryPaymentAmount()));
 
 			// Common item level fields between Inpatient, Outpatient, HHA, Hospice and SNF
 			TransformerUtils.mapEobCommonItemRevenue(item, eob, claimLine.getRevenueCenterCode(),

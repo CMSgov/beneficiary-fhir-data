@@ -124,46 +124,37 @@ final class PartDEventTransformer {
 		rxItem.addAdjudication().setCategory(planPaidAmountAdjudicationCategory)
 				.setReason(TransformerUtils.createCodeableConcept(eob, CcwCodebookVariable.DRUG_CVRG_STUS_CD,
 						claimGroup.getDrugCoverageStatusCode()))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(planPaidAmountAdjudicationValue);
+				.setAmount(TransformerUtils.createMoney(planPaidAmountAdjudicationValue));
 
 		rxItem.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.GDC_BLW_OOPT_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getGrossCostBelowOutOfPocketThreshold());
+				.setAmount(TransformerUtils.createMoney(claimGroup.getGrossCostBelowOutOfPocketThreshold()));
 
 		rxItem.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.GDC_ABV_OOPT_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getGrossCostAboveOutOfPocketThreshold());
+				.setAmount(TransformerUtils.createMoney(claimGroup.getGrossCostAboveOutOfPocketThreshold()));
 
 		rxItem.addAdjudication()
-				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.PTNT_PAY_AMT)).getAmount()
-				.setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getPatientPaidAmount());
+				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.PTNT_PAY_AMT))
+				.setAmount(TransformerUtils.createMoney(claimGroup.getPatientPaidAmount()));
 
 		rxItem.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.OTHR_TROOP_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getOtherTrueOutOfPocketPaidAmount());
+				.setAmount(TransformerUtils.createMoney(claimGroup.getOtherTrueOutOfPocketPaidAmount()));
 
 		rxItem.addAdjudication().setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LICS_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getLowIncomeSubsidyPaidAmount());
+				.setAmount(TransformerUtils.createMoney(claimGroup.getLowIncomeSubsidyPaidAmount()));
 
 		rxItem.addAdjudication().setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.PLRO_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getPatientLiabilityReductionOtherPaidAmount());
+				.setAmount(TransformerUtils.createMoney(claimGroup.getPatientLiabilityReductionOtherPaidAmount()));
 
 		rxItem.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.TOT_RX_CST_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getTotalPrescriptionCost());
+				.setAmount(TransformerUtils.createMoney(claimGroup.getTotalPrescriptionCost()));
 
 		rxItem.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.RPTD_GAP_DSCNT_NUM))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(claimGroup.getGapDiscountAmount());
+				.setAmount(TransformerUtils.createMoney(claimGroup.getGapDiscountAmount()));
 
 		if (claimGroup.getPrescriberIdQualifierCode() == null
 				|| !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01"))
