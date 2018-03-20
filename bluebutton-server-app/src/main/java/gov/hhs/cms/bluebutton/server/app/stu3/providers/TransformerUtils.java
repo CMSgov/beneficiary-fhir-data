@@ -164,6 +164,16 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * @param amountValue
+	 *            the value to use for {@link Money#getValue()}
+	 * @return a new {@link Money} instance, with the specified
+	 *         {@link Money#getValue()}
+	 */
+	static Money createMoney(Number amountValue) {
+		return createMoney(Optional.of(amountValue));
+	}
+
+	/**
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} that the {@link BenefitComponent}
 	 *            should be part of
@@ -1534,8 +1544,7 @@ public final class TransformerUtils {
 		}
 
 		if (paymentAmount.isPresent()) {
-			eob.getPayment().setAmount(
-					(Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(paymentAmount.get()));
+			eob.getPayment().setAmount(createMoney(paymentAmount));
 		}
 	}
 
@@ -1708,46 +1717,38 @@ public final class TransformerUtils {
 		}
 
 		AdjudicationComponent adjudicationForPayment = item.addAdjudication();
-		adjudicationForPayment.setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_NCH_PMT_AMT)).getAmount()
-				.setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(paymentAmount);
+		adjudicationForPayment.setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_NCH_PMT_AMT))
+				.setAmount(createMoney(paymentAmount));
 		if (paymentCode.isPresent())
 			adjudicationForPayment
 					.addExtension(createExtensionCoding(eob, CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode));
 
 		item.addAdjudication().setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_BENE_PMT_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(beneficiaryPaymentAmount);
+				.setAmount(createMoney(beneficiaryPaymentAmount));
 
 		item.addAdjudication().setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_PRVDR_PMT_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(providerPaymentAmount);
+				.setAmount(createMoney(providerPaymentAmount));
 
 		item.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(beneficiaryPartBDeductAmount);
+				.setAmount(createMoney(beneficiaryPartBDeductAmount));
 
 		if (primaryPayerCode.isPresent()) {
 			item.addExtension(createExtensionCoding(eob, CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, primaryPayerCode));
 		}
 
 		item.addAdjudication().setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(primaryPayerPaidAmount);
+				.setAmount(createMoney(primaryPayerPaidAmount));
 		item.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_COINSRNC_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(coinsuranceAmount);
+				.setAmount(createMoney(coinsuranceAmount));
 
 		item.addAdjudication().setCategory(createAdjudicationCategory(CcwCodebookVariable.LINE_SBMTD_CHRG_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(submittedChargeAmount);
+				.setAmount(createMoney(submittedChargeAmount));
 
 		item.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_ALOWD_CHRG_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(allowedChargeAmount);
+				.setAmount(createMoney(allowedChargeAmount));
 
 		if (processingIndicatorCode.isPresent())
 			item.addAdjudication(
@@ -1838,18 +1839,15 @@ public final class TransformerUtils {
 
 		item.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_RATE_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(rateAmount);
+				.setAmount(createMoney(rateAmount));
 
 		item.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(totalChargeAmount);
+				.setAmount(createMoney(totalChargeAmount));
 
 		item.addAdjudication()
 				.setCategory(TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(nonCoveredChargeAmount);
+				.setAmount(createMoney(nonCoveredChargeAmount));
 
 		SimpleQuantity qty = new SimpleQuantity();
 		qty.setValue(unitCount);
@@ -1905,8 +1903,7 @@ public final class TransformerUtils {
 		}
 
 		item.addAdjudication().setCategory(createAdjudicationCategory(CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT))
-				.getAmount().setSystem(TransformerConstants.CODING_MONEY).setCode(TransformerConstants.CODED_MONEY_USD)
-				.setValue(paymentAmount);
+				.setAmount(createMoney(paymentAmount));
 	}
 
 	/**
@@ -2048,8 +2045,7 @@ public final class TransformerUtils {
 			TransformerUtils.addCareTeamPractitioner(eob, null, TransformerConstants.CODING_NPI_US,
 					attendingPhysicianNpi.get(), ClaimCareteamrole.PRIMARY);
 		}
-		eob.setTotalCost(
-				(Money) new Money().setSystem(TransformerConstants.CODED_MONEY_USD).setValue(totalChargeAmount));
+		eob.setTotalCost(createMoney(totalChargeAmount));
 
 		addAdjudicationTotal(eob, CcwCodebookVariable.PRPAYAMT, primaryPayerPaidAmount);
 

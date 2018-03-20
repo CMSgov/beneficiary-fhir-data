@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
 
@@ -149,8 +150,12 @@ final class TransformerConstants {
 	 */
 	static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
-	// FIXME should be "urn:iso:std:iso:4217"
-	static final String CODING_MONEY = "urn:std:iso:4217";
+	/**
+	 * The standard {@link Money#getSystem()} for currency. (It looks odd that it
+	 * has "iso" in there twice, but some web searches seem to confirm that that's
+	 * correct.)
+	 */
+	static final String CODING_MONEY = "urn:iso:std:iso:4217";
 	
 	/**
 	 * Used to identify the drugs that were purchased as part of Part D, Carrier,

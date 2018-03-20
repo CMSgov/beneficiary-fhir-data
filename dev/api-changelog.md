@@ -1,5 +1,16 @@
 # API Changelog
 
+## CBBF-169: Fixed Money Codings
+
+[Money](http://hl7.org/fhir/STU3/datatypes.html#Money) values returned by the API were previously structured incorrectly per the FHIR specification and have now been corrected:
+
+1. The `Money.system` was incorrect:
+    * Previously: `USD`
+    * Corrected/Current: `urn:iso:std:iso:4217`
+2. The `Money.code` was missing.
+    * Previously: (missing)
+    * Corrected/Current: `USD`
+
 ## CBBF-97 (again): More fixes to code systems, etc.  (Sprint 47, 2018-03)
 
 ### Change `Patient.identifier` Systems

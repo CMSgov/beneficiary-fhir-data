@@ -132,15 +132,12 @@ final class DMEClaimTransformer {
 			item.addAdjudication()
 					.setCategory(
 							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD)
-					.setValue(claimLine.getPrimaryPayerAllowedChargeAmount());
+					.setAmount(TransformerUtils.createMoney(claimLine.getPrimaryPayerAllowedChargeAmount()));
 
 			item.addAdjudication()
 					.setCategory(
 							TransformerUtils.createAdjudicationCategory(CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT))
-					.getAmount().setSystem(TransformerConstants.CODING_MONEY)
-					.setCode(TransformerConstants.CODED_MONEY_USD).setValue(claimLine.getPurchasePriceAmount());
+					.setAmount(TransformerUtils.createMoney(claimLine.getPurchasePriceAmount()));
 
 			if (claimLine.getScreenSavingsAmount().isPresent()) {
 				// TODO should this be an adjudication?
