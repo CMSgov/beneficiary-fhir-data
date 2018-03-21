@@ -43,7 +43,7 @@
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
-  when: data_pipeline_tmp_dir is defined and stat_tmp.exists == false
+  when: data_pipeline_tmp_dir is defined and stat_tmp.stat.exists == false
 
 # If the app's JAR is in S3, grab it from there.
 - block:
