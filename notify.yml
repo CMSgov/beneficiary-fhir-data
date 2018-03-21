@@ -26,7 +26,7 @@
         subtype: html
         body: |
           <p>Salutations!</p>
-          <p>This is an automated notification that the Blue Button API's Developer Preview environment is being updated. No downtime is expected as part of this update. Please report any problems or questions by replying to all recipients of this email.</p>
+          <p>This is an automated notification that the Blue Button API's Developer Sandbox environment is being updated. No downtime is expected as part of this update. Please report any problems or questions by replying to all recipients of this email.</p>
           <p>Here are some additional details about the deployment:</p>
           <ul>
             <li>
@@ -61,7 +61,7 @@
         subtype: html
         body: |
           <p>Salutations!</p>
-          <p>This is an automated notification that the Blue Button API's Developer Preview environment is being updated. No downtime is expected as part of this update. Please report any problems or questions to the <a href="https://groups.google.com/forum/#!forum/developer-group-for-cms-blue-button-api">Developer Group for CMS Blue Button API</a>.</p>
+          <p>This is an automated notification that the Blue Button API's Developer Sandbox environment is being updated. No downtime is expected as part of this update. Please report any problems or questions to the <a href="https://groups.google.com/forum/#!forum/developer-group-for-cms-blue-button-api">Developer Group for CMS Blue Button API</a>.</p>
           <p>Any/all API changes being made to the Blue Button API Data Server(s) will be detailed here: <a href="https://github.com/CMSgov/bluebutton-data-server/blob/master/dev/api-changelog.md">Blue Button Data Server: API Changelog</a>.</p>
           <p>
             Best regards,<br />
