@@ -1,5 +1,6 @@
-# Ignore the Python virtual environment.
+# Ignore the Python virtual environment and external roles.
 venv/
+roles_external/
 
 # Ignore Eclipse metadata.
 .project
