@@ -185,8 +185,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		else
 			dateRange = Optional.of(dateRangeParam);
 
-		eobs.addAll(findCarrierClaimsByPatient(patient, dateRange).stream().map(ClaimType.CARRIER.getTransformer())
-				.collect(Collectors.toList()));
+		// eobs.addAll(findCarrierClaimsByPatient(patient,
+		// dateRange).stream().map(ClaimType.CARRIER.getTransformer())
+		// .collect(Collectors.toList()));
 		eobs.addAll(findDMEClaimsByPatient(patient, dateRange).stream().map(ClaimType.DME.getTransformer())
 				.collect(Collectors.toList()));
 		eobs.addAll(findHHAClaimsByPatient(patient, dateRange).stream().map(ClaimType.HHA.getTransformer())
@@ -195,13 +196,12 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 				.collect(Collectors.toList()));
 		eobs.addAll(findInpatientClaimsByPatient(patient, dateRange).stream().map(ClaimType.INPATIENT.getTransformer())
 				.collect(Collectors.toList()));
-		eobs.addAll(findOutpatientClaimsByPatient(patient, dateRange).stream()
-				.map(ClaimType.OUTPATIENT.getTransformer()).collect(Collectors.toList()));
+		// eobs.addAll(findOutpatientClaimsByPatient(patient, dateRange).stream()
+		// .map(ClaimType.OUTPATIENT.getTransformer()).collect(Collectors.toList()));
 		eobs.addAll(findPartDEventsByPatient(patient, dateRange).stream().map(ClaimType.PDE.getTransformer())
 				.collect(Collectors.toList()));
 		eobs.addAll(findSNFClaimsByPatient(patient, dateRange).stream().map(ClaimType.SNF.getTransformer())
 				.collect(Collectors.toList()));
-		 
 
 		return eobs;
 	}
