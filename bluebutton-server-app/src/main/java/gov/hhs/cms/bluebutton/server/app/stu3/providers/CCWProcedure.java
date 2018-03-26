@@ -9,7 +9,7 @@ import java.util.Optional;
  */
 final class CCWProcedure extends IcdCode {
 
-	private LocalDate procedureDate;
+	private Optional<LocalDate> procedureDate;
 
 	/**
 	 * Constructs a new {@link CCWProcedure}.
@@ -31,14 +31,18 @@ final class CCWProcedure extends IcdCode {
 		Objects.requireNonNull(icdVersionCode);
 		Objects.requireNonNull(procedureDate);
 
-		this.procedureDate = procedureDate.get();
-
+		if (procedureDate.isPresent()) {
+			this.procedureDate = procedureDate;
+		} else {
+			this.procedureDate = Optional.empty();
+		}
 	}
 
 	/**
-	 * @return the ICD procedure date
+	 * @return the ICD procedure date or {@link Optional#empty()} if no date is
+	 *         present
 	 */
-	public LocalDate getProcedureDate() {
+	public Optional<LocalDate> getProcedureDate() {
 		return procedureDate;
 	}
 

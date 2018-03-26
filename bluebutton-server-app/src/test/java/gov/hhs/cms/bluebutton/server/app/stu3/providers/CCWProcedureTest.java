@@ -44,7 +44,7 @@ public class CCWProcedureTest {
 
 		Optional<CCWProcedure> diagnosis = CCWProcedure.from(code, Optional.of(version), procDate);
 
-		Assert.assertEquals(procDate.get(), diagnosis.get().getProcedureDate());
+		Assert.assertEquals(procDate.get(), diagnosis.get().getProcedureDate().get());
 		Assert.assertEquals(system, diagnosis.get().getFhirSystem());
 
 		TransformerTestUtils.assertHasCoding(system, code.get(), diagnosis.get().toCodeableConcept().getCoding());

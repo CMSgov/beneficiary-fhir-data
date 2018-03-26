@@ -518,7 +518,9 @@ public final class TransformerUtils {
 
 		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size() + 1);
 		procedureComponent.setProcedure(createCodeableConcept(procedure.getFhirSystem(), procedure.getCode()));
-		procedureComponent.setDate(convertToDate(procedure.getProcedureDate()));
+		if (procedure.getProcedureDate().isPresent()) {
+			procedureComponent.setDate(convertToDate(procedure.getProcedureDate().get()));
+		}
 
 		eob.getProcedure().add(procedureComponent);
 		return procedureComponent.getSequenceElement().getValue();
