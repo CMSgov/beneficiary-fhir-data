@@ -1762,7 +1762,7 @@ public final class TransformerUtils {
 		if (lineDiagnosis.isPresent())
 			addDiagnosisLink(eob, item, lineDiagnosis.get());
 
-		if (hctHgbTestTypeCode.isPresent() && hctHgbTestResult.compareTo(BigDecimal.ZERO) != 0) {
+		if (hctHgbTestTypeCode.isPresent()) {
 			Observation hctHgbObservation = new Observation();
 			hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
 			hctHgbObservation
@@ -1773,7 +1773,7 @@ public final class TransformerUtils {
 					calculateVariableReferenceUrl(CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM),
 					new Reference(hctHgbObservation));
 			item.addExtension(hctHgbObservationReference);
-		} else if (!hctHgbTestTypeCode.isPresent() && hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
+		} else if (hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
 			// Nothing to do here; don't map a non-existent Observation.
 		} else {
 			throw new InvalidRifValueException(String.format(
