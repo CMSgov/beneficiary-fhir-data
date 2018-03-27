@@ -35,6 +35,8 @@ public class CCWProcedureTest {
 		Character versionIcdUnknown = 'U';
 		String systemIcdUnknown = String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", versionIcdUnknown);
 		assertMatches(versionIcdUnknown, systemIcdUnknown);
+
+		assertDateNotPresent(versionIcdUnknown, systemIcdUnknown);
 	}
 
 	static void assertMatches(Character version, String system) {
@@ -45,6 +47,30 @@ public class CCWProcedureTest {
 		Optional<CCWProcedure> diagnosis = CCWProcedure.from(code, Optional.of(version), procDate);
 
 		Assert.assertEquals(procDate.get(), diagnosis.get().getProcedureDate().get());
+		Assert.assertEquals(system, diagnosis.get().getFhirSystem());
+
+		TransformerTestUtils.assertHasCoding(system, code.get(), diagnosis.get().toCodeableConcept().getCoding());
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = codeableConcept.addCoding();
+		coding.setSystem(system).setCode(code.get());
+
+		Assert.assertTrue(diagnosis.get().isContainedIn(codeableConcept));
+	}
+
+	/**
+	 * Verifies that a procedure date isn't present even though there is a procedure
+	 * code present
+	 */
+	static void assertDateNotPresent(Character version, String system) {
+
+		Optional<String> code = Optional.of("code");
+		Optional<LocalDate> procDate = Optional.empty();
+
+		Optional<CCWProcedure> diagnosis = CCWProcedure.from(code, Optional.of(version), procDate);
+
+		Assert.assertEquals(Optional.empty(), diagnosis.get().getProcedureDate());
+
 		Assert.assertEquals(system, diagnosis.get().getFhirSystem());
 
 		TransformerTestUtils.assertHasCoding(system, code.get(), diagnosis.get().toCodeableConcept().getCoding());

@@ -31,11 +31,7 @@ final class CCWProcedure extends IcdCode {
 		Objects.requireNonNull(icdVersionCode);
 		Objects.requireNonNull(procedureDate);
 
-		if (procedureDate.isPresent()) {
-			this.procedureDate = procedureDate;
-		} else {
-			this.procedureDate = Optional.empty();
-		}
+		this.procedureDate = procedureDate;
 	}
 
 	/**
