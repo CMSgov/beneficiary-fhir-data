@@ -83,7 +83,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
-import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
@@ -1773,11 +1772,6 @@ public final class TransformerUtils {
 					calculateVariableReferenceUrl(CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM),
 					new Reference(hctHgbObservation));
 			item.addExtension(hctHgbObservationReference);
-		} else if (hctHgbTestResult.compareTo(BigDecimal.ZERO) == 0) {
-			// Nothing to do here; don't map a non-existent Observation.
-		} else {
-			throw new InvalidRifValueException(String.format(
-					"Inconsistent hctHgbTestTypeCode and hctHgbTestResult" + " values for claim '%s'.", claimId));
 		}
 
 		if (nationalDrugCode.isPresent()) {
