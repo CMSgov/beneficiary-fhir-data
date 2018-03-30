@@ -260,6 +260,14 @@ public class SpringConfiguration {
 
 		poolingDataSource.setMaximumPoolSize(connectionsMax);
 
+		/*
+		 * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
+		 * strongly worded letter instructing it to avoid sequential scans whenever
+		 * possible.
+		 */
+		if (poolingDataSource.getJdbcUrl().contains("postgre"))
+			poolingDataSource.setConnectionInitSql("set enable_seqscan = false;");
+
 		poolingDataSource.setRegisterMbeans(true);
 		poolingDataSource.setMetricRegistry(metricRegistry);
 	}
