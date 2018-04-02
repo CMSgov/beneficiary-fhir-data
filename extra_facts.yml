@@ -19,4 +19,4 @@
     - name: Calculate Deployment ID
       set_fact:
         # This can be overridden on the command line, but defaults to a timestamp.
-        deploy_id: "{{ deploy_id_custom | default(deploy_timestamp | regex_replace(':', '-') | regex_replace('\\+0000', 'Z')) }}"
+        deploy_id: "{{ deploy_id_custom | default(deploy_timestamp | regex_replace(':', '-') | regex_replace('\\+00-?00', 'Z')) }}"
