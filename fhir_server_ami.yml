@@ -26,6 +26,11 @@
         region: "{{ aws_region }}"
         zone: "{{ aws_zone }}"
         vpc_subnet_id: "{{ aws_vpc_subnet }}"
+        volumes:
+          - device_name: /dev/sda1
+            volume_type: gp2
+            # The logs occasionally filled up the drive when it was only 10GB.
+            volume_size: 40
         instance_profile_name: BlueButtonBackend-DataServer
         wait: true
         exact_count: 1
