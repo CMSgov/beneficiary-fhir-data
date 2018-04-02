@@ -9,9 +9,11 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -91,6 +93,28 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel
  */
 public final class TransformerUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
+
+	/**
+	 * Tracks the {@link CcwCodebookVariable}s that have already had code lookup
+	 * failures due to missing {@link Value} matches. Why track this? To ensure that
+	 * we don't spam log events for failed lookups over and over and over. This was
+	 * needed to fix CBBF-162, where those log events were flooding our logs and
+	 * filling up the drive.
+	 *
+	 * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
+	 */
+	private static final Set<CcwCodebookVariable> codebookLookupMissingFailures = new HashSet<>();
+
+	/**
+	 * Tracks the {@link CcwCodebookVariable}s that have already had code lookup
+	 * failures due to duplicate {@link Value} matches. Why track this? To ensure
+	 * that we don't spam log events for failed lookups over and over and over. This
+	 * was needed to fix CBBF-162, where those log events were flooding our logs and
+	 * filling up the drive.
+	 *
+	 * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
+	 */
+	private static final Set<CcwCodebookVariable> codebookLookupDuplicateFailures = new HashSet<>();
 
 	/**
 	 * @param eob
@@ -1079,14 +1103,22 @@ public final class TransformerUtils {
 		if (matchingVariableValues.size() == 1) {
 			return Optional.of(matchingVariableValues.get(0).getDescription());
 		} else if (matchingVariableValues.isEmpty()) {
-			LOGGER.info("No display value match found for {}.{} in resource '{}/{}'.",
-					CcwCodebookVariable.class.getSimpleName(), ccwVariable.name(),
-					rootResource.getClass().getSimpleName(), rootResource.getId());
+			if (!codebookLookupMissingFailures.contains(ccwVariable)) {
+				// Note: The race condition here (from concurrent requests) is harmless.
+				codebookLookupMissingFailures.add(ccwVariable);
+				LOGGER.info("No display value match found for {}.{} in resource '{}/{}'.",
+						CcwCodebookVariable.class.getSimpleName(), ccwVariable.name(),
+						rootResource.getClass().getSimpleName(), rootResource.getId());
+			}
 			return Optional.empty();
 		} else if (matchingVariableValues.size() > 1) {
-			LOGGER.info("Multiple display value matches found for {}.{} in resource '{}/{}'.",
-					CcwCodebookVariable.class.getSimpleName(), ccwVariable.name(),
-					rootResource.getClass().getSimpleName(), rootResource.getId());
+			if (!codebookLookupDuplicateFailures.contains(ccwVariable)) {
+				// Note: The race condition here (from concurrent requests) is harmless.
+				codebookLookupDuplicateFailures.add(ccwVariable);
+				LOGGER.info("Multiple display value matches found for {}.{} in resource '{}/{}'.",
+						CcwCodebookVariable.class.getSimpleName(), ccwVariable.name(),
+						rootResource.getClass().getSimpleName(), rootResource.getId());
+			}
 			return Optional.empty();
 		} else {
 			throw new BadCodeMonkeyException();
