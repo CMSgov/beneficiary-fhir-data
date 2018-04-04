@@ -1,5 +1,18 @@
 # API Changelog
 
+## CBBF-175: Fixed `ExplanationOfBenefit.diagnosis.type` Entries
+
+Several changes have been made to these entries:
+
+* The `Coding.system` has been changed.
+    * Previously: ``
+    * Corrected/current: `https://bluebutton.cms.gov/resources/codesystem/diagnosis-type`
+* The `Coding.code` values have been fixed.
+    * Previous format: `[CODE1]`
+    * Corrected/current format: `code1`
+        * In rare cases where there's more than one code, these will be captured in additional `ExplanationOfBenefit.diagnosis.type` entries.
+* The `Coding.display` values are included.
+
 ## CBBF-169: Fixed Money Codings
 
 [Money](http://hl7.org/fhir/STU3/datatypes.html#Money) values returned by the API were previously structured incorrectly per the FHIR specification and have now been corrected:

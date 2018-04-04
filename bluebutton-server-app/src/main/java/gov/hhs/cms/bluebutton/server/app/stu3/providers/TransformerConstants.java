@@ -4,6 +4,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -140,7 +141,11 @@ final class TransformerConstants {
 	// FIXME this URL has a typo -- first 'c' shouldn't have been there
 	private static final String CODING_CCW_TYPE_SERVICE = "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
-	static final String CODING_FHIR_DIAGNOSIS_TYPE = "http://hl7.org/fhir/ex-diagnosistype";
+	/**
+	 * Used as the {@link Coding#getSystem()} for
+	 * {@link DiagnosisComponent#getType()} entries.
+	 */
+	static final String CODING_SYSTEM_BBAPI_DIAGNOSIS_TYPE = BASE_URL_BBAPI_RESOURCES + "/codesystem/diagnosis-type";
 
 	/**
 	 * Used as the {@link Coding#getSystem()} for {@link ItemComponent#getService()}

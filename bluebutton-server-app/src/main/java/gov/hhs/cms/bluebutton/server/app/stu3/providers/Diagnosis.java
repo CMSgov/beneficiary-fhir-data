@@ -7,6 +7,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
+import org.hl7.fhir.dstu3.model.codesystems.ExDiagnosistype;
+
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
+
 /**
  * Models a diagnosis code entry in a claim.
  */
@@ -137,6 +143,78 @@ final class Diagnosis extends IcdCode {
 	 * the various diagnoses in a claim.
 	 */
 	static enum DiagnosisLabel {
-		PRINCIPAL, ADMITTING, FIRSTEXTERNAL, EXTERNAL, REASONFORVISIT;
+		/**
+		 * Note: display text matches {@link ExDiagnosistype#PRINCIPAL}.
+		 */
+		PRINCIPAL("principal", "The single medical diagnosis that is most relevant to the patient's chief complaint"
+				+ " or need for treatment."),
+
+		/**
+		 * Note: display text matches {@link ExDiagnosistype#ADMITTING}.
+		 */
+		ADMITTING("admitting", "The diagnosis given as the reason why the patient was admitted to the hospital."),
+
+		/**
+		 * Note: display text (mostly) matches
+		 * {@link CcwCodebookVariable#FST_DGNS_E_CD}.
+		 */
+		FIRSTEXTERNAL("external-first",
+				"The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."),
+
+		/**
+		 * Note: display text (mostly) matches
+		 * {@link CcwCodebookVariable#FST_DGNS_E_CD}.
+		 */
+		EXTERNAL("external",
+				"A code used to identify an external cause of injury, poisoning, or other adverse effect."),
+
+		/**
+		 * Note: display text (mostly) matches
+		 * {@link CcwCodebookVariable#RSN_VISIT_CD1}.
+		 */
+		REASONFORVISIT("reason-for-visit", "A diagnosis code used to identify the patient's reason for the visit.");
+
+		private final String fhirCode;
+		private final String fhirDisplay;
+
+		/**
+		 * Enum constant constructor.
+		 *
+		 * @param fhirCode
+		 *            the value to use for {@link #toCode()}
+		 * @param fhirDisplay
+		 *            the value to use for {@link #getDisplay()}
+		 */
+		private DiagnosisLabel(String fhirCode, String fhirDisplay) {
+			this.fhirCode = fhirCode;
+			this.fhirDisplay = fhirDisplay;
+		}
+
+		/**
+		 * @return the FHIR {@link Coding#getSystem()} to use for the
+		 *         {@link DiagnosisComponent#getType()} that this {@link DiagnosisLabel}
+		 *         should be mapped to
+		 */
+		public String getSystem() {
+			return TransformerConstants.CODING_SYSTEM_BBAPI_DIAGNOSIS_TYPE;
+		}
+
+		/**
+		 * @return the FHIR {@link Coding#getCode()} to use for the
+		 *         {@link DiagnosisComponent#getType()} that this {@link DiagnosisLabel}
+		 *         should be mapped to
+		 */
+		public String toCode() {
+			return fhirCode;
+		}
+
+		/**
+		 * @return the FHIR {@link Coding#getDisplay()} to use for the
+		 *         {@link DiagnosisComponent#getType()} that this {@link DiagnosisLabel}
+		 *         should be mapped to
+		 */
+		public String getDisplay() {
+			return fhirDisplay;
+		}
 	}
 }

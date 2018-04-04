@@ -303,9 +303,11 @@ public final class TransformerUtils {
 		DiagnosisComponent diagnosisComponent = new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
 		diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
 
-		if (!diagnosis.getLabels().isEmpty()) {
-			diagnosisComponent.addType(createCodeableConcept(TransformerConstants.CODING_FHIR_DIAGNOSIS_TYPE,
-					String.valueOf(diagnosis.getLabels())));
+		for (DiagnosisLabel diagnosisLabel : diagnosis.getLabels()) {
+			CodeableConcept diagnosisTypeConcept = createCodeableConcept(diagnosisLabel.getSystem(),
+					diagnosisLabel.toCode());
+			diagnosisTypeConcept.getCodingFirstRep().setDisplay(diagnosisLabel.getDisplay());
+			diagnosisComponent.addType(diagnosisTypeConcept);
 		}
 		if (diagnosis.getPresentOnAdmission().isPresent()) {
 			diagnosisComponent.addExtension(
