@@ -20,9 +20,6 @@ node {
 		// Grab the commit that triggered the build.
 		checkout scm
 
-		sh "env"
-		sh "shopt"
-
 		def ansibleRunner = docker.build('ansible-runner', './dockerfiles/ansible-runner')
 		ansibleRunner.inside {
 			sh 'echo "Hello World!"'
