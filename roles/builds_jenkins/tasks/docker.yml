@@ -39,3 +39,20 @@
   become: true
   notify:
     - Restart Docker
+
+- name: Create Docker Group
+  group:
+    name: docker
+    system: true
+  become: true
+  notify:
+    - Restart Jenkins
+
+- name: Add Jenkins User to Docker Group
+  user:
+    name: jenkins
+    group: docker
+    append: true
+  become: true
+  notify:
+    - Restart Jenkins

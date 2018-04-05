@@ -5,3 +5,9 @@
     name: docker
     state: restarted
   become: true
+
+- name: Restart Jenkins
+  systemd:
+    name: jenkins
+    state: restarted
+  become: true
