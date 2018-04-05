@@ -110,3 +110,9 @@
   notify:
     - Reload Apache
 
+- name: Enable and Start Apache
+  systemd:
+    name: httpd
+    enabled: true
+    state: started
+  become: true
