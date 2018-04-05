@@ -16,21 +16,26 @@
  */
 
 node {
-	stage('Checkout') {
+	stage('Prepare') {
 		// Grab the commit that triggered the build.
 		checkout scm
-	}
 
-	stage('Prepare Tooling') {
-		withPythonEnv('/usr/bin/python2.7') {
-			pysh "pip install --upgrade setuptools"
-			pysh "pip install --requirement requirements.txt"
+		def ansibleRunner = docker.build('ansible-runner', './dockerfiles/ansible-runner')
+		ansibleRunner.inside {
+			sh 'echo "Hello World!"'
 		}
 	}
 
-	stage('Check Ansible Syntax') {
-		withPythonEnv('/usr/bin/python2.7') {
-			pysh "ansible-playbook backend.yml --inventory=hosts_development --syntax-check"
-		}
-	}
+//	stage('Prepare Tooling') {
+//		withPythonEnv('/usr/bin/python2.7') {
+//			pysh "pip install --upgrade setuptools"
+//			pysh "pip install --requirement requirements.txt"
+//		}
+//	}
+//
+//	stage('Check Ansible Syntax') {
+//		withPythonEnv('/usr/bin/python2.7') {
+//			pysh "ansible-playbook backend.yml --inventory=hosts_development --syntax-check"
+//		}
+//	}
 }
