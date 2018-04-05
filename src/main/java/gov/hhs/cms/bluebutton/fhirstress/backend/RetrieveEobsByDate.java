@@ -1,22 +1,11 @@
 package gov.hhs.cms.bluebutton.fhirstress.backend;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Coverage;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
 
-import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
+//import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
 
 /**
  * This JMeter sampler will run a search for a random FHIR {@link Patient} and
@@ -24,8 +13,7 @@ import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
  * {@link ExplanationOfBenefit}s.
  */
 public final class RetrieveEobsByDate extends CustomSamplerClient {
-	private List<String> patientIds;
-  private BenefitIdMgr bim; 
+	// private BenefitIdMgr bim;
 
 	/**
 	 * @see org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient#setupTest(org.apache.jmeter.protocol.java.sampler.JavaSamplerContext)
@@ -33,20 +21,20 @@ public final class RetrieveEobsByDate extends CustomSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
-    bim = new BenefitIdMgr(1,1,10000,"201400000","%05d"); 
+		// bim = new BenefitIdMgr(1,1,10000,"201400000","%05d");
 	}
 
 	/**
-	 * Test Implementation 
+	 * Test Implementation
 	 */
-  @Override
+	@Override
 	protected void executeTest() {
-    // Removed the Rif parser to speed things up
-    //if (this.parser.hasNext()) 
-    //{  
-      //RifEntry entry = this.parser.next();
+		// Removed the Rif parser to speed things up
+		// if (this.parser.hasNext())
+		// {
+		// RifEntry entry = this.parser.next();
 
-      // TODO - query EOBs for a patient filtering by date
-    //}
+		// TODO - query EOBs for a patient filtering by date
+		// }
 	}
 }

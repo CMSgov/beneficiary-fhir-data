@@ -1,8 +1,0 @@
-all:
-  hosts:
-    jmeter-client:
-      ansible_port: 22 
-      ansible_host: "{{ vault_jmeter_client_ip }}" 
-    jmeter-server:
-      ansible_port: 22 
-      ansible_host: "{{ vault_jmeter_server_ip }}"

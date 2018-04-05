@@ -3,6 +3,7 @@ venv/
 
 # Ignore the collected stress tests results.
 results/
+jmeter.log
 
 # Ignore vault password file
 vault.password

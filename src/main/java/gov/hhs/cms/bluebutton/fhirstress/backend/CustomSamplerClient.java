@@ -28,11 +28,11 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	protected static final String DELIMITER = "delimiter";
 	protected static final String HOSTNAME_UNKNOWN = "unknown-host";
 
-  protected abstract void executeTest();
+	protected abstract void executeTest();
 
 	protected String hostName;
 	protected IGenericClient client;
-  //protected RifParser parser = null;
+	// protected RifParser parser = null;
 
 	/**
 	 * @see org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient#getDefaultParameters()
@@ -56,27 +56,19 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
 		this.hostName = getHostname();
-    int proxyPort = Integer.parseInt(context.getParameter(PROXY_PORT));
 
-    if(context.getParameter(PROXY_HOST).equals("null")) { // no proxy
-		  this.client = FhirClient.create(
-        context.getParameter(PARAM_SERVER),
-        context.getParameter(KEYSTORE_DIR)
-      );
-    }
-    else { // use proxy
-		  this.client = FhirClient.create(
-        context.getParameter(PARAM_SERVER),
-        context.getParameter(KEYSTORE_DIR),
-        context.getParameter(PROXY_HOST),
-        Integer.parseInt(context.getParameter(PROXY_PORT))
-      );
-    }
-    //this.parser = new RifParser(context.getParameter(RIFFILE), context.getParameter(DELIMITER));
-    //System.out.println("Thread loops = " + context.getParameter(LOOPS));
+		if (context.getParameter(PROXY_HOST).equals("null")) { // no proxy
+			this.client = FhirClient.create(context.getParameter(PARAM_SERVER), context.getParameter(KEYSTORE_DIR));
+		} else { // use proxy
+			this.client = FhirClient.create(context.getParameter(PARAM_SERVER), context.getParameter(KEYSTORE_DIR),
+					context.getParameter(PROXY_HOST), Integer.parseInt(context.getParameter(PROXY_PORT)));
+		}
+		// this.parser = new RifParser(context.getParameter(RIFFILE),
+		// context.getParameter(DELIMITER));
+		// System.out.println("Thread loops = " + context.getParameter(LOOPS));
 
 		// Find the IDs that can be queried in each sample run.
-		//this.patientIds = findPatientIds();
+		// this.patientIds = findPatientIds();
 	}
 
 	/**
@@ -93,31 +85,28 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 			sample.setSuccessful(true);
 			sample.setResponseMessage("Sample succeeded on host: " + hostName);
 			sample.setResponseCodeOK();
-		} catch (IllegalArgumentException|InvalidRequestException|FhirClientConnectionException e) {
+		} catch (IllegalArgumentException | InvalidRequestException | FhirClientConnectionException e) {
 			// Mark this sample iteration as failed.
 			sample.sampleEnd();
 			sample.setSuccessful(false);
 			sample.setResponseMessage("Exception: " + e);
 
 			/*
-			 * Serialize the stack trace to a String and attach it to the sample
-			 * results.
+			 * Serialize the stack trace to a String and attach it to the sample results.
 			 */
 			StringWriter stringWriter = new StringWriter();
 			e.printStackTrace(new java.io.PrintWriter(stringWriter));
 			sample.setResponseData(stringWriter.toString(), StandardCharsets.UTF_8.name());
 			sample.setDataType(org.apache.jmeter.samplers.SampleResult.TEXT);
-      if (e instanceof FhirClientConnectionException) {
-			  sample.setResponseCode("504");
-      }
-      else {
-			  sample.setResponseCode("500");
-      }
+			if (e instanceof FhirClientConnectionException) {
+				sample.setResponseCode("504");
+			} else {
+				sample.setResponseCode("500");
+			}
 		}
 
 		return sample;
 	}
-
 
 	/**
 	 * @return the hostname of the system this code is running on, or
@@ -140,4 +129,3 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	}
 
 }
-

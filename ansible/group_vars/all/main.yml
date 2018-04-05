@@ -8,22 +8,22 @@ proxy_env:
   http_proxy: "{{ vault_http_proxy }}" 
   https_proxy: "{{ vault_https_proxy }}"
 
-test_lib: ../target/fhir-stress-test-0.1.0-SNAPSHOT-uber.jar
-test_plan: ../jmeter-project/jmeter-fhir-test.jmx
-test_keystore: ../dev/ssl-stores/client.keystore
-remoteTestDir: /opt/fhir_stress
+test_lib: "../target/fhir-stress-test-0.1.0-SNAPSHOT-uber.jar"
+test_plan: "../jmeter-project/jmeter-fhir-test.jmx"
+test_keystore: "../dev/ssl-stores/client.keystore"
+remote_test_dir: "/opt/fhir_stress"
 jmeter_version: 3.3
-remoteJmeterDir: "{{ remoteTestDir }}/apache-jmeter-{{ jmeter_version }}"
-jmeterServerPort: "{{ vault_jmeter_server_port }}"
-jmeterServerRmiLocalPort: "{{ vault_jmeter_server_rmi_local_port }}" 
-jmeterClientRmiLocalPort: "{{ vault_jmeter_client_rmi_local_port }}"
-fhir_server: https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3
+remote_jmeter_dir: "{{ remote_test_dir }}/apache-jmeter-{{ jmeter_version }}"
+jmeter_server_port: "{{ vault_jmeter_server_port }}"
+jmeter_server_rmi_local_port: "{{ vault_jmeter_server_rmi_local_port }}" 
+jmeter_client_rmi_local_port: "{{ vault_jmeter_client_rmi_local_port }}"
+fhir_server: "https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3"
 thread_count: 10
 thread_loops: 1000
 scheduler: true
 duration: 300
 poll: 30
-jmeterServerIP: "{{ vault_jmeter_server_ip }}" 
+jmeter_server_ip: "{{ vault_jmeter_server_ip }}" 
 
 # TODO use RHEL here!
 # Ubuntu 14.04 (Trusty)
