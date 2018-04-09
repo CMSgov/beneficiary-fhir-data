@@ -20,9 +20,23 @@ node {
 		// Grab the commit that triggered the build.
 		checkout scm
 
-		def ansibleRunner = docker.build('ansible-runner', './dockerfiles/ansible-runner')
-		ansibleRunner.inside {
+		/*
+		 * Prepare the Ansible execution environment. We use Docker for this, as the
+		 * Jenkins system is in FIPS mode, which prevents virtualenv, pip, and
+		 * Ansible from working (different symptoms, but generally they need MD5).
+		 */
+
+		// First, prepare the Ansible Docker image.
+		// FIXME: Get the Docker image building in Jenkins/LSS. Until then, we're
+		// using an image Karl built locally and then exported-imported to the
+		// Jenkins system.
+		//def ansibleRunner = docker.build('ansible_runner', './dockerfiles/ansible_runner')
+		def ansibleRunner = docker.image('ansible_runner')
+
+		// Ensure the Ansible image is ready to go.
+		ansibleRunner.inside('--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro') {
 			sh 'echo "Hello World!"'
+			sh 'ansible --version'
 		}
 	}
 
