@@ -1,8 +1,9 @@
 package gov.hhs.cms.bluebutton.fhirstress.backend;
 
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.io.StringWriter;
+import java.net.Inet4Address;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.jmeter.config.Arguments;
@@ -10,29 +11,38 @@ import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
-import gov.hhs.cms.bluebutton.fhirstress.utils.FhirClient;
-//import gov.hhs.cms.bluebutton.fhirstress.utils.RifParser;
-//import gov.hhs.cms.bluebutton.fhirstress.utils.RifEntry;
-
 //import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+//import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
+import gov.hhs.cms.bluebutton.fhirstress.utils.FhirClient;
+import gov.hhs.cms.bluebutton.fhirstress.utils.RifParser;
 
+/**
+ * {@link CustomSamplerClient} encapsulates the common variables and methods
+ * that are shared among all tests in this package. Simply derive from this
+ * class and implement {@link CustomSamplerClient#executeTest()} at a minimum to
+ * create new test functionality.
+ */
 public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	protected static final String PARAM_SERVER = "fhir_server";
 	protected static final String KEYSTORE_DIR = "keystore_dir";
 	protected static final String PROXY_HOST = "proxy_host";
 	protected static final String PROXY_PORT = "proxy_port";
 	protected static final String RIFFILE = "riffile";
-	protected static final String DELIMITER = "delimiter";
+	protected static final String RIFTYPE = "riftype";
 	protected static final String HOSTNAME_UNKNOWN = "unknown-host";
 
+	/**
+	 * Abstract method that should be implemented by derived classes to implement
+	 * test functionality specific to the desired test case.
+	 */
 	protected abstract void executeTest();
 
 	protected String hostName;
 	protected IGenericClient client;
-	// protected RifParser parser = null;
+	protected RifParser parser = null;
 
 	/**
 	 * @see org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient#getDefaultParameters()
@@ -45,7 +55,7 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 		defaultParameters.addArgument(PROXY_HOST, "null");
 		defaultParameters.addArgument(PROXY_PORT, "0");
 		defaultParameters.addArgument(RIFFILE, "beneficiary_test.rif");
-		defaultParameters.addArgument(DELIMITER, "|");
+		defaultParameters.addArgument(RIFTYPE, "BENEFICIARY");
 		return defaultParameters;
 	}
 
@@ -63,12 +73,12 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 			this.client = FhirClient.create(context.getParameter(PARAM_SERVER), context.getParameter(KEYSTORE_DIR),
 					context.getParameter(PROXY_HOST), Integer.parseInt(context.getParameter(PROXY_PORT)));
 		}
-		// this.parser = new RifParser(context.getParameter(RIFFILE),
-		// context.getParameter(DELIMITER));
-		// System.out.println("Thread loops = " + context.getParameter(LOOPS));
-
-		// Find the IDs that can be queried in each sample run.
-		// this.patientIds = findPatientIds();
+		
+//		try {
+//			this.parser = new RifParser(context.getParameter(RIFFILE), RifFileType.valueOf(context.getParameter(RIFTYPE).toUpperCase()));
+//		} catch (URISyntaxException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	/**

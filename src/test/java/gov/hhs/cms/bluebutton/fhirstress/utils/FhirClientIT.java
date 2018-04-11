@@ -10,14 +10,14 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 /**
  * Unit test for simple FhirClient.
  */
-public class FhirClientTest extends TestCase {
+public class FhirClientIT extends TestCase {
 	/**
 	 * Create the test case
 	 *
 	 * @param testName
 	 *            name of the test case
 	 */
-	public FhirClientTest(String testName) {
+	public FhirClientIT(String testName) {
 		super(testName);
 	}
 
@@ -25,7 +25,7 @@ public class FhirClientTest extends TestCase {
 	 * @return the suite of tests being tested
 	 */
 	public static Test suite() {
-		return new TestSuite(FhirClientTest.class);
+		return new TestSuite(FhirClientIT.class);
 	}
 
 	/**

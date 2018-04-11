@@ -1,5 +1,9 @@
 package gov.hhs.cms.bluebutton.fhirstress.utils;
 
+/**
+ * A utility method that helps manage an index into a RIF file containting
+ *
+ */
 public class BenefitIdMgr {
 	protected int currIndex;
 	protected int minIndex;
@@ -35,7 +39,7 @@ public class BenefitIdMgr {
 	}
 
 	/**
-	 * Public Methods
+	 * Private Methods
 	 */
 
 	/**
@@ -44,7 +48,7 @@ public class BenefitIdMgr {
 	 * @param index
 	 *            a {@link int} value to set the next index to.
 	 */
-	public void setCurrIndex(int index) {
+	private synchronized void setCurrIndex(int index) {
 		if (index < minIndex) {
 			index = minIndex;
 		} else if (index > maxIndex) {
@@ -54,26 +58,19 @@ public class BenefitIdMgr {
 	}
 
 	/**
-	 * Retrieves the next benefit id available by concating the prefix to the next
+	 * Public Methods
+	 */
+	
+	/**
+	 * Retrieves the next benefit id available by concatinating the prefix to the next
 	 * index value and increments the current index
 	 *
 	 * @return a {@link String} containing the next benefit ID
 	 */
-	public String nextId() {
+	public synchronized String nextId() {
 		String nextId = String.format(prefix + format, currIndex);
 		incCurrIndex();
 		return nextId;
-	}
-
-	/**
-	 * Retrieves the previous benefit id available by concating the prefix to the
-	 * previous index value and decrements the current index
-	 *
-	 * @return a {@link String} containing the previous benefit ID
-	 */
-	public String prevId() {
-		decCurrIndex();
-		return String.format(prefix + format, currIndex);
 	}
 
 	/**
@@ -83,19 +80,9 @@ public class BenefitIdMgr {
 	/**
 	 * Increments the current index and applies boundary conditions to the value
 	 */
-	private void incCurrIndex() {
+	private synchronized void incCurrIndex() {
 		if (++currIndex > maxIndex) {
 			currIndex = minIndex;
 		}
 	}
-
-	/**
-	 * Decrements the current index and applies boundary conditions to the value
-	 */
-	private void decCurrIndex() {
-		if (--currIndex < minIndex) {
-			currIndex = maxIndex;
-		}
-	}
-
 };

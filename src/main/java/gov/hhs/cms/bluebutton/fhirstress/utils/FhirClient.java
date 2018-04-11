@@ -39,6 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.log4j.BasicConfigurator;
 
+/**
+ * A class that simplifies connecting to FHIR backend server(s) that require a secure connection(X509).
+ */
 public final class FhirClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirClient.class);
 

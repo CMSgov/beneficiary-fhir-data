@@ -117,6 +117,22 @@
 			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<!-- Provides sample data used in tests. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<!-- Used for parsing JSON resources. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -206,6 +222,22 @@
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- This is to run the integration tests -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>

@@ -32,9 +32,9 @@
             <stringProp name="Argument.value">${__P(riffile,beneficiary_test.rif)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="delimiter" elementType="Argument">
-            <stringProp name="Argument.name">delimiter</stringProp>
-            <stringProp name="Argument.value">${__P(delimiter,|)}</stringProp>
+          <elementProp name="riftype" elementType="Argument">
+            <stringProp name="Argument.name">riftype</stringProp>
+            <stringProp name="Argument.value">${__P(riftype,BENEFICIARY)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="thread_count" elementType="Argument">
@@ -105,9 +105,9 @@
                 <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
-              <elementProp name="delimiter" elementType="Argument">
-                <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${delimiter}</stringProp>
+              <elementProp name="riftype" elementType="Argument">
+                <stringProp name="Argument.name">riftype</stringProp>
+                <stringProp name="Argument.value">${riftype}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -143,9 +143,9 @@
                 <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
-              <elementProp name="delimiter" elementType="Argument">
-                <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${delimiter}</stringProp>
+              <elementProp name="riftype" elementType="Argument">
+                <stringProp name="Argument.name">riftype</stringProp>
+                <stringProp name="Argument.value">${riftype}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -181,9 +181,9 @@
                 <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
-              <elementProp name="delimiter" elementType="Argument">
-                <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${delimiter}</stringProp>
+              <elementProp name="riftype" elementType="Argument">
+                <stringProp name="Argument.name">riftype</stringProp>
+                <stringProp name="Argument.value">${riftype}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
@@ -219,9 +219,9 @@
                 <stringProp name="Argument.value">${riffile}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
-              <elementProp name="delimiter" elementType="Argument">
-                <stringProp name="Argument.name">delimiter</stringProp>
-                <stringProp name="Argument.value">${delimiter}</stringProp>
+              <elementProp name="riftype" elementType="Argument">
+                <stringProp name="Argument.name">riftype</stringProp>
+                <stringProp name="Argument.value">${riftype}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
