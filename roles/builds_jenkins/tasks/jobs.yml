@@ -32,7 +32,7 @@
     dest: /var/lib/jenkins/.ssh/config
     owner: jenkins
     group: jenkins
-    mode: u=rw,g=rw,o=r
+    mode: u=rw,g=r,o=r
   become: true
 
 - name: Configure Jobs
