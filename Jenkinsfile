@@ -35,7 +35,7 @@ node {
 
 		// Ensure the Ansible image is ready to go.
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-			def vaultPasswordArg = "--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+			def vaultPasswordArg = "--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro".toString()
 			ansibleRunner.inside(
 					'--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro',
 					vaultPasswordArg
@@ -49,7 +49,7 @@ node {
 
 	stage('Deploy to Test') {
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-			def vaultPasswordArg = "--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+			def vaultPasswordArg = "--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro".toString()
 			ansibleRunner.inside(
 					'--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro',
 					vaultPasswordArg
