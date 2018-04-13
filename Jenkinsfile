@@ -37,19 +37,18 @@ node {
 		ansibleRunner.inside('--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro') {
 			sh 'pwd && ls -la'
 			sh 'ansible --version'
+			sh 'ansible-playbook backend.yml --inventory=hosts_test --syntax-check'
 		}
 	}
 
-//	stage('Prepare Tooling') {
-//		withPythonEnv('/usr/bin/python2.7') {
-//			pysh "pip install --upgrade setuptools"
-//			pysh "pip install --requirement requirements.txt"
-//		}
-//	}
-//
-//	stage('Check Ansible Syntax') {
-//		withPythonEnv('/usr/bin/python2.7') {
-//			pysh "ansible-playbook backend.yml --inventory=hosts_development --syntax-check"
-//		}
-//	}
+	stage('Deploy to Test') {
+		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
+		ansibleRunner.inside(
+				'--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro',
+				"--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+		) {
+			sh 'pwd && ls -la'
+			sh 'ansible-playbook backend.yml --inventory=hosts_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+		} }
+	}
 }
