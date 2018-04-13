@@ -42,6 +42,7 @@ node {
 			def dockerArgs = '--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
 			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 			ansibleRunner.inside(dockerArgs) {
+				sh 'whoami'
 				sh 'pwd && ls -la'
 				sh 'ansible --version'
 				sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
