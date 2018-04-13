@@ -55,6 +55,7 @@ node {
 
 	stage('Deploy to Test') {
 		sh 'echo Deploying to test...'
+		def ansibleRunner = docker.image('ansible_runner')
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
 			sh 'echo Using Ansible Vault credentials...'
 			def dockerArgs = '-u root:root'
