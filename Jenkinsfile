@@ -56,9 +56,11 @@ node {
 	stage('Deploy to Test') {
 		sh 'echo Deploying to test...'
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
+			sh 'echo "Using Ansible Vault credentials...'
 			def dockerArgs = '-u root:root'
 			dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
 			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+			sh 'echo About to run Docker...'
 			ansibleRunner.inside(dockerArgs) {
 				sh 'ln -s /etc/ansible/roles roles_external'
 				sh 'pwd && ls -la'
