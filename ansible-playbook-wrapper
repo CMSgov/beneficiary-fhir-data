@@ -6,6 +6,7 @@
 ##
 
 set -e
+set -x
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -14,6 +15,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 logsDirectory="${scriptDirectory}/logs"
 if [ ! -d "${logsDirectory}" ]; then
   mkdir "${logsDirectory}"
+  echo "Created Ansible logs directory: '${logsDirectory}'"
 fi
 
 # The `ansible.cfg` file tells Ansible to log to this file automatically.
