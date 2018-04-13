@@ -72,13 +72,17 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		def dockerArgs = '-u root:root'
 
 		// Ensure that Ansible uses Jenkins' SSH config and keys.
-		dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
+		dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh_jenkins:ro'
 
 		// Bind mount the `vault.password` file where it's needed.
 		dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 
 		// Prepend the specified closure with some needed in-container setup.
 		def bodyWithSetup = {
+			// Copy the SSH config and keys and fix permissions.
+			sh 'cp -r /root/.ssh_jenkins /root/.ssh'
+			sh 'chmod -R u=rw,g=,o= /root/.ssh'
+
 			// Link the project's Ansible roles to where they're expected.
 			sh 'ln -s /etc/ansible/roles roles_external'
 			body.call()
