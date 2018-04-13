@@ -39,10 +39,12 @@ node {
 
 		// Ensure the Ansible image is ready to go.
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-			def dockerArgs = '--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
+			def dockerArgs = '-u root:root'
+			dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
 			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 			ansibleRunner.inside(dockerArgs) {
-				sh 'whoami'
+				sh 'cat /etc/passwd'
+				sh 'echo $USER && echo $UID && whoami'
 				sh 'pwd && ls -la'
 				sh 'ansible --version'
 				sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
@@ -52,7 +54,8 @@ node {
 
 	stage('Deploy to Test') {
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-			def dockerArgs = '--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
+			def dockerArgs = '-u root:root'
+			dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
 			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 			ansibleRunner.inside(dockerArgs) {
 				sh 'pwd && ls -la'
