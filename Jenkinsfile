@@ -25,7 +25,7 @@ node {
 			// Just some general "what does the container look like" debug
 			// logging. Useful for if/when things go sideways.
 			sh 'cat /etc/passwd'
-			sh 'echo $USER && echo $UID && whoami'
+			sh 'echo $USER && echo $UID && echo $HOME && whoami'
 			sh 'pwd && ls -la'
 			sh 'ansible --version'
 
