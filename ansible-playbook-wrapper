@@ -10,6 +10,11 @@ set -e
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Make sure that the logs directory exists.
+if [ ! -d './logs' ]; then
+  mkdir logs
+fi
+
 # The `ansible.cfg` file tells Ansible to log to this file automatically.
 originalLog="./logs/ansible.log"
 
