@@ -34,11 +34,15 @@ node {
 		def ansibleRunner = docker.image('ansible_runner')
 
 		// Ensure the Ansible image is ready to go.
-		ansibleRunner.inside('--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro') {
+		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
+		ansibleRunner.inside(
+				'--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro',
+				"--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+		) {
 			sh 'pwd && ls -la'
 			sh 'ansible --version'
-			sh 'ansible-playbook backend.yml --inventory=hosts_test --syntax-check'
-		}
+			sh 'ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
+		} }
 	}
 
 	stage('Deploy to Test') {
@@ -48,7 +52,7 @@ node {
 				"--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 		) {
 			sh 'pwd && ls -la'
-			sh 'ansible-playbook backend.yml --inventory=hosts_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+			sh 'ansible-playbook-wrapper backend.yml --inventory=hosts_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 		} }
 	}
 }
