@@ -22,19 +22,21 @@ node {
 
 		// Ensure the Ansible image is ready to go.
 		insideAnsibleContainer {
-			sh 'ln -s /etc/ansible/roles roles_external'
+			// Just some general "what does the container look like" debug
+			// logging. Useful for if/when things go sideways.
 			sh 'cat /etc/passwd'
 			sh 'echo $USER && echo $UID && whoami'
 			sh 'pwd && ls -la'
 			sh 'ansible --version'
+
+			// Verify the play's syntax before we run it.
 			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
 		}
 	}
 
 	stage('Deploy to Test') {
 		insideAnsibleContainer {
-			sh 'ln -s /etc/ansible/roles roles_external'
-			sh 'pwd && ls -la'
+			// Run the play against the test environment.
 			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 		}
 	}
@@ -77,6 +79,10 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 
 		// Now start the container with the above args and run the specified
 		// closure in it, returning the result from that.
-		return ansibleRunner.inside(dockerArgs, body)
+		// (The `<<` operator combines the two closures, running `body` last.)
+		return ansibleRunner.inside(dockerArgs) { body <<
+			// Link the project's Ansible roles to where they're expected.
+			sh 'ln -s /etc/ansible/roles roles_external'
+		}
 	}
 }
