@@ -28,8 +28,8 @@ WORKDIR /ansible_setup
 # Install Ansible and other Python libs.
 RUN pip install --requirement requirements.txt
 
-# Install Ansible roles.
-RUN ansible-galaxy install --role-file=install_roles.yml
+# Install Ansible roles to system location.
+RUN ansible-galaxy install --roles-path=/etc/ansible/roles --role-file=install_roles.yml
 
 # Cleanup Ansible setup files.
 RUN rm -rf /ansible_setup

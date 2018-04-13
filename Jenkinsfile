@@ -43,6 +43,7 @@ node {
 			dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
 			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 			ansibleRunner.inside(dockerArgs) {
+				sh 'mkdir logs && ln -s /etc/ansible/roles roles_external'
 				sh 'cat /etc/passwd'
 				sh 'echo $USER && echo $UID && whoami'
 				sh 'pwd && ls -la'
@@ -58,6 +59,7 @@ node {
 			dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
 			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 			ansibleRunner.inside(dockerArgs) {
+				sh 'mkdir logs && ln -s /etc/ansible/roles roles_external'
 				sh 'pwd && ls -la'
 				sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 			}
