@@ -1,5 +1,40 @@
 ---
 
+- name: Generate SSH Key for Jenkins User
+  user:
+    name: jenkins
+    generate_ssh_key: true
+    ssh_key_comment: 'Jenkins/deployment user for BBAPI'
+  become: true
+
+# Grab the key now so it can be authorized on other hosts, later.
+- name: Grab Jenkins SSH Public Key as Variable
+  slurp:
+    src: /var/lib/jenkins/.ssh/id_rsa.pub
+  become: true
+  register: slurp_jenkins_ssh_pub
+
+- name: Search EC2 for BBAPI Systems
+  ec2_remote_facts:
+    region: "{{ aws_region }}"
+    filters:
+      'tag:Project': 'BBAPI'
+  delegate_to: localhost
+  environment:
+    no_proxy: ''
+    http_proxy: ''
+    https_proxy: ''
+  register: ec2_search_bbapi
+
+- name: Create SSH Config for Ansible Jobs
+  template:
+    src: ssh_config.j2
+    dest: /var/lib/jenkins/.ssh/config
+    owner: jenkins
+    group: jenkins
+    mode: u=rw,g=rw,o=r
+  become: true
+
 - name: Configure Jobs
   jenkins_script:
     url: "{{ jenkins_url_local }}"

@@ -11,7 +11,7 @@ import hudson.model.*;
 //
 
 //
-// Check/Update the Project
+// Checks/updates the specified project.
 //
 def createOrUpdateProject = { projectName ->
   // Hardcode these values for all the Blue Button projects.
@@ -83,10 +83,55 @@ def createOrUpdateProject = { projectName ->
   }
 }
 
+//
+// Creates/updates the specified file credentials.
+//
+def createOrUpdateFileCredentials = { newSecret ->
+  domain = com.cloudbees.plugins.credentials.domains.Domain.global()
+  credsStore = Jenkins.instance.getExtensionList("com.cloudbees.plugins.credentials.SystemCredentialsProvider")[0].getStore()
+
+  secrets = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
+    org.jenkinsci.plugins.plaincredentials.FileCredentials.class,
+    Jenkins.instance
+  )
+
+  id = newSecret.id
+  matchingSecret = secrets.find { secret -> secret.id == id }
+  if (matchingSecret) {
+    println "Secret found: ${matchingSecret.id}"
+
+    if (newSecret.scope != matchingSecret.scope ||
+        newSecret.description != matchingSecret.description ||
+        newSecret.fileName != matchingSecret.fileName ||
+        newSecret.secretBytes != matchingSecret.secretBytes) {
+      updateResult = credsStore.updateCredentials(domain, matchingSecret, newSecret)
+      if (updateResult) {
+        println "Changed: secret updated: ${id}"
+      } else {
+        println "Secret failed to update: ${id}"
+      }
+    }
+  } else {
+    println "Secret not found: ${id}"
+    credsStore.addCredentials(domain, newSecret)
+    println "Changed: secret created: ${id}"
+  }
+}
+
 
 //
 // Create/Update All of the Projects
 //
+
+createOrUpdateFileCredentials(
+  new org.jenkinsci.plugins.plaincredentials.impl.FileCredentialsImpl(
+    com.cloudbees.plugins.credentials.CredentialsScope.GLOBAL,
+    'bluebutton-ansible-playbooks-data-ansible-vault-password',
+    'bluebutton-ansible-playbooks-data-ansible-vault-password',
+    'vault.password',
+    com.cloudbees.plugins.credentials.SecretBytes.fromString('{{ vault_jenkins_bluebutton_ansible_playbooks_data_ansible_vault_password | b64encode }}')
+  )
+)
 
 projectNames = [
   'bluebutton-parent-pom',
