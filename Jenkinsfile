@@ -48,7 +48,7 @@ node {
 				sh 'echo $USER && echo $UID && whoami'
 				sh 'pwd && ls -la'
 				sh 'ansible --version'
-				sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
+				sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check || echo "Syntax check failed."'
 			}
 		}
 	}
