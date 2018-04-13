@@ -54,6 +54,7 @@ node {
 	}
 
 	stage('Deploy to Test') {
+		sh 'echo Deploying to test...'
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
 			def dockerArgs = '-u root:root'
 			dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
