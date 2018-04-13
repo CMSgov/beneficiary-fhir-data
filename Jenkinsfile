@@ -77,12 +77,15 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		// Bind mount the `vault.password` file where it's needed.
 		dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 
-		// Now start the container with the above args and run the specified
-		// closure in it, returning the result from that.
-		// (The `<<` operator combines the two closures, running `body` last.)
-		return ansibleRunner.inside(dockerArgs) { body <<
+		// Prepend the specified closure with some needed in-container setup.
+		def bodyWithSetup = body << {
 			// Link the project's Ansible roles to where they're expected.
 			sh 'ln -s /etc/ansible/roles roles_external'
 		}
+
+		// Now start the container with the above args and run the specified
+		// closure in it, returning the result from that.
+		// (The `<<` operator combines the two closures, running `body` last.)
+		return ansibleRunner.inside(dockerArgs, bodyWithSetup)
 	}
 }
