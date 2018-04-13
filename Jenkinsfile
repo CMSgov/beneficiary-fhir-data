@@ -48,20 +48,17 @@ node {
 				sh 'echo $USER && echo $UID && whoami'
 				sh 'pwd && ls -la'
 				sh 'ansible --version'
-				sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check || echo "Syntax check failed."'
+				sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
 			}
 		}
 	}
 
 	stage('Deploy to Test') {
-		sh 'echo Deploying to test...'
 		def ansibleRunner = docker.image('ansible_runner')
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-			sh 'echo Using Ansible Vault credentials...'
 			def dockerArgs = '-u root:root'
 			dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
 			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
-			sh 'echo About to run Docker...'
 			ansibleRunner.inside(dockerArgs) {
 				sh 'ln -s /etc/ansible/roles roles_external'
 				sh 'pwd && ls -la'
