@@ -6,7 +6,6 @@
 ##
 
 set -e
-set -x
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
