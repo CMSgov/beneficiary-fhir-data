@@ -27,7 +27,6 @@ node {
 			sh 'cat /etc/passwd'
 			sh 'echo $USER && echo $UID && echo $HOME && whoami'
 			sh 'pwd && ls -la'
-			sh 'ls -la $HOME/.ssh'
 			sh 'ansible --version'
 
 			// Verify the play's syntax before we run it.
@@ -81,7 +80,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		// Prepend the specified closure with some needed in-container setup.
 		def bodyWithSetup = {
 			// Copy the SSH config and keys and fix permissions.
-			sh 'cp -r /root/.ssh_jenkins /root/.ssh'
+			sh 'cp --recursive --no-target-directory /root/.ssh_jenkins /root/.ssh'
 			sh 'chmod -R u=rw,g=,o= /root/.ssh'
 
 			// Link the project's Ansible roles to where they're expected.
