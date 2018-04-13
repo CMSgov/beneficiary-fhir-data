@@ -35,7 +35,7 @@ node {
 
 		// Ensure the Ansible image is ready to go.
 		ansibleRunner.inside('--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro') {
-			sh 'echo "Hello World!"'
+			sh 'pwd && ls -la'
 			sh 'ansible --version'
 		}
 	}
