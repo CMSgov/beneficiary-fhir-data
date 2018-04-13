@@ -24,6 +24,10 @@ node {
 		 * Prepare the Ansible execution environment. We use Docker for this, as the
 		 * Jenkins system is in FIPS mode, which prevents virtualenv, pip, and
 		 * Ansible from working (different symptoms, but generally they need MD5).
+		 *
+		 * Jenkins Docker references:
+		 * * <https://builds.ls.r53.cmsfhir.systems/jenkins/job/bluebutton-ansible-playbooks-data/pipeline-syntax/globals#docker>
+		 * * <https://github.com/jenkinsci/docker-workflow-plugin/blob/master/src/main/resources/org/jenkinsci/plugins/docker/workflow/Docker.groovy>
 		 */
 
 		// First, prepare the Ansible Docker image.
@@ -35,11 +39,9 @@ node {
 
 		// Ensure the Ansible image is ready to go.
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-			def vaultPasswordArg = "--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro".toString()
-			ansibleRunner.inside(
-					'--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro',
-					vaultPasswordArg
-			) {
+			def dockerArgs = '--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
+			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+			ansibleRunner.inside(dockerArgs) {
 				sh 'pwd && ls -la'
 				sh 'ansible --version'
 				sh 'ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
@@ -49,11 +51,9 @@ node {
 
 	stage('Deploy to Test') {
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-			def vaultPasswordArg = "--volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro".toString()
-			ansibleRunner.inside(
-					'--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro',
-					vaultPasswordArg
-			) {
+			def dockerArgs = '--volume=/var/lib/jenkins/.ssh:/root/.ssh:ro'
+			dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+			ansibleRunner.inside(dockerArgs) {
 				sh 'pwd && ls -la'
 				sh 'ansible-playbook-wrapper backend.yml --inventory=hosts_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 			}
