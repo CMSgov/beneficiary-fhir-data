@@ -11,12 +11,13 @@ set -e
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Make sure that the logs directory exists.
-if [ ! -d './logs' ]; then
-  mkdir logs
+logsDirectory="${scriptDirectory}/logs"
+if [ ! -d "${logsDirectory}" ]; then
+  mkdir "${logsDirectory}"
 fi
 
 # The `ansible.cfg` file tells Ansible to log to this file automatically.
-originalLog="./logs/ansible.log"
+originalLog="${logsDirectory}/ansible.log"
 
 # Create the file if it doesn't exist yet.
 if [ ! -f "${originalLog}" ]; then
@@ -29,7 +30,7 @@ timestamp=$(date --iso-8601=seconds)
 # Call this function to rename the `ansible.log` file to include a timesatamp.
 timestampLog() {
   # Timestamp the log file.
-  timestampedLog="./logs/ansible-production-${timestamp}.log"
+  timestampedLog="${logsDirectory}/ansible-production-${timestamp}.log"
   mv "${originalLog}" "${timestampedLog}"
   echo "Log written to: ${timestampedLog}"
 }
