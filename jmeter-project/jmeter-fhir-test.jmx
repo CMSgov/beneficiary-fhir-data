@@ -42,6 +42,11 @@
             <stringProp name="Argument.value">${__P(thread_count,10)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="continue_forever" elementType="Argument">
+            <stringProp name="Argument.name">continue_forever</stringProp>
+            <stringProp name="Argument.value">${__P(continue_forever,false)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
           <elementProp name="thread_loops" elementType="Argument">
             <stringProp name="Argument.name">thread_loops</stringProp>
             <stringProp name="Argument.value">${__P(thread_loops,1000)}</stringProp>
@@ -65,7 +70,7 @@
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-          <stringProp name="LoopController.continue_forever">false</stringProp>
+          <stringProp name="LoopController.continue_forever">${continue_forever}</stringProp>
           <stringProp name="LoopController.loops">${thread_loops}</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">${thread_count}</stringProp>

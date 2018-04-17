@@ -2,7 +2,7 @@ package gov.hhs.cms.bluebutton.fhirstress.backend;
 
 import java.io.StringWriter;
 import java.net.Inet4Address;
-import java.net.URISyntaxException;
+//import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 

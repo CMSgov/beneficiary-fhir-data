@@ -54,10 +54,6 @@
 		</repository>
 	</repositories>
 
-	<properties>
-		<hapi-fhir.version>2.4.0-PR660</hapi-fhir.version>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

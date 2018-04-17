@@ -170,6 +170,7 @@
         -Jfhir_server={{ fhir_server }} 
         -Jthread_count={{ thread_count }} 
         -Jthread_loops={{ thread_loops }} 
+        -Gcontinue_forever={{ continue_forever | bool | lower }} 
         -Gscheduler={{ scheduler | bool | lower }} 
         -Gduration={{ duration }}"
       #command: "/opt/fhir-stress/apache-jmeter-2.13/bin/jmeter --nongui --testfile /opt/fhir-stress/jmeter-fhir-test.jmx --logfile /opt/fhir-stress/log.jtl --jmeterlogfile /opt/fhir-stress/log-jmeter.txt --remotestart {{ hostvars | get_members(groups, 'servers') | map(attribute='ansible_fqdn') | list | join(',') }} --jmeterproperty fhir_server={{ fhir_server }}"

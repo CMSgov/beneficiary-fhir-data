@@ -23,5 +23,5 @@ command line to execute the tests:
 
 This will execute the ansible test script and prompt for an ssh password to the
 servers whose configurations are protected in the ansible vault file found in
-group_vars.
+group_vars.  NOTE: Use ssh-agent to cache and better automate the login process.
 
