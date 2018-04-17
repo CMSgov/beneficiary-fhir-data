@@ -29,3 +29,11 @@
   with_items:
     - "{{ remote_jmeter_dir }}/bin/jmeter-server"
     - "{{ remote_jmeter_dir }}/bin/jmeter"
+
+- name: Disable SSL for RMI(needed for JMeter 4.0 or later)
+  copy: 
+    src: "{{ jmeter_properties_file }}"
+    dest: "{{ remote_jmeter_dir }}/bin"
+    owner: root
+    group: root
+    mode: 0644
