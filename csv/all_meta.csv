@@ -645,3 +645,4 @@ thrpy_cap_ind_cd5,THRPY_CAP_IND_CD5,Therapy Cap Indicator 5 Code,THRPY_CAP_IND_C
 tier_id,TIER_ID,Medicare Part D Formulary Tier Number,TIER_ID,TIER_ID,CHAR,2,PDE and Plan Characteristics (derived),Null,
 tot_rx_cst_amt,TOT_RX_CST_AMT,Total drug cost (Part D),TOTALCST,TOT_RX_CST_AMT,NUM,10,PDE,,
 v_dod_sw,V_DOD_SW,Valid Date of Death Switch,V_DOD_SW,BENE_VALID_DEATH_DT_SW,CHAR,1,CMS Enrollment Database (EDB),,
+
