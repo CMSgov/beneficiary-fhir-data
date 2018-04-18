@@ -1,0 +1,39 @@
+---
+
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    # Needed to supply `keytool` and also to run the app server.
+    - java-1.8.0-openjdk-devel
+  become: true
+
+- name: Create Directory Tree for '{{ remote_test_dir }}' 
+  file: 
+    path: "{{ remote_test_dir }}" 
+    state: directory
+
+- name: Download and Unpack JMeter
+  unarchive: 
+    src: "http://archive.apache.org/dist/jmeter/binaries/apache-jmeter-{{ jmeter_version }}.tgz"
+    dest: "{{ remote_test_dir }}"
+    copy: no
+
+- name: Fix JMeter Executable Permissions
+  file: 
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0774
+  with_items:
+    - "{{ remote_jmeter_dir }}/bin/jmeter-server"
+    - "{{ remote_jmeter_dir }}/bin/jmeter"
+
+- name: Disable SSL for RMI(needed for JMeter 4.0 or later)
+  copy: 
+    src: "{{ jmeter_properties_file }}"
+    dest: "{{ remote_jmeter_dir }}/bin"
+    owner: root
+    group: root
+    mode: 0644

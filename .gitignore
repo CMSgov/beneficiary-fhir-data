@@ -5,3 +5,5 @@
 # Ignore Maven output folders
 /target*/
 
+# Ignore .DS_Store files
+.DS_Store

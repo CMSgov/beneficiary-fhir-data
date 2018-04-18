@@ -3,3 +3,10 @@ venv/
 
 # Ignore the collected stress tests results.
 results/
+jmeter.log
+
+# Ignore vault password file
+vault.password
+
+# Ignore any retry files created by ansible
+*.retry

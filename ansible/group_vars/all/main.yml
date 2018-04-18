@@ -2,8 +2,53 @@
 #
 # Variables here are applicable to all host groups.
 #
-
 region: us-east-1
 
+proxy_env: 
+  http_proxy: "{{ vault_http_proxy }}" 
+  https_proxy: "{{ vault_https_proxy }}"
+  
+# JMeter configuration
+# location of local uber jar containing jmeter test plan
+test_lib: "../target/fhir-stress-test-0.1.0-SNAPSHOT-uber.jar"
+# location of local jmeter test script
+test_plan: "../jmeter-project/jmeter-fhir-test.jmx"
+# location of local keystore used in test
+test_keystore: "../dev/ssl-stores/client.keystore"
+# remote directory to store jmeter test
+remote_test_dir: "/opt/fhir_stress"
+# location of local jmeter properties file overrides
+jmeter_properties_file: "../jmeter-project/jmeter.properties"
+# jmeter version
+jmeter_version: 4.0
+# remote location of apache jmeter installation
+remote_jmeter_dir: "{{ remote_test_dir }}/apache-jmeter-{{ jmeter_version }}"
+# remote jmeter server IP address
+jmeter_server_ip: "{{ vault_jmeter_server_ip }}"
+# remote jmeter server port 
+jmeter_server_port: "{{ vault_jmeter_server_port }}"
+# jmeter server remote method invocation(RMI) port, used for jmeter server communication
+jmeter_server_rmi_local_port: "{{ vault_jmeter_server_rmi_local_port }}" 
+# jmeter client remote method invocation(RMI) port, used for jmeter client communication
+jmeter_client_rmi_local_port: "{{ vault_jmeter_client_rmi_local_port }}"
+# URI of FHIR server under test
+fhir_server: "https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3"
+
+# NOTE: As configured, a sampler thread will run until the time duration has elapsed, the thread_loop count is ignored because continue_forever is set to true.
+# Number of threads within the JMeter Thread Group (https://jmeter.apache.org/api/org/apache/jmeter/threads/AbstractThreadGroup.html#NUM_THREADS)
+thread_count: 10
+# When true the sampler threads run forever, when false the thread_loops variable is enabled for each sampler thread
+continue_forever: true
+# Number of times to run each thread.  Only enabled when continue_forever is set to false.
+thread_loops: 1000
+# Enables the duration field for the sampler threads.  
+scheduler: true
+# The duration in seconds for a sampler thread to run.
+duration: 300
+# Poll interval(in seconds) to check for test completion.  Used because some servers will disconnect the ssh connection prior to test completion causing the ansible script to fail,
+poll: 30
+
+
+# TODO use RHEL here!
 # Ubuntu 14.04 (Trusty)
-ami_id_ubuntu: ami-d05e75b8
+#ami_id_ubuntu: ami-d05e75b8

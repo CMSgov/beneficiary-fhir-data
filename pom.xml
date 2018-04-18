@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -9,7 +10,7 @@
 	<parent>
 		<groupId>gov.hhs.cms.bluebutton</groupId>
 		<artifactId>bluebutton-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>gov.hhs.cms.bluebutton.fhirstress</groupId>
@@ -52,10 +53,6 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
-	<properties>
-		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
-	</properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -101,35 +98,46 @@
 					<groupId>commons-pool2</groupId>
 					<artifactId>commons-pool2</artifactId>
 				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<!-- Provides the FHIR client being used to create/push resources to the 
-				server. -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-base</artifactId>
-			<version>${hapi-fhir.version}</version>
-			<exclusions>
+				<!-- Exclude SLF4J bindings that are causing conflicts for the logger -->
 				<exclusion>
-					<!-- This has no business being included by a library. -->
-					<artifactId>jcl-over-slf4j</artifactId>
 					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<!-- At least one "structures" JAR must also be included -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
 
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+			<artifactId>bluebutton-server-app</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>classes</classifier>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<!-- Provides sample data used in tests. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<!-- Used for parsing JSON resources. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>4.0</version>
 		</dependency>
 	</dependencies>
 
@@ -210,6 +218,22 @@
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- This is to run the integration tests -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>
