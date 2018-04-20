@@ -18,14 +18,14 @@ from subprocess import call
 from datetime import datetime
 from collections import OrderedDict
 
-def make_meta():
-    html_page = urlopen("http://localhost:4000/resources/variables")
+def make_meta(url="http://localhost:4000/resources/variables"):
+    html_page = urlopen(url)
     soup = BeautifulSoup(html_page, "html.parser")
     all_meta = []
     for link in soup.findAll('a'):
           #print(link.get('href',''), link.string)
-          url = "%s/%s" % ("http://localhost:4000/resources/variables", link.get('href'))
-          print(url)      
+          url = "%s/%s" % (url, link.get('href'))
+          #print(url)      
           try:
               page = urlopen(url)
               bisque  = BeautifulSoup(page, "html.parser")
@@ -115,4 +115,5 @@ if __name__ == "__main__":
 
     # Get the file from the command line
     make_meta()
+    make_meta(url="http://localhost:4000/resources/codesystem")
 
