@@ -37,7 +37,7 @@ node {
 	stage('Deploy to Test') {
 		insideAnsibleContainer {
 			// Run the play against the test environment.
-			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+			sh './ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds:env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 		}
 	}
 }
