@@ -22,8 +22,8 @@
       with_items:
         - "{{ vault_ec2_instance.test.data_pipeline.ip }}"
         - "{{ vault_ec2_instance.test.data_server.ip }}"
-        - "{{ vault_ec2_instance.prod.az_a.data_pipeline.ip }}"
-        - "{{ vault_ec2_instance.prod.az_a.data_server.ip }}"
+        - "{{ vault_ec2_instance.production.az_a.data_pipeline.ip }}"
+        - "{{ vault_ec2_instance.production.az_a.data_server.ip }}"
       register: cmd_ssh_keyscan
       changed_when: false
 
