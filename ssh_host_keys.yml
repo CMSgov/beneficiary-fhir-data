@@ -14,16 +14,16 @@
         owner: root
         group: root
         mode: u=rw,g=r,o=r
-        line: "{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
+        line: "{{ vault_ec2_instance.lss.builds.dns_private }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
       become: true
 
     - name: Scan Other Host Keys
       command: "/usr/bin/ssh-keyscan -t ecdsa {{ item }}"
       with_items:
-        - "{{ vault_ec2_instance.test.data_pipeline.ip }}"
-        - "{{ vault_ec2_instance.test.data_server.ip }}"
-        - "{{ vault_ec2_instance.production.az_a.data_pipeline.ip }}"
-        - "{{ vault_ec2_instance.production.az_a.data_server.ip }}"
+        - "{{ vault_ec2_instance.test.data_pipeline.dns_private }}"
+        - "{{ vault_ec2_instance.test.data_server.dns_private }}"
+        - "{{ vault_ec2_instance.production.az_a.data_pipeline.dns_private }}"
+        - "{{ vault_ec2_instance.production.az_a.data_server.dns_private }}"
       register: cmd_ssh_keyscan
       changed_when: false
 
