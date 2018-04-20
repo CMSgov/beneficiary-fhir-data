@@ -18,7 +18,7 @@
       become: true
 
     - name: Scan Other Host Keys
-      command: "/usr/bin/ssh-keyscan -t ecdsa -H {{ item }}"
+      command: "/usr/bin/ssh-keyscan -t ecdsa {{ item }}"
       with_items:
         - "{{ vault_ec2_instance.test.data_pipeline.ip }}"
         - "{{ vault_ec2_instance.test.data_server.ip }}"
