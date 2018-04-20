@@ -30,6 +30,6 @@
     - name: Add Other Host Keys
       lineinfile:
         path: /etc/ssh/ssh_known_hosts
-        line: "{{ item.stdout.lines[0] }}"
+        line: "{{ item.stdout_lines[0] }}"
       become: true
       with_items: "{{ cmd_ssh_keyscan.results }}"
