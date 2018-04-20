@@ -1,0 +1,9 @@
+value,description,URL
+CARRIER,Carrier,https://www.medicare.gov/what-medicare-covers/part-b/what-medicare-part-b-covers.html
+DME,Durrable Medical Equipment,https://www.medicare.gov/what-medicare-covers/part-b/durable-medical-equipment.html
+HHA, Home Health Services,https://www.medicare.gov/coverage/home-health-services.html
+HOSPICE,Hospice,https://www.medicare.gov/what-medicare-covers/part-a/part-a-coverage-hospice.html
+INPATIENT,Inpatient (Part A),https://www.medicare.gov/coverage/hospital-care-inpatient.html
+OUTPATIENT,Outpatient (Part B),https://www.medicare.gov/what-medicare-covers/part-b/what-medicare-part-b-covers.html
+PDE,Pharmacy,https://www.medicare.gov/part-d/coverage/part-d-coverage.html
+
