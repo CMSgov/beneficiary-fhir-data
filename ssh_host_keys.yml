@@ -8,14 +8,11 @@
   tasks:
 
     - name: Add Jenkins SSH Host Key
-      lineinfile:
+      known_hosts:
         path: /etc/ssh/ssh_known_hosts
-        create: true
-        regexp: "^{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}$"
-        line: "{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
-        owner: root
-        group: root
-        mode: u=rw,g=r,o=r
+        name: "{{ vault_ec2_instance.lss.builds.ip }}"
+        hash_host: true
+        key: "{{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
       become: true
 
     - name: Scan Other Host Keys
@@ -31,7 +28,6 @@
     - name: Add Other Host Keys
       lineinfile:
         path: /etc/ssh/ssh_known_hosts
-        regexp: "^{{ item.stdout.lines[0] }}$"
         line: "{{ item.stdout.lines[0] }}"
       become: true
       with_items: "{{ cmd_ssh_keyscan.results }}"
