@@ -1,0 +1,23 @@
+Host bluebutton-healthapt-test-data-pipeline
+  HostName {{ ec2_search_bbapi | json_query('instances[?tags.Name==`{}`] | [0].private_dns_name'.format(vault_ec2_instance_names.test.data_pipeline)) }}
+  User {{ vault_users_deploy }}
+  PreferredAuthentications publickey
+  IdentitiesOnly yes
+
+Host bluebutton-healthapt-test-data-server
+  HostName {{ ec2_search_bbapi | json_query('instances[?tags.Name==`{}`] | [0].private_dns_name'.format(vault_ec2_instance_names.test.data_server)) }}
+  User {{ vault_users_deploy }}
+  PreferredAuthentications publickey
+  IdentitiesOnly yes
+
+Host bluebutton-healthapt-prod-az-a-data-pipeline
+  HostName {{ ec2_search_bbapi | json_query('instances[?tags.Name==`{}`] | [0].private_dns_name'.format(vault_ec2_instance_names.production.az_a.data_pipeline)) }}
+  User {{ vault_users_deploy }}
+  PreferredAuthentications publickey
+  IdentitiesOnly yes
+
+Host bluebutton-healthapt-prod-az-a-data-server
+  HostName {{ ec2_search_bbapi | json_query('instances[?tags.Name==`{}`] | [0].private_dns_name'.format(vault_ec2_instance_names.production.az_a.data_server)) }}
+  User {{ vault_users_deploy }}
+  PreferredAuthentications publickey
+  IdentitiesOnly yes
