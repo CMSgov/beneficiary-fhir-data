@@ -73,6 +73,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 
 		// Ensure that Ansible uses Jenkins' SSH config and keys.
 		dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh_jenkins:ro'
+		dockerArgs += ' --volume=/etc/ssh/ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro'
 
 		// Bind mount the `vault.password` file where it's needed.
 		dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
