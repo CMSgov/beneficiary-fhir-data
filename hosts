@@ -23,7 +23,7 @@ bluebutton-healthapt-prod-az-a-data-server
 # variables for each environment in a single Ansible Vault file:
 #
 #     $ ansible-vault edit group_vars/env_test/vault.yml
-[env_test:children]
+[env_test]
 bluebutton-healthapt-test-data-pipeline
 bluebutton-healthapt-test-data-server
 
@@ -31,6 +31,6 @@ bluebutton-healthapt-test-data-server
 # variables for each environment in a single Ansible Vault file:
 #
 #     $ ansible-vault edit group_vars/env_production_az_a/vault.yml
-[env_production_az_a:children]
+[env_production_az_a]
 bluebutton-healthapt-prod-az-a-data-pipeline
 bluebutton-healthapt-prod-az-a-data-server
