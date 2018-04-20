@@ -8,6 +8,9 @@
 #     $ `ansible-vault edit group_vars/env_production/vault.yml`.
 ##
 
+- name: Add SSH Host Keys
+  import_playbook: ssh_host_keys.yml
+
 - name: Configure Systems for Ansible Pipelining
   hosts: all
   vars:

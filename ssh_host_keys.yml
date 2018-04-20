@@ -1,0 +1,36 @@
+---
+##
+# Ensure that the SSH host keys of the backend systems are trusted.
+##
+- name: Add SHH Host Keys
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Add Jenkins SSH Host Key
+      lineinfile:
+        path: /etc/ssh/ssh_known_hosts
+        regexp: "^{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}$"
+        line: "{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+      become: true
+
+    - name: Scan Other Host Keys
+      command: "/usr/bin/ssh-keyscan -t ecdsa -H {{ item }}"
+      with_items:
+        - "{{ vault_ec2_instance.test.data_pipeline.ip }}"
+        - "{{ vault_ec2_instance.test.data_server.ip }}"
+        - "{{ vault_ec2_instance.prod.az_a.data_pipeline.ip }}"
+        - "{{ vault_ec2_instance.prod.az_a.data_server.ip }}"
+      register: cmd_ssh_keyscan
+      changed_when: false
+
+    - name: Add Other Host Keys
+      lineinfile:
+        path: /etc/ssh/ssh_known_hosts
+        regexp: "^{{ item.stdout.lines[0] }}$"
+        line: "{{ item.stdout.lines[0] }}"
+      become: true
+      with_items: "{{ cmd_ssh_keyscan.results }}"
