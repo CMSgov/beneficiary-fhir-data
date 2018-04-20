@@ -10,6 +10,7 @@
     - name: Add Jenkins SSH Host Key
       lineinfile:
         path: /etc/ssh/ssh_known_hosts
+        create: true
         regexp: "^{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}$"
         line: "{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
         owner: root
