@@ -1,4 +1,4 @@
 value,description
-8,CMS developed DRG using patient status code
-8,CMS developed DRG using patient status code
+1,Day outlier (condition code 60)
+6,Valid diagnosis related groups (DRG) received from the intermediary
 8,CMS developed DRG using patient status code
