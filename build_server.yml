@@ -7,9 +7,10 @@
   hosts: builds
 
   # Needs to be specified here, as it's not configured properly on the host
-  # itself.
+  # itself. (Note: `169.254.169.254` is the EC2 instance metadata address, per
+  # <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html>.)
   environment:
-    no_proxy: localhost
+    no_proxy: 'localhost,169.254.169.254'
     http_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
     https_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
 
