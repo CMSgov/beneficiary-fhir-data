@@ -47,8 +47,8 @@ def areDomainListsEqual = { domainList1, domainList2 ->
   if (domainList1.getSize() != domainList2.getSize()) return false
 
   for (int i = 0; i < domainList1.getSize(); i++) {
-    ActiveDirectoryDomain domain1 = domainList1.get(i);
-    ActiveDirectoryDomain domain2 = domainList2.get(i);
+    hudson.plugins.active_directory.ActiveDirectoryDomain domain1 = domainList1.get(i);
+    hudson.plugins.active_directory.ActiveDirectoryDomain domain2 = domainList2.get(i);
     if (domain1 == null && domain2 != null) return false
     if (domain2 == null && domain1 != null) return false
 	if (domain1 == null) continue
