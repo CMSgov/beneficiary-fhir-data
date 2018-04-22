@@ -20,10 +20,6 @@
     filters:
       'tag:Project': 'BBAPI'
   delegate_to: localhost
-  environment:
-    no_proxy: ''
-    http_proxy: ''
-    https_proxy: ''
   register: ec2_search_bbapi
 
 - name: Create SSH Config for Ansible Jobs
