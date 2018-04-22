@@ -18,10 +18,10 @@ def areSecurityRealmsEqual = { realm1, realm2 ->
   if (realm2 == null && realm1 != null) return false
   if (realm1.getClass() != realm2.getClass()) return false
 
-  if (realm1.getClass() != hudson.security.HudsonPrivateSecurityRealm.class) {
+  if (realm1.getClass() == hudson.security.HudsonPrivateSecurityRealm.class) {
     if (realm1.allowsSignup() != realm2.allowsSignup()) return false
     if (realm1.isEnableCaptcha() != realm2.isEnableCaptcha()) return false
-  } else if (realm1.getClass() != hudson.plugins.active_directory.ActiveDirectorySecurityRealm.class) {
+  } else if (realm1.getClass() == hudson.plugins.active_directory.ActiveDirectorySecurityRealm.class) {
     if (!areDomainListsEqual(realm1.getDomains(), realm2.getDomains())) return false
     if (realm1.isStartTls() != realm2.isStartTls()) return false
     if (realm1.getGroupLookupStrategy() != realm2.getGroupLookupStrategy()) return false
