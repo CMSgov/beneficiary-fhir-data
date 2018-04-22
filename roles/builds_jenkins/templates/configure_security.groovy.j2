@@ -31,7 +31,7 @@ def areDomainListsEqual = { domainList1, domainList2 ->
     if (domain1.getBindName() != domain2.getBindName()) return false
     if ((domain1.getBindPassword() == null) != (domain2.getBindPassword() == null)) return false
 	if (domain1.getBindPassword() != null) {
-	  if (domain1.getBindPassword().getPlainText() != domain2.getBindPassword.getPlainText()) return false
+	  if (domain1.getBindPassword().getPlainText() != domain2.getBindPassword().getPlainText()) return false
     }
     if (domain1.getSite() != domain2.getSite()) return false
   }
@@ -91,22 +91,19 @@ def domain = new hudson.plugins.active_directory.ActiveDirectoryDomain(
   '{{ vault_jenkins_domain.bind_user_dn }}',
   '{{ vault_jenkins_domain.bind_user_password }}'
 )
-def domains = new ArrayList<hudson.plugins.active_directory.ActiveDirectoryDomain>()
-domains.add(domain)
 def securityRealm = new hudson.plugins.active_directory.ActiveDirectorySecurityRealm(
-  "", // param: domain
-  domains,
-  "", // param: site
-  "", // param: bindName
-  "", // param: bindPassword
-  "", // param: server
+  null, // param: domain
+  [domain],
+  null, // param: site
+  null, // param: bindName
+  null, // param: bindPassword
+  null, // param: server
   hudson.plugins.active_directory.GroupLookupStrategy.AUTO,
   false, // param: removeIrrelevantGroups
-  false, // param: customDomain
+  null, // param: customDomain
   null, // param: cacheConfiguration
   true // param: startTls
 )
-println(securityRealm.dump())
 if(!areSecurityRealmsEqual(securityRealm, Jenkins.instance.getSecurityRealm())) {
   Jenkins.instance.setSecurityRealm(securityRealm)
   Jenkins.instance.save()
