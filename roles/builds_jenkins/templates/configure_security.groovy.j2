@@ -84,12 +84,27 @@ def areAuthorizationStrategiesEqual = { authzStrat1, authzStrat2 ->
 //
 
 // Configure the security realm, which handles authentication.
-def securityRealm = new hudson.plugins.active_directory.ActiveDirectorySecurityRealm(
+def domain = new hudson.plugins.active_directory.ActiveDirectoryDomain(
   '{{ vault_jenkins_domain.name }}',
+  '{{ vault_jenkins_domain.server }}',
   null, // param: site
   '{{ vault_jenkins_domain.bind_user_dn }}',
-  '{{ vault_jenkins_domain.bind_user_password }}',
-  '{{ vault_jenkins_domain.server }}'
+  '{{ vault_jenkins_domain.bind_user_password }}'
+)
+def domains = new ArrayList<hudson.plugins.active_directory.ActiveDirectoryDomain>()
+domains.add(domain)
+def securityRealm = new hudson.plugins.active_directory.ActiveDirectorySecurityRealm(
+  "", // param: domain
+  domains,
+  "", // param: site
+  "", // param: bindName
+  "", // param: bindPassword
+  "", // param: server
+  hudson.plugins.active_directory.GroupLookupStrategy.AUTO,
+  false, // param: removeIrrelevantGroups
+  false, // param: customDomain
+  null, // param: cacheConfiguration
+  true // param: startTls
 )
 if(!areSecurityRealmsEqual(securityRealm, Jenkins.instance.getSecurityRealm())) {
   Jenkins.instance.setSecurityRealm(securityRealm)
