@@ -5,54 +5,69 @@ import jenkins.model.*;
 import hudson.*;
 import hudson.model.*;
 
-// Define some helper functions to check equality of config objects.
+
+//
+// Define the Helper Functions for Comparing Configurations
+//
+
+//
+// Determines if two SecurityRealms are equal.
+//
 def areSecurityRealmsEqual = { realm1, realm2 ->
   if (realm1 == null && realm2 != null) return false
   if (realm2 == null && realm1 != null) return false
   if (realm1.getClass() != realm2.getClass()) return false
 
-  if (realm1.getClass() != hudson.security.HudsonPrivateSecurityRealm.class) throw new IllegalArgumentException()
-  if (realm1.allowsSignup() != realm2.allowsSignup()) return false
-  if (realm1.isEnableCaptcha() != realm2.isEnableCaptcha()) return false
+  if (realm1.getClass() != hudson.security.HudsonPrivateSecurityRealm.class) {
+    if (realm1.allowsSignup() != realm2.allowsSignup()) return false
+    if (realm1.isEnableCaptcha() != realm2.isEnableCaptcha()) return false
+  else if (realm1.getClass() != hudson.plugins.active_directory.ActiveDirectorySecurityRealm.class) {
+    if (!areDomainListsEqual(realm1.getDomains(), realm2.getDomains())) return false
+    if (realm1.isStartTls() != realm2.isStartTls()) return false
+    if (realm1.getGroupLookupStrategy() != realm2.getGroupLookupStrategy()) return false
+    if (realm1.removeIrrelevantGroups != realm2.removeIrrelevantGroups) return false
+    if (realm1.getSize() != realm2.getSize()) return false
+    if (realm1.getTtl() != realm2.getTtl()) return false
+	if (hudson.plugins.active_directory.ActiveDirectorySecurityRealm.EnvironmentProperty.toMap(realm1.getEnvironmentProperties()) != hudson.plugins.active_directory.ActiveDirectorySecurityRealm.EnvironmentProperty.toMap(realm2.getEnvironmentProperties())) return false
+	if (realm1.getTlsConfiguration() != realm2.getTlsConfiguration()) return false
+    if (realm1.getJenkinsInternalUser() != realm2.getJenkinsInternalUser()) return false
+  } else {
+    throw new IllegalArgumentException()
+  }
   return true
 }
 
-def areRealmDetailsPropertiesEqual = { detailsProperty1, detailsProperty2 ->
-  if (detailsProperty1 == null && detailsProperty2 != null) return false
-  if (detailsProperty2 == null && detailsProperty1 != null) return false
-  if (detailsProperty1.getClass() != detailsProperty2.getClass()) return false
+//
+// Determines if two List<ActiveDirectoryDomain> instances are equal.
+//
+def areDomainListsEqual = { domainList1, domainList2 ->
+  if (domainList1 == null && domainList2 != null) return false
+  if (domainList2 == null && domainList1 != null) return false
+  if (domainList1 == null) return true
+  if (domainList1.getSize() != domainList2.getSize()) return false
 
-  if (detailsProperty1.getClass() != hudson.security.HudsonPrivateSecurityRealm.Details.class) throw new IllegalArgumentException("Unexpected type: '${detailsProperty1.getClass()}'")
-  if (detailsProperty1.getPassword() != detailsProperty2.getPassword()) return false
+  for (int i = 0; i < domainList1.getSize(); i++) {
+    ActiveDirectoryDomain domain1 = domainList1.get(i);
+    ActiveDirectoryDomain domain2 = domainList2.get(i);
+    if (domain1 == null && domain2 != null) return false
+    if (domain2 == null && domain1 != null) return false
+	if (domain1 == null) continue
+
+    if (domain1.getName() != domain2.getName()) return false
+    if (domain1.getServers() != domain2.getServers()) return false
+    if (domain1.getBindName() != domain2.getBindName()) return false
+    if ((domain1.getBindPassword() == null) != (domain2.getBindPassword() == null)) return false
+	if (domain1.getBindPassword() != null) {
+	  if (domain1.getBindPassword().getPlainText() != domain2.getBindPassword.getPlainText()) return false
+    }
+    if (domain1.getSite() != domain2.getSite()) return false
+  }
   return true
 }
 
-def areUserMailPropertiesEqual = { mailProperty1, mailProperty2 ->
-  if (mailProperty1 == null && mailProperty2 != null) return false
-  if (mailProperty2 == null && mailProperty1 != null) return false
-  if (mailProperty1.getClass() != mailProperty2.getClass()) return false
-
-  if (mailProperty1.getClass() != hudson.tasks.Mailer.UserProperty.class) throw new IllegalArgumentException()
-  if (mailProperty1.getAddress() != mailProperty2.getAddress()) return false
-  return true
-}
-
-def areUsersEqual = { user1, user2 ->
-  if (user1 == null && user2 != null) return false
-  if (user2 == null && user1 != null) return false
-  if (user1.getClass() != user2.getClass()) return false
-
-  if (user1.getClass() != User.class) throw new IllegalArgumentException()
-  if (user1.getId() != user2.getId()) return false
-  if (user1.getFullName() != user2.getFullName()) return false
-  if (user1.getDescription() != user2.getDescription()) return false
-
-  // Note: No generic way to compare all properties, so we have to cherry-pick the ones we care about.
-  if (!areRealmDetailsPropertiesEqual(user1.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details.class), user2.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details.class))) return false
-  if (!areUserMailPropertiesEqual(user1.getProperty(hudson.tasks.Mailer.UserProperty.class), user2.getProperty(hudson.tasks.Mailer.UserProperty.class))) return false
-  return true
-}
-
+//
+// Determines if two AuthorizationStrategy instances are equal.
+//
 def areAuthorizationStrategiesEqual = { authzStrat1, authzStrat2 ->
   if (authzStrat1 == null && authzStrat2 != null) return false
   if (authzStrat2 == null && authzStrat1 != null) return false
@@ -63,27 +78,37 @@ def areAuthorizationStrategiesEqual = { authzStrat1, authzStrat2 ->
   return true
 }
 
+
+//
+// Configure Jenkins authentication and authorization (using above methods).
+//
+
 // Configure the security realm, which handles authentication.
-def securityRealm = new hudson.security.HudsonPrivateSecurityRealm(false)
+def domain = new hudson.plugins.active_directory.ActiveDirectoryDomain(
+  '{{ vault_jenkins_domain.name }}',
+  '{{ vault_jenkins_domain.server }}',
+  null, // param: site
+  '{{ vault_jenkins_domain.bind_user_dn }}',
+  '{{ vault_jenkins_domain.bind_user_password }}'
+)
+def securityRealm = new hudson.plugins.active_directory.ActiveDirectorySecurityRealm(
+  domain.name,
+  [domain],
+  domain.site,
+  domain.bindName,
+  domain.bindPassword.toPlainString(),
+  domain.servers,
+  hudson.plugins.active_directory.GroupLookupStrategy.AUTO,
+  false, // param: removeIrrelevantGroups
+  false, // param: customDomain
+  null, // param: cacheConfiguration
+  true // param: startTls
+)
 if(!areSecurityRealmsEqual(securityRealm, Jenkins.instance.getSecurityRealm())) {
   Jenkins.instance.setSecurityRealm(securityRealm)
   Jenkins.instance.save()
   println "Changed authentication."
 } else { println("Authentication already correct.") }
-
-
-// Create a user to login with.
-def adminUser = Jenkins.instance.getSecurityRealm().createAccount("{{ vault_jenkins_admin_username }}", "{{ vault_jenkins_admin_password }}")
-adminUser.addProperty(new hudson.tasks.Mailer.UserProperty("{{ vault_jenkins_admin_email }}"));
-existingAdminUser = null
-for (User user : Jenkins.instance.getSecurityRealm().getAllUsers())
-  if (user.getId() == adminUser.getId())
-    existingAdminUser = user
-if (!areUsersEqual(adminUser, existingAdminUser)) {
-  adminUser.save()
-  println("Changed admin user.")
-} else { println("Admin user already correct.") }
-
 
 // Configure the authorization strategy, which specifies who can do what.
 def authorizationStrategy = new hudson.security.FullControlOnceLoggedInAuthorizationStrategy()

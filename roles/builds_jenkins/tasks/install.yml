@@ -40,16 +40,18 @@
     # proxy).
     jenkins_url_external: "https://{{ vault_builds_server_name }}{{ jenkins_context_path }}"
 
-    # The LDAP user that should be used when logging into Jenkins to run
+    # The Active Directory user that should be used when logging into Jenkins to run
     # configuration scripts.
-    jenkins_admin_username: "{{ vault_jenkins_admin_username }}"
-    jenkins_admin_password: "{{ vault_jenkins_admin_password }}"
+    jenkins_admin_username: "{{ vault_jenkins_domain.bind_user_login }}"
+    jenkins_admin_password: "{{ vault_jenkins_domain.bind_user_password }}"
 
     jenkins_plugins_extra:
       # Provides config files to jobs, e.g. Maven settings.xml files.
       - config-file-provider
       # Adds support for GH build status and commit hook triggers.
       - github
+      # Adds support for Active Directory authentication and authorization.
+      - active-directory
 
     # The default 60s leads to not-infrequent timeout errors.
     jenkins_plugins_timeout: 180
