@@ -106,6 +106,7 @@ def securityRealm = new hudson.plugins.active_directory.ActiveDirectorySecurityR
   null, // param: cacheConfiguration
   true // param: startTls
 )
+println(securityRealm.dump())
 if(!areSecurityRealmsEqual(securityRealm, Jenkins.instance.getSecurityRealm())) {
   Jenkins.instance.setSecurityRealm(securityRealm)
   Jenkins.instance.save()
