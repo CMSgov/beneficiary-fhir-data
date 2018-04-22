@@ -96,7 +96,7 @@ def securityRealm = new hudson.plugins.active_directory.ActiveDirectorySecurityR
   [domain],
   domain.site,
   domain.bindName,
-  domain.bindPassword.toPlainString(),
+  domain.bindPassword.getPlainText(),
   domain.servers,
   hudson.plugins.active_directory.GroupLookupStrategy.AUTO,
   false, // param: removeIrrelevantGroups
