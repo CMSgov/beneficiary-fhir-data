@@ -92,12 +92,12 @@ def domain = new hudson.plugins.active_directory.ActiveDirectoryDomain(
   '{{ vault_jenkins_domain.bind_user_password }}'
 )
 def securityRealm = new hudson.plugins.active_directory.ActiveDirectorySecurityRealm(
-  domain.name,
-  [domain],
-  domain.site,
-  domain.bindName,
-  domain.bindPassword.getPlainText(),
-  domain.servers,
+  domain.getName(),
+  Arrays.asList(domain),
+  domain.getSite(),
+  domain.getBindName(),
+  domain.getBindPassword().getPlainText(),
+  domain.getServers(),
   hudson.plugins.active_directory.GroupLookupStrategy.AUTO,
   false, // param: removeIrrelevantGroups
   false, // param: customDomain
