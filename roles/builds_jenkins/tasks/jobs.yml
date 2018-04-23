@@ -36,7 +36,7 @@
   ec2_remote_facts:
     region: "{{ aws_region }}"
     filters:
-      'tag:Project': 'BBAPI'
+      'tag:CONTRACT': 'BBAPI'
   delegate_to: localhost
   register: ec2_search_bbapi
 
