@@ -79,7 +79,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 
 		// Ensure that Ansible uses Jenkins' Maven repo.
-		dockerArgs += ' --volume=/var/lib/jenkins/.m2:/root/.m2:ro'
+		dockerArgs += ' --volume=/u01/jenkins/.m2:/root/.m2:ro'
 
 		// Prepend the specified closure with some needed in-container setup.
 		def bodyWithSetup = {
