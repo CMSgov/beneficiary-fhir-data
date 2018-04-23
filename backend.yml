@@ -73,12 +73,7 @@
         data_server_war_name: "bluebutton-server-app-{{ data_server_version }}.war"
         data_server_war_local_dir: "~/.m2/repository/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ data_server_version }}"
         data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
-        data_server_ssl_client_certificates:
-          - alias: client_frontend
-            certificate: "{{ lookup('file', 'files/bluebutton-frontend-%s-client-public.crt' % (vault_frontend_env_name)) }}"
-        # Uncomment this temporarily if you have a local test certificate you need to use for a bit.
-        #  - alias: client_test
-        #    certificate: "{{ lookup('file', 'dev/client-test-certificate.pem') }}"
+        # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
         data_server_db_url: "{{ vault_data_db_url }}"
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
