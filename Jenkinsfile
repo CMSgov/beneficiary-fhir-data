@@ -78,6 +78,9 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		// Bind mount the `vault.password` file where it's needed.
 		dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
 
+		// Ensure that Ansible uses Jenkins' Maven repo.
+		dockerArgs += ' --volume=/var/lib/jenkins/.m2:/root/.m2:ro'
+
 		// Prepend the specified closure with some needed in-container setup.
 		def bodyWithSetup = {
 			// Copy the SSH config and keys and fix permissions.

@@ -14,6 +14,24 @@
   become: true
   register: slurp_jenkins_ssh_pub
 
+- name: Create Maven Directory
+  file:
+    state: directory
+    path: /u01/jenkins/.m2
+    owner: jenkins
+    group: jenkins
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create Maven Directory Symlink
+  file:
+    state: link
+    src: /u01/jenkins/.m2
+    dest: /var/lib/jenkins/.m2
+    owner: jenkins
+    group: jenkins
+  become: true
+
 - name: Search EC2 for BBAPI Systems
   ec2_remote_facts:
     region: "{{ aws_region }}"
