@@ -32,6 +32,9 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 public enum StaticRifResource {
 	SAMPLE_A_BENES(resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
+	SAMPLE_A_BENEFICIARY_HISTORY(resourceUrl("rif-static-samples/sample-a-beneficiaryhistory.txt"),
+			RifFileType.BENEFICIARY_HISTORY, 3),
+
 	SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
 	SAMPLE_A_INPATIENT(resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
@@ -395,7 +398,12 @@ public enum StaticRifResource {
 				tempDownloadStream = new BufferedInputStream(new FileInputStream(tempDownloadPath.toFile()));
 				CSVParser parser = RifParsingUtils.createCsvParser(RifParsingUtils.CSV_FORMAT, tempDownloadStream,
 						StandardCharsets.UTF_8);
-				parser.forEach(r -> uniqueIds.add(r.get(resource.getRifFileType().getIdColumn())));
+				parser.forEach(r -> {
+					if (resource.getRifFileType().getIdColumn() != null)
+						uniqueIds.add(r.get(resource.getRifFileType().getIdColumn()));
+					else
+						uniqueIds.add("" + r.getRecordNumber());
+				});
 			} finally {
 				if (tempDownloadPath != null)
 					Files.deleteIfExists(tempDownloadPath);
