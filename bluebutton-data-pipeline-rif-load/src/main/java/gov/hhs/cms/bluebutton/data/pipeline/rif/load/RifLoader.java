@@ -57,6 +57,7 @@ import com.zaxxer.hikari.pool.HikariProxyConnection;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryCsvWriter;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimCsvWriter;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
@@ -418,6 +419,9 @@ public final class RifLoader {
 		if (rifFileType == RifFileType.BENEFICIARY) {
 			for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
 				hashBeneficiaryHicn(fileEventMetrics, rifRecordEvent);
+		} else if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
+			for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+				hashBeneficiaryHistoryHicn(fileEventMetrics, rifRecordEvent);
 		}
 
 		// Only one of each failure/success Timer.Contexts will be applied.
@@ -472,11 +476,33 @@ public final class RifLoader {
 						if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
 							loadAction = LoadAction.INSERTED;
 							entityManager.persist(record);
-						} else {
+						} else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
 							loadAction = LoadAction.UPDATED;
-							entityManager.merge(record);
-						}
 
+							/*
+							 * When beneficiaries are updated, we need to be careful to capture their
+							 * current/previous state as a BeneficiaryHistory record.
+							 */
+							if (record instanceof Beneficiary) {
+								Beneficiary newBene = (Beneficiary) record;
+								Beneficiary oldBene = entityManager.find(Beneficiary.class, newBene.getBeneficiaryId());
+
+								if (oldBene != null) {
+									BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
+									oldBeneCopy.setBeneficiaryId(oldBene.getBeneficiaryId());
+									oldBeneCopy.setBirthDate(oldBene.getBirthDate());
+									oldBeneCopy.setHicn(oldBene.getHicn());
+									oldBeneCopy.setSex(oldBene.getSex());
+
+									entityManager.persist(oldBeneCopy);
+								}
+							}
+
+							entityManager.merge(record);
+						} else {
+							throw new BadCodeMonkeyException(String.format("Unhandled %s: '%s'.", RecordAction.class,
+									rifRecordEvent.getRecordAction()));
+						}
 					} else
 						throw new BadCodeMonkeyException();
 
@@ -593,6 +619,37 @@ public final class RifLoader {
 
 		Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
 		beneficiary.setHicn(computeHicnHash(options, secretKeyFactory, beneficiary.getHicn()));
+
+		timerHashing.stop();
+	}
+
+	/**
+	 * <p>
+	 * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a
+	 * {@link BeneficiaryHistory}, switches the {@link BeneficiaryHistory#getHicn()}
+	 * property to a cryptographic hash of its current value. This is done for
+	 * security purposes, and the Blue Button API frontend applications know how to
+	 * compute the exact same hash, which allows the two halves of the system to
+	 * interoperate.
+	 * </p>
+	 * <p>
+	 * All other {@link RifRecordEvent}s are left unmodified.
+	 * </p>
+	 *
+	 * @param metrics
+	 *            the {@link MetricRegistry} to use
+	 * @param rifRecordEvent
+	 *            the {@link RifRecordEvent} to (possibly) modify
+	 */
+	private void hashBeneficiaryHistoryHicn(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+		if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
+			return;
+
+		Timer.Context timerHashing = metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "hicnsHashed"))
+				.time();
+
+		BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
+		beneficiaryHistory.setHicn(computeHicnHash(options, secretKeyFactory, beneficiaryHistory.getHicn()));
 
 		timerHashing.stop();
 	}

@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
@@ -79,6 +80,51 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("Doe", beneRow.getNameSurname());
 		Assert.assertEquals("John", beneRow.getNameGiven());
 		Assert.assertEquals(new Character('A'), beneRow.getNameMiddleInitial().get());
+	}
+
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_A_BENEFICIARY_HISTORY}.
+	 */
+	@Test
+	public void processBeneficiaryHistoryRecord_SAMPLE_A() {
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(),
+				StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.toRifFile());
+		RifFilesProcessor processor = new RifFilesProcessor();
+		RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
+		List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collect(Collectors.toList());
+
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.getRecordCount(), rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent0 = rifEventsList.get(0);
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.getRifFileType(),
+				rifRecordEvent0.getFileEvent().getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent0.getRecord());
+		Assert.assertTrue(rifRecordEvent0.getRecord() instanceof BeneficiaryHistory);
+		BeneficiaryHistory beneficiaryHistory0 = (BeneficiaryHistory) rifRecordEvent0.getRecord();
+		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent0.getRecordAction());
+		Assert.assertEquals("567834", beneficiaryHistory0.getBeneficiaryId());
+		Assert.assertEquals(LocalDate.of(1979, Month.MARCH, 17), beneficiaryHistory0.getBirthDate());
+		Assert.assertEquals(('F'), beneficiaryHistory0.getSex());
+		Assert.assertEquals("543217066Z", beneficiaryHistory0.getHicn());
+
+		/*
+		 * We should expect and be able to cope with BENEFICIARY_HISTORY records that
+		 * are exact duplicates.
+		 */
+		for (RifRecordEvent<?> rifRecordEvent : new RifRecordEvent<?>[] { rifEventsList.get(1),
+				rifEventsList.get(2) }) {
+			Assert.assertEquals(StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY.getRifFileType(),
+					rifRecordEvent.getFileEvent().getFile().getFileType());
+			Assert.assertNotNull(rifRecordEvent.getRecord());
+			Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryHistory);
+			BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
+			Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
+			Assert.assertEquals("567834", beneficiaryHistory.getBeneficiaryId());
+			Assert.assertEquals(LocalDate.of(1980, Month.MARCH, 17), beneficiaryHistory.getBirthDate());
+			Assert.assertEquals(('M'), beneficiaryHistory.getSex());
+			Assert.assertEquals("543217066T", beneficiaryHistory.getHicn());
+		}
 	}
 
 	/**
