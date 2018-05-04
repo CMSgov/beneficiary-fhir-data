@@ -3,7 +3,7 @@
  */
 @XmlSchema(namespace = XmlNamespace.BB_RIF, xmlns = {
 		@XmlNs(prefix = "bbr", namespaceURI = XmlNamespace.BB_RIF) }, elementFormDefault = XmlNsForm.QUALIFIED)
-@RifLayoutsGenerator(spreadsheetResource = "rif-layout-and-fhir-mapping.xlsx", beneficiarySheet = "Beneficiary", pdeSheet = "PDE", carrierSheet = "Carrier", inpatientSheet = "Inpatient", outpatientSheet = "Outpatient", hhaSheet = "HHA", dmeSheet = "DME", hospiceSheet = "Hospice", snfSheet = "SNF")
+@RifLayoutsGenerator(spreadsheetResource = "rif-layout-and-fhir-mapping.xlsx", beneficiarySheet = "Beneficiary", beneficiaryHistorySheet = "Beneficiary History", pdeSheet = "PDE", carrierSheet = "Carrier", inpatientSheet = "Inpatient", outpatientSheet = "Outpatient", hhaSheet = "HHA", dmeSheet = "DME", hospiceSheet = "Hospice", snfSheet = "SNF")
 package gov.hhs.cms.bluebutton.data.model.rif;
 
 import javax.xml.bind.annotation.XmlNs;

@@ -26,6 +26,12 @@ public @interface RifLayoutsGenerator {
 
 	/**
 	 * @return the name of the sheet in the Excel file that contains the RIF
+	 *         layout for beneficiary history data
+	 */
+	String beneficiaryHistorySheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF
 	 *         layout for PDE claims data
 	 */
 	String pdeSheet();

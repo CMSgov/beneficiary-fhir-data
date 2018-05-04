@@ -1,10 +1,15 @@
 package gov.hhs.cms.bluebutton.data.model.codegen;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Transient;
 
 import com.squareup.javapoet.ClassName;
 
@@ -33,8 +38,10 @@ public final class MappingSpec {
 	private String headerEntity;
 	private String headerTable;
 	private String headerEntityIdField;
+	private String headerEntityGeneratedIdField;
 	private boolean hasLines = false;
 	private String lineTable;
+	private List<String> headerEntityTransientFields;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -45,6 +52,7 @@ public final class MappingSpec {
 	public MappingSpec(String packageName) {
 		Objects.requireNonNull(packageName);
 		this.packageName = packageName;
+		this.headerEntityTransientFields = new ArrayList<>();
 	}
 
 	/**
@@ -127,6 +135,25 @@ public final class MappingSpec {
 	 */
 	public MappingSpec setHeaderEntityIdField(String headerEntityIdField) {
 		this.headerEntityIdField = headerEntityIdField;
+		return this;
+	}
+
+	/**
+	 * @return the name of the {@link Entity} {@link GeneratedValue} field that
+	 *         should be used as the {@link Id} in the {@link #getHeaderEntity()}
+	 *         {@link Entity}
+	 */
+	public String getHeaderEntityGeneratedIdField() {
+		return headerEntityGeneratedIdField;
+	}
+
+	/**
+	 * @param headerEntityGeneratedIdField
+	 *            the new value for {@link #getHeaderEntityGeneratedIdField()}
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
+	 */
+	public MappingSpec setHeaderEntityGeneratedIdField(String headerEntityGeneratedIdField) {
+		this.headerEntityGeneratedIdField = headerEntityGeneratedIdField;
 		return this;
 	}
 
@@ -244,7 +271,26 @@ public final class MappingSpec {
 			throw new IllegalStateException();
 		return "lineNumber";
 	}
+	
+	/**
+	 * @return the fields in {@link #getHeaderEntity()} that should be marked as
+	 *         {@link Transient}
+	 */
+	public List<String> getHeaderEntityTransientFields() {
+		return headerEntityTransientFields;
+	}
 
+	/**
+	 * @param headerEntityTransientFields
+	 *            the new value for {@link #getHeaderEntityTransientFields()}
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
+	 */
+	public MappingSpec setHeaderEntityTransientFields(String... headerEntityTransientFields) {
+		Objects.requireNonNull(headerEntityTransientFields);
+		this.headerEntityTransientFields = Arrays.asList(headerEntityTransientFields);
+		return this;
+	}
+	
 	/**
 	 * @return the {@link ClassName} for the class to be built that will contain
 	 *         parsing code for the layout

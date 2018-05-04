@@ -125,10 +125,8 @@ public final class SampleDataColumnsTest {
 	 *         {@link RifFileType}
 	 */
 	private static Enum<?>[] getColumnsInEnum(RifFileType rifFileType) {
-		Enum<?> idColumn = rifFileType.getIdColumn();
-		Class<?> columnEnumClass = idColumn.getDeclaringClass();
 		try {
-			Enum<?>[] columnEnums = (Enum<?>[]) columnEnumClass.getMethod("values").invoke(null);
+			Enum<?>[] columnEnums = (Enum<?>[]) rifFileType.getColumnEnum().getMethod("values").invoke(null);
 			return columnEnums;
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {

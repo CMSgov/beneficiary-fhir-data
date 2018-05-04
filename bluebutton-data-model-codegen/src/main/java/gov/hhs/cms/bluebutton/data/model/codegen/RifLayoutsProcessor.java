@@ -34,13 +34,17 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -170,6 +174,21 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiarySheet()))
 					.setHeaderEntity("Beneficiary").setHeaderTable("Beneficiaries")
 					.setHeaderEntityIdField("beneficiaryId").setHasLines(false));
+			/*
+			 * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
+			 * DB), as they won't ever have changed data. We should change the RIF layout to
+			 * exclude them, but this was implemented in a bit of a rush, and there wasn't
+			 * time to fix that.
+			 */
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiaryHistorySheet()))
+					.setHeaderEntity("BeneficiaryHistory").setHeaderTable("BeneficiariesHistory")
+					.setHeaderEntityGeneratedIdField("beneficiaryHistoryId")
+					.setHeaderEntityTransientFields("stateCode", "countyCode", "postalCode", "race",
+							"entitlementCodeOriginal", "entitlementCodeCurrent", "endStageRenalDiseaseCode",
+							"medicareEnrollmentStatusCode", "partATerminationCode", "partBTerminationCode",
+							"nameSurname", "nameGiven", "nameMiddleInitial")
+					.setHasLines(false));
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
 					.setHeaderEntity("PartDEvent").setHeaderTable("PartDEvents").setHeaderEntityIdField("eventId")
@@ -411,6 +430,42 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				.addMember("name", "$S", "`" + mappingSpec.getHeaderTable() + "`").build();
 		TypeSpec.Builder headerEntityClass = TypeSpec.classBuilder(mappingSpec.getHeaderEntity())
 				.addAnnotation(entityAnnotation).addAnnotation(tableAnnotation).addModifiers(Modifier.PUBLIC);
+
+		// Create an Entity field with accessors for the generated-ID field (if any).
+		if (mappingSpec.getHeaderEntityGeneratedIdField() != null) {
+			FieldSpec.Builder idFieldBuilder = FieldSpec.builder(TypeName.LONG,
+					mappingSpec.getHeaderEntityGeneratedIdField(), Modifier.PRIVATE);
+			idFieldBuilder.addAnnotation(Id.class);
+			idFieldBuilder.addAnnotation(AnnotationSpec.builder(Column.class)
+					.addMember("name", "$S", String.format("`%s`", mappingSpec.getHeaderEntityGeneratedIdField()))
+					.addMember("nullable", "$L", false).addMember("updatable", "$L", false).build());
+			String sequenceName = String.format("%s_%s_seq", mappingSpec.getHeaderEntity().simpleName(),
+					mappingSpec.getHeaderEntityGeneratedIdField());
+			/*
+			 * FIXME For consistency, sequence names should be mixed-case, but can't be, due
+			 * to https://hibernate.atlassian.net/browse/HHH-9431.
+			 */
+			sequenceName = sequenceName.toLowerCase();
+			idFieldBuilder.addAnnotation(AnnotationSpec.builder(GeneratedValue.class)
+					.addMember("strategy", "$T.SEQUENCE", GenerationType.class)
+					.addMember("generator", "$S", sequenceName).build());
+			idFieldBuilder
+					.addAnnotation(AnnotationSpec.builder(SequenceGenerator.class).addMember("name", "$S", sequenceName)
+							.addMember("sequenceName", "$S", sequenceName)
+							.addMember("allocationSize", "$L", 50).build());
+			FieldSpec idField = idFieldBuilder.build();
+			headerEntityClass.addField(idField);
+
+			MethodSpec.Builder idFieldGetter = MethodSpec.methodBuilder(calculateGetterName(idField))
+					.addModifiers(Modifier.PUBLIC).returns(idField.type);
+			addGetterStatement(false, idField, idFieldGetter);
+			headerEntityClass.addMethod(idFieldGetter.build());
+
+			MethodSpec.Builder idFieldSetter = MethodSpec.methodBuilder(calculateSetterName(idField))
+					.addModifiers(Modifier.PUBLIC).returns(void.class).addParameter(idField.type, idField.name);
+			addSetterStatement(false, idField, idFieldSetter);
+			headerEntityClass.addMethod(idFieldSetter.build());
+		}
 
 		// Create an Entity field with accessors for each RIF field.
 		for (int fieldIndex = 0; fieldIndex <= mappingSpec.calculateLastHeaderFieldIndex(); fieldIndex++) {
@@ -840,53 +895,55 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			annotations.add(idAnnotation.build());
 		}
 
-		// Add an @Column annotation to every column.
-		AnnotationSpec.Builder columnAnnotation = AnnotationSpec.builder(Column.class)
-				.addMember("name", "$S", "`" + rifField.getJavaFieldName() + "`")
-				.addMember("nullable", "$L", rifField.isRifColumnOptional());
-		if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength().isPresent()) {
-			columnAnnotation.addMember("length", "$L", rifField.getRifColumnLength().get());
-		} else if (rifField.getRifColumnType() == RifColumnType.NUM) {
-			/*
-			 * In SQL, the precision is the number of digits in the unscaled
-			 * value, e.g. "123.45" has a precision of 5. The scale is the
-			 * number of digits to the right of the decimal point, e.g. "123.45"
-			 * has a scale of 2.
-			 */
-
-			if (rifField.getRifColumnLength().isPresent() && rifField.getRifColumnScale().isPresent()) {
-				columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength().get());
-				columnAnnotation.addMember("scale", "$L", rifField.getRifColumnScale().get());
-			} else {
+		// Add an @Column annotation to every non-transient column.
+		boolean isTransient = mappingSpec.getHeaderEntityTransientFields().contains(rifField.getJavaFieldName());
+		if (!isTransient) {
+			AnnotationSpec.Builder columnAnnotation = AnnotationSpec.builder(Column.class)
+					.addMember("name", "$S", "`" + rifField.getJavaFieldName() + "`")
+					.addMember("nullable", "$L", rifField.isRifColumnOptional());
+			if (rifField.getRifColumnType() == RifColumnType.CHAR && rifField.getRifColumnLength().isPresent()) {
+				columnAnnotation.addMember("length", "$L", rifField.getRifColumnLength().get());
+			} else if (rifField.getRifColumnType() == RifColumnType.NUM) {
 				/*
-				 * Unfortunately, Hibernate's SQL schema generation (HBM2DDL)
-				 * doesn't correctly handle SQL numeric datatypes that don't
-				 * have a defined precision and scale. What it _should_ do is
-				 * represent those types in PostgreSQL as a "NUMERIC", but what
-				 * it does instead is insert a default precision and scale as
-				 * "NUMBER(19, 2)". The only way to force the correct behavior
-				 * is to specify a columnDefinition, so we do that. This leads
-				 * to incorrect behavior with HSQL (for different reasons), but
-				 * fortunately that doesn't happen to cause problems with our
-				 * tests.
+				 * In SQL, the precision is the number of digits in the unscaled value, e.g.
+				 * "123.45" has a precision of 5. The scale is the number of digits to the right
+				 * of the decimal point, e.g. "123.45" has a scale of 2.
 				 */
-				StringBuilder columnDefinition = new StringBuilder();
-				columnDefinition.append("numeric");
-				if (rifField.getRifColumnLength().isPresent() || rifField.getRifColumnScale().isPresent()) {
-					columnDefinition.append('(');
-					if (rifField.getRifColumnLength().isPresent()) {
-						columnDefinition.append(rifField.getRifColumnLength().get());
+
+				if (rifField.getRifColumnLength().isPresent() && rifField.getRifColumnScale().isPresent()) {
+					columnAnnotation.addMember("precision", "$L", rifField.getRifColumnLength().get());
+					columnAnnotation.addMember("scale", "$L", rifField.getRifColumnScale().get());
+				} else {
+					/*
+					 * Unfortunately, Hibernate's SQL schema generation (HBM2DDL) doesn't correctly
+					 * handle SQL numeric datatypes that don't have a defined precision and scale.
+					 * What it _should_ do is represent those types in PostgreSQL as a "NUMERIC",
+					 * but what it does instead is insert a default precision and scale as
+					 * "NUMBER(19, 2)". The only way to force the correct behavior is to specify a
+					 * columnDefinition, so we do that. This leads to incorrect behavior with HSQL
+					 * (for different reasons), but fortunately that doesn't happen to cause
+					 * problems with our tests.
+					 */
+					StringBuilder columnDefinition = new StringBuilder();
+					columnDefinition.append("numeric");
+					if (rifField.getRifColumnLength().isPresent() || rifField.getRifColumnScale().isPresent()) {
+						columnDefinition.append('(');
+						if (rifField.getRifColumnLength().isPresent()) {
+							columnDefinition.append(rifField.getRifColumnLength().get());
+						}
+						if (rifField.getRifColumnScale().isPresent()) {
+							columnDefinition.append(", ");
+							columnDefinition.append(rifField.getRifColumnScale().get());
+						}
+						columnDefinition.append(')');
 					}
-					if (rifField.getRifColumnScale().isPresent()) {
-						columnDefinition.append(", ");
-						columnDefinition.append(rifField.getRifColumnScale().get());
-					}
-					columnDefinition.append(')');
+					columnAnnotation.addMember("columnDefinition", "$S", columnDefinition.toString());
 				}
-				columnAnnotation.addMember("columnDefinition", "$S", columnDefinition.toString());
 			}
+			annotations.add(columnAnnotation.build());
+		} else {
+			annotations.add(AnnotationSpec.builder(Transient.class).build());
 		}
-		annotations.add(columnAnnotation.build());
 
 		return annotations;
 	}
@@ -914,7 +971,20 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	 *            the "getter" method to generate the statement in
 	 */
 	private static void addGetterStatement(RifField rifField, FieldSpec entityField, MethodSpec.Builder entityGetter) {
-		if (!rifField.isRifColumnOptional())
+		addGetterStatement(rifField.isRifColumnOptional(), entityField, entityGetter);
+	}
+
+	/**
+	 * @param optional
+	 *            <code>true</code> if the property is an {@link Optional} one,
+	 *            <code>false</code> otherwise
+	 * @param entityField
+	 *            the {@link FieldSpec} for the field being wrapped by the "getter"
+	 * @param entityGetter
+	 *            the "getter" method to generate the statement in
+	 */
+	private static void addGetterStatement(boolean optional, FieldSpec entityField, MethodSpec.Builder entityGetter) {
+		if (!optional)
 			entityGetter.addStatement("return $N", entityField);
 		else
 			entityGetter.addStatement("return $T.ofNullable($N)", Optional.class, entityField);
