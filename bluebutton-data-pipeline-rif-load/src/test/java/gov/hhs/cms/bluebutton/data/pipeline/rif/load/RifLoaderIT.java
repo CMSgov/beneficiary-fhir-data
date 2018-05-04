@@ -11,10 +11,14 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +27,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory_;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
@@ -57,14 +63,20 @@ public final class RifLoaderIT {
 		loadSample(StaticRifResourceGroup.SAMPLE_U);
 
 		/*
-		 * Verify that the updates worked as expected bymanually checking some
-		 * fields.
+		 * Verify that the updates worked as expected by manually checking some fields.
 		 */
 		LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
 		EntityManagerFactory entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(options);
 		EntityManager entityManager = null;
 		try {
 			entityManager = entityManagerFactory.createEntityManager();
+
+			CriteriaQuery<BeneficiaryHistory> beneficiaryHistoryCriteria = entityManager.getCriteriaBuilder()
+					.createQuery(BeneficiaryHistory.class);
+			List<BeneficiaryHistory> beneficiaryHistoryEntries = entityManager.createQuery(
+					beneficiaryHistoryCriteria.select(beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
+					.getResultList();
+			Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
 			Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
 			// Last Name inserted with value of "Doe"
@@ -170,7 +182,7 @@ public final class RifLoaderIT {
 			LOGGER.info("Checking DB for records for: {}", rifResource);
 			RifFilesEvent rifFilesEventSingle = new RifFilesEvent(Instant.now(), rifResource.toRifFile());
 			RifFileRecords rifFileRecordsCopy = processor.produceRecords(rifFilesEventSingle.getFileEvents().get(0));
-			assertAreInDatabase(entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
+			assertAreInDatabase(options, entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
 		}
 		LOGGER.info("All records found in DB.");
 	}
@@ -187,20 +199,47 @@ public final class RifLoaderIT {
 	/**
 	 * Verifies that the specified RIF records are actually in the database.
 	 * 
+	 * @param options
+	 *            the {@link LoadAppOptions} to use
 	 * @param entityManagerFactory
 	 *            the {@link EntityManagerFactory} to use
 	 * @param records
 	 *            the RIF records to verify
 	 */
-	private static void assertAreInDatabase(EntityManagerFactory entityManagerFactory, Stream<Object> records) {
+	private static void assertAreInDatabase(LoadAppOptions options, EntityManagerFactory entityManagerFactory,
+			Stream<Object> records) {
 		EntityManager entityManager = null;
 		try {
 			entityManager = entityManagerFactory.createEntityManager();
 
 			for (Object record : records.collect(Collectors.toList())) {
-				Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
-				Object recordFromDb = entityManager.find(record.getClass(), recordId);
-				Assert.assertNotNull(recordFromDb);
+				/*
+				 * We need to handle BeneficiaryHistory separately, as it has a generated ID.
+				 */
+				if (record instanceof BeneficiaryHistory) {
+					BeneficiaryHistory beneficiaryHistoryToFind = (BeneficiaryHistory) record;
+					beneficiaryHistoryToFind.setHicn(RifLoader.computeHicnHash(options,
+							RifLoader.createSecretKeyFactory(), beneficiaryHistoryToFind.getHicn()));
+
+					CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+					CriteriaQuery<BeneficiaryHistory> query = criteriaBuilder.createQuery(BeneficiaryHistory.class);
+					Root<BeneficiaryHistory> from = query.from(BeneficiaryHistory.class);
+					query.select(from).where(
+							criteriaBuilder.equal(from.get(BeneficiaryHistory_.beneficiaryId),
+									beneficiaryHistoryToFind.getBeneficiaryId()),
+							criteriaBuilder.equal(from.get(BeneficiaryHistory_.birthDate),
+									beneficiaryHistoryToFind.getBirthDate()),
+							criteriaBuilder.equal(from.get(BeneficiaryHistory_.sex), beneficiaryHistoryToFind.getSex()),
+							criteriaBuilder.equal(from.get(BeneficiaryHistory_.hicn),
+									beneficiaryHistoryToFind.getHicn()));
+					List<BeneficiaryHistory> beneficiaryHistoryFound = entityManager.createQuery(query).getResultList();
+					Assert.assertNotNull(beneficiaryHistoryFound);
+					Assert.assertFalse(beneficiaryHistoryFound.isEmpty());
+				} else {
+					Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
+					Object recordFromDb = entityManager.find(record.getClass(), recordId);
+					Assert.assertNotNull(recordFromDb);
+				}
 			}
 		} finally {
 			if (entityManager != null)

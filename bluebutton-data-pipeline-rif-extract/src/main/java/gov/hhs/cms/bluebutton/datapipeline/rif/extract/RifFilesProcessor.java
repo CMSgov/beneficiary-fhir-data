@@ -20,6 +20,8 @@ import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistoryParser;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryParser;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimParser;
@@ -78,6 +80,9 @@ public final class RifFilesProcessor {
 		if (file.getFileType() == RifFileType.BENEFICIARY) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildBeneficiaryEvent;
+		} else if (file.getFileType() == RifFileType.BENEFICIARY_HISTORY) {
+			isGrouped = false;
+			recordParser = RifFilesProcessor::buildBeneficiaryHistoryEvent;
 		} else if (file.getFileType() == RifFileType.PDE) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildPartDEvent;
@@ -166,6 +171,29 @@ public final class RifFilesProcessor {
 		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
 		Beneficiary beneficiaryRow = BeneficiaryParser.parseRif(csvRecords);
 		return new RifRecordEvent<Beneficiary>(fileEvent, recordAction, beneficiaryRow);
+	}
+
+	/**
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord} to be mapped (in a single-element
+	 *            {@link List}), which must be from a
+	 *            {@link RifFileType#BENEFICIARY_HISTORY} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
+	 */
+	private static RifRecordEvent<BeneficiaryHistory> buildBeneficiaryHistoryEvent(RifFileEvent fileEvent,
+			List<CSVRecord> csvRecords) {
+		if (csvRecords.size() != 1)
+			throw new BadCodeMonkeyException();
+		CSVRecord csvRecord = csvRecords.get(0);
+
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecord.toString());
+
+		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
+		BeneficiaryHistory beneficiaryHistoryRow = BeneficiaryHistoryParser.parseRif(csvRecords);
+		return new RifRecordEvent<BeneficiaryHistory>(fileEvent, recordAction, beneficiaryHistoryRow);
 	}
 
 	/**
