@@ -12,7 +12,6 @@
   vars:
     # "Compute Optimized" with 4 vCPUs, 7.5 GB RAM, $0.209/hour
     ec2_instance_type: "c4.xlarge"
-    #ec2_instance_type: "t2.micro"
   
   tasks:
     
@@ -30,6 +29,11 @@
         path: support
         state: directory
 
+    # The EC2 instances created within this AWS environment are not internet
+    # facing. So, assuming the host running this script is internet facing,
+    # download the jmeter package locally so it can be uploaded to the instances
+    # from this host.  Another strategy would be to just create an AMI used by
+    # the EC2 instances that already includes this package.
     - name: Download JMeter locally
       get_url:
         url: "http://archive.apache.org/dist/jmeter/binaries/apache-jmeter-{{ jmeter_version }}.tgz"
@@ -105,7 +109,6 @@
           CreatedBy: "{{ whoami.stdout }}"
       register: ec2_servers
     
-
     - name: Create inventory group 'client'
       add_host:
         hostname: "{{ item.private_dns_name }}"
