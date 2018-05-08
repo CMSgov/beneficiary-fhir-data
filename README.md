@@ -53,7 +53,7 @@ recommended to create an __extravars.yml__ file containing the following informa
 and pass it to the ansible script as demonstrated in [Running the
 tests](#running-the-tests).
 
-        ec2_key_name: <name of pem file to use when creating ec2 instances> 
+        ec2_key_name: <name of aws ec2 key(no pem extension) to use when creating ec2 instances> 
         profile: <environment profile name(i.e. bbfhir)>
         mfa_sn: <serial number of mfa device>
         num_servers: <number of jmeter slave servers to launch> 
