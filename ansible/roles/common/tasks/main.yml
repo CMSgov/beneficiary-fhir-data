@@ -1,24 +1,25 @@
 ---
 
-- name: Install Pre-requisites
-  yum:
-    name: "{{ item }}"
-    state: latest
-  with_items:
-    # Needed to supply `keytool` and also to run the app server.
-    - java-1.8.0-openjdk-devel
-  become: true
+# TODO: Removed jdk install because these instance are not internet facing and
+# they already have the jdk installed in the ami
+#- name: Install Pre-requisites
+#  yum:
+#    name: "{{ item }}"
+#    state: latest
+#  with_items:
+#    # Needed to supply `keytool` and also to run the app server.
+#    - java-1.8.0-openjdk-devel
+#  become: true
 
 - name: Create Directory Tree for '{{ remote_test_dir }}' 
   file: 
     path: "{{ remote_test_dir }}" 
     state: directory
 
-- name: Download and Unpack JMeter
+- name: Copy and Unpack JMeter
   unarchive: 
-    src: "http://archive.apache.org/dist/jmeter/binaries/apache-jmeter-{{ jmeter_version }}.tgz"
+    src: "support/apache-jmeter-{{ jmeter_version }}.tgz"
     dest: "{{ remote_test_dir }}"
-    copy: no
 
 - name: Fix JMeter Executable Permissions
   file: 

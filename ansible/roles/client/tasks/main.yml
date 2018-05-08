@@ -1,5 +1,11 @@
 ---
 
+#- name: create hello.txt
+#  shell: echo 'Hello World!' > /home/ec2-user/hello.txt
+#
+#- name: cat hello.txt 
+#  command: cat /home/ec2-user/hello.txt
+#
 - name: Copy Test Plan
   copy: 
     src: "{{ test_plan }}"
@@ -7,4 +13,4 @@
     owner: root
     group: root
     mode: 0664
-    
+  
