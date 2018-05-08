@@ -7,10 +7,10 @@ set of load and performance tests for the FHIR backend test server.
 
 ### Bluebutton-server Application
 
-This test suite has dependencies on the bluebutton-server application.  Clone
+This test suite has dependencies on the bluebutton-data-server application.  Clone
 that repo from: 
 
-https://github.com/HHSIDEAlab/bluebutton-server
+https://github.com/HHSIDEAlab/bluebutton-data-server
 
 Then be sure to run a _mvn clean install_ in the bluebutton-server repository
 before attempting to build this test suite.
@@ -46,10 +46,10 @@ steps to setup the environment:
         aws_access_key_id = <access key from csv file>
         aws_secret_access_key = <secret key from csv file> 
 
-### extravars.yml
+### Extra Variables
 
 To simplify the command line when running the ansible test scripts it is highly
-recommended to create an extravars.yml file containing the following information
+recommended to create an __extravars.yml__ file containing the following information
 and pass it to the ansible script as demonstrated in [Running the
 tests](#running-the-tests).
 
@@ -69,7 +69,7 @@ retrieve the serial number use the following steps:
   3. Select Users | __username__
   4. Select the __Security Credentials Tab__
   5. Locate __Assigned MFA device__ entry
-  6. Use this entry as the __mfa_sn__ entry in [extravars.yml](#extravars.yml) 
+  6. Use this entry as the __mfa_sn__ entry in [extravars.yml](#extra-variables)
 
 ## Running the tests
 
