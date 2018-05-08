@@ -69,7 +69,7 @@ retrieve the serial number use the following steps:
   3. Select Users | __username__
   4. Select the __Security Credentials Tab__
   5. Locate __Assigned MFA device__ entry
-  6. Use this entry as the __mfa_sn__ entry in [extravars.yml](#extravars-yml) 
+  6. Use this entry as the __mfa_sn__ entry in [extravars.yml](#extravars.yml) 
 
 ## Running the tests
 
