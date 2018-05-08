@@ -1,6 +1,6 @@
 ---
 
-# TODO: Removed jdk install because these instance are not internet facing and
+# Removed jdk install because these instance are not internet facing and
 # they already have the jdk installed in the ami
 #- name: Install Pre-requisites
 #  yum:

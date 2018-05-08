@@ -1,11 +1,5 @@
 ---
 
-#- name: create hello.txt
-#  shell: echo 'Hello World!' > /home/ec2-user/hello.txt
-#
-#- name: cat hello.txt 
-#  command: cat /home/ec2-user/hello.txt
-
 - name: Copy Stress Tests Library
   copy: 
     src: "{{ test_lib }}"
