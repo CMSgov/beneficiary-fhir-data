@@ -10,7 +10,7 @@ set of load and performance tests for the FHIR backend test server.
 This test suite has dependencies on the bluebutton-data-server application.  Clone
 that repo from: 
 
-https://github.com/HHSIDEAlab/bluebutton-data-server
+https://github.com/CMSgov/bluebutton-data-server
 
 Then be sure to run a _mvn clean install_ in the bluebutton-server repository
 before attempting to build this test suite.
