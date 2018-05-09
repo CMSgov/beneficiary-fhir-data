@@ -1,9 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -29,11 +26,9 @@ import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -162,16 +157,12 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link ExplanationOfBenefit}s
-	 * @param dateRangeParam
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link ExplanationOfBenefit}s by these dates
 	 * @return Returns a {@link List} of {@link ExplanationOfBenefit}s, which
 	 *         may contain multiple matching resources, or may also be empty.
 	 */
 	@Search
 	public List<ExplanationOfBenefit> findByPatient(
-			@RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient,
-			@OptionalParam(name = "billablePeriodDate") DateRangeParam dateRangeParam) {
+			@RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient) {
 		/*
 		 * The way our JPA/SQL schema is setup, we have to run a separate search
 		 * for each claim type, then combine the results. It's not super
@@ -179,30 +170,23 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 */
 		List<ExplanationOfBenefit> eobs = new LinkedList<>();
 
-		Optional<DateRangeParam> dateRange = null;
-		if (dateRangeParam == null)
-			dateRange = Optional.empty();
-		else
-			dateRange = Optional.of(dateRangeParam);
-
-		eobs.addAll(findCarrierClaimsByPatient(patient, dateRange).stream().map(ClaimType.CARRIER.getTransformer())
+		eobs.addAll(findCarrierClaimsByPatient(patient).stream().map(ClaimType.CARRIER.getTransformer())
 				.collect(Collectors.toList()));
-		eobs.addAll(findDMEClaimsByPatient(patient, dateRange).stream().map(ClaimType.DME.getTransformer())
+		eobs.addAll(findDMEClaimsByPatient(patient).stream().map(ClaimType.DME.getTransformer())
 				.collect(Collectors.toList()));
-		eobs.addAll(findHHAClaimsByPatient(patient, dateRange).stream().map(ClaimType.HHA.getTransformer())
+		eobs.addAll(findHHAClaimsByPatient(patient).stream().map(ClaimType.HHA.getTransformer())
 				.collect(Collectors.toList()));
-		eobs.addAll(findHospiceClaimsByPatient(patient, dateRange).stream().map(ClaimType.HOSPICE.getTransformer())
+		eobs.addAll(findHospiceClaimsByPatient(patient).stream().map(ClaimType.HOSPICE.getTransformer())
 				.collect(Collectors.toList()));
-		eobs.addAll(findInpatientClaimsByPatient(patient, dateRange).stream().map(ClaimType.INPATIENT.getTransformer())
+		eobs.addAll(findInpatientClaimsByPatient(patient).stream().map(ClaimType.INPATIENT.getTransformer())
 				.collect(Collectors.toList()));
-		eobs.addAll(findOutpatientClaimsByPatient(patient, dateRange).stream()
+		eobs.addAll(findOutpatientClaimsByPatient(patient).stream()
 				.map(ClaimType.OUTPATIENT.getTransformer()).collect(Collectors.toList()));
-		eobs.addAll(findPartDEventsByPatient(patient, dateRange).stream().map(ClaimType.PDE.getTransformer())
+		eobs.addAll(findPartDEventsByPatient(patient).stream().map(ClaimType.PDE.getTransformer())
 				.collect(Collectors.toList()));
-		eobs.addAll(findSNFClaimsByPatient(patient, dateRange).stream().map(ClaimType.SNF.getTransformer())
+		eobs.addAll(findSNFClaimsByPatient(patient).stream().map(ClaimType.SNF.getTransformer())
 				.collect(Collectors.toList()));
 		 
-
 		return eobs;
 	}
 
@@ -212,14 +196,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link CarrierClaim}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link CarrierClaim}s by these dates
 	 * @return the {@link CarrierClaim}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<CarrierClaim> findCarrierClaimsByPatient(ReferenceParam patient,
-			Optional<DateRangeParam> dateRange) {
+	private Collection<CarrierClaim> findCarrierClaimsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<CarrierClaim> criteria = builder.createQuery(CarrierClaim.class);
@@ -228,10 +208,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(CarrierClaim_.beneficiaryId), root.get(CarrierClaim_.dateFrom), dateRange);
+				root.get(CarrierClaim_.beneficiaryId));
 
 		List<CarrierClaim> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in CarrierClaims-claimEntities size is " + claimEntities.size());
 		return claimEntities;
 	}
 
@@ -242,13 +221,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link DMEClaim}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link DMEClaim}s by these dates
 	 * @return the {@link DMEClaim}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<DMEClaim> findDMEClaimsByPatient(ReferenceParam patient, Optional<DateRangeParam> dateRange) {
+	private Collection<DMEClaim> findDMEClaimsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<DMEClaim> criteria = builder.createQuery(DMEClaim.class);
@@ -257,10 +233,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(DMEClaim_.beneficiaryId), root.get(DMEClaim_.dateFrom), dateRange);
+				root.get(DMEClaim_.beneficiaryId));
 
 		List<DMEClaim> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in DMEClaims-claimEntities size is " + claimEntities.size());
 		return claimEntities;
 	}
 
@@ -269,13 +244,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link HHAClaim}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link HHAClaim}s by these dates
 	 * @return the {@link HHAClaim}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<HHAClaim> findHHAClaimsByPatient(ReferenceParam patient, Optional<DateRangeParam> dateRange) {
+	private Collection<HHAClaim> findHHAClaimsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<HHAClaim> criteria = builder.createQuery(HHAClaim.class);
@@ -284,10 +256,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(HHAClaim_.beneficiaryId), root.get(HHAClaim_.dateFrom), dateRange);
+				root.get(HHAClaim_.beneficiaryId));
 
 		List<HHAClaim> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in HHAClaims-claimEntities size is " + claimEntities.size());
 		return claimEntities;
 	}
 
@@ -296,14 +267,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link HospiceClaim}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link HospiceClaim}s by these dates
 	 * @return the {@link HospiceClaim}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<HospiceClaim> findHospiceClaimsByPatient(ReferenceParam patient,
-			Optional<DateRangeParam> dateRange) {
+	private Collection<HospiceClaim> findHospiceClaimsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<HospiceClaim> criteria = builder.createQuery(HospiceClaim.class);
@@ -312,10 +279,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(HospiceClaim_.beneficiaryId), root.get(HospiceClaim_.dateFrom), dateRange);
+				root.get(HospiceClaim_.beneficiaryId));
 
 		List<HospiceClaim> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in HospiceClaims-claimEntities size is " + claimEntities.size());
 		return claimEntities;
 	}
 
@@ -324,14 +290,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link InpatientClaim}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link InpatientClaim}s by these dates
 	 * @return the {@link InpatientClaim}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<InpatientClaim> findInpatientClaimsByPatient(ReferenceParam patient,
-			Optional<DateRangeParam> dateRange) {
+	private Collection<InpatientClaim> findInpatientClaimsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<InpatientClaim> criteria = builder.createQuery(InpatientClaim.class);
@@ -340,10 +302,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(InpatientClaim_.beneficiaryId), root.get(InpatientClaim_.dateFrom), dateRange);
+				root.get(InpatientClaim_.beneficiaryId));
 
 		List<InpatientClaim> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in InpatientClaims-claimEntities size is " + claimEntities.size());
 
 		return claimEntities;
 	}
@@ -353,14 +314,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link OutpatientClaim}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link OutpatientClaim}s by these dates
 	 * @return the {@link OutpatientClaim}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<OutpatientClaim> findOutpatientClaimsByPatient(ReferenceParam patient,
-			Optional<DateRangeParam> dateRange) {
+	private Collection<OutpatientClaim> findOutpatientClaimsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<OutpatientClaim> criteria = builder.createQuery(OutpatientClaim.class);
@@ -369,11 +326,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(OutpatientClaim_.beneficiaryId), root.get(OutpatientClaim_.dateFrom), dateRange);
-
+				root.get(OutpatientClaim_.beneficiaryId));
 
 		List<OutpatientClaim> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in OutpatientClaims-claimEntities size is " + claimEntities.size());
 		return claimEntities;
 	}
 
@@ -382,14 +337,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link PartDEvent}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link PartDEvent}s by these dates
 	 * @return the {@link PartDEvent}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<PartDEvent> findPartDEventsByPatient(ReferenceParam patient,
-			Optional<DateRangeParam> dateRange) {
+	private Collection<PartDEvent> findPartDEventsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<PartDEvent> criteria = builder.createQuery(PartDEvent.class);
@@ -398,10 +349,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(PartDEvent_.beneficiaryId), root.get(PartDEvent_.prescriptionFillDate), dateRange);
+				root.get(PartDEvent_.beneficiaryId));
 
 		List<PartDEvent> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in PartD-claimEntities size is " + claimEntities.size());
 
 		return claimEntities;
 	}
@@ -411,13 +361,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            a {@link ReferenceParam} for the
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find
 	 *            matches for {@link SNFClaim}s
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link SNFClaim}s by these dates
 	 * @return the {@link SNFClaim}s
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Collection<SNFClaim> findSNFClaimsByPatient(ReferenceParam patient, Optional<DateRangeParam> dateRange) {
+	private Collection<SNFClaim> findSNFClaimsByPatient(ReferenceParam patient) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<SNFClaim> criteria = builder.createQuery(SNFClaim.class);
@@ -426,11 +373,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.select(root);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
-				root.get(SNFClaim_.beneficiaryId), root.get(SNFClaim_.dateFrom), dateRange);
-
+				root.get(SNFClaim_.beneficiaryId));
 
 		List<SNFClaim> claimEntities = entityManager.createQuery(criteriaQuery).getResultList();
-		LOGGER.info("deh-info in SNFClaims-claimEntities size is " + claimEntities.size());
 
 		return claimEntities;
 	}
@@ -448,60 +393,15 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            {@link CriteriaBuilder} for the search
 	 * @param beneficiaryIdPath
 	 *            {@link Path} for the beneficiaryId
-	 * @param dateFromPath
-	 *            {@link Path} for the service from date (fill date for PartD)
-	 * @param dateRange
-	 *            a {@link DateRangeParam} can be used to search for
-	 *            {@link ExplanationOfBenefit}s by these dates
 	 * @return the {@link CriteriaQuery}
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private CriteriaQuery createSearchCriteria(CriteriaQuery criteria, ReferenceParam patient, Root root,
-			CriteriaBuilder builder, Path beneficiaryIdPath, Path dateFromPath, Optional<DateRangeParam> dateRange) {
+			CriteriaBuilder builder, Path beneficiaryIdPath) {
 		
 		// FIXME completely ignores the patient param's system
 
-		// no search dates were supplied in the url
-		if (!dateRange.isPresent()) {
-			criteria.where(builder.equal(beneficiaryIdPath, patient.getIdPart()));
-			LOGGER.info("deh- dateRange is empty");
-			return criteria;
-		}
-
-		Date from = dateRange.get().getLowerBoundAsInstant();
-		Date to = dateRange.get().getUpperBoundAsInstant();
-		LOGGER.info("deh-..from date - " + from);
-		LOGGER.info("deh-..to date - " + to);
-		// only one search date was supplied with a greater than or equal to
-		// operator in the url
-		if (dateRange.get().getUpperBoundAsInstant() == null) {
-			Comparable dateRangeLowerBound = LocalDateTime
-					.ofInstant(dateRange.get().getLowerBoundAsInstant().toInstant(), ZoneId.systemDefault())
-					.toLocalDate();
-			criteria.where(builder.and(builder.equal(beneficiaryIdPath, patient.getIdPart()),
-					builder.greaterThanOrEqualTo(dateFromPath, dateRangeLowerBound)));
-			return criteria;
-		}
-
-		// only one search date was supplied with a less than or equal to
-		// operator in the url
-		if (dateRange.get().getLowerBoundAsInstant() == null) {
-			Comparable dateRangeUpperBound = LocalDateTime
-					.ofInstant(dateRange.get().getUpperBoundAsInstant().toInstant(), ZoneId.systemDefault())
-					.toLocalDate();
-			criteria.where(builder.and(builder.equal(beneficiaryIdPath, patient.getIdPart()),
-					builder.lessThanOrEqualTo(dateFromPath, dateRangeUpperBound)));
-			return criteria;
-		}
-
-		// both lower bound and upper bound search dates were supplied in the
-		// url
-		Comparable dateRangeLowerBound = LocalDateTime
-				.ofInstant(dateRange.get().getLowerBoundAsInstant().toInstant(), ZoneId.systemDefault()).toLocalDate();
-		Comparable dateRangeUpperBound = LocalDateTime
-				.ofInstant(dateRange.get().getUpperBoundAsInstant().toInstant(), ZoneId.systemDefault()).toLocalDate();
-		criteria.where(builder.and(builder.equal(beneficiaryIdPath, patient.getIdPart()),
-						builder.between(dateFromPath, dateRangeLowerBound, dateRangeUpperBound)));
+		criteria.where(builder.equal(beneficiaryIdPath, patient.getIdPart()));
 		return criteria;
 	}
 }
