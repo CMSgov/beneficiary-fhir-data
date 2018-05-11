@@ -205,7 +205,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<CarrierClaim> criteria = builder.createQuery(CarrierClaim.class);
 		Root<CarrierClaim> root = criteria.from(CarrierClaim.class);
 		ClaimType.CARRIER.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(CarrierClaim_.beneficiaryId));
@@ -230,7 +230,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<DMEClaim> criteria = builder.createQuery(DMEClaim.class);
 		Root<DMEClaim> root = criteria.from(DMEClaim.class);
 		ClaimType.DME.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(DMEClaim_.beneficiaryId));
@@ -253,7 +253,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<HHAClaim> criteria = builder.createQuery(HHAClaim.class);
 		Root<HHAClaim> root = criteria.from(HHAClaim.class);
 		ClaimType.HHA.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(HHAClaim_.beneficiaryId));
@@ -276,7 +276,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<HospiceClaim> criteria = builder.createQuery(HospiceClaim.class);
 		Root<HospiceClaim> root = criteria.from(HospiceClaim.class);
 		ClaimType.HOSPICE.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(HospiceClaim_.beneficiaryId));
@@ -299,7 +299,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<InpatientClaim> criteria = builder.createQuery(InpatientClaim.class);
 		Root<InpatientClaim> root = criteria.from(InpatientClaim.class);
 		ClaimType.INPATIENT.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(InpatientClaim_.beneficiaryId));
@@ -323,7 +323,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<OutpatientClaim> criteria = builder.createQuery(OutpatientClaim.class);
 		Root<OutpatientClaim> root = criteria.from(OutpatientClaim.class);
 		ClaimType.OUTPATIENT.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(OutpatientClaim_.beneficiaryId));
@@ -346,7 +346,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<PartDEvent> criteria = builder.createQuery(PartDEvent.class);
 		Root<PartDEvent> root = criteria.from(PartDEvent.class);
 		ClaimType.PDE.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(PartDEvent_.beneficiaryId));
@@ -370,7 +370,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		CriteriaQuery<SNFClaim> criteria = builder.createQuery(SNFClaim.class);
 		Root<SNFClaim> root = criteria.from(SNFClaim.class);
 		ClaimType.SNF.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root);
+		criteria.select(root).distinct(true);
 
 		CriteriaQuery criteriaQuery = createSearchCriteria(criteria, patient, root, builder,
 				root.get(SNFClaim_.beneficiaryId));

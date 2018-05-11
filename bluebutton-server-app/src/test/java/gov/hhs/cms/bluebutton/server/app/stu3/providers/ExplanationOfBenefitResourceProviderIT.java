@@ -1,9 +1,12 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -440,6 +443,47 @@ public final class ExplanationOfBenefitResourceProviderIT {
 						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.SNF.name()))
 				.findFirst().get();
 		SNFClaimTransformerTest.assertMatches(snfClaim, snfClaimFromSearchResult);
+	}
+
+	/**
+	 * <p>
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * doesn't return duplicate results.
+	 * </p>
+	 * <p>
+	 * This is a regression test case for TODO.
+	 * </p>
+	 *
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsHasNoDupes() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r).forEach(beneficiary -> {
+			Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+					.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+					.returnBundle(Bundle.class).execute();
+			Assert.assertNotNull(searchResults);
+
+			/*
+			 * Verify that the returned Bundle doesn't have any resources with duplicate
+			 * IDs.
+			 */
+			Set<String> claimIds = new HashSet<>();
+			for (BundleEntryComponent searchResultEntry : searchResults.getEntry()) {
+				String resourceId = searchResultEntry.getResource().getId();
+				if (claimIds.contains(resourceId))
+					Assert.assertFalse(claimIds.contains(resourceId));
+				claimIds.add(resourceId);
+			}
+			if (searchResults.getTotal() > 0)
+				Assert.assertFalse(claimIds.isEmpty());
+		});
 	}
 
 	/**
