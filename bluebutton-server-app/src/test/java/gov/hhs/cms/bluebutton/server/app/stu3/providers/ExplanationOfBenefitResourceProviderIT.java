@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -366,83 +367,40 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		CarrierClaim carrierClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
 				.map(r -> (CarrierClaim) r).findFirst().get();
-		ExplanationOfBenefit carrierClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.CARRIER.name()))
-				.findFirst().get();
-		CarrierClaimTransformerTest.assertMatches(carrierClaim, carrierClaimFromSearchResult);
+		Assert.assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+		CarrierClaimTransformerTest.assertMatches(carrierClaim,
+				filterToClaimType(searchResults, ClaimType.CARRIER).get(0));
 
 		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit dmeClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.DME.name()))
-				.findFirst().get();
-		DMEClaimTransformerTest.assertMatches(dmeClaim, dmeClaimFromSearchResult);
+		DMEClaimTransformerTest.assertMatches(dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0));
 
 		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit hhaClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.HHA.name()))
-				.findFirst().get();
-		HHAClaimTransformerTest.assertMatches(hhaClaim, hhaClaimFromSearchResult);
+		HHAClaimTransformerTest.assertMatches(hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
 
 		HospiceClaim hospiceClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim)
 				.map(r -> (HospiceClaim) r).findFirst().get();
-		ExplanationOfBenefit hospiceClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.HOSPICE.name()))
-				.findFirst().get();
-		HospiceClaimTransformerTest.assertMatches(hospiceClaim, hospiceClaimFromSearchResult);
+		HospiceClaimTransformerTest.assertMatches(hospiceClaim,
+				filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
 
 		InpatientClaim inpatientClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
 				.map(r -> (InpatientClaim) r).findFirst().get();
-		ExplanationOfBenefit inpatientClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.INPATIENT.name()))
-				.findFirst().get();
-		InpatientClaimTransformerTest.assertMatches(inpatientClaim, inpatientClaimFromSearchResult);
+		InpatientClaimTransformerTest.assertMatches(inpatientClaim,
+				filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
 
 		OutpatientClaim outpatientClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
 				.map(r -> (OutpatientClaim) r).findFirst().get();
-		ExplanationOfBenefit outpatientClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.OUTPATIENT.name()))
-				.findFirst().get();
-		OutpatientClaimTransformerTest.assertMatches(outpatientClaim, outpatientClaimFromSearchResult);
+		OutpatientClaimTransformerTest.assertMatches(outpatientClaim,
+				filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
 
 		PartDEvent partDEvent = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
-		ExplanationOfBenefit partDEventFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.PDE.name()))
-				.findFirst().get();
-		PartDEventTransformerTest.assertMatches(partDEvent, partDEventFromSearchResult);
+		PartDEventTransformerTest.assertMatches(partDEvent, filterToClaimType(searchResults, ClaimType.PDE).get(0));
 
 		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit snfClaimFromSearchResult = (ExplanationOfBenefit) searchResults.getEntry().stream()
-				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
-				.map(e -> (ExplanationOfBenefit) e.getResource())
-				.filter(e -> TransformerTestUtils.isCodeInConcept(e.getType(),
-						TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, ClaimType.SNF.name()))
-				.findFirst().get();
-		SNFClaimTransformerTest.assertMatches(snfClaim, snfClaimFromSearchResult);
+		SNFClaimTransformerTest.assertMatches(snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
 	}
 
 	/**
@@ -511,5 +469,23 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
 		ServerTestUtils.cleanDatabaseServer();
+	}
+
+	/**
+	 * @param bundle
+	 *            the {@link Bundle} to filter
+	 * @param claimType
+	 *            the {@link ClaimType} to use as a filter
+	 * @return a filtered {@link List} of the {@link ExplanationOfBenefit}s from the
+	 *         specified {@link Bundle} that match the specified {@link ClaimType}
+	 */
+	private static List<ExplanationOfBenefit> filterToClaimType(Bundle bundle, ClaimType claimType) {
+		List<ExplanationOfBenefit> carrierClaimResults = bundle.getEntry().stream()
+				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
+				.map(e -> (ExplanationOfBenefit) e.getResource()).filter(e -> {
+					return TransformerTestUtils.isCodeInConcept(e.getType(),
+							TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, claimType.name());
+				}).collect(Collectors.toList());
+		return carrierClaimResults;
 	}
 }
