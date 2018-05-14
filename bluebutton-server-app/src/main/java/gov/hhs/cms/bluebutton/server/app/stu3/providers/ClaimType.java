@@ -40,8 +40,7 @@ enum ClaimType {
 	CARRIER(CarrierClaim.class, CarrierClaim_.claimId, CarrierClaim_.beneficiaryId, CarrierClaimTransformer::transform,
 			CarrierClaim_.lines),
 	
-	DME(DMEClaim.class, DMEClaim_.claimId, CarrierClaim_.beneficiaryId, DMEClaimTransformer::transform,
-			DMEClaim_.lines),
+	DME(DMEClaim.class, DMEClaim_.claimId, DMEClaim_.beneficiaryId, DMEClaimTransformer::transform, DMEClaim_.lines),
 	
 	HHA(HHAClaim.class, HHAClaim_.claimId, HHAClaim_.beneficiaryId, HHAClaimTransformer::transform, HHAClaim_.lines),
 
