@@ -1,11 +1,14 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -27,6 +30,8 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory_;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary_;
 
 /**
@@ -199,14 +204,50 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (hicnHash == null || hicnHash.trim().isEmpty())
 			throw new IllegalArgumentException();
 
+		/*
+		 * Beneficiaries' HICNs can change over time and those past HICNs may land in
+		 * BeneficiaryHistory records. Accordingly, we need to search for matching HICNs
+		 * in both the Beneficiary and the BeneficiaryHistory records. Once a match is
+		 * found, we return the Beneficiary data for the matched `beneficiaryId`.
+		 */
+
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		Set<String> matchingBeneficiaryIds = new HashSet<>();
 
-		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
-		Root<Beneficiary> root = criteria.from(Beneficiary.class);
-		criteria.select(root);
-		criteria.where(builder.equal(root.get(Beneficiary_.hicn), hicnHash));
+		// Search the Beneficiary records for HICN matches.
+		CriteriaQuery<String> beneHicnQuery = builder.createQuery(String.class);
+		Root<Beneficiary> beneHicnQueryRoot = beneHicnQuery.from(Beneficiary.class);
+		beneHicnQuery.select(beneHicnQueryRoot.get(Beneficiary_.beneficiaryId));
+		beneHicnQuery.where(builder.equal(beneHicnQueryRoot.get(Beneficiary_.hicn), hicnHash));
+		matchingBeneficiaryIds.addAll(entityManager.createQuery(beneHicnQuery).getResultList());
 
-		Beneficiary beneficiary = entityManager.createQuery(criteria).getSingleResult();
+		// Search the BeneficiaryHistory records for HICN matches.
+		CriteriaQuery<String> beneHistoryHicnQuery = builder.createQuery(String.class);
+		Root<BeneficiaryHistory> beneHistoryHicnQueryRoot = beneHistoryHicnQuery.from(BeneficiaryHistory.class);
+		beneHistoryHicnQuery.select(beneHistoryHicnQueryRoot.get(BeneficiaryHistory_.beneficiaryId));
+		beneHistoryHicnQuery.where(builder.equal(beneHistoryHicnQueryRoot.get(BeneficiaryHistory_.hicn), hicnHash));
+		matchingBeneficiaryIds.addAll(entityManager.createQuery(beneHistoryHicnQuery).getResultList());
+
+		/*
+		 * Because data is always dirty, we watch out for and throw an error if no
+		 * matches are found or if more than one match is found.
+		 */
+		if (matchingBeneficiaryIds.size() <= 0) {
+			throw new NoResultException();
+		} else if (matchingBeneficiaryIds.size() > 1) {
+			throw new NonUniqueResultException();
+		}
+
+		/*
+		 * Try to pull the Beneficiary record for the (sole) matching beneficiaryId.
+		 * Because the BeneficiaryHistory table doesn't have a FK to the Beneficiary
+		 * table, we watch out for cases where a matching Beneficiary can't be found
+		 * (again: data is always dirty).
+		 */
+		Beneficiary beneficiary = entityManager.find(Beneficiary.class, matchingBeneficiaryIds.iterator().next());
+		if (beneficiary == null) {
+			throw new NoResultException();
+		}
 
 		Patient patient = BeneficiaryTransformer.transform(beneficiary);
 		return patient;
