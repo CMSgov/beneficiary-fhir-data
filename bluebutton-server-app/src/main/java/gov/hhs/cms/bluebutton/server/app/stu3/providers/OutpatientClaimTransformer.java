@@ -7,6 +7,8 @@ import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -20,15 +22,23 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel
  */
 final class OutpatientClaimTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param claim
 	 *            the CCW {@link OutpatientClaim} to transform
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
 	 *         specified {@link OutpatientClaim}
 	 */
-	static ExplanationOfBenefit transform(Object claim) {
+	static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(OutpatientClaimTransformer.class.getSimpleName(), "transform")).time();
+
 		if (!(claim instanceof OutpatientClaim))
 			throw new BadCodeMonkeyException();
-		return transformClaim((OutpatientClaim) claim);
+		ExplanationOfBenefit eob = transformClaim((OutpatientClaim) claim);
+
+		timer.stop();
+		return eob;
 	}
 
 	/**

@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -19,46 +21,56 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
  */
 final class CoverageTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param medicareSegment
 	 *            the {@link MedicareSegment} to generate a {@link Coverage}
 	 *            resource for
 	 * @param beneficiary
-	 *            the {@link Beneficiary} to generate a {@link Coverage}
-	 *            resource for
+	 *            the {@link Beneficiary} to generate a {@link Coverage} resource
+	 *            for
 	 * @return the {@link Coverage} resource that was generated
 	 */
-	public static Coverage transform(MedicareSegment medicareSegment, Beneficiary beneficiary) {
+	public static Coverage transform(MetricRegistry metricRegistry, MedicareSegment medicareSegment,
+			Beneficiary beneficiary) {
 		Objects.requireNonNull(medicareSegment);
 
 		if (medicareSegment == MedicareSegment.PART_A)
-			return transformPartA(beneficiary);
+			return transformPartA(metricRegistry, beneficiary);
 		else if (medicareSegment == MedicareSegment.PART_B)
-			return transformPartB(beneficiary);
+			return transformPartB(metricRegistry, beneficiary);
 		else if (medicareSegment == MedicareSegment.PART_D)
-			return transformPartD(beneficiary);
+			return transformPartD(metricRegistry, beneficiary);
 		else
 			throw new BadCodeMonkeyException();
 	}
 
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param beneficiary
-	 *            the CCW {@link Beneficiary} to generate the {@link Coverage}s
-	 *            for
-	 * @return the FHIR {@link Coverage} resources that can be generated from
-	 *         the specified {@link Beneficiary}
+	 *            the CCW {@link Beneficiary} to generate the {@link Coverage}s for
+	 * @return the FHIR {@link Coverage} resources that can be generated from the
+	 *         specified {@link Beneficiary}
 	 */
-	public static List<Coverage> transform(Beneficiary beneficiary) {
-		return Arrays.stream(MedicareSegment.values()).map(s -> transform(s, beneficiary)).collect(Collectors.toList());
+	public static List<Coverage> transform(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+		return Arrays.stream(MedicareSegment.values()).map(s -> transform(metricRegistry, s, beneficiary))
+				.collect(Collectors.toList());
 	}
 
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param beneficiary
 	 *            the {@link Beneficiary} to generate a
 	 *            {@link MedicareSegment#PART_A} {@link Coverage} resource for
 	 * @return {@link MedicareSegment#PART_A} {@link Coverage} resource for the
 	 *         specified {@link Beneficiary}
 	 */
-	private static Coverage transformPartA(Beneficiary beneficiary) {
+	private static Coverage transformPartA(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(CoverageTransformer.class.getSimpleName(), "transform", "part_a")).time();
+
 		Objects.requireNonNull(beneficiary);
 
 		Coverage coverage = new Coverage();
@@ -94,17 +106,23 @@ final class CoverageTransformer {
 					beneficiary.getPartATerminationCode()));
 		}
 
+		timer.stop();
 		return coverage;
 	}
 
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param beneficiary
 	 *            the {@link Beneficiary} to generate a
 	 *            {@link MedicareSegment#PART_B} {@link Coverage} resource for
 	 * @return {@link MedicareSegment#PART_B} {@link Coverage} resource for the
 	 *         specified {@link Beneficiary}
 	 */
-	private static Coverage transformPartB(Beneficiary beneficiary) {
+	private static Coverage transformPartB(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(CoverageTransformer.class.getSimpleName(), "transform", "part_b")).time();
+
 		Objects.requireNonNull(beneficiary);
 
 		Coverage coverage = new Coverage();
@@ -128,17 +146,23 @@ final class CoverageTransformer {
 					beneficiary.getPartBTerminationCode()));
 		}
 
+		timer.stop();
 		return coverage;
 	}
 
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param beneficiary
 	 *            the {@link Beneficiary} to generate a
 	 *            {@link MedicareSegment#PART_D} {@link Coverage} resource for
 	 * @return {@link MedicareSegment#PART_D} {@link Coverage} resource for the
 	 *         specified {@link Beneficiary}
 	 */
-	private static Coverage transformPartD(Beneficiary beneficiary) {
+	private static Coverage transformPartD(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(CoverageTransformer.class.getSimpleName(), "transform", "part_d")).time();
+
 		Objects.requireNonNull(beneficiary);
 
 		Coverage coverage = new Coverage();
@@ -154,6 +178,7 @@ final class CoverageTransformer {
 					beneficiary.getMedicareEnrollmentStatusCode()));
 		}
 
+		timer.stop();
 		return coverage;
 	}
 }

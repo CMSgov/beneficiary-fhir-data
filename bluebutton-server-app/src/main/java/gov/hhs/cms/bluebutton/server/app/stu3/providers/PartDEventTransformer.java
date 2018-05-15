@@ -12,6 +12,8 @@ import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -24,15 +26,23 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
  */
 final class PartDEventTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param claim
 	 *            the CCW {@link PartDEvent} to transform
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
 	 *         specified {@link PartDEvent}
 	 */
-	static ExplanationOfBenefit transform(Object claim) {
+	static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform")).time();
+
 		if (!(claim instanceof PartDEvent))
 			throw new BadCodeMonkeyException();
-		return transformClaim((PartDEvent) claim);
+		ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
+
+		timer.stop();
+		return eob;
 	}
 
 	/**
