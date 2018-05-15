@@ -115,6 +115,14 @@
 				via `web.xml`. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-servlet</artifactId>
+			<version>${metrics.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled
+				via `web.xml`. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-servlets</artifactId>
+			<version>${metrics.version}</version>
 		</dependency>
 
 		<dependency>
