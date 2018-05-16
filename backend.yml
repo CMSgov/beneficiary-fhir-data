@@ -5,7 +5,7 @@
 # stored in encrypted Ansible Vault files. Those files can be edited using the 
 # `ansible-vault` command, e.g.:
 # 
-#     $ `ansible-vault edit group_vars/env_production/vault.yml`.
+#     $ `ansible-vault edit group_vars/env_prod/vault.yml`.
 ##
 
 - name: Add SSH Host Keys

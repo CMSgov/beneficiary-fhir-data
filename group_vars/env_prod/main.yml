@@ -1,5 +1,5 @@
 ---
-authorized_client_certificates:
+data_server_ssl_client_certificates:
 # Uncomment this temporarily if you have a local test certificate you need to use for a bit.
 #  - alias: client_test
 #    certificate: "{{ lookup('file', 'dev/client-test-certificate.pem') }}"

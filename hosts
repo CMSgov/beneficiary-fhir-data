@@ -13,24 +13,42 @@ bluebutton-healthapt-lss-builds
 
 [data_pipeline_systems]
 bluebutton-healthapt-test-data-pipeline
-bluebutton-healthapt-prod-az-a-data-pipeline
+bluebutton-healthapt-prod-data-pipeline
 
 [data_server_systems]
-bluebutton-healthapt-test-data-server
-bluebutton-healthapt-prod-az-a-data-server
+bluebutton-healthapt-test-data-server-a-1
+bluebutton-healthapt-test-data-server-b-1
+bluebutton-healthapt-prod-data-server-a-1
+bluebutton-healthapt-prod-data-server-b-1
 
-# This environment-wide group allows us to store all of the security-sensitive
-# variables for each environment in a single Ansible Vault file:
+
+##
+# These environment-wide groups allow us to store all of the security-sensitive
+# variables for each environment in separate Ansible Vault files, e.g.:
 #
 #     $ ansible-vault edit group_vars/env_test/vault.yml
+##
+
 [env_test]
 bluebutton-healthapt-test-data-pipeline
-bluebutton-healthapt-test-data-server
+bluebutton-healthapt-test-data-server-a-1
+bluebutton-healthapt-test-data-server-b-1
 
-# This environment-wide group allows us to store all of the security-sensitive
-# variables for each environment in a single Ansible Vault file:
-#
-#     $ ansible-vault edit group_vars/env_production_az_a/vault.yml
-[env_production_az_a]
-bluebutton-healthapt-prod-az-a-data-pipeline
-bluebutton-healthapt-prod-az-a-data-server
+[env_test_az_a]
+bluebutton-healthapt-test-data-pipeline
+bluebutton-healthapt-test-data-server-a-1
+
+[env_test_az_b]
+bluebutton-healthapt-test-data-server-b-1
+
+[env_prod]
+bluebutton-healthapt-prod-data-pipeline
+bluebutton-healthapt-prod-data-server-a-1
+bluebutton-healthapt-prod-data-server-b-1
+
+[env_prod_az_a]
+bluebutton-healthapt-prod-data-pipeline
+bluebutton-healthapt-prod-data-server-a-1
+
+[env_prod_az_b]
+bluebutton-healthapt-prod-data-server-b-1
