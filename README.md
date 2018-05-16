@@ -45,33 +45,41 @@ Run the following command to download and install the roles required by this pro
 
 ### SSH
 
-These playbooks rely on SSH host aliases, which must be configured in your `~/.ssh/config` file. Here's an example with fake IPs and user names (ask a HealthAPT sysadmin for the correct values):
+These playbooks rely on SSH host aliases, which must be configured in your `~/.ssh/config` file. See how this file is created for Jenkins in the `roles/builds_jenkins/templates/ssh_config.j2` template. You'll need to speak with HealthAPT system admins to get the account, SSH access, and keys that will be needed for this to work.
 
-```
-Host bluebutton-healthapt-prod-data-pipeline
-  HostName 1.2.3.4
-  User myusername
-  IdentityFile ~/workspaces/cms/healthapt-aws-sshkey.pem
-
-Host bluebutton-healthapt-prod-data-server
-  HostName 1.2.3.5
-  User myusername
-  IdentityFile ~/workspaces/cms/healthapt-aws-sshkey.pem
-```
-
-## Ansible Vault Password
+### Ansible Vault Password
 
 The security-sensitive values used in these playbooks (e.g. usernames, passwords, etc.) are encrypted using [Ansible Vault](http://docs.ansible.com/ansible/playbooks_vault.html). In order to view these values or run the plays you will need a copy of the project's `vault.password` file. Please this file in the root of the project, and ensure that it is only readable by your user account. **Never** commit it to source control! (Git is configured to ignore it via [.gitignore](./.gitignore).)
 
-If you don't have this file, you will receive errors like the following when trying to run the playbooks:
+### AWS API Security Tokens
 
-    TODO
+The AWS accounts used for the systems being managed are configured to require multi-factor authentication. You'll first need to ensure that you have set this up such that you can login to the AWS account's web console (speak with HealthAPT system administrators for the URL and assistance with this). Once you can login to the web console, ensure that you've created an API key for your user and configured it as a profile in `~/.aws/credentials`, e.g.:
+
+```
+# These AWS keys are for my user in the Blue Button 2.0 Backend AWS account.
+[bluebutton_backend]
+aws_access_key_id = foo
+aws_secret_access_key = bar
+```
+
+Due to the MFA requirements, though, that access key won't be useable by itself. Instead, you'll have to configure an additional profile in `~/.aws/credentials` with a valid MFA/session token, e.g.:
+
+```
+[bluebutton_backend_mfa]
+aws_secret_access_key = fizz
+aws_session_token = buzz
+aws_access_key_id = whoozit
+```
+
+You can Google around for how to generate this. Or, much more simply, you can use the provided `aws-mfa-refresh.sh` script to automatically generate/update it as needed (be sure to use the correct `mfa-serial-number` value, as listed in IAM for your user):
+
+    $ ./aws-mfa-refresh.sh --source-profile=bluebutton_backend --mfa-serial-number arn:aws:iam::11111111:mfa/myuser
 
 ## Running the Playbooks
 
 The playbooks can be run, as follows:
 
-    $ ansible-playbook backend.yml --inventory-file=hosts_production --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT" |& tee "logs/ansible-production-$(date --iso-8601=seconds).log"
+    $ ./ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds:env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"
 
 The `extra-vars` in that command may need to be adjusted:
 
@@ -85,4 +93,3 @@ This project is in the worldwide [public domain](LICENSE.md). As stated in [CONT
 > This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 >
 > All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
-
