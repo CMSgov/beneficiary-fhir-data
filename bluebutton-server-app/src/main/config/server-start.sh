@@ -1,8 +1,23 @@
 #!/bin/bash
 
+# Check to see if we are running in Cygwin.
+case "$( uname )" in
+	CYGWIN*) cygwin=true ;;
+	*) cygwin=false ;;
+esac
+
+# In Cygwin, some of the args will have unescaped backslashes. Fix that.
+if [[ "${cygwin}" = true ]]; then
+	set -- "${@//\\/\\\\}"
+fi
+
 # Makes debugging problems a lot easier if this is always logged.
 echo "Server start script is being run as follows:"
-echo -e "$0 $@\n"
+if [[ "${cygwin}" = true ]]; then
+	echo -e "${0//\\/\\\\} $@\n"
+else
+	echo -e "$0 $@\n"
+fi
 
 # Constants.
 serverVersion='8.1.0.Final'
@@ -14,12 +29,6 @@ dbPassword=""
 
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# Check to see if we are running in Cygwin.
-case "$( uname )" in
-	CYGWIN*) cygwin=true ;;
-	*) cygwin=false ;;
-esac
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
@@ -57,13 +66,16 @@ done
 if [[ -z "${targetDirectory}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
 
 # In Cygwin, some of those paths will come in as Windows-formatted. Fix that.
-if [[ "${cygwin}" = true ]]; then targetDirectory=$(cygpath --unix "${targetDirectory}"); fi
+if [[ "${cygwin}" = true ]]; then
+	if [[ ! -z "${javaHome}" ]]; then javaHome="$(cygpath --unix ${javaHome})"; fi
+	if [[ ! -z "${visualVm}" ]]; then visualVm="$(cygpath --unix ${visualVm})"; fi
+	if [[ ! -z "${targetDirectory}" ]]; then targetDirectory="$(cygpath --unix ${targetDirectory})"; fi
+fi
 
 # Verify that java was found.
 if [[ -z "${javaHome}" ]]; then
 	command -v java >/dev/null 2>&1 || { echo >&2 "Java not found. Specify -j option."; exit 1; }
 else
-	if [[ "${cygwin}" = true ]]; then javaHome=$(cygpath --unix "${javaHome}"); fi
 	command -v "${javaHome}/bin/java" >/dev/null 2>&1 || { echo >&2 "Java not found in -j: '${javaHome}'"; exit 1; }
 fi
 
@@ -107,9 +119,9 @@ for f in "${serverArtifact}" "${serverPortsFile}" "${warArtifact}" "${keyStore}"
 done
 
 # In Cygwin, some of those paths need to be Windows-formatted. Do that.
-if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact}"); fi
-if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --windows "${keyStore}"); fi
-if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --windows "${trustStore}"); fi
+if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact}"); warArtifact="${warArtifact//\\/\\\\}"; fi
+if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
+if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
 
 # If the server install already exists, clean it out to start fresh.
 if [[ -d "${serverHome}" ]]; then
@@ -127,9 +139,9 @@ if [[ ! -d "${serverHome}" ]]; then
 fi
 
 # Read the server ports to be used from the ports file.
-serverPortManagement=$(grep "^server.port.management=" "${serverPortsFile}" | cut -d'=' -f2 )
-serverPortHttp=$(grep "^server.port.http=" "${serverPortsFile}" | cut -d'=' -f2 )
-serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | cut -d'=' -f2 )
+serverPortManagement=$(grep "^server.port.management=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )
+serverPortHttp=$(grep "^server.port.http=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )
+serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )
 if [[ -z "${serverPortManagement}" ]]; then >&2 echo "Server management port not specified in '${serverPortsFile}'."; exit 1; fi
 if [[ -z "${serverPortHttp}" ]]; then >&2 echo "Server HTTP port not specified in '${serverPortsFile}'."; exit 1; fi
 if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
@@ -178,7 +190,7 @@ JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
 
 # Uncomment this next line to enable debugging Wildfly at launch. It will wait 
 # for a debugger to connect when first launching the server.
-# JAVA_OPTS="\$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y"
+JAVA_OPTS="\$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y"
 
 # These ports are only used until the server is configured, but need to be
 # set anyways, as the defaults on first launch conflict with Jenkins and other 
@@ -187,6 +199,7 @@ JAVA_OPTS="\$JAVA_OPTS -Djboss.management.http.port=${serverPortManagement} -Djb
 
 # These properties are all referenced within the standalone.xml we'll be using.
 JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.db.url=${dbUrl}"
+JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.logs.dir=${workDirectory}"
 JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.ssl.keystore.path=${keyStore} -Dbbfhir.ssl.truststore.path=${trustStore}"
 
 # This just adds a searchable bit of text to the command line, so we can 
