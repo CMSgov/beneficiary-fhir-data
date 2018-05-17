@@ -24,5 +24,5 @@ ${logic.tablespaces-escape} tablespace "beneficiaries_ts"
  */
 create sequence beneficiaryHistory_beneficiaryHistoryId_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 50;
 
-create index ${logic.index-create-concurrently} "BeneficiariesHistory_hicn_idx"
+create index "BeneficiariesHistory_hicn_idx"
   on "BeneficiariesHistory" ("hicn");
