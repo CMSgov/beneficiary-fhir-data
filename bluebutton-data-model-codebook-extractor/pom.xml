@@ -75,6 +75,16 @@
 						<arguments>
 							<argument>${project.build.outputDirectory}</argument>
 						</arguments>
+						<systemProperties>
+							<systemProperty>
+								<!-- Ensure that the Logback config is loaded. (Can't just name this file
+									`logback.xml` and let it be found as normal, since this JAR file gets built
+									into other applications and thus that config file may conflict with their
+									configs. -->
+								<key>logback.configurationFile</key>
+								<value>logback-CodebookPdfToXmlApp.xml</value>
+							</systemProperty>
+						</systemProperties>
 					</configuration>
 				</plugin>
 				<plugin>
