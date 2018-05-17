@@ -419,7 +419,7 @@ public final class RifLoader {
 		MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
 
 		// TODO make the features configurable
-		LoadFeatures features = new LoadFeatures(false, false);
+		LoadFeatures features = new LoadFeatures(true, false);
 
 		RifFileType rifFileType = fileEvent.getFile().getFileType();
 
