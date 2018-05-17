@@ -206,15 +206,24 @@ public final class RifLoader {
 	}
 
 	/**
-	 * @return the {@link LoadStrategy} that should be used
+	 * @param features
+	 *            the configured {@link LoadFeatures}
+	 * @param recordAction
+	 *            the {@link RecordAction} of the specific record being processed
+	 * @return the {@link LoadStrategy} that should be used for the record being
+	 *         processed
 	 */
-	private LoadStrategy selectStrategy(LoadFeatures features) {
-		if (features.isIdempotencyRequired())
-			return LoadStrategy.INSERT_IDEMPOTENT;
-		else if (features.isCopyDesired() && isDatabasePostgreSql())
-			return LoadStrategy.COPY_NON_IDEMPOTENT;
-		else
+	private LoadStrategy selectStrategy(LoadFeatures features, RecordAction recordAction) {
+		if (recordAction == RecordAction.INSERT) {
+			if (features.isIdempotencyRequired())
+				return LoadStrategy.INSERT_IDEMPOTENT;
+			else if (features.isCopyDesired() && isDatabasePostgreSql())
+				return LoadStrategy.COPY_NON_IDEMPOTENT;
+			else
+				return LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT;
+		} else {
 			return LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT;
+		}
 	}
 
 	/**
@@ -411,7 +420,6 @@ public final class RifLoader {
 
 		// TODO make the features configurable
 		LoadFeatures features = new LoadFeatures(false, false);
-		LoadStrategy strategy = selectStrategy(features);
 
 		RifFileType rifFileType = fileEvent.getFile().getFileType();
 
@@ -441,7 +449,10 @@ public final class RifLoader {
 
 			List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
 			for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
+				RecordAction recordAction = rifRecordEvent.getRecordAction();
 				Object record = rifRecordEvent.getRecord();
+
+				LoadStrategy strategy = selectStrategy(features, recordAction);
 
 				/*
 				 * If we can, load the record using PostgreSQL's native copy
