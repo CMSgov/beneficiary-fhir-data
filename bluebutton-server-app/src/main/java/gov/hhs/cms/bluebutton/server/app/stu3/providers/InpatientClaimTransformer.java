@@ -10,6 +10,8 @@ import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -23,15 +25,23 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel
  */
 final class InpatientClaimTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param claim
 	 *            the CCW {@link InpatientClaim} to transform
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
 	 *         specified {@link InpatientClaim}
 	 */
-	static ExplanationOfBenefit transform(Object claim) {
+	static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(InpatientClaimTransformer.class.getSimpleName(), "transform")).time();
+
 		if (!(claim instanceof InpatientClaim))
 			throw new BadCodeMonkeyException();
-		return transformClaim((InpatientClaim) claim);
+		ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
+
+		timer.stop();
+		return eob;
 	}
 
 	/**

@@ -11,6 +11,8 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationCompon
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -24,14 +26,21 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel
  */
 final class SNFClaimTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param claim
 	 *            the CCW {@link SNFClaim} to transform
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
 	 *         specified {@link SNFClaim}
 	 */
-	static ExplanationOfBenefit transform(Object claim) {
+	static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(SNFClaimTransformer.class.getSimpleName(), "transform")).time();
+
 		if (!(claim instanceof SNFClaim))
 			throw new BadCodeMonkeyException();
+
+		timer.stop();
 		return transformClaim((SNFClaim) claim);
 	}
 

@@ -13,6 +13,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
@@ -39,7 +41,7 @@ public final class CarrierClaimTransformerTest {
 		CarrierClaim claim = parsedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
 				.findFirst().get();
 
-		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(claim);
+		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 
@@ -58,7 +60,7 @@ public final class CarrierClaimTransformerTest {
 		CarrierClaim claim = parsedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
 				.findFirst().get();
 
-		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(claim);
+		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 	

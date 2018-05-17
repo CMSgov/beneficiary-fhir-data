@@ -10,6 +10,8 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -22,15 +24,23 @@ import gov.hhs.cms.bluebutton.data.model.rif.HHAClaimLine;
  */
 final class HHAClaimTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param claim
 	 *            the CCW {@link HHAClaim} to transform
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
 	 *         specified {@link HHAClaim}
 	 */
-	static ExplanationOfBenefit transform(Object claim) {
+	static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform")).time();
+
 		if (!(claim instanceof HHAClaim))
 			throw new BadCodeMonkeyException();
-		return transformClaim((HHAClaim) claim);
+		ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
+
+		timer.stop();
+		return eob;
 	}
 
 	/**
