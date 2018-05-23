@@ -39,6 +39,7 @@ import com.codahale.metrics.MetricRegistry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
@@ -106,7 +107,7 @@ public final class ServerTestUtils {
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
 
 		IGenericClient client = ctx.newRestfulGenericClient(fhirBaseUrl);
-
+		client.setEncoding(EncodingEnum.JSON);
 		/*
 		 * The FHIR client logging (for tests) can be managed via the
 		 * `src/test/resources/logback-test.xml` file.
