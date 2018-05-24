@@ -9,6 +9,8 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -31,7 +33,7 @@ public final class BeneficiaryTransformerTest {
 		Beneficiary beneficiary = parsedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		Patient patient = BeneficiaryTransformer.transform(beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary);
 		assertMatches(beneficiary, patient);
 	}
 
@@ -48,7 +50,7 @@ public final class BeneficiaryTransformerTest {
 				.findFirst().get();
 		TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
 
-		Patient patient = BeneficiaryTransformer.transform(beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary);
 		assertMatches(beneficiary, patient);
 	}
 

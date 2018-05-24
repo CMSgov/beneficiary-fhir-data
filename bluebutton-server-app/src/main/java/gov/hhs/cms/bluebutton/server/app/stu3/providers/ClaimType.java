@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import javax.persistence.Entity;
@@ -13,6 +14,8 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+
+import com.codahale.metrics.MetricRegistry;
 
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
@@ -62,7 +65,7 @@ enum ClaimType {
 	private final Class<?> entityClass;
 	private final SingularAttribute<?, ?> entityIdAttribute;
 	private final SingularAttribute<?, String> entityBeneficiaryIdAttribute;
-	private final Function<Object, ExplanationOfBenefit> transformer;
+	private final BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer;
 	private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
 	/**
@@ -81,13 +84,15 @@ enum ClaimType {
 	 */
 	private ClaimType(Class<?> entityClass, SingularAttribute<?, ?> entityIdAttribute,
 			SingularAttribute<?, String> entityBeneficiaryIdAttribute,
-			Function<Object, ExplanationOfBenefit> transformer, PluralAttribute<?, ?, ?>... entityLazyAttributes) {
+			BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer,
+			PluralAttribute<?, ?, ?>... entityLazyAttributes) {
 		this.entityClass = entityClass;
 		this.entityIdAttribute = entityIdAttribute;
 		this.entityBeneficiaryIdAttribute = entityBeneficiaryIdAttribute;
 		this.transformer = transformer;
 		this.entityLazyAttributes = entityLazyAttributes != null
-				? Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes)) : Collections.emptyList();
+				? Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes))
+				: Collections.emptyList();
 	}
 
 	/**
@@ -117,7 +122,7 @@ enum ClaimType {
 	 * @return the {@link Function} to use to transform the JPA {@link Entity}
 	 *         instances into FHIR {@link ExplanationOfBenefit} instances
 	 */
-	public Function<Object, ExplanationOfBenefit> getTransformer() {
+	public BiFunction<MetricRegistry, Object, ExplanationOfBenefit> getTransformer() {
 		return transformer;
 	}
 

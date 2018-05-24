@@ -9,6 +9,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -35,13 +37,16 @@ public final class CoverageTransformerTest {
 		Beneficiary beneficiary = parsedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		Coverage partACoverage = CoverageTransformer.transform(MedicareSegment.PART_A, beneficiary);
+		Coverage partACoverage = CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A,
+				beneficiary);
 		assertPartAMatches(beneficiary, partACoverage);
 
-		Coverage partBCoverage = CoverageTransformer.transform(MedicareSegment.PART_B, beneficiary);
+		Coverage partBCoverage = CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_B,
+				beneficiary);
 		assertPartBMatches(beneficiary, partBCoverage);
 
-		Coverage partDCoverage = CoverageTransformer.transform(MedicareSegment.PART_D, beneficiary);
+		Coverage partDCoverage = CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_D,
+				beneficiary);
 		assertPartDMatches(beneficiary, partDCoverage);
 	}
 

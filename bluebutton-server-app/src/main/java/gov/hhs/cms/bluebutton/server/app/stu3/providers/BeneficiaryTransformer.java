@@ -6,6 +6,9 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
@@ -15,12 +18,29 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
  */
 final class BeneficiaryTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param beneficiary
 	 *            the CCW {@link Beneficiary} to transform
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
-	public static Patient transform(Beneficiary beneficiary) {
+	public static Patient transform(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform")).time();
+		Patient patient = transform(beneficiary);
+		timer.stop();
+
+		return patient;
+	}
+
+	/**
+	 * @param beneficiary
+	 *            the CCW {@link Beneficiary} to transform
+	 * @return a FHIR {@link Patient} resource that represents the specified
+	 *         {@link Beneficiary}
+	 */
+	private static Patient transform(Beneficiary beneficiary) {
 		Objects.requireNonNull(beneficiary);
 
 		Patient patient = new Patient();

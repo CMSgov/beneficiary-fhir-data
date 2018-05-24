@@ -33,6 +33,7 @@ import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcesso
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -382,6 +383,16 @@ public class SpringConfiguration {
 		reporter.start();
 
 		return metricRegistry;
+	}
+
+	/**
+	 * @return the {@link HealthCheckRegistry} for the application, which collects
+	 *         any/all health checks that it provides
+	 */
+	@Bean
+	public HealthCheckRegistry healthCheckRegistry() {
+		HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
+		return healthCheckRegistry;
 	}
 
 	/**
