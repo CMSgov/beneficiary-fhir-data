@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -649,7 +650,7 @@ final class TransformerTestUtils {
 	 *            the actual {@link Coding} to verify
 	 */
 	static void assertHasCoding(String expectedSystem, String expectedCode, Coding actualCode) {
-		assertHasCoding(expectedSystem, null, expectedCode, Arrays.asList(actualCode));
+		assertHasCoding(expectedSystem, null, null, expectedCode, Arrays.asList(actualCode));
 	}
 
 	/**
@@ -661,7 +662,7 @@ final class TransformerTestUtils {
 	 *            the actual {@link List}&lt;{@link Coding}&gt; to verify
 	 */
 	static void assertHasCoding(String expectedSystem, String expectedCode, List<Coding> actualCode) {
-		assertHasCoding(expectedSystem, null, expectedCode, actualCode);
+		assertHasCoding(expectedSystem, null, null, expectedCode, actualCode);
 	}
 
 	/**
@@ -669,16 +670,20 @@ final class TransformerTestUtils {
 	 *            the expected {@link Coding#getSystem()} value
 	 * @param expectedVersion
 	 *            the expected {@link Coding#getVersion()} value
+	 * @param expectedVersion
+	 *            the expected {@link Coding#getDisplay()} value
 	 * @param expectedCode
 	 *            the expected {@link Coding#getCode()} value
 	 * @param actualCode
 	 *            the actual {@link List}&lt;{@link Coding}&gt; to verify
 	 */
-	static void assertHasCoding(String expectedSystem, String expectedVersion, String expectedCode,
+	static void assertHasCoding(String expectedSystem, String expectedVersion, String expectedDisplay,
+			String expectedCode,
 			List<Coding> actualCode) {
 		Assert.assertTrue("No matching Coding found: " + actualCode.toString(), actualCode.stream().anyMatch(c -> {
 			if (!expectedSystem.equals(c.getSystem())
 					|| (expectedVersion != null && !expectedVersion.equals(c.getVersion()))
+					|| (expectedDisplay != null && !expectedDisplay.equals(c.getDisplay()))
 					|| !expectedCode.equals(c.getCode())) {
 				return false;
 			}
@@ -1962,9 +1967,9 @@ final class TransformerTestUtils {
 			int index) {
 		if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
 			assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, "" + hcpcsYearCode.get(),
-					hcpcsInitialModifierCode.get(), item.getModifier().get(index).getCoding());
+					null, hcpcsInitialModifierCode.get(), item.getModifier().get(index).getCoding());
 			TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, "" + hcpcsYearCode.get(),
-					hcpcsCode.get(), item.getService().getCoding());
+					null, hcpcsCode.get(), item.getService().getCoding());
 		} else { // while others do not...
 			if (hcpcsInitialModifierCode.isPresent()) {
 				assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsInitialModifierCode.get(),
@@ -1994,5 +1999,13 @@ final class TransformerTestUtils {
 			assertDateEquals(expectedStartDate.get(), actualPeriod.getStartElement());
 		if (expectedEndDate.isPresent())
 			assertDateEquals(expectedEndDate.get(), actualPeriod.getEndElement());
+	}
+
+	/**
+	 * @throws IOException
+	 */
+	static void assertFDADrugCodeDisplayEquals(String nationalDrugCode) throws IOException {
+		TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode);
+
 	}
 }

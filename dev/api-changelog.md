@@ -1,5 +1,16 @@
 # API Changelog
 
+## BLUEBUTTON-146: Display NDC (National Drug Code) Substance Names in EOB
+
+Several changes have been made to these entries:
+
+* The `Coding.display` to the EOB has been added for NDC fields in Part D, Carrier and DME.
+
+* The Substance Name will be displayed in the `Coding.display` for NDC fields.
+
+* The FDA NDC product file will be downloaded and "baked" into the application during the build process.
+   
+
 ## CBBF-175: Fixed `ExplanationOfBenefit.diagnosis.type` Entries
 
 Several changes have been made to these entries:

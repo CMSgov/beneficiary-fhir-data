@@ -149,6 +149,11 @@
 			<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+   			 <groupId>commons-io</groupId>
+  			  <artifactId>commons-io</artifactId>
+  			  <version>2.5</version>
+		</dependency>	
 	</dependencies>
 
 	<build>
@@ -312,6 +317,28 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
+						process. -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<executions>
+                	<execution>
+                    	<id>download-fda-drug-data</id>
+                    	<phase>process-classes</phase>          
+                    	<goals>
+                    	    <goal>java</goal>           
+                   	 </goals>
+                	</execution>
+            	</executions>
+				<configuration>
+					<mainClass>gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp</mainClass>
+					<arguments>
+						<argument>${project.build.outputDirectory}</argument>
+					</arguments>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

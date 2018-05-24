@@ -1,34 +1,47 @@
 package gov.hhs.cms.bluebutton.server.app;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.function.Function;
+import java.util.Stack;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
-import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
-
-import gov.hhs.cms.bluebutton.data.codebook.extractor.PdfParser;
-import gov.hhs.cms.bluebutton.data.codebook.extractor.SupportedCodebook;
-import gov.hhs.cms.bluebutton.data.codebook.model.Codebook;
-import gov.hhs.cms.bluebutton.data.codebook.model.Variable;
+import org.apache.commons.io.FileUtils;
 
 /**
- * A simple application that calls {@link PdfParser} for each of the
- * {@link SupportedCodebook}s.
+ * A simple application that downloads the FDA NDC (national drug code) file;
+ * unzips it and then converts it to UTF-8 format
  */
 public final class FDADrugDataUtilityApp {
+
 	/**
+	 * Size of the buffer to read/write data
+	 */
+	private static final int BUFFER_SIZE = 4096;
+
+	/**
+	 * 
 	 * The application entry point, which will receive all non-JVM command line
 	 * options in the <code>args</code> array.
 	 * 
@@ -42,98 +55,136 @@ public final class FDADrugDataUtilityApp {
 	 *            this application must be the already-existing path to write the
 	 *            parsed XML codebooks files out to</li>
 	 *            </ol>
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
-		System.out.printf("OUTPUT_DIR argument is specified." + args.toString());
+	public static void main(String[] args) throws IOException {
 		if (args.length < 1) {
-			System.err.println("OUTPUT_DIR argument not specified.");
+			System.err.println("OUTPUT_DIR argument not specified for FDA NDC download.");
 			System.exit(1);
 		}
 		if (args.length > 1) {
-			System.err.println("Invalid arguments supplied.");
+			System.err.println("Invalid arguments supplied for FDA NDC download.");
 			System.exit(2);
 		}
 
 		Path outputPath = Paths.get(args[0]);
 		if (!Files.isDirectory(outputPath)) {
-			System.err.println("OUTPUT_DIR does not exist.");
+			System.err.println("OUTPUT_DIR does not exist for FDA NDC download.");
 			System.exit(3);
 		}
 
-		if (args.length == 1) {
-			System.out.printf("OUTPUT_DIR argument is specified." + args.toString());
-			System.exit(1);
+		// download FDA NDC file
+		String nationalDrugCodeDownloadableFile = "https://www.accessdata.fda.gov/cder/ndctext.zip";
+		String downloadedNdcZipFile = outputPath.toString() + "\\ndctext.zip";
+		try {
+			// connectionTimeout, readTimeout = 10 seconds
+			FileUtils.copyURLToFile(new URL(nationalDrugCodeDownloadableFile), new File(downloadedNdcZipFile), 10000, 10000);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		 
+		// unzip FDA NDC file
+		unzip(downloadedNdcZipFile, outputPath.toString());
+		Files.move(Paths.get(outputPath.toString() + "\\product.txt"),
+				Paths.get(outputPath.toString() + "\\fda_products_cp1252.tsv"), REPLACE_EXISTING);
+		
+		// convert file format from cp1252 to utf8
+		CharsetDecoder inDec=Charset.forName("windows-1252").newDecoder()
+			.onMalformedInput(CodingErrorAction.REPORT)
+			.onUnmappableCharacter(CodingErrorAction.REPORT);
 
-		// Define the Variable fixers/modifiers
-		List<Function<Variable, Variable>> variableFixers = buildVariableFixers();
+		CharsetEncoder outEnc=StandardCharsets.UTF_8.newEncoder()
+			.onMalformedInput(CodingErrorAction.REPORT)
+			.onUnmappableCharacter(CodingErrorAction.REPORT);
 
-		for (SupportedCodebook supportedCodebook : SupportedCodebook.values()) {
-			// First, parse the PDF to model objects.
-			Codebook codebook = PdfParser.parseCodebookPdf(supportedCodebook);
+		try
+		(FileInputStream is = new FileInputStream(outputPath.toString() + "\\fda_products_cp1252.tsv");
+			 BufferedReader reader=new BufferedReader(new InputStreamReader(is, inDec));
+				FileOutputStream fw = new FileOutputStream(outputPath.toString() + "\\fda_products_utf8.tsv");
+			 BufferedWriter out=new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
-			// Then, fix/modify those model objects as needed.
-			ListIterator<Variable> variablesIter = codebook.getVariables().listIterator();
-			while (variablesIter.hasNext()) {
-				Variable variable = variablesIter.next();
-				for (Function<Variable, Variable> variableFixer : variableFixers) {
-					variable = variableFixer.apply(variable);
-					if (variable == null)
-						throw new IllegalStateException();
-				}
-				variablesIter.set(variable);
-			}
-
-			// Finally, write out the final model objects to XML.
-			Path outputFile = outputPath.resolve(supportedCodebook.getCodebookXmlResourceName());
-			writeCodebookXmlToFile(codebook, outputFile);
-			System.out.printf("Extracted codebook PDF to XML: %s\n", outputFile.toAbsolutePath());
+			 for(String in; (in = reader.readLine()) != null; ) {
+				   out.write(in);
+				   out.newLine();
+		      }
 		}
-	}
-
-	/**
-	 * @return the {@link List} of "variable fixer" {@link Function}s, each of which
-	 *         will be given an opportunity to modify or replace each
-	 *         {@link Variable}
-	 */
-	private static List<Function<Variable, Variable>> buildVariableFixers() {
-		List<Function<Variable, Variable>> variableFixers = new LinkedList<>();
 
 		/*
-		 * Fix a typo in one of the Variable IDs. Appears in the
-		 * "December 2017, Version 1.4" PDF.
+		 * Convert tab separated file to comma separated file
 		 */
-		variableFixers.add(v -> {
-			if (v.getCodebook().getId() != SupportedCodebook.FFS_CLAIMS.name()
-					|| !v.getId().equals("NCH_CLM_PRVDT_PMT_AMT"))
-				return v;
 
-			v.setId("NCH_CLM_PRVDR_PMT_AMT");
-			return v;
-		});
+		File outputNDCFile = new File(outputPath.toString() + "\\fda_products_utf8.csv");
 
-		return variableFixers;
+		try {
+			String line;
+			Stack stack = new Stack();
+			BufferedReader br = new BufferedReader(new FileReader(outputPath.toString() + "\\fda_products_utf8.tsv"));
+			FileWriter writer = (new FileWriter(outputNDCFile));
+			while ((line = br.readLine()) != null)
+				stack.push(line.replace("\t", ","));
+			while (!stack.isEmpty()) {
+				writer.write((String) stack.pop());
+				if (!stack.empty())
+					writer.write("\n");
+			}
+
+		} catch (FileNotFoundException a) {
+			System.out.println("Could not open file");
+			a.printStackTrace();
+		} catch (IOException b) {
+			System.out.println("IOException occured");
+			b.printStackTrace();
+		} catch (Exception c) {
+			c.printStackTrace();
+		}
 	}
 
 	/**
-	 * @param codebook
-	 *            the {@link Codebook} to write out
-	 * @param outputFile
-	 *            the {@link Path} of the file to write the {@link Codebook} out as
-	 *            XML to (which will be overwritten if it already exists)
+	 * Extracts a zip file specified by the zipFilePath to a directory specified by
+	 * destDirectory (will be created if does not exists)
+	 * 
+	 * @param zipFilePath
+	 * @param destDirectory
+	 * @throws IOException
 	 */
-	private static void writeCodebookXmlToFile(Codebook codebook, Path outputFile) {
-		try (FileWriter outputWriter = new FileWriter(outputFile.toFile());) {
-			JAXBContext jaxbContext = JAXBContext.newInstance(Codebook.class);
-			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
-
-			jaxbMarshaller.marshal(codebook, outputWriter);
-		} catch (JAXBException e) {
-			throw new UncheckedJaxbException(e);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+	private static void unzip(String zipFilePath, String destDirectory) throws IOException {
+		File destDir = new File(destDirectory);
+		if (!destDir.exists()) {
+			destDir.mkdir();
 		}
+		ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+		ZipEntry entry = zipIn.getNextEntry();
+		// iterates over entries in the zip file
+		while (entry != null) {
+			String filePath = destDirectory + File.separator + entry.getName();
+			if (!entry.isDirectory()) {
+				// if the entry is a file, extracts it
+				extractFile(zipIn, filePath);
+			} else {
+				// if the entry is a directory, make the directory
+				File dir = new File(filePath);
+				dir.mkdir();
+			}
+			zipIn.closeEntry();
+			entry = zipIn.getNextEntry();
+		}
+		zipIn.close();
+	}
+
+	/**
+	 * Extracts a zip entry (file entry)
+	 * 
+	 * @param zipIn
+	 * @param filePath
+	 * @throws IOException
+	 */
+	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+		byte[] bytesIn = new byte[BUFFER_SIZE];
+		int read = 0;
+		while ((read = zipIn.read(bytesIn)) != -1) {
+			bos.write(bytesIn, 0, read);
+		}
+		bos.close();
 	}
 }

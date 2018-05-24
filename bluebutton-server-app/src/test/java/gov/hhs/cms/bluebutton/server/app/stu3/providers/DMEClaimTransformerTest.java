@@ -97,7 +97,7 @@ public final class DMEClaimTransformerTest {
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
 				0/* index */);
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS,
-				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(),
+				"" + claim.getHcpcsYearCode().get(), null, claimLine1.getHcpcsCode().get(),
 				eobItem0.getService().getCoding());
 
 		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT,
