@@ -7,10 +7,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -23,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Stack;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -109,34 +105,7 @@ public final class FDADrugDataUtilityApp {
 		      }
 		}
 
-		/*
-		 * Convert tab separated file to comma separated file
-		 */
 
-		File outputNDCFile = new File(outputPath.toString() + "\\fda_products_utf8.csv");
-
-		try {
-			String line;
-			Stack stack = new Stack();
-			BufferedReader br = new BufferedReader(new FileReader(outputPath.toString() + "\\fda_products_utf8.tsv"));
-			FileWriter writer = (new FileWriter(outputNDCFile));
-			while ((line = br.readLine()) != null)
-				stack.push(line.replace("\t", ","));
-			while (!stack.isEmpty()) {
-				writer.write((String) stack.pop());
-				if (!stack.empty())
-					writer.write("\n");
-			}
-
-		} catch (FileNotFoundException a) {
-			System.out.println("Could not open file");
-			a.printStackTrace();
-		} catch (IOException b) {
-			System.out.println("IOException occured");
-			b.printStackTrace();
-		} catch (Exception c) {
-			c.printStackTrace();
-		}
 	}
 
 	/**
