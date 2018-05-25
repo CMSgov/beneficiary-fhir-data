@@ -206,15 +206,24 @@ public final class RifLoader {
 	}
 
 	/**
-	 * @return the {@link LoadStrategy} that should be used
+	 * @param features
+	 *            the configured {@link LoadFeatures}
+	 * @param recordAction
+	 *            the {@link RecordAction} of the specific record being processed
+	 * @return the {@link LoadStrategy} that should be used for the record being
+	 *         processed
 	 */
-	private LoadStrategy selectStrategy(LoadFeatures features) {
-		if (features.isIdempotencyRequired())
-			return LoadStrategy.INSERT_IDEMPOTENT;
-		else if (features.isCopyDesired() && isDatabasePostgreSql())
-			return LoadStrategy.COPY_NON_IDEMPOTENT;
-		else
+	private LoadStrategy selectStrategy(LoadFeatures features, RecordAction recordAction) {
+		if (recordAction == RecordAction.INSERT) {
+			if (features.isIdempotencyRequired())
+				return LoadStrategy.INSERT_IDEMPOTENT;
+			else if (features.isCopyDesired() && isDatabasePostgreSql())
+				return LoadStrategy.COPY_NON_IDEMPOTENT;
+			else
+				return LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT;
+		} else {
 			return LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT;
+		}
 	}
 
 	/**
@@ -410,8 +419,7 @@ public final class RifLoader {
 		MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
 
 		// TODO make the features configurable
-		LoadFeatures features = new LoadFeatures(false, false);
-		LoadStrategy strategy = selectStrategy(features);
+		LoadFeatures features = new LoadFeatures(true, false);
 
 		RifFileType rifFileType = fileEvent.getFile().getFileType();
 
@@ -441,7 +449,10 @@ public final class RifLoader {
 
 			List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
 			for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
+				RecordAction recordAction = rifRecordEvent.getRecordAction();
 				Object record = rifRecordEvent.getRecord();
+
+				LoadStrategy strategy = selectStrategy(features, recordAction);
 
 				/*
 				 * If we can, load the record using PostgreSQL's native copy
@@ -484,18 +495,7 @@ public final class RifLoader {
 							 * current/previous state as a BeneficiaryHistory record.
 							 */
 							if (record instanceof Beneficiary) {
-								Beneficiary newBene = (Beneficiary) record;
-								Beneficiary oldBene = entityManager.find(Beneficiary.class, newBene.getBeneficiaryId());
-
-								if (oldBene != null) {
-									BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
-									oldBeneCopy.setBeneficiaryId(oldBene.getBeneficiaryId());
-									oldBeneCopy.setBirthDate(oldBene.getBirthDate());
-									oldBeneCopy.setHicn(oldBene.getHicn());
-									oldBeneCopy.setSex(oldBene.getSex());
-
-									entityManager.persist(oldBeneCopy);
-								}
+								updateBeneficaryHistory(entityManager, (Beneficiary) record);
 							}
 
 							entityManager.merge(record);
@@ -548,6 +548,31 @@ public final class RifLoader {
 
 			if (entityManager != null)
 				entityManager.close();
+		}
+	}
+
+	/**
+	 * Ensures that a {@link BeneficiaryHistory} record is created for the specified
+	 * {@link Beneficiary}, if that {@link Beneficiary} already exists and is just
+	 * being updated.
+	 *
+	 * @param entityManager
+	 *            the {@link EntityManager} to use
+	 * @param newBeneficiaryRecord
+	 *            the {@link Beneficiary} record being processed
+	 */
+	private static void updateBeneficaryHistory(EntityManager entityManager, Beneficiary newBeneficiaryRecord) {
+		Beneficiary oldBeneficiaryRecord = entityManager.find(Beneficiary.class,
+				newBeneficiaryRecord.getBeneficiaryId());
+
+		if (oldBeneficiaryRecord != null) {
+			BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
+			oldBeneCopy.setBeneficiaryId(oldBeneficiaryRecord.getBeneficiaryId());
+			oldBeneCopy.setBirthDate(oldBeneficiaryRecord.getBirthDate());
+			oldBeneCopy.setHicn(oldBeneficiaryRecord.getHicn());
+			oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
+
+			entityManager.persist(oldBeneCopy);
 		}
 	}
 
