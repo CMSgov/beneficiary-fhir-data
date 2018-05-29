@@ -81,8 +81,8 @@ public final class FDADrugDataUtilityApp {
 		 
 		// unzip FDA NDC file
 		unzip(downloadedNdcZipFile, outputPath.toString());
-		Files.move(Paths.get(outputPath.toString() + "\\product.txt"),
-				Paths.get(outputPath.toString() + "\\fda_products_cp1252.tsv"), REPLACE_EXISTING);
+		Files.move(Paths.get(outputPath.toString() + File.separator + "product.txt"),
+				Paths.get(outputPath.toString() + File.separator + "fda_products_cp1252.tsv"), REPLACE_EXISTING);
 		
 		// convert file format from cp1252 to utf8
 		CharsetDecoder inDec=Charset.forName("windows-1252").newDecoder()
@@ -94,9 +94,10 @@ public final class FDADrugDataUtilityApp {
 			.onUnmappableCharacter(CodingErrorAction.REPORT);
 
 		try
-		(FileInputStream is = new FileInputStream(outputPath.toString() + "\\fda_products_cp1252.tsv");
+		(FileInputStream is = new FileInputStream(outputPath.toString() + File.separator + "fda_products_cp1252.tsv");
 			 BufferedReader reader=new BufferedReader(new InputStreamReader(is, inDec));
-				FileOutputStream fw = new FileOutputStream(outputPath.toString() + "\\fda_products_utf8.tsv");
+				FileOutputStream fw = new FileOutputStream(
+						outputPath.toString() + File.separator + "fda_products_utf8.tsv");
 			 BufferedWriter out=new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
 			 for(String in; (in = reader.readLine()) != null; ) {
