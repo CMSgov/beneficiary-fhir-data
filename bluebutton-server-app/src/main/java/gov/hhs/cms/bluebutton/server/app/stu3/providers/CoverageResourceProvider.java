@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -17,6 +18,9 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
+
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -42,6 +46,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
 	private static final Pattern COVERAGE_ID_PATTERN = Pattern.compile("(.*)-(\\p{Alnum}+)");
 
 	private EntityManager entityManager;
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * @param entityManager
@@ -51,6 +56,15 @@ public final class CoverageResourceProvider implements IResourceProvider {
 	@PersistenceContext
 	public void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
+	}
+
+	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
+	 */
+	@Inject
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
 	}
 
 	/**
@@ -107,7 +121,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
 					new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
 		}
 
-		Coverage coverage = CoverageTransformer.transform(coverageIdSegment.get(), beneficiaryEntity);
+		Coverage coverage = CoverageTransformer.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);
 		return coverage;
 	}
 
@@ -132,7 +146,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
 	public List<Coverage> searchByBeneficiary(@RequiredParam(name = Coverage.SP_BENEFICIARY) ReferenceParam beneficiary) {
 		try {
 			Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart());
-			return CoverageTransformer.transform(beneficiaryEntity);
+			return CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
 		} catch (NoResultException e) {
 			return new LinkedList<>();
 		}
@@ -150,14 +164,19 @@ public final class CoverageResourceProvider implements IResourceProvider {
 	 */
 	private Beneficiary findBeneficiaryById(String beneficiaryId)
 			throws NoResultException {
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		Timer.Context timerBeneQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
+		try {
+			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+			Root<Beneficiary> root = criteria.from(Beneficiary.class);
+			criteria.select(root);
+			criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
 
-		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
-		Root<Beneficiary> root = criteria.from(Beneficiary.class);
-		criteria.select(root);
-		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
-
-		Beneficiary beneficiaryEntity = entityManager.createQuery(criteria).getSingleResult();
-		return beneficiaryEntity;
+			Beneficiary beneficiaryEntity = entityManager.createQuery(criteria).getSingleResult();
+			return beneficiaryEntity;
+		} finally {
+			timerBeneQuery.stop();
+		}
 	}
 }

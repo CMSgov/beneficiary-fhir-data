@@ -12,6 +12,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
@@ -38,7 +40,7 @@ public final class HospiceClaimTransformerTest {
 		HospiceClaim claim = parsedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> (HospiceClaim) r)
 				.findFirst().get();
 
-		ExplanationOfBenefit eob = HospiceClaimTransformer.transform(claim);
+		ExplanationOfBenefit eob = HospiceClaimTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 

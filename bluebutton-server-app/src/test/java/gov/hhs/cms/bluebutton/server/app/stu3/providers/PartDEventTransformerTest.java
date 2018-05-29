@@ -13,6 +13,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
@@ -38,7 +40,7 @@ public final class PartDEventTransformerTest {
 		PartDEvent claim = parsedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
 
-		ExplanationOfBenefit eob = PartDEventTransformer.transform(claim);
+		ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 
