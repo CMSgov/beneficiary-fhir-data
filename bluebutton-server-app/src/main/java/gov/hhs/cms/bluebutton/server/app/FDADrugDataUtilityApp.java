@@ -71,7 +71,7 @@ public final class FDADrugDataUtilityApp {
 
 		// download FDA NDC file
 		String nationalDrugCodeDownloadableFile = "https://www.accessdata.fda.gov/cder/ndctext.zip";
-		String downloadedNdcZipFile = outputPath.toString() + "\\ndctext.zip";
+		String downloadedNdcZipFile = outputPath.toString() + File.separator + "ndctext.zip";
 		try {
 			// connectionTimeout, readTimeout = 10 seconds
 			FileUtils.copyURLToFile(new URL(nationalDrugCodeDownloadableFile), new File(downloadedNdcZipFile), 10000, 10000);
