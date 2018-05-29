@@ -74,7 +74,8 @@ public final class FDADrugDataUtilityApp {
 		String downloadedNdcZipFile = outputPath.toString() + File.separator + "ndctext.zip";
 		try {
 			// connectionTimeout, readTimeout = 10 seconds
-			FileUtils.copyURLToFile(new URL(nationalDrugCodeDownloadableFile), new File(downloadedNdcZipFile), 10000, 10000);
+			FileUtils.copyURLToFile(new URL(nationalDrugCodeDownloadableFile), new File(downloadedNdcZipFile), 90000,
+					90000);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
