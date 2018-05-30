@@ -63,7 +63,7 @@ public final class BlueButtonServerInitializer implements WebApplicationInitiali
 		ServletRegistration.Dynamic cxfServletReg = servletContext.addServlet("fhirStu3Servlet", stu3Servlet);
 		cxfServletReg.setLoadOnStartup(1);
 		cxfServletReg.addMapping("/v1/fhir/*");
-		cxfServletReg.addMapping("/baseDstu3/*");
+		// cxfServletReg.addMapping("/baseDstu3/*");
 
 		/*
 		 * Register the MetricRegistry and HealthCheckRegistry into the ServletContext,
