@@ -1,5 +1,7 @@
 ---
 data_server_ssl_client_certificates:
+  - alias: client_frontend
+    certificate: "{{ lookup('file', 'files/bluebutton-frontend-test-client-public.crt') }}"
   - alias: client_backend_perf_tests
     certificate: "{{ lookup('file', 'files/bluebutton-backend-perf-tests-test-public.crt') }}"
 # Uncomment this temporarily if you have a local test certificate you need to use for a bit.
