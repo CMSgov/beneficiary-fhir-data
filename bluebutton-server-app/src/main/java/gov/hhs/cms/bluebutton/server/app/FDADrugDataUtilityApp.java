@@ -77,7 +77,7 @@ public final class FDADrugDataUtilityApp {
 			FileUtils.copyURLToFile(new URL(nationalDrugCodeDownloadableFile), new File(downloadedNdcZipFile), 90000,
 					90000);
 		} catch (IOException e) {
-			System.out.println("socket message " + e.getMessage() + "socket cause " + e.getCause().toString());
+			System.err.println("socket message " + e.getMessage());
 			e.printStackTrace();
 		}
 		 
