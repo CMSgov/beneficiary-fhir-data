@@ -72,7 +72,7 @@ public final class ServerTestUtils {
 	 */
 	public static IGenericClient createFhirClient(Optional<ClientSslIdentity> clientSslIdentity) {
 		// Figure out where the test server is running.
-		String fhirBaseUrl = String.format("%s/v1/fhir", getServerBaseUrl());
+		String fhirBaseUrl = String.format("%s/baseDstu3", getServerBaseUrl());
 
 		/*
 		 * We need to override the FHIR client's SSLContext. Unfortunately, that
