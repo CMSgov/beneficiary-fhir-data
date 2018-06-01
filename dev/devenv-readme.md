@@ -137,39 +137,6 @@ Right now, the script does not create the Maven `toolchains.xml` file (though it
 </toolchains>
 ```
 
-### Maven GPG Signing
-
-Given that most of this project's builds go through Maven Central, all builds for the project have signing turned on by default. If you do not have a GPG key configured on your system, you will receive errors like the following:
-
-```
-[INFO] --- maven-gpg-plugin:1.5:sign (sign-artifacts) @ bluebutton-parent ---
-gpg: directory `/home/karl/.gnupg' created
-gpg: new configuration file `/home/karl/.gnupg/gpg.conf' created
-gpg: WARNING: options in `/home/karl/.gnupg/gpg.conf' are not yet active during this run
-gpg: keyring `/home/karl/.gnupg/secring.gpg' created
-gpg: keyring `/home/karl/.gnupg/pubring.gpg' created
-gpg: no default secret key: secret key not available
-gpg: signing failed: secret key not available
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD FAILURE
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.505 s
-[INFO] Finished at: 2016-06-13T09:06:37-04:00
-[INFO] Final Memory: 18M/481M
-[INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-gpg-plugin:1.5:sign (sign-artifacts) on project bluebutton-parent: Exit code: 2 -> [Help 1]
-```
-
-To fix these errors, the simplest thing to do is just install GPG and create keys for yourself, per the instructions here: [Central Repository: Working with PGP Signatures](http://central.sonatype.org/pages/working-with-pgp-signatures.html).
-
-GPG signing can also be disabled by adding `-Dgpg.skip=true` to your Maven builds, e.g.:
-
-```
-$ mvn clean verify -Dgpg.skip=true
-```
-
-But please note that the `deploy` goal/phase will still fail if builds are not signed by an authorized user, as that's a requirement imposed by the repository itself.  To enable deployments you will need to configure [OSSRH Hosting](#ossrh).
-
 ### Proper HAPI-FHIR branch
 
 Currently the Blue Button repositories require a specific version of the HAPI-FHIR libraries in order to build successfully.  The following commands should be run in order to configure the required libraries properly for the build:
