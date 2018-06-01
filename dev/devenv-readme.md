@@ -137,50 +137,6 @@ Right now, the script does not create the Maven `toolchains.xml` file (though it
 </toolchains>
 ```
 
-### Maven GPG Signing
-
-Given that most of this project's builds go through Maven Central, all builds for the project have signing turned on by default. If you do not have a GPG key configured on your system, you will receive errors like the following:
-
-```
-[INFO] --- maven-gpg-plugin:1.5:sign (sign-artifacts) @ bluebutton-parent ---
-gpg: directory `/home/karl/.gnupg' created
-gpg: new configuration file `/home/karl/.gnupg/gpg.conf' created
-gpg: WARNING: options in `/home/karl/.gnupg/gpg.conf' are not yet active during this run
-gpg: keyring `/home/karl/.gnupg/secring.gpg' created
-gpg: keyring `/home/karl/.gnupg/pubring.gpg' created
-gpg: no default secret key: secret key not available
-gpg: signing failed: secret key not available
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD FAILURE
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.505 s
-[INFO] Finished at: 2016-06-13T09:06:37-04:00
-[INFO] Final Memory: 18M/481M
-[INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-gpg-plugin:1.5:sign (sign-artifacts) on project bluebutton-parent: Exit code: 2 -> [Help 1]
-```
-
-To fix these errors, the simplest thing to do is just install GPG and create keys for yourself, per the instructions here: [Central Repository: Working with PGP Signatures](http://central.sonatype.org/pages/working-with-pgp-signatures.html).
-
-GPG signing can also be disabled by adding `-Dgpg.skip=true` to your Maven builds, e.g.:
-
-```
-$ mvn clean verify -Dgpg.skip=true
-```
-
-But please note that the `deploy` goal/phase will still fail if builds are not signed by an authorized user, as that's a requirement imposed by the repository itself.  To enable deployments you will need to configure [OSSRH Hosting](#ossrh).
-
-### Proper HAPI-FHIR branch
-
-Currently the Blue Button repositories require a specific version of the HAPI-FHIR libraries in order to build successfully.  The following commands should be run in order to configure the required libraries properly for the build:
-
-```
-$ git clone git@github.com:HHSIDEAlab/hapi-fhir.git
-$ cd hapi-fhir
-$ git checkout -b fix-race-condition-in-if-none-exists-2.4 origin/fix-race-condition-in-if-none-exists-2.4
-$ mvn clean install
-```
-
 ### Skipping Tests
 
 The default install goal for the maven build will run the integration tests.  If you do not want to run them as some do use AWS resources use the following command line when executing the build:
@@ -243,20 +199,3 @@ target/generated-sources/annotations
 ```
 1. Click the **Apply and Close** button.
 1. When prompted to rebuild the project select **Yes**.
-
-<a name="ossrh"></a>
-## OSSRH Hosting
-
-Even with a GPG key, you will be unable to deploy to OSSRH/Maven Central, unless your account has been given permissions to do so. This will result in errors like the following:
-
-```
-[ERROR] Failed to execute goal org.sonatype.plugins:nexus-staging-maven-plugin:1.6.7:deploy (injected-nexus-deploy) on project bluebutton-parent: Failed to deploy artifacts: Could not transfer artifact gov.hhs.cms.bluebutton:bluebutton-parent:pom.asc:1.1.1-20160614.223219-1 from/to ossrh (https://oss.sonatype.org/content/repositories/snapshots): Access denied to https://oss.sonatype.org/content/repositories/snapshots/gov/hhs/cms/bluebutton/bluebutton-parent/1.1.1-SNAPSHOT/bluebutton-parent-1.1.1-20160614.223219-1.pom.asc. Error code 401, Unauthorized -> [Help 1]
-```
-
-Follow the following procedure to obtain those permissions and resolve this problem:
-
-1. [Create a Sonatype JIRA account](https://issues.sonatype.org/secure/Signup!default.jspa).
-1. Ensure you've published your GPG key to a public key server, per [OSSRH: Working With PGP Signatures](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key).
-1. [File a new OSSRH issue](https://issues.sonatype.org/secure/CreateIssue.jspa) requesting authorization for the `gov.hhs.cms.bluebutton` repo in OSSRH. See [OSSRH-23379: Authorize Shaun Brockhoff to deploy to gov.hhs.cms.bluebutton repo](https://issues.sonatype.org/browse/OSSRH-23379) for an example.
-1. Follow the instructions on [OSSRH: Apache Maven: Distribution Management and Authentication](http://central.sonatype.org/pages/apache-maven.html#distribution-management-and-authentication) to ensure that your `~/.m2/settings.xml` file has a `<server/>` entry for `<id>ossrh</id>`, with your JIRA login and password.
-
