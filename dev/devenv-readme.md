@@ -137,17 +137,6 @@ Right now, the script does not create the Maven `toolchains.xml` file (though it
 </toolchains>
 ```
 
-### Proper HAPI-FHIR branch
-
-Currently the Blue Button repositories require a specific version of the HAPI-FHIR libraries in order to build successfully.  The following commands should be run in order to configure the required libraries properly for the build:
-
-```
-$ git clone git@github.com:HHSIDEAlab/hapi-fhir.git
-$ cd hapi-fhir
-$ git checkout -b fix-race-condition-in-if-none-exists-2.4 origin/fix-race-condition-in-if-none-exists-2.4
-$ mvn clean install
-```
-
 ### Skipping Tests
 
 The default install goal for the maven build will run the integration tests.  If you do not want to run them as some do use AWS resources use the following command line when executing the build:
@@ -210,20 +199,3 @@ target/generated-sources/annotations
 ```
 1. Click the **Apply and Close** button.
 1. When prompted to rebuild the project select **Yes**.
-
-<a name="ossrh"></a>
-## OSSRH Hosting
-
-Even with a GPG key, you will be unable to deploy to OSSRH/Maven Central, unless your account has been given permissions to do so. This will result in errors like the following:
-
-```
-[ERROR] Failed to execute goal org.sonatype.plugins:nexus-staging-maven-plugin:1.6.7:deploy (injected-nexus-deploy) on project bluebutton-parent: Failed to deploy artifacts: Could not transfer artifact gov.hhs.cms.bluebutton:bluebutton-parent:pom.asc:1.1.1-20160614.223219-1 from/to ossrh (https://oss.sonatype.org/content/repositories/snapshots): Access denied to https://oss.sonatype.org/content/repositories/snapshots/gov/hhs/cms/bluebutton/bluebutton-parent/1.1.1-SNAPSHOT/bluebutton-parent-1.1.1-20160614.223219-1.pom.asc. Error code 401, Unauthorized -> [Help 1]
-```
-
-Follow the following procedure to obtain those permissions and resolve this problem:
-
-1. [Create a Sonatype JIRA account](https://issues.sonatype.org/secure/Signup!default.jspa).
-1. Ensure you've published your GPG key to a public key server, per [OSSRH: Working With PGP Signatures](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key).
-1. [File a new OSSRH issue](https://issues.sonatype.org/secure/CreateIssue.jspa) requesting authorization for the `gov.hhs.cms.bluebutton` repo in OSSRH. See [OSSRH-23379: Authorize Shaun Brockhoff to deploy to gov.hhs.cms.bluebutton repo](https://issues.sonatype.org/browse/OSSRH-23379) for an example.
-1. Follow the instructions on [OSSRH: Apache Maven: Distribution Management and Authentication](http://central.sonatype.org/pages/apache-maven.html#distribution-management-and-authentication) to ensure that your `~/.m2/settings.xml` file has a `<server/>` entry for `<id>ossrh</id>`, with your JIRA login and password.
-
