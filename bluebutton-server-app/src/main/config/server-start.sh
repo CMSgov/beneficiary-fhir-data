@@ -100,6 +100,9 @@ error() {
 }
 trap 'error ${LINENO}' ERR
 
+# Ensure that the working directory is consistent.
+cd "${targetDirectory}/.."
+
 # Define all of the derived paths we'll need.
 workDirectory="${targetDirectory}/bluebutton-server"
 serverArtifact="${workDirectory}/wildfly-dist-${serverVersion}.tar.gz"

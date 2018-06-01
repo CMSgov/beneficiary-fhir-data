@@ -1,5 +1,24 @@
 #!/bin/bash
 
+# Check to see if we are running in Cygwin.
+case "$( uname )" in
+	CYGWIN*) cygwin=true ;;
+	*) cygwin=false ;;
+esac
+
+# In Cygwin, some of the args will have unescaped backslashes. Fix that.
+if [[ "${cygwin}" = true ]]; then
+	set -- "${@//\\/\\\\}"
+fi
+
+# Makes debugging problems a lot easier if this is always logged.
+echo "Server stop script is being run as follows:"
+if [[ "${cygwin}" = true ]]; then
+	echo -e "${0//\\/\\\\} $@\n"
+else
+	echo -e "$0 $@\n"
+fi
+
 # Constants.
 serverVersion='8.1.0.Final'
 serverInstall="wildfly-${serverVersion}"
@@ -34,6 +53,9 @@ if [[ -z "${targetDirectory}" ]]; then >&2 echo 'The -t option is required.'; ex
 
 # In Cygwin, some of those paths will come in as Windows-formatted. Fix that.
 if [[ "${cygwin}" = true ]]; then targetDirectory=$(cygpath --unix "${targetDirectory}"); fi
+
+# Ensure that the working directory is consistent.
+cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
 workDirectory="${targetDirectory}/bluebutton-server"
