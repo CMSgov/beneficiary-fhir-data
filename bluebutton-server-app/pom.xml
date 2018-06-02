@@ -341,17 +341,33 @@
                    	 </goals>
                    	 <configuration>
                    	 	<systemProperties>
+                   	 	<property>
+                              <key>JAVA_HOME</key>
+                              <value>${JAVA_HOME}</value>
+                          </property>
+                          <property>
+                              <key>JAVA.HOME</key>
+                              <value>${JAVA.HOME}</value>
+                          </property>
+                          <property>
+                              <key>java_home</key>
+                              <value>${java_home}</value>
+                          </property>
+                          <property>
+                              <key>java.home</key>
+                              <value>${java.home}</value>
+                          </property>
                           <property>
                               <key>http_proxy</key>
-                              <value>${env.http_proxy}</value>
+                              <value>${JAVA_HOME}</value>
                           </property>
                           <property>
                               <key>https_proxy</key>
-                              <value>${env.https_proxy}</value>
+                              <value>${https_proxy}</value>
                           </property>
                           <property>
                               <key>HTTP_PROXY</key>
-                              <value>${env.HTTP_PROXY}</value>
+                              <value>${HTTP_PROXY}</value>
                           </property>
                           <property>
                               <key>HTTPS_PROXY</key>
@@ -359,7 +375,7 @@
                           </property>
                           <property>
                               <key>http.proxyHost</key>
-                              <value>${http.proxyHost}</value>
+                              <value>${HTTP.PROXYHOSt}</value>
                           </property>
                            <property>
                               <key>https.proxyHost</key>
