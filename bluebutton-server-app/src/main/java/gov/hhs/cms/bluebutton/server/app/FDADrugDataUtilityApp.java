@@ -69,6 +69,23 @@ public final class FDADrugDataUtilityApp {
 			System.exit(3);
 		}
 
+		System.err.println("deh-get property - http_proxy " + System.getProperty("http_proxy"));
+		System.err.println("deh-get property - HTTP_PROXY " + System.getProperty("HTTP_PROXY"));
+		System.err.println("deh-get property - https_proxy " + System.getProperty("https_proxy"));
+		System.err.println("deh-get property - HTTPS_PROXY " + System.getProperty("HTTPS_PROXY"));
+		System.err.println("deh-get env http_proxy" + System.getenv("http_proxy"));
+		System.err.println("deh-get env HTTP_PROXY" + System.getenv("HTTP_PROXY"));
+		System.err.println("deh-get env https_proxy" + System.getenv("https_proxy"));
+		System.err.println("deh-get env HTTPS_PROXY" + System.getenv("HTTPS_PROXY"));
+
+		System.setProperty("http.proxyHost", System.getProperty("http_proxy"));
+		System.setProperty("https.proxyHost", System.getProperty("https_proxy"));
+		/*
+		 * if (needsProxy()) { System.setProperty("http.proxyHost",getProxyHost());
+		 * System.setProperty("http.proxyPort",getProxyPort()); } else {
+		 * System.setProperty("http.proxyHost","");
+		 * System.setProperty("http.proxyPort",""); }
+		 */
 		// download FDA NDC file
 		String nationalDrugCodeDownloadableFile = "https://www.accessdata.fda.gov/cder/ndctext.zip";
 		String downloadedNdcZipFile = outputPath.toString() + File.separator + "ndctext.zip";

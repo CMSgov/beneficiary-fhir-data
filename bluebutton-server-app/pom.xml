@@ -339,6 +339,26 @@
                     	<goals>
                     	    <goal>java</goal>           
                    	 </goals>
+                   	 <configuration>
+                   	 	<systemProperties>
+                          <property>
+                              <key>http_proxy</key>
+                              <value>${env.http_proxy}</value>
+                          </property>
+                          <property>
+                              <key>https_proxy</key>
+                              <value>${env.https_proxy}</value>
+                          </property>
+                          <property>
+                              <key>HTTP_PROXY</key>
+                              <value>${env.HTTP_PROXY}</value>
+                          </property>
+                          <property>
+                              <key>HTTPS_PROXY</key>
+                              <value>${env.HTTPS_PROXY}</value>
+                          </property>
+                    	  </systemProperties>
+                      </configuration>
                 	</execution>
             	</executions>
 				<configuration>
@@ -346,6 +366,7 @@
 					<arguments>
 						<argument>${project.build.outputDirectory}</argument>
 					</arguments>
+					
 				</configuration>
 			</plugin>
 		</plugins>
