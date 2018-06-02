@@ -372,7 +372,7 @@
                           </property>
                           <property>
                               <key>http.proxyHost</key>
-                              <value>${http.proxyHost}</value>
+                              <value>${http.proxyhost}</value>
                           </property>
                           <property>
                               <key>http.proxyPort</key>
