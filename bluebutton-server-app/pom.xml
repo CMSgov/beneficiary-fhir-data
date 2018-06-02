@@ -357,6 +357,10 @@
                               <key>HTTPS_PROXY</key>
                               <value>${env.HTTPS_PROXY}</value>
                           </property>
+                          <property>
+                              <key>http.proxyHost</key>
+                              <value>${env.http.proxyHost}</value>
+                          </property>
                     	  </systemProperties>
                       </configuration>
                 	</execution>

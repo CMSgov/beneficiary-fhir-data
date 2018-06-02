@@ -23,8 +23,6 @@ import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -75,6 +73,7 @@ public final class FDADrugDataUtilityApp {
 		System.err.println("deh-get property - HTTP_PROXY " + System.getProperty("HTTP_PROXY"));
 		System.err.println("deh-get property - https_proxy " + System.getProperty("https_proxy"));
 		System.err.println("deh-get property - HTTPS_PROXY " + System.getProperty("HTTPS_PROXY"));
+		System.err.println("deh-get property - http.proxyHost" + System.getProperty("http.proxyHost"));
 		System.err.println("deh-get env http_proxy" + System.getenv("http_proxy"));
 		System.err.println("deh-get env HTTP_PROXY" + System.getenv("HTTP_PROXY"));
 		System.err.println("deh-get env https_proxy" + System.getenv("https_proxy"));
@@ -84,19 +83,29 @@ public final class FDADrugDataUtilityApp {
 		System.err.println("deh-get env https.proxyHost" + System.getenv("https.proxyHost"));
 		System.err.println("deh-get env https.proxyPort" + System.getenv("https.proxyPort"));
 
+		System.err.println("deh-get property before set- https.proxyHost " + System.getProperty("https.proxyHost"));
+		System.err.println("deh-get property before set- https.proxyPort " + System.getProperty("https.proxyPort"));
+		System.err.println("deh-get property before set- http.proxyHost " + System.getProperty("http.proxyHost"));
+		System.err.println("deh-get property before set- http.proxyPort " + System.getProperty("http.proxyPort"));
 		System.setProperty("http.proxyHost", "nat");
 		System.setProperty("http.proxyPort", "3128");
 		System.setProperty("https.proxyHost", "nat");
-		System.setProperty("https.proxyHost", "3128");
+		System.setProperty("https.proxyPort", "3128");
 		System.setProperty("http.nonProxyHosts", "localhost");
 
-		URL vURL = new URL("http", "nat", 3128, "https://www.accessdata.fda.gov/cder/ndctext.zip");
+		System.err.println("deh-get property after set- https.proxyHost " + System.getProperty("https.proxyHost"));
+		System.err.println("deh-get property after set- https.proxyPort " + System.getProperty("https.proxyPort"));
+		System.err.println("deh-get property after set- http.proxyHost " + System.getProperty("http.proxyHost"));
+		System.err.println("deh-get property after set- http.proxyPort " + System.getProperty("http.proxyPort"));
 
-		HttpsURLConnection vCon = (HttpsURLConnection) vURL.openConnection();
-		int vResponseCode = vCon.getResponseCode();
-		String vResponseMessage = vCon.getResponseMessage();
-		System.err.println("deh-vResponseCode " + vResponseCode);
-		System.err.println("deh-vResponseMessage " + vResponseMessage);
+		// URL vURL = new URL("http", "nat", 3128,
+		// "https://www.accessdata.fda.gov/cder/ndctext.zip");
+
+		// HttpURLConnection vCon = (HttpURLConnection) vURL.openConnection();
+		// int vResponseCode = vCon.getResponseCode();
+		// String vResponseMessage = vCon.getResponseMessage();
+		// System.err.println("deh-vResponseCode " + vResponseCode);
+		// System.err.println("deh-vResponseMessage " + vResponseMessage);
 
 		/*
 		 * if (needsProxy()) { System.setProperty("http.proxyHost",getProxyHost());
