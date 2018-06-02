@@ -77,9 +77,17 @@ public final class FDADrugDataUtilityApp {
 		System.err.println("deh-get env HTTP_PROXY" + System.getenv("HTTP_PROXY"));
 		System.err.println("deh-get env https_proxy" + System.getenv("https_proxy"));
 		System.err.println("deh-get env HTTPS_PROXY" + System.getenv("HTTPS_PROXY"));
+		System.err.println("deh-get env http.proxyHost" + System.getenv("http.proxyHost"));
+		System.err.println("deh-get env http.proxyPort" + System.getenv("http.proxyPort"));
+		System.err.println("deh-get env https.proxyHost" + System.getenv("https.proxyHost"));
+		System.err.println("deh-get env https.proxyPort" + System.getenv("https.proxyPort"));
 
-		System.setProperty("http.proxyHost", System.getProperty("http_proxy"));
-		System.setProperty("https.proxyHost", System.getProperty("https_proxy"));
+		System.setProperty("http.proxyHost", "nat");
+		System.setProperty("http.proxyPort", "3128");
+		System.setProperty("https.proxyHost", "nat");
+		System.setProperty("https.proxyHost", "3128");
+		System.setProperty("http.nonProxyHosts", "localhost");
+
 		/*
 		 * if (needsProxy()) { System.setProperty("http.proxyHost",getProxyHost());
 		 * System.setProperty("http.proxyPort",getProxyPort()); } else {
