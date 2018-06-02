@@ -341,25 +341,9 @@
                    	 </goals>
                    	 <configuration>
                    	 	<systemProperties>
-                   	 	<property>
-                              <key>JAVA_HOME</key>
-                              <value>${JAVA_HOME}</value>
-                          </property>
-                          <property>
-                              <key>JAVA.HOME</key>
-                              <value>${JAVA.HOME}</value>
-                          </property>
-                          <property>
-                              <key>java_home</key>
-                              <value>${java_home}</value>
-                          </property>
                           <property>
                               <key>java.home</key>
                               <value>${java.home}</value>
-                          </property>
-                          <property>
-                              <key>http_proxy</key>
-                              <value>${JAVA_HOME}</value>
                           </property>
                           <property>
                               <key>https_proxy</key>
@@ -375,11 +359,19 @@
                           </property>
                           <property>
                               <key>http.proxyHost</key>
-                              <value>${HTTP.PROXYHOSt}</value>
+                              <value>${http.proxyHost}</value>
+                          </property>
+                          <property>
+                              <key>http.proxyPort</key>
+                              <value>${http.proxyPort}</value>
                           </property>
                            <property>
                               <key>https.proxyHost</key>
                               <value>${https.proxyHost}</value>
+                          </property>
+                          <property>
+                              <key>http.nonProxyHosts</key>
+                              <value>${http.nonProxyHosts}</value>
                           </property>
                     	  </systemProperties>
                       </configuration>

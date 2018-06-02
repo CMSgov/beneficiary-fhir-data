@@ -69,9 +69,7 @@ public final class FDADrugDataUtilityApp {
 			System.exit(3);
 		}
 
-		System.err.println("deh-get property - JAVA_HOME " + System.getProperty("JAVA_HOME"));
-		System.err.println("deh-get property - java_home " + System.getProperty("java_home"));
-		System.err.println("deh-get property - JAVA.HOME " + System.getProperty("JAVA.HOME"));
+
 		System.err.println("deh-get property - java.home " + System.getProperty("java.home"));
 		System.err.println("deh-get property - http_proxy " + System.getProperty("http_proxy"));
 		System.err.println("deh-get property - HTTP_PROXY " + System.getProperty("HTTP_PROXY"));
@@ -79,14 +77,7 @@ public final class FDADrugDataUtilityApp {
 		System.err.println("deh-get property - HTTPS_PROXY " + System.getProperty("HTTPS_PROXY"));
 		System.err.println("deh-get property - http.proxyHost" + System.getProperty("http.proxyHost"));
 		System.err.println("deh-get property - https.proxyHost" + System.getProperty("https.proxyHost"));
-		System.err.println("deh-get env http_proxy" + System.getenv("http_proxy"));
-		System.err.println("deh-get env HTTP_PROXY" + System.getenv("HTTP_PROXY"));
-		System.err.println("deh-get env https_proxy" + System.getenv("https_proxy"));
-		System.err.println("deh-get env HTTPS_PROXY" + System.getenv("HTTPS_PROXY"));
-		System.err.println("deh-get env http.proxyHost" + System.getenv("http.proxyHost"));
-		System.err.println("deh-get env http.proxyPort" + System.getenv("http.proxyPort"));
-		System.err.println("deh-get env https.proxyHost" + System.getenv("https.proxyHost"));
-		System.err.println("deh-get env https.proxyPort" + System.getenv("https.proxyPort"));
+		System.err.println("deh-get property - http.nonProxyHosts" + System.getProperty("http.nonProxyHosts"));
 
 		System.err.println("deh-get property before set- https.proxyHost " + System.getProperty("https.proxyHost"));
 		System.err.println("deh-get property before set- https.proxyPort " + System.getProperty("https.proxyPort"));
