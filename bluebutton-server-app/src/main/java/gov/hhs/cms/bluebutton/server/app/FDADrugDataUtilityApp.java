@@ -92,6 +92,10 @@ public final class FDADrugDataUtilityApp {
 
 		URL vURL = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
 		HttpsURLConnection vCon = (HttpsURLConnection) vURL.openConnection();
+		int vResponseCode = vCon.getResponseCode();
+		String vResponseMessage = vCon.getResponseMessage();
+		System.err.println("deh-vResponseCode " + vResponseCode);
+		System.err.println("deh-vResponseMessage " + vResponseMessage);
 
 		/*
 		 * if (needsProxy()) { System.setProperty("http.proxyHost",getProxyHost());
