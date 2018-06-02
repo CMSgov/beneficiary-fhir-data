@@ -74,6 +74,7 @@ public final class FDADrugDataUtilityApp {
 		System.err.println("deh-get property - https_proxy " + System.getProperty("https_proxy"));
 		System.err.println("deh-get property - HTTPS_PROXY " + System.getProperty("HTTPS_PROXY"));
 		System.err.println("deh-get property - http.proxyHost" + System.getProperty("http.proxyHost"));
+		System.err.println("deh-get property - https.proxyHost" + System.getProperty("https.proxyHost"));
 		System.err.println("deh-get env http_proxy" + System.getenv("http_proxy"));
 		System.err.println("deh-get env HTTP_PROXY" + System.getenv("HTTP_PROXY"));
 		System.err.println("deh-get env https_proxy" + System.getenv("https_proxy"));
@@ -126,7 +127,8 @@ public final class FDADrugDataUtilityApp {
 			e.printStackTrace();
 			System.exit(4);
 		}
-		 
+		System.err.println("deh-made it past ndc download command");
+
 		// unzip FDA NDC file
 		unzip(downloadedNdcZipFile, outputPath.toString());
 		Files.move(Paths.get(outputPath.toString() + File.separator + "product.txt"),

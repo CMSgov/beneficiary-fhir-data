@@ -359,7 +359,11 @@
                           </property>
                           <property>
                               <key>http.proxyHost</key>
-                              <value>${env.http.proxyHost}</value>
+                              <value>${http.proxyHost}</value>
+                          </property>
+                           <property>
+                              <key>https.proxyHost</key>
+                              <value>${https.proxyHost}</value>
                           </property>
                     	  </systemProperties>
                       </configuration>
