@@ -23,6 +23,8 @@ import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -87,6 +89,9 @@ public final class FDADrugDataUtilityApp {
 		System.setProperty("https.proxyHost", "nat");
 		System.setProperty("https.proxyHost", "3128");
 		System.setProperty("http.nonProxyHosts", "localhost");
+
+		URL vURL = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
+		HttpsURLConnection vCon = (HttpsURLConnection) vURL.openConnection();
 
 		/*
 		 * if (needsProxy()) { System.setProperty("http.proxyHost",getProxyHost());
