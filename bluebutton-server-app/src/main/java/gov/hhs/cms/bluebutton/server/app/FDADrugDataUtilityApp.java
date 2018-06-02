@@ -71,6 +71,7 @@ public final class FDADrugDataUtilityApp {
 
 
 		System.err.println("deh-get property - java.home " + System.getProperty("java.home"));
+		System.err.println("deh-get property - file.encoding " + System.getProperty("file.encoding"));
 		System.err.println("deh-get property - http_proxy " + System.getProperty("http_proxy"));
 		System.err.println("deh-get property - HTTP_PROXY " + System.getProperty("HTTP_PROXY"));
 		System.err.println("deh-get property - https_proxy " + System.getProperty("https_proxy"));

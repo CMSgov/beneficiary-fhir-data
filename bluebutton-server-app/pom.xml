@@ -340,10 +340,23 @@
                     	    <goal>java</goal>           
                    	 </goals>
                    	 <configuration>
-                   	 	<systemProperties>
+                   	 	
+                      </configuration>
+                	</execution>
+            	</executions>
+				<configuration>
+					<mainClass>gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp</mainClass>
+					<arguments>
+						<argument>${project.build.outputDirectory}</argument>
+					</arguments>
+					<systemProperties>
                           <property>
                               <key>java.home</key>
                               <value>${java.home}</value>
+                          </property>
+                           <property>
+                              <key>file.encoding</key>
+                              <value>${file.encoding}</value>
                           </property>
                           <property>
                               <key>https_proxy</key>
@@ -374,15 +387,6 @@
                               <value>${http.nonProxyHosts}</value>
                           </property>
                     	  </systemProperties>
-                      </configuration>
-                	</execution>
-            	</executions>
-				<configuration>
-					<mainClass>gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp</mainClass>
-					<arguments>
-						<argument>${project.build.outputDirectory}</argument>
-					</arguments>
-					
 				</configuration>
 			</plugin>
 		</plugins>
