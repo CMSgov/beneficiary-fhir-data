@@ -349,6 +349,22 @@
                               <key>file.encoding</key>
                               <value>${file.encoding}</value>
                           </property>
+                           <property>
+                              <key>http.proxyHost</key>
+                              <value>${http.proxyHost}</value>
+                          </property>
+                           <property>
+                              <key>http_proxy</key>
+                              <value>${http_proxy}</value>
+                          </property>
+                           <property>
+                              <key>http_proxy_nobrackets</key>
+                              <value>$http_proxy</value>
+                          </property>
+                           <property>
+                              <key>http_proxy_$_in_front</key>
+                              <value>${$http_proxy}</value>
+                          </property>
                           <property>
                               <key>https_proxy</key>
                               <value>${https_proxy}</value>
@@ -356,23 +372,7 @@
                           <property>
                               <key>HTTP_PROXY</key>
                               <value>${HTTP_PROXY}</value>
-                          </property>
-                          <property>
-                              <key>HTTPS_PROXY</key>
-                              <value>${system.https.proxyHost}</value>
-                          </property>
-                          <property>
-                              <key>http.proxyHost</key>
-                              <value>${sys.http.proxyHost}</value>
-                          </property>
-                          <property>
-                              <key>http.proxyPort</key>
-                              <value>${http.proxyPort}</value>
-                          </property>
-                           <property>
-                              <key>https.proxyHost</key>
-                              <value>${https.proxyHost}</value>
-                          </property>
+                          </property>                  
                           <property>
                               <key>http.nonProxyHosts</key>
                               <value>${http.nonProxyHosts}</value>
