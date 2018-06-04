@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -69,7 +71,23 @@ public final class FDADrugDataUtilityApp {
 			System.exit(3);
 		}
 
+		Properties projectProps = new Properties();
+		try (InputStream projectPropsStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("project.properties");) {
+			projectProps.load(projectPropsStream);
 
+			System.err.println("deh-get file prop http_proxy " + projectProps.getProperty("project.http.proxy"));
+			System.err
+					.println("deh-get file prop http.proxyHost " + projectProps.getProperty("project.http.proxyHost"));
+
+		}
+
+		System.err.println("deh-get property - env.http_proxy " + System.getProperty("env.http_proxy").toString());
+		System.err.println("deh-get property - env.HTTP_PROXY " + System.getProperty("env.HTTP_PROXY").toString());
+		System.err.println(
+				"deh-get property - env.http.proxyHost " + System.getProperty("env.http.proxyHost").toString());
+
+		System.err.println("deh-get property - httpproxy " + System.getProperty("httpproxy"));
 		System.err.println("deh-get property - java.home " + System.getProperty("java.home"));
 		System.err.println("deh-get property - file.encoding " + System.getProperty("file.encoding"));
 		System.err.println("deh-get property - http_proxy " + System.getProperty("http_proxy"));

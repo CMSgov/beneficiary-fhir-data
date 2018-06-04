@@ -340,6 +340,9 @@
                     	    <goal>java</goal>           
                    	 </goals>
                    	 <configuration>
+                   		 <systemPropertyVariables>
+     					   <httpproxy>${http_proxy}</httpproxy>      
+      					</systemPropertyVariables>        	 
                    	 	<systemProperties>
                           <property>
                               <key>java.home</key>
@@ -357,13 +360,17 @@
                               <key>http_proxy</key>
                               <value>${http_proxy}</value>
                           </property>
-                           <property>
-                              <key>http_proxy_nobrackets</key>
-                              <value>$http_proxy</value>
+                          <property>
+                              <key>env.http.proxyHost</key>
+                              <value>${env.http.proxyHost}</value>
                           </property>
                            <property>
-                              <key>http_proxy_$_in_front</key>
-                              <value>${$http_proxy}</value>
+                              <key>env.http_proxy</key>
+                              <value>${env.http_proxy}</value>
+                          </property>
+                          <property>
+                              <key>env.HTTP_PROXY</key>
+                              <value>${env.HTTP_PROXY}</value>
                           </property>
                           <property>
                               <key>https_proxy</key>
