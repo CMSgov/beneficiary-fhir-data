@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
@@ -21,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -71,28 +69,9 @@ public final class FDADrugDataUtilityApp {
 			System.exit(3);
 		}
 
-		Properties projectProps = new Properties();
-		try (InputStream projectPropsStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("project.properties");) {
-			projectProps.load(projectPropsStream);
-
-			System.err.println("deh-get file prop http_proxy " + projectProps.getProperty("project.http.proxy"));
-			System.err
-					.println("deh-get file prop http.proxyHost " + projectProps.getProperty("project.http.proxyHost"));
-
-		}
-
-		System.err.println("deh-get property - env.http_proxy " + System.getProperty("env.http_proxy").toString());
-		System.err.println("deh-get property - env.HTTP_PROXY " + System.getProperty("env.HTTP_PROXY").toString());
-		System.err.println(
-				"deh-get property - env.http.proxyHost " + System.getProperty("env.http.proxyHost").toString());
-
-		System.err.println("deh-get property - httpproxy " + System.getProperty("httpproxy"));
 		System.err.println("deh-get property - java.home " + System.getProperty("java.home"));
 		System.err.println("deh-get property - file.encoding " + System.getProperty("file.encoding"));
 		System.err.println("deh-get property - http_proxy " + System.getProperty("http_proxy"));
-		System.err.println("deh-get property - http_proxy_nobrackets " + System.getProperty("http_proxy_nobrackets"));
-		System.err.println("deh-get property - http_proxy_$_in_front " + System.getProperty("http_proxy_$_in_front"));
 		System.err.println("deh-get property - HTTP_PROXY " + System.getProperty("HTTP_PROXY"));
 		System.err.println("deh-get property - https_proxy " + System.getProperty("https_proxy"));
 		System.err.println("deh-get property - HTTPS_PROXY " + System.getProperty("HTTPS_PROXY"));
@@ -100,14 +79,10 @@ public final class FDADrugDataUtilityApp {
 		System.err.println("deh-get property - https.proxyHost" + System.getProperty("https.proxyHost"));
 		System.err.println("deh-get property - http.nonProxyHosts" + System.getProperty("http.nonProxyHosts"));
 
-		System.err.println("deh-get property before set- https.proxyHost " + System.getProperty("https.proxyHost"));
-		System.err.println("deh-get property before set- https.proxyPort " + System.getProperty("https.proxyPort"));
-		System.err.println("deh-get property before set- http.proxyHost " + System.getProperty("http.proxyHost"));
-		System.err.println("deh-get property before set- http.proxyPort " + System.getProperty("http.proxyPort"));
-		System.setProperty("http.proxyHost", "nat");
-		System.setProperty("http.proxyPort", "3128");
-		System.setProperty("https.proxyHost", "nat");
-		System.setProperty("https.proxyPort", "3128");
+		System.setProperty("http.proxyHost", "???");
+		System.setProperty("http.proxyPort", "????");
+		System.setProperty("https.proxyHost", "???");
+		System.setProperty("https.proxyPort", "????");
 		System.setProperty("http.nonProxyHosts", "localhost");
 
 		System.err.println("deh-get property after set- https.proxyHost " + System.getProperty("https.proxyHost"));
@@ -115,21 +90,6 @@ public final class FDADrugDataUtilityApp {
 		System.err.println("deh-get property after set- http.proxyHost " + System.getProperty("http.proxyHost"));
 		System.err.println("deh-get property after set- http.proxyPort " + System.getProperty("http.proxyPort"));
 
-		// URL vURL = new URL("http", "nat", 3128,
-		// "https://www.accessdata.fda.gov/cder/ndctext.zip");
-
-		// HttpURLConnection vCon = (HttpURLConnection) vURL.openConnection();
-		// int vResponseCode = vCon.getResponseCode();
-		// String vResponseMessage = vCon.getResponseMessage();
-		// System.err.println("deh-vResponseCode " + vResponseCode);
-		// System.err.println("deh-vResponseMessage " + vResponseMessage);
-
-		/*
-		 * if (needsProxy()) { System.setProperty("http.proxyHost",getProxyHost());
-		 * System.setProperty("http.proxyPort",getProxyPort()); } else {
-		 * System.setProperty("http.proxyHost","");
-		 * System.setProperty("http.proxyPort",""); }
-		 */
 		// download FDA NDC file
 		String nationalDrugCodeDownloadableFile = "https://www.accessdata.fda.gov/cder/ndctext.zip";
 		String downloadedNdcZipFile = outputPath.toString() + File.separator + "ndctext.zip";
