@@ -62,23 +62,3 @@ This project is in the worldwide [public domain](LICENSE.md). As stated in [CONT
 > This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 >
 > All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
-
-
-## Server Start
-
-To get the correct settings for locating where the bash path is, copy the the Maven settings file from the Maven conf directory
-to C:/Users/User.Name/.m2. In the new copy add the following profile:
-
-	<profile>
-      <id>windows-config</id>
-
-      <activation>
-        <os>
-          <family>windows</family>
-        </os>
-      </activation>
-
-      <properties>
-        <bash.exe>c:/bit9prog/dev/cygwin64/bin/bash.exe</bash.exe>
-      </properties>
-    </profile>
