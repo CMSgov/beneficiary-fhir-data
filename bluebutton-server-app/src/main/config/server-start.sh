@@ -202,8 +202,10 @@ JAVA_OPTS="\$JAVA_OPTS -Djboss.management.http.port=${serverPortManagement} -Djb
 
 # These properties are all referenced within the standalone.xml we'll be using.
 JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.db.url=${dbUrl}"
-JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.logs.dir=${workDirectory}"
 JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.ssl.keystore.path=${keyStore} -Dbbfhir.ssl.truststore.path=${trustStore}"
+
+# Used in src/main/resources/logback.xml as the directory to write the app log to. Must have a trailing slash.
+JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.logs.dir=${workDirectory}/"
 
 # This just adds a searchable bit of text to the command line, so we can 
 # determine which java processes were started by this script.
