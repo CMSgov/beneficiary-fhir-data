@@ -278,7 +278,6 @@
 						<configuration>
 							<executable>${bash.exe}</executable>
 							<arguments>
-								<argument>-l</argument>
 								<argument>${project.basedir}/src/main/config/server-start.sh</argument>
 								<argument>-j</argument>
 								<argument>${java.home}</argument>
@@ -303,7 +302,6 @@
 						<configuration>
 							<executable>${bash.exe}</executable>
 							<arguments>
-								<argument>-l</argument>
 								<argument>${project.basedir}/src/main/config/server-stop.sh</argument>
 								<argument>-t</argument>
 								<argument>${project.build.directory}</argument>
