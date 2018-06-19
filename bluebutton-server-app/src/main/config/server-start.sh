@@ -19,6 +19,13 @@ else
 	echo -e "$0 $@\n"
 fi
 
+# In Cygwin, non-login shells have no path. Fix that.
+# (Note: And we can't run this in a login shell, as it won't exit until ALL
+# child processes do, even with setsid/disown/etc.)
+if [[ "${cygwin}" = true ]]; then
+	source /etc/profile
+fi
+
 # Constants.
 serverVersion='8.1.0.Final'
 serverInstall="wildfly-${serverVersion}"
