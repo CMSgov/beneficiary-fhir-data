@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # Check to see if we are running in Cygwin.
-case "$( uname )" in
+uname="$(uname)"
+if [[ -z "${uname}" ]]; then uname="$(/usr/bin/uname)"; fi
+if [[ -z "${uname}" ]]; then echo "Unable to find uname." >&2; exit 1; fi
+case "${uname}" in
 	CYGWIN*) cygwin=true ;;
 	*) cygwin=false ;;
 esac
-
 # In Cygwin, some of the args will have unescaped backslashes. Fix that.
 if [[ "${cygwin}" = true ]]; then
 	set -- "${@//\\/\\\\}"
@@ -17,6 +19,13 @@ if [[ "${cygwin}" = true ]]; then
 	echo -e "${0//\\/\\\\} $@\n"
 else
 	echo -e "$0 $@\n"
+fi
+
+# In Cygwin, non-login shells have no path. Fix that.
+# (Note: And we can't run this in a login shell, as it won't exit until ALL
+# child processes do, even with setsid/disown/etc.)
+if [[ "${cygwin}" = true ]]; then
+	source /etc/profile
 fi
 
 # Constants.
