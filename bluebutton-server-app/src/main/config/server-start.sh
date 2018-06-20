@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # Check to see if we are running in Cygwin.
-case "$( uname )" in
+uname="$(uname)"
+if [[ -z "${uname}" ]]; then uname="$(/usr/bin/uname)"; fi
+if [[ -z "${uname}" ]]; then echo "Unable to find uname." >&2; exit 1; fi
+case "${uname}" in
 	CYGWIN*) cygwin=true ;;
 	*) cygwin=false ;;
 esac
