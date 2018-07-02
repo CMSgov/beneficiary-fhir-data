@@ -3,29 +3,39 @@ Development Environment Setup
 
 Thinking of contributing to this project or some of the other Java-based Blue Button projects? Great! This document provides some help on getting a development environment setup for that work.
 
+## Getting Started
+
+### Windows: Cygwin
+
+TODO: document install of cygwin, apt-cyg, etc.
+
+Things seem to go badly sideways in Cygwin if it tries to use ACL permissions. To avoid that, adjust the `/cygdrive` mount in `/etc/fstab` to include the `acl` and `exec` options, e.g.:
+
+    none /cygdrive cygdrive binary,posix=0,user,noacl,exec 0 0
+
+After changing that, be sure to completely close and restart all Cygwin processes. (Here's the reference that helped me solve this problem: <https://stackoverflow.com/questions/5828037/cygwin-sets-file-permission-to-000/7082542#7082542>.)
+
+Install the dependencies required by the `devenv-install.py` script:
+
+    $ apt-cyg install python3 python3-lxml python3-setuptools unzip cabextract
+
+__Note:__ If apt-cyg is having problems connecting to your cygwin mirror this may be due to an [incorrect HOSTTYPE setting](#hosttype).
+
+Install and configure Git:
+
+    $ apt-cyg install git
+    $ git config --global user.email "myemail@example.com"
+    $ git config --global user.name "My Full Name"
+
 ## Automation FTW!
 
 First off, if you're on one of the following platforms, we provide the [devenv-install.py](./devenv-install.py) script, which automates most of the work for you. It supports:
 
 * Windows, with [Cygwin](https://www.cygwin.com/)
 
-It can be run as follows:
+It can be run as follows from a Bash prompt:
 
-1. Install Python 3.
-
-  On Windows, this can be done using [apt-cyg](https://github.com/transcode-open/apt-cyg), as follows:
-    
-    ```
-    $ apt-cyg install python3 python3-setuptools
-    ```
-
-    __Note:__ If apt-cyg is having problems connecting to your cygwin mirror this may be due to an [incorrect HOSTTYPE setting](#hosttype).
-    
-1. Run the script:
-
-    ```
     $ ./devenv-install.py
-    ```
 
 What does it do for you? Great question! It will create a `~/workspaces/tools/` directory and then download and install (as a user) the following into there for you:
 
@@ -43,53 +53,46 @@ If you're not using one of those supported platforms, or would prefer to setup t
 ## Cygwin Configuration
 
 ### Associating .sh files with Cygwin
+
 Shell scripts that end in .sh should be associated with the Cygwin shell you have chosen to use.  Follow these steps to change the association for your installation:
 
-  1. Open a Command Prompt by pressing the Windows Key+R, type "cmd" and press return.
-  1. In the newly opened command prompt type:
+1. Open an elevated Command Prompt by finding the **Command Prompt** application in the Start menu, right-clicking it, and selecting **Run as administrator**.
+1. Create an empty/unmapped file type for `.sh` script files:
+    
+    ```
+    > assoc .sh=unix_shell_script
+    ```
+    
+1. Map the file type created in the previous step to a launch command:
+    
+    ```
+    > ftype unix_shell_script="C:\cygwin64\bin\bash.exe" %1 %*
+    ```
+    
 
-    ``` 
-    # Everything after .sh= is the ftype name
-    > assoc .sh
-    .sh=sh_auto_file
-    ``` 
-  1. Using the ftype name discovered in the previous step check the current association:
-
-    ```
-    # Example of sh_auto_file set to use git-bash
-    > ftype sh_auto_file
-    sh_auto_file="C:\Git\git-bash.exe" --no-cd "%L" %*
-    ```
-  1. If necessary, change the .sh association to use your Cygwin shell:
-
-    ```
-    # Example setting Cygwin bash to be associated with .sh files 
-    > ftype sh_auto_file="C:\cygwin64\bin\bash.exe" %1 %*
-    ```
 <a name="hosttype"></a>
 ### HOSTTYPE Configuration
 
 If apt-cyg is having problems connecting to a Cygwin mirror your HOSTTYPE configuration may be the problem.  Verify your HOSTTYPE does not have additional decoration(i.e. x86_64-cygwin) and only contains the system architecture(i.e. x86_64) that you are attempting to install on.
 
-    ```
-    # Example incorrect setting
-    $ echo $HOSTTYPE
-    x86_64-cygwin
+```
+# Example incorrect setting
+$ echo $HOSTTYPE
+x86_64-cygwin
 
-    # Example correct setting
-    $ echo $HOSTTYPE
-    x86_64
-    ```
+# Example correct setting
+$ echo $HOSTTYPE
+x86_64
 
-HOSTTYPE can be overridden on the command line or set in your shell configuration(i.e. .bashrc, .cshrc, etc).  To override HOSTTYPE on the command line use the following construct:
+`HOSTTYPE` can be overridden on the command line or set in your shell configuration (i.e. `~/.bashrc`, `~/.cshrc`, etc).  To override `HOSTTYPE` on the command line use the following construct:
 
-    ```
-    # for csh/tcsh
-    > setenv HOSTTYPE x86_64 && apt-cyg <command>
+```
+# for csh/tcsh
+> setenv HOSTTYPE x86_64 && apt-cyg <command>
 
-    # for bash
-    $ HOSTTYPE=x86_64 apt-cyg <command>
-    ```
+# for bash
+$ HOSTTYPE=x86_64 apt-cyg <command>
+```
 
 ## AWS Configuration
 
@@ -163,6 +166,11 @@ Verify Eclipse is using the correct JDK.
 If you're using Eclipse for development, you'll want to configure its preferences, as follows:
 
 1. Open **Window > Preferences**.
+1. Select **Maven**.
+    1. Enable **Download Artifact Sources**.
+    1. Enable **Download Artifact JavaDoc**.
+1. Select **Maven > Annotation Processing**.
+    1. Enable the **Automatically configure JDT APT** option.
 1. Select **Java > Code Style > Code Templates**.
     1. Click **Import...** and select this project's [eclipse-codetemplates.xml](./eclipse-codetemplates.xml) file.
         * This configures the file, class, method, etc. comments on new items such that they match the existing style used in these projects.
@@ -185,17 +193,3 @@ If you have already cloned Blue Button repositories to your system they can easi
 1. Select the pom files you want to import from the **Projects** table.
 1. Click **Finish**.
 1. The projects and packages you selected will now appear in the **Project Explorer** window.
-
-### Enable Auto-generated Code
-
-Some of the projects use the m2e-apt plugin to generate source code that is compiled into some of the jars.  This is not enabled by default but can be by easily following these steps:
-
-1. In the **Project Explorer** right-click on the **bluebutton-data-model-rif** project and select **Properties**.
-1. In the **Properties** dialog, on the left-hand side select **Java Compiler > Annotation Processing**.
-1. Check the checkbox labeled **Enable project specific settings".
-1. In the **Generated source directory** editbox enter the following:
-```
-target/generated-sources/annotations
-```
-1. Click the **Apply and Close** button.
-1. When prompted to rebuild the project select **Yes**.

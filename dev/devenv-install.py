@@ -12,6 +12,7 @@
 # At this time, it is known to support the following platforms:
 # * Windows, with Cygwin and the following packages installed:
 #     * python3
+#     * python3-lxml
 #     * unzip
 #     * cabextract
 #
@@ -34,6 +35,9 @@ import collections
 import subprocess
 import tempfile
 import stat
+from pathlib import Path
+import xml.etree.ElementTree
+from lxml import etree
 
 def main():
     """
@@ -65,12 +69,8 @@ def main():
     # Install Maven.
     maven_archive_path = maven_download()
     maven_install_path = maven_install(maven_archive_path)
-    maven_config_env(maven_install_path)
+    maven_config_env(maven_install_path, jdk_install_path)
 
-    # Install Tomcat.
-    #tomcat_archive = tomcat_download()
-    #tomcat_install(tomcat_archive)
-    
     print('')
     print('Done.')
 
@@ -85,7 +85,7 @@ def jdk_download():
     
     # The URL to download from.
     jdk_urls = {
-        'cygwin': 'http://download.oracle.com/otn-pub/java/jdk/8u66-b18/jdk-8u66-windows-x64.exe'
+        'cygwin': 'http://download.oracle.com/otn-pub/java/jdk/8u172-b11/a58eab1ec242421181065cdc37240b08/jdk-8u172-windows-x64.exe'
     }
     jdk_url = jdk_urls[sys.platform]
     
@@ -185,6 +185,10 @@ def jdk_extract_exe(jdk_archive_path, jdk_install_path):
     tools_zip = os.path.join(jdk_install_path, 'tools.zip')
     extract_archive(tools_zip, jdk_install_path)
     os.remove(tools_zip)
+
+    # Mark unpack200.exe as executable.
+    unpack_exe = os.path.join(jdk_install_path, 'jre', 'bin', 'unpack200.exe')
+    os.chmod(unpack_exe, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
     
     # Unpack all of the JAR `*.pack` files that were in `tools.zip`.
     for path, dirs, files in os.walk(jdk_install_path):
@@ -192,11 +196,13 @@ def jdk_extract_exe(jdk_archive_path, jdk_install_path):
             jar_file, _ = os.path.splitext(pack_file)
             jar_file = jar_file + '.jar'
             unpack_cmd = [
-                os.path.join(jdk_install_path, 'jre', 'bin', 'unpack200.exe'),
+                unpack_exe,
                 '--remove-pack-file',
                 cygpath_to_windows(os.path.join(path, pack_file)),
                 cygpath_to_windows(os.path.join(path, jar_file))
             ]
+            # Note: If this starts throwing odd errors, try replacing the
+            # permissions on the workspaces directory and its descendants.
             subprocess.check_call(unpack_cmd,  
                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
@@ -227,8 +233,11 @@ def eclipse_download():
     """
     
     # The URL to download from.
+    # Note: A little tricky to find this link, as Eclipse now _wants_ you to
+    # just download an installer, rather than the full packge. Found this link
+    # here: <https://www.eclipse.org/downloads/eclipse-packages/>.
     eclipse_urls = {
-        'cygwin': 'http://download.eclipse.org/technology/epp/downloads/release/mars/1/eclipse-jee-mars-1-win32-x86_64.zip'
+        'cygwin': 'http://download.eclipse.org/technology/epp/downloads/release/oxygen/3a/eclipse-jee-oxygen-3a-win32-x86_64.zip'
     }
     eclipse_url = eclipse_urls[sys.platform]
     
@@ -373,15 +382,9 @@ def eclipse_install_plugins(eclipse_install_path):
     
     # Enables easy APT code generation for Maven projects.
     apt_plugins = PluginGroup('Maven Integration for Eclipse JDT APT', 
-            [Plugin('org.jboss.tools.maven.apt.feature.feature.group', '1.1.1.201411262015')], 
+            [Plugin('org.jboss.tools.maven.apt.feature.feature.group', '1.5.0.201805160042')],
             ['http://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-apt'])
     plugin_groups.append(apt_plugins)
-    
-    # Just makes editing Markdown files slightly more convenient.
-    markdown_plugins = PluginGroup('Markdown Editor', 
-            [Plugin('markdown.editor.feature.feature.group', '1.2.0.201501260515')], 
-            ['http://www.nodeclipse.org/updates/markdown/'])
-    plugin_groups.append(markdown_plugins)
     
     # The Eclipse executable.
     eclipse_exe = os.path.join(eclipse_install_path, 'eclipse')
@@ -425,7 +428,7 @@ def maven_download():
     
     # The URL to download from.
     maven_urls = {
-        'cygwin': 'http://www.us.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip'
+        'cygwin': 'http://www.us.apache.org/dist/maven/maven-3/3.5.3/binaries/apache-maven-3.5.3-bin.zip'
     }
     maven_url = maven_urls[sys.platform]
     
@@ -483,12 +486,13 @@ def maven_install(maven_archive_path):
     
     return maven_install_path
 
-def maven_config_env(maven_install_path):
+def maven_config_env(maven_install_path, jdk_install_path):
     """
     Configures the environment variables, etc. for the specified Maven installation.
     
     Args:
         maven_install_path (str): The local path for the Maven install.
+        jdk_install_path (str): The local path for the JDK install.
     
     Returns:
         (nothing)
@@ -500,72 +504,60 @@ def maven_config_env(maven_install_path):
     bash_path_include('${MAVEN_HOME}/bin')
     print('done.')
 
-def tomcat_download():
-    """
-    Download the Tomcat archive/installer from tomcat.apache.org.
+    # Create the settings.xml file.
+    print('   - Creating settings.xml... ', end="", flush=True)
+    settings_path = os.path.join(get_maven_user_dir(), 'settings.xml')
+    if not os.path.isfile(settings_path):
+        # Copy the distribution file as a starting point.
+        settings_source_path = os.path.join(maven_install_path, 'conf', 'settings.xml')
+        shutil.copyfile(settings_source_path, settings_path)
 
-    Returns:
-        The path to the downloaded file, which will be saved into the
-        `get_installers_dir()` directory.
-    """
-    
-    # The URL to download from: Tomcat 7.0.65.
-    tomcat_url = "http://www.us.apache.org/dist/tomcat/tomcat-7/v7.0.65/bin/apache-tomcat-7.0.65.tar.gz"
-    
-    # The path to save the installer to.
-    file_name = urlsplit(tomcat_url).path.split('/')[-1]
-    file_path_local = os.path.join(get_installers_dir(), file_name)
-    
-    print('4) Install Tomcat')
-    
-    if not os.path.exists(file_path_local):
-        # Download the installer.
-        print('   - Downloading ' + file_name + '... ', end="", flush=True)
-        with urllib.request.urlopen(tomcat_url) as response, open(file_path_local, 'wb') as tomcat_archive:
-            shutil.copyfileobj(response, tomcat_archive)
-        print('downloaded.')
+        # Then add the required profile to that (if on Cygwin).
+        if sys.platform == 'cygwin':
+            profile_windows_xml =  etree.fromstring((
+                    "    <profile>\n"
+                    "      <id>windows-config</id>\n"
+                    "      <activation>\n"
+                    "        <os>\n"
+                    "          <family>windows</family>\n"
+                    "        </os>\n"
+                    "      </activation>\n"
+                    "      <properties>\n"
+                    "        <bash.exe>{}</bash.exe>\n"
+                    "      </properties>\n"
+                    "    </profile>\n"
+                    ).format(cygpath_to_windows('/usr/bin/bash')))
+            settings_xml = etree.parse(settings_path)
+            settings_xml.find('{http://maven.apache.org/SETTINGS/1.0.0}profiles').append(profile_windows_xml)
+            settings_xml.write(settings_path)
+        print('done.')
     else:
-        print('   - Installer ' + file_name + ' already downloaded.')
-    
-    return file_path_local
+        print('already present.' + settings_path)
 
-def tomcat_install(tomcat_archive_path):
-    """
-    Extract the specified Tomcat archive/installer into the `get_tools_dir()`
-    directory.
-    
-    Args:
-        tomcat_archive_path (str): The local path to the archive/installer to
-            extract Tomcat from.
-    
-    Returns:
-        The path to the downloaded file, which will be saved into the
-        `get_installers_dir()` directory.
-    """
-    
-    # The path to install to.
-    _, tomcat_name = os.path.split(tomcat_archive_path)
-    tomcat_name = re.sub('\.tar\.gz$', '', tomcat_name)
-    tomcat_install_path = os.path.join(get_tools_dir(), tomcat_name)
-    tomcat_install_path_tmp = os.path.join(get_tools_dir(), tomcat_name + "-tmp")
-
-    if not os.path.exists(tomcat_install_path):
-        # Extract the Tomcat install.
-        print('   - Extracting ' + tomcat_name + '... ', end="", flush=True)
-
-        with tarfile.open(tomcat_archive_path) as tomcat_archive:
-            tomcat_archive.extractall(tomcat_install_path_tmp)
-
-        # Make the extracted 'apache-tomcat...-tmp/apache-tomcat-7.0.65' directory the 
-        # actual install.
-        shutil.move(os.path.join(tomcat_install_path_tmp, tomcat_name), 
-                tomcat_install_path)
-        os.rmdir(tomcat_install_path_tmp)
-        print('extracted.')
+    # Create the toolchains.xml file.
+    print('   - Updating toolchains.xml... ', end="", flush=True)
+    toolchains_path = os.path.join(get_maven_user_dir(), "toolchains.xml")
+    if not os.path.isfile(toolchains_path):
+        toolchains_xml = (
+                "<?xml version=\"1.0\" encoding=\"UTF8\"?>\n"
+                "<toolchains>\n"
+                "  <toolchain>\n"
+                "    <type>jdk</type>\n"
+                "    <provides>\n"
+                "      <version>1.8</version>\n"
+                "      <vendor>oracle</vendor>\n"
+                "    </provides>\n"
+                "    <configuration>\n"
+                "      <jdkHome>{}</jdkHome>\n"
+                "    </configuration>\n"
+                "  </toolchain>\n"
+                "</toolchains>\n"
+                ).format(cygpath_to_windows(jdk_install_path))
+        with open(toolchains_path, "w+") as toolchains_file:
+            toolchains_file.writelines(toolchains_xml)
+        print('done.')
     else:
-        print('   - Archive ' + tomcat_name + ' already extracted.')
-    
-    return tomcat_install_path
+        print('already present.')
 
 def get_workspaces_dir():
     """
@@ -619,6 +611,24 @@ def get_installers_dir():
     os.makedirs(installers_dir, exist_ok=True)
     return installers_dir
 
+def get_maven_user_dir():
+    """
+    Return the path to the user's .m2 directory.
+    
+    Create the directory if it does not already exist.
+    
+    Returns:
+        The path to the user's .m2 directory.
+    """
+    
+    if sys.platform == 'cygwin':
+        user_dir = cygpath_to_unix(os.environ['USERPROFILE'])
+    else:
+        raise OSError('Unsupported platform: ' + sys.platform)
+    maven_user_dir = os.path.join(user_dir, '.m2')
+    os.makedirs(maven_user_dir, exist_ok=True)
+    return maven_user_dir
+
 def extract_archive(archive, destination):
     """
     Extracts the specified `.zip` or `.tar.gz` archive to the specified 
@@ -656,20 +666,43 @@ def cygpath_to_windows(path):
         A new path, in Windows format.
     """
     
-    cygpath_cmd = [ 
+    cygpath_cmd = [
         'cygpath', 
         '--windows', 
         '--absolute',
         '--codepage', 'UTF8',
         path
     ]
-    windows_path = subprocess.check_output(cygpath_cmd, 
+    windows_path = subprocess.check_output(cygpath_cmd,
         stderr=subprocess.STDOUT)
     return windows_path.decode('utf8').rstrip('\n')
 
+def cygpath_to_unix(path):
+    """
+    Uses Cygwin's `cygpath` utility to convert a path to Windows format, e.g.
+    `/cygdrive/c/foo/bar`.
+    
+    Args:
+        path (str): The path to be converted.
+    
+    Returns:
+        A new path, in Unix/Cygwin format.
+    """
+    
+    cygpath_cmd = [
+        'cygpath',
+        '--unix',
+        '--absolute',
+        '--codepage', 'UTF8',
+        path
+    ]
+    unix_path = subprocess.check_output(cygpath_cmd,
+        stderr=subprocess.STDOUT)
+    return unix_path.decode('utf8').rstrip('\n')
+
 def cygpath_if_windows(path):
     """
-    Returns the result of `cygpath_if_windows` for the specified path if this 
+    Returns the result of `cygpath_to_windows` for the specified path if this
     script is being run inside Cygwin. Otherwise, returns the path as-is.
     
     Args:
@@ -755,7 +788,6 @@ def bash_path_include(directory):
     
     # The line being added to the file.
     path_entry = 'export PATH=${PATH}:' + directory + '\n'
-    
     
     # Open two files:
     #  1. .bashrc, for reading
