@@ -10,7 +10,7 @@ Thinking of contributing to this project or some of the other Java-based Blue Bu
 Cygwin provides a Unix environment for Windows systems. It should be installed as follows:
 
 1. Create a directory to install Cygwin to. `C:\cygwin64` is traditional.
-    * GDIT staff on Windows systems will likely need to go with `C:\bit9progs\dev\cygwin64`, instead.
+    * GDIT staff on Windows systems will likely need to go with `C:\bit9prog\dev\cygwin64`, instead.
 1. Download the Cygwin installer from <https://cygwin.com/setup-x86_64.exe> and save it to that directory, e.g. `C:\cygwin64\setup-x86_64.exe`.
 1. Open a non-administrator Windows/DOS command prompt from the Start menu.
 1. Run the following command to download and install Cygwin and a couple of basic extra packages (adjust the `cygwin64` directory entries to match the one you chose earlier):
@@ -52,7 +52,7 @@ After changing that, be sure to completely close and restart all Cygwin processe
 
 Install the dependencies required by the `devenv-install.py` script:
 
-    $ apt-cyg install python3 python3-lxml python3-setuptools unzip cabextract
+    $ apt-cyg install python3 python3-lxml python3-setuptools unzip cabextract wget
 
 __Note:__ If apt-cyg is having problems connecting to your cygwin mirror this may be due to an [incorrect HOSTTYPE setting](#hosttype).
 
