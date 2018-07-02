@@ -93,6 +93,7 @@ x86_64-cygwin
 # Example correct setting
 $ echo $HOSTTYPE
 x86_64
+```
 
 `HOSTTYPE` can be overridden on the command line or set in your shell configuration (i.e. `~/.bashrc`, `~/.cshrc`, etc).  To override `HOSTTYPE` on the command line use the following construct:
 
@@ -141,8 +142,6 @@ Below are links to detailed instructions on configuring your AWS credentials for
 
 ## Github Configuration
 
-### Github SSH
-
 You will need to configure an SSH credential in order to clone the Blue Button repositories.  Instructions are thoroughly documented on Github but for convenience here are the relevant links:
 
   * [Connecting to Github with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
@@ -152,32 +151,9 @@ You will need to configure an SSH credential in order to clone the Blue Button r
 
 ## Maven Configuration
 
-### Maven `toolchains.xml`
-
-Right now, the script does not create the Maven `toolchains.xml` file (though it can and should). As a workaround, create it manually yourself, as `~/.m2/toolchains.xml`, with content similar to the following (adjust the paths to match your system):
-
-```
-<?xml version="1.0" encoding="UTF8"?>
-<toolchains>
-  <toolchain>
-    <type>jdk</type>
-    <provides>
-      <version>1.8</version>
-      <vendor>oracle</vendor>
-      <!-- Change the id value to match the jdk version on your system --> 
-      <id>jdk-8u31-linux-x64</id>
-    </provides>
-    <configuration>
-      <!-- Change the jdkHome value to point to the jdk location on your system --> 
-      <jdkHome>/home/myusername/workspaces/tools/jdk-8u31-linux-x64</jdkHome>
-    </configuration>
-  </toolchain>
-</toolchains>
-```
-
 ### Skipping Tests
 
-The default install goal for the maven build will run the integration tests.  If you do not want to run them as some do use AWS resources use the following command line when executing the build:
+The default `install` goal for most Blue Button Maven projects will run integration tests.  If you do not want to run them (as some do use AWS resources), add the `-DskipITs` flag to the build. For example:
 
 ```
 $ mvn clean install -DskipITs
