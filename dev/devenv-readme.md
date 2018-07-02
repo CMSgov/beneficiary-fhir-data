@@ -7,7 +7,40 @@ Thinking of contributing to this project or some of the other Java-based Blue Bu
 
 ### Windows: Cygwin
 
-TODO: document install of cygwin, apt-cyg, etc.
+Cygwin provides a Unix environment for Windows systems. It should be installed as follows:
+
+1. Create a directory to install Cygwin to. `C:\cygwin64` is traditional.
+    * GDIT staff on Windows systems will likely need to go with `C:\bit9progs\dev\cygwin64`, instead.
+1. Download the Cygwin installer from <https://cygwin.com/setup-x86_64.exe> and save it to that directory, e.g. `C:\cygwin64\setup-x86_64.exe`.
+1. Open a non-administrator Windows/DOS command prompt from the Start menu.
+1. Run the following command to download and install Cygwin and a couple of basic extra packages (adjust the `cygwin64` directory entries to match the one you chose earlier):
+    
+    ```
+    > setup-x86_64.exe --no-admin --quiet-mode --arch x86_64 --site http://mirror.cs.vt.edu/pub/cygwin/cygwin/ --only-site --root C:\cygwin64 --local-package-dir C:\cygwin64\packages-local --packages lynx --no-desktop
+    ```
+    
+1. Wait for that installation to complete.
+
+Once Cygwin is installed, it can be launched by launching the **Cygwin64 Terminal** application that will now be in the Start menu.
+
+#### Cygwin: Package Management
+
+Astonishingly, Cygwin doesn't really provide a decent package manager out of the box (in Unix systems, "package managers" are OS-provided utilities for installing available software). Instead, most folks either use the provided `setup-x86_64.exe` or a third-party utility like `[apt-cyg](https://github.com/transcode-open/apt-cyg)`. This guide recommends the use of `apt-cyg`, even though it doesn't support package upgrades and is unmaintained, as `setup-x86_64.exe` has a whole bunch of its own issues, such as an inability to update itself. Nonetheless, feel free to use whatever makes you happiest -- you'll just have to figure out yourself how to install all of the packages listed here as being installed via '`apt-cyg install ...`'.
+
+Launch a Cygwin terminal and install `apt-cyg` by running  the following:
+
+    $ lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg
+    $ install apt-cyg /bin
+
+Once installed, `apt-cyg can be used to install packages by running '`apt-cyg install <package>..`'. For example, to install the silly `fortune` utility:
+
+    $ apt-cyg install fortune-mod
+    $ fortune
+    A debugged program is one for which you have not yet found the conditions
+    that make it fail.
+                    -- Jerry Ogdin
+
+#### Cygwin: Permissions Fix
 
 Things seem to go badly sideways in Cygwin if it tries to use ACL permissions. To avoid that, adjust the `/cygdrive` mount in `/etc/fstab` to include the `acl` and `exec` options, e.g.:
 
@@ -15,44 +48,21 @@ Things seem to go badly sideways in Cygwin if it tries to use ACL permissions. T
 
 After changing that, be sure to completely close and restart all Cygwin processes. (Here's the reference that helped me solve this problem: <https://stackoverflow.com/questions/5828037/cygwin-sets-file-permission-to-000/7082542#7082542>.)
 
+#### Cygwin: Other Prerequisites
+
 Install the dependencies required by the `devenv-install.py` script:
 
     $ apt-cyg install python3 python3-lxml python3-setuptools unzip cabextract
 
 __Note:__ If apt-cyg is having problems connecting to your cygwin mirror this may be due to an [incorrect HOSTTYPE setting](#hosttype).
 
-Install and configure Git:
+Install and configure the other general development utilities that will be needed:
 
     $ apt-cyg install git
     $ git config --global user.email "myemail@example.com"
     $ git config --global user.name "My Full Name"
 
-## Automation FTW!
-
-First off, if you're on one of the following platforms, we provide the [devenv-install.py](./devenv-install.py) script, which automates most of the work for you. It supports:
-
-* Windows, with [Cygwin](https://www.cygwin.com/)
-
-It can be run as follows from a Bash prompt:
-
-    $ ./devenv-install.py
-
-What does it do for you? Great question! It will create a `~/workspaces/tools/` directory and then download and install (as a user) the following into there for you:
-
-* An [Oracle Java 8 JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-* [Apache Maven](https://maven.apache.org/)
-* [Latest Eclipse Version](https://www.eclipse.org/downloads/)
-    * As of 10/20/2017, Eclipse Mars and Oxygen are known to work with our projects.
-* Eclipse __m2e-apt__ Plugin
-    * The m2e-apt plugin allows Maven projects in Eclipse to easily leverage [the JDK's Annotation Processing framework](http://docs.oracle.com/javase/7/docs/technotes/guides/apt/).
-    * Manual installation of the m2e-apt plugin can be achieved by using the [Drag To Install](http://marketplace.eclipse.org/content/m2e-apt) option.  To install from within Eclipse IDE open **Help > Eclipse Marketplace...** and search for **m2e-apt** using the **Eclipse Marketplace** find dialog box.  Click the **Install** button for the plugin and restart Eclipse when prompted. 
-    * [Usage Instructions for m2e-apt](https://developer.jboss.org/en/tools/blog/2012/05/20/annotation-processing-support-in-m2e-or-m2e-apt-100-is-out?_sscc=t)
-
-If you're not using one of those supported platforms, or would prefer to setup things manually, you'll want to download and install the items listed above yourself.
-
-## Cygwin Configuration
-
-### Associating .sh files with Cygwin
+#### Cygwin: Shell Script File Association
 
 Shell scripts that end in .sh should be associated with the Cygwin shell you have chosen to use.  Follow these steps to change the association for your installation:
 
@@ -71,7 +81,7 @@ Shell scripts that end in .sh should be associated with the Cygwin shell you hav
     
 
 <a name="hosttype"></a>
-### HOSTTYPE Configuration
+#### Cygwin: HOSTTYPE Configuration
 
 If apt-cyg is having problems connecting to a Cygwin mirror your HOSTTYPE configuration may be the problem.  Verify your HOSTTYPE does not have additional decoration(i.e. x86_64-cygwin) and only contains the system architecture(i.e. x86_64) that you are attempting to install on.
 
@@ -93,6 +103,31 @@ x86_64
 # for bash
 $ HOSTTYPE=x86_64 apt-cyg <command>
 ```
+
+## Automation FTW!
+
+First off, if you're on one of the following platforms, we provide the [devenv-install.py](./devenv-install.py) script, which automates most of the work for you. It supports:
+
+* Windows, with [Cygwin](https://www.cygwin.com/)
+
+It can be run as follows from a Bash prompt:
+
+    $ wget https://github.com/CMSgov/bluebutton-parent-pom/raw/master/dev/devenv-install.py
+    $ chmod a+x ./devenv-install.py
+    $ ./devenv-install.py
+
+What does it do for you? Great question! It will create a `~/workspaces/tools/` directory and then download and install (as a user) the following into there for you:
+
+* An [Oracle Java 8 JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* [Apache Maven](https://maven.apache.org/)
+* [Latest Eclipse Version](https://www.eclipse.org/downloads/)
+    * As of 10/20/2017, Eclipse Mars and Oxygen are known to work with our projects.
+* Eclipse __m2e-apt__ Plugin
+    * The m2e-apt plugin allows Maven projects in Eclipse to easily leverage [the JDK's Annotation Processing framework](http://docs.oracle.com/javase/7/docs/technotes/guides/apt/).
+    * Manual installation of the m2e-apt plugin can be achieved by using the [Drag To Install](http://marketplace.eclipse.org/content/m2e-apt) option.  To install from within Eclipse IDE open **Help > Eclipse Marketplace...** and search for **m2e-apt** using the **Eclipse Marketplace** find dialog box.  Click the **Install** button for the plugin and restart Eclipse when prompted.
+    * [Usage Instructions for m2e-apt](https://developer.jboss.org/en/tools/blog/2012/05/20/annotation-processing-support-in-m2e-or-m2e-apt-100-is-out?_sscc=t)
+
+If you're not using one of those supported platforms, or would prefer to setup things manually, you'll want to download and install the items listed above yourself.
 
 ## AWS Configuration
 
