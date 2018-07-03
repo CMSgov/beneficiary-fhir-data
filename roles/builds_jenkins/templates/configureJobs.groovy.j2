@@ -118,6 +118,39 @@ def createOrUpdateFileCredentials = { newSecret ->
   }
 }
 
+//
+// Creates/updates the specified String credentials.
+//
+def createOrUpdateStringCredentials = { newSecret ->
+  domain = com.cloudbees.plugins.credentials.domains.Domain.global()
+  credsStore = Jenkins.instance.getExtensionList("com.cloudbees.plugins.credentials.SystemCredentialsProvider")[0].getStore()
+  
+  secrets = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
+    org.jenkinsci.plugins.plaincredentials.StringCredentials.class,
+    Jenkins.instance
+  )
+  
+  id = newSecret.id
+  matchingSecret = secrets.find { secret -> secret.id == id }
+  
+  if (matchingSecret) {
+    println "Secret found: ${matchingSecret.id}"
+    
+    if (hudson.util.Secret.toString(newSecret.secret) != hudson.util.Secret.toString(matchingSecret.secret)) {
+      updateResult = credsStore.updateCredentials(domain, matchingSecret, newSecret)  
+      if (updateResult) {
+        println "Changed: secret updated: ${id}" 
+      } else {
+        println "Secret failed to update: ${id}"
+      }
+    }
+  } else {
+    println "Secret not found: ${id}"
+    credsStore.addCredentials(domain, newSecret)
+    println "Changed: secret created: ${id}"
+  }
+}
+
 
 //
 // Create/Update All of the Projects
@@ -130,6 +163,24 @@ createOrUpdateFileCredentials(
     'bluebutton-ansible-playbooks-data-ansible-vault-password',
     'vault.password',
     com.cloudbees.plugins.credentials.SecretBytes.fromString('{{ vault_jenkins_bluebutton_ansible_playbooks_data_ansible_vault_password | b64encode }}')
+  )
+)
+
+createOrUpdateStringCredentials(
+  new org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl(
+    com.cloudbees.plugins.credentials.CredentialsScope.GLOBAL,
+    'proxy-host',
+    'The HTTP/S proxy server host to use.',
+    hudson.util.Secret.fromString('{{ vault_proxy_host }}')
+  )
+)
+
+createOrUpdateStringCredentials(
+  new org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl(
+    com.cloudbees.plugins.credentials.CredentialsScope.GLOBAL,
+    'proxy-port',
+    'The HTTP/S proxy server port to use.',
+    hudson.util.Secret.fromString('{{ vault_proxy_port }}')
   )
 )
 
