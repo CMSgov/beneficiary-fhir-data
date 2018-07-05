@@ -69,27 +69,6 @@ public final class FDADrugDataUtilityApp {
 			System.exit(3);
 		}
 
-		System.err.println("deh-get property - java.home " + System.getProperty("java.home"));
-		System.err.println("deh-get property - file.encoding " + System.getProperty("file.encoding"));
-		System.err.println("deh-get property - http_proxy " + System.getProperty("http_proxy"));
-		System.err.println("deh-get property - HTTP_PROXY " + System.getProperty("HTTP_PROXY"));
-		System.err.println("deh-get property - https_proxy " + System.getProperty("https_proxy"));
-		System.err.println("deh-get property - HTTPS_PROXY " + System.getProperty("HTTPS_PROXY"));
-		System.err.println("deh-get property - http.proxyHost" + System.getProperty("http.proxyHost"));
-		System.err.println("deh-get property - https.proxyHost" + System.getProperty("https.proxyHost"));
-		System.err.println("deh-get property - http.nonProxyHosts" + System.getProperty("http.nonProxyHosts"));
-
-		System.setProperty("http.proxyHost", "???");
-		System.setProperty("http.proxyPort", "????");
-		System.setProperty("https.proxyHost", "???");
-		System.setProperty("https.proxyPort", "????");
-		System.setProperty("http.nonProxyHosts", "localhost");
-
-		System.err.println("deh-get property after set- https.proxyHost " + System.getProperty("https.proxyHost"));
-		System.err.println("deh-get property after set- https.proxyPort " + System.getProperty("https.proxyPort"));
-		System.err.println("deh-get property after set- http.proxyHost " + System.getProperty("http.proxyHost"));
-		System.err.println("deh-get property after set- http.proxyPort " + System.getProperty("http.proxyPort"));
-
 		// download FDA NDC file
 		String nationalDrugCodeDownloadableFile = "https://www.accessdata.fda.gov/cder/ndctext.zip";
 		String downloadedNdcZipFile = outputPath.toString() + File.separator + "ndctext.zip";
