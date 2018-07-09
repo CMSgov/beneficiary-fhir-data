@@ -63,3 +63,23 @@ For your convenience, a dev-only-really-don't-use-these-anywhere-else server key
     ```
     $ openssl pkcs12 -in dev/ssl-stores/client.pfx -passin pass:changeit -nodes -out dev/ssl-stores/client-unsecured.pem
     ```
+
+## Windows/Cygwin Settings
+
+Windows/Cygwin users will need to tell our builds what the full path to `bash.exe` is. First, copy the the default Maven `settings.xml` file from the Maven `conf/` directory to `C:/Users/User.Name/.m2`. In this new copy add the following profile in the `<profiles />` section towards the bottom of the file:
+
+    <profile>
+      <id>windows-config</id>
+
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+
+      <properties>
+        <bash.exe>c:/bit9prog/dev/cygwin64/bin/bash.exe</bash.exe>
+      </properties>
+    </profile>
+
+Be sure to adjust the `<bash.exe />` path as needed, using forward slashes instead of backslashes for directory separators.
