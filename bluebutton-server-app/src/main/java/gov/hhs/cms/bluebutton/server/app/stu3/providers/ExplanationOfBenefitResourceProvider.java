@@ -19,6 +19,7 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 
@@ -136,6 +137,12 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		}
 
 		ExplanationOfBenefit eob = eobIdType.get().getTransformer().apply(metricRegistry, claimEntity);
+
+		// set the meta data on the resource for when this Beneficiary resource was last
+		// updated
+
+		TransformerUtils.setMetaData(builder, entityManager, eobIdType.get().toString(), null, eob);
+
 		return eob;
 	}
 
@@ -219,7 +226,26 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *         specified claim/event
 	 */
 	private List<ExplanationOfBenefit> transformToEobs(ClaimType claimType, List<?> claims) {
-		return claims.stream().map(c -> claimType.getTransformer().apply(metricRegistry, c))
+
+		List<ExplanationOfBenefit> eobList = claims.stream()
+				.map(c -> claimType.getTransformer().apply(metricRegistry, c))
 				.collect(Collectors.toList());
+		  
+		// set the meta data on the resource for when this Beneficiary resource was last
+		// updated
+		try {
+			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+			TransformerUtils.setMetaData(builder, entityManager, claimType.toString(), null, eobList.get(0));
+
+			for (ExplanationOfBenefit eob : eobList) {
+				eob.setMeta(new Meta().setLastUpdated(eobList.get(0).getMeta().getLastUpdated()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return eobList;
+		 
 	}
 }

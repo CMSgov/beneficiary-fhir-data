@@ -72,6 +72,7 @@ public final class PatientResourceProviderIT {
 		Assert.assertNotNull(searchResults);
 		Assert.assertEquals(1, searchResults.getTotal());
 		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+		Assert.assertNotNull(patientFromSearchResult.getMeta().getLastUpdated());
 		BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
 	}
 
@@ -113,6 +114,7 @@ public final class PatientResourceProviderIT {
 		Assert.assertNotNull(searchResults);
 		Assert.assertEquals(1, searchResults.getTotal());
 		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+		Assert.assertNotNull(patientFromSearchResult.getMeta().getLastUpdated());
 		BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
 	}
 
@@ -138,6 +140,7 @@ public final class PatientResourceProviderIT {
 					Assert.assertNotNull(searchResults);
 					Assert.assertEquals(1, searchResults.getTotal());
 					Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+					Assert.assertNotNull(patientFromSearchResult.getMeta().getLastUpdated());
 					Assert.assertEquals(h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
 				});
 	}

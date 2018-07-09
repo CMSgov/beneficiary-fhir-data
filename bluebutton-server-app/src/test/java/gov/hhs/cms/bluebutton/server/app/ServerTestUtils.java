@@ -40,6 +40,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.DataSetManifest;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileRecords;
 import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
@@ -205,7 +206,7 @@ public final class ServerTestUtils {
 	 *         {@link Beneficiary}s, etc.)
 	 */
 	public static List<Object> parseData(List<StaticRifResource> sampleResources) {
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(new DataSetManifest(Instant.now()),
 				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 		RifFilesProcessor processor = new RifFilesProcessor();
 		List<Object> recordsParsed = new ArrayList<>();
@@ -225,7 +226,7 @@ public final class ServerTestUtils {
 	 */
 	public static List<Object> loadData(List<StaticRifResource> sampleResources) {
 		LoadAppOptions loadOptions = createRifLoaderOptions();
-		RifFilesEvent rifFilesEvent = new RifFilesEvent(Instant.now(),
+		RifFilesEvent rifFilesEvent = new RifFilesEvent(new DataSetManifest(Instant.now()),
 				sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
 		// Create the processors that will handle each stage of the pipeline.
