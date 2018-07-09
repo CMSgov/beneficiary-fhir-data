@@ -348,23 +348,23 @@
 								<systemProperty>
 									<key>http.proxyHost</key>
 									<value>${http.proxyHost}</value>
-								</property>
+								</systemProperty>
 								<systemProperty>
 									<key>http.proxyPort</key>
 									<value>${http.proxyPort}</value>
-								</property>
+								</systemProperty>
 								<systemProperty>
 									<key>https.proxyHost</key>
 									<value>${https.proxyHost}</value>
-								</property>
+								</systemProperty>
 								<systemProperty>
 									<key>https.proxyPort</key>
 									<value>${https.proxyPort}</value>
-								</property>
+								</systemProperty>
 								<systemProperty>
 									<key>http.nonProxyHosts</key>
 									<value>${http.nonProxyHosts}</value>
-								</property>
+								</systemProperty>
 							</systemProperties>
 						</configuration>
 					</execution>
