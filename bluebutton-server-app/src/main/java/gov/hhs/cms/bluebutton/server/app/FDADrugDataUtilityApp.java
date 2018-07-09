@@ -82,7 +82,6 @@ public final class FDADrugDataUtilityApp {
 			e.printStackTrace();
 			System.exit(4);
 		}
-		System.err.println("deh-made it past ndc download command");
 
 		// unzip FDA NDC file
 		unzip(downloadedNdcZipFile, outputPath.toString());
