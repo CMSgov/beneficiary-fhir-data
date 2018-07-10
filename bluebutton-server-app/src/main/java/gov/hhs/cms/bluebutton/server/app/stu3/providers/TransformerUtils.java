@@ -2532,12 +2532,33 @@ public final class TransformerUtils {
 		if (claimDrugCode.isEmpty())
 			return null;
 
+		// read the entire NDC file the first time and put in a Map
+		if (ndcProductMap.size() == 0) {
+			readFDADrugCodeFile();
+		}
+
 		String claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
 	    
 		if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
 			String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
 			return ndcSubstanceName;
 		}
+
+		if (!drugCodeLookupMissingFailures.contains(claimDrugCodeReformatted)) {
+			drugCodeLookupMissingFailures.add(claimDrugCodeReformatted);
+			LOGGER.info("No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
+					claimDrugCodeReformatted, "fda_products_utf8.tsv");
+		}
+
+		return null;
+	}
+
+	/**
+	 * Reads ALL the PRODUCTNDC and SUBSTANCENAME fields from the FDA NDC Products
+	 * file which was downloaded during the build process
+	 * 
+	 */
+	public static Map<String, String> readFDADrugCodeFile() {
 
 		InputStream ndcProductStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream("fda_products_utf8.tsv");
@@ -2556,32 +2577,17 @@ public final class TransformerUtils {
 				String ndcProductColumns[] = line.split("\t");
 				String nationalDrugCodeManufacturer = StringUtils
 						.leftPad(ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-				String nationalDrugCodeIngredient = StringUtils.leftPad(
-						ndcProductColumns[1].substring(ndcProductColumns[1].indexOf("-") + 1,
-								ndcProductColumns[1].length()),
-						4, '0');
+				String nationalDrugCodeIngredient = StringUtils.leftPad(ndcProductColumns[1]
+						.substring(ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()), 4, '0');
 				ndcProductMap.put(nationalDrugCodeManufacturer + "-" + nationalDrugCodeIngredient,
 						ndcProductColumns[13]);
-				// check if drug code is in the map; if so get substance name
-				if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
-					String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
-					ndcProductsIn.close();
-					return ndcSubstanceName;
-				}
 			}
 			ndcProductsIn.close();
 		} catch (IOException e) {
-			// TODO-fix deh what should we do here..just log it.. Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		if (!drugCodeLookupMissingFailures.contains(claimDrugCodeReformatted)) {
-			drugCodeLookupMissingFailures.add(claimDrugCodeReformatted);
-			LOGGER.info("No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
-					claimDrugCodeReformatted, "fda_products_utf8.tsv");
-		}
-
-		return null;
+		return ndcProductMap;
 	}
 
 }
