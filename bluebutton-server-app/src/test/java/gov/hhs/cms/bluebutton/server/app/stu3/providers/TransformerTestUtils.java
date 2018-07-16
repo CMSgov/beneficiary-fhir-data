@@ -2004,8 +2004,10 @@ final class TransformerTestUtils {
 	/**
 	 * @throws IOException
 	 */
-	static void assertFDADrugCodeDisplayEquals(String nationalDrugCode) throws IOException {
-		TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode);
+	static void assertFDADrugCodeDisplayEquals(String nationalDrugCode, String nationalDrugCodeDisplayValue)
+			throws IOException {
+		Assert.assertEquals(TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode),
+				nationalDrugCodeDisplayValue);
 
 	}
 }

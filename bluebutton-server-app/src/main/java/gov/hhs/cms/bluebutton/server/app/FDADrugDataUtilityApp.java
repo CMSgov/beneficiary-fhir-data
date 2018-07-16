@@ -49,7 +49,7 @@ public final class FDADrugDataUtilityApp {
 	 *            <ol>
 	 *            <li><code>OUTPUT_DIR</code>: the first (and only) argument for
 	 *            this application must be the already-existing path to write the
-	 *            parsed XML codebooks files out to</li>
+	 *            NDC file out to</li>
 	 *            </ol>
 	 * @throws IOException
 	 */
@@ -70,23 +70,21 @@ public final class FDADrugDataUtilityApp {
 		}
 
 		// download FDA NDC file
-		String nationalDrugCodeDownloadableFile = "https://www.accessdata.fda.gov/cder/ndctext.zip";
-		String downloadedNdcZipFile = outputPath.toString() + File.separator + "ndctext.zip";
+		Path downloadedNdcZipFile = Paths.get(outputPath.toString(), "ndctext.zip");
 		try {
 			// connectionTimeout, readTimeout = 10 seconds
-			FileUtils.copyURLToFile(new URL(nationalDrugCodeDownloadableFile), new File(downloadedNdcZipFile), 10000,
+			FileUtils.copyURLToFile(new URL("https://www.accessdata.fda.gov/cder/ndctext.zip"),
+					new File(downloadedNdcZipFile.toString()), 10000,
 					10000);
 		} catch (IOException e) {
-			System.err.println("socket timeout-ndc file to download " + nationalDrugCodeDownloadableFile);
-			System.err.println("socket timeout-file to download to " + downloadedNdcZipFile);
 			e.printStackTrace();
 			System.exit(4);
 		}
 
 		// unzip FDA NDC file
-		unzip(downloadedNdcZipFile, outputPath.toString());
-		Files.move(Paths.get(outputPath.toString() + File.separator + "product.txt"),
-				Paths.get(outputPath.toString() + File.separator + "fda_products_cp1252.tsv"), REPLACE_EXISTING);
+		unzip(downloadedNdcZipFile.toString(), outputPath.toString());
+		Files.move(Paths.get(outputPath.toString(), "product.txt"),
+				Paths.get(outputPath.toString(), "fda_products_cp1252.tsv"), REPLACE_EXISTING);
 		
 		// convert file format from cp1252 to utf8
 		CharsetDecoder inDec=Charset.forName("windows-1252").newDecoder()
@@ -98,10 +96,11 @@ public final class FDADrugDataUtilityApp {
 			.onUnmappableCharacter(CodingErrorAction.REPORT);
 
 		try
-		(FileInputStream is = new FileInputStream(outputPath.toString() + File.separator + "fda_products_cp1252.tsv");
+		(FileInputStream is = new FileInputStream(
+				Paths.get(outputPath.toString(), "fda_products_cp1252.tsv").toString());
 			 BufferedReader reader=new BufferedReader(new InputStreamReader(is, inDec));
 				FileOutputStream fw = new FileOutputStream(
-						outputPath.toString() + File.separator + "fda_products_utf8.tsv");
+						Paths.get(outputPath.toString(), "fda_products_utf8.tsv").toString());
 			 BufferedWriter out=new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
 			 for(String in; (in = reader.readLine()) != null; ) {
@@ -130,13 +129,13 @@ public final class FDADrugDataUtilityApp {
 		ZipEntry entry = zipIn.getNextEntry();
 		// iterates over entries in the zip file
 		while (entry != null) {
-			String filePath = destDirectory + File.separator + entry.getName();
+			Path filePath = Paths.get(destDirectory, entry.getName());
 			if (!entry.isDirectory()) {
 				// if the entry is a file, extracts it
-				extractFile(zipIn, filePath);
+				extractFile(zipIn, filePath.toString());
 			} else {
 				// if the entry is a directory, make the directory
-				File dir = new File(filePath);
+				File dir = new File(filePath.toString());
 				dir.mkdir();
 			}
 			zipIn.closeEntry();

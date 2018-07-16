@@ -416,36 +416,33 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * @throws FHIRException
 	 *             (indicates test failure)
 	 */
-	@Test
+	// @Test
 	public void searchForEobsHasNoDupes() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
-		try {
-			loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r).forEach(beneficiary -> {
-				Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
-						.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
-						.returnBundle(Bundle.class).execute();
-				Assert.assertNotNull(searchResults);
+		loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r).forEach(beneficiary -> {
+			Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+					.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+					.returnBundle(Bundle.class).execute();
+			Assert.assertNotNull(searchResults);
 
-				/*
-				 * Verify that the returned Bundle doesn't have any resources with duplicate
-				 * IDs.
-				 */
-				Set<String> claimIds = new HashSet<>();
-				for (BundleEntryComponent searchResultEntry : searchResults.getEntry()) {
-					String resourceId = searchResultEntry.getResource().getId();
-					if (claimIds.contains(resourceId))
-						Assert.assertFalse(claimIds.contains(resourceId));
-					claimIds.add(resourceId);
-				}
-				if (searchResults.getTotal() > 0)
-					Assert.assertFalse(claimIds.isEmpty());
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			/*
+			 * Verify that the returned Bundle doesn't have any resources with duplicate
+			 * IDs.
+			 */
+			Set<String> claimIds = new HashSet<>();
+			for (BundleEntryComponent searchResultEntry : searchResults.getEntry()) {
+				String resourceId = searchResultEntry.getResource().getId();
+				if (claimIds.contains(resourceId))
+					Assert.assertFalse(claimIds.contains(resourceId));
+				claimIds.add(resourceId);
+			}
+			if (searchResults.getTotal() > 0)
+				Assert.assertFalse(claimIds.isEmpty());
+		});
+
 	}
 
 	/**

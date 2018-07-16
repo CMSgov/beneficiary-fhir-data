@@ -1,4 +1,4 @@
-# API Change 
+# API Changelog 
 
 ## BLUEBUTTON-146: Display NDC (National Drug Code) Substance Names in EOB
 
@@ -8,7 +8,7 @@ Several changes have been made to these entries:
 
 * The Substance Name will be displayed in the `Coding.display` for NDC fields.
 
-* The FDA NDC product file will be downloaded and "baked" into the application during the build process.
+* The FDA NDC product file we use is downloaded from (https://www.accessdata.fda.gov/cder/ndctext.zip).
    
 ## BLUEBUTTON-200: Fix duplicate `ExplanationOfBenefit`s bug
 

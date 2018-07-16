@@ -124,9 +124,9 @@ public final class TransformerUtils {
 	private static final Set<CcwCodebookVariable> codebookLookupDuplicateFailures = new HashSet<>();
 
 	/**
-	 * Stores the PRODUCTNDC and SUBSTANCENAME from the failures.
+	 * Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file.
 	 */
-	private static final Map<String, String> ndcProductMap = new HashMap<String, String>();
+	private static Map<String, String> ndcProductMap = new HashMap<String, String>();
 
 	/**
 	 * Tracks the national drug codes that have already had code lookup failures.
@@ -2534,7 +2534,7 @@ public final class TransformerUtils {
 
 		// read the entire NDC file the first time and put in a Map
 		if (ndcProductMap.size() == 0) {
-			readFDADrugCodeFile();
+			ndcProductMap = readFDADrugCodeFile();
 		}
 
 		String claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
@@ -2544,6 +2544,7 @@ public final class TransformerUtils {
 			return ndcSubstanceName;
 		}
 
+		// log which NDC codes we couldn't find a match for in our downloaded NDC file
 		if (!drugCodeLookupMissingFailures.contains(claimDrugCodeReformatted)) {
 			drugCodeLookupMissingFailures.add(claimDrugCodeReformatted);
 			LOGGER.info("No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
@@ -2560,6 +2561,7 @@ public final class TransformerUtils {
 	 */
 	public static Map<String, String> readFDADrugCodeFile() {
 
+		Map<String, String> ndcProductHashMap = new HashMap<String, String>();
 		InputStream ndcProductStream = Thread.currentThread().getContextClassLoader()
 				.getResourceAsStream("fda_products_utf8.tsv");
 
@@ -2579,15 +2581,16 @@ public final class TransformerUtils {
 						.leftPad(ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
 				String nationalDrugCodeIngredient = StringUtils.leftPad(ndcProductColumns[1]
 						.substring(ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()), 4, '0');
-				ndcProductMap.put(nationalDrugCodeManufacturer + "-" + nationalDrugCodeIngredient,
+				ndcProductHashMap.put(String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
 						ndcProductColumns[13]);
 			}
 			ndcProductsIn.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.exit(6);
 		}
 
-		return ndcProductMap;
+		return ndcProductHashMap;
 	}
 
 }

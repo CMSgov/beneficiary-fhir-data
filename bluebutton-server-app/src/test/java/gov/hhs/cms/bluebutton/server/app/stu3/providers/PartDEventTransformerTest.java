@@ -158,11 +158,11 @@ public final class PartDEventTransformerTest {
 					CcwCodebookVariable.SUBMSN_CLR_CD, claim.getSubmissionClarificationCode(), eob);
 
 		try {
-
-			TransformerTestUtils.assertFDADrugCodeDisplayEquals(claim.getNationalDrugCode());
+			TransformerTestUtils.assertFDADrugCodeDisplayEquals(claim.getNationalDrugCode(),
+					"DEXPANTHENOL; MENTHOL; SALICYLIC ACID");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(6);
 		}
 
 	}
