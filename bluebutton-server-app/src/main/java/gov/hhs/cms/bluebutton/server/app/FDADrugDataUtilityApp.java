@@ -70,11 +70,11 @@ public final class FDADrugDataUtilityApp {
 		}
 
 		// download FDA NDC file
-		Path downloadedNdcZipFile = Paths.get(outputPath.toString(), "ndctext.zip");
+		Path downloadedNdcZipFile = Paths.get(outputPath.resolve("ndctext.zip").toFile().getAbsolutePath());
 		try {
 			// connectionTimeout, readTimeout = 10 seconds
 			FileUtils.copyURLToFile(new URL("https://www.accessdata.fda.gov/cder/ndctext.zip"),
-					new File(downloadedNdcZipFile.toString()), 10000,
+					new File(downloadedNdcZipFile.toFile().getAbsolutePath()), 10000,
 					10000);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -82,9 +82,9 @@ public final class FDADrugDataUtilityApp {
 		}
 
 		// unzip FDA NDC file
-		unzip(downloadedNdcZipFile.toString(), outputPath.toString());
-		Files.move(Paths.get(outputPath.toString(), "product.txt"),
-				Paths.get(outputPath.toString(), "fda_products_cp1252.tsv"), REPLACE_EXISTING);
+		unzip(downloadedNdcZipFile, outputPath);
+		Files.move(Paths.get(outputPath.resolve("product.txt").toFile().getAbsolutePath()),
+				Paths.get(outputPath.resolve("fda_products_cp1252.tsv").toFile().getAbsolutePath()), REPLACE_EXISTING);
 		
 		// convert file format from cp1252 to utf8
 		CharsetDecoder inDec=Charset.forName("windows-1252").newDecoder()
@@ -97,10 +97,10 @@ public final class FDADrugDataUtilityApp {
 
 		try
 		(FileInputStream is = new FileInputStream(
-				Paths.get(outputPath.toString(), "fda_products_cp1252.tsv").toString());
+				outputPath.resolve("fda_products_cp1252.tsv").toFile().getAbsolutePath());
 			 BufferedReader reader=new BufferedReader(new InputStreamReader(is, inDec));
 				FileOutputStream fw = new FileOutputStream(
-						Paths.get(outputPath.toString(), "fda_products_utf8.tsv").toString());
+						outputPath.resolve("fda_products_utf8.tsv").toFile().getAbsolutePath());
 			 BufferedWriter out=new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
 
 			 for(String in; (in = reader.readLine()) != null; ) {
@@ -120,22 +120,22 @@ public final class FDADrugDataUtilityApp {
 	 * @param destDirectory
 	 * @throws IOException
 	 */
-	private static void unzip(String zipFilePath, String destDirectory) throws IOException {
-		File destDir = new File(destDirectory);
+	private static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
+		File destDir = new File(destDirectory.toFile().getAbsolutePath());
 		if (!destDir.exists()) {
 			destDir.mkdir();
 		}
-		ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+		ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile().getAbsolutePath()));
 		ZipEntry entry = zipIn.getNextEntry();
 		// iterates over entries in the zip file
 		while (entry != null) {
-			Path filePath = Paths.get(destDirectory, entry.getName());
+			Path filePath = Paths.get(destDirectory.toFile().getAbsolutePath(), entry.getName());
 			if (!entry.isDirectory()) {
 				// if the entry is a file, extracts it
-				extractFile(zipIn, filePath.toString());
+				extractFile(zipIn, filePath);
 			} else {
 				// if the entry is a directory, make the directory
-				File dir = new File(filePath.toString());
+				File dir = new File(filePath.toFile().getAbsolutePath());
 				dir.mkdir();
 			}
 			zipIn.closeEntry();
@@ -151,8 +151,8 @@ public final class FDADrugDataUtilityApp {
 	 * @param filePath
 	 * @throws IOException
 	 */
-	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+	private static void extractFile(ZipInputStream zipIn, Path filePath) throws IOException {
+		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath.toFile().getAbsolutePath()));
 		byte[] bytesIn = new byte[BUFFER_SIZE];
 		int read = 0;
 		while ((read = zipIn.read(bytesIn)) != -1) {
