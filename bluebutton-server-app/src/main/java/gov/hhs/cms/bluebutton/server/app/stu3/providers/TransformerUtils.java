@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -126,7 +127,7 @@ public final class TransformerUtils {
 	/**
 	 * Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file.
 	 */
-	private static Map<String, String> ndcProductMap = new HashMap<String, String>();
+	private static Map<String, String> ndcProductMap = null;
 
 	/**
 	 * Tracks the national drug codes that have already had code lookup failures.
@@ -2532,8 +2533,14 @@ public final class TransformerUtils {
 		if (claimDrugCode.isEmpty())
 			return null;
 
+		/*
+		 * There's a race condition here: we may initialize this static field more than
+		 * once if multiple requests come in at the same time. However, the assignment
+		 * is atomic, so the race and reinitialization is harmless other than maybe
+		 * wasting a bit of time.
+		 */
 		// read the entire NDC file the first time and put in a Map
-		if (ndcProductMap.size() == 0) {
+		if (ndcProductMap == null) {
 			ndcProductMap = readFDADrugCodeFile();
 		}
 
@@ -2586,8 +2593,7 @@ public final class TransformerUtils {
 			}
 			ndcProductsIn.close();
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(6);
+			throw new UncheckedIOException("Unable to read NDC code data.", e);
 		}
 
 		return ndcProductHashMap;
