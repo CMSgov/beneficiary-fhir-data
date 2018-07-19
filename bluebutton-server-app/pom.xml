@@ -107,6 +107,19 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
+		<dependency>
+			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
+				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-json-classic</artifactId>
+			<version>0.1.5</version>
+		</dependency>
+		<dependency>
+			<!-- Required by logback-json-classic. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-jackson</artifactId>
+			<version>0.1.5</version>
+		</dependency>
 
 		<dependency>
 			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
