@@ -2,8 +2,6 @@ package gov.hhs.cms.bluebutton.server.app;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.security.auth.x500.X500Principal;
 import javax.servlet.Filter;
@@ -20,7 +18,6 @@ import org.slf4j.MDC;
 
 import ch.qos.logback.classic.ClassicConstants;
 import ch.qos.logback.classic.helpers.MDCInsertingServletFilter;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
 /**
  * Adds some common {@link HttpServletRequest} properties to the logging
@@ -34,29 +31,6 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
  */
 public final class LoggingContextFilter implements Filter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoggingContextFilter.class);
-
-	/**
-	 * <p>
-	 * The set of {@link Pattern}s for finding and stripping sensitive info (i.e.
-	 * PII/PHI) from {@link HttpServletRequest#getRequestURI()} values. Each
-	 * {@link Pattern}'s {@code 1} group will identify the data to be masked.
-	 * </p>
-	 * <p>
-	 * See these methods for more info on the URIs masked here:
-	 * </p>
-	 * <ul>
-	 * <li>{@link TransformerUtils#buildPatientId(String)}</li>
-	 * <li>{@link TransformerUtils#buildCoverageId(gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment, String)}</li>
-	 * <li>{@link TransformerUtils#buildEobId(gov.hhs.cms.bluebutton.server.app.stu3.providers.ClaimType, String)}</li>
-	 * </ul>
-	 */
-	private static final Pattern[] URI_SENSITIVE_INFO_PATTERNS = new Pattern[] {
-
-			Pattern.compile(".*/Patient/(-?\\d+).*"),
-
-			Pattern.compile(".*/Coverage/part-[abcd]-(-?\\d+).*"),
-
-			Pattern.compile(".*/ExplanationOfBenefit/(?:[a-z]+)-(-?\\d+).*") };
 
 	/**
 	 * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
@@ -125,31 +99,6 @@ public final class LoggingContextFilter implements Filter {
 			return null;
 		}
 		return certs[certs.length - 1];
-	}
-
-	/**
-	 * @param requestUri
-	 *            the {@link HttpServletRequest#getRequestURI()} value to mask
-	 *            sensitive info (if any) in
-	 * @return the URI that was passed in, but with any sensitive info masked
-	 */
-	static String stripSensitiveInfoFromUri(String requestUri) {
-		if (requestUri == null)
-			return null;
-
-		for (Pattern uriSensitiveInfoPattern : URI_SENSITIVE_INFO_PATTERNS) {
-			Matcher uriSensitiveInfoMatcher = uriSensitiveInfoPattern.matcher(requestUri);
-			if (uriSensitiveInfoMatcher.matches()) {
-				/*
-				 * Replace the URI with itself, except capture group 1 from the regex is just
-				 * "***".
-				 */
-				requestUri = String.format("%s%s%s", requestUri.substring(0, uriSensitiveInfoMatcher.start(1)), "***",
-						requestUri.substring(uriSensitiveInfoMatcher.end(1)));
-			}
-		}
-
-		return requestUri;
 	}
 
 	/**
