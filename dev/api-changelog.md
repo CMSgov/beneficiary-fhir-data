@@ -1,5 +1,15 @@
-# API Changelog
+# API Changelog 
 
+## BLUEBUTTON-146: Display NDC (National Drug Code) Substance Names in EOB
+
+Several changes have been made to these entries:
+
+* The `Coding.display` to the EOB has been added for NDC fields in Part D, Carrier and DME.
+
+* The Substance Name will be displayed in the `Coding.display` for NDC fields.
+
+* The FDA NDC product file we use is downloaded from (https://www.accessdata.fda.gov/cder/ndctext.zip).
+   
 ## BLUEBUTTON-200: Fix duplicate `ExplanationOfBenefit`s bug
 
 A bug was fixed that had been causing duplicate `ExplanationOfBenefit` resources to be returned for most beneficiaries. (It had been generating one exact-duplicate EOB per each claim line in each claim.)
@@ -11,6 +21,7 @@ Beneficiaries' HIC history is now considered for patient lookup requests. This s
 ## CBBF-167: Removed date search parameter for EOB searches
 
 This functionality had not been supported/surfaced by the frontend, but was still appearing in the application's capability statement (i.e. `/metadata`). Since it isn't needed or supported at this time, it was removed to correct the overall capability statement.
+
 
 ## CBBF-175: Fixed `ExplanationOfBenefit.diagnosis.type` Entries
 
