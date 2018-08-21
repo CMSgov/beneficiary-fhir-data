@@ -1,5 +1,9 @@
 # API Changelog 
 
+## BLUEBUTTON-267: Refresh Schedule API
+
+Code has been added to set the LastUpdated date in the resource's (i.e. EOB, Patient) meta data section for when a certain claim type or beneficiary was last updated in our Blue Button FHIR database. 
+
 ## BLUEBUTTON-146: Display NDC (National Drug Code) Substance Names in EOB
 
 Several changes have been made to these entries:
@@ -10,6 +14,7 @@ Several changes have been made to these entries:
 
 * The FDA NDC product file we use is downloaded from (https://www.accessdata.fda.gov/cder/ndctext.zip).
    
+>>>>>>> 3da20747d2290166ab49800745b90d1274b2a086
 ## BLUEBUTTON-200: Fix duplicate `ExplanationOfBenefit`s bug
 
 A bug was fixed that had been causing duplicate `ExplanationOfBenefit` resources to be returned for most beneficiaries. (It had been generating one exact-duplicate EOB per each claim line in each claim.)

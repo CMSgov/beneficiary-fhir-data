@@ -25,6 +25,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -43,6 +48,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -90,6 +96,8 @@ import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.RifDataloadHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.RifDataloadHistory_;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
@@ -1202,6 +1210,51 @@ public final class TransformerUtils {
 	 */
 	static Reference referencePractitioner(String practitionerNpi) {
 		return createIdentifierReference(TransformerConstants.CODING_NPI_US, practitionerNpi);
+	}
+
+	/**
+	 * read the RifDataloadHistory table to get last updated date for each file type
+	 * 
+	 * @param builder
+	 *            the {@link CriteriaBuilder} to use to build the query
+	 * @param entityManager
+	 *            the {@link EntityManager} with/to
+	 * @param fileType
+	 *            the beneficiary or claim type
+	 * @param patient
+	 *            the {@link Patient} data to read for last updated date
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} data to read for last updated
+	 *            date
+	 */
+	static void setMetaData(CriteriaBuilder builder, EntityManager entityManager, String fileType, Patient patient,
+			ExplanationOfBenefit eob) {
+		List<RifDataloadHistory> rifDataloadHistoryList = new ArrayList<RifDataloadHistory>();
+		CriteriaQuery<RifDataloadHistory> rifDataloadHistoryQuery = builder.createQuery(RifDataloadHistory.class);
+		Root<RifDataloadHistory> rifDataloadHistoryRoot = rifDataloadHistoryQuery.from(RifDataloadHistory.class); //
+		rifDataloadHistoryQuery.select(rifDataloadHistoryRoot);
+		rifDataloadHistoryQuery
+				.where(builder.equal(rifDataloadHistoryRoot.get(RifDataloadHistory_.recordType),
+						fileType.toUpperCase()));
+		// TODO: change following orderyBy to use builder.max in the CriteriaQuery for
+		// better efficiency
+		rifDataloadHistoryQuery
+				.orderBy(builder.desc(rifDataloadHistoryRoot.get(RifDataloadHistory_.createUpdateTimestamp)));
+		rifDataloadHistoryList.addAll(entityManager.createQuery(rifDataloadHistoryQuery).getResultList());
+
+		if (rifDataloadHistoryList.size() > 0) {
+			try {
+				if (patient == null) {
+					eob.setMeta(new Meta().setLastUpdated(
+							new Date(rifDataloadHistoryList.get(0).getCreateUpdateTimestamp().getTime())));
+				} else {
+					patient.setMeta(new Meta().setLastUpdated(
+							new Date(rifDataloadHistoryList.get(0).getCreateUpdateTimestamp().getTime())));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**

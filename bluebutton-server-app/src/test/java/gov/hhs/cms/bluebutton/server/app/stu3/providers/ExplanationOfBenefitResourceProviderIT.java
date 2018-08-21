@@ -55,6 +55,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.CARRIER, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		CarrierClaimTransformerTest.assertMatches(claim, eob);
 	}
 
@@ -93,6 +94,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		DMEClaimTransformerTest.assertMatches(claim, eob);
 	}
 
@@ -131,6 +133,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.HHA, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		HHAClaimTransformerTest.assertMatches(claim, eob);
 	}
 
@@ -169,6 +172,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.HOSPICE, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		HospiceClaimTransformerTest.assertMatches(claim, eob);
 	}
 
@@ -207,6 +211,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.INPATIENT, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		InpatientClaimTransformerTest.assertMatches(claim, eob);
 	}
 
@@ -245,6 +250,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		OutpatientClaimTransformerTest.assertMatches(claim, eob);
 	}
 
@@ -283,6 +289,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.PDE, claim.getEventId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		PartDEventTransformerTest.assertMatches(claim, eob);
 	}
 
@@ -321,6 +328,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				TransformerUtils.buildEobId(ClaimType.SNF, claim.getClaimId()));
 
 		Assert.assertNotNull(eob);
+		Assert.assertNotNull(eob.getMeta().getLastUpdated());
 		SNFClaimTransformerTest.assertMatches(claim, eob);
 	}
 
