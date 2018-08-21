@@ -1,5 +1,9 @@
 # API Changelog
 
+## BLUEBUTTON-267: Refresh Schedule API
+
+Code has been added to set the LastUpdated date in the resource's (i.e. EOB, Patient) meta data section for when a certain claim type or beneficiary was last updated in our Blue Button FHIR database. 
+
 ## BLUEBUTTON-200: Fix duplicate `ExplanationOfBenefit`s bug
 
 A bug was fixed that had been causing duplicate `ExplanationOfBenefit` resources to be returned for most beneficiaries. (It had been generating one exact-duplicate EOB per each claim line in each claim.)
