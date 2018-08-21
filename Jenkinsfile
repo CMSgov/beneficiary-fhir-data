@@ -25,7 +25,17 @@ node {
 	}
 
 	stage('Build') {
-		mvn "--update-snapshots -Dmaven.test.failure.ignore clean install"
+		withCredentials([
+				string(credentialsId: 'proxy-host', variable: 'proxyHost'),
+				string(credentialsId: 'proxy-port', variable: 'proxyPort')
+		]) {
+			// Run our Maven build with the correct proxy server settings, as part of
+			// build needs to use the proxy to download some things.
+			// (Note: Exposing the proxy server details on the Maven command line isn't
+			// a risk, as anyone with shell access will already be able to find it from
+			// the build system's environment variables.)
+			mvn "--update-snapshots -Dmaven.test.failure.ignore clean install -Dhttp.proxyHost=${proxyHost} -Dhttp.proxyPort=${proxyPort} -Dhttps.proxyHost=${proxyHost} -Dhttps.proxyPort=${proxyPort} -Dhttp.nonProxyHosts=localhost"
+		}
 	}
 
 	stage('Archive') {

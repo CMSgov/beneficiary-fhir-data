@@ -176,7 +176,8 @@ final class PartDEventTransformer {
 					claimGroup.getPrescriberId(), ClaimCareteamrole.PRIMARY);
 		}
 
-		rxItem.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_NDC,
+		rxItem.setService(TransformerUtils.createCodeableConcept(TransformerConstants.CODING_NDC, null,
+				TransformerUtils.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
 				claimGroup.getNationalDrugCode()));
 
 		SimpleQuantity quantityDispensed = new SimpleQuantity();

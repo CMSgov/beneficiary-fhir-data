@@ -128,7 +128,7 @@ final class CarrierClaimTransformer {
 						CcwCodebookVariable.PRTCPTNG_IND_CD, claimLine.getProviderParticipatingIndCode()));
 				if (claimLine.getOrganizationNpi().isPresent()) {
 					TransformerUtils.addExtensionCoding(performingCareTeamMember, TransformerConstants.CODING_NPI_US,
-							TransformerConstants.CODING_NPI_US, "" + claimLine.getOrganizationNpi().get());
+							TransformerConstants.CODING_NPI_US, null, "" + claimLine.getOrganizationNpi().get());
 				}
 			}
 

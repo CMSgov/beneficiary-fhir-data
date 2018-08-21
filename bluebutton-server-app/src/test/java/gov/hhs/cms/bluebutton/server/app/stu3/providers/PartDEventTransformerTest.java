@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
@@ -72,7 +73,8 @@ public final class PartDEventTransformerTest {
 
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC, claim.getNationalDrugCode(),
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC, null,
+				TransformerUtils.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()), claim.getNationalDrugCode(),
 				rxItem.getService().getCoding());
 
 		TransformerTestUtils.assertHasCoding(V3ActCode.RXDINV.getSystem(),
@@ -154,6 +156,15 @@ public final class PartDEventTransformerTest {
 		if (claim.getSubmissionClarificationCode().isPresent())
 			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.SUBMSN_CLR_CD,
 					CcwCodebookVariable.SUBMSN_CLR_CD, claim.getSubmissionClarificationCode(), eob);
+
+		try {
+			TransformerTestUtils.assertFDADrugCodeDisplayEquals(claim.getNationalDrugCode(),
+					"DEXPANTHENOL; MENTHOL; SALICYLIC ACID");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(6);
+		}
+
 	}
 }
 
