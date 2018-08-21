@@ -1,5 +1,10 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -9,9 +14,11 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -23,6 +30,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -123,6 +131,16 @@ public final class TransformerUtils {
 	 * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
 	 */
 	private static final Set<CcwCodebookVariable> codebookLookupDuplicateFailures = new HashSet<>();
+
+	/**
+	 * Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file.
+	 */
+	private static Map<String, String> ndcProductMap = null;
+
+	/**
+	 * Tracks the national drug codes that have already had code lookup failures.
+	 */
+	private static final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
 
 	/**
 	 * @param eob
@@ -384,14 +402,20 @@ public final class TransformerUtils {
 	 *            the {@link Extension#getUrl()} to use
 	 * @param codingSystem
 	 *            the {@link Coding#getSystem()} to use
+	 * @param codingDisplay
+	 *            the {@link Coding#getDisplay()} to use
 	 * @param codingCode
 	 *            the {@link Coding#getCode()} to use
 	 */
 	static void addExtensionCoding(IBaseHasExtensions fhirElement, String extensionUrl, String codingSystem,
-			String codingCode) {
+			String codingDisplay, String codingCode) {
 		IBaseExtension<?, ?> extension = fhirElement.addExtension();
 		extension.setUrl(extensionUrl);
-		extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
+		if (codingDisplay == null)
+			extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
+		else
+			extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode).setDisplay(codingDisplay));
+
 	}
 
 	/**
@@ -645,7 +669,7 @@ public final class TransformerUtils {
 	 * @return a {@link CodeableConcept} with the specified {@link Coding}
 	 */
 	static CodeableConcept createCodeableConcept(String codingSystem, String codingCode) {
-		return createCodeableConcept(codingSystem, null, codingCode);
+		return createCodeableConcept(codingSystem, null, null, codingCode);
 	}
 
 	/**
@@ -653,15 +677,20 @@ public final class TransformerUtils {
 	 *            the {@link Coding#getSystem()} to use
 	 * @param codingVersion
 	 *            the {@link Coding#getVersion()} to use
+	 * @param codingDisplay
+	 *            the {@link Coding#getDisplay()} to use
 	 * @param codingCode
 	 *            the {@link Coding#getCode()} to use
 	 * @return a {@link CodeableConcept} with the specified {@link Coding}
 	 */
-	static CodeableConcept createCodeableConcept(String codingSystem, String codingVersion, String codingCode) {
+	static CodeableConcept createCodeableConcept(String codingSystem, String codingVersion, String codingDisplay,
+			String codingCode) {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = codeableConcept.addCoding().setSystem(codingSystem).setCode(codingCode);
 		if (codingVersion != null)
 			coding.setVersion(codingVersion);
+		if (codingDisplay != null)
+			coding.setDisplay(codingDisplay);
 		return codeableConcept;
 	}
 
@@ -1865,7 +1894,7 @@ public final class TransformerUtils {
 
 		if (nationalDrugCode.isPresent()) {
 			addExtensionCoding(item, TransformerConstants.CODING_NDC, TransformerConstants.CODING_NDC,
-					nationalDrugCode.get());
+					TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode.get()), nationalDrugCode.get());
 		}
 
 		return item;
@@ -2544,4 +2573,83 @@ public final class TransformerUtils {
 			concept.getCodingFirstRep().setVersion(hcpcsYear.get().toString());
 		});
 	}
+
+	/**
+	 * Retrieves the PRODUCTNDC and SUBSTANCENAME from the FDA NDC Products file
+	 * which was downloaded during the build process
+	 * 
+	 * @param claimDrugCode
+	 *            - NDC value in claim records
+	 */
+	public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
+
+		if (claimDrugCode.isEmpty())
+			return null;
+
+		/*
+		 * There's a race condition here: we may initialize this static field more than
+		 * once if multiple requests come in at the same time. However, the assignment
+		 * is atomic, so the race and reinitialization is harmless other than maybe
+		 * wasting a bit of time.
+		 */
+		// read the entire NDC file the first time and put in a Map
+		if (ndcProductMap == null) {
+			ndcProductMap = readFDADrugCodeFile();
+		}
+
+		String claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
+	    
+		if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
+			String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
+			return ndcSubstanceName;
+		}
+
+		// log which NDC codes we couldn't find a match for in our downloaded NDC file
+		if (!drugCodeLookupMissingFailures.contains(claimDrugCodeReformatted)) {
+			drugCodeLookupMissingFailures.add(claimDrugCodeReformatted);
+			LOGGER.info("No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
+					claimDrugCodeReformatted, "fda_products_utf8.tsv");
+		}
+
+		return null;
+	}
+
+	/**
+	 * Reads ALL the PRODUCTNDC and SUBSTANCENAME fields from the FDA NDC Products
+	 * file which was downloaded during the build process
+	 * 
+	 */
+	public static Map<String, String> readFDADrugCodeFile() {
+
+		Map<String, String> ndcProductHashMap = new HashMap<String, String>();
+		InputStream ndcProductStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("fda_products_utf8.tsv");
+
+		BufferedReader ndcProductsIn = null;
+		ndcProductsIn = new BufferedReader(new InputStreamReader(ndcProductStream));
+
+		// We want to extract the PRODUCTNDC and SUBSTANCENAME from the FDA Products
+		// file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map
+		// for easy retrieval to get the
+		// display value which is the SUBSTANCENAME
+		String line = "";
+		try {
+			ndcProductsIn.readLine();
+			while ((line = ndcProductsIn.readLine()) != null) {
+				String ndcProductColumns[] = line.split("\t");
+				String nationalDrugCodeManufacturer = StringUtils
+						.leftPad(ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
+				String nationalDrugCodeIngredient = StringUtils.leftPad(ndcProductColumns[1]
+						.substring(ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()), 4, '0');
+				ndcProductHashMap.put(String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+						ndcProductColumns[13]);
+			}
+			ndcProductsIn.close();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Unable to read NDC code data.", e);
+		}
+
+		return ndcProductHashMap;
+	}
+
 }

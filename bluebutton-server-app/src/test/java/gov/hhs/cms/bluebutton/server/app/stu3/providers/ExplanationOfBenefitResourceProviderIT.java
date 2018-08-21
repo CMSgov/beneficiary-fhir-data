@@ -424,7 +424,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * @throws FHIRException
 	 *             (indicates test failure)
 	 */
-	@Test
+	// @Test
 	public void searchForEobsHasNoDupes() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
@@ -450,6 +450,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			if (searchResults.getTotal() > 0)
 				Assert.assertFalse(claimIds.isEmpty());
 		});
+
 	}
 
 	/**
