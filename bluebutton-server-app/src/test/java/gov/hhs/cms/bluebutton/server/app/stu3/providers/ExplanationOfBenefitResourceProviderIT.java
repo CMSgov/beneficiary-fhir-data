@@ -340,41 +340,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 	/**
 	 * Verifies that
-	 * {@link ExplanationOfBenefitResourceProvider#search(ca.uhn.fhir.rest.param.ReferenceParam)}
-	 * works as expected for a {@link Patient} that does exist in the DB.
-	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
-	 */
-	// @Test
-	// public void searchForPagedEobsByExistingPatient() throws FHIRException {
-	// List<Object> loadedRecords = ServerTestUtils
-	// .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-	// IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-	//
-	// Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof
-	// Beneficiary).map(r -> (Beneficiary) r)
-	// .findFirst().get();
-	// Bundle searchResults =
-	// fhirClient.search().forResource(ExplanationOfBenefit.class)
-	// .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
-	// .returnBundle(Bundle.class).execute();
-	//
-	// Assert.assertNotNull(searchResults);
-	//
-	// CarrierClaim carrierClaim = loadedRecords.stream().filter(r -> r instanceof
-	// CarrierClaim)
-	// .map(r -> (CarrierClaim) r).findFirst().get();
-	// CarrierClaimTransformerTest.assertMatches(carrierClaim,
-	// filterToClaimType(searchResults, ClaimType.CARRIER).get(0));
-	//
-	// IBundleProvider result = (IBundleProvider) searchResults;
-	// result.getResources(0, 10);
-	// Assert.assertNotNull(result);
-	// }
-
-	/**
-	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB.
 	 * 
