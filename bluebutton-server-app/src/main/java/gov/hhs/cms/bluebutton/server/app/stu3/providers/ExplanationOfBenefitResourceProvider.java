@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -163,31 +162,22 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	public List<ExplanationOfBenefit> findByPatient(
 			@RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient) {
 		String beneficiaryId = patient.getIdPart();
-		int pageNumber = 1;
-		int pageSize = 1;
+
 		/*
-		 * The way our JPA/SQL schema is setup, we have to run a separate search
-		 * for each claim type, then combine the results. It's not super
-		 * efficient, but it's also not so inefficient that it's worth fixing.
+		 * The way our JPA/SQL schema is setup, we have to run a separate search for
+		 * each claim type, then combine the results. It's not super efficient, but it's
+		 * also not so inefficient that it's worth fixing.
 		 */
 		List<ExplanationOfBenefit> eobs = new LinkedList<>();
 
-		eobs.addAll(transformToEobs(ClaimType.CARRIER,
-				findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, pageNumber, pageSize)));
-		eobs.addAll(transformToEobs(ClaimType.DME,
-				findClaimTypeByPatient(ClaimType.DME, beneficiaryId, pageNumber, pageSize)));
-		eobs.addAll(transformToEobs(ClaimType.HHA,
-				findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, pageNumber, pageSize)));
-		eobs.addAll(transformToEobs(ClaimType.HOSPICE,
-				findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, pageNumber, pageSize)));
-		eobs.addAll(transformToEobs(ClaimType.INPATIENT,
-				findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId, pageNumber, pageSize)));
-		eobs.addAll(transformToEobs(ClaimType.OUTPATIENT,
-				findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, pageNumber, pageSize)));
-		eobs.addAll(transformToEobs(ClaimType.PDE,
-				findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, pageNumber, pageSize)));
-		eobs.addAll(transformToEobs(ClaimType.SNF,
-				findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, pageNumber, pageSize)));
+		eobs.addAll(transformToEobs(ClaimType.CARRIER, findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId)));
+		eobs.addAll(transformToEobs(ClaimType.DME, findClaimTypeByPatient(ClaimType.DME, beneficiaryId)));
+		eobs.addAll(transformToEobs(ClaimType.HHA, findClaimTypeByPatient(ClaimType.HHA, beneficiaryId)));
+		eobs.addAll(transformToEobs(ClaimType.HOSPICE, findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId)));
+		eobs.addAll(transformToEobs(ClaimType.INPATIENT, findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId)));
+		eobs.addAll(transformToEobs(ClaimType.OUTPATIENT, findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId)));
+		eobs.addAll(transformToEobs(ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId)));
+		eobs.addAll(transformToEobs(ClaimType.SNF, findClaimTypeByPatient(ClaimType.SNF, beneficiaryId)));
 
 		return eobs;
 	}
@@ -200,7 +190,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 * @return the matching claim/event entities
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private <T> List<T> findClaimTypeByPatient(ClaimType claimType, String patientId, int pageNumber, int pageSize) {
+	private <T> List<T> findClaimTypeByPatient(ClaimType claimType, String patientId) {
 		Timer.Context timerEobQuery = metricRegistry
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eobs", claimType.name().toLowerCase()))
 				.time();
@@ -213,15 +203,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			criteria.where(criteriaBuilder
 					.equal(root.get((SingularAttribute) claimType.getEntityBeneficiaryIdAttribute()), patientId));
 
-			/*
-			 * How do we get the next page? Probably better for the caller of this function
-			 * to handle page tracking.
-			 */
-			TypedQuery query = entityManager.createQuery(criteria);
-			query.setFirstResult((pageNumber - 1) * pageSize);
-			query.setMaxResults(pageSize);
-			List claimEntities = query.getResultList();
-			// List claimEntities = entityManager.createQuery(criteria).getResultList();
+			List claimEntities = entityManager.createQuery(criteria).getResultList();
 			return claimEntities;
 		} finally {
 			timerEobQuery.stop();
