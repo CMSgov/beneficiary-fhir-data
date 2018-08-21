@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -126,12 +127,32 @@ public final class TransformerUtils {
 	/**
 	 * Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file.
 	 */
-	private static Map<String, String> ndcProductMap = new HashMap<String, String>();
+	private static Map<String, String> ndcProductMap = null;
 
 	/**
 	 * Tracks the national drug codes that have already had code lookup failures.
 	 */
 	private static final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
+
+	/**
+	 * Stores the diagnosis ICD codes and their display values
+	 */
+	private static Map<String, String> icdMap = null;
+
+	/**
+	 * Tracks the diagnosis ICD codes that have already had code lookup failures.
+	 */
+	private static final Set<String> icdLookupMissingFailures = new HashSet<>();
+
+	/**
+	 * Stores the procedure codes and their display values
+	 */
+	private static Map<String, String> procedureMap = null;
+
+	/**
+	 * Tracks the procedure codes that have already had code lookup failures.
+	 */
+	private static final Set<String> procedureLookupMissingFailures = new HashSet<>();
 
 	/**
 	 * @param eob
@@ -565,7 +586,8 @@ public final class TransformerUtils {
 			return existingProcedure.get().getSequenceElement().getValue();
 
 		ProcedureComponent procedureComponent = new ProcedureComponent().setSequence(eob.getProcedure().size() + 1);
-		procedureComponent.setProcedure(createCodeableConcept(procedure.getFhirSystem(), procedure.getCode()));
+		procedureComponent.setProcedure(createCodeableConcept(procedure.getFhirSystem(), null,
+				retrieveProcedureCodeDisplay(procedure.getCode()), procedure.getCode()));
 		if (procedure.getProcedureDate().isPresent()) {
 			procedureComponent.setDate(convertToDate(procedure.getProcedureDate().get()));
 		}
@@ -2521,6 +2543,144 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * Retrieves the Diagnosis display value from a Diagnosis code look up file
+	 * 
+	 * @param icdCode
+	 *            - Diagnosis code
+	 */
+	public static String retrieveIcdCodeDisplay(String icdCode) {
+
+		if (icdCode.isEmpty())
+			return null;
+
+		/*
+		 * There's a race condition here: we may initialize this static field more than
+		 * once if multiple requests come in at the same time. However, the assignment
+		 * is atomic, so the race and reinitialization is harmless other than maybe
+		 * wasting a bit of time.
+		 */
+		// read the entire ICD file the first time and put in a Map
+		if (icdMap == null) {
+			icdMap = readIcdCodeFile();
+		}
+
+		if (icdMap.containsKey(icdCode)) {
+			String icdCodeDisplay = icdMap.get(icdCode);
+			return icdCodeDisplay;
+		}
+
+		// log which NDC codes we couldn't find a match for in our downloaded NDC file
+		if (!drugCodeLookupMissingFailures.contains(icdCode)) {
+			drugCodeLookupMissingFailures.add(icdCode);
+			LOGGER.info("No ICD code display value match found for ICD code {} in resource {}.", icdCode,
+					"DGNS_CD.txt");
+		}
+
+		return null;
+	}
+
+	/**
+	 * Reads ALL the ICD codes and display values from the DGNS_CD.txt file
+	 * 
+	 */
+	public static Map<String, String> readIcdCodeFile() {
+
+		Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
+		InputStream icdCodeDisplayStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("DGNS_CD.txt");
+
+		BufferedReader icdCodesIn = null;
+		icdCodesIn = new BufferedReader(new InputStreamReader(icdCodeDisplayStream));
+
+		// We want to extract the ICD Diagnosis codes and display values and put in a
+		// Map
+		// for easy retrieval to get the
+		// display value
+		String line = "";
+		try {
+			icdCodesIn.readLine();
+			while ((line = icdCodesIn.readLine()) != null) {
+				String icdColumns[] = line.split("\t");
+				icdDiagnosisMap.put(icdColumns[0], icdColumns[1]);
+			}
+			icdCodesIn.close();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Unable to read ICD code data.", e);
+		}
+
+		return icdDiagnosisMap;
+	}
+
+	/**
+	 * Retrieves the Procedure code and display value from a Procedure code look up
+	 * file
+	 * 
+	 * @param procedureCode
+	 *            - Procedure code
+	 */
+	public static String retrieveProcedureCodeDisplay(String procedureCode) {
+
+		if (procedureCode.isEmpty())
+			return null;
+
+		/*
+		 * There's a race condition here: we may initialize this static field more than
+		 * once if multiple requests come in at the same time. However, the assignment
+		 * is atomic, so the race and reinitialization is harmless other than maybe
+		 * wasting a bit of time.
+		 */
+		// read the entire Procedure code file the first time and put in a Map
+		if (procedureMap == null) {
+			procedureMap = readProcedureCodeFile();
+		}
+
+		if (procedureMap.containsKey(procedureCode)) {
+			String procedureCodeDisplay = procedureMap.get(procedureCode);
+			return procedureCodeDisplay;
+		}
+
+		// log which Procedure codes we couldn't find a match for in our procedure codes
+		// file
+		if (!procedureLookupMissingFailures.contains(procedureCode)) {
+			procedureLookupMissingFailures.add(procedureCode);
+			LOGGER.info("No procedure code display value match found for procedure code {} in resource {}.",
+					procedureCode, "PRCDR_CD.txt");
+		}
+
+		return null;
+	}
+
+	/**
+	 * Reads all the procedure codes and display values from the PRCDR_CD.txt file
+	 * 
+	 */
+	public static Map<String, String> readProcedureCodeFile() {
+
+		Map<String, String> procedureCodeMap = new HashMap<String, String>();
+		InputStream procedureCodeDisplayStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("PRCDR_CD.txt");
+
+		BufferedReader procedureCodesIn = null;
+		procedureCodesIn = new BufferedReader(new InputStreamReader(procedureCodeDisplayStream));
+
+		// We want to extract the procedure codes and display values and put in a
+		// Map for easy retrieval to get the display value
+		String line = "";
+		try {
+			procedureCodesIn.readLine();
+			while ((line = procedureCodesIn.readLine()) != null) {
+				String icdColumns[] = line.split("\t");
+				procedureCodeMap.put(icdColumns[0], icdColumns[1]);
+			}
+			procedureCodesIn.close();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Unable to read Procedure code data.", e);
+		}
+
+		return procedureCodeMap;
+	}
+
+	/**
 	 * Retrieves the PRODUCTNDC and SUBSTANCENAME from the FDA NDC Products file
 	 * which was downloaded during the build process
 	 * 
@@ -2532,8 +2692,14 @@ public final class TransformerUtils {
 		if (claimDrugCode.isEmpty())
 			return null;
 
+		/*
+		 * There's a race condition here: we may initialize this static field more than
+		 * once if multiple requests come in at the same time. However, the assignment
+		 * is atomic, so the race and reinitialization is harmless other than maybe
+		 * wasting a bit of time.
+		 */
 		// read the entire NDC file the first time and put in a Map
-		if (ndcProductMap.size() == 0) {
+		if (ndcProductMap == null) {
 			ndcProductMap = readFDADrugCodeFile();
 		}
 
@@ -2586,8 +2752,7 @@ public final class TransformerUtils {
 			}
 			ndcProductsIn.close();
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(6);
+			throw new UncheckedIOException("Unable to read NDC code data.", e);
 		}
 
 		return ndcProductHashMap;
