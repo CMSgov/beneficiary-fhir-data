@@ -37,7 +37,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory_;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary_;
-import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link Patient}
@@ -130,13 +129,6 @@ public final class PatientResourceProvider implements IResourceProvider {
 		}
 
 		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
-
-		// set the meta data on the resource for when this Beneficiary resource was last
-		// updated
-
-		TransformerUtils.setMetaData(builder, entityManager,
-				RifFileType.BENEFICIARY.toString(), patient, null);
-
 		return patient;
 	}
 
@@ -282,12 +274,6 @@ public final class PatientResourceProvider implements IResourceProvider {
 		}
 
 		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
-
-		// set the meta data on the resource for when this Beneficiary resource was last
-		// updated
-
-		TransformerUtils.setMetaData(builder, entityManager, RifFileType.BENEFICIARY.toString(), patient, null);
-
 		return patient;
 	}
 }
