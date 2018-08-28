@@ -1,5 +1,9 @@
 # API Changelog 
 
+## BLUEBUTTON-306: Remove baseDstu3 mapping
+
+Removing the old mapping (baseDstu3) from the servletRegistration as it was only kept to ensure backwards compatibility until the front end team completed changes. The mapping for the servletRegistration had previously be changed to "v1/fhir" as part of BLUEBUTTON-130.
+
 ## BLUEBUTTON-146: Display NDC (National Drug Code) Substance Names in EOB
 
 Several changes have been made to these entries:
