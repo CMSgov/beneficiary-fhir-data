@@ -2580,10 +2580,11 @@ public final class TransformerUtils {
 	}
 
 	/**
-	 * Reads ALL the ICD codes and display values from the DGNS_CD.txt file
+	 * Reads ALL the ICD codes and display values from the DGNS_CD.txt file. Refer
+	 * to the README file in the src/main/resources/lookups directory
 	 * 
 	 */
-	public static Map<String, String> readIcdCodeFile() {
+	private static Map<String, String> readIcdCodeFile() {
 
 		Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
 		InputStream icdCodeDisplayStream = Thread.currentThread().getContextClassLoader()
@@ -2591,11 +2592,11 @@ public final class TransformerUtils {
 
 		BufferedReader icdCodesIn = null;
 		icdCodesIn = new BufferedReader(new InputStreamReader(icdCodeDisplayStream));
-
-		// We want to extract the ICD Diagnosis codes and display values and put in a
-		// Map
-		// for easy retrieval to get the
-		// display value
+		/*
+		 * We want to extract the ICD Diagnosis codes and display values and put in a
+		 * map for easy retrieval to get the display value icdColumns[1] is
+		 * DGNS_DESC(i.e. 7840 code is HEADACHE description)
+		 */
 		String line = "";
 		try {
 			icdCodesIn.readLine();
@@ -2652,9 +2653,10 @@ public final class TransformerUtils {
 
 	/**
 	 * Reads all the procedure codes and display values from the PRCDR_CD.txt file
+	 * Refer to the README file in the src/main/resources/lookups directory
 	 * 
 	 */
-	public static Map<String, String> readProcedureCodeFile() {
+	private static Map<String, String> readProcedureCodeFile() {
 
 		Map<String, String> procedureCodeMap = new HashMap<String, String>();
 		InputStream procedureCodeDisplayStream = Thread.currentThread().getContextClassLoader()
@@ -2663,8 +2665,11 @@ public final class TransformerUtils {
 		BufferedReader procedureCodesIn = null;
 		procedureCodesIn = new BufferedReader(new InputStreamReader(procedureCodeDisplayStream));
 
-		// We want to extract the procedure codes and display values and put in a
-		// Map for easy retrieval to get the display value
+		/*
+		 * We want to extract the procedure codes and display values and put in a map
+		 * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
+		 * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
+		 */
 		String line = "";
 		try {
 			procedureCodesIn.readLine();
