@@ -2564,7 +2564,7 @@ public final class TransformerUtils {
 			icdMap = readIcdCodeFile();
 		}
 
-		if (icdMap.containsKey(icdCode)) {
+		if (icdMap.containsKey(icdCode.toUpperCase())) {
 			String icdCodeDisplay = icdMap.get(icdCode);
 			return icdCodeDisplay;
 		}
@@ -2581,7 +2581,7 @@ public final class TransformerUtils {
 
 	/**
 	 * Reads ALL the ICD codes and display values from the DGNS_CD.txt file. Refer
-	 * to the README file in the src/main/resources/lookups directory
+	 * to the README file in the src/main/resources directory
 	 * 
 	 */
 	private static Map<String, String> readIcdCodeFile() {
@@ -2635,7 +2635,7 @@ public final class TransformerUtils {
 			procedureMap = readProcedureCodeFile();
 		}
 
-		if (procedureMap.containsKey(procedureCode)) {
+		if (procedureMap.containsKey(procedureCode.toUpperCase())) {
 			String procedureCodeDisplay = procedureMap.get(procedureCode);
 			return procedureCodeDisplay;
 		}
@@ -2653,7 +2653,7 @@ public final class TransformerUtils {
 
 	/**
 	 * Reads all the procedure codes and display values from the PRCDR_CD.txt file
-	 * Refer to the README file in the src/main/resources/lookups directory
+	 * Refer to the README file in the src/main/resources directory
 	 * 
 	 */
 	private static Map<String, String> readProcedureCodeFile() {
