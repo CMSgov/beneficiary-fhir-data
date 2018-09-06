@@ -56,6 +56,7 @@ abstract class IcdCode {
 		coding.setSystem(system);
 
 		coding.setCode(icdCode);
+		coding.setDisplay(TransformerUtils.retrieveIcdCodeDisplay(icdCode));
 
 		return codeableConcept;
 	}

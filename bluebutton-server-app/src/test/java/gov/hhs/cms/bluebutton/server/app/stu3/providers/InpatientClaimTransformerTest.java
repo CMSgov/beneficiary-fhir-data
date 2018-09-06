@@ -119,6 +119,12 @@ public final class InpatientClaimTransformerTest {
 				claim.getPrimaryPayerPaidAmount(), claim.getFiscalIntermediaryNumber());
 
 		Assert.assertEquals(9, eob.getDiagnosis().size());
+		
+		// test to ensure the diagnosis code display lookup table process works
+		Optional<Diagnosis> diagnosis = Diagnosis.from(claim.getDiagnosis5Code(), claim.getDiagnosis5CodeVersion());
+		TransformerTestUtils.assertHasCoding(diagnosis.get().getFhirSystem(), null,
+				TransformerUtils.retrieveIcdCodeDisplay(diagnosis.get().getCode()), diagnosis.get().getCode(),
+				eob.getDiagnosis().get(6).getDiagnosisCodeableConcept().getCoding());
 
 		CCWProcedure ccwProcedure = new CCWProcedure(claim.getProcedure1Code(), claim.getProcedure1CodeVersion(),
 				claim.getProcedure1Date());
@@ -128,6 +134,13 @@ public final class InpatientClaimTransformerTest {
 		Assert.assertEquals(
 				Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
 				eob.getProcedure().get(0).getDate());
+
+		// test to ensure the procedure code display lookup table process works
+		CCWProcedure ccwProcedureDisplay = new CCWProcedure(claim.getProcedure6Code(), claim.getProcedure6CodeVersion(),
+				claim.getProcedure6Date());
+		TransformerTestUtils.assertHasCoding(ccwProcedureDisplay.getFhirSystem().toString(), null,
+				TransformerUtils.retrieveProcedureCodeDisplay(claim.getProcedure6Code().get()),
+				claim.getProcedure6Code().get(), eob.getProcedure().get(5).getProcedureCodeableConcept().getCoding());
 
 		Assert.assertEquals(1, eob.getItem().size());
 		ItemComponent eobItem0 = eob.getItem().get(0);
