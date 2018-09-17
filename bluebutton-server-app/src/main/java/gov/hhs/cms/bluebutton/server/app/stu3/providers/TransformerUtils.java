@@ -2739,10 +2739,12 @@ public final class TransformerUtils {
 		BufferedReader ndcProductsIn = null;
 		ndcProductsIn = new BufferedReader(new InputStreamReader(ndcProductStream));
 
-		// We want to extract the PRODUCTNDC and SUBSTANCENAME from the FDA Products
-		// file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map
-		// for easy retrieval to get the
-		// display value which is the SUBSTANCENAME
+		/*
+		 * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
+		 * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
+		 * put in a Map for easy retrieval to get the display value which is a
+		 * combination of PROPRIETARYNAME & SUBSTANCENAME
+		 */
 		String line = "";
 		try {
 			ndcProductsIn.readLine();
@@ -2752,8 +2754,10 @@ public final class TransformerUtils {
 						.leftPad(ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
 				String nationalDrugCodeIngredient = StringUtils.leftPad(ndcProductColumns[1]
 						.substring(ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()), 4, '0');
+				// ndcProductColumns[3] - Proprietary Name
+				// ndcProductColumns[13] - Substance Name
 				ndcProductHashMap.put(String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-						ndcProductColumns[13]);
+						ndcProductColumns[3] + " - " + ndcProductColumns[13]);
 			}
 			ndcProductsIn.close();
 		} catch (IOException e) {
