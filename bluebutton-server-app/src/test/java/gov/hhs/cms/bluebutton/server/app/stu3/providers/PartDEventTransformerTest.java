@@ -156,15 +156,12 @@ public final class PartDEventTransformerTest {
 		if (claim.getSubmissionClarificationCode().isPresent())
 			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.SUBMSN_CLR_CD,
 					CcwCodebookVariable.SUBMSN_CLR_CD, claim.getSubmissionClarificationCode(), eob);
-
 		try {
 			TransformerTestUtils.assertFDADrugCodeDisplayEquals(claim.getNationalDrugCode(),
-					"DEXPANTHENOL; MENTHOL; SALICYLIC ACID");
+					"HASOL Anagen Hair Tonic - DEXPANTHENOL; MENTHOL; SALICYLIC ACID");
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.exit(6);
 		}
-
 	}
 }
 
