@@ -87,6 +87,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 			//sh 'whoami'
 			sh 'id'
 			sh 'cat /etc/passwd'
+			sh 'cat /etc/sudoers'
 			sh 'touch foobar.txt'
 
 			// Copy the SSH config and keys and fix permissions.
