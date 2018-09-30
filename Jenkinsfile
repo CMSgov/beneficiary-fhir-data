@@ -69,7 +69,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 
 		// Run the container as root, not as the random unbound user that
 		// Jenkins defaults to (as that will cause Python/Ansible errors).
-		def dockerArgs = '-u jenkins:docker'
+		def dockerArgs = ''
 
 		// Ensure that Ansible uses Jenkins' SSH config and keys.
 		dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh_jenkins:ro'
@@ -83,6 +83,12 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 
 		// Prepend the specified closure with some needed in-container setup.
 		def bodyWithSetup = {
+			// Debug UID/GID.
+			sh 'whoami'
+			sh 'id'
+			sh 'cat /etc/passwd'
+			sh 'touch foobar.txt'
+
 			// Copy the SSH config and keys and fix permissions.
 			sh 'cp --recursive --no-target-directory /root/.ssh_jenkins /root/.ssh'
 			sh 'chmod -R u=rw,g=,o= /root/.ssh'
