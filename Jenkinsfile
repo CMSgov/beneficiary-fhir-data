@@ -88,7 +88,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 			sh 'id'
 			sh 'cat /etc/passwd'
 			//sh 'cat /etc/groups'
-			sh 'cat /etc/sudoers'
+			//sh 'cat /etc/sudoers'
 			sh 'which sudo'
 			sh 'touch foobar.txt'
 
