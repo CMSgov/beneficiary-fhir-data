@@ -84,7 +84,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		// Prepend the specified closure with some needed in-container setup.
 		def bodyWithSetup = {
 			// Debug UID/GID.
-			sh 'whoami'
+			//sh 'whoami'
 			sh 'id'
 			sh 'cat /etc/passwd'
 			sh 'touch foobar.txt'
