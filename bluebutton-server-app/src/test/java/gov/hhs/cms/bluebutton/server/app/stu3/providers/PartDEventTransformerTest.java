@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +12,8 @@ import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.codahale.metrics.MetricRegistry;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
@@ -37,7 +40,7 @@ public final class PartDEventTransformerTest {
 		PartDEvent claim = parsedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
 
-		ExplanationOfBenefit eob = PartDEventTransformer.transform(claim);
+		ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 
@@ -70,7 +73,8 @@ public final class PartDEventTransformerTest {
 
 		ItemComponent rxItem = eob.getItem().stream().filter(i -> i.getSequence() == 1).findAny().get();
 
-		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC, claim.getNationalDrugCode(),
+		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_NDC, null,
+				TransformerUtils.retrieveFDADrugCodeDisplay(claim.getNationalDrugCode()), claim.getNationalDrugCode(),
 				rxItem.getService().getCoding());
 
 		TransformerTestUtils.assertHasCoding(V3ActCode.RXDINV.getSystem(),
@@ -152,6 +156,12 @@ public final class PartDEventTransformerTest {
 		if (claim.getSubmissionClarificationCode().isPresent())
 			TransformerTestUtils.assertInfoWithCodeEquals(CcwCodebookVariable.SUBMSN_CLR_CD,
 					CcwCodebookVariable.SUBMSN_CLR_CD, claim.getSubmissionClarificationCode(), eob);
+		try {
+			TransformerTestUtils.assertFDADrugCodeDisplayEquals(claim.getNationalDrugCode(),
+					"HASOL Anagen Hair Tonic - DEXPANTHENOL; MENTHOL; SALICYLIC ACID");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 

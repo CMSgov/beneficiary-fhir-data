@@ -25,6 +25,11 @@
 			by SpringConfiguration, which will launch an embedded HSQL DB to host it. -->
 		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
 		<its.bbfhir.db.url>jdbc:bluebutton-test:hsqldb:mem</its.bbfhir.db.url>
+
+		<!-- Should work out of the box on Linux, but likely needs to be customized
+			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
+			for details. -->
+		<bash.exe>bash</bash.exe>
 	</properties>
 
 	<dependencies>
@@ -115,7 +120,16 @@
 				via `web.xml`. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-servlet</artifactId>
+			<version>${metrics.version}</version>
 		</dependency>
+		<dependency>
+			<!-- Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled
+				via `web.xml`. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-servlets</artifactId>
+			<version>${metrics.version}</version>
+		</dependency>
+		
 
 		<dependency>
 			<!-- The Blue Button API runs against PostgreSQL in production. -->
@@ -149,6 +163,11 @@
 			<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+   			 <groupId>commons-io</groupId>
+  			  <artifactId>commons-io</artifactId>
+  			  <version>2.5</version>
+		</dependency>	
 	</dependencies>
 
 	<build>
@@ -262,8 +281,9 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.basedir}/src/main/config/server-start.sh</executable>
+							<executable>${bash.exe}</executable>
 							<arguments>
+								<argument>${project.basedir}/src/main/config/server-start.sh</argument>
 								<argument>-j</argument>
 								<argument>${java.home}</argument>
 								<argument>-m</argument>
@@ -285,8 +305,9 @@
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${project.basedir}/src/main/config/server-stop.sh</executable>
+							<executable>${bash.exe}</executable>
 							<arguments>
+								<argument>${project.basedir}/src/main/config/server-stop.sh</argument>
 								<argument>-t</argument>
 								<argument>${project.build.directory}</argument>
 							</arguments>
@@ -310,6 +331,50 @@
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
+						process. -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.5.0</version>
+				<executions>
+					<execution>
+						<id>download-fda-drug-data</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp</mainClass>
+							<arguments>
+								<argument>${project.build.outputDirectory}</argument>
+							</arguments>
+							<systemProperties>
+								<systemProperty>
+									<key>http.proxyHost</key>
+									<value>${http.proxyHost}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>http.proxyPort</key>
+									<value>${http.proxyPort}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>https.proxyHost</key>
+									<value>${https.proxyHost}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>https.proxyPort</key>
+									<value>${https.proxyPort}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>http.nonProxyHosts</key>
+									<value>${http.nonProxyHosts}</value>
+								</systemProperty>
+							</systemProperties>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

@@ -9,6 +9,8 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
@@ -21,15 +23,23 @@ import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
  */
 final class DMEClaimTransformer {
 	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
 	 * @param claim
 	 *            the CCW {@link DMEClaim} to transform
 	 * @return a FHIR {@link ExplanationOfBenefit} resource that represents the
 	 *         specified {@link DMEClaim}
 	 */
-	static ExplanationOfBenefit transform(Object claim) {
+	static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+		Timer.Context timer = metricRegistry
+				.timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform")).time();
+
 		if (!(claim instanceof DMEClaim))
 			throw new BadCodeMonkeyException();
-		return transformClaim((DMEClaim) claim);
+		ExplanationOfBenefit eob = transformClaim((DMEClaim) claim);
+
+		timer.stop();
+		return eob;
 	}
 
 	/**

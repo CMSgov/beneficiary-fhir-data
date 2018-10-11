@@ -12,6 +12,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
@@ -38,7 +40,7 @@ public final class OutpatientClaimTransformerTest {
 		OutpatientClaim claim = parsedRecords.stream().filter(r -> r instanceof OutpatientClaim)
 				.map(r -> (OutpatientClaim) r).findFirst().get();
 
-		ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(claim);
+		ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 

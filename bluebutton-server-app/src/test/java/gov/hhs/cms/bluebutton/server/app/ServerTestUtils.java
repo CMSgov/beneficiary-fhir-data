@@ -72,9 +72,7 @@ public final class ServerTestUtils {
 	 */
 	public static IGenericClient createFhirClient(Optional<ClientSslIdentity> clientSslIdentity) {
 		// Figure out where the test server is running.
-		Properties testServerPorts = readTestServerPortsProperties();
-		int httpsPort = Integer.parseInt(testServerPorts.getProperty("server.port.https"));
-		String serverBaseUrl = String.format("https://localhost:%d/baseDstu3", httpsPort);
+		String fhirBaseUrl = String.format("%s/v1/fhir", getServerBaseUrl());
 
 		/*
 		 * We need to override the FHIR client's SSLContext. Unfortunately, that
@@ -82,25 +80,7 @@ public final class ServerTestUtils {
 		 * the settings used here mirror those that the default FHIR HttpClient
 		 * would use.
 		 */
-		SSLContext sslContext;
-		try {
-			SSLContextBuilder sslContextBuilder = SSLContexts.custom();
-
-			// If a client key is desired, configure the key store with it.
-			if (clientSslIdentity.isPresent())
-				sslContextBuilder.loadKeyMaterial(clientSslIdentity.get().getKeyStore(),
-						clientSslIdentity.get().getStorePassword(), clientSslIdentity.get().getKeyPass());
-
-			// Configure the trust store.
-			sslContextBuilder.loadTrustMaterial(getClientTrustStorePath().toFile(), "changeit".toCharArray());
-
-			sslContext = sslContextBuilder.build();
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		} catch (KeyManagementException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException
-				| CertificateException e) {
-			throw new IllegalStateException(e);
-		}
+		SSLContext sslContext = createSslContext(clientSslIdentity);
 
 		/*
 		 * The default timeout is 10s, which was failing for batches of 100. A
@@ -125,7 +105,7 @@ public final class ServerTestUtils {
 				.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement().build();
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
 
-		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		IGenericClient client = ctx.newRestfulGenericClient(fhirBaseUrl);
 
 		/*
 		 * The FHIR client logging (for tests) can be managed via the
@@ -141,6 +121,46 @@ public final class ServerTestUtils {
 		client.registerInterceptor(loggingInterceptor);
 
 		return client;
+	}
+
+	/**
+	 * @param clientSslIdentity
+	 *            the {@link ClientSslIdentity} to use as a login for the server
+	 * @return a new {@link SSLContext} for HTTP clients connecting to the server to
+	 *         use
+	 */
+	public static SSLContext createSslContext(Optional<ClientSslIdentity> clientSslIdentity) {
+		SSLContext sslContext;
+		try {
+			SSLContextBuilder sslContextBuilder = SSLContexts.custom();
+
+			// If a client key is desired, configure the key store with it.
+			if (clientSslIdentity.isPresent())
+				sslContextBuilder.loadKeyMaterial(clientSslIdentity.get().getKeyStore(),
+						clientSslIdentity.get().getStorePassword(), clientSslIdentity.get().getKeyPass());
+
+			// Configure the trust store.
+			sslContextBuilder.loadTrustMaterial(getClientTrustStorePath().toFile(), "changeit".toCharArray());
+
+			sslContext = sslContextBuilder.build();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		} catch (KeyManagementException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException
+				| CertificateException e) {
+			throw new IllegalStateException(e);
+		}
+		return sslContext;
+	}
+
+	/**
+	 * @return the base URL for the server (not for the FHIR servlet, but just the
+	 *         server itself)
+	 */
+	public static String getServerBaseUrl() {
+		Properties testServerPorts = readTestServerPortsProperties();
+		int httpsPort = Integer.parseInt(testServerPorts.getProperty("server.port.https"));
+		String serverBaseUrl = String.format("https://localhost:%d", httpsPort);
+		return serverBaseUrl;
 	}
 
 	/**

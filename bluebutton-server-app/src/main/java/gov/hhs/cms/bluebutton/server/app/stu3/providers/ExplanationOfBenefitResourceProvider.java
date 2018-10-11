@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -20,6 +21,9 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
+
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -44,6 +48,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(\\p{Alnum}+)");
 
 	private EntityManager entityManager;
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * @param entityManager
@@ -53,6 +58,15 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	@PersistenceContext
 	public void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
+	}
+
+	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
+	 */
+	@Inject
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
 	}
 
 	/**
@@ -102,9 +116,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			throw new ResourceNotFoundException(eobId);
 		String eobIdClaimIdText = eobIdMatcher.group(2);
 
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-
+		Timer.Context timerEobQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id")).time();
 		Class<?> entityClass = eobIdType.get().getEntityClass();
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery criteria = builder.createQuery(entityClass);
 		Root root = criteria.from(entityClass);
 		eobIdType.get().getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
@@ -116,9 +131,11 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			claimEntity = entityManager.createQuery(criteria).getSingleResult();
 		} catch (NoResultException e) {
 			throw new ResourceNotFoundException(eobId);
+		} finally {
+			timerEobQuery.stop();
 		}
 
-		ExplanationOfBenefit eob = eobIdType.get().getTransformer().apply(claimEntity);
+		ExplanationOfBenefit eob = eobIdType.get().getTransformer().apply(metricRegistry, claimEntity);
 		return eob;
 	}
 
@@ -174,17 +191,23 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private <T> List<T> findClaimTypeByPatient(ClaimType claimType, String patientId) {
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		Timer.Context timerEobQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eobs", claimType.name().toLowerCase()))
+				.time();
+		try {
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery criteria = criteriaBuilder.createQuery((Class) claimType.getEntityClass());
+			Root root = criteria.from((Class) claimType.getEntityClass());
+			claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
+			criteria.select(root).distinct(true);
+			criteria.where(criteriaBuilder
+					.equal(root.get((SingularAttribute) claimType.getEntityBeneficiaryIdAttribute()), patientId));
 
-		CriteriaQuery criteria = criteriaBuilder.createQuery((Class) claimType.getEntityClass());
-		Root root = criteria.from((Class) claimType.getEntityClass());
-		claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-		criteria.select(root).distinct(true);
-		criteria.where(criteriaBuilder.equal(root.get((SingularAttribute) claimType.getEntityBeneficiaryIdAttribute()),
-				patientId));
-
-		List claimEntities = entityManager.createQuery(criteria).getResultList();
-		return claimEntities;
+			List claimEntities = entityManager.createQuery(criteria).getResultList();
+			return claimEntities;
+		} finally {
+			timerEobQuery.stop();
+		}
 	}
 
 	/**
@@ -196,6 +219,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *         specified claim/event
 	 */
 	private List<ExplanationOfBenefit> transformToEobs(ClaimType claimType, List<?> claims) {
-		return claims.stream().map(claimType.getTransformer()).collect(Collectors.toList());
+		return claims.stream().map(c -> claimType.getTransformer().apply(metricRegistry, c))
+				.collect(Collectors.toList());
 	}
 }

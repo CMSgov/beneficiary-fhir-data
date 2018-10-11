@@ -33,6 +33,7 @@ import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcesso
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
@@ -209,10 +210,8 @@ public class SpringConfiguration {
 		if (!Files.isDirectory(serverRunDir))
 			serverRunDir = Paths.get("bluebutton-data-server-app", "target", "bluebutton-server");
 		if (!Files.isDirectory(serverRunDir))
-			throw new IllegalStateException();
-
-		if (!Files.exists(serverRunDir))
-			throw new IllegalStateException("Unable to find 'bluebutton-server' working directory.");
+			throw new IllegalStateException("Unable to find 'bluebutton-server' directory. Working directory: "
+					+ Paths.get(".").toAbsolutePath());
 
 		Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");
 		return testDbPropertiesPath;
@@ -382,6 +381,16 @@ public class SpringConfiguration {
 		reporter.start();
 
 		return metricRegistry;
+	}
+
+	/**
+	 * @return the {@link HealthCheckRegistry} for the application, which collects
+	 *         any/all health checks that it provides
+	 */
+	@Bean
+	public HealthCheckRegistry healthCheckRegistry() {
+		HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
+		return healthCheckRegistry;
 	}
 
 	/**

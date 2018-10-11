@@ -13,6 +13,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaimLine;
@@ -39,7 +41,7 @@ public final class DMEClaimTransformerTest {
 		DMEClaim claim = parsedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
 				.get();
 
-		ExplanationOfBenefit eob = DMEClaimTransformer.transform(claim);
+		ExplanationOfBenefit eob = DMEClaimTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 
@@ -97,7 +99,7 @@ public final class DMEClaimTransformerTest {
 				claimLine1.getHcpcsInitialModifierCode(), claimLine1.getHcpcsSecondModifierCode(), claim.getHcpcsYearCode(),
 				0/* index */);
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS,
-				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(),
+				"" + claim.getHcpcsYearCode().get(), null, claimLine1.getHcpcsCode().get(),
 				eobItem0.getService().getCoding());
 
 		TransformerTestUtils.assertAdjudicationAmountEquals(CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT,

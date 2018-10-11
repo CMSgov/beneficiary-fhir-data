@@ -13,6 +13,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.codahale.metrics.MetricRegistry;
+
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
@@ -39,7 +41,7 @@ public final class CarrierClaimTransformerTest {
 		CarrierClaim claim = parsedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
 				.findFirst().get();
 
-		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(claim);
+		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 
@@ -58,7 +60,7 @@ public final class CarrierClaimTransformerTest {
 		CarrierClaim claim = parsedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
 				.findFirst().get();
 
-		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(claim);
+		ExplanationOfBenefit eob = CarrierClaimTransformer.transform(new MetricRegistry(), claim);
 		assertMatches(claim, eob);
 	}
 	
@@ -122,7 +124,7 @@ public final class CarrierClaimTransformerTest {
 				claimLine1.getLinePricingLocalityCode(), eobItem0.getLocation());
 
 		TransformerTestUtils.assertHasCoding(TransformerConstants.CODING_SYSTEM_HCPCS,
-				"" + claim.getHcpcsYearCode().get(), claimLine1.getHcpcsCode().get(),
+				"" + claim.getHcpcsYearCode().get(), null, claimLine1.getHcpcsCode().get(),
 				eobItem0.getService().getCoding());
 		Assert.assertEquals(1, eobItem0.getModifier().size());
 		TransformerTestUtils.assertHcpcsCodes(eobItem0, claimLine1.getHcpcsCode(),

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -19,6 +20,9 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
+
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -48,6 +52,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
 
 	private EntityManager entityManager;
+	private MetricRegistry metricRegistry;
 
 	/**
 	 * @param entityManager
@@ -57,6 +62,15 @@ public final class PatientResourceProvider implements IResourceProvider {
 	@PersistenceContext
 	public void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
+	}
+
+	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
+	 */
+	@Inject
+	public void setMetricRegistry(MetricRegistry metricRegistry) {
+		this.metricRegistry = metricRegistry;
 	}
 
 	/**
@@ -98,6 +112,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
+		Timer.Context timerBeneQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
 		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
 		Root<Beneficiary> root = criteria.from(Beneficiary.class);
 		criteria.select(root);
@@ -108,9 +124,11 @@ public final class PatientResourceProvider implements IResourceProvider {
 			beneficiary = entityManager.createQuery(criteria).getSingleResult();
 		} catch (NoResultException e) {
 			throw new ResourceNotFoundException(patientId);
+		} finally {
+			timerBeneQuery.stop();
 		}
 
-		Patient patient = BeneficiaryTransformer.transform(beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
 		return patient;
 	}
 
@@ -215,18 +233,24 @@ public final class PatientResourceProvider implements IResourceProvider {
 		Set<String> matchingBeneficiaryIds = new HashSet<>();
 
 		// Search the Beneficiary records for HICN matches.
+		Timer.Context timerHicnQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn", "current")).time();
 		CriteriaQuery<String> beneHicnQuery = builder.createQuery(String.class);
 		Root<Beneficiary> beneHicnQueryRoot = beneHicnQuery.from(Beneficiary.class);
 		beneHicnQuery.select(beneHicnQueryRoot.get(Beneficiary_.beneficiaryId));
 		beneHicnQuery.where(builder.equal(beneHicnQueryRoot.get(Beneficiary_.hicn), hicnHash));
 		matchingBeneficiaryIds.addAll(entityManager.createQuery(beneHicnQuery).getResultList());
+		timerHicnQuery.stop();
 
 		// Search the BeneficiaryHistory records for HICN matches.
+		Timer.Context timerHicnHistoryQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn", "history")).time();
 		CriteriaQuery<String> beneHistoryHicnQuery = builder.createQuery(String.class);
 		Root<BeneficiaryHistory> beneHistoryHicnQueryRoot = beneHistoryHicnQuery.from(BeneficiaryHistory.class);
 		beneHistoryHicnQuery.select(beneHistoryHicnQueryRoot.get(BeneficiaryHistory_.beneficiaryId));
 		beneHistoryHicnQuery.where(builder.equal(beneHistoryHicnQueryRoot.get(BeneficiaryHistory_.hicn), hicnHash));
 		matchingBeneficiaryIds.addAll(entityManager.createQuery(beneHistoryHicnQuery).getResultList());
+		timerHicnHistoryQuery.stop();
 
 		/*
 		 * Because data is always dirty, we watch out for and throw an error if no
@@ -249,7 +273,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new NoResultException();
 		}
 
-		Patient patient = BeneficiaryTransformer.transform(beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
 		return patient;
 	}
 }

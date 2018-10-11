@@ -6,6 +6,42 @@ Previously, EOB responses had included a one-way cryptographic hash of each bene
 
 That field has now been removed from the returned `Patient` responses. It is still used behind-the-scenes, but did not need to be exposed otherwise.
 
+## BLUEBUTTON-147: Display ICD and Procedure code displays in EOB
+
+Several changes have been made to these entries:
+
+* The `Coding.display` to the EOB has been added for Diagnostic and Procedure codes in the appropriate claim types.
+
+* A descriptive name will be displayed in the `Coding.display` for Diagnosis/Procedure fields.
+
+## BLUEBUTTON-306: Remove baseDstu3 mapping
+
+Removing the old mapping (baseDstu3) from the servletRegistration as it was only kept to ensure backwards compatibility until the front end team completed changes. The mapping for the servletRegistration had previously be changed to "v1/fhir" as part of BLUEBUTTON-130.
+
+
+## BLUEBUTTON-146: Display NDC (National Drug Code) Substance Names in EOB
+
+Several changes have been made to these entries:
+
+* The `Coding.display` to the EOB has been added for NDC fields in Part D, Carrier and DME.
+
+* The Substance Name will be displayed in the `Coding.display` for NDC fields.
+
+* The FDA NDC product file we use is downloaded from (https://www.accessdata.fda.gov/cder/ndctext.zip).
+   
+## BLUEBUTTON-200: Fix duplicate `ExplanationOfBenefit`s bug
+
+A bug was fixed that had been causing duplicate `ExplanationOfBenefit` resources to be returned for most beneficiaries. (It had been generating one exact-duplicate EOB per each claim line in each claim.)
+
+## BLUEBUTTON-185: Include HIC history data in `Patient` lookups
+
+Beneficiaries' HIC history is now considered for patient lookup requests. This should improve our patient matching success rate to around 99%.
+
+## CBBF-167: Removed date search parameter for EOB searches
+
+This functionality had not been supported/surfaced by the frontend, but was still appearing in the application's capability statement (i.e. `/metadata`). Since it isn't needed or supported at this time, it was removed to correct the overall capability statement.
+
+
 ## CBBF-175: Fixed `ExplanationOfBenefit.diagnosis.type` Entries
 
 Several changes have been made to these entries:
