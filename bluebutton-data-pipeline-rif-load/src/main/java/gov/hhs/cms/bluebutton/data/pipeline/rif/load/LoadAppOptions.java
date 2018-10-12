@@ -26,6 +26,7 @@ public final class LoadAppOptions implements Serializable {
 	private final String databaseUsername;
 	private final char[] databasePassword;
 	private final int loaderThreads;
+	private final boolean idempotencyRequired;
 
 	/**
 	 * Constructs a new {@link LoadAppOptions} instance.
@@ -42,9 +43,11 @@ public final class LoadAppOptions implements Serializable {
 	 *            the value to use for {@link #getDatabasePassword()}
 	 * @param loaderThreads
 	 *            the value to use for {@link #getLoaderThreads()}
+	 * @param idempotencyRequired
+	 *            the value to use for {@link #isIdempotencyRequired()}
 	 */
 	public LoadAppOptions(int hicnHashIterations, byte[] hicnHashPepper, String databaseUrl, String databaseUsername,
-			char[] databasePassword, int loaderThreads) {
+			char[] databasePassword, int loaderThreads, boolean idempotencyRequired) {
 		if (loaderThreads < 1)
 			throw new IllegalArgumentException();
 
@@ -54,6 +57,7 @@ public final class LoadAppOptions implements Serializable {
 		this.databaseUsername = databaseUsername;
 		this.databasePassword = databasePassword;
 		this.loaderThreads = loaderThreads;
+		this.idempotencyRequired = idempotencyRequired;
 	}
 
 	/**
@@ -99,6 +103,24 @@ public final class LoadAppOptions implements Serializable {
 	 */
 	public int getLoaderThreads() {
 		return loaderThreads;
+	}
+
+	/**
+	 * @return
+	 *         <p>
+	 *         <code>true</code> if {@link RifLoader} should check to see if each
+	 *         record has already been processed, <code>false</code> if it should
+	 *         blindly assume that it hasn't
+	 *         </p>
+	 *         <p>
+	 *         This is sometimes a reasonable speed vs. safety tradeoff to make, as
+	 *         that checking is slow, particularly if indexes have been dropped in
+	 *         an attempt to speed up initial loads. Aside from that, though, this
+	 *         value is best left set to <code>true</code>.
+	 *         </p>
+	 */
+	public boolean isIdempotencyRequired() {
+		return idempotencyRequired;
 	}
 
 	/**

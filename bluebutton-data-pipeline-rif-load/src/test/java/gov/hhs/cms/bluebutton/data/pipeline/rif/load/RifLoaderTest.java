@@ -26,7 +26,7 @@ public final class RifLoaderTest {
 		LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
 		options = new LoadAppOptions(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8),
 				options.getDatabaseUrl(), options.getDatabaseUsername(), options.getDatabasePassword(),
-				options.getLoaderThreads());
+				options.getLoaderThreads(), options.isIdempotencyRequired());
 		LOGGER.info("salt/pepper: {}", Arrays.toString("nottherealpepper".getBytes(StandardCharsets.UTF_8)));
 		LOGGER.info("hash iterations: {}", 1000);
 		SecretKeyFactory secretKeyFactory = RifLoader.createSecretKeyFactory();
