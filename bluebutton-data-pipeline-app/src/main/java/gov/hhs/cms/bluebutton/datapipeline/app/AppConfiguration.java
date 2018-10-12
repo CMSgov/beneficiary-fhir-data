@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.datapipeline.app;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -88,6 +89,13 @@ public final class AppConfiguration implements Serializable {
 	 * value.
 	 */
 	public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
+
+	/**
+	 * The name of the environment variable that should be used to provide the
+	 * {@link #getLoadOptions()} {@link LoadAppOptions#isIdempotencyRequired()}
+	 * value.
+	 */
+	public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "IDEMPOTENCY_REQUIRED";
 
 	private final ExtractionOptions extractionOptions;
 	private final LoadAppOptions loadOptions;
@@ -234,6 +242,15 @@ public final class AppConfiguration implements Serializable {
 					String.format("Invalid value for configuration environment variable '%s': '%s'",
 							ENV_VAR_KEY_LOADER_THREADS, loaderThreadsText));
 
+		String idempotencyRequiredText = System.getenv(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
+		if (idempotencyRequiredText == null || idempotencyRequiredText.isEmpty())
+			throw new AppConfigurationException(String
+					.format("Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
+		Optional<Boolean> idempotencyRequired = parseBoolean(idempotencyRequiredText);
+		if (!idempotencyRequired.isPresent())
+			throw new AppConfigurationException(String.format(
+					"Invalid value for configuration environment variable '%s'.", ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
+
 		/*
 		 * Just for convenience: make sure DefaultAWSCredentialsProviderChain
 		 * has whatever it needs.
@@ -252,6 +269,24 @@ public final class AppConfiguration implements Serializable {
 
 		return new AppConfiguration(new ExtractionOptions(s3BucketName, allowedRifFileType),
 				new LoadAppOptions(hicnHashIterations, hicnHashPepper, databaseUrl, databaseUsername,
-						databasePassword.toCharArray(), loaderThreads));
+						databasePassword.toCharArray(), loaderThreads, idempotencyRequired.get()));
+	}
+
+	/**
+	 * Design note: want better parsing than what
+	 * {@link Boolean#parseBoolean(String)} provides.
+	 *
+	 * @param booleanText
+	 *            the text to try and parse a <code>boolean</code> from
+	 * @return the parsed <code>boolean</code>, or {@link Optional#empty()} if
+	 *         nothing valid could be parsed
+	 */
+	static Optional<Boolean> parseBoolean(String booleanText) {
+		if ("true".equalsIgnoreCase(booleanText))
+			return Optional.of(true);
+		else if ("false".equalsIgnoreCase(booleanText))
+			return Optional.of(false);
+		else
+			return Optional.empty();
 	}
 }

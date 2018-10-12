@@ -206,19 +206,15 @@ public final class RifLoader {
 	}
 
 	/**
-	 * @param features
-	 *            the configured {@link LoadFeatures}
 	 * @param recordAction
 	 *            the {@link RecordAction} of the specific record being processed
 	 * @return the {@link LoadStrategy} that should be used for the record being
 	 *         processed
 	 */
-	private LoadStrategy selectStrategy(LoadFeatures features, RecordAction recordAction) {
+	private LoadStrategy selectStrategy(RecordAction recordAction) {
 		if (recordAction == RecordAction.INSERT) {
-			if (features.isIdempotencyRequired())
+			if (options.isIdempotencyRequired())
 				return LoadStrategy.INSERT_IDEMPOTENT;
-			else if (features.isCopyDesired() && isDatabasePostgreSql())
-				return LoadStrategy.COPY_NON_IDEMPOTENT;
 			else
 				return LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT;
 		} else {
@@ -418,9 +414,6 @@ public final class RifLoader {
 		RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
 		MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
 
-		// TODO make the features configurable
-		LoadFeatures features = new LoadFeatures(true, false);
-
 		RifFileType rifFileType = fileEvent.getFile().getFileType();
 
 		// If these are Beneficiary records, first hash their HICNs.
@@ -452,62 +445,50 @@ public final class RifLoader {
 				RecordAction recordAction = rifRecordEvent.getRecordAction();
 				Object record = rifRecordEvent.getRecord();
 
-				LoadStrategy strategy = selectStrategy(features, recordAction);
-
-				/*
-				 * If we can, load the record using PostgreSQL's native copy
-				 * APIs, which are ludicrously fast. FIXME inaccurate comment
-				 */
+				LOGGER.trace("Loading '{}' record.", rifFileType);
+				LoadStrategy strategy = selectStrategy(recordAction);
 				LoadAction loadAction;
-				if (strategy == LoadStrategy.COPY_NON_IDEMPOTENT
-						&& rifRecordEvent.getRecordAction() == RecordAction.INSERT) {
-					postgresBatch.add(record);
-					loadAction = LoadAction.QUEUED;
-				} else {
-					// Push the record, if it's not already in DB.
-					LOGGER.trace("Loading '{}' record.", rifFileType);
 
-					if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
-						// Check to see if record already exists.
-						Timer.Context timerIdempotencyQuery = fileEventMetrics
-								.timer(MetricRegistry.name(getClass().getSimpleName(), "idempotencyQueries")).time();
-						Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
-						Objects.requireNonNull(recordId);
-						Object recordInDb = entityManager.find(record.getClass(), recordId);
-						timerIdempotencyQuery.close();
+				if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
+					// Check to see if record already exists.
+					Timer.Context timerIdempotencyQuery = fileEventMetrics
+							.timer(MetricRegistry.name(getClass().getSimpleName(), "idempotencyQueries")).time();
+					Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
+					Objects.requireNonNull(recordId);
+					Object recordInDb = entityManager.find(record.getClass(), recordId);
+					timerIdempotencyQuery.close();
 
-						if (recordInDb == null) {
-							loadAction = LoadAction.INSERTED;
-							entityManager.persist(record);
-							Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
-						} else {
-							loadAction = LoadAction.DID_NOTHING;
+					if (recordInDb == null) {
+						loadAction = LoadAction.INSERTED;
+						entityManager.persist(record);
+						Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
+					} else {
+						loadAction = LoadAction.DID_NOTHING;
+					}
+				} else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
+					if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
+						loadAction = LoadAction.INSERTED;
+						entityManager.persist(record);
+					} else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
+						loadAction = LoadAction.UPDATED;
+
+						/*
+						 * When beneficiaries are updated, we need to be careful to capture their
+						 * current/previous state as a BeneficiaryHistory record.
+						 */
+						if (record instanceof Beneficiary) {
+							updateBeneficaryHistory(entityManager, (Beneficiary) record);
 						}
-					} else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
-						if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
-							loadAction = LoadAction.INSERTED;
-							entityManager.persist(record);
-						} else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
-							loadAction = LoadAction.UPDATED;
 
-							/*
-							 * When beneficiaries are updated, we need to be careful to capture their
-							 * current/previous state as a BeneficiaryHistory record.
-							 */
-							if (record instanceof Beneficiary) {
-								updateBeneficaryHistory(entityManager, (Beneficiary) record);
-							}
+						entityManager.merge(record);
+					} else {
+						throw new BadCodeMonkeyException(String.format("Unhandled %s: '%s'.", RecordAction.class,
+								rifRecordEvent.getRecordAction()));
+					}
+				} else
+					throw new BadCodeMonkeyException();
 
-							entityManager.merge(record);
-						} else {
-							throw new BadCodeMonkeyException(String.format("Unhandled %s: '%s'.", RecordAction.class,
-									rifRecordEvent.getRecordAction()));
-						}
-					} else
-						throw new BadCodeMonkeyException();
-
-					LOGGER.trace("Loaded '{}' record.", rifFileType);
-				}
+				LOGGER.trace("Loaded '{}' record.", rifFileType);
 
 				fileEventMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "records", loadAction.name()))
 						.mark(1);
@@ -1006,9 +987,7 @@ public final class RifLoader {
 	private static enum LoadStrategy {
 		INSERT_IDEMPOTENT,
 
-		INSERT_UPDATE_NON_IDEMPOTENT,
-
-		COPY_NON_IDEMPOTENT;
+		INSERT_UPDATE_NON_IDEMPOTENT;
 	}
 
 	/**

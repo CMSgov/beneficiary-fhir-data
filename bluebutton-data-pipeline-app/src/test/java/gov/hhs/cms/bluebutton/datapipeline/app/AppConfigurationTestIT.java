@@ -61,6 +61,7 @@ public final class AppConfigurationTestIT {
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD,
 				String.valueOf(RifLoaderTestUtils.DB_PASSWORD));
 		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
+		testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
 		Process testApp = testAppBuilder.start();
 
 		int testAppExitCode = testApp.waitFor();
@@ -97,6 +98,9 @@ public final class AppConfigurationTestIT {
 		Assert.assertEquals(
 				Integer.parseInt(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
 				testAppConfig.getLoadOptions().getLoaderThreads());
+		Assert.assertEquals(AppConfiguration
+				.parseBoolean(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED))
+				.get(), testAppConfig.getLoadOptions().isIdempotencyRequired());
 	}
 
 	/**

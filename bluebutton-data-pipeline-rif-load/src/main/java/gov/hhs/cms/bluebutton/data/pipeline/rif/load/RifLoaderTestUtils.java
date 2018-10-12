@@ -74,6 +74,11 @@ public final class RifLoaderTestUtils {
 	 */
 	public static final char[] DB_PASSWORD = "".toCharArray();
 
+	/**
+	 * The value to use for {@link LoadAppOptions#isIdempotencyRequired()}.
+	 */
+	public static final boolean IDEMPOTENCY_REQUIRED = true;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderTestUtils.class);
 
 	/**
@@ -143,7 +148,7 @@ public final class RifLoaderTestUtils {
 	 */
 	public static LoadAppOptions getLoadOptions() {
 		return new LoadAppOptions(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER, DB_URL, DB_USERNAME, DB_PASSWORD,
-				LoadAppOptions.DEFAULT_LOADER_THREADS);
+				LoadAppOptions.DEFAULT_LOADER_THREADS, IDEMPOTENCY_REQUIRED);
 	}
 
 	/**

@@ -359,6 +359,8 @@ public final class S3ToDatabaseLoadAppIT {
 				String.valueOf(RifLoaderTestUtils.DB_PASSWORD));
 		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS,
 				String.valueOf(LoadAppOptions.DEFAULT_LOADER_THREADS));
+		appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
+				String.valueOf(RifLoaderTestUtils.IDEMPOTENCY_REQUIRED));
 		/*
 		 * Note: Not explicitly providing AWS credentials here, as the child
 		 * process will inherit any that are present in this build/test process.
