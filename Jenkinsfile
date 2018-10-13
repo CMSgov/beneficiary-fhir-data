@@ -69,7 +69,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 
 		// Run the container as root, not as the random unbound user that
 		// Jenkins defaults to (as that will cause Python/Ansible errors).
-		def dockerArgs = '-u root:root'
+		def dockerArgs = '--user root:root'
 
 		// Ensure that Ansible uses Jenkins' SSH config and keys.
 		dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh_jenkins:ro'
@@ -101,7 +101,11 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 			// around files owned by root. That's not great anyways, but it gets
 			// particularly annoying because Jenkins can't move/cleanup those files
 			// when it needs to later. So: we fix the ownership here and problem solved.
-			sh 'chown --recursive jenkins:docker .'
+			def jenkinsUid = sh 'id --user'
+			def jenkinsGid = sh 'id --group'
+			ansibleRunner.inside(dockerArgs, {
+				sh "chown --recursive $jenkinsUid:$jenkinsGid ."
+			})
 		}
 	}
 }
