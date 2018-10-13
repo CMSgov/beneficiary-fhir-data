@@ -101,10 +101,10 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 			// around files owned by root. That's not great anyways, but it gets
 			// particularly annoying because Jenkins can't move/cleanup those files
 			// when it needs to later. So: we fix the ownership here and problem solved.
-			def jenkinsUid = sh 'id --user'
-			def jenkinsGid = sh 'id --group'
+			def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
+			def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
 			ansibleRunner.inside(dockerArgs, {
-				sh "chown --recursive $jenkinsUid:$jenkinsGid ."
+				sh "chown --recursive ${jenkinsUid}:${jenkinsGid} ."
 			})
 		}
 	}
