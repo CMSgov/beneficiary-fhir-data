@@ -104,7 +104,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 			def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
 			def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
 			ansibleRunner.inside(dockerArgs, {
-				sh "chown --recursive ${jenkinsUid}:${jenkinsGid} ."
+				sh "find . -writable -exec chown ${jenkinsUid}:${jenkinsGid} '{}' \;"
 			})
 		}
 	}
