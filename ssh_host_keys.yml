@@ -2,7 +2,7 @@
 ##
 # Ensure that the SSH host keys of the backend systems are trusted.
 ##
-- name: Add SHH Host Keys
+- name: Add SSH Host Keys
   hosts: localhost
   connection: local
   tasks:
