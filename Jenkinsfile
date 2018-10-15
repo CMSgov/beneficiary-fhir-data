@@ -17,7 +17,7 @@
 
 properties([
 	parameters([
-		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project's non-master branches.', defaultValue: false)
+		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project\'s non-master branches.', defaultValue: false)
 	])
 ])
 
