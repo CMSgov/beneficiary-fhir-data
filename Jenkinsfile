@@ -38,9 +38,9 @@ node {
 			// Verify the play's syntax before we run it.
 			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
 		}
-
-		def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 	}
+
+	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
 	if (shouldDeploy) {
 		stage('Deploy to Test') {
