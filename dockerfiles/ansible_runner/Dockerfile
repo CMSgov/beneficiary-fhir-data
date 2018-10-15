@@ -21,6 +21,9 @@ RUN yum install -y \
 		git \
 	;
 
+# Clean up yum caches (removes over 100MB).
+RUN yum clean all
+
 # Copy Ansible setup files (temporarily).
 COPY . /ansible_setup
 WORKDIR /ansible_setup
