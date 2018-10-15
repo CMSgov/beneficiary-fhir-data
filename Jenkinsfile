@@ -17,7 +17,8 @@
 
 properties([
 	parameters([
-		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project\'s non-master branches.', defaultValue: false)
+		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project\'s non-master branches.', defaultValue: false),
+		booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false)
 	])
 ])
 
@@ -43,11 +44,22 @@ node {
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
 	milestone()
+	if (shouldDeploy && params.deploy_to_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
+		stage('Deploy to LSS') {
+			insideAnsibleContainer {
+				// Run the play against the LSS environment (which is just the Jenkins box for now).
+				sh './ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds'
+			}
+		}
+	} }
+	milestone()
+
+	milestone()
 	if (shouldDeploy) { lock(resource: 'env_test', inversePrecendence: true) {
 		stage('Deploy to Test') {
 			insideAnsibleContainer {
 				// Run the play against the test environment.
-				sh './ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds:env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+				sh './ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 			}
 		}
 	} }
