@@ -15,6 +15,12 @@
  * </p>
  */
 
+properties([
+	parameters([
+		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project's non-master branches.', defaultValue: false),
+	])
+])
+
 node {
 	stage('Prepare') {
 		// Grab the commit that triggered the build.
@@ -32,12 +38,16 @@ node {
 			// Verify the play's syntax before we run it.
 			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
 		}
+
+		def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 	}
 
-	stage('Deploy to Test') {
-		insideAnsibleContainer {
-			// Run the play against the test environment.
-			sh './ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds:env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+	if (shouldDeploy) {
+		stage('Deploy to Test') {
+			insideAnsibleContainer {
+				// Run the play against the test environment.
+				sh './ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds:env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+			}
 		}
 	}
 }
