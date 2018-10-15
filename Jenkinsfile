@@ -47,8 +47,8 @@ node {
 	if (shouldDeploy && params.deploy_to_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
 		stage('Deploy to LSS') {
 			insideAnsibleContainer {
-				// Run the play against the LSS environment (which is just the Jenkins box for now).
-				sh './ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds'
+				// Run the play against the LSS environment.
+				sh './ansible-playbook-wrapper backend.yml --limit=env_lss'
 			}
 		}
 	} }

@@ -7,13 +7,6 @@
     ssh_key_comment: 'Jenkins/deployment user for BBAPI'
   become: true
 
-# Grab the key now so it can be authorized on other hosts, later.
-- name: Grab Jenkins SSH Public Key as Variable
-  slurp:
-    src: /var/lib/jenkins/.ssh/id_rsa.pub
-  become: true
-  register: slurp_jenkins_ssh_pub
-
 - name: Create Maven Directory
   file:
     state: directory

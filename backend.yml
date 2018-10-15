@@ -21,15 +21,6 @@
 - name: Include Build Server Playbook
   import_playbook: build_server.yml
 
-- name: Configure Systems for Deploys
-  hosts: all
-  tasks:
-    - name: Authorize Jenkins/Deploy SSH Key
-      authorized_key:
-        user: "{{ vault_users_deploy }}"
-        key: "{{ hostvars['bluebutton-healthapt-lss-builds']['slurp_jenkins_ssh_pub'].content | b64decode }}"
-      become: true
-
 - name: Configure Data Pipeline System
   hosts: data_pipeline_systems
   tasks:

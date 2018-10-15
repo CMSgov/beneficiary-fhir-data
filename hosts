@@ -29,6 +29,9 @@ bluebutton-healthapt-prod-data-server-b-1
 #     $ ansible-vault edit group_vars/env_test/vault.yml
 ##
 
+[env_lss]
+bluebutton-healthapt-lss-builds
+
 [env_test]
 bluebutton-healthapt-test-data-pipeline
 bluebutton-healthapt-test-data-server-a-1
