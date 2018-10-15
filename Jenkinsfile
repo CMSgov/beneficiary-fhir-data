@@ -42,14 +42,16 @@ node {
 
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
-	if (shouldDeploy) {
+	milestone()
+	if (shouldDeploy) { lock(resource: 'env_test', inversePrecendence: true) {
 		stage('Deploy to Test') {
 			insideAnsibleContainer {
 				// Run the play against the test environment.
 				sh './ansible-playbook-wrapper backend.yml --limit=bluebutton-healthapt-lss-builds:env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 			}
 		}
-	}
+	} }
+	milestone()
 }
 
 /**
