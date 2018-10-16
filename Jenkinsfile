@@ -18,7 +18,7 @@
 properties([
 	parameters([
 		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project\'s non-master branches.', defaultValue: false),
-		booleanParam(name: 'bootstrap_lss', description: 'Whether to run the Ansible plays to bootstrap the LSS systems (e.g. Jenkins itself).', defaultValue: false),
+		booleanParam(name: 'bootstrap_jenkins', description: 'Whether to run the Ansible plays to bootstrap some pre-req Jenkins config.', defaultValue: false),
 		booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false)
 	])
 ])
@@ -45,8 +45,8 @@ node {
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
 	milestone()
-	if (shouldDeploy && params.bootstrap_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
-		stage('Bootstrap LSS') {
+	if (shouldDeploy && params.bootstrap_jenkins) { lock(resource: 'env_lss', inversePrecendence: true) {
+		stage('Bootstrap Jenkins') {
 			def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
 			def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
 			insideAnsibleContainer {
