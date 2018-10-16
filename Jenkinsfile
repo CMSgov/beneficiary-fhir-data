@@ -19,7 +19,8 @@ properties([
 	parameters([
 		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project\'s non-master branches.', defaultValue: false),
 		booleanParam(name: 'bootstrap_jenkins', description: 'Whether to run the Ansible plays to bootstrap some pre-req Jenkins config.', defaultValue: false),
-		booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false)
+		booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false),
+		booleanParam(name: 'deploy_to_prod', description: 'Whether to run the Ansible plays for PROD systems (without prompting first, which is the default behavior).', defaultValue: false)
 	])
 ])
 
@@ -83,6 +84,32 @@ node {
 			}
 		}
 	} }
+
+	if (shouldDeploy) {
+		/*
+		 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
+		 * deploying to production environments.
+		 */
+		if (!params.deploy_to_prod) {
+			/*
+			 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+			 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+			 * the build will be aborted. Either way, Jenkins will log the user ID that made
+			 * the decision.
+			 */
+			input 'Deploy to PROD?'
+		}
+
+		lock(resource: 'env_prod', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_prod_start')
+			stage('Deploy to Test') {
+				insideAnsibleContainer {
+					// Run the play against the test environment.
+					sh './ansible-playbook-wrapper backend.yml --limit=env_prod --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+				}
+			}
+		}
+	}
 }
 
 /**
