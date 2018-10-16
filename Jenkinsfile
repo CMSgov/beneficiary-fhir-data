@@ -99,7 +99,7 @@ node {
 		}
 	}
 
-	stage('Deploy to PROD') {
+	stage('Manual Approval') {
 		if (shouldDeploy) {
 			/*
 			 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
@@ -113,7 +113,13 @@ node {
 				 */
 				input 'Deploy to PROD?'
 			}
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
+		}
+	}
 
+	stage('Deploy to PROD') {
+		if (shouldDeploy) {
 			lock(resource: 'env_prod', inversePrecendence: true) {
 				milestone(label: 'stage_deploy_prod_start')
 
