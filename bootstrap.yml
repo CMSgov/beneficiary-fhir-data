@@ -17,6 +17,28 @@
 - name: Add SSH Host Keys
   import_playbook: ssh_host_keys.yml
 
+- name: Configure Systems for Deploys - SSH Config
+  hosts: localhost
+  vars:
+    - ssh_config_dest: "{{ lookup('env', 'HOME')/.ssh/config }}"
+    - ssh_config_uid: "{{ lookup('pipe', 'id --user') }}"
+    - ssh_config_gid: "{{ lookup('pipe', 'id --group') }}"
+  tasks:
+    - name: Search EC2 for BBAPI Systems
+      ec2_remote_facts:
+        region: "{{ aws_region }}"
+        filters:
+          'tag:CONTRACT': 'BBAPI'
+      register: ec2_search_bbapi
+    - name: Create SSH Config for Ansible Jobs
+      template:
+        src: ssh_config.j2
+        dest: "{{ ssh_config_dest }}"
+        owner: "{{ ssh_config_uid }}"
+        group: "{{ ssh_config_gid }}"
+        mode: u=rw,g=r,o=r
+      become: true
+
 - name: Configure Systems for Deploys - Fetch Jenkins SSH Public Key
   hosts: bluebutton-healthapt-lss-builds
   vars:

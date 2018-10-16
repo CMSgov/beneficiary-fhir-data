@@ -25,25 +25,6 @@
     group: jenkins
   become: true
 
-- name: Search EC2 for BBAPI Systems
-  ec2_remote_facts:
-    region: "{{ aws_region }}"
-    filters:
-      'tag:CONTRACT': 'BBAPI'
-  delegate_to: localhost
-  register: ec2_search_bbapi
-
-- debug: var=ec2_search_bbapi
-
-- name: Create SSH Config for Ansible Jobs
-  template:
-    src: ssh_config.j2
-    dest: /var/lib/jenkins/.ssh/config
-    owner: jenkins
-    group: jenkins
-    mode: u=rw,g=r,o=r
-  become: true
-
 - name: Configure Jobs
   jenkins_script:
     url: "{{ jenkins_url_local }}"

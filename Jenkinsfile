@@ -47,9 +47,18 @@ node {
 	milestone()
 	if (shouldDeploy && params.bootstrap_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
 		stage('Bootstrap LSS') {
+			def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
+			def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
 			insideAnsibleContainer {
-				// Bootstrap this system: SSH known_hosts, etc.
-				sh './ansible-playbook-wrapper bootstrap.yml'
+				/*
+				 * Bootstrap this system: SSH known_hosts, config, etc. Note
+				 * that the `.ssh/config` path is customized to ensure that the
+				 * 'real' version of the file for the Jenkin's user is created/
+				 * updated, rather than the copy of it that is used inside the
+				 * Docker container. (If the file is created/modified here, you
+				 * will likely the job a second time after it goes boom.)
+				 */
+				sh "./ansible-playbook-wrapper bootstrap.yml --extra-vars 'ssh_config_dest=/root/.ssh_jenkins/config ssh_config_uid=${jenkinsUid} ssh_config_gid=${jenkinsGid}'"
 			}
 		}
 	} }
@@ -108,7 +117,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		def dockerArgs = '--user root:root'
 
 		// Ensure that Ansible uses Jenkins' SSH config and keys.
-		dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh_jenkins:ro'
+		dockerArgs += ' --volume=/var/lib/jenkins/.ssh:/root/.ssh_jenkins:rw'
 		dockerArgs += ' --volume=/etc/ssh:/etc/ssh:rw'
 
 		// Bind mount the `vault.password` file where it's needed.
