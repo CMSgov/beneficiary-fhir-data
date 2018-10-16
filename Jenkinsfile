@@ -41,11 +41,12 @@ node {
 			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
 		}
 	}
+	milestone(label: 'stage_prepare_complete')
 
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
-	milestone()
 	if (shouldDeploy && params.bootstrap_jenkins) { lock(resource: 'env_lss', inversePrecendence: true) {
+		milestone(label: 'stage_bootstrap_start')
 		stage('Bootstrap Jenkins') {
 			def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
 			def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
@@ -62,10 +63,9 @@ node {
 			}
 		}
 	} }
-	milestone()
 
-	milestone()
 	if (shouldDeploy && params.deploy_to_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
+		milestone(label: 'stage_deploy_lss_start')
 		stage('Deploy to LSS') {
 			insideAnsibleContainer {
 				// Run the play against the LSS environment.
@@ -73,10 +73,9 @@ node {
 			}
 		}
 	} }
-	milestone()
 
-	milestone()
 	if (shouldDeploy) { lock(resource: 'env_test', inversePrecendence: true) {
+		milestone(label: 'stage_deploy_test_start')
 		stage('Deploy to Test') {
 			insideAnsibleContainer {
 				// Run the play against the test environment.
@@ -84,7 +83,6 @@ node {
 			}
 		}
 	} }
-	milestone()
 }
 
 /**
