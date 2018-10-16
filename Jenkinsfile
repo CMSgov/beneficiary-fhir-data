@@ -46,45 +46,57 @@ node {
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
 	stage('Bootstrap Jenkins') {
-		if (shouldDeploy && params.bootstrap_jenkins) { lock(resource: 'env_lss', inversePrecendence: true) {
-			milestone(label: 'stage_bootstrap_start')
+		if (shouldDeploy && params.bootstrap_jenkins) {
+			lock(resource: 'env_lss', inversePrecendence: true) {
+				milestone(label: 'stage_bootstrap_start')
 
-			def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
-			def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
-			insideAnsibleContainer {
-				/*
-				 * Bootstrap this system: SSH known_hosts, config, etc. Note
-				 * that the `.ssh/config` path is customized to ensure that the
-				 * 'real' version of the file for the Jenkin's user is created/
-				 * updated, rather than the copy of it that is used inside the
-				 * Docker container. (If the file is created/modified here, you
-				 * will likely the job a second time after it goes boom.)
-				 */
-				sh "./ansible-playbook-wrapper bootstrap.yml --extra-vars 'ssh_config_dest=/root/.ssh_jenkins/config ssh_config_uid=${jenkinsUid} ssh_config_gid=${jenkinsGid}'"
+				def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
+				def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
+				insideAnsibleContainer {
+					/*
+					 * Bootstrap this system: SSH known_hosts, config, etc. Note
+					 * that the `.ssh/config` path is customized to ensure that the
+					 * 'real' version of the file for the Jenkin's user is created/
+					 * updated, rather than the copy of it that is used inside the
+					 * Docker container. (If the file is created/modified here, you
+					 * will likely the job a second time after it goes boom.)
+					 */
+					sh "./ansible-playbook-wrapper bootstrap.yml --extra-vars 'ssh_config_dest=/root/.ssh_jenkins/config ssh_config_uid=${jenkinsUid} ssh_config_gid=${jenkinsGid}'"
+				}
 			}
-		} }
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Bootstrap Jenkins')
+		}
 	}
 
 	stage('Deploy to LSS') {
-		if (shouldDeploy && params.deploy_to_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_lss_start')
+		if (shouldDeploy && params.deploy_to_lss) {
+			lock(resource: 'env_lss', inversePrecendence: true) {
+				milestone(label: 'stage_deploy_lss_start')
 
-			insideAnsibleContainer {
-				// Run the play against the LSS environment.
-				sh './ansible-playbook-wrapper backend.yml --limit=env_lss'
+				insideAnsibleContainer {
+					// Run the play against the LSS environment.
+					sh './ansible-playbook-wrapper backend.yml --limit=env_lss'
+				}
 			}
-		} }
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to LSS')
+		}
 	}
 
 	stage('Deploy to TEST') {
-		if (shouldDeploy) { lock(resource: 'env_test', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_test_start')
+		if (shouldDeploy) {
+			lock(resource: 'env_test', inversePrecendence: true) {
+				milestone(label: 'stage_deploy_test_start')
 
-			insideAnsibleContainer {
-				// Run the play against the test environment.
-				sh './ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+				insideAnsibleContainer {
+					// Run the play against the test environment.
+					sh './ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+				}
 			}
-		} }
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to TEST')
+		}
 	}
 
 	stage('Deploy to PROD') {
@@ -97,8 +109,7 @@ node {
 				/*
 				 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
 				 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-				 * the build will be aborted. Either way, Jenkins will log the user ID that made
-				 * the decision.
+				 * the build will be aborted.
 				 */
 				input 'Deploy to PROD?'
 			}
@@ -111,6 +122,8 @@ node {
 					sh './ansible-playbook-wrapper backend.yml --limit=env_prod --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 				}
 			}
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to PROD')
 		}
 	}
 }
