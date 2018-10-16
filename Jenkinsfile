@@ -42,7 +42,6 @@ node {
 			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
 		}
 	}
-	milestone(label: 'stage_prepare_complete')
 
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
