@@ -45,9 +45,10 @@ node {
 
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
-	if (shouldDeploy && params.bootstrap_jenkins) { lock(resource: 'env_lss', inversePrecendence: true) {
-		milestone(label: 'stage_bootstrap_start')
-		stage('Bootstrap Jenkins') {
+	stage('Bootstrap Jenkins') {
+		if (shouldDeploy && params.bootstrap_jenkins) { lock(resource: 'env_lss', inversePrecendence: true) {
+			milestone(label: 'stage_bootstrap_start')
+
 			def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
 			def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
 			insideAnsibleContainer {
@@ -61,47 +62,50 @@ node {
 				 */
 				sh "./ansible-playbook-wrapper bootstrap.yml --extra-vars 'ssh_config_dest=/root/.ssh_jenkins/config ssh_config_uid=${jenkinsUid} ssh_config_gid=${jenkinsGid}'"
 			}
-		}
-	} }
+		} }
+	}
 
-	if (shouldDeploy && params.deploy_to_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
-		milestone(label: 'stage_deploy_lss_start')
-		stage('Deploy to LSS') {
+	stage('Deploy to LSS') {
+		if (shouldDeploy && params.deploy_to_lss) { lock(resource: 'env_lss', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_lss_start')
+
 			insideAnsibleContainer {
 				// Run the play against the LSS environment.
 				sh './ansible-playbook-wrapper backend.yml --limit=env_lss'
 			}
-		}
-	} }
+		} }
+	}
 
-	if (shouldDeploy) { lock(resource: 'env_test', inversePrecendence: true) {
-		milestone(label: 'stage_deploy_test_start')
-		stage('Deploy to Test') {
+	stage('Deploy to TEST') {
+		if (shouldDeploy) { lock(resource: 'env_test', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_test_start')
+
 			insideAnsibleContainer {
 				// Run the play against the test environment.
 				sh './ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
 			}
-		}
-	} }
+		} }
+	}
 
-	if (shouldDeploy) {
-		/*
-		 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
-		 * deploying to production environments.
-		 */
-		if (!params.deploy_to_prod) {
+	stage('Deploy to PROD') {
+		if (shouldDeploy) {
 			/*
-			 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-			 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-			 * the build will be aborted. Either way, Jenkins will log the user ID that made
-			 * the decision.
+			 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
+			 * deploying to production environments.
 			 */
-			input 'Deploy to PROD?'
-		}
+			if (!params.deploy_to_prod) {
+				/*
+				 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+				 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+				 * the build will be aborted. Either way, Jenkins will log the user ID that made
+				 * the decision.
+				 */
+				input 'Deploy to PROD?'
+			}
 
-		lock(resource: 'env_prod', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_prod_start')
-			stage('Deploy to Test') {
+			lock(resource: 'env_prod', inversePrecendence: true) {
+				milestone(label: 'stage_deploy_prod_start')
+
 				insideAnsibleContainer {
 					// Run the play against the test environment.
 					sh './ansible-playbook-wrapper backend.yml --limit=env_prod --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
