@@ -45,6 +45,9 @@ node {
 
 	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
+	def dataPipelineVersion = '0.1.0-SNAPSHOT'
+	def dataServerVersion = '1.0.0-SNAPSHOT'
+
 	stage('Bootstrap Jenkins') {
 		if (shouldDeploy && params.bootstrap_jenkins) {
 			lock(resource: 'env_lss', inversePrecendence: true) {
@@ -91,7 +94,7 @@ node {
 
 				insideAnsibleContainer {
 					// Run the play against the test environment.
-					sh './ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+					sh "./ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
 				}
 			}
 		} else {
@@ -124,8 +127,8 @@ node {
 				milestone(label: 'stage_deploy_prod_start')
 
 				insideAnsibleContainer {
-					// Run the play against the test environment.
-					sh './ansible-playbook-wrapper backend.yml --limit=env_prod --extra-vars "data_pipeline_version=0.1.0-SNAPSHOT data_server_version=1.0.0-SNAPSHOT"'
+					// Run the play against the prod environment.
+					sh "./ansible-playbook-wrapper backend.yml --limit=env_prod --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
 				}
 			}
 		} else {
