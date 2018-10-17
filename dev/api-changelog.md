@@ -1,5 +1,11 @@
 # API Changelog
 
+## BLUEBUTTON-480: Trim Leading and Trailing Whitespace from Codes
+
+Some of our source data erroneously included leading/trailing whitespace, which was being passed through to the `Coding` entries that it ended up being used in.
+
+All `Coding`s returned by the API should now have leading and trailing whitespace trimmed.
+
 ## BLUEBUTTON-239: Remove the HICN Hash from `Patient.identifier`
 
 Previously, EOB responses had included a one-way cryptographic hash of each beneficiary's current HICN.
