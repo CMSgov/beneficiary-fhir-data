@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 /**
  * <p>
  * This is the script that will be run by Jenkins to deploy the Blue Button API
