@@ -33,7 +33,7 @@
         data_pipeline_appjar_localpath: "~/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/{{ data_pipeline_version }}"
         data_pipeline_jvm_args: '-Xmx24g'
         data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
-        data_pipeline_loader_threads: 200
+        #data_pipeline_loader_threads: (see group_vars/env_*/main.yml)
         data_pipeline_user: "{{ vault_data_pipeline_user }}"
         data_pipeline_s3_bucket: "{{ vault_data_pipeline_s3_bucket }}"
         data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
@@ -41,6 +41,7 @@
         data_pipeline_db_url: "{{ vault_data_db_url }}"
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
+        #data_pipeline_idempotency_required: (see group_vars/env_*/main.yml)
 
 - name: Configure Data Server System
   hosts: data_server_systems

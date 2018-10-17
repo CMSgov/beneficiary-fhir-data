@@ -1,4 +1,11 @@
 ---
+# Any more threads than this, and the test Data Pipeline server will eventually crash.
+data_pipeline_loader_threads: 100
+
+# There is no ongoing data refresh here: if we're loading data in test, it should be an initial
+# load.
+data_pipeline_idempotency_required: false
+
 data_server_ssl_client_certificates:
   - alias: client_frontend
     certificate: "{{ lookup('file', 'files/bluebutton-frontend-test-client-public.crt') }}"
