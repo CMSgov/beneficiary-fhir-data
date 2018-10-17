@@ -1,11 +1,5 @@
 # API Changelog
 
-## BLUEBUTTON-239: Remove the HICN Hash from `Patient.identifier`
-
-Previously, EOB responses had included a one-way cryptographic hash of each beneficiary's current HICN.
-
-That field has now been removed from the returned `Patient` responses. It is still used behind-the-scenes, but did not need to be exposed otherwise.
-
 ## BLUEBUTTON-147: Display ICD and Procedure code displays in EOB
 
 Several changes have been made to these entries:
