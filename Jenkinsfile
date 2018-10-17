@@ -14,8 +14,8 @@
  * </p>
  */
 
-node {
-	stage('Checkout') {
+stage('Checkout') {
+	node {
 		// Grab the commit that triggered the build.
 		checkout scm
 
@@ -23,8 +23,12 @@ node {
 		// are distinguishable from other builds.
 		setPomVersionUsingBuildId()
 	}
-	
-	stage('Build') {
+}
+
+stage('Build') {
+	milestone(label: 'stage_build_start')
+
+	node {
 		mvn "--update-snapshots clean install"
 	}
 }
