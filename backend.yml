@@ -31,7 +31,7 @@
         data_pipeline_dir: '/u01/bluebutton-data-pipeline'
         data_pipeline_appjar_name: "bluebutton-data-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
         data_pipeline_appjar_localpath: "~/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/{{ data_pipeline_version }}"
-        data_pipeline_jvm_args: '-Xmx24g'
+        #data_pipeline_jvm_args: (see group_vars/env_*/main.yml)
         data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
         #data_pipeline_loader_threads: (see group_vars/env_*/main.yml)
         data_pipeline_user: "{{ vault_data_pipeline_user }}"

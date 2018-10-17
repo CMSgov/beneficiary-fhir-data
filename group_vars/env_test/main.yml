@@ -1,4 +1,6 @@
 ---
+# This system is an m4.large (2 vCPUs, 8 GB RAM)
+data_pipeline_jvm_args: '-Xmx6g'
 # Any more threads than this, and the test Data Pipeline server will eventually crash.
 data_pipeline_loader_threads: 100
 
