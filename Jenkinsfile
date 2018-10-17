@@ -46,12 +46,14 @@ stage('Build') {
 }
 
 stage('Archive') {
-	// Fingerprint the output artifacts and archive the test results.
-	// (Archiving the artifacts here would waste space, as the build
-	// deploys them to the local Maven repository.)
-	fingerprint '**/target/*.jar'
-	junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
-	archiveArtifacts artifacts: '**/target/*-reports/*.txt', allowEmptyArchive: true
+	node {
+		// Fingerprint the output artifacts and archive the test results.
+		// (Archiving the artifacts here would waste space, as the build
+		// deploys them to the local Maven repository.)
+		fingerprint '**/target/*.jar'
+		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
+		archiveArtifacts artifacts: '**/target/*-reports/*.txt', allowEmptyArchive: true
+	}
 }
 
 
