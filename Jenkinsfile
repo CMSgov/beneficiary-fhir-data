@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 /**
  * <p>
  * This is the script that will be run by Jenkins to build and test this
@@ -13,6 +15,10 @@
  * <a href="https://builds.ls.r53.cmsfhir.systems/jenkins/job/bluebutton-parent-pom">bluebutton-parent-pom</a>.
  * </p>
  */
+
+properties([
+	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
+])
 
 stage('Checkout') {
 	node {
