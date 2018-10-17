@@ -18,6 +18,12 @@
  */
 
 properties([
+	pipelineTriggers([
+		triggers: [[
+			$class: 'jenkins.triggers.ReverseBuildTrigger',
+			upstreamProjects: "bluebutton-data-server/master,bluebutton-data-pipeline/master", threshold: hudson.model.Result.SUCCESS
+		]]
+	]),
 	parameters([
 		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project\'s non-master branches.', defaultValue: false),
 		booleanParam(name: 'bootstrap_jenkins', description: 'Whether to run the Ansible plays to bootstrap some pre-req Jenkins config.', defaultValue: false),
