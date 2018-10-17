@@ -27,8 +27,8 @@ properties([
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
-node {
-	stage('Prepare') {
+stage('Prepare') {
+	node {
 		// Grab the commit that triggered the build.
 		checkout scm
 
@@ -45,17 +45,19 @@ node {
 			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
 		}
 	}
+}
 
-	def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
+def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
 
-	def dataPipelineVersion = '0.1.0-SNAPSHOT'
-	def dataServerVersion = '1.0.0-SNAPSHOT'
+def dataPipelineVersion = '0.1.0-SNAPSHOT'
+def dataServerVersion = '1.0.0-SNAPSHOT'
 
-	stage('Bootstrap Jenkins') {
-		if (shouldDeploy && params.bootstrap_jenkins) {
-			lock(resource: 'env_lss', inversePrecendence: true) {
-				milestone(label: 'stage_bootstrap_start')
+stage('Bootstrap Jenkins') {
+	if (shouldDeploy && params.bootstrap_jenkins) {
+		lock(resource: 'env_lss', inversePrecendence: true) {
+			milestone(label: 'stage_bootstrap_start')
 
+			node {
 				def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
 				def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
 				insideAnsibleContainer {
@@ -70,75 +72,82 @@ node {
 					sh "./ansible-playbook-wrapper bootstrap.yml --extra-vars 'ssh_config_dest=/root/.ssh_jenkins/config ssh_config_uid=${jenkinsUid} ssh_config_gid=${jenkinsGid}'"
 				}
 			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Bootstrap Jenkins')
 		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Bootstrap Jenkins')
 	}
+}
 
-	stage('Deploy to LSS') {
-		if (shouldDeploy && params.deploy_to_lss) {
-			lock(resource: 'env_lss', inversePrecendence: true) {
-				milestone(label: 'stage_deploy_lss_start')
+stage('Deploy to LSS') {
+	if (shouldDeploy && params.deploy_to_lss) {
+		lock(resource: 'env_lss', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_lss_start')
 
+			node {
 				insideAnsibleContainer {
 					// Run the play against the LSS environment.
 					sh './ansible-playbook-wrapper backend.yml --limit=env_lss'
 				}
 			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to LSS')
 		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to LSS')
 	}
+}
 
-	stage('Deploy to TEST') {
-		if (shouldDeploy) {
-			lock(resource: 'env_test', inversePrecendence: true) {
-				milestone(label: 'stage_deploy_test_start')
+stage('Deploy to TEST') {
+	if (shouldDeploy) {
+		lock(resource: 'env_test', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_test_start')
 
+			node {
 				insideAnsibleContainer {
 					// Run the play against the test environment.
 					sh "./ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
 				}
 			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to TEST')
 		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to TEST')
 	}
+}
 
-	stage('Manual Approval') {
-		if (shouldDeploy) {
+stage('Manual Approval') {
+	if (shouldDeploy) {
+		/*
+		 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
+		 * deploying to production environments.
+		 */
+		if (!params.deploy_to_prod) {
 			/*
-			 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
-			 * deploying to production environments.
+			 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+			 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+			 * the build will be aborted.
 			 */
-			if (!params.deploy_to_prod) {
-				/*
-				 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-				 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-				 * the build will be aborted.
-				 */
-				input 'Deploy to PROD?'
-			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
+			input 'Deploy to PROD?'
 		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
 	}
+}
 
-	stage('Deploy to PROD') {
-		if (shouldDeploy) {
-			lock(resource: 'env_prod', inversePrecendence: true) {
-				milestone(label: 'stage_deploy_prod_start')
+stage('Deploy to PROD') {
+	if (shouldDeploy) {
+		lock(resource: 'env_prod', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_prod_start')
 
+			node {
 				insideAnsibleContainer {
 					// Run the play against the prod environment.
 					sh "./ansible-playbook-wrapper backend.yml --limit=env_prod --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
 				}
 			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to PROD')
 		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to PROD')
 	}
 }
+
 
 /**
  * @return the result returned from running the specified `Closure` inside the
