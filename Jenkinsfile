@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 /**
  * <p>
  * This is the script that will be run by Jenkins to build and test this 
@@ -14,8 +16,18 @@
  * </p>
  */
 
-node {
-	stage('Checkout') {
+properties([
+	pipelineTriggers([
+		triggers: [[
+			$class: 'jenkins.triggers.ReverseBuildTrigger',
+			upstreamProjects: "bluebutton-parent-pom/master", threshold: hudson.model.Result.SUCCESS
+		]]
+	]),
+	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
+])
+
+stage('Checkout') {
+	node {
 		// Grab the commit that triggered the build.
 		checkout scm
 
@@ -23,12 +35,18 @@ node {
 		// are distinguishable from other builds.
 		setPomVersionUsingBuildId()
 	}
+}
 
-	stage('Build') {
+stage('Build') {
+	node {
+		milestone(label: 'stage_build_start')
+
 		mvn "--update-snapshots -Dmaven.test.failure.ignore clean install"
 	}
+}
 
-	stage('Archive') {
+stage('Archive') {
+	node {
 		// Fingerprint the output artifacts and archive the test results.
 		// (Archiving the artifacts here would waste space, as the build
 		// deploys them to the local Maven repository.)
@@ -37,6 +55,7 @@ node {
 		archiveArtifacts artifacts: '**/target/*-reports/*.txt', allowEmptyArchive: true
 	}
 }
+
 
 /**
  * Runs Maven with the specified arguments.
