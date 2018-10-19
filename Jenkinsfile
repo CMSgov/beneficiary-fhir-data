@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 /**
  * <p>
  * This is the script that will be run by Jenkins to build and test this
@@ -14,8 +16,12 @@
  * </p>
  */
 
-node {
-	stage('Checkout') {
+properties([
+	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
+])
+
+stage('Checkout') {
+	node {
 		// Grab the commit that triggered the build.
 		checkout scm
 
@@ -23,8 +29,12 @@ node {
 		// are distinguishable from other builds.
 		setPomVersionUsingBuildId()
 	}
-	
-	stage('Build') {
+}
+
+stage('Build') {
+	milestone(label: 'stage_build_start')
+
+	node {
 		mvn "--update-snapshots clean install"
 	}
 }
