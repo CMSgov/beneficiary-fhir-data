@@ -1,6 +1,9 @@
 ---
+# This system is an m4.large (2 vCPUs, 8 GB RAM)
+# But temporarily (2018-10-17) it's an m4.2xlarge (8 vCPUs, 32 GB RAM)
+data_pipeline_jvm_args: '-Xmx24g'
 # Any more threads than this, and the test Data Pipeline server will eventually crash.
-data_pipeline_loader_threads: 100
+data_pipeline_loader_threads: 200
 
 # There is no ongoing data refresh here: if we're loading data in test, it should be an initial
 # load.

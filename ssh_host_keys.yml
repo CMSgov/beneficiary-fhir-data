@@ -2,7 +2,7 @@
 ##
 # Ensure that the SSH host keys of the backend systems are trusted.
 ##
-- name: Add SHH Host Keys
+- name: Add SSH Host Keys
   hosts: localhost
   connection: local
   tasks:
@@ -14,16 +14,18 @@
         owner: root
         group: root
         mode: u=rw,g=r,o=r
-        line: "{{ vault_ec2_instance.lss.builds.dns_private }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
+        line: "{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
       become: true
 
     - name: Scan Other Host Keys
       command: "/usr/bin/ssh-keyscan -t ecdsa {{ item }}"
       with_items:
-        - "{{ vault_ec2_instance.test.data_pipeline.dns_private }}"
-        - "{{ vault_ec2_instance.test.data_server.dns_private }}"
-        - "{{ vault_ec2_instance.production.az_a.data_pipeline.dns_private }}"
-        - "{{ vault_ec2_instance.production.az_a.data_server.dns_private }}"
+        - "{{ vault_ec2_instance.test.data_pipeline.ip }}"
+        - "{{ vault_ec2_instance.test.data_server_a_1.ip }}"
+        - "{{ vault_ec2_instance.test.data_server_b_1.ip }}"
+        - "{{ vault_ec2_instance.production.data_pipeline.ip }}"
+        - "{{ vault_ec2_instance.production.data_server_a_1.ip }}"
+        - "{{ vault_ec2_instance.production.data_server_b_1.ip }}"
       register: cmd_ssh_keyscan
       changed_when: false
 

@@ -7,13 +7,6 @@
     ssh_key_comment: 'Jenkins/deployment user for BBAPI'
   become: true
 
-# Grab the key now so it can be authorized on other hosts, later.
-- name: Grab Jenkins SSH Public Key as Variable
-  slurp:
-    src: /var/lib/jenkins/.ssh/id_rsa.pub
-  become: true
-  register: slurp_jenkins_ssh_pub
-
 - name: Create Maven Directory
   file:
     state: directory
@@ -30,23 +23,6 @@
     dest: /var/lib/jenkins/.m2
     owner: jenkins
     group: jenkins
-  become: true
-
-- name: Search EC2 for BBAPI Systems
-  ec2_remote_facts:
-    region: "{{ aws_region }}"
-    filters:
-      'tag:CONTRACT': 'BBAPI'
-  delegate_to: localhost
-  register: ec2_search_bbapi
-
-- name: Create SSH Config for Ansible Jobs
-  template:
-    src: ssh_config.j2
-    dest: /var/lib/jenkins/.ssh/config
-    owner: jenkins
-    group: jenkins
-    mode: u=rw,g=r,o=r
   become: true
 
 - name: Configure Jobs
