@@ -124,7 +124,7 @@ public final class S3RifFile implements RifFile {
 		// Get the file download result, blocking and waiting if necessary.
 		ManifestEntryDownloadResult fileDownloadResult;
 		try {
-			fileDownloadResult = manifestEntryDownload.get(1, TimeUnit.HOURS);
+			fileDownloadResult = manifestEntryDownload.get(2, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
 			// We're not expecting interrupts here, so go boom.
 			throw new BadCodeMonkeyException(e);
