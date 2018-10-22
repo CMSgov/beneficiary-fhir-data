@@ -193,7 +193,7 @@ public final class DataSetQueue {
 					return;
 
 				/* Don't download too many files ahead, either. */
-				if (manifestToProcessIndex.get() >= 3)
+				if (manifestToProcessIndex.get() >= 2)
 					return;
 
 				Future<ManifestEntryDownloadResult> manifestEntryDownload = s3TaskManager
