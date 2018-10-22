@@ -19,6 +19,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
+import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
@@ -73,7 +74,7 @@ public final class ManifestEntryDownloadTaskIT {
 							manifest.getEntries().get(0).getParentManifest().getTimestampText(),
 							manifest.getEntries().get(0).getName()));
 			Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
-			s3TaskManager = new S3TaskManager(new ExtractionOptions(options.getS3BucketName()));
+			s3TaskManager = new S3TaskManager(new MetricRegistry(), new ExtractionOptions(options.getS3BucketName()));
 			LOGGER.info("Downloading '{}' to '{}'...", objectRequest.getKey(),
 					localTempFile.toAbsolutePath().toString());
 			Download downloadHandle = s3TaskManager.getS3TransferManager().download(objectRequest,

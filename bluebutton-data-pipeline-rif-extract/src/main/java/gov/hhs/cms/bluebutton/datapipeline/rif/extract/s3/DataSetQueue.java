@@ -1,21 +1,12 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,10 +28,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
 /**
@@ -48,7 +36,6 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
  */
 public final class DataSetQueue {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
-	private static final int GIGA = 1000 * 1000 * 1000;
 
 	private final MetricRegistry appMetrics;
 	private final ExtractionOptions options;
@@ -60,12 +47,6 @@ public final class DataSetQueue {
 	 * represents the {@link DataSetManifest} that should be processed next.
 	 */
 	private final SortedSet<DataSetManifest> manifestsToProcess;
-
-	/**
-	 * Tracks the asynchronous downloads of {@link DataSetManifestEntry}s, which
-	 * will produce {@link ManifestEntryDownloadResult}.
-	 */
-	private final Map<DataSetManifestEntry, Future<ManifestEntryDownloadResult>> manifestEntryDownloads;
 
 	/**
 	 * Tracks the {@link DataSetManifest#getId()} values of the most recently
@@ -101,7 +82,6 @@ public final class DataSetQueue {
 		this.s3TaskManager = s3TaskManager;
 
 		this.manifestsToProcess = new TreeSet<>();
-		this.manifestEntryDownloads = new HashMap<>();
 		this.recentlyProcessedManifests = new HashSet<>();
 		this.knownInvalidManifests = new HashSet<>();
 	}
@@ -160,46 +140,8 @@ public final class DataSetQueue {
 				manifestsToProcessIterator.remove();
 				knownInvalidManifests.remove(manifestId);
 				recentlyProcessedManifests.remove(manifestId);
-				manifestEntryDownloads.entrySet()
-						.removeIf(e -> e.getKey().getParentManifest().getId().equals(manifestId));
+				s3TaskManager.cleanupOldDataSet(manifestId);
 			}
-		}
-
-		/*
-		 * Ensure that the upcoming data sets are being downloaded
-		 * asynchronously.
-		 */
-		AtomicInteger manifestToProcessIndex = new AtomicInteger(0);
-		for (Iterator<DataSetManifest> manifestsToProcessIterator = manifestsToProcess
-				.iterator(); manifestsToProcessIterator.hasNext(); manifestToProcessIndex.incrementAndGet()) {
-			DataSetManifest manifestToProcess = manifestsToProcessIterator.next();
-			manifestToProcess.getEntries().forEach(manifestEntry -> {
-				// Only create one download task per manifest entry.
-				if (manifestEntryDownloads.containsKey(manifestEntry))
-					return;
-
-				/*
-				 * Don't start more downloads if we're low on disk space, unless
-				 * this is the very next data set to process.
-				 */
-				Path tmpdir = Paths.get(System.getProperty("java.io.tmpdir"));
-				long usableFreeTempSpace;
-				try {
-					usableFreeTempSpace = Files.getFileStore(tmpdir).getUsableSpace();
-				} catch (IOException e) {
-					throw new UncheckedIOException(e);
-				}
-				if (manifestToProcessIndex.get() > 0 && usableFreeTempSpace < 50 * GIGA)
-					return;
-
-				/* Don't download too many files ahead, either. */
-				if (manifestToProcessIndex.get() >= 3)
-					return;
-
-				Future<ManifestEntryDownloadResult> manifestEntryDownload = s3TaskManager
-						.submit(new ManifestEntryDownloadTask(s3TaskManager, appMetrics, options, manifestEntry));
-				manifestEntryDownloads.put(manifestEntry, manifestEntryDownload);
-			});
 		}
 	}
 
@@ -328,20 +270,21 @@ public final class DataSetQueue {
 	 * @return the {@link DataSetManifest} for the next data set that should be
 	 *         processed, if any
 	 */
-	public Optional<QueuedDataSet> getNextDataSetToProcess() {
-		if (isEmpty()) {
-			return Optional.empty();
-		}
-
-		DataSetManifest nextManifestToProcess = getManifestsToProcess().findFirst().get();
-		Map<DataSetManifestEntry, Future<ManifestEntryDownloadResult>> manifestEntryDownloads = nextManifestToProcess
-				.getEntries().stream().collect(Collectors.toMap(Function.identity(), this.manifestEntryDownloads::get));
-		return Optional.of(new QueuedDataSet(nextManifestToProcess, manifestEntryDownloads));
+	public Optional<DataSetManifest> getNextDataSetToProcess() {
+		return getManifestsToProcess().findFirst();
 	}
 
 	/**
-	 * @return the count of {@link DataSetManifest}s found for data sets that
-	 *         need to be processed (including those known to be invalid)
+	 * @return the {@link DataSetManifest} for the next-but-one data set that should
+	 *         be processed, if any
+	 */
+	public Optional<DataSetManifest> getSecondDataSetToProcess() {
+		return getManifestsToProcess().skip(1).findFirst();
+	}
+
+	/**
+	 * @return the count of {@link DataSetManifest}s found for data sets that need
+	 *         to be processed (including those known to be invalid)
 	 */
 	public int getPendingManifestsCount() {
 		return manifestsToProcess.size() + knownInvalidManifests.size() - recentlyProcessedManifests.size();
@@ -366,56 +309,5 @@ public final class DataSetQueue {
 	 */
 	public void markProcessed(DataSetManifest manifest) {
 		this.recentlyProcessedManifests.add(manifest.getId());
-	}
-
-	/**
-	 * Cleans up all of the local copies of S3 files that this
-	 * {@link DataSetQueue} has downloaded, in preparation for application
-	 * shutdown.
-	 */
-	public void cleanup() {
-		this.manifestEntryDownloads.entrySet().forEach(e -> {
-			// Hacky, but takes advantage of code re-use.
-			new S3RifFile(appMetrics, e.getKey(), e.getValue()).cleanupTempFile();
-		});
-	}
-
-	/**
-	 * Represents a specific data set queued in a {@link DataSetQueue}, waiting
-	 * to be processed.
-	 */
-	public static final class QueuedDataSet {
-		private final DataSetManifest manifest;
-		private final Map<DataSetManifestEntry, Future<ManifestEntryDownloadResult>> manifestEntryDownloads;
-
-		/**
-		 * Constructs a new {@link QueuedDataSet} instance.
-		 * 
-		 * @param manifest
-		 *            the value to use for {@link #getManifest()}
-		 * @param manifestEntryDownloads
-		 *            the value to use for {@link #getManifestEntryDownloads()}
-		 */
-		public QueuedDataSet(DataSetManifest manifest,
-				Map<DataSetManifestEntry, Future<ManifestEntryDownloadResult>> manifestEntryDownloads) {
-			this.manifest = manifest;
-			this.manifestEntryDownloads = manifestEntryDownloads;
-		}
-
-		/**
-		 * @return the {@link DataSetManifest} that is queued for processing
-		 */
-		public DataSetManifest getManifest() {
-			return manifest;
-		}
-
-		/**
-		 * @return a {@link Map} of the {@link DataSetManifestEntry}s in
-		 *         {@link #getManifest()} and the asynchronous {@link Future}
-		 *         tasks to download their file contents locally
-		 */
-		public Map<DataSetManifestEntry, Future<ManifestEntryDownloadResult>> getManifestEntryDownloads() {
-			return manifestEntryDownloads;
-		}
 	}
 }
