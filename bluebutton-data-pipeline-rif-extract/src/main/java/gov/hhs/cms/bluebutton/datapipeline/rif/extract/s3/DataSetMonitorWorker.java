@@ -1,8 +1,14 @@
 package gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Pattern;
@@ -19,7 +25,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFilesEvent;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.ExtractionOptions;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetManifest.DataSetManifestId;
-import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.DataSetQueue.QueuedDataSet;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.DataSetMoveTask;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
 
@@ -40,6 +45,8 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.s3.task.S3TaskManager;
  */
 public final class DataSetMonitorWorker implements Runnable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
+
+	private static final int GIGA = 1000 * 1000 * 1000;
 
 	/**
 	 * The directory name that pending/incoming RIF data sets will be pulled
@@ -103,7 +110,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		this.appMetrics = appMetrics;
 		this.options = options;
 		this.listener = listener;
-		this.s3TaskManager = new S3TaskManager(options);
+		this.s3TaskManager = new S3TaskManager(appMetrics, options);
 
 		this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
 	}
@@ -126,8 +133,7 @@ public final class DataSetMonitorWorker implements Runnable {
 		}
 
 		// We've found the oldest manifest.
-		QueuedDataSet dataSetToProcess = dataSetQueue.getNextDataSetToProcess().get();
-		DataSetManifest manifestToProcess = dataSetToProcess.getManifest();
+		DataSetManifest manifestToProcess = dataSetQueue.getNextDataSetToProcess().get();
 		LOGGER.info(
 				"Found data set to process: '{}'."
 						+ " There were '{}' total pending data sets and '{}' completed ones.",
@@ -164,15 +170,37 @@ public final class DataSetMonitorWorker implements Runnable {
 		}
 
 		/*
-		 * Huzzah! We've got a data set to process and we've verified it's all
-		 * there and ready to go.
+		 * Huzzah! We've got a data set to process and we've verified it's all there
+		 * waiting for us in S3. Now convert it into a RifFilesEvent (containing a List
+		 * of asynchronously-downloading S3RifFiles.
 		 */
 		LOGGER.info(LOG_MESSAGE_DATA_SET_READY);
 		List<S3RifFile> rifFiles = manifestToProcess.getEntries().stream()
 				.map(manifestEntry -> new S3RifFile(appMetrics, manifestEntry,
-						dataSetToProcess.getManifestEntryDownloads().get(manifestEntry)))
+						s3TaskManager.downloadAsync(manifestEntry)))
 				.collect(Collectors.toList());
 		RifFilesEvent rifFilesEvent = new RifFilesEvent(manifestToProcess.getTimestamp(), new ArrayList<>(rifFiles));
+
+		/*
+		 * To save time for the next data set, peek ahead at it. If it's available and
+		 * it looks like there's enough disk space, start downloading it early in the
+		 * background.
+		 */
+		Optional<DataSetManifest> secondManifestToProcess = dataSetQueue.getSecondDataSetToProcess();
+		if (secondManifestToProcess.isPresent() && dataSetIsAvailable(secondManifestToProcess.get())) {
+			Path tmpdir = Paths.get(System.getProperty("java.io.tmpdir"));
+			long usableFreeTempSpace;
+			try {
+				usableFreeTempSpace = Files.getFileStore(tmpdir).getUsableSpace();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+
+			if (usableFreeTempSpace >= (50 * GIGA)) {
+				secondManifestToProcess.get().getEntries().stream()
+						.forEach(manifestEntry -> s3TaskManager.downloadAsync(manifestEntry));
+			}
+		}
 
 		/*
 		 * Now we hand that off to the DataSetMonitorListener, to do the *real*
@@ -255,12 +283,6 @@ public final class DataSetMonitorWorker implements Runnable {
 	 * preparation for application shutdown.
 	 */
 	public void cleanup() {
-		/*
-		 * Have the data set queue clean itself up, to ensure that temp files
-		 * aren't left around wasting disk space after we exit.
-		 */
-		this.dataSetQueue.cleanup();
-
 		/*
 		 * Stop accepting new S3 tasks, cancel those tasks that can be canceled
 		 * safely, and wait for the rest to complete.
