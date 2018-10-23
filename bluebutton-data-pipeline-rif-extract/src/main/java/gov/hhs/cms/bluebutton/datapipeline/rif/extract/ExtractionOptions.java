@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 
 import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
@@ -61,10 +61,9 @@ public final class ExtractionOptions implements Serializable {
 	}
 
 	/**
-	 * @return the AWS {@link Region} that should be used when interacting with
-	 *         S3
+	 * @return the AWS {@link Regions} that should be used when interacting with S3
 	 */
-	public Region getS3Region() {
+	public Regions getS3Region() {
 		/*
 		 * NOTE: This is hardcoded for now, unless/until we have a need to
 		 * support other regions. If that happens, just make the region a field
