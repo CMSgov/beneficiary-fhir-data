@@ -10,9 +10,13 @@ alter table "Beneficiaries"
     add constraint "Beneficiaries_pkey" 
     primary key ("beneficiaryId");
 
+alter table "BeneficiariesHistory"
+    add constraint "BeneficiariesHistory_pkey"
+    primary key ("beneficiaryHistoryId");
+
 alter table "CarrierClaimLines" 
     add constraint "CarrierClaimLines_pkey" 
-    primary key ("lineNumber", "parentClaim");
+    primary key ("parentClaim", "lineNumber");
 
 alter table "CarrierClaims" 
     add constraint "CarrierClaims_pkey" 
@@ -20,7 +24,7 @@ alter table "CarrierClaims"
 
 alter table "DMEClaimLines" 
     add constraint "DMEClaimLines_pkey" 
-    primary key ("lineNumber", "parentClaim");
+    primary key ("parentClaim", "lineNumber");
 
 alter table "DMEClaims" 
     add constraint "DMEClaims_pkey" 
@@ -28,7 +32,7 @@ alter table "DMEClaims"
 
 alter table "HHAClaimLines" 
     add constraint "HHAClaimLines_pkey" 
-    primary key ("lineNumber", "parentClaim");
+    primary key ("parentClaim", "lineNumber");
 
 alter table "HHAClaims" 
     add constraint "HHAClaims_pkey" 
@@ -36,7 +40,7 @@ alter table "HHAClaims"
 
 alter table "HospiceClaimLines" 
     add constraint "HospiceClaimLines_pkey" 
-    primary key ("lineNumber", "parentClaim");
+    primary key ("parentClaim", "lineNumber");
 
 alter table "HospiceClaims" 
     add constraint "HospiceClaims_pkey" 
@@ -44,7 +48,7 @@ alter table "HospiceClaims"
 
 alter table "InpatientClaimLines" 
     add constraint "InpatientClaimLines_pkey" 
-    primary key ("lineNumber", "parentClaim");
+    primary key ("parentClaim", "lineNumber");
 
 alter table "InpatientClaims" 
     add constraint "InpatientClaims_pkey" 
@@ -52,7 +56,7 @@ alter table "InpatientClaims"
 
 alter table "OutpatientClaimLines" 
     add constraint "OutpatientClaimLines_pkey" 
-    primary key ("lineNumber", "parentClaim");
+    primary key ("parentClaim", "lineNumber");
 
 alter table "OutpatientClaims" 
     add constraint "OutpatientClaims_pkey" 
@@ -64,7 +68,7 @@ alter table "PartDEvents"
 
 alter table "SNFClaimLines" 
     add constraint "SNFClaimLines_pkey" 
-    primary key ("lineNumber", "parentClaim");
+    primary key ("parentClaim", "lineNumber");
 
 alter table "SNFClaims" 
     add constraint "SNFClaims_pkey" 
@@ -174,3 +178,11 @@ create index "PartDEvents_beneficiaryId_idx"
 
 create index "SNFClaims_beneficiaryId_idx" 
     on "SNFClaims" ("beneficiaryId");
+
+
+-- Create all of the HICN indexes on beneficiary tables.
+create index ${logic.index-create-concurrently} "Beneficiaries_hicn_idx"
+    on "Beneficiaries" ("hicn");
+
+create index "BeneficiariesHistory_hicn_idx"
+  on "BeneficiariesHistory" ("hicn");
