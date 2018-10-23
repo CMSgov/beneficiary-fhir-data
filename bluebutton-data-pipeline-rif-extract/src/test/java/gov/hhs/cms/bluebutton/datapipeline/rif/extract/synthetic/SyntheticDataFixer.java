@@ -35,7 +35,7 @@ import gov.hhs.cms.bluebutton.datapipeline.rif.extract.LocalRifFile;
 
 /**
  * A one-off utility application for fixing the sample data that was produced on
- * 2017-11-27. FIXME rename package
+ * 2017-11-27.
  */
 public final class SyntheticDataFixer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SyntheticDataFixer.class);
