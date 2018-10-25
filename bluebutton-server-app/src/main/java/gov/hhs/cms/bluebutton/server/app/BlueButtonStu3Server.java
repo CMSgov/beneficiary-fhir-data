@@ -22,7 +22,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
@@ -98,11 +97,6 @@ public class BlueButtonStu3Server extends RestfulServer {
 		List<IResourceProvider> resourceProviders = springContext
 				.getBean(SpringConfiguration.BLUEBUTTON_STU3_RESOURCE_PROVIDERS, List.class);
 		setResourceProviders(resourceProviders);
-
-		// Set paging provider
-		FifoMemoryPagingProvider pagingProvider = new FifoMemoryPagingProvider(10);
-		pagingProvider.setDefaultPageSize(10);
-		setPagingProvider(pagingProvider);
 
 		/*
 		 * Each "plain" provider has one or more annotated methods that provides
