@@ -265,7 +265,8 @@ public final class ServerTestUtils {
 		String jdbcPassword = testDbProps.getProperty(SpringConfiguration.PROP_DB_PASSWORD);
 
 		return new LoadAppOptions(RifLoaderTestUtils.HICN_HASH_ITERATIONS, RifLoaderTestUtils.HICN_HASH_PEPPER,
-				jdbcUrl, jdbcUsername, jdbcPassword.toCharArray(), LoadAppOptions.DEFAULT_LOADER_THREADS);
+				jdbcUrl, jdbcUsername, jdbcPassword.toCharArray(), LoadAppOptions.DEFAULT_LOADER_THREADS,
+				RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
 	}
 
 	/**

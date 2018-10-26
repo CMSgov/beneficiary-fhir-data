@@ -1052,7 +1052,7 @@ public final class TransformerUtils {
 		if (code instanceof Character)
 			codeString = ((Character) code).toString();
 		else if (code instanceof String)
-			codeString = (String) code;
+			codeString = code.toString().trim();
 		else
 			throw new BadCodeMonkeyException("Unsupported: " + code);
 

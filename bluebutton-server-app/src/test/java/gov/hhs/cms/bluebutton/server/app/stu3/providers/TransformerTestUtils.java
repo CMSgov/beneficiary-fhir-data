@@ -370,7 +370,7 @@ final class TransformerTestUtils {
 		if(expectedCode instanceof Character)
 			Assert.assertEquals(((Character) expectedCode).toString(), actual.getCode());
 		else if (expectedCode instanceof String)
-			Assert.assertEquals(expectedCode, actual.getCode());
+			Assert.assertEquals(((String) expectedCode).trim(), actual.getCode());
 		else
 			throw new BadCodeMonkeyException();
 	}
