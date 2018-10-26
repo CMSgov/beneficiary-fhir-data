@@ -357,7 +357,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
-		Bundle searchResults = (Bundle) fhirClient.search().forResource(ExplanationOfBenefit.class)
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
 				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
 				.returnBundle(Bundle.class).execute();
 
