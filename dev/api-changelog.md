@@ -1,5 +1,11 @@
 # API Changelog
 
+## BLUEBUTTON-266: Implement Data Server Paging
+
+Adding paging to the backend to lessen the load on the frontend. Changes have been made to ExplanationOfBenefitResourceProvider.findByPatient to now return a resulting bundle containing the resources matching the beneficiaryId. The bundle is created from resources pulled from a new EoBBundleProvider class, returning a small sublist of the resources for each page. Links are added to the bundle for the previous and next pages as appropriate.
+
+This implementation allows the frontend to utilize the links we've added to the bundle instead of having to filter through the data and create their own. This is not a final solution as other issues will need to be addressed regarding result integrity in the future.
+
 ## BLUEBUTTON-480: Trim Leading and Trailing Whitespace from Codes
 
 Some of our source data erroneously included leading/trailing whitespace, which was being passed through to the `Coding` entries that it ended up being used in.
