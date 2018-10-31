@@ -2,7 +2,6 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -26,14 +25,14 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -41,8 +40,8 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
@@ -53,6 +52,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 @Component
 public final class ExplanationOfBenefitResourceProvider implements IResourceProvider {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
 	/**
 	 * A {@link Pattern} that will match the
 	 * {@link ExplanationOfBenefit#getId()}s used in this application.
@@ -61,9 +61,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 	private EntityManager entityManager;
 	private MetricRegistry metricRegistry;
-
-	private static final Integer PAGESIZE = 50; // default value for pageSize
-	private static final Integer OFFSET = 0; // default value for startIndex
 
 	/**
 	 * @param entityManager
@@ -171,8 +168,11 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            {@link ExplanationOfBenefit#getPatient()} to try and find matches
 	 *            for {@link ExplanationOfBenefit}s
 	 * @param startIndex
-	 * 			  an {@link OptionalParam} for the startIndex (or offset) used to 
-	 * 			  determine pagination
+	 *            an {@link OptionalParam} for the startIndex (or offset) used to
+	 *            determine pagination
+	 * @param requestDetails
+	 *            a {@link RequestDetails} containing the details of the request
+	 *            URL, used to parse out pagination values
 	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may
 	 *         contain multiple matching resources, or may also be empty.
 	 */
@@ -182,7 +182,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			@OptionalParam(name = "startIndex") String startIndex,
 			RequestDetails requestDetails) {
 		/*
-		 * startIndex is an optional parameter here because it must be handled in the
+		 * startIndex is an optional parameter here because it must be declared in the
 		 * event it is passed in. However, it is not being used here because it is also
 		 * contained within requestDetails and parsed out along with other parameters
 		 * later.
@@ -190,7 +190,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		String beneficiaryId = patient.getIdPart();
 
-		List<IBaseResource> eobs = new ArrayList<IBaseResource>();
+		List<ExplanationOfBenefit> eobs = new ArrayList<ExplanationOfBenefit>();
 		/*
 		 * The way our JPA/SQL schema is setup, we have to run a separate search for
 		 * each claim type, then combine the results. It's not super efficient, but it's
@@ -205,57 +205,76 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		eobs.addAll(transformToEobs(ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId)));
 		eobs.addAll(transformToEobs(ClaimType.SNF, findClaimTypeByPatient(ClaimType.SNF, beneficiaryId)));
 
-		EobBundleProvider bundleProvider = new EobBundleProvider(eobs);
+		eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
+
+		PagingArguments pagingArgs = new PagingArguments(requestDetails);
+		if (pagingArgs.isPagingRequested()) {
+			/*
+			 * If paging is requested, create and return a paged bundle.
+			 */
+			return createPagedBundle(eobs, beneficiaryId, pagingArgs);
+		}
 
 		/*
-		 * Create the bundle to return.
+		 * Create and return a non paged bundle.
 		 */
-		Bundle bundle = createBundle(bundleProvider, beneficiaryId, requestDetails, eobs.size());
+		Bundle bundle = new Bundle();
+		for (IBaseResource res : eobs) {
+			BundleEntryComponent entry = bundle.addEntry();
+			entry.setResource((Resource) res);
+		}
 		
-
-		/**
-		 * Return a bundle which can page through and return the resources.
-		 */
 		return bundle;
 	}
 
+	/*
+	 * @param eob1 an {@link ExplanationOfBenefit} to be compared
+	 * 
+	 * @param eob2 an {@link ExplanationOfBenefit} to be compared
+	 */
+	private static int compareByClaimIdThenClaimType(ExplanationOfBenefit eob1, ExplanationOfBenefit eob2) {
+		/*
+		 * In order for paging to be meaningful (and stable), the claims have to be
+		 * consistently sorted across different app server instances (in case page 1
+		 * comes from Server A but page 2 comes from Server B). Right now, we don't have
+		 * anything "useful" to sort by, so we just sort by claim ID (subsorted by claim
+		 * type). TODO once we have metadata from BLUEBUTTON-XXX on when each claim was
+		 * first loaded into our DB, we should sort by that.
+		 */
+		if (TransformerUtils.getUnprefixedClaimId(eob1) == TransformerUtils.getUnprefixedClaimId(eob2)) {
+			return TransformerUtils.getClaimType(eob1).compareTo(TransformerUtils.getClaimType(eob2));
+		} else {
+			return TransformerUtils.getUnprefixedClaimId(eob1).compareTo(TransformerUtils.getUnprefixedClaimId(eob2));
+		}
+	}
+
 	/**
-	 * @param bundleProvider
-	 *            the {@link EobBundleProvider} from which to return a bundle
+	 * @param eobs
+	 *            a list of {@link ExplanationOfBenefit}, of which a portion will be
+	 *            added to the bundle based on the paging values
 	 * @param beneficiaryId
 	 *            the {@link Beneficiary#getBeneficiaryId()} to include in the links
-	 * @param requestDetails
-	 *            the {@link RequestDetails} containing additional parameters for
-	 *            the URL in need of parsing out
-	 * @param numTotalResults
-	 *            the number of total results returned by the query matching the
-	 *            {@link Beneficiary#getBeneficiaryId()}, needed to help determine
-	 *            pagination
+	 * @param pagingArgs
+	 *            the {@link PagingArguments} containing the parsed parameters for
+	 *            the paging URLs
 	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may
 	 *         contain multiple matching resources, or may also be empty.
 	 */
-	private Bundle createBundle(EobBundleProvider bundleProvider, String beneficiaryId, RequestDetails requestDetails,
-			int numTotalResults) {
+	private Bundle createPagedBundle(List<ExplanationOfBenefit> eobs, String beneficiaryId,
+			PagingArguments pagingArgs) {
 		/*
-		 * Parse parameters from RequestDetails.
+		 * Grab paging arguments from pagingArgs.
 		 */
-		Integer pageSize = parseParameterFromRequestDetails(requestDetails, "_count");
-		if (pageSize == null) {
-			pageSize = PAGESIZE;
-		}
-
-		Integer startIndex = parseParameterFromRequestDetails(requestDetails, "startIndex");
-		if (startIndex == null) {
-			startIndex = OFFSET;
-		}
-
-		String serverBase = requestDetails.getServerBaseForRequest();
+		Integer pageSize = pagingArgs.getPageSize();
+		Integer startIndex = pagingArgs.getStartIndex();
+		String serverBase = pagingArgs.getServerBase();
 
 		/*
 		 * Determine which resources to return based on the pageSize and startIndex.
 		 */
 		int numToReturn;
-		List<IBaseResource> resourceList;
+		List<ExplanationOfBenefit> resourceList;
+		int numTotalResults = eobs.size();
 		if (pageSize == null || pageSize.equals(Integer.valueOf(0))) {
 			numToReturn = numTotalResults;
 		} else {
@@ -263,7 +282,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		}
 
 		if (numToReturn > 0) {
-			resourceList = bundleProvider.getResources(startIndex, numToReturn + startIndex);
+			resourceList = eobs.subList(startIndex, numToReturn + startIndex);
 		} else {
 			resourceList = Collections.emptyList();
 		}
@@ -305,40 +324,24 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	private void addPagingLinks(Bundle bundle, String serverBase, String beneficiaryId, Integer startIndex,
 			Integer pageSize, int numToReturn, int numTotalResults) {
 
-		// Link to the next page.
+
 		if (startIndex + numToReturn < numTotalResults) {
+			// Link to the next page.
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_NEXT)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex + numToReturn, numToReturn)));
+
+			// Link to the last page.
+			int start = (numTotalResults / pageSize - 1) * pageSize;
+			bundle.addLink(new BundleLinkComponent().setRelation("last")
+					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
 		}
 
-		// Link to the previous page.
 		if (startIndex > 0) {
+			// Link to the previous page.
 			int start = Math.max(0, startIndex - pageSize);
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
 		}
-
-		/*
-		 * TODO Create a link to the last page. Currently Bundle.LINK_LAST is not
-		 * supported and it does not appear to like setRelation("last").
-		 */
-	}
-
-	/**
-	 * @param requestDetails
-	 *            the {@link RequestDetails} containing additional parameters for
-	 *            the URL in need of parsing out
-	 * @param parameterToParse
-	 *            the parameter to parse from requestDetails
-	 * @return Returns the parsed parameter as an Integer, null if the parameter is
-	 *         not found.
-	 */
-	private Integer parseParameterFromRequestDetails(RequestDetails requestDetails, String parameterToParse) {
-		if (requestDetails.getParameters().containsKey(parameterToParse)) {
-			return Integer.parseInt(requestDetails.getParameters().get(parameterToParse)[0]);
-		}
-
-		return null;
 	}
 
 	/**
@@ -395,70 +398,81 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 				.collect(Collectors.toList());
 	}
 
-	/**
-	 * This FHIR {@link IBundleProvider} contains all resources matching the search
-	 * sorted by claim ID the by claim type. Returns sublist of those resources,
-	 * useful for paging.
-	 */
-	final static class EobBundleProvider implements IBundleProvider {
+	private static final class PagingArguments {
+		private Optional<Integer> pageSize;
+		private Optional<Integer> startIndex;
+		private String serverBase;
 
-		private List<IBaseResource> eobs = new ArrayList<IBaseResource>();
-		private InstantDt published = InstantDt.withCurrentTime();
-
-		public EobBundleProvider(List<IBaseResource> eobs) {
-
-			this.eobs = eobs;
-
-			/*
-			 * In order for paging to be meaningful (and stable), the claims have to be
-			 * consistently sorted across different app server instances (in case page 1
-			 * comes from Server A but page 2 comes from Server B). Right now, we don't have
-			 * anything "useful" to sort by, so we just sort by claim ID (subsorted by claim
-			 * type). TODO once we have metadata from BLUEBUTTON-XXX on when each claim was
-			 * first loaded into our DB, we should sort by that.
-			 */
-			eobs.sort(EobBundleProvider::compareByClaimIdThenClaimType);
+		public PagingArguments(RequestDetails requestDetails) {
+			pageSize = parseIntegerParameters(requestDetails, "_count");
+			startIndex = parseIntegerParameters(requestDetails, "startIndex");
+			serverBase = requestDetails.getServerBaseForRequest();
 		}
-		
-		private static int compareByClaimIdThenClaimType(IBaseResource res1, IBaseResource res2) {
-			if (!(res1 instanceof ExplanationOfBenefit))
-				throw new IllegalArgumentException();
-			if (!(res2 instanceof ExplanationOfBenefit))
-				throw new IllegalArgumentException();
-			ExplanationOfBenefit eob1 = (ExplanationOfBenefit) res1;
-			ExplanationOfBenefit eob2 = (ExplanationOfBenefit) res2;
-			if (TransformerUtils.getUnprefixedClaimId(eob1) == TransformerUtils.getUnprefixedClaimId(eob2)) {
-				return TransformerUtils.getClaimType(eob1).compareTo(TransformerUtils.getClaimType(eob2));
-			} else {
-				return TransformerUtils.getUnprefixedClaimId(eob1)
-						.compareTo(TransformerUtils.getUnprefixedClaimId(eob2));
+
+		/**
+		 * @param requestDetails
+		 *            the {@link RequestDetails} containing additional parameters for
+		 *            the URL in need of parsing out
+		 * @param parameterToParse
+		 *            the parameter to parse from requestDetails
+		 * @return Returns the parsed parameter as an Integer, null if the parameter is
+		 *         not found.
+		 */
+		private Optional<Integer> parseIntegerParameters(RequestDetails requestDetails, String parameterToParse) {
+			if (requestDetails.getParameters().containsKey(parameterToParse)) {
+				try {
+					return Optional.of(Integer.parseInt(requestDetails.getParameters().get(parameterToParse)[0]));
+				} catch (NumberFormatException e) {
+					LOGGER.warn("Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.",
+							e);
+					throw new InvalidRequestException(
+							"Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.");
+				}
 			}
+			return Optional.empty();
 		}
 
-		@Override
-		public String getUuid() {
-			return null;
+		/*
+		 * @return Returns true if the pageSize or startIndex is present (i.e. paging is
+		 * requested), false if they are not present, and throws an
+		 * IllegalArgumentException if the arguments are mismatched.
+		 */
+		public boolean isPagingRequested() {
+			if (pageSize.isPresent() || startIndex.isPresent())
+				return true;
+			else if (!pageSize.isPresent() && !startIndex.isPresent())
+				return false;
+			else
+				// It's better to let clients requesting mismatched options know they goofed
+				// than to try and guess their intent.
+				throw new IllegalArgumentException(String
+						.format("Mismatched paging arguments: pageSize='%s', startIndex='%s'", pageSize, startIndex));
 		}
 
-		@Override
-		public IPrimitiveType<Date> getPublished() {
-			return published;
+		/*
+		 * @return Returns the pageSize as an integer. Note: the pageSize must exist at
+		 * this point, otherwise paging would not have been requested.
+		 */
+		public Integer getPageSize() {
+			return pageSize.get();
 		}
 
-		@Override
-		public Integer preferredPageSize() {
-			return 10;
+		/*
+		 * @return Returns the startIndex as an integer. If the startIndex is not set,
+		 * return 0.
+		 */
+		public Integer getStartIndex() {
+			if (startIndex.isPresent()) {
+				return startIndex.get();
+			}
+			return 0;
 		}
 
-		@Override
-		public Integer size() {
-			return eobs.size();
-		}
-
-		@Override
-		public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-			int end = Math.min(theToIndex, eobs.size());
-			return eobs.subList(theFromIndex, end);
+		/*
+		 * @return Returns the serverBase.
+		 */
+		public String getServerBase() {
+			return serverBase;
 		}
 	}
 }

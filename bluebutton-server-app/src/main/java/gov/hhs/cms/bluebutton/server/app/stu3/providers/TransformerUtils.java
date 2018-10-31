@@ -619,14 +619,13 @@ public final class TransformerUtils {
 	 *         {@link CarrierClaim#getClaimId()})
 	 */
 	static String getUnprefixedClaimId(ExplanationOfBenefit eob) {
-		String id = null;
 		for (Identifier i : eob.getIdentifier()) {
 			if (i.getSystem().contains("clm_id") || i.getSystem().contains("pde_id")) {
-				id = i.getValue();
+				return i.getValue();
 			}
 		}
 
-		return id;
+		throw new BadCodeMonkeyException("A claim ID was expected but none was found.");
 	}
 
 	/**
