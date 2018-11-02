@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -636,7 +635,7 @@ public final class TransformerUtils {
 	 */
 	static ClaimType getClaimType(ExplanationOfBenefit eob) {
 		String type = eob.getType().getCoding().stream()
-				.filter(p -> EnumUtils.isValidEnum(ClaimType.class, p.getCode()))
+				.filter(c -> c.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE))
 				.findFirst().get().getCode();
 		return ClaimType.valueOf(type);
 	}

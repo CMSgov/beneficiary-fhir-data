@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -212,13 +213,13 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			/*
 			 * A page size of 0 is odd enough that we should throw an exception.
 			 */
-			if (pagingArgs.getPageSize().get().equals(Integer.valueOf(0))) {
+			if (pagingArgs.getPageSize() == 0) {
 				throw new InvalidRequestException("Invalid request - the page size should not be zero.");
 			}
 
-			int numToReturn = Math.min(pagingArgs.getPageSize().get(), eobs.size());
-			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex().get(),
-					pagingArgs.getStartIndex().get() + numToReturn);
+			int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
+			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
+					pagingArgs.getStartIndex() + numToReturn);
 			bundle = addResourcesToBundle(bundle, resources);
 			addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
 		} else {
@@ -282,8 +283,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 */
 	private void addPagingLinks(Bundle bundle, PagingArguments pagingArgs, String beneficiaryId, int numTotalResults) {
 
-		Integer pageSize = pagingArgs.getPageSize().get();
-		Integer startIndex = pagingArgs.getStartIndex().get();
+		Integer pageSize = pagingArgs.getPageSize();
+		Integer startIndex = pagingArgs.getStartIndex();
 		String serverBase = pagingArgs.getServerBase();
 
 		if (startIndex + pageSize < numTotalResults) {
@@ -415,19 +416,23 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 * @return Returns the pageSize as an integer. Note: the pageSize must exist at
 		 * this point, otherwise paging would not have been requested.
 		 */
-		public Optional<Integer> getPageSize() {
-			return pageSize;
+		public int getPageSize() {
+			if (!isPagingRequested())
+				throw new BadCodeMonkeyException();
+			return pageSize.get();
 		}
 
 		/*
 		 * @return Returns the startIndex as an integer. If the startIndex is not set,
 		 * return 0.
 		 */
-		public Optional<Integer> getStartIndex() {
+		public int getStartIndex() {
+			if (!isPagingRequested())
+				throw new BadCodeMonkeyException();
 			if (startIndex.isPresent()) {
-				return startIndex;
+				return startIndex.get();
 			}
-			return Optional.of(0);
+			return 0;
 		}
 
 		/*
