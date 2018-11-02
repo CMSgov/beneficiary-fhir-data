@@ -613,6 +613,34 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to extract the id from
+	 * @return the <code>claimId</code> field value (e.g. from
+	 *         {@link CarrierClaim#getClaimId()})
+	 */
+	static String getUnprefixedClaimId(ExplanationOfBenefit eob) {
+		for (Identifier i : eob.getIdentifier()) {
+			if (i.getSystem().contains("clm_id") || i.getSystem().contains("pde_id")) {
+				return i.getValue();
+			}
+		}
+
+		throw new BadCodeMonkeyException("A claim ID was expected but none was found.");
+	}
+
+	/**
+	 * @param eob
+	 *            the {@link ExplanationOfBenefit} to extract the claim type from
+	 * @return the {@link ClaimType}
+	 */
+	static ClaimType getClaimType(ExplanationOfBenefit eob) {
+		String type = eob.getType().getCoding().stream()
+				.filter(c -> c.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE))
+				.findFirst().get().getCode();
+		return ClaimType.valueOf(type);
+	}
+
+	/**
 	 * @param beneficiary
 	 *            the {@link Beneficiary} to calculate the {@link Patient#getId()}
 	 *            value for
