@@ -1,7 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -207,23 +206,25 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
+		Bundle bundle = new Bundle();
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		if (pagingArgs.isPagingRequested()) {
 			/*
-			 * If paging is requested, create and return a paged bundle.
+			 * A page size of 0 is odd enough that we should throw an exception.
 			 */
-			return createPagedBundle(eobs, beneficiaryId, pagingArgs);
+			if (pagingArgs.getPageSize().get().equals(Integer.valueOf(0))) {
+				throw new InvalidRequestException("Invalid request - the page size should not be zero.");
+			}
+
+			int numToReturn = Math.min(pagingArgs.getPageSize().get(), eobs.size());
+			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex().get(),
+					pagingArgs.getStartIndex().get() + numToReturn);
+			bundle = addResourcesToBundle(bundle, resources);
+			addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
+		} else {
+			bundle = addResourcesToBundle(bundle, eobs);
 		}
 
-		/*
-		 * Create and return a non paged bundle.
-		 */
-		Bundle bundle = new Bundle();
-		for (IBaseResource res : eobs) {
-			BundleEntryComponent entry = bundle.addEntry();
-			entry.setResource((Resource) res);
-		}
-		
 		return bundle;
 	}
 
@@ -249,57 +250,20 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	}
 
 	/**
+	 * @param bunlde
+	 *            a {@link Bundle} to add the list of {@link ExplanationOfBenefit}
+	 *            resources to.
 	 * @param eobs
 	 *            a list of {@link ExplanationOfBenefit}, of which a portion will be
 	 *            added to the bundle based on the paging values
-	 * @param beneficiaryId
-	 *            the {@link Beneficiary#getBeneficiaryId()} to include in the links
-	 * @param pagingArgs
-	 *            the {@link PagingArguments} containing the parsed parameters for
-	 *            the paging URLs
 	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may
 	 *         contain multiple matching resources, or may also be empty.
 	 */
-	private Bundle createPagedBundle(List<ExplanationOfBenefit> eobs, String beneficiaryId,
-			PagingArguments pagingArgs) {
-		/*
-		 * Grab paging arguments from pagingArgs.
-		 */
-		Integer pageSize = pagingArgs.getPageSize();
-		Integer startIndex = pagingArgs.getStartIndex();
-		String serverBase = pagingArgs.getServerBase();
-
-		/*
-		 * Determine which resources to return based on the pageSize and startIndex.
-		 */
-		int numToReturn;
-		List<ExplanationOfBenefit> resourceList;
-		int numTotalResults = eobs.size();
-		if (pageSize == null || pageSize.equals(Integer.valueOf(0))) {
-			numToReturn = numTotalResults;
-		} else {
-			numToReturn = Math.min(pageSize, numTotalResults);
-		}
-
-		if (numToReturn > 0) {
-			resourceList = eobs.subList(startIndex, numToReturn + startIndex);
-		} else {
-			resourceList = Collections.emptyList();
-		}
-
-		/*
-		 * Create the bundle and add the resources.
-		 */
-		Bundle bundle = new Bundle();
-		for (IBaseResource res : resourceList) {
+	private Bundle addResourcesToBundle(Bundle bundle, List<ExplanationOfBenefit> eobs) {
+		for (IBaseResource res : eobs) {
 			BundleEntryComponent entry = bundle.addEntry();
 			entry.setResource((Resource) res);
 		}
-
-		/*
-		 * Create the paging links and add them to the bundle.
-		 */
-		addPagingLinks(bundle, serverBase, beneficiaryId, startIndex, pageSize, numToReturn, numTotalResults);
 
 		return bundle;
 	}
@@ -307,37 +271,31 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	/**
 	 * @param bundle
 	 *            the {@link Bundle} to which links are being added
-	 * @param serverBase
-	 *            the serverBase for the request
+	 * @param pagingArgs
+	 *            the {@link PagingArguments} containing the parsed parameters for
+	 *            the paging URLs
 	 * @param beneficiaryId
 	 *            the {@link Beneficiary#getBeneficiaryId()} to include in the links
-	 * @param startIndex
-	 *            the index for the resources at which to begin the next page
-	 * @param pageSize
-	 *            the total number of resources contained on a page
-	 * @param numToReturn
-	 *            the number of resources to return for the current page
 	 * @param numTotalResults
 	 *            the number of total resources matching the
-	 *            {@link Beneficiary#getBeneficiaryId()} *
+	 *            {@link Beneficiary#getBeneficiaryId()}
 	 */
-	private void addPagingLinks(Bundle bundle, String serverBase, String beneficiaryId, Integer startIndex,
-			Integer pageSize, int numToReturn, int numTotalResults) {
+	private void addPagingLinks(Bundle bundle, PagingArguments pagingArgs, String beneficiaryId, int numTotalResults) {
 
+		Integer pageSize = pagingArgs.getPageSize().get();
+		Integer startIndex = pagingArgs.getStartIndex().get();
+		String serverBase = pagingArgs.getServerBase();
 
-		if (startIndex + numToReturn < numTotalResults) {
-			// Link to the next page.
+		if (startIndex + pageSize < numTotalResults) {
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_NEXT)
-					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex + numToReturn, numToReturn)));
+					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex + pageSize, pageSize)));
 
-			// Link to the last page.
 			int start = (numTotalResults / pageSize - 1) * pageSize;
 			bundle.addLink(new BundleLinkComponent().setRelation("last")
 					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
 		}
 
 		if (startIndex > 0) {
-			// Link to the previous page.
 			int start = Math.max(0, startIndex - pageSize);
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
@@ -398,10 +356,14 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 				.collect(Collectors.toList());
 	}
 
+	/*
+	 * PagingArguments encapsulates the arguments related to paging for an 
+	 * {@link ExplanationOfBenefit} request.
+	 */
 	private static final class PagingArguments {
-		private Optional<Integer> pageSize;
-		private Optional<Integer> startIndex;
-		private String serverBase;
+		private final Optional<Integer> pageSize;
+		private final Optional<Integer> startIndex;
+		private final String serverBase;
 
 		public PagingArguments(RequestDetails requestDetails) {
 			pageSize = parseIntegerParameters(requestDetails, "_count");
@@ -434,11 +396,11 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		/*
 		 * @return Returns true if the pageSize or startIndex is present (i.e. paging is
-		 * requested), false if they are not present, and throws an
-		 * IllegalArgumentException if the arguments are mismatched.
+		 * 		   requested), false if they are not present, and throws an
+		 *         IllegalArgumentException if the arguments are mismatched.
 		 */
 		public boolean isPagingRequested() {
-			if (pageSize.isPresent() || startIndex.isPresent())
+			if (pageSize.isPresent())
 				return true;
 			else if (!pageSize.isPresent() && !startIndex.isPresent())
 				return false;
@@ -453,19 +415,19 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 * @return Returns the pageSize as an integer. Note: the pageSize must exist at
 		 * this point, otherwise paging would not have been requested.
 		 */
-		public Integer getPageSize() {
-			return pageSize.get();
+		public Optional<Integer> getPageSize() {
+			return pageSize;
 		}
 
 		/*
 		 * @return Returns the startIndex as an integer. If the startIndex is not set,
 		 * return 0.
 		 */
-		public Integer getStartIndex() {
+		public Optional<Integer> getStartIndex() {
 			if (startIndex.isPresent()) {
-				return startIndex.get();
+				return startIndex;
 			}
-			return 0;
+			return Optional.of(0);
 		}
 
 		/*
