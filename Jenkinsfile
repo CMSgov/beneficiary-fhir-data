@@ -137,6 +137,23 @@ stage('Manual Approval') {
 	}
 }
 
+stage('Deploy to DPR') {
+	if (shouldDeploy) {
+		lock(resource: 'env_dpr', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_dpr_start')
+
+			node {
+				insideAnsibleContainer {
+					// Run the play against the prod environment.
+					sh "./ansible-playbook-wrapper backend.yml --limit=env_dpr --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
+				}
+			}
+		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to DPR')
+	}
+}
+
 stage('Deploy to PROD') {
 	if (shouldDeploy) {
 		lock(resource: 'env_prod', inversePrecendence: true) {
