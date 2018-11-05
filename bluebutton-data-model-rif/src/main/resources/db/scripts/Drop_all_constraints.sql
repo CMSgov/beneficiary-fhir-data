@@ -27,3 +27,6 @@ alter table "OutpatientClaims" drop constraint if exists "OutpatientClaims_pkey"
 alter table "PartDEvents" drop constraint if exists "PartDEvents_pkey";
 alter table "SNFClaimLines" drop constraint if exists "SNFClaimLines_pkey";
 alter table "SNFClaims" drop constraint if exists "SNFClaims_pkey";
+
+drop index if exists "Beneficiaries_hicn_idx";
+drop index if exists "BeneficiariesHistory_hicn_idx";
