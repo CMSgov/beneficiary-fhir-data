@@ -4,7 +4,7 @@ package gov.hhs.cms.bluebutton.data.model.rif.samples;
  * Enumerates the locations of various test data sets in S3.
  */
 public enum TestDataSetLocation {
-	SYNTHETIC_DATA("data-synthetic/2017-11-27T00:00:00.000Z-fixed"),
+	SYNTHETIC_DATA("data-synthetic/2017-11-27T00:00:00.000Z-fixed-with-negative-ids"),
 
 	DUMMY_DATA_1000000_BENES("data-random/1000000-beneficiaries-2017-10-21T00:00:00.000Z"),
 
