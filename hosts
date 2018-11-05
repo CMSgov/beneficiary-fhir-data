@@ -5,7 +5,10 @@
 # specify a shared username that all Ansible connections will use. Accordingly,
 # users must have an SSH alias for these systems in their `~/.ssh/config`
 # file, which must define the `HostName` `User`, and `IdentityFile` for each
-# system.
+# system. For the Jenkins server's SSH config, update the
+# `templates/ssh_config.j2` template file and run the
+# `bluebutton-ansible-playbooks-data` job with `bootstrap_jenkins` enabled,
+# which will apply the SSH config changes to the Jenkins system itself.
 ##
 
 [builds]
