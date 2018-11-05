@@ -37,6 +37,7 @@
         filters:
           'tag:CONTRACT': 'BBAPI'
       register: ec2_search_bbapi
+    - debug: var=ec2_search_bbapi
     - name: Create SSH Config for Ansible Jobs
       template:
         src: ssh_config.j2
