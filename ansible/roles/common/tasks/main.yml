@@ -1,15 +1,13 @@
 ---
 
-# Removed jdk install because these instance are not internet facing and
-# they already have the jdk installed in the ami
-#- name: Install Pre-requisites
-#  yum:
-#    name: "{{ item }}"
-#    state: latest
-#  with_items:
-#    # Needed to supply `keytool` and also to run the app server.
-#    - java-1.8.0-openjdk-devel
-#  become: true
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    # Needed to supply `keytool` and also to run the app server.
+    - java-1.8.0-openjdk-devel
+  become: true
 
 - name: Create Directory Tree for '{{ remote_test_dir }}' 
   file: 
