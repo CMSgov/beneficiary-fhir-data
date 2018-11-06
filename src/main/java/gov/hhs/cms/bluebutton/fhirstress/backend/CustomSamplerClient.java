@@ -6,10 +6,13 @@ import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -33,6 +36,7 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	protected static final String RIFFILE = "riffile";
 	protected static final String RIFTYPE = "riftype";
 	protected static final String HOSTNAME_UNKNOWN = "unknown-host";
+	private static final Logger LOGGER = LoggerFactory.getLogger(FhirClient.class);
 
 	/**
 	 * Abstract method that should be implemented by derived classes to implement
@@ -50,7 +54,7 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 	@Override
 	public Arguments getDefaultParameters() {
 		Arguments defaultParameters = new Arguments();
-		defaultParameters.addArgument(PARAM_SERVER, "https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3");
+		defaultParameters.addArgument(PARAM_SERVER, "https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir");
 		defaultParameters.addArgument(KEYSTORE_DIR, "/opt/fhir_stress/dev/ssl-stores");
 		defaultParameters.addArgument(PROXY_HOST, "null");
 		defaultParameters.addArgument(PROXY_PORT, "0");
@@ -95,11 +99,11 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 			sample.setSuccessful(true);
 			sample.setResponseMessage("Sample succeeded on host: " + hostName);
 			sample.setResponseCodeOK();
-		} catch (IllegalArgumentException | InvalidRequestException | FhirClientConnectionException e) {
+		} catch (Throwable e) {
 			// Mark this sample iteration as failed.
 			sample.sampleEnd();
 			sample.setSuccessful(false);
-			sample.setResponseMessage("Exception: " + e);
+			sample.setResponseMessage(ExceptionUtils.getStackTrace(e));
 
 			/*
 			 * Serialize the stack trace to a String and attach it to the sample results.
