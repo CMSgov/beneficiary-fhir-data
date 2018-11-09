@@ -32,7 +32,7 @@
     - ssh_config_gid: "{{ lookup('pipe', 'id --group') }}"
   tasks:
     - name: Search EC2 for BBAPI Systems
-      ec2_remote_facts:
+      ec2_instance_facts:
         region: "{{ aws_region }}"
         filters:
           'tag:CONTRACT': 'BBAPI'
