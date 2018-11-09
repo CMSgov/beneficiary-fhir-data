@@ -27,7 +27,7 @@
     http_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
     https_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
   vars:
-    - ssh_config_dest: "{{ lookup('env', 'HOME')/.ssh/config }}"
+    - ssh_config_dest: "{{ lookup('env', 'HOME') }}/.ssh/config"
     - ssh_config_uid: "{{ lookup('pipe', 'id --user') }}"
     - ssh_config_gid: "{{ lookup('pipe', 'id --group') }}"
   tasks:
