@@ -3,7 +3,7 @@
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Create Local Results Directory 
+    - name: Create Local Results Directory
       file:
         path: results
         state: directory
@@ -34,7 +34,7 @@
   hosts: client:servers
   become: True
   gather_facts: True
-#  environment: "{{proxy_env}}"
+  environment: "{{proxy_env}}"
   roles:
     - common
 
@@ -42,7 +42,7 @@
   hosts: client
   become: True
   gather_facts: True
-#  environment: "{{proxy_env}}"
+  environment: "{{proxy_env}}"
   roles:
     - client 
 
@@ -50,14 +50,14 @@
   hosts: servers
   become: True
   gather_facts: True
-#  environment: "{{proxy_env}}"
+  environment: "{{proxy_env}}"
   roles:
     - server 
 
 - name: Launch JMeter servers
   hosts: servers
   become: True
-#  environment: "{{proxy_env}}"
+  environment: "{{proxy_env}}"
   gather_facts: True
   
   tasks:
@@ -73,11 +73,10 @@
 - name: Launch JMeter client and start tests
   hosts: client
   become: True
-#  environment: "{{proxy_env}}"
+  environment: "{{proxy_env}}"
   gather_facts: True
   
   tasks:
-    
     - name: 'Run Stress'
       # Command Line Docs: http://jmeter.apache.org/usermanual/get-started.html
       command: "{{ remote_jmeter_dir }}/bin/jmeter -n -X 
