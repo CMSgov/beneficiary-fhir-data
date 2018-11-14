@@ -57,7 +57,8 @@ app_tag: PERFTEST
 tier_tag: APPLICATION
 env_tag: TEST
 
-#TODO: AMI description 
+# Red Hat Enterprise Linux (RHEL) 7.2 (HVM)
+# https://aws.amazon.com/marketplace/pp/B019NS7T5I
 ami_id_rhel: ami-2051294a
 
 ##
