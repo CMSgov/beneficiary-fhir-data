@@ -39,7 +39,7 @@
           </elementProp>
           <elementProp name="thread_count" elementType="Argument">
             <stringProp name="Argument.name">thread_count</stringProp>
-            <stringProp name="Argument.value">${__P(thread_count,10)}</stringProp>
+            <stringProp name="Argument.value">${__P(thread_count,5)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="continue_forever" elementType="Argument">
@@ -49,7 +49,7 @@
           </elementProp>
           <elementProp name="thread_loops" elementType="Argument">
             <stringProp name="Argument.name">thread_loops</stringProp>
-            <stringProp name="Argument.value">${__P(thread_loops,1000)}</stringProp>
+            <stringProp name="Argument.value">${__P(thread_loops,500)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="scheduler" elementType="Argument">
@@ -82,7 +82,7 @@
         <stringProp name="ThreadGroup.delay">0</stringProp>
       </ThreadGroup>
       <hashTree>
-        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrievePatients" enabled="false">
+        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrievePatients" enabled="true">
           <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
             <collectionProp name="Arguments.arguments">
               <elementProp name="fhir_server" elementType="Argument">
@@ -97,12 +97,12 @@
               </elementProp>
               <elementProp name="proxy_host" elementType="Argument">
                 <stringProp name="Argument.name">proxy_host</stringProp>
-                <stringProp name="Argument.value">null</stringProp>
+                <stringProp name="Argument.value">${proxy_host}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="proxy_port" elementType="Argument">
                 <stringProp name="Argument.name">proxy_port</stringProp>
-                <stringProp name="Argument.value">0</stringProp>
+                <stringProp name="Argument.value">${proxy_port}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="riffile" elementType="Argument">
@@ -120,7 +120,7 @@
           <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrievePatients</stringProp>
         </JavaSampler>
         <hashTree/>
-        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveEobs" enabled="false">
+        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveEobs" enabled="true">
           <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
             <collectionProp name="Arguments.arguments">
               <elementProp name="fhir_server" elementType="Argument">
@@ -135,12 +135,12 @@
               </elementProp>
               <elementProp name="proxy_host" elementType="Argument">
                 <stringProp name="Argument.name">proxy_host</stringProp>
-                <stringProp name="Argument.value">null</stringProp>
+                <stringProp name="Argument.value">${proxy_host}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="proxy_port" elementType="Argument">
                 <stringProp name="Argument.name">proxy_port</stringProp>
-                <stringProp name="Argument.value">0</stringProp>
+                <stringProp name="Argument.value">${proxy_port}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="riffile" elementType="Argument">
@@ -158,7 +158,7 @@
           <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrieveEobs</stringProp>
         </JavaSampler>
         <hashTree/>
-        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveCoverages" enabled="true">
+        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveCoverages" enabled="false">
           <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
             <collectionProp name="Arguments.arguments">
               <elementProp name="fhir_server" elementType="Argument">
@@ -173,12 +173,12 @@
               </elementProp>
               <elementProp name="proxy_host" elementType="Argument">
                 <stringProp name="Argument.name">proxy_host</stringProp>
-                <stringProp name="Argument.value">null</stringProp>
+                <stringProp name="Argument.value">${proxy_host}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="proxy_port" elementType="Argument">
                 <stringProp name="Argument.name">proxy_port</stringProp>
-                <stringProp name="Argument.value">0</stringProp>
+                <stringProp name="Argument.value">${proxy_port}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
               <elementProp name="riffile" elementType="Argument">
@@ -232,7 +232,7 @@
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\log.jtl</stringProp>
+          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\2018-11-14\10-23\log.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
@@ -268,7 +268,7 @@
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\log.jtl</stringProp>
+          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\2018-11-14\10-23\log.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
         <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
@@ -304,7 +304,7 @@
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\log.jtl</stringProp>
+          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\2018-11-14\10-23\log.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
         <ResultCollector guiclass="RespTimeGraphVisualizer" testclass="ResultCollector" testname="Response Time Graph" enabled="true">
@@ -340,7 +340,7 @@
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\log.jtl</stringProp>
+          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\2018-11-14\10-23\log.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
         <ResultCollector guiclass="TableVisualizer" testclass="ResultCollector" testname="View Results in Table" enabled="true">
@@ -376,7 +376,7 @@
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\log.jtl</stringProp>
+          <stringProp name="filename">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\ansible\results\2018-11-14\10-23\log.jtl</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
