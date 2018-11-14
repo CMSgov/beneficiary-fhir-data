@@ -158,7 +158,7 @@
           <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrieveEobs</stringProp>
         </JavaSampler>
         <hashTree/>
-        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveCoverages" enabled="false">
+        <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveCoverages" enabled="true">
           <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" enabled="true">
             <collectionProp name="Arguments.arguments">
               <elementProp name="fhir_server" elementType="Argument">
