@@ -18,16 +18,14 @@ jmeter_properties_file: "../jmeter-project/jmeter.properties"
 jmeter_version: 4.0
 # remote location of apache jmeter installation
 remote_jmeter_dir: "{{ remote_test_dir }}/apache-jmeter-{{ jmeter_version }}"
-# remote jmeter server IP address
-jmeter_server_ip: "{{ vault_jmeter_server_ip }}"
 # remote jmeter server port 
-jmeter_server_port: "{{ vault_jmeter_server_port }}"
+jmeter_server_port: 1099
 # jmeter server remote method invocation(RMI) port, used for jmeter server communication
-jmeter_server_rmi_local_port: "{{ vault_jmeter_server_rmi_local_port }}" 
+jmeter_server_rmi_local_port: 4000 
 # jmeter client remote method invocation(RMI) port, used for jmeter client communication
-jmeter_client_rmi_local_port: "{{ vault_jmeter_client_rmi_local_port }}"
+jmeter_client_rmi_local_port: 4001
 # URI of FHIR server under test
-fhir_server: "https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3"
+fhir_server: "https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir"
 
 # NOTE: As configured, a sampler thread will run until the time duration has elapsed, the thread_loop count is ignored because continue_forever is set to true.
 # Number of threads within the JMeter Thread Group (https://jmeter.apache.org/api/org/apache/jmeter/threads/AbstractThreadGroup.html#NUM_THREADS)
@@ -51,23 +49,23 @@ poll: 30
 region: us-east-1
 
 proxy_env: 
-  http_proxy: "{{ vault_http_proxy }}" 
-  https_proxy: "{{ vault_https_proxy }}"
+  http_proxy: "" 
+  https_proxy: ""
 
 # Tags
 app_tag: PERFTEST
 tier_tag: APPLICATION
 env_tag: TEST
 
-# RHEL template-21-encrypted - ami-3a934c40 
-ami_id_rhel: ami-3a934c40
+# Red Hat Enterprise Linux (RHEL) 7.2 (HVM)
+# https://aws.amazon.com/marketplace/pp/B019NS7T5I
+ami_id_rhel: ami-2051294a
 
-# Security Groups
-gss_common_services: sg-5984922d
-app_server_security_group: sg-6333c316
-general_services_group: sg-a333c3d6
-linux_to_ad_via_ssd_group: sg-8ef1defb
-temp_app_pub_group: sg-6acc3c1f
+##
+# TODO: These are specific to the GDIT dev playground AWS account
+subnet_id: subnet-b9a6e492
 
-# Subnet: subnet-b83dbbf3 | tscw10-app-1c
-subnet_id: subnet-b83dbbf3
+security_group_ids:
+  - sg-fbc4b59c
+  - sg-0215d9e116b23f489
+##

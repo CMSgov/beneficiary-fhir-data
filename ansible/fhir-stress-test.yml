@@ -1,25 +1,9 @@
 ---
-- name: AWS - Provision Resources and Instances
+- name: Prepare
   hosts: localhost
-  connection: local
   gather_facts: false
-
-  vars_prompt:
-    - name: mfa
-      prompt: "What is the MFA code for {{ mfa_sn }}?"
-      private: no
-
-  vars:
-    # "Compute Optimized" with 4 vCPUs, 7.5 GB RAM, $0.209/hour
-    ec2_instance_type: "c4.xlarge"
-  
   tasks:
-    
-    - name: Local - whoami
-      local_action: command whoami
-      register: whoami
-
-    - name: Create Local Results Directory 
+    - name: Create Local Results Directory
       file:
         path: results
         state: directory
@@ -28,7 +12,7 @@
       file:
         path: support
         state: directory
-
+        
     # The EC2 instances created within this AWS environment are not internet
     # facing. So, assuming the host running this script is internet facing,
     # download the jmeter package locally so it can be uploaded to the instances
@@ -39,97 +23,12 @@
         url: "http://archive.apache.org/dist/jmeter/binaries/apache-jmeter-{{ jmeter_version }}.tgz"
         dest: "support/apache-jmeter-{{ jmeter_version }}.tgz"
 
-    - name: Acquire a session token
-      sts_session_token:
-        profile: "{{ profile }}"
-        region: "{{ region }}"
-        mfa_serial_number: "{{ mfa_sn }}"
-        mfa_token: "{{ mfa }}"
-      register: session_credentials
-
-    - name: EC2 - Provision 'bluebutton-stress' client
-      ec2:
-        aws_access_key: "{{ session_credentials.sts_creds.access_key }}"
-        aws_secret_key: "{{ session_credentials.sts_creds.secret_key }}"
-        security_token: "{{ session_credentials.sts_creds.session_token }}"
-        key_name: "{{ ec2_key_name }}"
-        group_id:
-          - "{{ gss_common_services }}"
-          - "{{ app_server_security_group }}"
-          - "{{ general_services_group }}"
-          - "{{ linux_to_ad_via_ssd_group }}"
-          - "{{ temp_app_pub_group }}"
-        instance_type: "{{ ec2_instance_type }}"
-        image: "{{ ami_id_rhel }}"
-        region: "{{ region }}"
-        vpc_subnet_id: "{{ subnet_id }}" 
-        wait: true
-        exact_count: 1
-        count_tag:
-          Name: bluebutton-stress-client
-          Application: "{{ app_tag }}"
-        instance_tags:
-          Name: bluebutton-stress-client
-          APPLICATION: "{{ app_tag }}"
-          TIER: "{{ tier_tag }}"
-          PURPOSE: bluebutton-stress-client
-          ENVIRONMENT: "{{ env_tag }}"
-          CreatedBy: "{{ whoami.stdout }}"
-      register: ec2_client
-    
-    - name: EC2 - Provision 'bluebutton-stress' servers
-      ec2:
-        aws_access_key: "{{ session_credentials.sts_creds.access_key }}"
-        aws_secret_key: "{{ session_credentials.sts_creds.secret_key }}"
-        security_token: "{{ session_credentials.sts_creds.session_token }}"
-        key_name: "{{ ec2_key_name }}"
-        group_id:
-          - "{{ gss_common_services }}"
-          - "{{ app_server_security_group }}"
-          - "{{ general_services_group }}"
-          - "{{ linux_to_ad_via_ssd_group }}"
-          - "{{ temp_app_pub_group }}"
-        instance_type: "{{ ec2_instance_type }}"
-        image: "{{ ami_id_rhel }}"
-        region: "{{ region }}"
-        vpc_subnet_id: "{{ subnet_id }}" 
-        wait: true
-        # The default of 300s here wasn't cutting it for 8 servers.
-        wait_timeout: 600
-        exact_count: "{{ num_servers }}" 
-        count_tag:
-          Name: bluebutton-stress-server
-          Application: "{{ app_tag }}"
-        instance_tags:
-          Name: bluebutton-stress-server
-          APPLICATION: "{{ app_tag }}"
-          TIER: "{{ tier_tag }}"
-          PURPOSE: bluebutton-stress-server
-          ENVIRONMENT: "{{ env_tag }}"
-          CreatedBy: "{{ whoami.stdout }}"
-      register: ec2_servers
-    
-    - name: Create inventory group 'client'
-      add_host:
-        hostname: "{{ item.private_dns_name }}"
-        groupname: client
-      with_items: "{{ ec2_client.instances }}"
-
-    - name: Create inventory group 'servers'
-      add_host:
-        hostname: "{{ item.private_dns_name }}"
-        groupname: servers
-      with_items: "{{ ec2_servers.instances }}"
-
-    - name: Wait for SSH to come up
-      wait_for:
-        host: "{{ item.private_dns_name }}"
-        port: 22
-        timeout: 320
-        state: started
-      with_flattened:
-        - "{{ ec2_client.instances }}"
-        - "{{ ec2_servers.instances }}"
+- name: Configure Systems for Ansible Pipelining
+  hosts: client:servers
+  vars:
+    ansible_ssh_pipelining: false
+  roles:
+    - rhel_ansible_pipelining
 
 - name: Configure roles common to all servers 
   hosts: client:servers
@@ -164,12 +63,12 @@
   tasks:
     - name: Launch JMeter Server in Background
       # The "JMeter Server" is what the distributed testing nodes run.
-      shell: "( ( nohup {{ remote_jmeter_dir }}/bin/jmeter -s 
+      shell: "nohup {{ remote_jmeter_dir }}/bin/jmeter -s 
         -Djava.rmi.server.hostname={{ ansible_eth0.ipv4.address }}
         -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} 
         -Dserver_port={{ jmeter_server_port }} 
         -j {{ remote_test_dir }}/log-jmeter.txt
-        &> /dev/null) & )" 
+        &> {{ remote_test_dir }}/log-jmeter-console.txt &" 
 
 - name: Launch JMeter client and start tests
   hosts: client
@@ -178,7 +77,6 @@
   gather_facts: True
   
   tasks:
-    
     - name: 'Run Stress'
       # Command Line Docs: http://jmeter.apache.org/usermanual/get-started.html
       command: "{{ remote_jmeter_dir }}/bin/jmeter -n -X 
@@ -213,19 +111,3 @@
         dest: "results/"
         fail_on_missing: yes
         flat: yes
-
-- name: Terminate instances
-  hosts: localhost
-  connection: local
-  tasks:
-    - name: Terminate instances that were previously launched
-      ec2:
-        aws_access_key: "{{ session_credentials.sts_creds.access_key }}"
-        aws_secret_key: "{{ session_credentials.sts_creds.secret_key }}"
-        security_token: "{{ session_credentials.sts_creds.session_token }}"
-        state: 'absent'
-        region: "{{ region }}"
-        instance_ids: '{{ item }}'
-      with_flattened:
-        - "{{ ec2_client.instance_ids }}"
-        - "{{ ec2_servers.instance_ids }}"

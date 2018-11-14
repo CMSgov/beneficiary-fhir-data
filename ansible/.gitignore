@@ -15,3 +15,5 @@ extravars.yml
 
 # ignore temporary files
 *.swp
+
+ansible.log

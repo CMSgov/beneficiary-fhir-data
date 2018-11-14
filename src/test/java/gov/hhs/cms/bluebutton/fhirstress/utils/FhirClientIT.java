@@ -32,7 +32,7 @@ public class FhirClientIT extends TestCase {
 	 * Test FHIR server connectivity
 	 */
 	public void testFhirClient() {
-		IGenericClient client = FhirClient.create("https://fhir.backend.bluebutton.hhsdevcloud.us/baseDstu3",
+		IGenericClient client = FhirClient.create("https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir",
 				"./dev/ssl-stores");
 		Patient patient = client.read().resource(Patient.class).withId("20140000005499").execute();
 		assertEquals("Doe", patient.getName().get(0).getFamily());
