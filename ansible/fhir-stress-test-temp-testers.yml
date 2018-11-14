@@ -18,6 +18,7 @@
       local_action: command whoami
       register: whoami
 
+    # TODO: Fix this
     #- name: Acquire a session token
     #  sts_session_token:
     #    profile: "{{ profile }}"
@@ -46,6 +47,7 @@
           PURPOSE: bluebutton-stress-client
           ENVIRONMENT: "{{ env_tag }}"
           CreatedBy: "{{ whoami.stdout }}"
+          CONTRACT: BBAPI
       register: ec2_client
     
     - name: EC2 - Provision 'bluebutton-stress' servers
@@ -70,6 +72,7 @@
           PURPOSE: bluebutton-stress-server
           ENVIRONMENT: "{{ env_tag }}"
           CreatedBy: "{{ whoami.stdout }}"
+          CONTRACT: BBAPI
       register: ec2_servers
     
     - name: Create inventory group 'client'
