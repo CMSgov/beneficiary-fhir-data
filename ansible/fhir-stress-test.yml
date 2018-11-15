@@ -128,5 +128,4 @@
   tasks:
     - name: Move ansible log into results dir
       command: mv ./ansible.log {{ hostvars['localhost']['results_path'].stdout }}/ansible.log
-      run_once: true
       ignore_errors: yes
