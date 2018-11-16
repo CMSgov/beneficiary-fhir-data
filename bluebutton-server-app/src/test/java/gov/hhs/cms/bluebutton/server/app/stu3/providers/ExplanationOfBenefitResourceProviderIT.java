@@ -364,6 +364,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		Assert.assertNotNull(searchResults);
 
 		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		/*
 		 * Verify that no paging links (e.g. next, prev, last) exist in the bundle.
 		 */
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
@@ -442,6 +449,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		Assert.assertEquals(2, searchResults.getEntry().size());
 
 		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		/*
 		 * Verify a link to the last page exists.
 		 */
 		Assert.assertNotNull(searchResults.getLink("last"));
@@ -463,7 +477,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * While on the last page the bundle should not have a "last" link.
 		 */
 		Assert.assertNull(searchResults.getLink("last"));
-		
+
 		/*
 		 * Verify that the combined results are the same size as
 		 * "all of the claim records in the sample."
@@ -542,6 +556,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
 
 		/*
 		 * Verify that no paging links exist, since there should only be one page.
