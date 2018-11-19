@@ -226,6 +226,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			bundle = addResourcesToBundle(bundle, eobs);
 		}
 
+		bundle.setTotal(eobs.size());
+
 		return bundle;
 	}
 
