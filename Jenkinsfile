@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 /**
  * <p>
  * This is the script that will be run by Jenkins to build and test this 
@@ -14,8 +16,18 @@
  * </p>
  */
 
-node {
-	stage('Checkout') {
+properties([
+	pipelineTriggers([
+		triggers: [[
+			$class: 'jenkins.triggers.ReverseBuildTrigger',
+			upstreamProjects: "bluebutton-parent-pom/master,bluebutton-data-model/master,bluebutton-data-pipeline/master", threshold: hudson.model.Result.SUCCESS
+		]]
+	]),
+	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
+])
+
+stage('Checkout') {
+	node {
 		// Grab the commit that triggered the build.
 		checkout scm
 
@@ -23,12 +35,28 @@ node {
 		// are distinguishable from other builds.
 		setPomVersionUsingBuildId()
 	}
+}
 
-	stage('Build') {
-		mvn "--update-snapshots -Dmaven.test.failure.ignore clean install"
+stage('Build') {
+	node {
+		milestone(label: 'stage_build_start')
+
+		withCredentials([
+				string(credentialsId: 'proxy-host', variable: 'proxyHost'),
+				string(credentialsId: 'proxy-port', variable: 'proxyPort')
+		]) {
+			// Run our Maven build with the correct proxy server settings, as part of
+			// build needs to use the proxy to download some things.
+			// (Note: Exposing the proxy server details on the Maven command line isn't
+			// a risk, as anyone with shell access will already be able to find it from
+			// the build system's environment variables.)
+			mvn "--update-snapshots -Dmaven.test.failure.ignore clean install -Dhttp.proxyHost=${proxyHost} -Dhttp.proxyPort=${proxyPort} -Dhttps.proxyHost=${proxyHost} -Dhttps.proxyPort=${proxyPort} -Dhttp.nonProxyHosts=localhost"
+		}
 	}
+}
 
-	stage('Archive') {
+stage('Archive') {
+	node {
 		// Fingerprint the output artifacts and archive the test results.
 		// (Archiving the artifacts here would waste space, as the build
 		// deploys them to the local Maven repository.)
@@ -38,6 +66,7 @@ node {
 		archiveArtifacts artifacts: '**/target/*-reports/*.txt', allowEmptyArchive: true
 	}
 }
+
 
 /**
  * Runs Maven with the specified arguments.
