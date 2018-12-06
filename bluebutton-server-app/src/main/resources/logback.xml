@@ -11,7 +11,7 @@
 	</appender>
 
 	<appender name="FILE_STRUCTURED" class="ch.qos.logback.core.FileAppender">
-		<file>${bbfhir.logs.dir:-./target/bluebutton-server/}bluebutton-server-app.json.log</file>
+		<file>${bbfhir.logs.dir:-./target/bluebutton-server/}bluebutton-server-app-log.json</file>
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<!-- We output the application log as newline-delimited JSON objects (NDJSON).
 				This allows us to easily parse and search our logs. More importantly, it
