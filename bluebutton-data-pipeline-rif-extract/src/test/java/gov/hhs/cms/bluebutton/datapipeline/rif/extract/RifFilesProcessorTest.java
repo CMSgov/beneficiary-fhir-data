@@ -171,9 +171,9 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.getPrescriptionFillDate());
 		Assert.assertEquals(LocalDate.of(2015, Month.MAY, 27), pdeRow.getPaymentDate().get());
 		Assert.assertEquals("01", pdeRow.getServiceProviderIdQualiferCode());
-		Assert.assertEquals("111222333", pdeRow.getServiceProviderId());
+		Assert.assertEquals("1023011079", pdeRow.getServiceProviderId());
 		Assert.assertEquals("01", pdeRow.getPrescriberIdQualifierCode());
-		Assert.assertEquals("444555666", pdeRow.getPrescriberId());
+		Assert.assertEquals("1750384806", pdeRow.getPrescriberId());
 		Assert.assertEquals(new BigDecimal(799999), pdeRow.getPrescriptionReferenceNumber());
 		Assert.assertEquals("51270012299", pdeRow.getNationalDrugCode());
 		Assert.assertEquals("H9999", pdeRow.getPlanContractId());
@@ -490,7 +490,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(new BigDecimal("693.11"), claimGroup.getPaymentAmount());
 		Assert.assertEquals(new BigDecimal("11.00"), claimGroup.getPrimaryPayerPaidAmount());
 		Assert.assertEquals("KY", claimGroup.getProviderStateCode());
-		Assert.assertEquals("1111111111", claimGroup.getOrganizationNpi().get());
+		Assert.assertEquals("1497758544", claimGroup.getOrganizationNpi().get());
 		Assert.assertEquals("2222222222", claimGroup.getAttendingPhysicianNpi().get());
 		Assert.assertEquals("3333333333", claimGroup.getOperatingPhysicianNpi().get());
 		Assert.assertTrue(claimGroup.getOtherPhysicianNpi().isPresent());
@@ -830,7 +830,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals('3', claimGroup.getHcpcsYearCode().get().charValue());
 		Assert.assertEquals("R5555", claimGroup.getDiagnosis1Code().get());
 		Assert.assertEquals('0', claimGroup.getDiagnosis1CodeVersion().get().charValue());
-		Assert.assertEquals("222333222", claimGroup.getReferringPhysicianNpi().get());
+		Assert.assertEquals("1306849450", claimGroup.getReferringPhysicianNpi().get());
 		Assert.assertEquals("0", claimGroup.getClinicalTrialNumber().get());
 		Assert.assertEquals(1, claimGroup.getLines().size());
 
