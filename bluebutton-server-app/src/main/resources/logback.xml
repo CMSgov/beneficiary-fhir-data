@@ -1,7 +1,17 @@
 <configuration scan="false">
 
-	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+	<appender name="FILE_UNSTRUCTURED" class="ch.qos.logback.core.FileAppender">
 		<file>${bbfhir.logs.dir:-./target/bluebutton-server/}bluebutton-server-app.log</file>
+		<encoder>
+			<!-- As we transition to structured logs, we need to leave our unstructured
+				logs in place for a bit. Once the new logs are being pushed to CloudWatch
+				and Splunk as expected, we can remove this old logging file & format. -->
+			<pattern>%date{ISO8601} [%thread] %-5level %logger{36} [%file:%line] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE_STRUCTURED" class="ch.qos.logback.core.FileAppender">
+		<file>${bbfhir.logs.dir:-./target/bluebutton-server/}bluebutton-server-app.json.log</file>
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<!-- We output the application log as newline-delimited JSON objects (NDJSON).
 				This allows us to easily parse and search our logs. More importantly, it
@@ -34,7 +44,8 @@
 	 -->
 
 	<root level="info">
-		<appender-ref ref="FILE" />
+		<appender-ref ref="FILE_UNSTRUCTURED" />
+		<appender-ref ref="FILE_STRUCTURED" />
 	</root>
 
 </configuration>
