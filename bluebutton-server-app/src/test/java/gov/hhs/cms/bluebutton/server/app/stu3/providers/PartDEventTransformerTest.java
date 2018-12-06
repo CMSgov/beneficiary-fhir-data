@@ -162,6 +162,12 @@ public final class PartDEventTransformerTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		try {
+			TransformerTestUtils.assertNPICodeDisplayEquals(claim.getPrescriberId(),
+					"DR. ROBERT BISBEE MD");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 

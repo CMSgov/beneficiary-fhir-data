@@ -1,5 +1,13 @@
 # API Changelog
 
+## BLUEBUTTON-500: Display NPI code displays in EOB
+
+Several changes have been made to these entries:
+
+* The `Coding.display` to the EOB has been added for NPI type fields in the appropriate claim types.
+
+* A practitioner's/organization's name will be displayed in the appropriate `Coding.display` for NPI fields.
+
 ## BLUEBUTTON-480: Trim Leading and Trailing Whitespace from Codes
 
 Some of our source data erroneously included leading/trailing whitespace, which was being passed through to the `Coding` entries that it ended up being used in.
