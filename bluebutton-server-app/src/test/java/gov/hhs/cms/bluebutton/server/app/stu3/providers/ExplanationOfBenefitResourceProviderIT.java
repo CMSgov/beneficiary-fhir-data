@@ -1,5 +1,6 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
@@ -361,8 +364,22 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		Assert.assertNotNull(searchResults);
 
 		/*
-		 * Verify that each of the expected claims (one for every claim type) is
-		 * present and looks correct.
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		/*
+		 * Verify that no paging links (e.g. next, prev, last) exist in the bundle.
+		 */
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("last"));
+
+		/*
+		 * Verify that each of the expected claims (one for every claim type) is present
+		 * and looks correct.
 		 */
 
 		CarrierClaim carrierClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
@@ -404,6 +421,201 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	}
 
 	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsByExistingPatientWithPaging() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		List<IBaseResource> combinedResults = new ArrayList<>();
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+				.count(2).returnBundle(Bundle.class).execute();
+		
+		searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
+
+		Assert.assertNotNull(searchResults);
+		Assert.assertEquals(2, searchResults.getEntry().size());
+
+		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		/*
+		 * Verify a link to the last page exists.
+		 */
+		Assert.assertNotNull(searchResults.getLink("last"));
+
+		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
+			searchResults = fhirClient.loadPage().next(searchResults).execute();
+			Assert.assertNotNull(searchResults);
+			Assert.assertTrue(searchResults.hasEntry());
+
+			/*
+			 * Each page after the first should have a previous link.
+			 */
+			Assert.assertNotNull(searchResults.getLink(Bundle.LINK_PREV));
+
+			searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
+		}
+
+		/*
+		 * While on the last page the bundle should not have a "last" link.
+		 */
+		Assert.assertNull(searchResults.getLink("last"));
+
+		/*
+		 * Verify that the combined results are the same size as
+		 * "all of the claim records in the sample."
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(),
+				combinedResults.size());
+
+		/*
+		 * Verify that each of the expected claims (one for every claim type) is present
+		 * and looks correct.
+		 */
+
+		CarrierClaim carrierClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
+				.map(r -> (CarrierClaim) r).findFirst().get();
+		Assert.assertEquals(1, filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).size());
+		CarrierClaimTransformerTest.assertMatches(carrierClaim,
+				filterToClaimTypeFromList(combinedResults, ClaimType.CARRIER).get(0));
+
+		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
+				.get();
+		DMEClaimTransformerTest.assertMatches(dmeClaim,
+				filterToClaimTypeFromList(combinedResults, ClaimType.DME).get(0));
+
+		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
+				.get();
+		HHAClaimTransformerTest.assertMatches(hhaClaim,
+				filterToClaimTypeFromList(combinedResults, ClaimType.HHA).get(0));
+
+		HospiceClaim hospiceClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim)
+				.map(r -> (HospiceClaim) r).findFirst().get();
+		HospiceClaimTransformerTest.assertMatches(hospiceClaim,
+				filterToClaimTypeFromList(combinedResults, ClaimType.HOSPICE).get(0));
+
+		InpatientClaim inpatientClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
+				.map(r -> (InpatientClaim) r).findFirst().get();
+		InpatientClaimTransformerTest.assertMatches(inpatientClaim,
+				filterToClaimTypeFromList(combinedResults, ClaimType.INPATIENT).get(0));
+
+		OutpatientClaim outpatientClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
+				.map(r -> (OutpatientClaim) r).findFirst().get();
+		OutpatientClaimTransformerTest.assertMatches(outpatientClaim,
+				filterToClaimTypeFromList(combinedResults, ClaimType.OUTPATIENT).get(0));
+
+		PartDEvent partDEvent = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
+				.findFirst().get();
+		PartDEventTransformerTest.assertMatches(partDEvent,
+				filterToClaimTypeFromList(combinedResults, ClaimType.PDE).get(0));
+
+		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
+				.get();
+		SNFClaimTransformerTest.assertMatches(snfClaim,
+				filterToClaimTypeFromList(combinedResults, ClaimType.SNF).get(0));
+	}
+
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with a
+	 * page size of 50 with fewer (8) results.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(50)
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		/*
+		 * Verify that no paging links exist, since there should only be one page.
+		 */
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("last"));
+
+		/*
+		 * Verify that each of the expected claims (one for every claim type) is present
+		 * and looks correct.
+		 */
+
+		CarrierClaim carrierClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
+				.map(r -> (CarrierClaim) r).findFirst().get();
+		Assert.assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+		CarrierClaimTransformerTest.assertMatches(carrierClaim,
+				filterToClaimType(searchResults, ClaimType.CARRIER).get(0));
+
+		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
+				.get();
+		DMEClaimTransformerTest.assertMatches(dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0));
+
+		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
+				.get();
+		HHAClaimTransformerTest.assertMatches(hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+
+		HospiceClaim hospiceClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim)
+				.map(r -> (HospiceClaim) r).findFirst().get();
+		HospiceClaimTransformerTest.assertMatches(hospiceClaim,
+				filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+
+		InpatientClaim inpatientClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
+				.map(r -> (InpatientClaim) r).findFirst().get();
+		InpatientClaimTransformerTest.assertMatches(inpatientClaim,
+				filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+
+		OutpatientClaim outpatientClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
+				.map(r -> (OutpatientClaim) r).findFirst().get();
+		OutpatientClaimTransformerTest.assertMatches(outpatientClaim,
+				filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+
+		PartDEvent partDEvent = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
+				.findFirst().get();
+		PartDEventTransformerTest.assertMatches(partDEvent, filterToClaimType(searchResults, ClaimType.PDE).get(0));
+
+		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
+				.get();
+		SNFClaimTransformerTest.assertMatches(snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+	}
+
+
+	/**
 	 * <p>
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
@@ -423,7 +635,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r).forEach(beneficiary -> {
-			Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+			Bundle searchResults = fhirClient.search()
+					.forResource(ExplanationOfBenefit.class)
 					.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
 					.returnBundle(Bundle.class).execute();
 			Assert.assertNotNull(searchResults);
@@ -481,12 +694,23 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 *         specified {@link Bundle} that match the specified {@link ClaimType}
 	 */
 	private static List<ExplanationOfBenefit> filterToClaimType(Bundle bundle, ClaimType claimType) {
-		List<ExplanationOfBenefit> carrierClaimResults = bundle.getEntry().stream()
+		List<ExplanationOfBenefit> results = bundle.getEntry().stream()
 				.filter(e -> e.getResource() instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e.getResource()).filter(e -> {
 					return TransformerTestUtils.isCodeInConcept(e.getType(),
 							TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, claimType.name());
 				}).collect(Collectors.toList());
-		return carrierClaimResults;
+		return results;
+	}
+
+	private static List<ExplanationOfBenefit> filterToClaimTypeFromList(List<IBaseResource> resources,
+			ClaimType claimType) {
+		List<ExplanationOfBenefit> results = resources.stream()
+				.filter(r -> r instanceof ExplanationOfBenefit)
+				.map(e -> (ExplanationOfBenefit) e).filter(e -> {
+					return TransformerTestUtils.isCodeInConcept(e.getType(),
+							TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, claimType.name());
+				}).collect(Collectors.toList());
+		return results;
 	}
 }

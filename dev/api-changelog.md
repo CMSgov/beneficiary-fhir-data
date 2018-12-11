@@ -18,7 +18,6 @@ Several changes have been made to these entries:
        <display value="DR. JOHN E DOE MD" />
 </provider>
 
-
 ## BLUEBUTTON-266: Implement Data Server Paging
 
 Adding paging to the backend to lessen the load on the frontend. Changes have been made to ExplanationOfBenefitResourceProvider.findByPatient to now return a resulting bundle containing the resources matching the beneficiaryId. The bundle is created from resources pulled from a new EoBBundleProvider class, returning a small sublist of the resources for each page. Links are added to the bundle for the previous and next pages as appropriate.
