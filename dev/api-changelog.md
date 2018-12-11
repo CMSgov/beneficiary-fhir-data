@@ -1,12 +1,29 @@
 # API Changelog
 
-## BLUEBUTTON-500: Display NPI code displays in EOB
+## BLUEBUTTON-150: Display NPI code displays in EOB
 
 Several changes have been made to these entries:
 
-* The `Coding.display` to the EOB has been added for NPI type fields in the appropriate claim types.
+* The `Identifier.display` to the EOB has been added for NPI type fields in the appropriate claim types.
 
-* A practitioner's/organization's name will be displayed in the appropriate `Coding.display` for NPI fields.
+* A practitioner's/organization's name will be displayed in the appropriate `Identifier.display` for NPI fields.
+
+* An example of what a practitioner's name will look like is as follows:
+
+<provider>
+       <identifier>
+            <system value="http://hl7.org/fhir/sid/us-npi" />
+            <value value="9999333999" />
+       </identifier>
+       <display value="DR. JOHN E DOE MD" />
+</provider>
+
+
+## BLUEBUTTON-266: Implement Data Server Paging
+
+Adding paging to the backend to lessen the load on the frontend. Changes have been made to ExplanationOfBenefitResourceProvider.findByPatient to now return a resulting bundle containing the resources matching the beneficiaryId. The bundle is created from resources pulled from a new EoBBundleProvider class, returning a small sublist of the resources for each page. Links are added to the bundle for the previous and next pages as appropriate.
+
+This implementation allows the frontend to utilize the links we've added to the bundle instead of having to filter through the data and create their own. This is not a final solution as other issues will need to be addressed regarding result integrity in the future.
 
 ## BLUEBUTTON-480: Trim Leading and Trailing Whitespace from Codes
 

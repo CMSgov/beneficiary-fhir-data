@@ -1,6 +1,7 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
@@ -160,13 +161,13 @@ public final class PartDEventTransformerTest {
 			TransformerTestUtils.assertFDADrugCodeDisplayEquals(claim.getNationalDrugCode(),
 					"HASOL Anagen Hair Tonic - DEXPANTHENOL; MENTHOL; SALICYLIC ACID");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new UncheckedIOException(e);
 		}
 		try {
 			TransformerTestUtils.assertNPICodeDisplayEquals(claim.getPrescriberId(),
 					"DR. ROBERT BISBEE MD");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new UncheckedIOException(e);
 		}
 	}
 }

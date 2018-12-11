@@ -335,9 +335,7 @@ public final class TransformerUtils {
 		if (careTeamEntry == null) {
 			careTeamEntry = eob.addCareTeam();
 			careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
-			careTeamEntry.setProvider(new Reference()
-					.setIdentifier(new Identifier().setSystem(practitionerIdSystem).setValue(practitionerIdValue))
-					.setDisplay(retrieveNpiCodeDisplay(practitionerIdValue)));
+			careTeamEntry.setProvider(createIdentifierReference(practitionerIdSystem, practitionerIdValue));
 
 			CodeableConcept careTeamRoleConcept = createCodeableConcept(ClaimCareteamrole.OTHER.getSystem(),
 					careTeamRole.toCode());
