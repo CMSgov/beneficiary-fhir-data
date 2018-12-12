@@ -38,7 +38,8 @@
         data_pipeline_s3_bucket: "{{ vault_data_pipeline_s3_bucket }}"
         data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
         data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
-        data_pipeline_db_url: "{{ vault_data_db_url }}"
+        # Primary (i.e. write) DB defined in `group_vars/env_<name>/vault.yml`:
+        data_pipeline_db_url: "{{ vault_data_db_primary_url }}"
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
         #data_pipeline_idempotency_required: (see group_vars/env_*/main.yml)
@@ -66,7 +67,8 @@
         data_server_war_local_dir: "~/.m2/repository/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ data_server_version }}"
         data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
         # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
-        data_server_db_url: "{{ vault_data_db_url }}"
+        # Secondary (i.e. read-only) DBs defined in `group_vars/env_<name>_az_<x>/vault.yml`:
+        data_server_db_url: "{{ vault_data_db_secondary_url }}"
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
         data_server_db_connections_max: 400
