@@ -155,6 +155,16 @@ public final class TransformerUtils {
 	private static final Set<String> procedureLookupMissingFailures = new HashSet<>();
 
 	/**
+	 * Stores the NPI codes and their display values
+	 */
+	private static Map<String, String> npiMap = null;
+
+	/**
+	 * Tracks the NPI codes that have already had code lookup failures.
+	 */
+	private static final Set<String> npiCodeLookupMissingFailures = new HashSet<>();
+
+	/**
 	 * @param eob
 	 *            the {@link ExplanationOfBenefit} that the adjudication total
 	 *            should be part of
@@ -325,8 +335,7 @@ public final class TransformerUtils {
 		if (careTeamEntry == null) {
 			careTeamEntry = eob.addCareTeam();
 			careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
-			careTeamEntry.setProvider(new Reference()
-					.setIdentifier(new Identifier().setSystem(practitionerIdSystem).setValue(practitionerIdValue)));
+			careTeamEntry.setProvider(createIdentifierReference(practitionerIdSystem, practitionerIdValue));
 
 			CodeableConcept careTeamRoleConcept = createCodeableConcept(ClaimCareteamrole.OTHER.getSystem(),
 					careTeamRole.toCode());
@@ -745,7 +754,8 @@ public final class TransformerUtils {
 	 * @return a {@link Reference} with the specified {@link Identifier}
 	 */
 	static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
-		return new Reference().setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue));
+		return new Reference().setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+				.setDisplay(retrieveNpiCodeDisplay(identifierValue));
 	}
 
 	/**
@@ -2638,6 +2648,88 @@ public final class TransformerUtils {
 		}
 
 		return icdDiagnosisMap;
+	}
+
+	/**
+	 * Retrieves the NPI display value from an NPI code look up file
+	 * 
+	 * @param npiCode
+	 *            - NPI code
+	 */
+	public static String retrieveNpiCodeDisplay(String npiCode) {
+
+		if (npiCode.isEmpty())
+			return null;
+
+		/*
+		 * There's a race condition here: we may initialize this static field more than
+		 * once if multiple requests come in at the same time. However, the assignment
+		 * is atomic, so the race and reinitialization is harmless other than maybe
+		 * wasting a bit of time.
+		 */
+		// read the entire NPI file the first time and put in a Map
+		if (npiMap == null) {
+			npiMap = readNpiCodeFile();
+		}
+
+		if (npiMap.containsKey(npiCode.toUpperCase())) {
+			String npiCodeDisplay = npiMap.get(npiCode);
+			return npiCodeDisplay;
+		}
+
+		// log which NPI codes we couldn't find a match for in our downloaded NPI file
+		if (!npiCodeLookupMissingFailures.contains(npiCode)) {
+			npiCodeLookupMissingFailures.add(npiCode);
+			LOGGER.info("No NPI code display value match found for NPI code {} in resource {}.", npiCode,
+					"NPI_Coded_Display_Values_Tab.txt");
+		}
+
+		return null;
+	}
+
+	/**
+	 * Reads ALL the NPI codes and display values from the
+	 * NPI_Coded_Display_Values_Tab.txt file. Refer to the README file in the
+	 * src/main/resources directory
+	 * 
+	 */
+	private static Map<String, String> readNpiCodeFile() {
+
+		Map<String, String> npiCodeMap = new HashMap<String, String>();
+		InputStream npiCodeDisplayStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("NPI_Coded_Display_Values_Tab.txt");
+
+		BufferedReader npiCodesIn = null;
+		npiCodesIn = new BufferedReader(new InputStreamReader(npiCodeDisplayStream));
+		/*
+		 * We want to extract the NPI codes and display values and put in a map for easy
+		 * retrieval to get the display value-- npiColumns[0] is the NPI Code,
+		 * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
+		 * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
+		 * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
+		 * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
+		 * provider credential.
+		 */
+		String line = "";
+		try {
+			npiCodesIn.readLine();
+			while ((line = npiCodesIn.readLine()) != null) {
+				String npiColumns[] = line.split("\t");
+				if (npiColumns[4].isEmpty()) {
+					String npiDisplayName = npiColumns[8].trim() + " " + npiColumns[6].trim() + " "
+							+ npiColumns[7].trim() + " " + npiColumns[5].trim() + " " + npiColumns[9].trim() + " "
+							+ npiColumns[10].trim();
+					npiCodeMap.put(npiColumns[0], npiDisplayName.replace("  ", " ").trim());
+				} else {
+					npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
+				}
+			}
+			npiCodesIn.close();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Unable to read NPI code data.", e);
+		}
+
+		return npiCodeMap;
 	}
 
 	/**
