@@ -59,16 +59,38 @@
   become: True
   environment: "{{proxy_env}}"
   gather_facts: True
-  
+  handlers:
+    - name: Reload Services
+      command: /usr/bin/systemctl daemon-reload
+      become: true
+
+    - name: Start JMeter Service
+      service:
+        name: bluebutton-jmeter
+        state: started
+      become: true
+
   tasks:
-    - name: Launch JMeter Server in Background
-      # The "JMeter Server" is what the distributed testing nodes run.
-      shell: "nohup {{ remote_jmeter_dir }}/bin/jmeter -s 
-        -Djava.rmi.server.hostname={{ ansible_eth0.ipv4.address }}
-        -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} 
-        -Dserver_port={{ jmeter_server_port }} 
-        -j {{ remote_test_dir }}/log-jmeter.txt
-        &> {{ remote_test_dir }}/log-jmeter-console.txt &" 
+    - name: Create JMeter Service Wrapper Script
+      template:
+        src: bluebutton-jmeter.sh.j2
+        dest: "{{ remote_test_dir }}/bluebutton-jmeter.sh"
+        owner: "{{ remote_jmeter_user }}"
+        group: "{{ remote_jmeter_user }}"
+        mode: u=rwx,g=rx,o=rx
+      become: true
+
+    - name: Create JMeter Service Definition
+      template:
+        src: bluebutton-jmeter.service.j2
+        dest: /etc/systemd/system/bluebutton-jmeter.service
+        owner: "{{ remote_jmeter_user }}"
+        group: "{{ remote_jmeter_user }}"
+        mode: u=rw,g=r,o=r
+      become: true
+      notify:
+        - 'Reload Services'
+        - 'Start JMeter Service'
 
 - name: Launch JMeter client and start tests
   hosts: client

@@ -4,8 +4,8 @@
   copy: 
     src: "{{ test_lib }}"
     dest: "{{ remote_jmeter_dir }}/lib/ext/"
-    owner: root
-    group: root
+    owner: "{{ remote_jmeter_user }}"
+    group: "{{ remote_jmeter_user }}"
     mode: 0664
 
 - name: Create Keystore Directory 
@@ -17,6 +17,6 @@
   copy: 
     src: "{{ test_keystore }}"
     dest: "{{ remote_test_dir }}/dev/ssl-stores"
-    owner: root
-    group: root
+    owner: "{{ remote_jmeter_user }}"
+    group: "{{ remote_jmeter_user }}"
     mode: 0664
