@@ -1,11 +1,16 @@
 ---
 - name: Prepare
   hosts: localhost
-  gather_facts: false
+  gather_facts: true
   tasks:
+    # This generates a new results folder for each test execution
+    - name: Create results path variable
+      command: /bin/echo "results/{{ansible_date_time.date}}/{{ansible_date_time.hour}}-{{ansible_date_time.minute}}"
+      register: results_path
+
     - name: Create Local Results Directory
       file:
-        path: results
+        path: "{{ results_path.stdout }}"
         state: directory
 
     - name: Create Local Support Directory 
@@ -100,6 +105,7 @@
   
   tasks:
     - name: 'Run Stress'
+      ignore_errors: yes
       # Command Line Docs: http://jmeter.apache.org/usermanual/get-started.html
       command: "{{ remote_jmeter_dir }}/bin/jmeter -n -X 
         -Dclient.rmi.localport={{ jmeter_client_rmi_local_port }} 
@@ -121,15 +127,27 @@
       poll: "{{ poll }}" 
 
     - name: Collect Results
+      ignore_errors: yes
       fetch: 
         src: "{{ remote_test_dir }}/log.jtl"
-        dest: "results/"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/"
         fail_on_missing: yes
         flat: yes
     
     - name: Collect Logs
+      ignore_errors: yes
       fetch: 
         src: "{{ remote_test_dir }}/log-jmeter.txt"
-        dest: "results/"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/"
         fail_on_missing: yes
         flat: yes
+
+- name: Cleanup localhost
+  hosts: localhost
+  environment: "{{proxy_env}}"
+  gather_facts: false
+  
+  tasks:
+    - name: Move ansible log into results dir
+      command: mv ./ansible.log {{ hostvars['localhost']['results_path'].stdout }}/ansible.log
+      ignore_errors: yes
