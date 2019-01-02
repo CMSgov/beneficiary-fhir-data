@@ -73,6 +73,8 @@
       service:
         name: bluebutton-jmeter
         state: started
+      async: 30
+      poll: 0
       become: true
 
   tasks:
