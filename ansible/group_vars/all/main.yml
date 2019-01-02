@@ -11,11 +11,11 @@ test_plan: "../jmeter-project/jmeter-fhir-test.jmx"
 # location of local keystore used in test
 test_keystore: "../dev/ssl-stores/client.keystore"
 # remote directory to store jmeter test
-remote_test_dir: "/opt/fhir_stress"
+remote_test_dir: "/usr/local/bluebutton-jmeter-service"
 # location of local jmeter properties file overrides
 jmeter_properties_file: "../jmeter-project/jmeter.properties"
 # jmeter version
-jmeter_version: 4.0
+jmeter_version: 5.0
 # remote location of apache jmeter installation
 remote_jmeter_dir: "{{ remote_test_dir }}/apache-jmeter-{{ jmeter_version }}"
 # remote jmeter server port 
@@ -26,6 +26,9 @@ jmeter_server_rmi_local_port: 4000
 jmeter_client_rmi_local_port: 4001
 # URI of FHIR server under test
 fhir_server: "https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir"
+# remote user to run jmeter
+remote_jmeter_user: bb-jmeter
+
 
 # NOTE: As configured, a sampler thread will run until the time duration has elapsed, the thread_loop count is ignored because continue_forever is set to true.
 # Number of threads within the JMeter Thread Group (https://jmeter.apache.org/api/org/apache/jmeter/threads/AbstractThreadGroup.html#NUM_THREADS)
@@ -37,6 +40,7 @@ thread_loops: 1000
 # Enables the duration field for the sampler threads.  
 scheduler: true
 # The duration in seconds for a sampler thread to run.
+# The duration is used to set the async timeout duration (even if scheduler is false) 
 duration: 300
 # Poll interval(in seconds) to check for test completion.  Used because some servers will disconnect the ssh connection prior to test completion causing the ansible script to fail,
 poll: 30
@@ -61,11 +65,11 @@ env_tag: TEST
 # https://aws.amazon.com/marketplace/pp/B019NS7T5I
 ami_id_rhel: ami-2051294a
 
-##
-# TODO: These are specific to the GDIT dev playground AWS account
-subnet_id: subnet-b9a6e492
+###
+# TODO: These are specific to the GDIT BB AWS account
+subnet_id: subnet-43851a1f
 
 security_group_ids:
-  - sg-fbc4b59c
-  - sg-0215d9e116b23f489
-##
+  - sg-c254c582
+  - sg-00934127d109774ad
+###

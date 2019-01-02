@@ -4,7 +4,7 @@
   copy: 
     src: "{{ test_plan }}"
     dest: "{{ remote_test_dir }}"
-    owner: root
-    group: root
+    owner: "{{ remote_jmeter_user }}"
+    group: "{{ remote_jmeter_user }}"
     mode: 0664
   
