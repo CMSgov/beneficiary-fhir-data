@@ -6,8 +6,8 @@
 
 #serverAlias=server
 #serverCommonName=server.example.com
-clientAlias=client-test
-clientCommonName=client-test
+clientAlias=bluebutton-backend-prod-data-server-client-test
+clientCommonName=bluebutton-backend-prod-data-server-client-test
 
 # Generate the server keypair into a temp keystore.
 #keytool -genkeypair -alias "${serverAlias}" -keyalg RSA -keysize 4096 -dname cn="${serverCommonName}" -validity 3650 -keypass changeit -keystore tmp-keystore.jks -storepass changeit
