@@ -65,9 +65,9 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.registerInterceptor(jsonInterceptor);
 
 		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "capability-statement"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "metadata"));
 
-		assertJsonDiffIsEmpty("capability-statement");
+		assertJsonDiffIsEmpty("metadata");
 	}
 
 	/**
@@ -92,74 +92,14 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.registerInterceptor(jsonInterceptor);
 
 		fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patient-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patientRead"));
 
-		assertJsonDiffIsEmpty("patient-read");
+		assertJsonDiffIsEmpty("patientRead");
 	}
 
 	/**
 	 * Verifies that there is no change between the current and approved responses
 	 * for the patient search endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a file was not found)
-	 */
-	@Test
-	public void patientSearch() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
-		List<Object> loadedRecords = ServerTestUtils
-				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
-				.findFirst().get();
-
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
-
-		fhirClient.search().forResource(Patient.class)
-				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
-				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patient-search"));
-
-		assertJsonDiffIsEmpty("patient-search");
-	}
-
-	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the patient search by hicn endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a file was not found)
-	 */
-	@Test
-	public void patientSearchByHicn() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
-		List<Object> loadedRecords = ServerTestUtils
-				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
-				.findFirst().get();
-
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
-
-
-		fhirClient.search().forResource(Patient.class)
-				.where(Patient.IDENTIFIER.exactly()
-						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
-				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patient-search-by-hicn"));
-
-		assertJsonDiffIsEmpty("patient-search-by-hicn");
-	}
-
-	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the patient search by id endpoint.
 	 * 
 	 * @throws IOException
 	 *             (indicates a file was not found)
@@ -178,23 +118,23 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = new JsonInterceptor();
 		fhirClient.registerInterceptor(jsonInterceptor);
 
-		fhirClient.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+		fhirClient.search().forResource(Patient.class)
+				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
 				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patient-search-by-id"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patientSearchById"));
 
-		assertJsonDiffIsEmpty("patient-search-by-id");
+		assertJsonDiffIsEmpty("patientSearchById");
 	}
 
 	/**
 	 * Verifies that there is no change between the current and approved responses
-	 * for the patient search by id with paging endpoint.
+	 * for the patient search by hicn endpoint.
 	 * 
 	 * @throws IOException
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void patientSearchByIdWithPaging() throws IOException {
+	public void patientByIdentifier() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -207,13 +147,14 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = new JsonInterceptor();
 		fhirClient.registerInterceptor(jsonInterceptor);
 
-		fhirClient.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
-				.count(8).returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(),
-				generateFileName(targetResponseDir, "patient-search-by-id-with-paging"));
 
-		assertJsonDiffIsEmpty("patient-search-by-id-with-paging");
+		fhirClient.search().forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly()
+						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patientByIdentifier"));
+
+		assertJsonDiffIsEmpty("patientByIdentifier");
 	}
 
 	/**
@@ -240,9 +181,9 @@ public final class EndpointJsonResponseComparatorIT {
 		Coverage partACoverage = fhirClient.read(Coverage.class,
 				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary.getBeneficiaryId()));
 		Assert.assertNotNull(partACoverage);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverage-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverageRead"));
 
-		assertJsonDiffIsEmpty("coverage-read");
+		assertJsonDiffIsEmpty("coverageRead");
 	}
 
 	/**
@@ -253,7 +194,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void coverageSearch() throws IOException {
+	public void coverageSearchByPatientId() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -270,9 +211,67 @@ public final class EndpointJsonResponseComparatorIT {
 				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
 				.returnBundle(Bundle.class).execute();
 		Assert.assertNotNull(coverageBundle);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverage-search"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverageSearchByPatientId"));
 
-		assertJsonDiffIsEmpty("coverage-search");
+		assertJsonDiffIsEmpty("coverageSearchByPatientId");
+	}
+
+	/**
+	 * Verifies that there is no change between the current and approved responses
+	 * for the patient search by id endpoint.
+	 * 
+	 * @throws IOException
+	 *             (indicates a file was not found)
+	 */
+	@Test
+	public void eobByPatientIdAll() throws IOException {
+		Path targetResponseDir = getTargetResponseDir();
+
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		fhirClient.setEncoding(EncodingEnum.JSON);
+		JsonInterceptor jsonInterceptor = new JsonInterceptor();
+		fhirClient.registerInterceptor(jsonInterceptor);
+
+		fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobByPatientIdAll"));
+
+		assertJsonDiffIsEmpty("eobByPatientIdAll");
+	}
+
+	/**
+	 * Verifies that there is no change between the current and approved responses
+	 * for the patient search by id with paging endpoint.
+	 * 
+	 * @throws IOException
+	 *             (indicates a file was not found)
+	 */
+	@Test
+	public void eobByPatientIdPaged() throws IOException {
+		Path targetResponseDir = getTargetResponseDir();
+
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		fhirClient.setEncoding(EncodingEnum.JSON);
+		JsonInterceptor jsonInterceptor = new JsonInterceptor();
+		fhirClient.registerInterceptor(jsonInterceptor);
+
+		fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(8)
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobByPatientIdPaged"));
+
+		assertJsonDiffIsEmpty("eobByPatientIdPaged");
 	}
 
 	/**
@@ -283,7 +282,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void carrierRead() throws IOException {
+	public void eobReadCarrier() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -299,9 +298,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit carrEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()));
 		Assert.assertNotNull(carrEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "carr-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadCarrier"));
 
-		assertJsonDiffIsEmpty("carr-claim-read");
+		assertJsonDiffIsEmpty("eobReadCarrier");
 	}
 
 	/**
@@ -312,7 +311,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void dmeRead() throws IOException {
+	public void eobReadDme() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -328,9 +327,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit dmeEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
 		Assert.assertNotNull(dmeEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "dme-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadDme"));
 
-		assertJsonDiffIsEmpty("dme-claim-read");
+		assertJsonDiffIsEmpty("eobReadDme");
 	}
 
 	/**
@@ -341,7 +340,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void hhaRead() throws IOException {
+	public void eobReadHha() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -357,9 +356,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit hhaEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
 		Assert.assertNotNull(hhaEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "hha-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadHha"));
 
-		assertJsonDiffIsEmpty("hha-claim-read");
+		assertJsonDiffIsEmpty("eobReadHha");
 	}
 
 	/**
@@ -370,7 +369,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void hosRead() throws IOException {
+	public void eobReadHospice() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -386,9 +385,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit hosEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()));
 		Assert.assertNotNull(hosEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "hos-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadHospice"));
 
-		assertJsonDiffIsEmpty("hos-claim-read");
+		assertJsonDiffIsEmpty("eobReadHospice");
 	}
 
 	/**
@@ -399,7 +398,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void inpRead() throws IOException {
+	public void eobReadInpatient() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -415,9 +414,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit inpEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()));
 		Assert.assertNotNull(inpEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "inp-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadInpatient"));
 
-		assertJsonDiffIsEmpty("inp-claim-read");
+		assertJsonDiffIsEmpty("eobReadInpatient");
 	}
 
 	/**
@@ -428,7 +427,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void outRead() throws IOException {
+	public void eobReadOutpatient() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -444,9 +443,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit outEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()));
 		Assert.assertNotNull(outEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "out-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadOutpatient"));
 
-		assertJsonDiffIsEmpty("out-claim-read");
+		assertJsonDiffIsEmpty("eobReadOutpatient");
 	}
 
 	/**
@@ -457,7 +456,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void pdeRead() throws IOException {
+	public void eobReadPde() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -473,9 +472,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit pdeEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
 		Assert.assertNotNull(pdeEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "pde-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadPde"));
 
-		assertJsonDiffIsEmpty("pde-claim-read");
+		assertJsonDiffIsEmpty("eobReadPde");
 	}
 
 	/**
@@ -486,7 +485,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *             (indicates a file was not found)
 	 */
 	@Test
-	public void snfRead() throws IOException {
+	public void eobReadSnf() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
 		List<Object> loadedRecords = ServerTestUtils
@@ -502,9 +501,9 @@ public final class EndpointJsonResponseComparatorIT {
 		ExplanationOfBenefit snfEob = fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
 		Assert.assertNotNull(snfEob);
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "snf-claim-read"));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadSnf"));
 
-		assertJsonDiffIsEmpty("snf-claim-read");
+		assertJsonDiffIsEmpty("eobReadSnf");
 	}
 
 	/**

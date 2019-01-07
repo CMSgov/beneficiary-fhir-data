@@ -1,15 +1,15 @@
 {
   "resourceType": "Bundle",
-  "id": "7d0f8c5b-39db-4c96-a680-d5e6d8f3444e",
+  "id": "66a109a2-8414-4b18-9938-43588491f9ac",
   "meta": {
-    "lastUpdated": "2019-01-03T09:55:26.090-06:00"
+    "lastUpdated": "2019-01-07T15:34:14.322-06:00"
   },
   "type": "searchset",
   "total": 8,
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9760/v1/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2F567834"
+      "url": "https://localhost:8100/v1/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2F567834"
     }
   ],
   "entry": [
@@ -2295,7 +2295,7 @@
                 {
                   "system": "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
                   "code": "51",
-                  "display": "Discharged/transferred to a Hospice ? medical facility."
+                  "display": "Discharged/transferred to a Hospice � medical facility."
                 }
               ]
             }

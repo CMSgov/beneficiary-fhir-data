@@ -1,20 +1,20 @@
 {
   "resourceType": "Bundle",
-  "id": "6f52dbf9-8a15-4202-803c-a12e53def94e",
+  "id": "17083224-74ae-4869-8b5e-72f44a76a9b1",
   "meta": {
-    "lastUpdated": "2019-01-03T09:55:23.995-06:00"
+    "lastUpdated": "2019-01-07T15:34:19.969-06:00"
   },
   "type": "searchset",
   "total": 1,
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9760/v1/fhir/Patient?_format=json&identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
+      "url": "https://localhost:8100/v1/fhir/Patient?_format=json&_id=%7C567834"
     }
   ],
   "entry": [
     {
-      "fullUrl": "https://localhost:9760/v1/fhir/Patient/567834",
+      "fullUrl": "https://localhost:8100/v1/fhir/Patient/567834",
       "resource": {
         "resourceType": "Patient",
         "id": "567834",
