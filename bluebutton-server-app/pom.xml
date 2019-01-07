@@ -66,11 +66,8 @@
 		</dependency>
 		
 		<dependency>
-		    <groupId>com.fasterxml.jackson.dataformat</groupId>
-		    <artifactId>jackson-dataformat-xml</artifactId>
-		    <version>2.9.7</version>
-		</dependency>
-		<dependency>
+			<!-- Needed for comparing JSON files to obtain the diff. See
+				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
 			<groupId>com.flipkart.zjsonpatch</groupId>
 			<artifactId>zjsonpatch</artifactId>
 			<version>0.4.6</version>
