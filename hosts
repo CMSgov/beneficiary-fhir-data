@@ -23,6 +23,7 @@ bluebutton-healthapt-prod-data-pipeline
 bluebutton-healthapt-test-data-server-a-1
 bluebutton-healthapt-test-data-server-b-1
 bluebutton-healthapt-dpr-data-server-a-1
+bluebutton-healthapt-dpr-data-server-b-1
 bluebutton-healthapt-prod-data-server-a-1
 bluebutton-healthapt-prod-data-server-b-1
 
@@ -52,10 +53,14 @@ bluebutton-healthapt-test-data-server-b-1
 [env_dpr]
 bluebutton-healthapt-dpr-data-pipeline
 bluebutton-healthapt-dpr-data-server-a-1
+bluebutton-healthapt-dpr-data-server-b-1
 
 [env_dpr_az_a]
 bluebutton-healthapt-dpr-data-pipeline
 bluebutton-healthapt-dpr-data-server-a-1
+
+[env_dpr_az_b]
+bluebutton-healthapt-dpr-data-server-b-1
 
 [env_prod]
 bluebutton-healthapt-prod-data-pipeline

@@ -25,6 +25,7 @@
         - "{{ vault_ec2_instance.test.data_server_b_1.ip }}"
         - "{{ vault_ec2_instance.developer_preview.data_pipeline.ip }}"
         - "{{ vault_ec2_instance.developer_preview.data_server_a_1.ip }}"
+        - "{{ vault_ec2_instance.developer_preview.data_server_b_1.ip }}"
         - "{{ vault_ec2_instance.production.data_pipeline.ip }}"
         - "{{ vault_ec2_instance.production.data_server_a_1.ip }}"
         - "{{ vault_ec2_instance.production.data_server_b_1.ip }}"
