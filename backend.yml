@@ -72,3 +72,11 @@
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
         data_server_db_connections_max: 400
+    - name: Copy Local Test SSL Keypair
+      copy:
+        src: "{{ data_server_ssl_client_certificate_test }}"
+        dest: '/u01/jboss/bluebutton-backend-test-data-server-client-test-keypair.pem'
+        owner: root
+        group: root
+        mode: 'u=rw,g=,o='
+      become: true
