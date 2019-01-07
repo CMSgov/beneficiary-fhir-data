@@ -1,12 +1,14 @@
 ---
-# This system is an m4.large (2 vCPUs, 8 GB RAM)
-data_pipeline_jvm_args: '-Xmx6g'
-# Any more threads than this, and the test Data Pipeline server will eventually crash.
-data_pipeline_loader_threads: 100
+# This system is an m4.large (2 vCPUs, 8 GB RAM).
+data_pipeline_ec2_instance_type_mem_mib: "{{ 8 * 1024 }}"
+data_pipeline_ec2_instance_type_vcpu: 2
 
 # There is no ongoing data refresh here: if we're loading data in the developer preview environment, it should be an initial
 # load.
 data_pipeline_idempotency_required: false
+
+# These systems are m4.xlarge (4 vCPUs, 16 GB RAM).
+data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
