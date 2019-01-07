@@ -4,17 +4,17 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
 
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+/**
+ * An interceptor class to save endpoint responses from requests to a
+ * fhirClient.
+ */
 public class JsonInterceptor implements IClientInterceptor {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonInterceptor.class);
-
-	private Logger myLog = ourLog;
 	private String response;
 
 	@Override
@@ -25,22 +25,21 @@ public class JsonInterceptor implements IClientInterceptor {
 
 	@Override
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
+		/*
+		 * The following code comes from {@link LoggingInterceptor} and has been
+		 * re-purposed and used here to save responses from the fhirClient.
+		 */
 		theResponse.bufferEntity();
 		InputStream respEntity = null;
 		try {
 			respEntity = theResponse.readEntity();
-			if (respEntity != null) {
-				final byte[] bytes;
-				try {
-					bytes = IOUtils.toByteArray(respEntity);
-				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
-				}
-				response = new String(bytes, "UTF-8");
-				myLog.info("Client response body:\n{}", response);
-			} else {
-				myLog.info("Client response body: (none)");
+			final byte[] bytes;
+			try {
+				bytes = IOUtils.toByteArray(respEntity);
+			} catch (IllegalStateException e) {
+				throw new InternalErrorException(e);
 			}
+			response = new String(bytes, "UTF-8");
 		} finally {
 			IOUtils.closeQuietly(respEntity);
 		}
