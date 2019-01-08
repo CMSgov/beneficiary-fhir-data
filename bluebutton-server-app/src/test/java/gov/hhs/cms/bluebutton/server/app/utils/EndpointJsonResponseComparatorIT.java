@@ -9,8 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -22,6 +24,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonDiff;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -513,7 +517,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * @throws IOException
 	 *             (indicates a file was not found)
 	 */
-	private void assertJsonDiffIsEmpty(String fileName) throws IOException {
+	private static void assertJsonDiffIsEmpty(String fileName) throws IOException {
 		Path approvedResponseDir = Paths.get(".", "src", "test", "resources", "endpoint-responses");
 		if (!Files.isDirectory(approvedResponseDir))
 			throw new IllegalStateException();
@@ -534,33 +538,38 @@ public final class EndpointJsonResponseComparatorIT {
 			throw new FileNotFoundException(
 					"Can't read file at " + generateFileName(targetResponseDir, fileName).toString());
 		}
-			
 
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode beforeNode = mapper.readTree(approvedJson);
 		JsonNode afterNode = mapper.readTree(newJson);
 		JsonNode patch = JsonDiff.asJson(beforeNode, afterNode);
 
-		// TODO: Is there a better way to do this? Streams/filters...
-		Iterator<JsonNode> iterator = patch.elements();
-		String diff = "";
-		while (iterator.hasNext()) {
-			JsonNode node = iterator.next();
-			String pathValue = node.get("path").toString();
-			if (!pathValue.contentEquals("\"/id\"") && !pathValue.contentEquals("\"/meta/lastUpdated\"")) {
-				// We ignore any updates to the id or lastUpdated fields as they will change
-				// with each call to the endpoint.
-				diff = diff + node.toString();
+		// Filter out diffs that we don't care about (due to changing with each call)
+		// such as "lastUpdated" fields, the port on URLs, etc. ...
+		NodeFilteringConsumer consumer = new NodeFilteringConsumer(new NodeFilter() {
+			public boolean apply(JsonNode node) {
+				String pattern = "\"/id\"|\"/date\"|\"/link/[0-9]/url\"|\"/entry/[0-9]/fullUrl\"|\"/meta/lastUpdated\"";
+				Pattern p = Pattern.compile(pattern);
+				Matcher m = p.matcher(node.get("path").toString());
+				return m.matches();
 			}
-		}
+		});
 
-		Assert.assertEquals("", diff);
+		patch.forEach(consumer);
+		if (patch.size() > 0) {
+			for (int i = 0; i < patch.size(); i++) {
+				Assert.assertEquals("{}", patch.get(i).toString());
+			}
+		} else {
+			ArrayNode node = (ArrayNode) patch;
+			Assert.assertEquals(0, node.size());
+		}
 	}
 
-	/*
+	/**
 	 * Returns the path to where a file should be written.
 	 */
-	private Path getTargetResponseDir() {
+	private static Path getTargetResponseDir() {
 		// Path targetResponseDir = Paths.get(".", "src", "test", "resources",
 		// "endpoint-responses");
 		Path targetResponseDir = Paths.get(".", "target", "endpoint-responses");
@@ -570,23 +579,23 @@ public final class EndpointJsonResponseComparatorIT {
 		return targetResponseDir;
 	}
 
-	/*
-	 * @param directory 
+	/**
+	 * @param directory
 	 *            The path to where the file should should be written
-	 * @param endpoint 
-	 * 			  The string to identify which endpoint's response the
-	 * 			  file contents contain
+	 * @param endpoint
+	 *            The string to identify which endpoint's response the file contents
+	 *            contain
 	 * @return Returns a path to use as a filename
 	 */
 	private static Path generateFileName(Path directory, String endpoint) {
 		return Paths.get(directory.toString(), endpoint + ".json");
 	}
 
-	/*
+	/**
 	 * @param contents
 	 *            The string to be written to a file
 	 * @param fileName
-	 * 			  The path to name the file
+	 *            The path to name the file
 	 */
 	private static void writeFile(String contents, Path fileName) {
 		try {
@@ -600,14 +609,45 @@ public final class EndpointJsonResponseComparatorIT {
 		}
 	}
 
-	/*
+	/**
 	 * @param path
 	 *            The path to the file
 	 * @param encoding
-	 * 			  The charset with which to decode the bytes
+	 *            The charset with which to decode the bytes
 	 */
 	private static String readFile(Path path, Charset encoding) throws IOException {
 		byte[] encoded = Files.readAllBytes(path);
 		return new String(encoded, encoding);
+	}
+
+	/**
+	 * NodeFilter is a simple interface with one method that takes a single
+	 * argument, {@link JsonNode}, and returns true if the JsonNode satisfies the
+	 * filter.
+	 */
+	private static interface NodeFilter {
+		boolean apply(JsonNode node);
+	}
+
+	/**
+	 * NodeFilteringConsumer implements the {@link Consumer} interface, and is used
+	 * to filter out fields in a JsonNode that meet requirements as specified by a
+	 * given {@link NodeFilter}.
+	 */
+	private static class NodeFilteringConsumer implements Consumer<JsonNode> {
+
+		private NodeFilter f;
+
+		public NodeFilteringConsumer(NodeFilter f) {
+			this.f = f;
+		}
+
+		@Override
+		public void accept(JsonNode t) {
+			if (f.apply(t)) {
+				ObjectNode node = (ObjectNode) t;
+				node.removeAll();
+			}
+		}
 	}
 }
