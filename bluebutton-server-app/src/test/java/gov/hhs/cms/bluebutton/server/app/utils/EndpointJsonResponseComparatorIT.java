@@ -48,7 +48,8 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
 /**
  * Integration tests for comparing changes in the JSON from our endpoint
- * responses.
+ * responses. This test code relies on the assumption that SAMPLE_A will have at
+ * least one bene and that every bene in it will have >= 1 EOB of every type.
  */
 public final class EndpointJsonResponseComparatorIT {
 
