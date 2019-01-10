@@ -31,9 +31,9 @@
         data_pipeline_dir: '/u01/bluebutton-data-pipeline'
         data_pipeline_appjar_name: "bluebutton-data-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
         data_pipeline_appjar_localpath: "~/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/{{ data_pipeline_version }}"
-        #data_pipeline_jvm_args: (see group_vars/env_*/main.yml)
+        data_pipeline_jvm_args: "-Xmx{{ ((data_pipeline_ec2_instance_type_mem_mib | int) * 0.80) | int }}m"
         data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
-        #data_pipeline_loader_threads: (see group_vars/env_*/main.yml)
+        data_pipeline_loader_threads: "{{ data_pipeline_ec2_instance_type_vcpu * 50 }}"
         data_pipeline_user: "{{ vault_data_pipeline_user }}"
         data_pipeline_s3_bucket: "{{ vault_data_pipeline_s3_bucket }}"
         data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
@@ -58,7 +58,7 @@
         data_server_appserver_service: jboss
         data_server_appserver_installer_name: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
         data_server_appserver_local_dir: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
-        data_server_appserver_jvmargs: '-Xmx8g -XX:MaxMetaspaceSize=2g'
+        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_vinstance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m"
         data_server_appserver_management_port: "{{ vault_data_server_appserver_management_port }}"
         data_server_appserver_management_username: "{{ vault_data_server_appserver_management_username }}"
         data_server_appserver_management_password: "{{ vault_data_server_appserver_management_password }}"
