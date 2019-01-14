@@ -550,6 +550,10 @@ public final class EndpointJsonResponseComparatorIT {
 		NodeFilteringConsumer consumer = new NodeFilteringConsumer(new NodeFilter() {
 			public boolean apply(JsonNode node) {
 				String pattern = "\"/id\"|\"/date\"|\"/link/[0-9]/url\"|\"/entry/[0-9]/fullUrl\"|\"/meta/lastUpdated\"";
+				// Additional workaround regex due to the HAPI server not always returning array
+				// elements in the same order.
+				pattern += "|\"/rest/[0-9]/resource/[0-9]/searchParam/[0-9]\"";
+
 				Pattern p = Pattern.compile(pattern);
 				Matcher m = p.matcher(node.get("path").toString());
 				return m.matches();
