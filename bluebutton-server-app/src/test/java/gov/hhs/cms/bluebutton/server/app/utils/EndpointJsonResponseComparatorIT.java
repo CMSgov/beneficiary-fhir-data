@@ -183,9 +183,8 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = new JsonInterceptor();
 		fhirClient.registerInterceptor(jsonInterceptor);
 
-		Coverage partACoverage = fhirClient.read(Coverage.class,
+		fhirClient.read(Coverage.class,
 				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary.getBeneficiaryId()));
-		Assert.assertNotNull(partACoverage);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverageRead"));
 
 		assertJsonDiffIsEmpty("coverageRead");
@@ -212,10 +211,9 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = new JsonInterceptor();
 		fhirClient.registerInterceptor(jsonInterceptor);
 
-		Bundle coverageBundle = fhirClient.search().forResource(Coverage.class)
+		fhirClient.search().forResource(Coverage.class)
 				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
 				.returnBundle(Bundle.class).execute();
-		Assert.assertNotNull(coverageBundle);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverageSearchByPatientId"));
 
 		assertJsonDiffIsEmpty("coverageSearchByPatientId");
@@ -300,9 +298,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		CarrierClaim carrClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
 				.map(r -> (CarrierClaim) r).findFirst().get();
-		ExplanationOfBenefit carrEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()));
-		Assert.assertNotNull(carrEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadCarrier"));
 
 		assertJsonDiffIsEmpty("eobReadCarrier");
@@ -329,9 +326,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit dmeEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
-		Assert.assertNotNull(dmeEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadDme"));
 
 		assertJsonDiffIsEmpty("eobReadDme");
@@ -358,9 +354,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit hhaEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
-		Assert.assertNotNull(hhaEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadHha"));
 
 		assertJsonDiffIsEmpty("eobReadHha");
@@ -387,9 +382,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		HospiceClaim hosClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> (HospiceClaim) r)
 				.findFirst().get();
-		ExplanationOfBenefit hosEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()));
-		Assert.assertNotNull(hosEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadHospice"));
 
 		assertJsonDiffIsEmpty("eobReadHospice");
@@ -416,9 +410,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		InpatientClaim inpClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
 				.map(r -> (InpatientClaim) r).findFirst().get();
-		ExplanationOfBenefit inpEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()));
-		Assert.assertNotNull(inpEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadInpatient"));
 
 		assertJsonDiffIsEmpty("eobReadInpatient");
@@ -445,9 +438,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		OutpatientClaim outClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
 				.map(r -> (OutpatientClaim) r).findFirst().get();
-		ExplanationOfBenefit outEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()));
-		Assert.assertNotNull(outEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadOutpatient"));
 
 		assertJsonDiffIsEmpty("eobReadOutpatient");
@@ -474,9 +466,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		PartDEvent pdeClaim = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
-		ExplanationOfBenefit pdeEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
-		Assert.assertNotNull(pdeEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadPde"));
 
 		assertJsonDiffIsEmpty("eobReadPde");
@@ -503,9 +494,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit snfEob = fhirClient.read(ExplanationOfBenefit.class,
+		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
-		Assert.assertNotNull(snfEob);
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadSnf"));
 
 		assertJsonDiffIsEmpty("eobReadSnf");
