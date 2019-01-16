@@ -564,7 +564,7 @@ public final class EndpointJsonResponseComparatorIT {
 		pattern.append("|\"/meta/lastUpdated\"");
 		pattern.append("|\"/procedure/[0-9]/date\"");
 		pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
-		pattern.append("|\"/version\"");
+		pattern.append("|\"/software/version\"");
 
 		// Additional workaround regex due to the HAPI server not always returning array
 		// elements in the same order for the capability statement.
