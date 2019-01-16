@@ -152,7 +152,6 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = new JsonInterceptor();
 		fhirClient.registerInterceptor(jsonInterceptor);
 
-
 		fhirClient.search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly()
 						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
@@ -521,7 +520,7 @@ public final class EndpointJsonResponseComparatorIT {
 			throw new FileNotFoundException(
 					"Can't read file at " + generateFileName(approvedResponseDir, fileName).toString());
 		}
-		
+
 		String newJson;
 		try {
 			newJson = readFile(generateFileName(targetResponseDir, fileName), Charset.defaultCharset());
@@ -541,7 +540,7 @@ public final class EndpointJsonResponseComparatorIT {
 			public boolean apply(JsonNode node) {
 				String pattern = "\"/id\"|\"/date\"|\"/link/[0-9]/url\"|\"/entry/[0-9]/fullUrl\"|\"/meta/lastUpdated\"";
 				// Additional workaround regex due to the HAPI server not always returning array
-				// elements in the same order.
+				// elements in the same order for the capability statement.
 				pattern += "|\"/rest/[0-9]/resource/[0-9]/searchParam/[0-9]\"";
 
 				Pattern p = Pattern.compile(pattern);

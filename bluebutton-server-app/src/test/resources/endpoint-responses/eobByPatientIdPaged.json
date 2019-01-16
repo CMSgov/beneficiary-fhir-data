@@ -1,15 +1,15 @@
 {
   "resourceType": "Bundle",
-  "id": "54c44e2a-8401-4fd0-b2c3-00e7d718682b",
+  "id": "ffe5f73e-7745-4983-98cf-e78400f6bf2f",
   "meta": {
-    "lastUpdated": "2019-01-07T15:34:20.822-06:00"
+    "lastUpdated": "2019-01-16T13:49:46.320-06:00"
   },
   "type": "searchset",
   "total": 8,
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:8100/v1/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2F567834"
+      "url": "https://localhost:9350/v1/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2F567834"
     }
   ],
   "entry": [
@@ -154,7 +154,7 @@
         "organization": {
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "1111111111"
+            "value": "1497758544"
           }
         },
         "facility": {
@@ -170,7 +170,7 @@
           ],
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "1111111111"
+            "value": "1497758544"
           }
         },
         "information": [
@@ -800,7 +800,7 @@
               "agent": {
                 "identifier": {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "222333222"
+                  "value": "1306849450"
                 }
               }
             },
@@ -808,7 +808,7 @@
               {
                 "identifier": {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "value": "222333222"
+                  "value": "1306849450"
                 }
               }
             ]
@@ -2295,7 +2295,7 @@
                 {
                   "system": "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
                   "code": "51",
-                  "display": "Discharged/transferred to a Hospice – medical facility."
+                  "display": "Discharged/transferred to a Hospice â€“ medical facility."
                 }
               ]
             }
@@ -3669,7 +3669,7 @@
         "organization": {
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "111222333"
+            "value": "1023011079"
           }
         },
         "facility": {
@@ -3685,7 +3685,7 @@
           ],
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "111222333"
+            "value": "1023011079"
           }
         },
         "information": [
@@ -3948,7 +3948,7 @@
             "provider": {
               "identifier": {
                 "system": "http://hl7.org/fhir/sid/us-npi",
-                "value": "444555666"
+                "value": "1750384806"
               }
             },
             "role": {
@@ -4384,7 +4384,7 @@
                 "url": "http://hl7.org/fhir/sid/us-npi",
                 "valueCoding": {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "code": "5555553305"
+                  "code": "1497758544"
                 }
               }
             ],
