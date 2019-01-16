@@ -538,12 +538,7 @@ public final class EndpointJsonResponseComparatorIT {
 		// such as "lastUpdated" fields, the port on URLs, etc. ...
 		NodeFilteringConsumer consumer = new NodeFilteringConsumer(new NodeFilter() {
 			public boolean apply(JsonNode node) {
-				String pattern = "\"/id\"|\"/date\"|\"/link/[0-9]/url\"|\"/entry/[0-9]/fullUrl\"|\"/meta/lastUpdated\"";
-				// Additional workaround regex due to the HAPI server not always returning array
-				// elements in the same order for the capability statement.
-				pattern += "|\"/rest/[0-9]/resource/[0-9]/searchParam/[0-9]\"";
-
-				Pattern p = Pattern.compile(pattern);
+				Pattern p = createRegexPattern();
 				Matcher m = p.matcher(node.get("path").toString());
 				return m.matches();
 			}
@@ -558,6 +553,24 @@ public final class EndpointJsonResponseComparatorIT {
 			ArrayNode node = (ArrayNode) patch;
 			Assert.assertEquals(0, node.size());
 		}
+	}
+
+	private static Pattern createRegexPattern() {
+		StringBuilder pattern = new StringBuilder();
+		pattern.append("\"/id\"");
+		pattern.append("|\"/date\"");
+		pattern.append("|\"/link/[0-9]/url\"");
+		pattern.append("|\"/entry/[0-9]/fullUrl\"");
+		pattern.append("|\"/meta/lastUpdated\"");
+		pattern.append("|\"/procedure/[0-9]/date\"");
+		pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
+		pattern.append("|\"/version\"");
+
+		// Additional workaround regex due to the HAPI server not always returning array
+		// elements in the same order for the capability statement.
+		pattern.append("|\"/rest/[0-9]/resource/[0-9]/searchParam/[0-9]\"");
+
+		return Pattern.compile(pattern.toString());
 	}
 
 	/**
