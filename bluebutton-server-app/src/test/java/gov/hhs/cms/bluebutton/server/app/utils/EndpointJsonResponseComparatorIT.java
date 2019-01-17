@@ -8,7 +8,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -27,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonDiff;
+import com.google.gson.JsonArray;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -70,9 +75,51 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.registerInterceptor(jsonInterceptor);
 
 		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "metadata"));
+
+		// writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir,
+		// "metadata"));
+		writeFile(workaround(jsonInterceptor.getResponse()), generateFileName(targetResponseDir, "metadata"));
 
 		assertJsonDiffIsEmpty("metadata");
+	}
+
+	/**
+	 * Additional workaround due to HAPI not always returning array elements in the
+	 * same order for a specific searchParam {@link JsonArray} in the capability
+	 * statement. This method is only necessary until the bug has been remedied with
+	 * HAPI.
+	 * 
+	 * @param unsortedResponse
+	 *            The JSON string with an unsorted searchParam array
+	 * @return The JSON string with the sorted searchParam array
+	 * @throws IOException
+	 */
+	private String workaround(String unsortedResponse) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter();
+		JsonNode parsedJson = mapper.readTree(unsortedResponse);
+		JsonNode searchParamsNode = parsedJson.at("/rest/0/resource/3/searchParam");
+
+		Iterator<JsonNode> searchParamsIterator = searchParamsNode.elements();
+		List<JsonNode> searchParams = new ArrayList<JsonNode>();
+		while (searchParamsIterator.hasNext()) {
+			searchParams.add(searchParamsIterator.next());
+		}
+		
+		Collections.sort(searchParams, new Comparator<JsonNode>() {
+			public int compare(JsonNode node1, JsonNode node2) {
+				String name1 = node1.get("name").toString();
+				String name2 = node2.get("name").toString();
+				return name1.compareTo(name2);
+			}
+		});
+
+		((ArrayNode) searchParamsNode).removeAll();
+		for (int i = 0; i < searchParams.size(); i++) {
+			((ArrayNode) searchParamsNode).add((ObjectNode) searchParams.get(i));
+		}
+
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
 	}
 
 	/**
@@ -565,10 +612,6 @@ public final class EndpointJsonResponseComparatorIT {
 		pattern.append("|\"/procedure/[0-9]/date\"");
 		pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
 		pattern.append("|\"/software/version\"");
-
-		// Additional workaround regex due to the HAPI server not always returning array
-		// elements in the same order for the capability statement.
-		pattern.append("|\"/rest/[0-9]/resource/[0-9]/searchParam/[0-9]\"");
 
 		return Pattern.compile(pattern.toString());
 	}
