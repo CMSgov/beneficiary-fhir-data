@@ -104,6 +104,7 @@ public final class RifLoaderIT {
 	 * Runs {@link RifLoader} against the
 	 * {@link StaticRifResourceGroup#SAMPLE_B} data.
 	 */
+	@Ignore
 	@Test
 	public void loadSampleB() {
 		loadSample(StaticRifResourceGroup.SAMPLE_B);
@@ -113,6 +114,7 @@ public final class RifLoaderIT {
 	 * Runs {@link RifLoader} against the
 	 * {@link StaticRifResourceGroup#SYNTHETIC_DATA} data.
 	 */
+	@Ignore
 	@Test
 	public void loadSyntheticData() {
 		Assume.assumeTrue(String.format("Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",

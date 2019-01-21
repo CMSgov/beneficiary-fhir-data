@@ -25,6 +25,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
@@ -80,6 +81,13 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("Doe", beneRow.getNameSurname());
 		Assert.assertEquals("John", beneRow.getNameGiven());
 		Assert.assertEquals(new Character('A'), beneRow.getNameMiddleInitial().get());
+
+		Assert.assertEquals("3456789", beneRow.getMedicareBeneficiaryId().get());
+		Assert.assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBeneficiaryDateOfDeath().get());
+		Assert.assertEquals(LocalDate.of(1983, Month.MARCH, 24), beneRow.getMedicareCoverageStartDate().get());
+		Assert.assertEquals(new Character('D'), beneRow.getHmoIndicatorAprInd().get());
+		Assert.assertEquals(new BigDecimal(5), beneRow.getPartDMonthsCount().get());
+		Assert.assertEquals("BB", beneRow.getPartDLowIncomeCostShareGroupDecCode().get());
 	}
 
 	/**
@@ -125,6 +133,37 @@ public final class RifFilesProcessorTest {
 			Assert.assertEquals(('M'), beneficiaryHistory.getSex());
 			Assert.assertEquals("543217066T", beneficiaryHistory.getHicn());
 		}
+	}
+
+	/**
+	 * Ensures that {@link RifFilesProcessor} can correctly handle
+	 * {@link StaticRifResource#SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY}.
+	 */
+	@Test
+	public void process1MedicareBeneficiaryIdHistoryRecord() {
+		RifFilesEvent filesEvent = new RifFilesEvent(Instant.now(),
+				StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.toRifFile());
+		RifFilesProcessor processor = new RifFilesProcessor();
+		RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
+		List<RifRecordEvent<?>> rifEventsList = rifFileRecords.getRecords().collect(Collectors.toList());
+
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.getRecordCount(),
+				rifEventsList.size());
+
+		RifRecordEvent<?> rifRecordEvent0 = rifEventsList.get(0);
+		Assert.assertEquals(StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY.getRifFileType(),
+				rifRecordEvent0.getFileEvent().getFile().getFileType());
+		Assert.assertNotNull(rifRecordEvent0.getRecord());
+		Assert.assertTrue(rifRecordEvent0.getRecord() instanceof MedicareBeneficiaryIdHistory);
+		MedicareBeneficiaryIdHistory medicareBeneficiaryIdHistory = (MedicareBeneficiaryIdHistory) rifRecordEvent0
+				.getRecord();
+
+		Assert.assertEquals(new BigDecimal(400), medicareBeneficiaryIdHistory.getBeneficiaryId().get());
+		Assert.assertEquals(LocalDate.of(2011, Month.APRIL, 16),
+				medicareBeneficiaryIdHistory.getMbiEffectiveDate().get());
+		Assert.assertEquals(new BigDecimal(400), medicareBeneficiaryIdHistory.getBeneficiaryId().get());
+		Assert.assertEquals("9AB2WW3GR44", medicareBeneficiaryIdHistory.getMedicareBeneficiaryId().get());
+
 	}
 
 	/**

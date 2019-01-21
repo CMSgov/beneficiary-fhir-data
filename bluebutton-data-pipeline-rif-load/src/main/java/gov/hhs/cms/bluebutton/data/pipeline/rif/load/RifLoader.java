@@ -551,7 +551,9 @@ public final class RifLoader {
 			oldBeneCopy.setBeneficiaryId(oldBeneficiaryRecord.getBeneficiaryId());
 			oldBeneCopy.setBirthDate(oldBeneficiaryRecord.getBirthDate());
 			oldBeneCopy.setHicn(oldBeneficiaryRecord.getHicn());
+			oldBeneCopy.setUnhashedHicn(oldBeneficiaryRecord.getUnhashedHicn());
 			oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
+			oldBeneCopy.setMedicareBeneficiaryId(oldBeneficiaryRecord.getMedicareBeneficiaryId());
 
 			entityManager.persist(oldBeneCopy);
 		}
@@ -624,6 +626,9 @@ public final class RifLoader {
 				.time();
 
 		Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
+		// set the unhashed Hicn
+		beneficiary.setUnhashedHicn(beneficiary.getHicn());
+		// set the hashed Hicn
 		beneficiary.setHicn(computeHicnHash(options, secretKeyFactory, beneficiary.getHicn()));
 
 		timerHashing.stop();
@@ -655,6 +660,11 @@ public final class RifLoader {
 				.time();
 
 		BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
+
+		// set the unhashed Hicn
+		beneficiaryHistory.setUnhashedHicn(beneficiaryHistory.getHicn());
+
+		// set the hashed Hicn
 		beneficiaryHistory.setHicn(computeHicnHash(options, secretKeyFactory, beneficiaryHistory.getHicn()));
 
 		timerHashing.stop();
