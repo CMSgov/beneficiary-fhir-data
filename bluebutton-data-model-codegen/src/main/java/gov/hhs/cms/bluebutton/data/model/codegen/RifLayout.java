@@ -301,6 +301,8 @@ public final class RifLayout {
 
 		DATE,
 
-		NUM;
+		NUM,
+		
+		TIME;
 	}
 }

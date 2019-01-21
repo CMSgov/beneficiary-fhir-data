@@ -42,6 +42,7 @@ public final class MappingSpec {
 	private boolean hasLines = false;
 	private String lineTable;
 	private List<String> headerEntityTransientFields;
+	private List<RifField> headerEntityAdditionalDatabaseFields;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -53,6 +54,7 @@ public final class MappingSpec {
 		Objects.requireNonNull(packageName);
 		this.packageName = packageName;
 		this.headerEntityTransientFields = new ArrayList<>();
+		this.headerEntityAdditionalDatabaseFields = new ArrayList<RifField>();
 	}
 
 	/**
@@ -291,6 +293,26 @@ public final class MappingSpec {
 		return this;
 	}
 	
+	/**
+	 * @return the fields in {@link #getHeaderEntity()} that should be marked as
+	 *         {@link Transient}
+	 */
+	public List<RifField> getHeaderEntityAdditionalDatabaseFields() {
+		return headerEntityAdditionalDatabaseFields;
+	}
+
+	/**
+	 * @param headerEntityAdditionalDatabaseFields
+	 *            the new value for
+	 *            {@link #getHeaderEntityAdditionalDatabaseFields()}
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
+	 */
+	public MappingSpec setHeaderEntityAdditionalDatabaseFields(List<RifField> headerEntityAdditionalDatabaseFields) {
+		Objects.requireNonNull(headerEntityAdditionalDatabaseFields);
+		this.headerEntityAdditionalDatabaseFields = headerEntityAdditionalDatabaseFields;
+		return this;
+	}
+
 	/**
 	 * @return the {@link ClassName} for the class to be built that will contain
 	 *         parsing code for the layout

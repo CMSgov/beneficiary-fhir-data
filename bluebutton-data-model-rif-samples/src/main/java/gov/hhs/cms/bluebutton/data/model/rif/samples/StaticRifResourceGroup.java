@@ -12,6 +12,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.RifFile;
  */
 public enum StaticRifResourceGroup {
 	SAMPLE_A(StaticRifResource.SAMPLE_A_BENES, StaticRifResource.SAMPLE_A_BENEFICIARY_HISTORY,
+			StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
 			StaticRifResource.SAMPLE_A_CARRIER, StaticRifResource.SAMPLE_A_PDE, StaticRifResource.SAMPLE_A_INPATIENT,
 			StaticRifResource.SAMPLE_A_OUTPATIENT, StaticRifResource.SAMPLE_A_HHA, StaticRifResource.SAMPLE_A_HOSPICE,
 			StaticRifResource.SAMPLE_A_SNF, StaticRifResource.SAMPLE_A_DME),

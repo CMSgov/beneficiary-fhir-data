@@ -5,7 +5,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -29,6 +32,10 @@ public final class RifParsingUtils {
 	private final static DateTimeFormatter RIF_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
 			.appendPattern("dd-MMM-yyyy").toFormatter();
 
+	private final static DateTimeFormatter RIF_TIMESTAMP_FORMATTER = new DateTimeFormatterBuilder()
+			.parseCaseInsensitive()
+			.appendPattern("dd-MMM-yyyy HH:mm:ss").toFormatter();
+
 	/**
 	 * @param file
 	 *            the {@link RifFile} to parse
@@ -46,6 +53,7 @@ public final class RifParsingUtils {
 	 * @return a {@link CSVParser} for the specified {@link RifFile}
 	 */
 	public static CSVParser createCsvParser(CSVFormat csvFormat, RifFile file) {
+		String displayName = file.getDisplayName();
 		return createCsvParser(csvFormat, file.open(), file.getCharset());
 	}
 
@@ -185,16 +193,52 @@ public final class RifParsingUtils {
 	}
 
 	/**
+	 * @param timestampText
+	 *            the timestamp string to parse
+	 * @return the specified text as a {@link Instant}, parsed using
+	 *         {@link #RIF_DATE_FORMATTER}
+	 */
+	public static Instant parseTimestamp(String timestampText) {
+		/*
+		 * Might seem silly to pull this out, but it makes the code a bit easier to
+		 * read, and ensures that this parsing is standardized.
+		 */
+
+		try {
+			LocalDateTime localDateTime = LocalDateTime.parse(timestampText, RIF_TIMESTAMP_FORMATTER);
+			Instant instantFormatted = localDateTime.toInstant(ZoneOffset.UTC);
+			return instantFormatted;
+		} catch (DateTimeParseException e) {
+			throw new InvalidRifValueException(String.format("Unable to parse timestamp value: '%s'.", timestampText),
+					e);
+		}
+	}
+
+	/**
 	 * @param dateText
 	 *            the date string to parse
-	 * @return an {@link Optional} populated with a {@link LocalDate} if the
-	 *         input has data, or an empty Optional if not
+	 * @return an {@link Optional} populated with a {@link LocalDate} if the input
+	 *         has data, or an empty Optional if not
 	 */
 	public static Optional<LocalDate> parseOptionalDate(String dateText) {
 		if (dateText.isEmpty()) {
 			return Optional.empty();
 		} else {
 			return Optional.of(parseDate(dateText));
+		}
+	}
+
+	/**
+	 * @param timestampText
+	 *            the timestamp string to parse
+	 * @return an {@link Optional} populated with a {@link Instant} if the input has
+	 *         data, or an empty Optional if not
+	 */
+	public static Optional<Instant> parseOptionalTimestamp(String timestampText) {
+		if (timestampText.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return Optional.of(parseTimestamp(timestampText));
 		}
 	}
 
