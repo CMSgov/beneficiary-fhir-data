@@ -6,7 +6,6 @@
  */
 
 alter table "Beneficiaries" add column "unhashedHicn" varchar(64);
-alter table "Beneficiaries" alter column "unhashedHicn" set not null;
 
 alter table "Beneficiaries" add column "medicareBeneficiaryId" varchar(11);
 alter table "Beneficiaries" add column "beneficiaryDateOfDeath"	date;
@@ -184,6 +183,5 @@ alter table "Beneficiaries" add column "partDLowIncomeCostShareGroupNovCode"	var
 alter table "Beneficiaries" add column "partDLowIncomeCostShareGroupDecCode"	varchar(2);
 
 alter table "BeneficiariesHistory" add column "unhashedHicn" varchar(64);
-alter table "BeneficiariesHistory" alter column "unhashedHicn" set not null;
 alter table "BeneficiariesHistory" add column "medicareBeneficiaryId" varchar(11);
 
