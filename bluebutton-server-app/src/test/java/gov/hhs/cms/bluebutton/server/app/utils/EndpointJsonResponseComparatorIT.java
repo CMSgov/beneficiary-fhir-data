@@ -1,9 +1,9 @@
 package gov.hhs.cms.bluebutton.server.app.utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -63,47 +64,106 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the capability statement.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void metadata() throws IOException {
 		Path targetResponseDir = getTargetResponseDir();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
 
 		// writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir,
 		// "metadata"));
-		writeFile(workaround(jsonInterceptor.getResponse()), generateFileName(targetResponseDir, "metadata"));
+		writeFile(sortMetadataSearchParamArray(jsonInterceptor.getResponse()),
+				generateFileName(targetResponseDir, "metadata"));
 
 		assertJsonDiffIsEmpty("metadata");
 	}
 
 	/**
-	 * Additional workaround due to HAPI not always returning array elements in the
-	 * same order for a specific searchParam {@link JsonArray} in the capability
-	 * statement. This method is only necessary until the bug has been remedied with
-	 * HAPI.
+	 * FIXME: Additional workaround due to HAPI not always returning array elements
+	 * in the same order for a specific searchParam {@link JsonArray} in the
+	 * capability statement. This method is only necessary until the following issue
+	 * has been resolved with HAPI:
+	 * https://github.com/jamesagnew/hapi-fhir/issues/1183
+	 * 
+	 * Before: 
+	 *   {
+     *     "type": "Patient",
+     *     "profile": {
+     *       "reference": "http://hl7.org/fhir/Profile/Patient"
+     *     },
+     *     "interaction": [
+     *       {
+     *         "code": "read"
+     *       },
+     *       {
+     *         "code": "search-type"
+     *       }
+     *     ],
+	 * 	   "searchParam": [
+     *       {
+     *         "name": "identifier",
+     *         "type": "token",
+     *         "documentation": "A patient identifier"
+     *       },
+     *       {
+     *         "name": "_id",
+     *         "type": "token",
+     *         "documentation": "The ID of the resource"
+     *       }
+     *     ]
+     *   }  
+	 * 
+	 * After:
+	 *   {
+     *     "type": "Patient",
+     *     "profile": {
+     *       "reference": "http://hl7.org/fhir/Profile/Patient"
+     *     },
+     *     "interaction": [
+     *       {
+     *         "code": "read"
+     *       },
+     *       {
+     *         "code": "search-type"
+     *       }
+     *     ],
+     *     "searchParam": [
+     *       {
+     *         "name": "_id",
+     *         "type": "token",
+     *         "documentation": "The ID of the resource"
+     *       },
+     *       {
+     *         "name": "identifier",
+     *         "type": "token",
+     *         "documentation": "A patient identifier"
+     *       }
+     *     ]
+     *   }
 	 * 
 	 * @param unsortedResponse
 	 *            The JSON string with an unsorted searchParam array
 	 * @return The JSON string with the sorted searchParam array
 	 * @throws IOException
 	 */
-	private String workaround(String unsortedResponse) throws IOException {
+	private String sortMetadataSearchParamArray(String unsortedResponse) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter();
 		JsonNode parsedJson = mapper.readTree(unsortedResponse);
-		JsonNode searchParamsNode = parsedJson.at("/rest/0/resource/3/searchParam");
+		
+		// This returns the searchParam node for the resource type='Patient' from
+		// metadata.json
+		JsonNode searchParamsArray = parsedJson.at("/rest/0/resource/3/searchParam");
 
-		Iterator<JsonNode> searchParamsIterator = searchParamsNode.elements();
+		Iterator<JsonNode> searchParamsArrayIterator = searchParamsArray.elements();
 		List<JsonNode> searchParams = new ArrayList<JsonNode>();
-		while (searchParamsIterator.hasNext()) {
-			searchParams.add(searchParamsIterator.next());
+		while (searchParamsArrayIterator.hasNext()) {
+			searchParams.add(searchParamsArrayIterator.next());
 		}
 		
 		Collections.sort(searchParams, new Comparator<JsonNode>() {
@@ -114,9 +174,9 @@ public final class EndpointJsonResponseComparatorIT {
 			}
 		});
 
-		((ArrayNode) searchParamsNode).removeAll();
+		((ArrayNode) searchParamsArray).removeAll();
 		for (int i = 0; i < searchParams.size(); i++) {
-			((ArrayNode) searchParamsNode).add((ObjectNode) searchParams.get(i));
+			((ArrayNode) searchParamsArray).add((ObjectNode) searchParams.get(i));
 		}
 
 		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
@@ -127,7 +187,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the patient read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void patientRead() throws IOException {
@@ -138,10 +198,8 @@ public final class EndpointJsonResponseComparatorIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patientRead"));
@@ -154,7 +212,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the patient search endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void patientSearchById() throws IOException {
@@ -165,10 +223,8 @@ public final class EndpointJsonResponseComparatorIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.search().forResource(Patient.class)
 				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
@@ -183,7 +239,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the patient search by hicn endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void patientByIdentifier() throws IOException {
@@ -194,10 +250,8 @@ public final class EndpointJsonResponseComparatorIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly()
@@ -213,7 +267,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the coverage read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void coverageRead() throws IOException {
@@ -224,10 +278,8 @@ public final class EndpointJsonResponseComparatorIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.read(Coverage.class,
 				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary.getBeneficiaryId()));
@@ -241,7 +293,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the coverage search endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void coverageSearchByPatientId() throws IOException {
@@ -252,10 +304,8 @@ public final class EndpointJsonResponseComparatorIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.search().forResource(Coverage.class)
 				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
@@ -270,7 +320,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the patient search by id endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobByPatientIdAll() throws IOException {
@@ -281,10 +331,8 @@ public final class EndpointJsonResponseComparatorIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.search().forResource(ExplanationOfBenefit.class)
 				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
@@ -299,7 +347,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the patient search by id with paging endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobByPatientIdPaged() throws IOException {
@@ -310,10 +358,8 @@ public final class EndpointJsonResponseComparatorIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.search().forResource(ExplanationOfBenefit.class)
 				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(8)
@@ -328,7 +374,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the carrier read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadCarrier() throws IOException {
@@ -337,10 +383,8 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		CarrierClaim carrClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
 				.map(r -> (CarrierClaim) r).findFirst().get();
@@ -356,7 +400,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the dme read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadDme() throws IOException {
@@ -365,15 +409,12 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
 				.get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadDme"));
 
 		assertJsonDiffIsEmpty("eobReadDme");
@@ -384,7 +425,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the hha read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadHha() throws IOException {
@@ -393,15 +434,12 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
 				.get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadHha"));
 
 		assertJsonDiffIsEmpty("eobReadHha");
@@ -412,7 +450,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the hospice read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadHospice() throws IOException {
@@ -421,10 +459,8 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		HospiceClaim hosClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> (HospiceClaim) r)
 				.findFirst().get();
@@ -440,7 +476,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the inpatient read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadInpatient() throws IOException {
@@ -449,10 +485,8 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		InpatientClaim inpClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
 				.map(r -> (InpatientClaim) r).findFirst().get();
@@ -468,7 +502,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the outpatient read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadOutpatient() throws IOException {
@@ -477,10 +511,8 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		OutpatientClaim outClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
 				.map(r -> (OutpatientClaim) r).findFirst().get();
@@ -496,7 +528,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the pde read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadPde() throws IOException {
@@ -505,15 +537,12 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		PartDEvent pdeClaim = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadPde"));
 
 		assertJsonDiffIsEmpty("eobReadPde");
@@ -524,7 +553,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * for the snf read endpoint.
 	 * 
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	@Test
 	public void eobReadSnf() throws IOException {
@@ -533,15 +562,12 @@ public final class EndpointJsonResponseComparatorIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		fhirClient.setEncoding(EncodingEnum.JSON);
-		JsonInterceptor jsonInterceptor = new JsonInterceptor();
-		fhirClient.registerInterceptor(jsonInterceptor);
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
 				.get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
 		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadSnf"));
 
 		assertJsonDiffIsEmpty("eobReadSnf");
@@ -552,7 +578,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 *            A string to determine which files to compare. Compares the
 	 *            approved and current responses for an endpoint.
 	 * @throws IOException
-	 *             (indicates a file was not found)
+	 *             (indicates a JSON string could not be deserialized properly)
 	 */
 	private static void assertJsonDiffIsEmpty(String fileName) throws IOException {
 		Path approvedResponseDir = Paths.get(".", "src", "test", "resources", "endpoint-responses");
@@ -560,53 +586,41 @@ public final class EndpointJsonResponseComparatorIT {
 			throw new IllegalStateException();
 		Path targetResponseDir = getTargetResponseDir();
 
-		String approvedJson;
-		try {
-			approvedJson = readFile(generateFileName(approvedResponseDir, fileName), Charset.defaultCharset());
-		} catch (IOException e) {
-			throw new FileNotFoundException(
-					"Can't read file at " + generateFileName(approvedResponseDir, fileName).toString());
-		}
-
-		String newJson;
-		try {
-			newJson = readFile(generateFileName(targetResponseDir, fileName), Charset.defaultCharset());
-		} catch (IOException e) {
-			throw new FileNotFoundException(
-					"Can't read file at " + generateFileName(targetResponseDir, fileName).toString());
-		}
+		String approvedJson = readFile(generateFileName(approvedResponseDir, fileName));
+		String newJson = readFile(generateFileName(targetResponseDir, fileName));
 
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode beforeNode = mapper.readTree(approvedJson);
 		JsonNode afterNode = mapper.readTree(newJson);
-		JsonNode patch = JsonDiff.asJson(beforeNode, afterNode);
+		JsonNode diff = JsonDiff.asJson(beforeNode, afterNode);
 
 		// Filter out diffs that we don't care about (due to changing with each call)
 		// such as "lastUpdated" fields, the port on URLs, etc. ...
 		NodeFilteringConsumer consumer = new NodeFilteringConsumer(new NodeFilter() {
 			public boolean apply(JsonNode node) {
-				Pattern p = createRegexPattern();
+				Pattern p = getIgnoredPathsRegex();
 				Matcher m = p.matcher(node.get("path").toString());
 				return m.matches();
 			}
 		});
 
-		patch.forEach(consumer);
-		if (patch.size() > 0) {
-			for (int i = 0; i < patch.size(); i++) {
-				Assert.assertEquals("{}", patch.get(i).toString());
+		diff.forEach(consumer);
+		if (diff.size() > 0) {
+			for (int i = 0; i < diff.size(); i++) {
+				Assert.assertEquals("{}", diff.get(i).toString());
 			}
-		} else {
-			ArrayNode node = (ArrayNode) patch;
-			Assert.assertEquals(0, node.size());
 		}
 	}
 
-	private static Pattern createRegexPattern() {
+	/**
+	 * @return a regex pattern for ignored JSON paths.
+	 */
+	private static Pattern getIgnoredPathsRegex() {
 		StringBuilder pattern = new StringBuilder();
 		pattern.append("\"/id\"");
 		pattern.append("|\"/date\"");
 		pattern.append("|\"/link/[0-9]/url\"");
+		pattern.append("|\"/implementation/url\"");
 		pattern.append("|\"/entry/[0-9]/fullUrl\"");
 		pattern.append("|\"/meta/lastUpdated\"");
 		pattern.append("|\"/procedure/[0-9]/date\"");
@@ -617,14 +631,41 @@ public final class EndpointJsonResponseComparatorIT {
 	}
 
 	/**
-	 * Returns the path to where a file should be written.
+	 * @return a new {@link IGenericClient} fhirClient after setting the encoding to
+	 *         JSON.
+	 */
+	private static IGenericClient createFhirClientAndSetEncoding() {
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		fhirClient.setEncoding(EncodingEnum.JSON);
+
+		return fhirClient;
+	}
+
+	/**
+	 * @param fhirClient
+	 *            The {@link IGenericClient} to register the interceptor to.
+	 * 
+	 * @return a new {@link JsonInterceptor} after registering it with the
+	 *         fhirClient.
+	 */
+	private static JsonInterceptor createAndRegisterJsonInterceptor(IGenericClient fhirClient) {
+		JsonInterceptor jsonInterceptor = new JsonInterceptor();
+		fhirClient.registerInterceptor(jsonInterceptor);
+
+		return jsonInterceptor;
+	}
+
+	/**
+	 * @return the path to where a file should be written.
 	 */
 	private static Path getTargetResponseDir() {
-		// Path targetResponseDir = Paths.get(".", "src", "test", "resources",
-		// "endpoint-responses");
-		Path targetResponseDir = Paths.get(".", "target", "endpoint-responses");
+		Path targetResponseDir = Paths.get("..", "target");
 		if (!Files.isDirectory(targetResponseDir))
-			new File(targetResponseDir.toString()).mkdirs();
+			targetResponseDir = Paths.get("target");
+		if (!Files.isDirectory(targetResponseDir))
+			throw new IllegalStateException();
+
+		new File(targetResponseDir.toString() + "endpoint-response").mkdirs();
 
 		return targetResponseDir;
 	}
@@ -635,7 +676,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * @param endpoint
 	 *            The string to identify which endpoint's response the file contents
 	 *            contain
-	 * @return Returns a path to use as a filename
+	 * @return a path to use as a filename
 	 */
 	private static Path generateFileName(Path directory, String endpoint) {
 		return Paths.get(directory.toString(), endpoint + ".json");
@@ -662,12 +703,16 @@ public final class EndpointJsonResponseComparatorIT {
 	/**
 	 * @param path
 	 *            The path to the file
-	 * @param encoding
-	 *            The charset with which to decode the bytes
+	 * @return the contents of the file as a string.
 	 */
-	private static String readFile(Path path, Charset encoding) throws IOException {
-		byte[] encoded = Files.readAllBytes(path);
-		return new String(encoded, encoding);
+	private static String readFile(Path path) {
+		byte[] encoded = null;
+		try {
+			encoded = Files.readAllBytes(path);
+		} catch (IOException e) {
+			throw new UncheckedIOException("Can't read file at " + path.toString(), e);
+		}
+		return new String(encoded, Charset.forName("UTF-8"));
 	}
 
 	/**
@@ -699,5 +744,14 @@ public final class EndpointJsonResponseComparatorIT {
 				node.removeAll();
 			}
 		}
+	}
+
+	/**
+	 * Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after
+	 * each test case.
+	 */
+	@After
+	public void cleanDatabaseServerAfterEachTestCase() {
+		ServerTestUtils.cleanDatabaseServer();
 	}
 }
