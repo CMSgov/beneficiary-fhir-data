@@ -696,7 +696,7 @@ public final class EndpointJsonResponseComparatorIT {
 			fileWriter.flush();
 			fileWriter.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new UncheckedIOException("Could not write file at " + fileName.toString(), e);
 		}
 	}
 
