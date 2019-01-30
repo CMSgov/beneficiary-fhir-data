@@ -25,6 +25,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -58,6 +59,111 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
  * least one bene and that every bene in it will have >= 1 EOB of every type.
  */
 public final class EndpointJsonResponseComparatorIT {
+
+	@Ignore
+	@Test
+	/**
+	 * Generates the "golden" files, i.e. the approved responses to compare to. Run
+	 * by commenting out the @Ignore annotation and running this method as JUnit.
+	 */
+	public void generateApprovedResponseFiles() throws IOException {
+		Path approvedResponseDir = Paths.get("..", "src", "test", "resources", "endpoint-responses");
+		if (!Files.isDirectory(approvedResponseDir))
+			approvedResponseDir = Paths.get("src", "test", "resources", "endpoint-responses");
+		if (!Files.isDirectory(approvedResponseDir))
+			throw new IllegalStateException();
+
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		// writeFile(jsonInterceptor.getResponse(),
+		// generateFileName(approvedResponseDir, "metadata"));
+		writeFile(sortMetadataSearchParamArray(jsonInterceptor.getResponse()),
+				generateFileName(approvedResponseDir, "metadata"));
+
+		fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "patientRead"));
+
+		fhirClient.search().forResource(Patient.class)
+				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "patientSearchById"));
+
+		fhirClient.search().forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly()
+						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "patientByIdentifier"));
+
+		fhirClient.read(Coverage.class,
+				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary.getBeneficiaryId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "coverageRead"));
+
+		fhirClient.search().forResource(Coverage.class)
+				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "coverageSearchByPatientId"));
+
+		fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobByPatientIdAll"));
+
+		fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(8)
+				.returnBundle(Bundle.class).execute();
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobByPatientIdPaged"));
+
+		CarrierClaim carrClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
+				.map(r -> (CarrierClaim) r).findFirst().get();
+		fhirClient.read(ExplanationOfBenefit.class,
+				TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadCarrier"));
+
+		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
+				.get();
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadDme"));
+
+		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
+				.get();
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadHha"));
+
+		HospiceClaim hosClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> (HospiceClaim) r)
+				.findFirst().get();
+		fhirClient.read(ExplanationOfBenefit.class,
+				TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadHospice"));
+
+		InpatientClaim inpClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
+				.map(r -> (InpatientClaim) r).findFirst().get();
+		fhirClient.read(ExplanationOfBenefit.class,
+				TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadInpatient"));
+
+		OutpatientClaim outClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
+				.map(r -> (OutpatientClaim) r).findFirst().get();
+		fhirClient.read(ExplanationOfBenefit.class,
+				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadOutpatient"));
+
+		PartDEvent pdeClaim = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
+				.findFirst().get();
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadPde"));
+
+		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
+				.get();
+		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
+		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadSnf"));
+	}
 
 	/**
 	 * Verifies that there is no change between the current and approved responses
