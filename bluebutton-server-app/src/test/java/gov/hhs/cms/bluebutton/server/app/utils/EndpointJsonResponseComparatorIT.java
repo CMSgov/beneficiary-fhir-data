@@ -765,13 +765,14 @@ public final class EndpointJsonResponseComparatorIT {
 	 * @return the path to where a file should be written.
 	 */
 	private static Path getTargetResponseDir() {
-		Path targetResponseDir = Paths.get("..", "target");
-		if (!Files.isDirectory(targetResponseDir))
-			targetResponseDir = Paths.get("target");
-		if (!Files.isDirectory(targetResponseDir))
+		Path targetDir = Paths.get("..", "target");
+		if (!Files.isDirectory(targetDir))
+			targetDir = Paths.get("target");
+		if (!Files.isDirectory(targetDir))
 			throw new IllegalStateException();
 
-		new File(targetResponseDir.toString() + "endpoint-response").mkdirs();
+		new File(Paths.get(targetDir.toString(), "endpoint-responses").toString()).mkdirs();
+		Path targetResponseDir = Paths.get(targetDir.toString(), "endpoint-responses");
 
 		return targetResponseDir;
 	}
