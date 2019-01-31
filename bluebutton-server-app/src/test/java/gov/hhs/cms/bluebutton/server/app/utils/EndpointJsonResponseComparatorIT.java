@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +28,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -49,7 +54,10 @@ import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.ClaimType;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.CoverageResourceProvider;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerConstants;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
@@ -58,7 +66,67 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
  * responses. This test code relies on the assumption that SAMPLE_A will have at
  * least one bene and that every bene in it will have >= 1 EOB of every type.
  */
+@RunWith(Parameterized.class)
 public final class EndpointJsonResponseComparatorIT {
+
+	@Parameters(name = "endpointId = {0}")
+	public static Object[][] data() {
+		return new Object[][] { { "metadata", (Supplier<String>) EndpointJsonResponseComparatorIT::metadata },
+				{ "patientRead", (Supplier<String>) EndpointJsonResponseComparatorIT::patientRead },
+				{ "patientSearchById", (Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchById },
+				{ "patientByIdentifier", (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifier },
+				{ "coverageRead", (Supplier<String>) EndpointJsonResponseComparatorIT::coverageRead },
+				{ "coverageSearchByPatientId",
+						(Supplier<String>) EndpointJsonResponseComparatorIT::coverageSearchByPatientId },
+				{ "eobByPatientIdAll", (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdAll },
+				{ "eobByPatientIdPaged", (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdPaged },
+				{ "eobReadCarrier", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrier },
+				{ "eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDme },
+				{ "eobReadHha", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHha },
+				{ "eobReadHospice", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHospice },
+				{ "eobReadInpatient", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadInpatient },
+				{ "eobReadOutpatient", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadOutpatient },
+				{ "eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadPde },
+				{ "eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadSnf } };
+	}
+
+	private final String endpointId;
+	private final Supplier<String> endpointOperation;
+
+	/**
+	 * Parameterized test constructor: JUnit will construct a new instance of this
+	 * class for every top-level element returned by the {@link #data()}
+	 * {@link Parameters} test data generator, and then run the test cases in this
+	 * class using that specific test data element.
+	 * 
+	 * @param endpointId
+	 *            the name of the operation being tested, which is also used to
+	 *            locate the "approved" operation response file in the
+	 *            src/test/resources/endpoint-responses source directory
+	 * @param endpointOperation
+	 *            the operation to be tested
+	 * 
+	 */
+	public EndpointJsonResponseComparatorIT(String endpointId, Supplier<String> endpointOperation) {
+		this.endpointId = endpointId;
+		this.endpointOperation = endpointOperation;
+	}
+
+	/**
+	 * Generates current endpoint response files, comparing them to the
+	 * corresponding approved responses.
+	 */
+	@Test
+	public void verifyCorrectEndpointResponse() {
+		Path targetResponseDir = getTargetResponseDir();
+
+		// Call the server endpoint and save its result out to a file corresponding to
+		// the endpoint Id.
+		String endpointResponse = endpointOperation.get();
+		writeFile(endpointResponse, generateFileName(targetResponseDir, endpointId));
+
+		assertJsonDiffIsEmpty(endpointId);
+	}
 
 	@Ignore
 	@Test
@@ -66,127 +134,25 @@ public final class EndpointJsonResponseComparatorIT {
 	 * Generates the "golden" files, i.e. the approved responses to compare to. Run
 	 * by commenting out the @Ignore annotation and running this method as JUnit.
 	 */
-	public void generateApprovedResponseFiles() throws IOException {
-		Path approvedResponseDir = Paths.get("..", "src", "test", "resources", "endpoint-responses");
-		if (!Files.isDirectory(approvedResponseDir))
-			approvedResponseDir = Paths.get("src", "test", "resources", "endpoint-responses");
-		if (!Files.isDirectory(approvedResponseDir))
-			throw new IllegalStateException();
+	public void generateApprovedResponseFiles() {
+		Path approvedResponseDir = getApprovedResponseDir();
 
-		List<Object> loadedRecords = ServerTestUtils
-				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
-				.findFirst().get();
-
-		IGenericClient fhirClient = createFhirClientAndSetEncoding();
-		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
-
-		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
-		// writeFile(jsonInterceptor.getResponse(),
-		// generateFileName(approvedResponseDir, "metadata"));
-		writeFile(sortMetadataSearchParamArray(jsonInterceptor.getResponse()),
-				generateFileName(approvedResponseDir, "metadata"));
-
-		fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "patientRead"));
-
-		fhirClient.search().forResource(Patient.class)
-				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
-				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "patientSearchById"));
-
-		fhirClient.search().forResource(Patient.class)
-				.where(Patient.IDENTIFIER.exactly()
-						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
-				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "patientByIdentifier"));
-
-		fhirClient.read(Coverage.class,
-				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary.getBeneficiaryId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "coverageRead"));
-
-		fhirClient.search().forResource(Coverage.class)
-				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
-				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "coverageSearchByPatientId"));
-
-		fhirClient.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
-				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobByPatientIdAll"));
-
-		fhirClient.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(8)
-				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobByPatientIdPaged"));
-
-		CarrierClaim carrClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
-				.map(r -> (CarrierClaim) r).findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadCarrier"));
-
-		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
-				.get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadDme"));
-
-		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
-				.get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadHha"));
-
-		HospiceClaim hosClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> (HospiceClaim) r)
-				.findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadHospice"));
-
-		InpatientClaim inpClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
-				.map(r -> (InpatientClaim) r).findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadInpatient"));
-
-		OutpatientClaim outClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
-				.map(r -> (OutpatientClaim) r).findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadOutpatient"));
-
-		PartDEvent pdeClaim = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
-				.findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadPde"));
-
-		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
-				.get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(approvedResponseDir, "eobReadSnf"));
+		// Call the server endpoint and save its result out to a file corresponding to
+		// the endpoint Id.
+		String endpointResponse = endpointOperation.get();
+		writeFile(endpointResponse, generateFileName(approvedResponseDir, endpointId));
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the capability statement.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the {@link IGenericClient#fetchConformance()}
+	 *         operation
 	 */
-	@Test
-	public void metadata() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String metadata() {
 		IGenericClient fhirClient = createFhirClientAndSetEncoding();
 		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
-
-		// writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir,
-		// "metadata"));
-		writeFile(sortMetadataSearchParamArray(jsonInterceptor.getResponse()),
-				generateFileName(targetResponseDir, "metadata"));
-
-		assertJsonDiffIsEmpty("metadata");
+		return sortMetadataSearchParamArray(jsonInterceptor.getResponse());
 	}
 
 	/**
@@ -253,14 +219,19 @@ public final class EndpointJsonResponseComparatorIT {
      *   }
 	 * 
 	 * @param unsortedResponse
-	 *            The JSON string with an unsorted searchParam array
-	 * @return The JSON string with the sorted searchParam array
-	 * @throws IOException
+	 *            the JSON string with an unsorted searchParam array
+	 * @return the JSON string with the sorted searchParam array
 	 */
-	private String sortMetadataSearchParamArray(String unsortedResponse) throws IOException {
+	private static String sortMetadataSearchParamArray(String unsortedResponse) {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter();
-		JsonNode parsedJson = mapper.readTree(unsortedResponse);
+		JsonNode parsedJson = null;
+		try {
+			parsedJson = mapper.readTree(unsortedResponse);
+		} catch (IOException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+		}
 		
 		// This returns the searchParam node for the resource type='Patient' from
 		// metadata.json
@@ -285,20 +256,22 @@ public final class EndpointJsonResponseComparatorIT {
 			((ArrayNode) searchParamsArray).add((ObjectNode) searchParams.get(i));
 		}
 
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
+		String jsonResponse = null;
+		try {
+			jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
+		} catch (JsonProcessingException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+		}
+		return jsonResponse;
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the patient read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation
 	 */
-	@Test
-	public void patientRead() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String patientRead() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -308,22 +281,15 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patientRead"));
-
-		assertJsonDiffIsEmpty("patientRead");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the patient search endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 *         operation
 	 */
-	@Test
-	public void patientSearchById() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String patientSearchById() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -335,22 +301,15 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.search().forResource(Patient.class)
 				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
 				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patientSearchById"));
-
-		assertJsonDiffIsEmpty("patientSearchById");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the patient search by hicn endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 *         operation
 	 */
-	@Test
-	public void patientByIdentifier() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String patientByIdentifier() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -363,22 +322,15 @@ public final class EndpointJsonResponseComparatorIT {
 				.where(Patient.IDENTIFIER.exactly()
 						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
 				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "patientByIdentifier"));
-
-		assertJsonDiffIsEmpty("patientByIdentifier");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the coverage read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation
 	 */
-	@Test
-	public void coverageRead() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String coverageRead() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -389,22 +341,15 @@ public final class EndpointJsonResponseComparatorIT {
 
 		fhirClient.read(Coverage.class,
 				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary.getBeneficiaryId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverageRead"));
-
-		assertJsonDiffIsEmpty("coverageRead");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the coverage search endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 *         operation
 	 */
-	@Test
-	public void coverageSearchByPatientId() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String coverageSearchByPatientId() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -416,22 +361,15 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.search().forResource(Coverage.class)
 				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
 				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "coverageSearchByPatientId"));
-
-		assertJsonDiffIsEmpty("coverageSearchByPatientId");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the patient search by id endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam, String, ca.uhn.fhir.rest.method.RequestDetails)}
+	 *         operation
 	 */
-	@Test
-	public void eobByPatientIdAll() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobByPatientIdAll() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -443,22 +381,15 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.search().forResource(ExplanationOfBenefit.class)
 				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
 				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobByPatientIdAll"));
-
-		assertJsonDiffIsEmpty("eobByPatientIdAll");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the patient search by id with paging endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the paged
+	 *         {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam, String, ca.uhn.fhir.rest.method.RequestDetails)}
+	 *         operation
 	 */
-	@Test
-	public void eobByPatientIdPaged() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobByPatientIdPaged() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -470,22 +401,15 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.search().forResource(ExplanationOfBenefit.class)
 				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(8)
 				.returnBundle(Bundle.class).execute();
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobByPatientIdPaged"));
-
-		assertJsonDiffIsEmpty("eobByPatientIdPaged");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the carrier read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for Carrier claims
 	 */
-	@Test
-	public void eobReadCarrier() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadCarrier() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -496,22 +420,15 @@ public final class EndpointJsonResponseComparatorIT {
 				.map(r -> (CarrierClaim) r).findFirst().get();
 		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadCarrier"));
-
-		assertJsonDiffIsEmpty("eobReadCarrier");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the dme read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for DME claims
 	 */
-	@Test
-	public void eobReadDme() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadDme() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -521,22 +438,15 @@ public final class EndpointJsonResponseComparatorIT {
 		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
 				.get();
 		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadDme"));
-
-		assertJsonDiffIsEmpty("eobReadDme");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the hha read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for HHA claims
 	 */
-	@Test
-	public void eobReadHha() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadHha() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -546,22 +456,15 @@ public final class EndpointJsonResponseComparatorIT {
 		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
 				.get();
 		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadHha"));
-
-		assertJsonDiffIsEmpty("eobReadHha");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the hospice read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for Hospice claims
 	 */
-	@Test
-	public void eobReadHospice() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadHospice() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -572,22 +475,15 @@ public final class EndpointJsonResponseComparatorIT {
 				.findFirst().get();
 		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadHospice"));
-
-		assertJsonDiffIsEmpty("eobReadHospice");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the inpatient read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for Inpatient claims
 	 */
-	@Test
-	public void eobReadInpatient() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadInpatient() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -598,22 +494,15 @@ public final class EndpointJsonResponseComparatorIT {
 				.map(r -> (InpatientClaim) r).findFirst().get();
 		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadInpatient"));
-
-		assertJsonDiffIsEmpty("eobReadInpatient");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the outpatient read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for Outpatient claims
 	 */
-	@Test
-	public void eobReadOutpatient() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadOutpatient() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -624,22 +513,15 @@ public final class EndpointJsonResponseComparatorIT {
 				.map(r -> (OutpatientClaim) r).findFirst().get();
 		fhirClient.read(ExplanationOfBenefit.class,
 				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadOutpatient"));
-
-		assertJsonDiffIsEmpty("eobReadOutpatient");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the pde read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for PDE claims
 	 */
-	@Test
-	public void eobReadPde() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadPde() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -649,22 +531,15 @@ public final class EndpointJsonResponseComparatorIT {
 		PartDEvent pdeClaim = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
 		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadPde"));
-
-		assertJsonDiffIsEmpty("eobReadPde");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * Verifies that there is no change between the current and approved responses
-	 * for the snf read endpoint.
-	 * 
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * @return the results of the
+	 *         {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation for SNF claims
 	 */
-	@Test
-	public void eobReadSnf() throws IOException {
-		Path targetResponseDir = getTargetResponseDir();
-
+	public static String eobReadSnf() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -674,30 +549,37 @@ public final class EndpointJsonResponseComparatorIT {
 		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
 				.get();
 		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
-		writeFile(jsonInterceptor.getResponse(), generateFileName(targetResponseDir, "eobReadSnf"));
-
-		assertJsonDiffIsEmpty("eobReadSnf");
+		return jsonInterceptor.getResponse();
 	}
 
 	/**
-	 * @param fileName
-	 *            A string to determine which files to compare. Compares the
-	 *            approved and current responses for an endpoint.
-	 * @throws IOException
-	 *             (indicates a JSON string could not be deserialized properly)
+	 * Compares the approved and current responses for an endpoint.
+	 * 
+	 * @param endpointId
+	 *            the name of the operation being tested, used to determine which
+	 *            files to compare
 	 */
-	private static void assertJsonDiffIsEmpty(String fileName) throws IOException {
-		Path approvedResponseDir = Paths.get(".", "src", "test", "resources", "endpoint-responses");
-		if (!Files.isDirectory(approvedResponseDir))
-			throw new IllegalStateException();
+	private static void assertJsonDiffIsEmpty(String endpointId) {
+		Path approvedResponseDir = getApprovedResponseDir();
 		Path targetResponseDir = getTargetResponseDir();
 
-		String approvedJson = readFile(generateFileName(approvedResponseDir, fileName));
-		String newJson = readFile(generateFileName(targetResponseDir, fileName));
+		String approvedJson = readFile(generateFileName(approvedResponseDir, endpointId));
+		String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode beforeNode = mapper.readTree(approvedJson);
-		JsonNode afterNode = mapper.readTree(newJson);
+		JsonNode beforeNode = null;
+		try {
+			beforeNode = mapper.readTree(approvedJson);
+		} catch (IOException e) {
+			throw new UncheckedIOException("Unable to deserialize the following JSON content as tree: " + approvedJson,
+					e);
+		}
+		JsonNode afterNode = null;
+		try {
+			afterNode = mapper.readTree(newJson);
+		} catch (IOException e) {
+			throw new UncheckedIOException("Unable to deserialize the following JSON content as tree: " + newJson, e);
+		}
 		JsonNode diff = JsonDiff.asJson(beforeNode, afterNode);
 
 		// Filter out diffs that we don't care about (due to changing with each call)
@@ -719,7 +601,7 @@ public final class EndpointJsonResponseComparatorIT {
 	}
 
 	/**
-	 * @return a regex pattern for ignored JSON paths.
+	 * @return a regex pattern for ignored JSON paths
 	 */
 	private static Pattern getIgnoredPathsRegex() {
 		StringBuilder pattern = new StringBuilder();
@@ -738,7 +620,7 @@ public final class EndpointJsonResponseComparatorIT {
 
 	/**
 	 * @return a new {@link IGenericClient} fhirClient after setting the encoding to
-	 *         JSON.
+	 *         JSON
 	 */
 	private static IGenericClient createFhirClientAndSetEncoding() {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -749,10 +631,9 @@ public final class EndpointJsonResponseComparatorIT {
 
 	/**
 	 * @param fhirClient
-	 *            The {@link IGenericClient} to register the interceptor to.
-	 * 
+	 *            the {@link IGenericClient} to register the interceptor to.
 	 * @return a new {@link JsonInterceptor} after registering it with the
-	 *         fhirClient.
+	 *         fhirClient
 	 */
 	private static JsonInterceptor createAndRegisterJsonInterceptor(IGenericClient fhirClient) {
 		JsonInterceptor jsonInterceptor = new JsonInterceptor();
@@ -762,7 +643,20 @@ public final class EndpointJsonResponseComparatorIT {
 	}
 
 	/**
-	 * @return the path to where a file should be written.
+	 * @return the path to the approved endpoint response directory
+	 */
+	private static Path getApprovedResponseDir() {
+		Path approvedResponseDir = Paths.get("..", "src", "test", "resources", "endpoint-responses");
+		if (!Files.isDirectory(approvedResponseDir))
+			approvedResponseDir = Paths.get("src", "test", "resources", "endpoint-responses");
+		if (!Files.isDirectory(approvedResponseDir))
+			throw new IllegalStateException();
+
+		return approvedResponseDir;
+	}
+
+	/**
+	 * @return the path to the target endpoint response directory
 	 */
 	private static Path getTargetResponseDir() {
 		Path targetDir = Paths.get("..", "target");
@@ -779,9 +673,9 @@ public final class EndpointJsonResponseComparatorIT {
 
 	/**
 	 * @param directory
-	 *            The path to where the file should should be written
+	 *            the path to where the file should should be written
 	 * @param endpoint
-	 *            The string to identify which endpoint's response the file contents
+	 *            the string to identify which endpoint's response the file contents
 	 *            contain
 	 * @return a path to use as a filename
 	 */
@@ -791,9 +685,9 @@ public final class EndpointJsonResponseComparatorIT {
 
 	/**
 	 * @param contents
-	 *            The string to be written to a file
+	 *            the string to be written to a file
 	 * @param fileName
-	 *            The path to name the file
+	 *            the path to name the file
 	 */
 	private static void writeFile(String contents, Path fileName) {
 		try {
@@ -809,7 +703,7 @@ public final class EndpointJsonResponseComparatorIT {
 
 	/**
 	 * @param path
-	 *            The path to the file
+	 *            the path to the file
 	 * @return the contents of the file as a string.
 	 */
 	private static String readFile(Path path) {
