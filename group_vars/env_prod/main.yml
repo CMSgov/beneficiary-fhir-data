@@ -18,6 +18,3 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_local_test_env_prod_certificate.pem') }}"
   - alias: client_bluebutton_frontend_prod
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_prod_certificate.pem') }}"
-# Uncomment this temporarily if you have a local test certificate you need to use for a bit.
-#  - alias: client_test
-#    certificate: "{{ lookup('file', 'dev/client-test-certificate.pem') }}"
