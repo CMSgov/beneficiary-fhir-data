@@ -20,6 +20,12 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/bluebutton-backend-dpr-data-server-client-test-certificate.pem') }}"
   - alias: client_frontend
     certificate: "{{ lookup('file', 'files/bluebutton-frontend-dpr-client-public.crt') }}"
+  - alias: client_bcda_dev
+    certificate: "{{ lookup('file', 'files/client_data_server_bcda_dev_certificate.pem') }}"
+  - alias: client_bcda_test
+    certificate: "{{ lookup('file', 'files/client_data_server_bcda_test_certificate.pem') }}"
+  - alias: client_bcda_sbx
+    certificate: "{{ lookup('file', 'files/client_data_server_bcda_sbx_certificate.pem') }}"
 # Uncomment this temporarily if you have a local test certificate you need to use for a bit.
 #  - alias: client_test
 #    certificate: "{{ lookup('file', 'dev/client-test-certificate.pem') }}"
