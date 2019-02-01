@@ -9,12 +9,12 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.TemporalPrecisionEnum;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
