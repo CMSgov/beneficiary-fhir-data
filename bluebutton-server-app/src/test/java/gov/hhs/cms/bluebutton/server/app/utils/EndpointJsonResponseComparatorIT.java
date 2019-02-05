@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -68,6 +70,8 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
  */
 @RunWith(Parameterized.class)
 public final class EndpointJsonResponseComparatorIT {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(EndpointJsonResponseComparatorIT.class);
 
 	@Parameters(name = "endpointId = {0}")
 	public static Object[][] data() {
@@ -118,6 +122,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 */
 	@Test
 	public void verifyCorrectEndpointResponse() {
+		LOGGER.info("Starting test case: {}", endpointId);
 		Path targetResponseDir = getTargetResponseDir();
 
 		// Call the server endpoint and save its result out to a file corresponding to
@@ -126,14 +131,15 @@ public final class EndpointJsonResponseComparatorIT {
 		writeFile(endpointResponse, generateFileName(targetResponseDir, endpointId));
 
 		assertJsonDiffIsEmpty(endpointId);
+		LOGGER.info("Exiting test case: {}", endpointId);
 	}
 
-	@Ignore
-	@Test
 	/**
 	 * Generates the "golden" files, i.e. the approved responses to compare to. Run
 	 * by commenting out the @Ignore annotation and running this method as JUnit.
 	 */
+	@Ignore
+	@Test
 	public void generateApprovedResponseFiles() {
 		Path approvedResponseDir = getApprovedResponseDir();
 
