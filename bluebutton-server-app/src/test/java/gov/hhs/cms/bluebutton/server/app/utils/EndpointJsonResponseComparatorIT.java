@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -760,5 +762,13 @@ public final class EndpointJsonResponseComparatorIT {
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
 		ServerTestUtils.cleanDatabaseServer();
+	}
+
+	/**
+	 * TODO: remove this once memory issues have been resolved
+	 */
+	@BeforeClass
+	public void startHeapDumpCollection() {
+		ServerTestUtils.startHeapDumpCollector(Duration.ofSeconds(30));
 	}
 }
