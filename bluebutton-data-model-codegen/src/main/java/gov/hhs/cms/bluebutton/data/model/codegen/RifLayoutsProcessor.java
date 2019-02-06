@@ -181,7 +181,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntity("Beneficiary").setHeaderTable("Beneficiaries")
 					.setHeaderEntityIdField("beneficiaryId")
 					.setHeaderEntityAdditionalDatabaseFields(
-							createDetailsForAdditionalDatabaseFields(Arrays.asList("unhashedHicn")))
+							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
 					.setHasLines(false));
 			/*
 			 * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
@@ -198,7 +198,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							"medicareEnrollmentStatusCode", "partATerminationCode", "partBTerminationCode",
 							"nameSurname", "nameGiven", "nameMiddleInitial")
 					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
-							Arrays.asList("unhashedHicn", "medicareBeneficiaryId")))
+							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -655,7 +655,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			} else if (rifField.getRifColumnType() == RifColumnType.DATE) {
 				// Handle a LocalDate field.
 				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDate" : "parseDate";
-			} else if (rifField.getRifColumnType() == RifColumnType.TIME) {
+			} else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP) {
 				// Handle an Instant field.
 				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalTimestamp" : "parseTimestamp";
 			} else {
@@ -891,7 +891,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			return ClassName.get(String.class);
 		else if (rifField.getRifColumnType() == RifColumnType.DATE && rifField.getRifColumnLength().orElse(0) == 8)
 			return ClassName.get(LocalDate.class);
-		else if (rifField.getRifColumnType() == RifColumnType.TIME && rifField.getRifColumnLength().orElse(0) == 20)
+		else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP
+				&& rifField.getRifColumnLength().orElse(0) == 20)
 			return ClassName.get(Instant.class);
 		else if (rifField.getRifColumnType() == RifColumnType.NUM
 				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0)
@@ -1008,16 +1009,16 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		List<RifField> addlDatabaseFields = new ArrayList<RifField>();
 
 		for (String additionalDatabaseField : additionalDatabaseFields) {
-			if (additionalDatabaseField.contentEquals("unhashedHicn")) {
-				RifField unhashedHicn = new RifField("unhashed_Hicn", RifColumnType.CHAR, Optional.of(64),
+			if (additionalDatabaseField.contentEquals("hicnUnhashed")) {
+				RifField hicnUnhashed = new RifField("BENE_CRNT_HIC_NUM", RifColumnType.CHAR, Optional.of(64),
 						Optional.of(0), Boolean.FALSE, new URL(DATA_DICTIONARY_LINK + "benecrnthicnum"),
 						"BENE_CRNT_HIC_NUM",
-						"unhashedHicn");
-				addlDatabaseFields.add(unhashedHicn);
+						"hicnUnhashed");
+				addlDatabaseFields.add(hicnUnhashed);
 				continue;
 			}
 			if (additionalDatabaseField.contentEquals("medicareBeneficiaryId")) {
-				RifField medicareBeneficiaryId = new RifField("mbi_num", RifColumnType.CHAR, Optional.of(11),
+				RifField medicareBeneficiaryId = new RifField("MBI_NUM", RifColumnType.CHAR, Optional.of(11),
 						Optional.of(0), Boolean.TRUE, new URL(DATA_DICTIONARY_LINK + "mbinum"), "MBI_NUM",
 						"medicareBeneficiaryId");
 				addlDatabaseFields.add(medicareBeneficiaryId);

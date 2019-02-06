@@ -303,6 +303,6 @@ public final class RifLayout {
 
 		NUM,
 		
-		TIME;
+		TIMESTAMP;
 	}
 }
