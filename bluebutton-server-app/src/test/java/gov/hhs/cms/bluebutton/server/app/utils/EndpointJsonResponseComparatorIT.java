@@ -768,7 +768,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * TODO: remove this once memory issues have been resolved
 	 */
 	@BeforeClass
-	public void startHeapDumpCollection() {
+	public static void startHeapDumpCollection() {
 		ServerTestUtils.startHeapDumpCollector(Duration.ofSeconds(30));
 	}
 }
