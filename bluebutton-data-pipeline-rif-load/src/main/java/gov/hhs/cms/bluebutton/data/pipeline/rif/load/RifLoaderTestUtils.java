@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.sql.DataSource;
@@ -95,33 +96,43 @@ public final class RifLoaderTestUtils {
 			throw new BadCodeMonkeyException("Saving you from a career-changing event.");
 
 		EntityManagerFactory entityManagerFactory = createEntityManagerFactory(options);
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		EntityManager entityManager = null;
+		EntityTransaction transaction = null;
+		try {
+			entityManager = entityManagerFactory.createEntityManager();
 
-		// Determine the entity types to delete, and the order to do so in.
-		Comparator<Class<?>> entityDeletionSorter = (t1, t2) -> {
-			if (t1.equals(Beneficiary.class))
-				return 1;
-			if (t2.equals(Beneficiary.class))
-				return -1;
-			if (t1.getSimpleName().endsWith("Line"))
-				return -1;
-			if (t2.getSimpleName().endsWith("Line"))
-				return 1;
-			return 0;
-		};
-		List<Class<?>> entityTypesInDeletionOrder = entityManagerFactory.getMetamodel().getEntities().stream()
-				.map(t -> t.getJavaType()).sorted(entityDeletionSorter).collect(Collectors.toList());
+			// Determine the entity types to delete, and the order to do so in.
+			Comparator<Class<?>> entityDeletionSorter = (t1, t2) -> {
+				if (t1.equals(Beneficiary.class))
+					return 1;
+				if (t2.equals(Beneficiary.class))
+					return -1;
+				if (t1.getSimpleName().endsWith("Line"))
+					return -1;
+				if (t2.getSimpleName().endsWith("Line"))
+					return 1;
+				return 0;
+			};
+			List<Class<?>> entityTypesInDeletionOrder = entityManagerFactory.getMetamodel().getEntities().stream()
+					.map(t -> t.getJavaType()).sorted(entityDeletionSorter).collect(Collectors.toList());
 
-		LOGGER.info("Deleting all resources...");
-		entityManager.getTransaction().begin();
-		for (Class<?> entityClass : entityTypesInDeletionOrder) {
-			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-			CriteriaDelete query = builder.createCriteriaDelete(entityClass);
-			query.from(entityClass);
-			entityManager.createQuery(query).executeUpdate();
+			LOGGER.info("Deleting all resources...");
+			transaction = entityManager.getTransaction();
+			transaction.begin();
+			for (Class<?> entityClass : entityTypesInDeletionOrder) {
+				CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+				CriteriaDelete query = builder.createCriteriaDelete(entityClass);
+				query.from(entityClass);
+				entityManager.createQuery(query).executeUpdate();
+			}
+			transaction.commit();
+			LOGGER.info("Deleted all resources.");
+		} finally {
+			if (transaction != null && transaction.isActive())
+				transaction.rollback();
+			if (entityManager != null)
+				entityManager.close();
 		}
-		entityManager.getTransaction().commit();
-		LOGGER.info("Deleted all resources.");
 	}
 
 	/**
