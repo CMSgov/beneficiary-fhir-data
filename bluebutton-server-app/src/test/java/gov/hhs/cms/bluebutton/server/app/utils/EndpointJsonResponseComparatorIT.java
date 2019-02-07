@@ -769,6 +769,6 @@ public final class EndpointJsonResponseComparatorIT {
 	 */
 	@BeforeClass
 	public static void startHeapDumpCollection() {
-		ServerTestUtils.startHeapDumpCollector(Duration.ofSeconds(30));
+		ServerTestUtils.startHeapDumpCollector(Duration.ofSeconds(5));
 	}
 }
