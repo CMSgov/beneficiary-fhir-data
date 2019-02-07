@@ -340,12 +340,13 @@ public final class ServerTestUtils {
 						.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic",
 								com.sun.management.HotSpotDiagnosticMXBean.class);
 				mxBean.dumpHeap(heapDump.toString(), true);
+				LOGGER.info("Generated heap dump at: {}", heapDump.toAbsolutePath().toString());
 			} catch (IOException e) {
 				LOGGER.warn("Unable to generate heap dump.", e);
 				throw new UncheckedIOException(e);
 			}
 		};
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-		executor.schedule(collector, period.toMillis(), TimeUnit.MILLISECONDS);
+		executor.scheduleAtFixedRate(collector, period.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
 	}
 }
