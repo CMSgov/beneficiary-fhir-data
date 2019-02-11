@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<hapi-fhir.version>2.5</hapi-fhir.version>
+		<hapi-fhir.version>3.6</hapi-fhir.version>
 		<jersey.version>2.25.1</jersey.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec
@@ -51,18 +51,24 @@
 			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
 			<artifactId>bluebutton-data-model-rif</artifactId>
 		</dependency>
-
+		
+		<!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-dstu3 -->
 		<dependency>
-			<!-- This dependency includes the core HAPI-FHIR classes -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-base</artifactId>
-			<version>${hapi-fhir.version}</version>
+		    <groupId>ca.uhn.hapi.fhir</groupId>
+		    <artifactId>hapi-fhir-structures-dstu3</artifactId>
+		    <version>3.6.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-server -->
 		<dependency>
-			<!-- At least one "structures" JAR must also be included -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>${hapi-fhir.version}</version>
+		    <groupId>ca.uhn.hapi.fhir</groupId>
+		    <artifactId>hapi-fhir-server</artifactId>
+		    <version>3.6.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-client -->
+		<dependency>
+		    <groupId>ca.uhn.hapi.fhir</groupId>
+		    <artifactId>hapi-fhir-client</artifactId>
+		    <version>3.6.0</version>
 		</dependency>
 
 		<dependency>
