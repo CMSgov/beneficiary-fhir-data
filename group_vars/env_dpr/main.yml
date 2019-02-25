@@ -20,6 +20,10 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/bluebutton-backend-dpr-data-server-client-test-certificate.pem') }}"
   - alias: client_frontend
     certificate: "{{ lookup('file', 'files/bluebutton-frontend-dpr-client-public.crt') }}"
+  - alias: client_mct_test
+    certificate: "{{ lookup('file', 'files/client_data_server_mct_test_certificate.pem') }}"
+  - alias: client_mct_imp
+    certificate: "{{ lookup('file', 'files/client_data_server_mct_imp_certificate.pem') }}"
 # Uncomment this temporarily if you have a local test certificate you need to use for a bit.
 #  - alias: client_test
 #    certificate: "{{ lookup('file', 'dev/client-test-certificate.pem') }}"
