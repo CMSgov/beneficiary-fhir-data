@@ -7,7 +7,7 @@ aws_subnets:
     vpc_name: 'lscw10vc01'
     ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-app-1a') | list)[0].ipv4_cidr }}"
     availability_zone: 'us-east-1a'
-  # Has: lscw10ap04 (TODO)
+  # Has: lscw10ap04 (AWS admin box)
   - subnet_name: 'lscw10-data-1d'
     vpc_name: 'lscw10vc01'
     ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-data-1d') | list)[0].ipv4_cidr }}"
