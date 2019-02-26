@@ -1,2 +1,70 @@
 ---
 aws_region: us-east-1
+
+aws_subnets:
+  # Has: lscw10ap01 (Jenkins), lscw10ap02 (Foglight), lscw10dc01 (AD primary)
+  - subnet_name: 'lscw10-app-1a'
+    vpc_name: 'lscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-app-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  # Has: lscw10ap04 (TODO)
+  - subnet_name: 'lscw10-data-1d'
+    vpc_name: 'lscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-data-1d') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1d'
+  # Has: lscw10dc02 (AD secondary)
+  - subnet_name: 'lscw10-app-1b'
+    vpc_name: 'lscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-app-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+  - subnet_name: 'lscw10-data-1a'
+    vpc_name: 'tscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-data-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'lscw10-app-1a'
+    vpc_name: 'tscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-app-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'lscw10-pub-1a'
+    vpc_name: 'tscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-pub-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'lscw10-data-1b'
+    vpc_name: 'tscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-data-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+  - subnet_name: 'lscw10-app-1b'
+    vpc_name: 'tscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-app-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+  - subnet_name: 'lscw10-pub-1b'
+    vpc_name: 'tscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'lscw10-pub-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+
+aws_security_groups:
+  - sg_name: 'tsbb10sg02'
+    vpc_name: 'tscw10vc01'
+    description: 'HTTP Class Services'
+
+aws_vpcs:
+  - vpc_name: 'lscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'lscw10vc01') | list)[0].ipv4_cidr }}"
+    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'lscw10vc01')) }}"
+  - vpc_name: 'tscw10vc01'
+    ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'tscw10vc01') | list)[0].ipv4_cidr }}"
+    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'tscw10vc01')) }}"
+
+deployment_environment_ts:
+  env_name: 'ts'
+  data_server_elb:
+    elb_name: 'tsbb10lb01'
+    vpc_name: 'tscw10vc01'
+    security_group_names: "{{ aws_security_groups | selectattr('vpc_name', 'equalto', 'tscw10vc01') | selectattr('description', 'equalto', 'HTTP Class Services') | map(attribute='sg_name') | list }}"
+    internet_facing: false
+    access_logs_s3_bucket_name: "{{ vault_aws_elb_access_logs_s3_bucket_name }}"
+    ec2_instance_names:
+      - 'tscw10ap01'
+
+deployment_environments:
+  - "{{ deployment_environment_ts }}"

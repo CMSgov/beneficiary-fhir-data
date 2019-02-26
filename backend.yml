@@ -82,3 +82,6 @@
         group: root
         mode: 'u=rw,g=,o='
       become: true
+
+- name: Configure Load Balancers
+  import_playbook: load_balancers.yml
