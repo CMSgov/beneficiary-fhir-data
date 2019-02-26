@@ -11,7 +11,7 @@
     password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
     script: "{{ lookup('template', 'templates/configure_security.groovy.j2') }}"
   register: jenkins_script_security
-  changed_when: "(jenkins_script_security | success) and 'Changed' in jenkins_script_security.output"
+  changed_when: "(jenkins_script_security is success) and 'Changed' in jenkins_script_security.output"
 
 - name: Configure File Provider Plugin
   jenkins_script:
@@ -20,7 +20,7 @@
     password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
     script: "{{ lookup('template', 'templates/configureFileProvider.groovy.j2') }}"
   register: jenkins_script_file_provider
-  changed_when: "(jenkins_script_file_provider | success) and 'Changed' in jenkins_script_file_provider.output"
+  changed_when: "(jenkins_script_file_provider is success) and 'Changed' in jenkins_script_file_provider.output"
 
 - name: Configure GitHub Settings
   jenkins_script:
@@ -29,7 +29,7 @@
     password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
     script: "{{ lookup('template', 'templates/configureGitHub.groovy.j2') }}"
   register: jenkins_script_github
-  changed_when: "(jenkins_script_github | success) and 'Changed' in jenkins_script_github.output"
+  changed_when: "(jenkins_script_github is success) and 'Changed' in jenkins_script_github.output"
 
 # This keypair was created per the instructions here:
 # <http://central.sonatype.org/pages/working-with-pgp-signatures.html>.

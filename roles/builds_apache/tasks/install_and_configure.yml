@@ -5,12 +5,11 @@
 
 - name: Install Apache
   yum:
-    name: "{{ item }}"
+    name:
+      - httpd
+      - mod_ssl
     state: present
   become: true
-  with_items:
-    - httpd
-    - mod_ssl
 
 # FIXME: Replace with a HealthAPT/GDIT CA-signed cert, once available.
 - name: Generate SSL Key and Self-Signed Certificate
