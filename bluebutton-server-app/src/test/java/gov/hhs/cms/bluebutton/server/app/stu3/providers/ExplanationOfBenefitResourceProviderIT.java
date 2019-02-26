@@ -388,10 +388,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify that no paging links (e.g. next, prev, last) exist in the bundle.
+		 * Verify that no paging links (e.g. next, prev, first, last) exist in the
+		 * bundle.
 		 */
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("first"));
 		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
@@ -474,8 +476,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify a link to the last page exists.
+		 * Verify links to the first and last page exists.
 		 */
+		Assert.assertNotNull(searchResults.getLink("first"));
 		Assert.assertNotNull(searchResults.getLink("last"));
 
 		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
@@ -490,11 +493,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 			searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 		}
-
-		/*
-		 * While on the last page the bundle should not have a "last" link.
-		 */
-		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
 		 * Verify that the combined results are the same size as
@@ -585,8 +583,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify that no paging links exist, since there should only be one page.
+		 * Verify that only the first paging links exist, since there should only be one
+		 * page.
 		 */
+		Assert.assertNotNull(searchResults.getLink("first"));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
 		Assert.assertNull(searchResults.getLink("last"));
@@ -634,6 +634,57 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		SNFClaimTransformerTest.assertMatches(snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
 	}
 
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with a
+	 * page size of 0 with 8 results.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsWithPageSizesOfZero() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(0)
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		/*
+		 * Verify the bundle does not contain any paging links.
+		 */
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("first"));
+		Assert.assertNull(searchResults.getLink("last"));
+
+		/*
+		 * Verify that no claims are present in the bundle.
+		 */
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.DME).size());
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.HHA).size());
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.HOSPICE).size());
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.INPATIENT).size());
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.OUTPATIENT).size());
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.PDE).size());
+		Assert.assertEquals(0, filterToClaimType(searchResults, ClaimType.SNF).size());
+	}
 
 	/**
 	 * <p>

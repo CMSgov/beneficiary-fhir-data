@@ -228,20 +228,23 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		Bundle bundle = new Bundle();
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
+		LOGGER.info("Request details: {}", requestDetails);
 		if (pagingArgs.isPagingRequested()) {
 			/*
-			 * A page size of 0 is odd enough that we should throw an exception.
+			 * Only add resources/links to the bundle if the pageSize is not 0, as a
+			 * pageSize of 0 should return a bundle with only the total number of matched
+			 * resources (See https://www.hl7.org/fhir/search.html#count).
 			 */
-			if (pagingArgs.getPageSize() == 0) {
-				throw new InvalidRequestException("Invalid request - the page size should not be zero.");
+			LOGGER.info("Page size: {}", pagingArgs.getPageSize());
+			if (pagingArgs.getPageSize() != 0) {
+				int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
+				List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
+						pagingArgs.getStartIndex() + numToReturn);
+				bundle = addResourcesToBundle(bundle, resources);
+				addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
 			}
-
-			int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
-			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
-					pagingArgs.getStartIndex() + numToReturn);
-			bundle = addResourcesToBundle(bundle, resources);
-			addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
 		} else {
+			LOGGER.info("Adding entries to the bundle without paging");
 			bundle = addResourcesToBundle(bundle, eobs);
 		}
 
@@ -308,19 +311,25 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		Integer startIndex = pagingArgs.getStartIndex();
 		String serverBase = pagingArgs.getServerBase();
 
+		bundle.addLink(new BundleLinkComponent().setRelation("first")
+				.setUrl(createPagingLink(serverBase, beneficiaryId, 0, pageSize)));
+
 		if (startIndex + pageSize < numTotalResults) {
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_NEXT)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex + pageSize, pageSize)));
-
-			int start = (numTotalResults / pageSize - 1) * pageSize;
-			bundle.addLink(new BundleLinkComponent().setRelation("last")
-					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
 		}
 
 		if (startIndex > 0) {
 			int start = Math.max(0, startIndex - pageSize);
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
+		}
+
+		if (numTotalResults > pageSize) {
+			int start = (numTotalResults / pageSize - 1) * pageSize;
+			int finalPageSize = numTotalResults - start;
+			bundle.addLink(new BundleLinkComponent().setRelation("last")
+					.setUrl(createPagingLink(serverBase, beneficiaryId, start, finalPageSize)));
 		}
 	}
 
