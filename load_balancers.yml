@@ -130,5 +130,8 @@
           interval: 5 # minutes (default is 60 minutes)
           s3_location: "{{ item.data_server_elb.access_logs_s3_bucket_name }}"
           s3_prefix: "elb_access_logs/{{ item.env_name }}"
+        tags:
+          Name: "{{ item.data_server_elb.elb_name }}"
+          ENVIRONMENT: "{{ item.env_name }}"
         wait: true
       with_items: "{{ deployment_environments }}"
