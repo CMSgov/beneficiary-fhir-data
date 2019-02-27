@@ -11,6 +11,28 @@
 
   tasks:
 
+    - name: Set Infra Variables for Enabled Environments
+      set_fact:
+        aws_subnets: >
+          {%- set aws_subnets = [] %}
+          {%- set aws_subnets = aws_subnets + aws_subnets_ls if 'ls' in limit_envs %}
+          {%- set aws_subnets = aws_subnets + aws_subnets_ts if 'ts' in limit_envs %}
+          {{- aws_subnets }}
+        aws_security_groups: >
+          {%- set aws_security_groups = [] %}
+          {%- set aws_security_groups = aws_security_groups + aws_security_groups_ls if 'ls' in limit_envs %}
+          {%- set aws_security_groups = aws_security_groups + aws_security_groups_ts if 'ts' in limit_envs %}
+          {{- aws_security_groups }}
+        aws_vpcs: >
+          {%- set aws_vpcs = [] %}
+          {%- set aws_vpcs = aws_vpcs + aws_vpcs_ls if 'ls' in limit_envs %}
+          {%- set aws_vpcs = aws_vpcs + aws_vpcs_ts if 'ts' in limit_envs %}
+          {{- aws_vpcs }}
+        deployment_environments: >
+          {%- set deployment_environments = [] %}
+          {%- set deployment_environments = deployment_environments + [deployment_environment_ts] if 'ts' in limit_envs %}
+          {{- deployment_environments }}
+
     - name: Lookup EC2 Subnets
       ec2_vpc_subnet_facts:
         region: "{{ aws_region }}"
