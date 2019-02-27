@@ -51,11 +51,73 @@ aws_subnets_ts:
     ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'tscw10-pub-1b') | list)[0].ipv4_cidr }}"
     availability_zone: 'us-east-1b'
 
+aws_subnets_dp:
+  - subnet_name: 'dpcw10-data-1a'
+    vpc_name: 'dpcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'dpcw10-data-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'dpcw10-app-1a'
+    vpc_name: 'dpcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'dpcw10-app-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'dpcw10-pub-1a'
+    vpc_name: 'dpcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'dpcw10-pub-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'dpcw10-data-1b'
+    vpc_name: 'dpcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'dpcw10-data-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+  - subnet_name: 'dpcw10-app-1b'
+    vpc_name: 'dpcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'dpcw10-app-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+  - subnet_name: 'dpcw10-pub-1b'
+    vpc_name: 'dpcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'dpcw10-pub-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+
+aws_subnets_pd:
+  - subnet_name: 'pdcw10-data-1a'
+    vpc_name: 'pdcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'pdcw10-data-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'pdcw10-app-1a'
+    vpc_name: 'pdcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'pdcw10-app-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'pdcw10-pub-1a'
+    vpc_name: 'pdcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'pdcw10-pub-1a') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1a'
+  - subnet_name: 'pdcw10-data-1b'
+    vpc_name: 'pdcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'pdcw10-data-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+  - subnet_name: 'pdcw10-app-1b'
+    vpc_name: 'pdcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'pdcw10-app-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+  - subnet_name: 'pdcw10-pub-1b'
+    vpc_name: 'pdcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_subnets | selectattr('subnet_name', 'equalto', 'pdcw10-pub-1b') | list)[0].ipv4_cidr }}"
+    availability_zone: 'us-east-1b'
+
 aws_security_groups_ls: []
 
 aws_security_groups_ts:
   - sg_name: 'tsbb10sg02'
     vpc_name: 'tscw10vc01'
+    description: 'HTTP Class Services'
+
+aws_security_groups_dp:
+  - sg_name: 'dpbb10sg02'
+    vpc_name: 'dpcw10vc01'
+    description: 'HTTP Class Services'
+
+aws_security_groups_pd:
+  - sg_name: 'pdbb10sg02'
+    vpc_name: 'pdcw10vc01'
     description: 'HTTP Class Services'
 
 aws_vpcs_ls:
@@ -68,6 +130,16 @@ aws_vpcs_ts:
     ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'tscw10vc01') | list)[0].ipv4_cidr }}"
     subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'tscw10vc01')) }}"
 
+aws_vpcs_dp:
+  - vpc_name: 'dpcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'dpcw10vc01') | list)[0].ipv4_cidr }}"
+    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'dpcw10vc01')) }}"
+
+aws_vpcs_pd:
+  - vpc_name: 'pdcw10vc01'
+    ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'pdcw10vc01') | list)[0].ipv4_cidr }}"
+    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'pdcw10vc01')) }}"
+
 deployment_environment_ts:
   env_name: 'ts'
   data_server_elb:
@@ -78,3 +150,29 @@ deployment_environment_ts:
     access_logs_s3_bucket_name: "{{ vault_aws_elb_access_logs_s3_bucket_name }}"
     ec2_instance_names:
       - 'tscw10ap01'
+      # FIXME: Disabled, until <https://jira.cms.gov/browse/BLUEBUTTON-787> is resolved.
+      #- 'tscw10ap01'
+
+deployment_environment_dp:
+  env_name: 'dp'
+  data_server_elb:
+    elb_name: 'dpbb10lb01'
+    vpc_name: 'dpcw10vc01'
+    security_group_names: "{{ aws_security_groups_dp | selectattr('vpc_name', 'equalto', 'dpcw10vc01') | selectattr('description', 'equalto', 'HTTP Class Services') | map(attribute='sg_name') | list }}"
+    internet_facing: false
+    access_logs_s3_bucket_name: "{{ vault_aws_elb_access_logs_s3_bucket_name }}"
+    ec2_instance_names:
+      - 'dpcw10ap01'
+      - 'dpcw10ap02'
+
+deployment_environment_pd:
+  env_name: 'pd'
+  data_server_elb:
+    elb_name: 'pdbb10lb01'
+    vpc_name: 'pdcw10vc01'
+    security_group_names: "{{ aws_security_groups_pd | selectattr('vpc_name', 'equalto', 'pdcw10vc01') | selectattr('description', 'equalto', 'HTTP Class Services') | map(attribute='sg_name') | list }}"
+    internet_facing: false
+    access_logs_s3_bucket_name: "{{ vault_aws_elb_access_logs_s3_bucket_name }}"
+    ec2_instance_names:
+      - 'pdcw10ap01'
+      - 'pdcw10ap02'
