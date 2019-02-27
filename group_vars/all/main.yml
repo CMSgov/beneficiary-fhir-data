@@ -123,22 +123,18 @@ aws_security_groups_pd:
 aws_vpcs_ls:
   - vpc_name: 'lscw10vc01'
     ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'lscw10vc01') | list)[0].ipv4_cidr }}"
-    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'lscw10vc01')) }}"
 
 aws_vpcs_ts:
   - vpc_name: 'tscw10vc01'
     ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'tscw10vc01') | list)[0].ipv4_cidr }}"
-    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'tscw10vc01')) }}"
 
 aws_vpcs_dp:
   - vpc_name: 'dpcw10vc01'
     ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'dpcw10vc01') | list)[0].ipv4_cidr }}"
-    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'dpcw10vc01')) }}"
 
 aws_vpcs_pd:
   - vpc_name: 'pdcw10vc01'
     ipv4_cidr: "{{ (vault_aws_vpcs | selectattr('vpc_name', 'equalto', 'pdcw10vc01') | list)[0].ipv4_cidr }}"
-    subnet_names: "{{ (aws_subnets | selectattr('vpc_name', 'equalto', 'pdcw10vc01')) }}"
 
 deployment_environment_ts:
   env_name: 'ts'
