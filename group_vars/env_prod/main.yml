@@ -10,7 +10,7 @@ data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
-data_server_ssl_client_certificate_test: 'files/bluebutton-backend-prod-data-server-client-test-keypair.pem'
+data_server_ssl_client_certificate_test: 'files/client_data_server_local_test_env_prod_keypair.pem'
 
 # These are the SSL keypairs authorized to query this environment's Data Servers.
 data_server_ssl_client_certificates:
