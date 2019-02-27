@@ -79,7 +79,7 @@
         idle_timeout: 60
         scheme: "{{ 'internet-facing' if item.data_server_elb.internet_facing else 'internal' }}"
         region: "{{ aws_region }}"
-        subnets: "{{ aws_subnets | selectattr('vpc_name', 'equalto', item.data_server_elb.vpc_name) | map(attribute='facts.subnet_id') }}"
+        subnets: "{{ aws_subnets | selectattr('vpc_name', 'equalto', item.data_server_elb.vpc_name) | map(attribute='facts.subnet_id') | list }}"
         purge_subnets: true
         cross_az_load_balancing: false
         security_group_names: "{{ item.data_server_elb.security_group_names }}"
