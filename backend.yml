@@ -12,7 +12,7 @@
   import_playbook: ssh_host_keys.yml
 
 - name: Configure Systems for Ansible Pipelining
-  hosts: all
+  hosts: 'all:!localhost'
   vars:
     ansible_ssh_pipelining: false
   roles:
