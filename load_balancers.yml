@@ -54,8 +54,12 @@
     # Add a 'facts' value to each `aws_subnet` entry, with the subnet details from `ec2_vpc_subnets`.
     - name: Combine Subnet Specifications with Data From AWS API
       set_fact:
-        aws_subnets: "{{ item | combine({ 'facts': (ec2_vpc_subnets.results | selectattr('item.subnet_name', 'equalto', item.subnet_name) | list)[0].subnets[0] }) }}"
+        aws_subnet_with_facts: "{{ item | combine({ 'facts': (ec2_vpc_subnets.results | selectattr('item.subnet_name', 'equalto', item.subnet_name) | list)[0].subnets[0] }) }}"
       with_items: "{{ aws_subnets }}"
+      register: aws_subnets
+    - name: Fix Subnet Data Scope
+      set_fact:
+        aws_subnets: "{{ aws_subnets.results | map(attribute='ansible_facts.aws_subnet_with_facts') | list }}"
 
     - name: Query AWS API for EC2 Instances
       ec2_instance_facts:
