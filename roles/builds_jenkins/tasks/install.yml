@@ -5,10 +5,9 @@
 
 - name: Install Pre-requisites
   yum:
-    name: "{{ item }}"
-  with_items:
-    # The `-devel` variant is the JDK (instead of just the JRE).
-    - java-1.8.0-openjdk-devel
+    name:
+      # The `-devel` variant is the JDK (instead of just the JRE).
+      - java-1.8.0-openjdk-devel
   become: true
   notify:
     - "Restart Service 'jenkins'"
