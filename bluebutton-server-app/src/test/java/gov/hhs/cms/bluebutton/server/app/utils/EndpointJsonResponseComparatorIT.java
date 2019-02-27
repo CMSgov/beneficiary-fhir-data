@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -762,6 +763,8 @@ public final class EndpointJsonResponseComparatorIT {
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
 		ServerTestUtils.cleanDatabaseServer();
+		// FIXME temporary workaround to free up ram
+		SessionFactoryRegistry.INSTANCE.clearRegistrations();
 	}
 
 	/**
