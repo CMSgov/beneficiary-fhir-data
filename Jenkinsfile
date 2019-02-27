@@ -170,7 +170,7 @@ stage('Deploy to DPR') {
 						"data_server_version": "${dataServerVersion}"
 					}
 					""".stripIndent()
-					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_dpr --extra-vars '"@extra_vars.json"'
+					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_dpr --extra-vars "@extra_vars.json"'
 				}
 			}
 		}
