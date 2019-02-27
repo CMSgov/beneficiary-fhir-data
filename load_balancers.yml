@@ -61,6 +61,16 @@
       set_fact:
         aws_subnets: "{{ aws_subnets.results | map(attribute='ansible_facts.aws_subnet_with_facts') | list }}"
 
+    - name: Initialize Lists of ELB Subnets by Env
+      set_fact:
+        elb_subnets_by_env:
+          ts: []
+    - name: Populate Lists of ELB Subnets by Env
+      set_fact:
+        elb_subnets_by_env:
+          ts: "{{ elb_subnets_by_env.ts if ((item.vpc_name != deployment_environment_ts.data_server_elb.vpc_name) or ('-pub-' not in item.subnet_name)) else (elb_subnets_by_env.ts + [item]) }}"
+      with_items: "{{ aws_subnets }}"
+
     - name: Query AWS API for EC2 Instances
       ec2_instance_facts:
         region: "{{ aws_region }}"
@@ -83,7 +93,7 @@
         idle_timeout: 60
         scheme: "{{ 'internet-facing' if item.data_server_elb.internet_facing else 'internal' }}"
         region: "{{ aws_region }}"
-        subnets: "{{ aws_subnets | selectattr('vpc_name', 'equalto', item.data_server_elb.vpc_name) | map(attribute='facts.subnet_id') | list }}"
+        subnets: "{{ elb_subnets_by_env[item.env_name] | map(attribute='facts.subnet_id') | list }}"
         purge_subnets: true
         cross_az_load_balancing: false
         security_group_names: "{{ item.data_server_elb.security_group_names }}"
