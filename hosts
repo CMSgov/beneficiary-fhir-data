@@ -11,6 +11,10 @@
 # which will apply the SSH config changes to the Jenkins system itself.
 ##
 
+# Only used in plays for managing AWS infrastructure (basically: a box to
+# access the AWS API from).
+localhost ansible_connection=local
+
 [builds]
 bluebutton-healthapt-lss-builds
 
