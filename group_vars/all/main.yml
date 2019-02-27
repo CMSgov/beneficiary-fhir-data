@@ -145,9 +145,9 @@ deployment_environment_ts:
     internet_facing: false
     access_logs_s3_bucket_name: "{{ vault_aws_elb_access_logs_s3_bucket_name }}"
     ec2_instance_names:
-      - 'tscw10ap01'
       # FIXME: Disabled, until <https://jira.cms.gov/browse/BLUEBUTTON-787> is resolved.
       #- 'tscw10ap01'
+      - 'tscw10ap02'
 
 deployment_environment_dp:
   env_name: 'dp'
