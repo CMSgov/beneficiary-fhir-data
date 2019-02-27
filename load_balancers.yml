@@ -15,22 +15,22 @@
       set_fact:
         aws_subnets: >
           {%- set aws_subnets = [] %}
-          {%- set aws_subnets = aws_subnets + aws_subnets_ls if 'ls' in limit_envs %}
-          {%- set aws_subnets = aws_subnets + aws_subnets_ts if 'ts' in limit_envs %}
+          {%- set aws_subnets = aws_subnets + (aws_subnets_ls if 'ls' in limit_envs else []) %}
+          {%- set aws_subnets = aws_subnets + (aws_subnets_ts if 'ts' in limit_envs else []) %}
           {{- aws_subnets }}
         aws_security_groups: >
           {%- set aws_security_groups = [] %}
-          {%- set aws_security_groups = aws_security_groups + aws_security_groups_ls if 'ls' in limit_envs %}
-          {%- set aws_security_groups = aws_security_groups + aws_security_groups_ts if 'ts' in limit_envs %}
+          {%- set aws_security_groups = aws_security_groups + (aws_security_groups_ls if 'ls' in limit_envs else []) %}
+          {%- set aws_security_groups = aws_security_groups + (aws_security_groups_ts if 'ts' in limit_envs else []) %}
           {{- aws_security_groups }}
         aws_vpcs: >
           {%- set aws_vpcs = [] %}
-          {%- set aws_vpcs = aws_vpcs + aws_vpcs_ls if 'ls' in limit_envs %}
-          {%- set aws_vpcs = aws_vpcs + aws_vpcs_ts if 'ts' in limit_envs %}
+          {%- set aws_vpcs = aws_vpcs + (aws_vpcs_ls if 'ls' in limit_envs else []) %}
+          {%- set aws_vpcs = aws_vpcs + (aws_vpcs_ts if 'ts' in limit_envs else []) %}
           {{- aws_vpcs }}
         deployment_environments: >
           {%- set deployment_environments = [] %}
-          {%- set deployment_environments = deployment_environments + [deployment_environment_ts] if 'ts' in limit_envs %}
+          {%- set deployment_environments = deployment_environments + ([deployment_environment_ts] if 'ts' in limit_envs else []) %}
           {{- deployment_environments }}
 
     - name: Lookup EC2 Subnets
