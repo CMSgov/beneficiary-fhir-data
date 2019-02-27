@@ -16,12 +16,9 @@ data_server_ssl_client_certificate_test: 'files/bluebutton-backend-test-data-ser
 
 # These are the SSL keypairs authorized to query this environment's Data Servers.
 data_server_ssl_client_certificates:
-  - alias: client_test_local
-    certificate: "{{ lookup('file', 'files/bluebutton-backend-test-data-server-client-test-certificate.pem') }}"
-  - alias: client_frontend
-    certificate: "{{ lookup('file', 'files/bluebutton-frontend-test-client-public.crt') }}"
-  - alias: client_backend_perf_tests
-    certificate: "{{ lookup('file', 'files/bluebutton-backend-perf-tests-test-public.crt') }}"
-# Uncomment this temporarily if you have a local test certificate you need to use for a bit.
-#  - alias: client_test
-#    certificate: "{{ lookup('file', 'dev/client-test-certificate.pem') }}"
+  - alias: client_local_test_env_test
+    certificate: "{{ lookup('file', 'files/client_data_server_local_test_env_test_certificate.pem') }}"
+  - alias: client_bluebutton_frontend_test
+    certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
+  - alias: client_performance_tester
+    certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
