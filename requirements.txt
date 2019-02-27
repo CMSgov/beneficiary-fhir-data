@@ -3,6 +3,8 @@
 #     $ pip install --upgrade setuptools
 # Reference: https://github.com/ansible/ansible/issues/31741#issuecomment-336889622
 ansible==2.7.8
+boto
+boto3
 cryptography
 pycrypto
 awscli
