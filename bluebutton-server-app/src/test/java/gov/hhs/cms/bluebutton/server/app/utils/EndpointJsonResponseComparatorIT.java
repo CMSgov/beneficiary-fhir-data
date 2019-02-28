@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,14 +27,11 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -73,8 +69,6 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
  */
 @RunWith(Parameterized.class)
 public final class EndpointJsonResponseComparatorIT {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(EndpointJsonResponseComparatorIT.class);
 
 	@Parameters(name = "endpointId = {0}")
 	public static Object[][] data() {
@@ -125,7 +119,6 @@ public final class EndpointJsonResponseComparatorIT {
 	 */
 	@Test
 	public void verifyCorrectEndpointResponse() {
-		LOGGER.info("Starting test case: {}", endpointId);
 		Path targetResponseDir = getTargetResponseDir();
 
 		// Call the server endpoint and save its result out to a file corresponding to
@@ -134,7 +127,6 @@ public final class EndpointJsonResponseComparatorIT {
 		writeFile(endpointResponse, generateFileName(targetResponseDir, endpointId));
 
 		assertJsonDiffIsEmpty(endpointId);
-		LOGGER.info("Exiting test case: {}", endpointId);
 	}
 
 	/**
@@ -763,15 +755,8 @@ public final class EndpointJsonResponseComparatorIT {
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
 		ServerTestUtils.cleanDatabaseServer();
-		// FIXME temporary workaround to free up ram
+		// FIXME temporary workaround to free up ram. Details on this can be found at
+		// https://jira.cms.gov/browse/BLUEBUTTON-797
 		SessionFactoryRegistry.INSTANCE.clearRegistrations();
-	}
-
-	/**
-	 * TODO: remove this once memory issues have been resolved
-	 */
-	@BeforeClass
-	public static void startHeapDumpCollection() {
-		ServerTestUtils.startHeapDumpCollector(Duration.ofSeconds(5));
 	}
 }
