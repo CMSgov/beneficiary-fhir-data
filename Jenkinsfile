@@ -92,7 +92,14 @@ stage('Deploy to LSS') {
 			node {
 				insideAnsibleContainer {
 					// Run the play against the LSS environment.
-					sh './ansible-playbook-wrapper backend.yml --limit=env_lss'
+					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
+					{
+						"limit_envs": [
+							"ls"
+						]
+					}
+					""".stripIndent()
+					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_lss --extra-vars "@extra_vars.json"'
 				}
 			}
 		}
@@ -109,7 +116,16 @@ stage('Deploy to TEST') {
 			node {
 				insideAnsibleContainer {
 					// Run the play against the test environment.
-					sh "./ansible-playbook-wrapper backend.yml --limit=env_test --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
+					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
+					{
+						"limit_envs": [
+							"ts"
+						],
+						"data_pipeline_version": "${dataPipelineVersion}",
+						"data_server_version": "${dataServerVersion}"
+					}
+					""".stripIndent()
+					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_test --extra-vars "@extra_vars.json"'
 				}
 			}
 		}
@@ -145,7 +161,16 @@ stage('Deploy to DPR') {
 			node {
 				insideAnsibleContainer {
 					// Run the play against the prod environment.
-					sh "./ansible-playbook-wrapper backend.yml --limit=env_dpr --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
+					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
+					{
+						"limit_envs": [
+							"dp"
+						],
+						"data_pipeline_version": "${dataPipelineVersion}",
+						"data_server_version": "${dataServerVersion}"
+					}
+					""".stripIndent()
+					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_dpr --extra-vars "@extra_vars.json"'
 				}
 			}
 		}
@@ -162,7 +187,16 @@ stage('Deploy to PROD') {
 			node {
 				insideAnsibleContainer {
 					// Run the play against the prod environment.
-					sh "./ansible-playbook-wrapper backend.yml --limit=env_prod --extra-vars 'data_pipeline_version=${dataPipelineVersion} data_server_version=${dataServerVersion}'"
+					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
+					{
+						"limit_envs": [
+							"pd"
+						],
+						"data_pipeline_version": "${dataPipelineVersion}",
+						"data_server_version": "${dataServerVersion}"
+					}
+					""".stripIndent()
+					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_prod --extra-vars "@extra_vars.json"'
 				}
 			}
 		}
