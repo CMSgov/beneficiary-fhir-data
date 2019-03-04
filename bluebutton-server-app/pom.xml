@@ -64,6 +64,14 @@
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
+		
+		<dependency>
+			<!-- Needed for comparing JSON files to obtain the diff. See
+				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
+			<groupId>com.flipkart.zjsonpatch</groupId>
+			<artifactId>zjsonpatch</artifactId>
+			<version>0.4.6</version>
+		</dependency>
 
 		<dependency>
 			<!-- Needed for JEE/Servlet support -->

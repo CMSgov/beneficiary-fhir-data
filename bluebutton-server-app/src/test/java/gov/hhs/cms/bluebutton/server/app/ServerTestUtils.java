@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,14 +12,19 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.client.HttpClient;
@@ -310,5 +316,40 @@ public final class ServerTestUtils {
 			throw new UncheckedIOException(e);
 		}
 		return testDbProps;
+	}
+
+	/**
+	 * Starts a background thread that periodically generates a heap dump at
+	 * <code>./heap-dumps/</code>. Useful when trying to debug memory pressure
+	 * issues in our test code.
+	 * 
+	 * @param period
+	 *            how often to generate a heap dump
+	 */
+	@SuppressWarnings("restriction")
+	public static void startHeapDumpCollector(Duration period) {
+		Runnable collector = () -> {
+			MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+			try {
+				Path heapDumpsDir = Paths.get(".", "heap-dumps");
+				Files.createDirectories(heapDumpsDir);
+				String heapDumpFileName = String
+						.format("bluebutton-tests-%s.hprof", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+						.replaceAll(":", "-");
+				Path heapDump = heapDumpsDir.resolve(heapDumpFileName);
+				LOGGER.info("Generating heap dump at: {}", heapDump.toAbsolutePath().toString());
+
+				com.sun.management.HotSpotDiagnosticMXBean mxBean = java.lang.management.ManagementFactory
+						.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic",
+								com.sun.management.HotSpotDiagnosticMXBean.class);
+				mxBean.dumpHeap(heapDump.toString(), true);
+				LOGGER.info("Generated heap dump at: {}", heapDump.toAbsolutePath().toString());
+			} catch (IOException e) {
+				LOGGER.warn("Unable to generate heap dump.", e);
+				throw new UncheckedIOException(e);
+			}
+		};
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(collector, period.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
 	}
 }
