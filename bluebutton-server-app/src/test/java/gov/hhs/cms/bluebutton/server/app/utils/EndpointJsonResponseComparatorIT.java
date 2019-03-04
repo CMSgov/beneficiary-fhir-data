@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -131,7 +131,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 	/**
 	 * Generates the "golden" files, i.e. the approved responses to compare to. Run
-	 * by commenting out the @Ignore annotation and running this method as JUnit.
+	 * by commenting out the <code>@Ignore</code> annotation and running this method
+	 * as JUnit.
 	 */
 	@Ignore
 	@Test
@@ -714,7 +715,7 @@ public final class EndpointJsonResponseComparatorIT {
 		} catch (IOException e) {
 			throw new UncheckedIOException("Can't read file at " + path.toString(), e);
 		}
-		return new String(encoded, Charset.forName("UTF-8"));
+		return new String(encoded, StandardCharsets.UTF_8);
 	}
 
 	/**

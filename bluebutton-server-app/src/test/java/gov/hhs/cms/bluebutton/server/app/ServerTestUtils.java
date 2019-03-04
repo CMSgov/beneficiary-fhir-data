@@ -82,20 +82,22 @@ public final class ServerTestUtils {
 
 		/*
 		 * We need to override the FHIR client's SSLContext. Unfortunately, that
-		 * requires overriding the entire HttpClient that it uses. Otherwise, the
-		 * settings used here mirror those that the default FHIR HttpClient would use.
+		 * requires overriding the entire HttpClient that it uses. Otherwise,
+		 * the settings used here mirror those that the default FHIR HttpClient
+		 * would use.
 		 */
 		SSLContext sslContext = createSslContext(clientSslIdentity);
 
 		/*
-		 * The default timeout is 10s, which was failing for batches of 100. A 300s
-		 * timeout was failing for batches of 100 once Part B claims were mostly mapped,
-		 * so batches were cut to 10, which ran at 12s or so, each.
+		 * The default timeout is 10s, which was failing for batches of 100. A
+		 * 300s timeout was failing for batches of 100 once Part B claims were
+		 * mostly mapped, so batches were cut to 10, which ran at 12s or so,
+		 * each.
 		 */
 		FhirContext ctx = FhirContext.forDstu3();
 		ctx.getRestfulClientFactory().setSocketTimeout((int) TimeUnit.MINUTES.toMillis(5));
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(
-				RegistryBuilder.<ConnectionSocketFactory>create()
+				RegistryBuilder.<ConnectionSocketFactory> create()
 						.register("http", PlainConnectionSocketFactory.getSocketFactory())
 						.register("https", new SSLConnectionSocketFactory(sslContext)).build(),
 				null, null, null, 5000, TimeUnit.MILLISECONDS);
@@ -168,14 +170,14 @@ public final class ServerTestUtils {
 	}
 
 	/**
-	 * @return the local {@link Path} that development/test key and trust stores can
-	 *         be found in
+	 * @return the local {@link Path} that development/test key and trust stores
+	 * 		   can be found in
 	 */
 	static Path getSslStoresDirectory() {
 		/*
-		 * The working directory for tests will either be the module directory or their
-		 * parent directory. With that knowledge, we're searching for the ssl-stores
-		 * directory.
+		 * The working directory for tests will either be the module directory
+		 * or their parent directory. With that knowledge, we're searching for
+		 * the ssl-stores directory.
 		 */
 		Path sslStoresDir = Paths.get("..", "dev", "ssl-stores");
 		if (!Files.isDirectory(sslStoresDir))
@@ -186,8 +188,8 @@ public final class ServerTestUtils {
 	}
 
 	/**
-	 * @return the local {@link Path} to the trust store that FHIR clients should
-	 *         use
+	 * @return the local {@link Path} to the trust store that FHIR clients
+	 *         should use
 	 */
 	private static Path getClientTrustStorePath() {
 		Path trustStorePath = getSslStoresDirectory().resolve("client-truststore.jks");
@@ -268,8 +270,8 @@ public final class ServerTestUtils {
 		String jdbcUsername = testDbProps.getProperty(SpringConfiguration.PROP_DB_USERNAME);
 		String jdbcPassword = testDbProps.getProperty(SpringConfiguration.PROP_DB_PASSWORD);
 
-		return new LoadAppOptions(RifLoaderTestUtils.HICN_HASH_ITERATIONS, RifLoaderTestUtils.HICN_HASH_PEPPER, jdbcUrl,
-				jdbcUsername, jdbcPassword.toCharArray(), LoadAppOptions.DEFAULT_LOADER_THREADS,
+		return new LoadAppOptions(RifLoaderTestUtils.HICN_HASH_ITERATIONS, RifLoaderTestUtils.HICN_HASH_PEPPER,
+				jdbcUrl, jdbcUsername, jdbcPassword.toCharArray(), LoadAppOptions.DEFAULT_LOADER_THREADS,
 				RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
 	}
 
@@ -280,9 +282,9 @@ public final class ServerTestUtils {
 	 */
 	private static Properties readTestServerPortsProperties() {
 		/*
-		 * The working directory for tests will either be the module directory or their
-		 * parent directory. With that knowledge, we're searching for the
-		 * target/bluebutton-server directory.
+		 * The working directory for tests will either be the module directory
+		 * or their parent directory. With that knowledge, we're searching for
+		 * the target/bluebutton-server directory.
 		 */
 		Path serverRunDir = Paths.get("target", "bluebutton-server");
 		if (!Files.isDirectory(serverRunDir))
@@ -301,9 +303,9 @@ public final class ServerTestUtils {
 
 	/**
 	 * @return the {@link Properties} from the
-	 *         {@link SpringConfiguration#findTestDatabaseProperties()} file that
-	 *         should have been written out by {@link SpringConfiguration} when it
-	 *         created the test database
+	 *         {@link SpringConfiguration#findTestDatabaseProperties()} file
+	 *         that should have been written out by {@link SpringConfiguration}
+	 *         when it created the test database
 	 */
 	private static Properties readTestDatabaseProperties() {
 		Properties testDbProps = new Properties();
