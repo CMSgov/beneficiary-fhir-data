@@ -39,7 +39,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim_;
  * Enumerates the various Blue Button claim types that are supported by
  * {@link ExplanationOfBenefitResourceProvider}.
  */
-enum ClaimType {
+public enum ClaimType {
 	CARRIER(CarrierClaim.class, CarrierClaim_.claimId, CarrierClaim_.beneficiaryId, CarrierClaimTransformer::transform,
 			CarrierClaim_.lines),
 	

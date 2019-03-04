@@ -931,6 +931,8 @@ final class TransformerTestUtils {
 		Assert.assertTrue("Bad reference: " + reference, reference.hasIdentifier());
 		Assert.assertEquals(expectedIdentifierSystem, reference.getIdentifier().getSystem());
 		Assert.assertEquals(expectedIdentifierValue, reference.getIdentifier().getValue());
+		Assert.assertEquals(TransformerUtils.retrieveNpiCodeDisplay(expectedIdentifierValue),
+				reference.getDisplay());
 	}
 
 	/**
@@ -2008,6 +2010,16 @@ final class TransformerTestUtils {
 			throws IOException {
 		Assert.assertEquals(TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode),
 				nationalDrugCodeDisplayValue);
+
+	}
+
+	/**
+	 * Tests that the NPI code display is set correctly
+	 * 
+	 * @throws IOException
+	 */
+	static void assertNPICodeDisplayEquals(String npiCode, String npiCodeDisplayValue) throws IOException {
+		Assert.assertEquals(TransformerUtils.retrieveNpiCodeDisplay(npiCode), npiCodeDisplayValue);
 
 	}
 }

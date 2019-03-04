@@ -1,14 +1,14 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ./xsd/web-app_3_0.xsd">
- 
+
 	<!-- Adds some additional context variables that can be included in the 
-		app's logging. See http://logback.qos.ch/manual/mdc.html for details. -->
+		app's logging. -->
 	<filter>
-		<filter-name>MDCInsertingServletFilter</filter-name>
-		<filter-class>ch.qos.logback.classic.helpers.MDCInsertingServletFilter</filter-class>
+		<filter-name>LoggingContextFilter</filter-name>
+		<filter-class>gov.hhs.cms.bluebutton.server.app.LoggingContextFilter</filter-class>
 	</filter>
 	<filter-mapping>
-		<filter-name>MDCInsertingServletFilter</filter-name>
+		<filter-name>LoggingContextFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 

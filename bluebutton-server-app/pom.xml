@@ -82,6 +82,14 @@
 		    <artifactId>hapi-fhir-client</artifactId>
 		    <version>3.6.0</version>
 		</dependency>
+		
+		<dependency>
+			<!-- Needed for comparing JSON files to obtain the diff. See
+				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
+			<groupId>com.flipkart.zjsonpatch</groupId>
+			<artifactId>zjsonpatch</artifactId>
+			<version>0.4.6</version>
+		</dependency>
 
 		<dependency>
 			<!-- Needed for JEE/Servlet support -->
@@ -124,6 +132,19 @@
 				for more details. -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
+				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-json-classic</artifactId>
+			<version>0.1.5</version>
+		</dependency>
+		<dependency>
+			<!-- Required by logback-json-classic. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-jackson</artifactId>
+			<version>0.1.5</version>
 		</dependency>
 
 		<dependency>
