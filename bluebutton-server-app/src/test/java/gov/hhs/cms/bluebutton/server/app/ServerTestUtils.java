@@ -276,8 +276,9 @@ public final class ServerTestUtils {
 	}
 
 	/**
-	 * @return the {@link Properties} from the <code>server-ports.properties</code>
-	 *         that should have been written out by the integration tests'
+	 * @return the {@link Properties} from the
+	 *         <code>server-ports.properties</code> that should have been
+	 *         written out by the integration tests'
 	 *         <code>server-start.sh</code> script
 	 */
 	private static Properties readTestServerPortsProperties() {
