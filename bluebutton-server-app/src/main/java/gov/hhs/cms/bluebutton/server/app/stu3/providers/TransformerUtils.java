@@ -656,7 +656,7 @@ public final class TransformerUtils {
 	 * @return the {@link Patient#getId()} value that will be used for the specified
 	 *         {@link Beneficiary}
 	 */
-	static IdDt buildPatientId(Beneficiary beneficiary) {
+	public static IdDt buildPatientId(Beneficiary beneficiary) {
 		return buildPatientId(beneficiary.getBeneficiaryId());
 	}
 
