@@ -1,15 +1,15 @@
 {
   "resourceType": "Bundle",
-  "id": "39c37941-5ab2-449f-a0d5-bd2611b08d4f",
+  "id": "ced3ed17-fed4-4610-b818-ab171f3e9a35",
   "meta": {
-    "lastUpdated": "2019-01-16T13:49:38.707-06:00"
+    "lastUpdated": "2019-03-04T10:36:03.974-06:00"
   },
   "type": "searchset",
   "total": 8,
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9350/v1/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2F567834"
+      "url": "https://localhost:8271/v1/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2F567834"
     }
   ],
   "entry": [
@@ -155,7 +155,8 @@
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
             "value": "1497758544"
-          }
+          },
+          "display": "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
         },
         "facility": {
           "extension": [
@@ -171,7 +172,8 @@
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
             "value": "1497758544"
-          }
+          },
+          "display": "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
         },
         "information": [
           {
@@ -801,7 +803,8 @@
                 "identifier": {
                   "system": "http://hl7.org/fhir/sid/us-npi",
                   "value": "1306849450"
-                }
+                },
+                "display": "DR. HAROLD LEROY SMITSON II M.D."
               }
             },
             "recipient": [
@@ -809,7 +812,8 @@
                 "identifier": {
                   "system": "http://hl7.org/fhir/sid/us-npi",
                   "value": "1306849450"
-                }
+                },
+                "display": "DR. HAROLD LEROY SMITSON II M.D."
               }
             ]
           },
@@ -3670,7 +3674,8 @@
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
             "value": "1023011079"
-          }
+          },
+          "display": "ADVANTAGE HOME HEALTH CARE, INC."
         },
         "facility": {
           "extension": [
@@ -3686,7 +3691,8 @@
           "identifier": {
             "system": "http://hl7.org/fhir/sid/us-npi",
             "value": "1023011079"
-          }
+          },
+          "display": "ADVANTAGE HOME HEALTH CARE, INC."
         },
         "information": [
           {
@@ -3949,7 +3955,8 @@
               "identifier": {
                 "system": "http://hl7.org/fhir/sid/us-npi",
                 "value": "1750384806"
-              }
+              },
+              "display": "DR. ROBERT BISBEE MD"
             },
             "role": {
               "coding": [
@@ -4384,7 +4391,8 @@
                 "url": "http://hl7.org/fhir/sid/us-npi",
                 "valueCoding": {
                   "system": "http://hl7.org/fhir/sid/us-npi",
-                  "code": "1497758544"
+                  "code": "1497758544",
+                  "display": "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
                 }
               }
             ],
