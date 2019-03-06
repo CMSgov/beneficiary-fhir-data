@@ -1,7 +1,5 @@
 package gov.hhs.cms.bluebutton.server.app;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,15 +9,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -27,9 +29,18 @@ import org.apache.commons.io.FileUtils;
 
 /**
  * A simple application that downloads the FDA NDC (national drug code) file;
- * unzips it and then converts it to UTF-8 format
+ * unzips it and then converts it to UTF-8 format.
+ *
+ * See the <code>download-fda-drug-data</code> execution of
+ * <code>exec-maven-plugin</code> in this project's <code>pom.xml</code> for
+ * details on how this utility is run during the project's build.
  */
 public final class FDADrugDataUtilityApp {
+	/**
+	 * The name of the classpath resource (for the project's main web application)
+	 * for the FDA "Products" TSV file.
+	 */
+	public static final String FDA_PRODUCTS_RESOURCE = "fda_products_cp1252.tsv";
 
 	/**
 	 * Size of the buffer to read/write data
@@ -48,8 +59,9 @@ public final class FDADrugDataUtilityApp {
 	 *            </p>
 	 *            <ol>
 	 *            <li><code>OUTPUT_DIR</code>: the first (and only) argument for
-	 *            this application must be the already-existing path to write the
-	 *            NDC file out to</li>
+	 *            this application, which should be the path to the project's
+	 *            <code>${project.build.outputDirectory}</code> directory (i.e.
+	 *            <code>target/classes/</code>)</li>
 	 *            </ol>
 	 * @throws IOException
 	 */
@@ -69,47 +81,66 @@ public final class FDADrugDataUtilityApp {
 			System.exit(3);
 		}
 
-		// download FDA NDC file
-		Path downloadedNdcZipFile = Paths.get(outputPath.resolve("ndctext.zip").toFile().getAbsolutePath());
-		try {
-			// connectionTimeout, readTimeout = 10 seconds
-			FileUtils.copyURLToFile(new URL("https://www.accessdata.fda.gov/cder/ndctext.zip"),
-					new File(downloadedNdcZipFile.toFile().getAbsolutePath()), 10000,
-					10000);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(4);
+		// Create a temp directory that will be recursively deleted when we're done.
+		Path workingDir = Files.createTempDirectory("fda-data");
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				Files.walkFileTree(workingDir, new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						Files.delete(file);
+						return FileVisitResult.CONTINUE;
+					}
+
+					@Override
+					public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+						Files.delete(dir);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}));
+
+		// If the output file isn't already there, go build it.
+		Path convertedNdcDataFile = outputPath.resolve(FDA_PRODUCTS_RESOURCE);
+		if (!Files.exists(convertedNdcDataFile)) {
+			// download FDA NDC file
+			Path downloadedNdcZipFile = Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
+			if (!Files.isReadable(downloadedNdcZipFile)) {
+				try {
+					// connectionTimeout, readTimeout = 10 seconds
+					FileUtils.copyURLToFile(new URL("https://www.accessdata.fda.gov/cder/ndctext.zip"),
+							new File(downloadedNdcZipFile.toFile().getAbsolutePath()), 10000, 10000);
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(4);
+				}
+			}
+
+			// unzip FDA NDC file
+			Path originalNdcDataFile = workingDir.resolve("product.txt");
+			unzip(downloadedNdcZipFile, workingDir);
+
+			// convert file format from cp1252 to utf8
+			CharsetDecoder inDec = Charset.forName("windows-1252").newDecoder()
+					.onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
+
+			CharsetEncoder outEnc = StandardCharsets.UTF_8.newEncoder().onMalformedInput(CodingErrorAction.REPORT)
+					.onUnmappableCharacter(CodingErrorAction.REPORT);
+
+			try (FileInputStream is = new FileInputStream(originalNdcDataFile.toFile().getAbsolutePath());
+					BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
+					FileOutputStream fw = new FileOutputStream(convertedNdcDataFile.toFile().getAbsolutePath());
+					BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
+
+				for (String in; (in = reader.readLine()) != null;) {
+					out.write(in);
+					out.newLine();
+				}
+			}
 		}
-
-		// unzip FDA NDC file
-		unzip(downloadedNdcZipFile, outputPath);
-		Files.move(Paths.get(outputPath.resolve("product.txt").toFile().getAbsolutePath()),
-				Paths.get(outputPath.resolve("fda_products_cp1252.tsv").toFile().getAbsolutePath()), REPLACE_EXISTING);
-		
-		// convert file format from cp1252 to utf8
-		CharsetDecoder inDec=Charset.forName("windows-1252").newDecoder()
-			.onMalformedInput(CodingErrorAction.REPORT)
-			.onUnmappableCharacter(CodingErrorAction.REPORT);
-
-		CharsetEncoder outEnc=StandardCharsets.UTF_8.newEncoder()
-			.onMalformedInput(CodingErrorAction.REPORT)
-			.onUnmappableCharacter(CodingErrorAction.REPORT);
-
-		try
-		(FileInputStream is = new FileInputStream(
-				outputPath.resolve("fda_products_cp1252.tsv").toFile().getAbsolutePath());
-			 BufferedReader reader=new BufferedReader(new InputStreamReader(is, inDec));
-				FileOutputStream fw = new FileOutputStream(
-						outputPath.resolve("fda_products_utf8.tsv").toFile().getAbsolutePath());
-			 BufferedWriter out=new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
-
-			 for(String in; (in = reader.readLine()) != null; ) {
-				   out.write(in);
-				   out.newLine();
-		      }
-		}
-
-
 	}
 
 	/**
@@ -121,10 +152,6 @@ public final class FDADrugDataUtilityApp {
 	 * @throws IOException
 	 */
 	private static void unzip(Path zipFilePath, Path destDirectory) throws IOException {
-		File destDir = new File(destDirectory.toFile().getAbsolutePath());
-		if (!destDir.exists()) {
-			destDir.mkdir();
-		}
 		ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath.toFile().getAbsolutePath()));
 		ZipEntry entry = zipIn.getNextEntry();
 		// iterates over entries in the zip file
