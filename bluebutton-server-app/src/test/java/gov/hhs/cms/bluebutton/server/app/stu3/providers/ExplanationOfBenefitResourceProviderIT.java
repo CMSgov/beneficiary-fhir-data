@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -19,6 +23,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
@@ -31,6 +36,8 @@ import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.LoadAppOptions;
+import gov.hhs.cms.bluebutton.data.pipeline.rif.load.RifLoaderTestUtils;
 import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
 
 /**
@@ -677,8 +684,82 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	}
 
 	/**
-	 * Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called
-	 * after each test case.
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * with <code>excludeSAMHSA=true</code> properly filters out SAMHSA-related
+	 * claims.
+	 *
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsWithSamhsaFiltering() throws FHIRException {
+		//Load the SAMPLE_A resources normally.
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+		// Tweak the SAMPLE_A Carrier claim such that it's SAMHSA-related.
+		CarrierClaim carrierRifRecord = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
+				.map(r -> (CarrierClaim) r)
+				.findFirst().get();
+		LoadAppOptions loadAppOptions = ServerTestUtils.createRifLoaderOptions();
+		EntityManagerFactory entityManagerFactory = null;
+		EntityManager entityManager = null;
+		try {
+			entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(loadAppOptions);
+			entityManager = entityManagerFactory.createEntityManager();
+
+			entityManager.getTransaction().begin();
+			carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
+			carrierRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(carrierRifRecord);
+			entityManager.getTransaction().commit();
+		} finally {
+			if (entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
+			if (entityManager != null)
+				entityManager.close();
+			if (entityManagerFactory != null)
+				entityManagerFactory.close();
+		}
+
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT
+						.hasId(TransformerUtils.buildPatientId(carrierRifRecord.getBeneficiaryId())))
+				.and(new StringClientParam("excludeSAMHSA").matches().value("true")).returnBundle(Bundle.class)
+				.execute();
+		Assert.assertNotNull(searchResults);
+		for (ClaimType claimType : ClaimType.values()) {
+			/*
+			 * First, verify that the claims that should have been filtered out, were. Then
+			 * in the `else` clause, verify that everything was **not** filtered out.
+			 */
+			// FIXME remove the `else if`s once filtering fully supports all claim types
+			if (claimType.equals(ClaimType.CARRIER))
+				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+			else if (claimType.equals(ClaimType.HHA))
+				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+			else if (claimType.equals(ClaimType.HOSPICE))
+				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+			else if (claimType.equals(ClaimType.INPATIENT))
+				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+			else if (claimType.equals(ClaimType.OUTPATIENT))
+				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+			else if (claimType.equals(ClaimType.SNF))
+				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+			else if (claimType.equals(ClaimType.PDE))
+				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+			else
+				Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+		}
+	}
+
+	/**
+	 * Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after
+	 * each test case.
 	 */
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
