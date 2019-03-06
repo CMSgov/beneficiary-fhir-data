@@ -68,6 +68,7 @@ References:
 * [CMS Publication on ICD-9-CM Format](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HospitalQualityInits/Downloads/HospitalAppendix_F.pdf)
 * [CMS Publication on ICD-10-CM Format](https://www.cms.gov/Medicare/Coding/ICD10/Downloads/032310_ICD10_Slides.pdf)
 * [CMS Page on HCPCS](https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html) (see "HCPCS Background Information" section at bottom)
+* [Intro to CPT Coding](https://www.medicalbillingandcoding.org/intro-to-cpt/)
 
 Codes such as ICD-9 codes can be formatted differently in different situations. This flexibility presents challenges when implementing a blacklist-by-presence-of-codes approach as being taken here. To avoid those problems, codes from the CSV files and codes coming from our source data will all be normalized before being compared to each other, as follows:
 
