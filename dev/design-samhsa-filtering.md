@@ -61,6 +61,49 @@ The following table details all of the fields in our system which can contain SA
 |Part D Events|ICD Diagnosis|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Part D Events|ICD Procedure|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 
+## Code Normalization
+
+References:
+
+* [CMS Publication on ICD-9-CM Format](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HospitalQualityInits/Downloads/HospitalAppendix_F.pdf)
+* [CMS Publication on ICD-10-CM Format](https://www.cms.gov/Medicare/Coding/ICD10/Downloads/032310_ICD10_Slides.pdf)
+* [CMS Page on HCPCS](https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html) (see "HCPCS Background Information" section at bottom)
+
+Codes such as ICD-9 codes can be formatted differently in different situations. This flexibility presents challenges when implementing a blacklist-by-presence-of-codes approach as being taken here. To avoid those problems, codes from the CSV files and codes coming from our source data will all be normalized before being compared to each other, as follows:
+
+<!--
+  This is the piece of things that I'm most nervous about having mistakes right now. The above references are okay, but not as authoritative as I'd like.
+
+  Specific concerns:
+
+  * I haven't actually checked that ICD-10-PCS can be normalized in the same fashion as ICD-10-CM.
+  * Do any of these codesets allow leading or trailing zeroes? e.g. "001" should be equivalent to "0001"?
+  * Do the values used in our unit tests accurately reflect the formatting of real source values?
+-->
+
+* DRG Codes
+    * _TODO_
+* CPT Codes
+    * Strip all leading and trailing whitespace.
+    * Convert to all-caps.
+* ICD-9-CM Diagnosis Codes
+    * Strip all leading and trailing whitespace.
+    * Remove the first decimal point encountered (if any).
+    * Convert to all-caps.
+* ICD-9-CM Procedure Codes
+    * Strip all leading and trailing whitespace.
+    * Remove the first decimal point encountered (if any).
+    * Convert to all-caps.
+* ICD-10-CM Diagnosis Codes
+    * Strip all leading and trailing whitespace.
+    * Remove the first decimal point encountered (if any).
+    * Convert to all-caps.
+* ICD-10-PCS Diagnosis Codes
+    * Strip all leading and trailing whitespace.
+    * Remove the first decimal point encountered (if any).
+    * Convert to all-caps.
+
+Proper normalization is a key component of our SAMHSA filtering.
 
 ## Potential Future Improvements
 
