@@ -24,7 +24,7 @@
         {
           "type": "Coverage",
           "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Coverage"
+            "reference": "http://hl7.org/fhir/Profile/Coverage"
           },
           "interaction": [
             {
@@ -45,7 +45,7 @@
         {
           "type": "ExplanationOfBenefit",
           "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit"
+            "reference": "http://hl7.org/fhir/Profile/ExplanationOfBenefit"
           },
           "interaction": [
             {
@@ -70,7 +70,7 @@
         {
           "type": "OperationDefinition",
           "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/OperationDefinition"
+            "reference": "http://hl7.org/fhir/Profile/OperationDefinition"
           },
           "interaction": [
             {
@@ -81,7 +81,7 @@
         {
           "type": "Patient",
           "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/Patient"
+            "reference": "http://hl7.org/fhir/Profile/Patient"
           },
           "interaction": [
             {
@@ -107,7 +107,7 @@
         {
           "type": "StructureDefinition",
           "profile": {
-            "reference": "http://hl7.org/fhir/StructureDefinition/StructureDefinition"
+            "reference": "http://hl7.org/fhir/Profile/StructureDefinition"
           },
           "interaction": [
             {

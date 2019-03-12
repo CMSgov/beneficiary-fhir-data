@@ -139,8 +139,7 @@
     "identifier": {
       "system": "http://hl7.org/fhir/sid/us-npi",
       "value": "1497758544"
-    },
-    "display": "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    }
   },
   "facility": {
     "extension": [
@@ -156,8 +155,7 @@
     "identifier": {
       "system": "http://hl7.org/fhir/sid/us-npi",
       "value": "1497758544"
-    },
-    "display": "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+    }
   },
   "information": [
     {

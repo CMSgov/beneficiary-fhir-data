@@ -64,19 +64,19 @@
 			<artifactId>bluebutton-data-model-rif</artifactId>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-structures-dstu3 -->
+		<!-- At least one "structures" JAR must also be included -->
 		<dependency>
 		    <groupId>ca.uhn.hapi.fhir</groupId>
 		    <artifactId>hapi-fhir-structures-dstu3</artifactId>
 		    <version>3.6.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-server -->
+		<!-- This dependency includes the server HAPI-FHIR classes -->
 		<dependency>
 		    <groupId>ca.uhn.hapi.fhir</groupId>
 		    <artifactId>hapi-fhir-server</artifactId>
 		    <version>3.6.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-client -->
+		<!-- This dependency includes the client HAPI-FHIR classes -->
 		<dependency>
 		    <groupId>ca.uhn.hapi.fhir</groupId>
 		    <artifactId>hapi-fhir-client</artifactId>

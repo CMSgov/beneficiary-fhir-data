@@ -36,8 +36,7 @@
     "identifier": {
       "system": "http://hl7.org/fhir/sid/us-npi",
       "value": "1023011079"
-    },
-    "display": "ADVANTAGE HOME HEALTH CARE, INC."
+    }
   },
   "facility": {
     "extension": [
@@ -53,8 +52,7 @@
     "identifier": {
       "system": "http://hl7.org/fhir/sid/us-npi",
       "value": "1023011079"
-    },
-    "display": "ADVANTAGE HOME HEALTH CARE, INC."
+    }
   },
   "information": [
     {
@@ -317,8 +315,7 @@
         "identifier": {
           "system": "http://hl7.org/fhir/sid/us-npi",
           "value": "1750384806"
-        },
-        "display": "DR. ROBERT BISBEE MD"
+        }
       },
       "role": {
         "coding": [
