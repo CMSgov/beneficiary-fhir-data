@@ -228,23 +228,19 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		Bundle bundle = new Bundle();
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
-		LOGGER.info("Request details: {}", requestDetails);
 		if (pagingArgs.isPagingRequested()) {
 			/*
-			 * Only add resources/links to the bundle if the pageSize is not 0, as a
-			 * pageSize of 0 should return a bundle with only the total number of matched
-			 * resources (See https://www.hl7.org/fhir/search.html#count).
+			 * FIXME: Due to a bug in HAPI-FHIR described here
+			 * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
+			 * working correctly. Review bluebutton-data-server PR #129 for necessary code
+			 * changes when this issue is resolved.
 			 */
-			LOGGER.info("Page size: {}", pagingArgs.getPageSize());
-			if (pagingArgs.getPageSize() != 0) {
-				int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
-				List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
-						pagingArgs.getStartIndex() + numToReturn);
-				bundle = addResourcesToBundle(bundle, resources);
-				addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
-			}
+			int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
+			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
+					pagingArgs.getStartIndex() + numToReturn);
+			bundle = addResourcesToBundle(bundle, resources);
+			addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
 		} else {
-			LOGGER.info("Adding entries to the bundle without paging");
 			bundle = addResourcesToBundle(bundle, eobs);
 		}
 
