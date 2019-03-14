@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<hapi-fhir.version>2.5</hapi-fhir.version>
+		<hapi-fhir.version>3.6</hapi-fhir.version>
 		<jersey.version>2.25.1</jersey.version>
 
 		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec
@@ -31,6 +31,18 @@
 			for details. -->
 		<bash.exe>bash</bash.exe>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- The hapi-fhir-structures-dstu3 dependency tries to pull in a too-early 
+					version of this library (1.1) that isn't compatible with our other dependencies. -->
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.11</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -51,18 +63,24 @@
 			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
 			<artifactId>bluebutton-data-model-rif</artifactId>
 		</dependency>
-
-		<dependency>
-			<!-- This dependency includes the core HAPI-FHIR classes -->
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-base</artifactId>
-			<version>${hapi-fhir.version}</version>
-		</dependency>
+		
 		<dependency>
 			<!-- At least one "structures" JAR must also be included -->
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>${hapi-fhir.version}</version>
+			<version>3.6.0</version>
+		</dependency>
+		<dependency>
+			<!-- This dependency includes the server HAPI-FHIR classes -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		<dependency>
+			<!-- This dependency includes the client HAPI-FHIR classes -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+			<version>3.6.0</version>
 		</dependency>
 		
 		<dependency>
@@ -446,5 +464,4 @@
 			</build>
 		</profile>
 	</profiles>
-
 </project>
