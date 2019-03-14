@@ -8,7 +8,7 @@ limit_envs:
 
 aws_region: us-east-1
 
-# Note: Cygwin environmentts don't have a "root" user, as such. Instead, things
+# Note: Cygwin environments don't have a "root" user, as such. Instead, things
 # end up owned by the user that installed Cygwin (at least for the 
 # installed-per-user Cygwin setups that we tend to use).
 root_uid: 0
