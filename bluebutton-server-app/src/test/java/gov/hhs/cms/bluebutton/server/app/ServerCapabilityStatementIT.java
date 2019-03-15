@@ -39,7 +39,7 @@ public final class ServerCapabilityStatementIT {
 	public void getCapabilities() {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
-		CapabilityStatement capabilities = fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement capabilities = fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 		Assert.assertNotNull(capabilities);
 
 		// Verify that our custom server metadata is correct.

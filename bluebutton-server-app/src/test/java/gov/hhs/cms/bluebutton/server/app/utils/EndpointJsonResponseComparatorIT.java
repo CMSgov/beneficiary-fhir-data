@@ -153,7 +153,7 @@ public final class EndpointJsonResponseComparatorIT {
 		IGenericClient fhirClient = createFhirClientAndSetEncoding();
 		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
-		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 		return sortMetadataSearchParamArray(jsonInterceptor.getResponse());
 	}
 
@@ -282,7 +282,7 @@ public final class EndpointJsonResponseComparatorIT {
 		IGenericClient fhirClient = createFhirClientAndSetEncoding();
 		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
-		fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
+		fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -341,8 +341,8 @@ public final class EndpointJsonResponseComparatorIT {
 		IGenericClient fhirClient = createFhirClientAndSetEncoding();
 		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
-		fhirClient.read(Coverage.class,
-				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary.getBeneficiaryId()));
+		fhirClient.read().resource(Coverage.class)
+				.withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary)).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -420,8 +420,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		CarrierClaim carrClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
 				.map(r -> (CarrierClaim) r).findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -439,7 +439,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
 				.get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -457,7 +458,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
 				.get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -475,8 +477,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		HospiceClaim hosClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> (HospiceClaim) r)
 				.findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -494,8 +496,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		InpatientClaim inpClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
 				.map(r -> (InpatientClaim) r).findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -513,8 +515,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		OutpatientClaim outClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
 				.map(r -> (OutpatientClaim) r).findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -532,7 +534,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		PartDEvent pdeClaim = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 
@@ -550,7 +553,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
 				.get();
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId())).execute();
 		return jsonInterceptor.getResponse();
 	}
 

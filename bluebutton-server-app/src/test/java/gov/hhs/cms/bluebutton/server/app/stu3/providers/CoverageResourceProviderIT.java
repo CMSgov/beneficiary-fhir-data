@@ -38,16 +38,16 @@ public final class CoverageResourceProviderIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		Coverage partACoverage = fhirClient.read(Coverage.class,
-				TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary));
+		Coverage partACoverage = fhirClient.read().resource(Coverage.class)
+				.withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary)).execute();
 		CoverageTransformerTest.assertPartAMatches(beneficiary, partACoverage);
 
-		Coverage partBCoverage = fhirClient.read(Coverage.class,
-				TransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary));
+		Coverage partBCoverage = fhirClient.read().resource(Coverage.class)
+				.withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary)).execute();
 		CoverageTransformerTest.assertPartBMatches(beneficiary, partBCoverage);
 
-		Coverage partDCoverage = fhirClient.read(Coverage.class,
-				TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary));
+		Coverage partDCoverage = fhirClient.read().resource(Coverage.class)
+				.withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary)).execute();
 		CoverageTransformerTest.assertPartDMatches(beneficiary, partDCoverage);
 	}
 
@@ -66,7 +66,8 @@ public final class CoverageResourceProviderIT {
 
 		exception = null;
 		try {
-			fhirClient.read(Coverage.class, TransformerUtils.buildCoverageId(MedicareSegment.PART_A, "1234"));
+			fhirClient.read().resource(Coverage.class)
+					.withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, "1234")).execute();
 		} catch (ResourceNotFoundException e) {
 			exception = e;
 		}
@@ -74,7 +75,8 @@ public final class CoverageResourceProviderIT {
 
 		exception = null;
 		try {
-			fhirClient.read(Coverage.class, TransformerUtils.buildCoverageId(MedicareSegment.PART_B, "1234"));
+			fhirClient.read().resource(Coverage.class)
+					.withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_B, "1234")).execute();
 		} catch (ResourceNotFoundException e) {
 			exception = e;
 		}
@@ -82,7 +84,8 @@ public final class CoverageResourceProviderIT {
 
 		exception = null;
 		try {
-			fhirClient.read(Coverage.class, TransformerUtils.buildCoverageId(MedicareSegment.PART_D, "1234"));
+			fhirClient.read().resource(Coverage.class)
+					.withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, "1234")).execute();
 		} catch (ResourceNotFoundException e) {
 			exception = e;
 		}

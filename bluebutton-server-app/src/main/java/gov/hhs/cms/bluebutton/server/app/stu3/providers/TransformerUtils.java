@@ -679,7 +679,7 @@ public final class TransformerUtils {
 	 *            the {@link Beneficiary} to compute a {@link Coverage#getId()} for
 	 * @return the {@link Coverage#getId()} value to use for the specified values
 	 */
-	static IdDt buildCoverageId(MedicareSegment medicareSegment, Beneficiary beneficiary) {
+	public static IdDt buildCoverageId(MedicareSegment medicareSegment, Beneficiary beneficiary) {
 		return buildCoverageId(medicareSegment, beneficiary.getBeneficiaryId());
 	}
 
