@@ -13,7 +13,7 @@ alter table "Beneficiaries" add column "beneEnrollmentReferenceYear" numeric(4);
 alter table "Beneficiaries" add column "partAMonthsCount" numeric(3);
 alter table "Beneficiaries" add column "partBMonthsCount" numeric(3);
 alter table "Beneficiaries" add column "stateBuyInCoverageCount" numeric(3);
-alter table "Beneficiaries" add column "hMOCoverageCount" numeric(3);
+alter table "Beneficiaries" add column "hmoCoverageCount" numeric(3);
 alter table "Beneficiaries" add column "monthsRetireeDrugSubsidyCoverage" numeric(3);
 alter table "Beneficiaries" add column "sourceOfEnrollmentData"	varchar(3);
 alter table "Beneficiaries" add column "sampleMedicareGroupIndicator" varchar(2);

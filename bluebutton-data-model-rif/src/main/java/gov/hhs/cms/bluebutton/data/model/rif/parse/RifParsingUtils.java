@@ -29,9 +29,6 @@ public final class RifParsingUtils {
 	 */
 	public static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
 
-	private final static DateTimeFormatter RIF_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
-			.appendPattern("dd-MMM-yyyy").toFormatter();
-
 	private final static DateTimeFormatter RIF_TIMESTAMP_FORMATTER = new DateTimeFormatterBuilder()
 			.parseCaseInsensitive()
 			.appendPattern("dd-MMM-yyyy HH:mm:ss").toFormatter();
@@ -175,8 +172,7 @@ public final class RifParsingUtils {
 	/**
 	 * @param dateText
 	 *            the date string to parse
-	 * @return the specified text as a {@link LocalDate}, parsed using
-	 *         {@link #RIF_DATE_FORMATTER}
+	 * @return the specified text as a {@link LocalDate}
 	 */
 	public static LocalDate parseDate(String dateText) {
 		/*
@@ -184,8 +180,22 @@ public final class RifParsingUtils {
 		 * to read, and ensures that this parsing is standardized.
 		 */
 
+		DateTimeFormatter rifDateFormatter;
+		/*
+		 * Incoming dates usually are in the format of dd-MMM-yyyy (01-MAR-2019). There
+		 * are a couple instances where a date may come in the format of yyyyMMdd
+		 * (20190301). Thus the reason for the following code.
+		 */
+		if (dateText.matches("\\d{8}")) {
+			rifDateFormatter = new DateTimeFormatterBuilder().parseCaseInsensitive()
+					.appendPattern("yyyyMMdd").toFormatter();
+		} else {
+			rifDateFormatter = new DateTimeFormatterBuilder().parseCaseInsensitive()
+					.appendPattern("dd-MMM-yyyy").toFormatter();
+		}
+
 		try {
-			LocalDate dateFrom = LocalDate.parse(dateText, RIF_DATE_FORMATTER);
+			LocalDate dateFrom = LocalDate.parse(dateText, rifDateFormatter);
 			return dateFrom;
 		} catch (DateTimeParseException e) {
 			throw new InvalidRifValueException(String.format("Unable to parse date value: '%s'.", dateText), e);
@@ -196,7 +206,7 @@ public final class RifParsingUtils {
 	 * @param timestampText
 	 *            the timestamp string to parse
 	 * @return the specified text as a {@link Instant}, parsed using
-	 *         {@link #RIF_DATE_FORMATTER}
+	 *         {@link #RIF_TIMESTAMP_FORMATTER}
 	 */
 	public static Instant parseTimestamp(String timestampText) {
 		/*
@@ -246,7 +256,6 @@ public final class RifParsingUtils {
 	 * @param charText
 	 *            the char string to parse
 	 * @return the specified text as a {@link Character} (first character only),
-	 *         parsed using {@link #RIF_DATE_FORMATTER}
 	 */
 	public static Character parseCharacter(String charText) {
 		/*
