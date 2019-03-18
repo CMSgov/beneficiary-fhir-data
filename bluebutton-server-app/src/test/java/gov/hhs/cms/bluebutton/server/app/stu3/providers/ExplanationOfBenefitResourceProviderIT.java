@@ -388,8 +388,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify that no paging links (e.g. next, prev, first, last) exist in the
-		 * bundle.
+		 * Verify that no paging links exist in the bundle.
 		 */
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
@@ -476,9 +475,11 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify link to the last page exists.
+		 * Verify link to the last page exists but a link to the first does not since we
+		 * are on the first page.
 		 */
 		Assert.assertNotNull(searchResults.getLink("last"));
+		Assert.assertNull(searchResults.getLink("first"));
 
 		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
 			searchResults = fhirClient.loadPage().next(searchResults).execute();
