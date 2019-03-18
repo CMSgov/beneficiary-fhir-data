@@ -25,13 +25,10 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -42,7 +39,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
@@ -53,7 +49,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 @Component
 public final class ExplanationOfBenefitResourceProvider implements IResourceProvider {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
 	/**
 	 * A {@link Pattern} that will match the
 	 * {@link ExplanationOfBenefit#getId()}s used in this application.
@@ -382,6 +377,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		return claims.stream().map(c -> claimType.getTransformer().apply(metricRegistry, c))
 				.collect(Collectors.toList());
 	}
+<<<<<<< HEAD
 
 	/**
 	 * Removes all SAMHSA-related claims from the specified {@link List} of
@@ -485,4 +481,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			return serverBase;
 		}
 	}
+=======
+>>>>>>> 831a06c... BLUEBUTTON-765: Moving PagingArguments into its own class
 }
