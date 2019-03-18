@@ -313,20 +313,18 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		}
 
 		if (startIndex - pageSize >= 0) {
-			int start = Math.max(0, startIndex - pageSize);
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
-					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
+					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex - pageSize, pageSize)));
 		}
 
 		/*
-		 * This formula rounds count down to the nearest multiple of pageSize that's
-		 * less than and not equal to numTotalResults
+		 * This formula rounds numTotalResults down to the nearest multiple of pageSize
+		 * that's less than and not equal to numTotalResults
 		 */
 		int lastIndex = (numTotalResults - 1) / pageSize * pageSize;
 		if (startIndex < lastIndex) {
-			int finalPageSize = numTotalResults - lastIndex;
 			bundle.addLink(new BundleLinkComponent().setRelation("last")
-					.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, finalPageSize)));
+					.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, pageSize)));
 		}
 	}
 
