@@ -476,9 +476,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify links to the first and last page exists.
+		 * Verify link to the last page exists.
 		 */
-		Assert.assertNotNull(searchResults.getLink("first"));
 		Assert.assertNotNull(searchResults.getLink("last"));
 
 		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
@@ -487,12 +486,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			Assert.assertTrue(searchResults.hasEntry());
 
 			/*
-			 * Each page after the first should have a previous link.
+			 * Each page after the first should have a first and previous link.
 			 */
+			Assert.assertNotNull(searchResults.getLink("first"));
 			Assert.assertNotNull(searchResults.getLink(Bundle.LINK_PREV));
 
 			searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 		}
+
+		/*
+		 * On the last page the last link should not exist.
+		 */
+		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
 		 * Verify that the combined results are the same size as
@@ -583,10 +588,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify that only the first paging links exist, since there should only be one
-		 * page.
+		 * Verify that no paging links exist, since there should only be one page.
 		 */
-		Assert.assertNotNull(searchResults.getLink("first"));
+		Assert.assertNull(searchResults.getLink("first"));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
 		Assert.assertNull(searchResults.getLink("last"));

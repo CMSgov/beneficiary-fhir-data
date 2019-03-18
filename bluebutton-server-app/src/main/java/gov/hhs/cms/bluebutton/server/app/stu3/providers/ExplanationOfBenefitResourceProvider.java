@@ -302,25 +302,31 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		Integer startIndex = pagingArgs.getStartIndex();
 		String serverBase = pagingArgs.getServerBase();
 
-		bundle.addLink(new BundleLinkComponent().setRelation("first")
-				.setUrl(createPagingLink(serverBase, beneficiaryId, 0, pageSize)));
+		if (startIndex > 0) {
+			bundle.addLink(new BundleLinkComponent().setRelation("first")
+					.setUrl(createPagingLink(serverBase, beneficiaryId, 0, pageSize)));
+		}
 
 		if (startIndex + pageSize < numTotalResults) {
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_NEXT)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex + pageSize, pageSize)));
 		}
 
-		if (startIndex > 0) {
+		if (startIndex - pageSize >= 0) {
 			int start = Math.max(0, startIndex - pageSize);
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
 		}
 
-		if (numTotalResults > pageSize) {
-			int start = (numTotalResults / pageSize - 1) * pageSize;
-			int finalPageSize = numTotalResults - start;
+		/*
+		 * This formula rounds count down to the nearest multiple of pageSize that's
+		 * less than and not equal to numTotalResults
+		 */
+		int lastIndex = (numTotalResults - 1) / pageSize * pageSize;
+		if (startIndex < lastIndex) {
+			int finalPageSize = numTotalResults - lastIndex;
 			bundle.addLink(new BundleLinkComponent().setRelation("last")
-					.setUrl(createPagingLink(serverBase, beneficiaryId, start, finalPageSize)));
+					.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, finalPageSize)));
 		}
 	}
 
