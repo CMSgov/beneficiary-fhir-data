@@ -475,11 +475,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify link to the last page exists but a link to the first does not since we
-		 * are on the first page.
+		 * Verify links to the first and last page exist.
 		 */
 		Assert.assertNotNull(searchResults.getLink("last"));
-		Assert.assertNull(searchResults.getLink("first"));
+		Assert.assertNotNull(searchResults.getLink("first"));
 
 		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
 			searchResults = fhirClient.loadPage().next(searchResults).execute();
@@ -487,18 +486,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			Assert.assertTrue(searchResults.hasEntry());
 
 			/*
-			 * Each page after the first should have a first and previous link.
+			 * Each page after the first should have a first, previous, and last links.
 			 */
 			Assert.assertNotNull(searchResults.getLink("first"));
 			Assert.assertNotNull(searchResults.getLink(Bundle.LINK_PREV));
+			Assert.assertNotNull(searchResults.getLink("last"));
 
 			searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 		}
-
-		/*
-		 * On the last page the last link should not exist.
-		 */
-		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
 		 * Verify that the combined results are the same size as
@@ -589,12 +584,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify that no paging links exist, since there should only be one page.
+		 * Verify that only the first and last links exist as there are no previous or
+		 * next pages.
 		 */
-		Assert.assertNull(searchResults.getLink("first"));
+		Assert.assertNotNull(searchResults.getLink("first"));
+		Assert.assertNotNull(searchResults.getLink("last"));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
-		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
 		 * Verify that each of the expected claims (one for every claim type) is present

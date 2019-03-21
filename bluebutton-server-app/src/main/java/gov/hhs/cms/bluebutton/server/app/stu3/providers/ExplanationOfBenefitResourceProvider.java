@@ -231,8 +231,13 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			 * changes when this issue is resolved.
 			 */
 			int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
+			// int endIndex = Math.min(pagingArgs.getStartIndex() +
+			// pagingArgs.getPageSize(), eobs.size());
 			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
 					pagingArgs.getStartIndex() + numToReturn);
+			// List<ExplanationOfBenefit> resources =
+			// eobs.subList(pagingArgs.getStartIndex(),
+			// endIndex);
 			bundle = addResourcesToBundle(bundle, resources);
 			addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
 		} else {
@@ -302,10 +307,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		Integer startIndex = pagingArgs.getStartIndex();
 		String serverBase = pagingArgs.getServerBase();
 
-		if (startIndex > 0) {
-			bundle.addLink(new BundleLinkComponent().setRelation("first")
-					.setUrl(createPagingLink(serverBase, beneficiaryId, 0, pageSize)));
-		}
+		bundle.addLink(new BundleLinkComponent().setRelation("first")
+				.setUrl(createPagingLink(serverBase, beneficiaryId, 0, pageSize)));
 
 		if (startIndex + pageSize < numTotalResults) {
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_NEXT)
@@ -322,10 +325,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 * that's less than and not equal to numTotalResults
 		 */
 		int lastIndex = (numTotalResults - 1) / pageSize * pageSize;
-		if (startIndex < lastIndex) {
-			bundle.addLink(new BundleLinkComponent().setRelation("last")
-					.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, pageSize)));
-		}
+		bundle.addLink(new BundleLinkComponent().setRelation("last")
+				.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, pageSize)));
 	}
 
 	/**
