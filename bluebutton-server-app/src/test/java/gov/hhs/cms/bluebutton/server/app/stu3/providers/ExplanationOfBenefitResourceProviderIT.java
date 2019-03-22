@@ -442,13 +442,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB, with
-	 * paging.
+	 * paging. This test uses a count of 2 to verify our code will not run into an
+	 * IndexOutOfBoundsException on odd bundle sizes.
 	 * 
 	 * @throws FHIRException
 	 *             (indicates test failure)
 	 */
 	@Test
-	public void searchForEobsByExistingPatientWithPaging() throws FHIRException {
+	public void searchForEobsByExistingPatientWithEvenPaging() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -480,6 +481,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		Assert.assertNotNull(searchResults.getLink("last"));
 		Assert.assertNotNull(searchResults.getLink("first"));
 
+		/*
+		 * Verify that accessing all next links, eventually leading to the last page,
+		 * will not encounter an IndexOutOfBoundsException.
+		 */
 		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
 			searchResults = fhirClient.loadPage().next(searchResults).execute();
 			Assert.assertNotNull(searchResults);
@@ -556,7 +561,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB, with
 	 * paging. This test uses a count of 3 to verify our code will not run into an
-	 * IndexOutOfBoundsException.
+	 * IndexOutOfBoundsException on even bundle sizes.
 	 * 
 	 * @throws FHIRException
 	 *             (indicates test failure)
