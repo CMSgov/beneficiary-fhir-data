@@ -230,14 +230,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			 * working correctly. Review bluebutton-data-server PR #129 for necessary code
 			 * changes when this issue is resolved.
 			 */
-			int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
-			// int endIndex = Math.min(pagingArgs.getStartIndex() +
-			// pagingArgs.getPageSize(), eobs.size());
-			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
-					pagingArgs.getStartIndex() + numToReturn);
-			// List<ExplanationOfBenefit> resources =
-			// eobs.subList(pagingArgs.getStartIndex(),
-			// endIndex);
+			int endIndex = Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), eobs.size());
+			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(), endIndex);
 			bundle = addResourcesToBundle(bundle, resources);
 			addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
 		} else {
