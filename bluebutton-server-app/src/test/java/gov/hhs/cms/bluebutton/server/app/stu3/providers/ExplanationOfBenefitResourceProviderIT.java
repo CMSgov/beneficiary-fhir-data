@@ -596,6 +596,96 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	/**
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging on a page size of 0.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		/*
+		 * FIXME: According the the FHIR spec, paging for _count=0 should not return any
+		 * claim entries in the bundle, but instead just a total for the number of
+		 * entries that match the search criteria. 
+		 * This functionality does no work
+		 * currently (see https://github.com/jamesagnew/hapi-fhir/issues/1074) and so
+		 * for now paging with _count=0 should behave as though paging was not
+		 * requested.
+		 */
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(0)
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		/*
+		 * Verify that no paging links exist in the bundle.
+		 */
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("first"));
+		Assert.assertNull(searchResults.getLink("last"));
+
+		/*
+		 * Verify that each of the expected claims (one for every claim type) is present
+		 * and looks correct.
+		 */
+
+		CarrierClaim carrierClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
+				.map(r -> (CarrierClaim) r).findFirst().get();
+		Assert.assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+		CarrierClaimTransformerTest.assertMatches(carrierClaim,
+				filterToClaimType(searchResults, ClaimType.CARRIER).get(0));
+
+		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
+				.get();
+		DMEClaimTransformerTest.assertMatches(dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0));
+
+		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
+				.get();
+		HHAClaimTransformerTest.assertMatches(hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+
+		HospiceClaim hospiceClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim)
+				.map(r -> (HospiceClaim) r).findFirst().get();
+		HospiceClaimTransformerTest.assertMatches(hospiceClaim,
+				filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+
+		InpatientClaim inpatientClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
+				.map(r -> (InpatientClaim) r).findFirst().get();
+		InpatientClaimTransformerTest.assertMatches(inpatientClaim,
+				filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+
+		OutpatientClaim outpatientClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
+				.map(r -> (OutpatientClaim) r).findFirst().get();
+		OutpatientClaimTransformerTest.assertMatches(outpatientClaim,
+				filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+
+		PartDEvent partDEvent = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
+				.findFirst().get();
+		PartDEventTransformerTest.assertMatches(partDEvent, filterToClaimType(searchResults, ClaimType.PDE).get(0));
+
+		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
+				.get();
+		SNFClaimTransformerTest.assertMatches(snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+	}
+
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB, with a
 	 * page size of 50 with fewer (8) results.
 	 * 
