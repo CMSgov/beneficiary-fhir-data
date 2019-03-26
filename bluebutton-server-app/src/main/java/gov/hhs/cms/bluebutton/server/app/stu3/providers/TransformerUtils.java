@@ -93,6 +93,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
+import gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
@@ -2846,15 +2847,15 @@ public final class TransformerUtils {
 	}
 
 	/**
-	 * Reads ALL the PRODUCTNDC and SUBSTANCENAME fields from the FDA NDC Products
-	 * file which was downloaded during the build process
+	 * Reads all the <code>PRODUCTNDC</code> and <code>SUBSTANCENAME</code> fields
+	 * from the FDA NDC Products file which was downloaded during the build process.
 	 * 
+	 * See {@link FDADrugDataUtilityApp} for details.
 	 */
 	public static Map<String, String> readFDADrugCodeFile() {
-
 		Map<String, String> ndcProductHashMap = new HashMap<String, String>();
 		InputStream ndcProductStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("fda_products_utf8.tsv");
+				.getResourceAsStream(FDADrugDataUtilityApp.FDA_PRODUCTS_RESOURCE);
 
 		BufferedReader ndcProductsIn = null;
 		ndcProductsIn = new BufferedReader(new InputStreamReader(ndcProductStream));
