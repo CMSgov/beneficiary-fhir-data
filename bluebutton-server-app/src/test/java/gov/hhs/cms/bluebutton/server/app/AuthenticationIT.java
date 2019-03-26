@@ -6,7 +6,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.Assert;
 import org.junit.Test;
 
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 
 /**
@@ -26,7 +26,7 @@ public final class AuthenticationIT {
 		 * Just check an arbitrary endpoint (all trusted clients have access to
 		 * everything).
 		 */
-		CapabilityStatement capabilities = fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement capabilities = fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 		Assert.assertNotNull(capabilities);
 	}
 
@@ -43,7 +43,7 @@ public final class AuthenticationIT {
 		 * Just check an arbitrary endpoint (all trusted clients have access to
 		 * everything).
 		 */
-		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 	}
 
 	/**
@@ -62,6 +62,6 @@ public final class AuthenticationIT {
 		 * Just check an arbitrary endpoint (all trusted clients have access to
 		 * everything).
 		 */
-		fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 	}
 }

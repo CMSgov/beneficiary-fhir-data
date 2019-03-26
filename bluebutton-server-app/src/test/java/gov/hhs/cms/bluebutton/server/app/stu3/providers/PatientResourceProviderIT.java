@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
@@ -33,7 +33,7 @@ public final class PatientResourceProviderIT {
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
-		Patient patient = fhirClient.read(Patient.class, beneficiary.getBeneficiaryId());
+		Patient patient = fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
 		Assert.assertNotNull(patient);
 		BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
@@ -49,7 +49,7 @@ public final class PatientResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(Patient.class, "1234");
+		fhirClient.read().resource(Patient.class).withId("1234").execute();
 	}
 
 	/**
