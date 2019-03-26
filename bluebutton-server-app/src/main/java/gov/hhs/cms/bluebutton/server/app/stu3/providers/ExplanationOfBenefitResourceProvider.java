@@ -309,9 +309,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex + pageSize, pageSize)));
 		}
 
-		if (startIndex - pageSize >= 0) {
+		if (startIndex > 0) {
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
-					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex - pageSize, pageSize)));
+					.setUrl(createPagingLink(serverBase, beneficiaryId, Math.max(startIndex - pageSize, 0), pageSize)));
 		}
 
 		/*
