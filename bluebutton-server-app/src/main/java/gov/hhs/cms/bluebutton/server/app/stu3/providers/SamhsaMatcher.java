@@ -355,7 +355,7 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	}
 
 	/**
-	 * @param diagnoses
+	 * @param procedureConcept
 	 *            the procedure {@link CodeableConcept} to check
 	 * @return <code>true</code> if the specified procedure {@link CodeableConcept}
 	 *         contains any {@link Coding}s that match any of the {@link #cptCodes},
@@ -383,8 +383,8 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	 * @param procedureCoding
 	 *            the procedure {@link Coding} to check
 	 * @return <code>true</code> if the specified procedure {@link Coding} matches
-	 *         one of the {@link #icd9DiagnosisCodes} entries, <code>false</code> if
-	 *         it does not
+	 *         one of the {@link #cptCodes} entries, <code>false</code> if it does
+	 *         not
 	 */
 	private boolean isSamhsaCptCode(Coding procedureCoding) {
 		/*
