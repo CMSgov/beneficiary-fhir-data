@@ -7,7 +7,11 @@ import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -81,6 +85,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 	 * to <code>true</code> will also log messages out to a new source file.
 	 */
 	private static final boolean DEBUG = true;
+
+	private static final String DATA_DICTIONARY_LINK = "https://bluebutton.cms.gov/resources/variables/";
 
 	private final List<String> logMessages = new LinkedList<>();
 
@@ -173,7 +179,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiarySheet()))
 					.setHeaderEntity("Beneficiary").setHeaderTable("Beneficiaries")
-					.setHeaderEntityIdField("beneficiaryId").setHasLines(false));
+					.setHeaderEntityIdField("beneficiaryId")
+					.setHeaderEntityAdditionalDatabaseFields(
+							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
+					.setHasLines(false));
 			/*
 			 * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
 			 * DB), as they won't ever have changed data. We should change the RIF layout to
@@ -188,7 +197,15 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							"entitlementCodeOriginal", "entitlementCodeCurrent", "endStageRenalDiseaseCode",
 							"medicareEnrollmentStatusCode", "partATerminationCode", "partBTerminationCode",
 							"nameSurname", "nameGiven", "nameMiddleInitial")
+					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
+							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
 					.setHasLines(false));
+
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
+					.setHeaderEntity("MedicareBeneficiaryIdHistory").setHeaderTable("MedicareBeneficiaryIdHistory")
+					.setHeaderEntityIdField("medicareBeneficiaryIdKey").setHasLines(false));
+
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.pdeSheet()))
 					.setHeaderEntity("PartDEvent").setHeaderTable("PartDEvents").setHeaderEntityIdField("eventId")
@@ -488,6 +505,30 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			headerEntityClass.addMethod(headerFieldSetter.build());
 		}
 
+		/*
+		 * Create an Entity field for additional database fields that we need to store
+		 * data for whereas there isn't a corresponding RIF input field.
+		 */
+		for (RifField addlDatabaseField : mappingSpec.getHeaderEntityAdditionalDatabaseFields()) {
+			FieldSpec headerField = FieldSpec
+					.builder(selectJavaFieldType(addlDatabaseField), addlDatabaseField.getJavaFieldName(),
+							Modifier.PRIVATE)
+					.addAnnotations(createAnnotations(mappingSpec, addlDatabaseField)).build();
+			headerEntityClass.addField(headerField);
+			  
+			MethodSpec.Builder headerFieldGetter = MethodSpec.methodBuilder(calculateGetterName(headerField))
+					.addModifiers(Modifier.PUBLIC).returns(selectJavaPropertyType(addlDatabaseField));
+			addGetterStatement(addlDatabaseField, headerField, headerFieldGetter);
+			headerEntityClass.addMethod(headerFieldGetter.build());
+
+			MethodSpec.Builder headerFieldSetter = MethodSpec.methodBuilder(calculateSetterName(headerField))
+					.addModifiers(Modifier.PUBLIC).returns(void.class)
+					.addParameter(selectJavaPropertyType(addlDatabaseField), headerField.name);
+			addSetterStatement(addlDatabaseField, headerField, headerFieldSetter);
+			headerEntityClass.addMethod(headerFieldSetter.build());
+
+		}
+
 		// Add the parent-to-child join field and accessor, if appropriate.
 		if (mappingSpec.getHasLines()) {
 			ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
@@ -614,6 +655,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			} else if (rifField.getRifColumnType() == RifColumnType.DATE) {
 				// Handle a LocalDate field.
 				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalDate" : "parseDate";
+			} else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP) {
+				// Handle an Instant field.
+				parseUtilsMethodName = rifField.isRifColumnOptional() ? "parseOptionalTimestamp" : "parseTimestamp";
 			} else {
 				throw new IllegalStateException();
 			}
@@ -847,6 +891,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			return ClassName.get(String.class);
 		else if (rifField.getRifColumnType() == RifColumnType.DATE && rifField.getRifColumnLength().orElse(0) == 8)
 			return ClassName.get(LocalDate.class);
+		else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP
+				&& rifField.getRifColumnLength().orElse(0) == 20)
+			return ClassName.get(Instant.class);
 		else if (rifField.getRifColumnType() == RifColumnType.NUM
 				&& rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0)
 			return ClassName.get(BigDecimal.class);
@@ -946,6 +993,39 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		}
 
 		return annotations;
+	}
+
+	/**
+	 * @param List<String>
+	 *            the {@link RifField} to create an additional Annotated database
+	 *            field for
+	 * @return an ordered {@link List} of {@link RifField}s representing the
+	 *         additional fields that need to be stored to the database via JPA
+	 * 
+	 * @throws MalformedURLException
+	 */
+	private static List<RifField> createDetailsForAdditionalDatabaseFields(List<String> additionalDatabaseFields)
+			throws MalformedURLException {
+		List<RifField> addlDatabaseFields = new ArrayList<RifField>();
+
+		for (String additionalDatabaseField : additionalDatabaseFields) {
+			if (additionalDatabaseField.contentEquals("hicnUnhashed")) {
+				RifField hicnUnhashed = new RifField("BENE_CRNT_HIC_NUM", RifColumnType.CHAR, Optional.of(64),
+						Optional.of(0), Boolean.FALSE, new URL(DATA_DICTIONARY_LINK + "benecrnthicnum"),
+						"BENE_CRNT_HIC_NUM",
+						"hicnUnhashed");
+				addlDatabaseFields.add(hicnUnhashed);
+				continue;
+			}
+			if (additionalDatabaseField.contentEquals("medicareBeneficiaryId")) {
+				RifField medicareBeneficiaryId = new RifField("MBI_NUM", RifColumnType.CHAR, Optional.of(11),
+						Optional.of(0), Boolean.TRUE, new URL(DATA_DICTIONARY_LINK + "mbinum"), "MBI_NUM",
+						"medicareBeneficiaryId");
+				addlDatabaseFields.add(medicareBeneficiaryId);
+				continue;
+			}
+		}
+		return addlDatabaseFields;
 	}
 
 	/**
