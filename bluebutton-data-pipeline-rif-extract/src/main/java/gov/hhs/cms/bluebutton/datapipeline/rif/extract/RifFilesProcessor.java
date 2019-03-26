@@ -33,6 +33,8 @@ import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaimParser;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaimParser;
+import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistoryParser;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimParser;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
@@ -83,6 +85,9 @@ public final class RifFilesProcessor {
 		} else if (file.getFileType() == RifFileType.BENEFICIARY_HISTORY) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildBeneficiaryHistoryEvent;
+		} else if (file.getFileType() == RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY) {
+			isGrouped = false;
+			recordParser = RifFilesProcessor::buildMedicareBeneficiaryIdHistoryEvent;
 		} else if (file.getFileType() == RifFileType.PDE) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildPartDEvent;
@@ -194,6 +199,32 @@ public final class RifFilesProcessor {
 		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
 		BeneficiaryHistory beneficiaryHistoryRow = BeneficiaryHistoryParser.parseRif(csvRecords);
 		return new RifRecordEvent<BeneficiaryHistory>(fileEvent, recordAction, beneficiaryHistoryRow);
+	}
+
+	/**
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord} to be mapped (in a single-element
+	 *            {@link List}), which must be from a
+	 *            {@link RifFileType#Medicare_Beneficiary_Id_History}
+	 *            {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
+	 */
+	private static RifRecordEvent<MedicareBeneficiaryIdHistory> buildMedicareBeneficiaryIdHistoryEvent(
+			RifFileEvent fileEvent, List<CSVRecord> csvRecords) {
+		if (csvRecords.size() != 1)
+			throw new BadCodeMonkeyException();
+		CSVRecord csvRecord = csvRecords.get(0);
+
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecord.toString());
+
+		RecordAction recordAction = RecordAction.INSERT;
+		MedicareBeneficiaryIdHistory medicareBeneficiaryIdHistoryRow = MedicareBeneficiaryIdHistoryParser
+				.parseRif(csvRecords);
+		return new RifRecordEvent<MedicareBeneficiaryIdHistory>(fileEvent, recordAction,
+				medicareBeneficiaryIdHistoryRow);
 	}
 
 	/**
