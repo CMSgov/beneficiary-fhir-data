@@ -28,6 +28,9 @@ import com.justdavis.karl.misc.exceptions.unchecked.UncheckedIoException;
  *
  * See <code>/bluebutton-data-server.git/dev/design-samhsa-filtering.md</code>
  * for details on the design of this feature.
+ *
+ * This class is designed to be thread-safe, as it's expensive to construct and
+ * so should be used as a singleton.
  */
 @Component
 public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
