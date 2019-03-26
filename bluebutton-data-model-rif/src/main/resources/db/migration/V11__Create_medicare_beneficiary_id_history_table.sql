@@ -27,7 +27,7 @@ create table "MedicareBeneficiaryIdHistory" (
    
     constraint "MedicareBeneficiaryIdHistory_pkey" primary key ("medicareBeneficiaryIdKey")
 )
-${logic.tablespaces-escape} tablespace "medicarebeneficiaryidhistory_ts"
+${logic.tablespaces-escape} tablespace "beneficiaries_ts"
 ;
 
 create index "MedicareBeneficiaryIdHistory_beneficiaryId_idx"
