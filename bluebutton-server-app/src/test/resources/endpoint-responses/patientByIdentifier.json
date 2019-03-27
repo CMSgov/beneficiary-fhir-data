@@ -1,0 +1,63 @@
+{
+  "resourceType": "Bundle",
+  "id": "178b309b-4fba-4431-85f9-fe459de719f4",
+  "meta": {
+    "lastUpdated": "2019-01-16T13:49:30.999-06:00"
+  },
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://localhost:9350/v1/fhir/Patient?_format=json&identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
+    }
+  ],
+  "entry": [
+    {
+      "fullUrl": "https://localhost:9350/v1/fhir/Patient/567834",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "567834",
+        "extension": [
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/race",
+            "valueCoding": {
+              "system": "https://bluebutton.cms.gov/resources/variables/race",
+              "code": "1",
+              "display": "White"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
+            "value": "567834"
+          },
+          {
+            "system": "https://bluebutton.cms.gov/resources/identifier/hicn-hash",
+            "value": "99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
+          }
+        ],
+        "name": [
+          {
+            "use": "usual",
+            "family": "Doe",
+            "given": [
+              "John",
+              "A"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1981-03-17",
+        "address": [
+          {
+            "district": "123",
+            "state": "MO",
+            "postalCode": "12345"
+          }
+        ]
+      }
+    }
+  ]
+}

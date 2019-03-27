@@ -74,7 +74,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimColumn;
  * TODO file JIRA ticket to switch all existing URLs/URIs</li>
  * </ol>
  */
-final class TransformerConstants {
+public final class TransformerConstants {
 	/**
 	 * <p>
 	 * The base URL/URI/system for FHIR output when the domain concept in question
@@ -222,7 +222,7 @@ final class TransformerConstants {
 	 * HICNs. However, HICNs are still the primary/only Medicare identifier for
 	 * now.
 	 */
-	static final String CODING_BBAPI_BENE_HICN_HASH = BASE_URL_BBAPI_RESOURCES + "/identifier/hicn-hash";
+	public static final String CODING_BBAPI_BENE_HICN_HASH = BASE_URL_BBAPI_RESOURCES + "/identifier/hicn-hash";
 
 	/**
 	 * The {@link #CODING_BBAPI_BENE_HICN_HASH} used in earlier versions of the API,

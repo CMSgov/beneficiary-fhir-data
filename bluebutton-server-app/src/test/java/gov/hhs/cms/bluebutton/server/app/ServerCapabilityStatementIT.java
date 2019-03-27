@@ -12,7 +12,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
 import org.junit.Test;
 
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.VersionUtil;
 
 /**
@@ -39,7 +39,7 @@ public final class ServerCapabilityStatementIT {
 	public void getCapabilities() {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
-		CapabilityStatement capabilities = fhirClient.fetchConformance().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement capabilities = fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 		Assert.assertNotNull(capabilities);
 
 		// Verify that our custom server metadata is correct.

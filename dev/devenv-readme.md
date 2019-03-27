@@ -34,14 +34,14 @@ For your convenience, a dev-only-really-don't-use-these-anywhere-else server key
 1. Generate a new server keypair that's valid for `localhost` and `127.0.0.1` and a new keystore for it using Java's `keytool`, e.g.:
     
     ```
-    $ keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname "cn=localhost" -ext "san=ip:127.0.0.1" -validity 3650 -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/server.keystore -storepass changeit
+    $ keytool -genkeypair -alias server -keyalg RSA -keysize 4096 -dname "cn=localhost" -ext "san=dns:localhost,ip:127.0.0.1" -validity 3650 -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/server-keystore.jks -storepass changeit
     ```
     
 1. Export the server certificate to a new file that clients can use as their truststore:
     
     ```
-    $ keytool -exportcert -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keystore bluebutton-server.git/dev/ssl-stores/server.keystore -storepass changeit
-    $ keytool -importcert -noprompt -trustcacerts -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/client.truststore -storepass changeit
+    $ keytool -exportcert -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keystore bluebutton-server.git/dev/ssl-stores/server-keystore.jks -storepass changeit
+    $ keytool -importcert -noprompt -trustcacerts -alias server -file bluebutton-server.git/dev/ssl-stores/server.cer -keypass changeit -keystore bluebutton-server.git/dev/ssl-stores/client-truststore.jks -storepass changeit
     ```
     
 1. Generate a new client certificate that can be used in tests and place it in a new server truststore:

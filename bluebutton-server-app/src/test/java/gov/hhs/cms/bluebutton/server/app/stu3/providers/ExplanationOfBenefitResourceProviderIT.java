@@ -22,7 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -32,6 +32,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.DMEClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
@@ -61,8 +62,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		CarrierClaim claim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim).map(r -> (CarrierClaim) r)
 				.findFirst().get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.CARRIER, claim.getClaimId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.CARRIER, claim.getClaimId())).execute();
 
 		Assert.assertNotNull(eob);
 		CarrierClaimTransformerTest.assertMatches(claim, eob);
@@ -79,7 +80,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.CARRIER, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.CARRIER, "1234")).execute();
 	}
 
 	/**
@@ -99,8 +101,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		DMEClaim claim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId())).execute();
 
 		Assert.assertNotNull(eob);
 		DMEClaimTransformerTest.assertMatches(claim, eob);
@@ -117,7 +119,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.DME, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.DME, "1234")).execute();
 	}
 
 	/**
@@ -137,8 +140,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		HHAClaim claim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.HHA, claim.getClaimId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.HHA, claim.getClaimId())).execute();
 
 		Assert.assertNotNull(eob);
 		HHAClaimTransformerTest.assertMatches(claim, eob);
@@ -155,7 +158,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.HHA, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.HHA, "1234")).execute();
 	}
 
 	/**
@@ -175,8 +179,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		HospiceClaim claim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim).map(r -> (HospiceClaim) r)
 				.findFirst().get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.HOSPICE, claim.getClaimId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, claim.getClaimId())).execute();
 
 		Assert.assertNotNull(eob);
 		HospiceClaimTransformerTest.assertMatches(claim, eob);
@@ -193,7 +197,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.HOSPICE, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, "1234")).execute();
 	}
 
 	/**
@@ -213,8 +218,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		InpatientClaim claim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
 				.map(r -> (InpatientClaim) r).findFirst().get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.INPATIENT, claim.getClaimId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, claim.getClaimId())).execute();
 
 		Assert.assertNotNull(eob);
 		InpatientClaimTransformerTest.assertMatches(claim, eob);
@@ -231,7 +236,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.INPATIENT, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, "1234")).execute();
 	}
 
 	/**
@@ -251,8 +257,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		OutpatientClaim claim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
 				.map(r -> (OutpatientClaim) r).findFirst().get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.OUTPATIENT, claim.getClaimId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, claim.getClaimId())).execute();
 
 		Assert.assertNotNull(eob);
 		OutpatientClaimTransformerTest.assertMatches(claim, eob);
@@ -269,7 +275,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.OUTPATIENT, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, "1234")).execute();
 	}
 
 	/**
@@ -289,8 +296,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		PartDEvent claim = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
 				.findFirst().get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.PDE, claim.getEventId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.PDE, claim.getEventId())).execute();
 
 		Assert.assertNotNull(eob);
 		PartDEventTransformerTest.assertMatches(claim, eob);
@@ -307,7 +314,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.PDE, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.PDE, "1234")).execute();
 	}
 
 	/**
@@ -327,8 +335,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		SNFClaim claim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
 				.get();
-		ExplanationOfBenefit eob = fhirClient.read(ExplanationOfBenefit.class,
-				TransformerUtils.buildEobId(ClaimType.SNF, claim.getClaimId()));
+		ExplanationOfBenefit eob = fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.SNF, claim.getClaimId())).execute();
 
 		Assert.assertNotNull(eob);
 		SNFClaimTransformerTest.assertMatches(claim, eob);
@@ -345,7 +353,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		// No data is loaded, so this should return nothing.
-		fhirClient.read(ExplanationOfBenefit.class, TransformerUtils.buildEobId(ClaimType.SNF, "1234"));
+		fhirClient.read().resource(ExplanationOfBenefit.class)
+				.withId(TransformerUtils.buildEobId(ClaimType.SNF, "1234")).execute();
 	}
 
 	/**
@@ -375,7 +384,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * number of entries in the bundle
 		 */
 		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
-				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+				.filter(r -> !(r instanceof BeneficiaryHistory))
+				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
 		 * Verify that no paging links (e.g. next, prev, last) exist in the bundle.
@@ -460,7 +470,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * number of entries in the bundle
 		 */
 		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
-				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+				.filter(r -> !(r instanceof BeneficiaryHistory))
+				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
 		 * Verify a link to the last page exists.
@@ -490,7 +501,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * "all of the claim records in the sample."
 		 */
 		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
-				.filter(r -> !(r instanceof BeneficiaryHistory)).count(),
+				.filter(r -> !(r instanceof BeneficiaryHistory))
+				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(),
 				combinedResults.size());
 
 		/*
@@ -569,7 +581,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * number of entries in the bundle
 		 */
 		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
-				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+				.filter(r -> !(r instanceof BeneficiaryHistory))
+				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
 		 * Verify that no paging links exist, since there should only be one page.

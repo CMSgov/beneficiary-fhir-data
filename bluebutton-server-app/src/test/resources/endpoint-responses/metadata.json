@@ -1,0 +1,92 @@
+{
+  "resourceType" : "CapabilityStatement",
+  "status" : "active",
+  "date" : "2019-03-12T12:30:26-05:00",
+  "publisher" : "Centers for Medicare & Medicaid Services",
+  "kind" : "instance",
+  "software" : {
+    "name" : "Blue Button API: Direct",
+    "version" : "1.0.0-SNAPSHOT"
+  },
+  "implementation" : {
+    "description" : "gov.hhs.cms.bluebutton.fhir:bluebutton-server-app",
+    "url" : "https://localhost:8482/v1/fhir"
+  },
+  "fhirVersion" : "3.0.1",
+  "acceptUnknown" : "extensions",
+  "format" : [ "application/fhir+xml", "application/fhir+json" ],
+  "rest" : [ {
+    "mode" : "server",
+    "resource" : [ {
+      "type" : "Coverage",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/StructureDefinition/Coverage"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "beneficiary",
+        "type" : "reference",
+        "documentation" : "Covered party"
+      } ]
+    }, {
+      "type" : "ExplanationOfBenefit",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "patient",
+        "type" : "reference",
+        "documentation" : "The reference to the patient"
+      }, {
+        "name" : "startIndex",
+        "type" : "string"
+      } ]
+    }, {
+      "type" : "OperationDefinition",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/StructureDefinition/OperationDefinition"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      } ]
+    }, {
+      "type" : "Patient",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/StructureDefinition/Patient"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "_id",
+        "type" : "token",
+        "documentation" : "The ID of the resource"
+      }, {
+        "name" : "identifier",
+        "type" : "token",
+        "documentation" : "A patient identifier"
+      } ]
+    }, {
+      "type" : "StructureDefinition",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/StructureDefinition/StructureDefinition"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ]
+    } ]
+  } ]
+}
