@@ -50,9 +50,9 @@ public final class PagingArguments {
 		return Optional.empty();
 	}
 
-	/*
+	/**
 	 * @return Returns true if the pageSize either startIndex is present (i.e.
-	 * paging is requested), false if neither present.
+	 *         paging is requested), false if neither present.
 	 */
 	public boolean isPagingRequested() {
 		if (pageSize.isPresent() || startIndex.isPresent())
@@ -60,22 +60,30 @@ public final class PagingArguments {
 		return false;
 	}
 
-	/*
+	/**
 	 * @return Returns the pageSize as an integer. Note: if the pageSize does not
-	 * exist but the startIndex does (paging is requested) default to pageSize of
-	 * 10.
+	 *         exist but the startIndex does (paging is requested) default to
+	 *         pageSize of 10.
+	 * @throws InvalidRequestException
+	 *             HTTP 400: indicates a pageSize < 0 was provided
 	 */
 	public int getPageSize() {
 		if (!isPagingRequested())
 			throw new BadCodeMonkeyException();
 		if (!pageSize.isPresent())
 			return 10;
+		if (pageSize.isPresent())
+			if (pageSize.get() < 0)
+				throw new InvalidRequestException(String.format(
+						"HTTP 400 Bad Request: Value for startIndex cannot be negative: pageSize %s", pageSize.get()));
 		return pageSize.get();
 	}
 
-	/*
+	/**
 	 * @return Returns the startIndex as an integer. If the startIndex is not set,
-	 * return 0.
+	 *         return 0.
+	 * @throws InvalidRequestException
+	 *             HTTP 400: indicates a startIndex < 0 was provided
 	 */
 	public int getStartIndex() {
 		if (!isPagingRequested())
@@ -91,7 +99,7 @@ public final class PagingArguments {
 		return 0;
 	}
 
-	/*
+	/**
 	 * @return Returns the serverBase.
 	 */
 	public String getServerBase() {
