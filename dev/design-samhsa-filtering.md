@@ -10,6 +10,12 @@ Some CMS systems which use the Blue Button API's backend Data Server need to ens
 
 See [Blue Button 2.0 API Wiki: SAMHSA Filtering](https://confluence.cms.gov/display/BB/SAMHSA+Filtering) for more details.
 
+## User Interface
+
+On `ExplanationOfBenefit` queries add an `excludeSAMHSA=true` query parameter:
+
+    /v1/fhir/ExplanationOfBenefit?patient=Patient%2F<patient_id>&excludeSAMHSA=true
+
 ## Filtering Approach
 
 In order to determine which claims are SAMHSA-related, CMS has previously identified various diagnosis and procedure codes as being indicative of SAMHSA-related treatment. Any Part A or Part B claims referencing those codes are thus suppressed, which accomplishes the required SAMHSA filtering. This project takes the same approach:
