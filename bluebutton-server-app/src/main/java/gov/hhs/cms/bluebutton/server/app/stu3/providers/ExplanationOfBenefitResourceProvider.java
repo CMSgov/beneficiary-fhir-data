@@ -318,7 +318,12 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 * This formula rounds numTotalResults down to the nearest multiple of pageSize
 		 * that's less than and not equal to numTotalResults
 		 */
-		int lastIndex = (numTotalResults - 1) / pageSize * pageSize;
+		int lastIndex;
+		try {
+			lastIndex = (numTotalResults - 1) / pageSize * pageSize;
+		} catch (ArithmeticException e) {
+			throw new ArithmeticException(String.format("Cannot divide by zero: pageSize=%s", pageSize));
+		}
 		bundle.addLink(new BundleLinkComponent().setRelation("last")
 				.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, pageSize)));
 	}
