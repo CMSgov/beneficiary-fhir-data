@@ -17,6 +17,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
+import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
@@ -54,6 +55,8 @@ public final class SamhsaMatcherTest {
 			if (r instanceof Beneficiary)
 				return null;
 			else if (r instanceof BeneficiaryHistory)
+				return null;
+			else if (r instanceof MedicareBeneficiaryIdHistory)
 				return null;
 			else if (r instanceof HHAClaim)
 				return null;
