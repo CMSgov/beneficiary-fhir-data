@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
@@ -322,7 +323,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		try {
 			lastIndex = (numTotalResults - 1) / pageSize * pageSize;
 		} catch (ArithmeticException e) {
-			throw new ArithmeticException(String.format("Cannot divide by zero: pageSize=%s", pageSize));
+			throw new InvalidRequestException(String.format("Cannot divide by zero: pageSize=%s", pageSize));
 		}
 		bundle.addLink(new BundleLinkComponent().setRelation("last")
 				.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, pageSize)));
