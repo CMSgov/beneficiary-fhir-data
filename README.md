@@ -1,8 +1,14 @@
-# CMS Blue Button Server
+# CMS Blue Button 2.0 API Backend Data Server
 
-The CMS Blue Button project provides Medicare beneficiaries with access to their health care data, and supports an ecosystem of third-party applications that can leverage that data.
+The CMS Blue Button 2.0 API project provides Medicare beneficiaries with access to their health care data, and supports an ecosystem of third-party applications that can leverage that data.
 
-This project provides the FHIR server used as part of Blue Button.
+This project provides the backend Data Server that takes the raw relational claims data and hosts it in a FHIR-compliant REST web service.
+
+## Design
+
+Design documentation for the project can be found in the following files:
+
+* [Data Server Design: SAMHSA Filtering](./dev/design-samhsa-filtering.md)
 
 ## Development Environment
 

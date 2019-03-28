@@ -262,9 +262,10 @@ public final class ServerTestUtils {
 	}
 
 	/**
-	 * @return the {@link LoadAppOptions} to use with {@link RifLoader}
+	 * @return the {@link LoadAppOptions} to use with {@link RifLoader} in
+	 *         integration tests
 	 */
-	private static LoadAppOptions createRifLoaderOptions() {
+	public static LoadAppOptions createRifLoaderOptions() {
 		Properties testDbProps = readTestDatabaseProperties();
 		String jdbcUrl = testDbProps.getProperty(SpringConfiguration.PROP_DB_URL);
 		String jdbcUsername = testDbProps.getProperty(SpringConfiguration.PROP_DB_USERNAME);

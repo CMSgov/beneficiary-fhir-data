@@ -47,6 +47,9 @@
         "type" : "reference",
         "documentation" : "The reference to the patient"
       }, {
+        "name" : "excludeSAMHSA",
+        "type" : "string"
+      }, {
         "name" : "startIndex",
         "type" : "string"
       } ]

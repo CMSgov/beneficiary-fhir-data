@@ -65,6 +65,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -2888,4 +2889,24 @@ public final class TransformerUtils {
 		return ndcProductHashMap;
 	}
 
+	/**
+	 * @param metricRegistry
+	 *            the {@link MetricRegistry} to use
+	 * @param rifRecord
+	 *            the RIF record (e.g. a {@link CarrierClaim} instance) to transform
+	 * @return the transformed {@link ExplanationOfBenefit} for the specified RIF
+	 *         record
+	 */
+	static ExplanationOfBenefit transformRifRecordToEob(MetricRegistry metricRegistry, Object rifRecord) {
+		if (rifRecord == null)
+			throw new IllegalArgumentException();
+
+		for (ClaimType claimType : ClaimType.values()) {
+			if (claimType.getEntityClass().isInstance(rifRecord)) {
+				return claimType.getTransformer().apply(metricRegistry, rifRecord);
+			}
+		}
+
+		throw new BadCodeMonkeyException(String.format("Unhandled %s: %s", ClaimType.class, rifRecord.getClass()));
+	}
 }

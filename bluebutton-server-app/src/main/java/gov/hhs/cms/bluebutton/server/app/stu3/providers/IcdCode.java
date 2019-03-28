@@ -10,6 +10,16 @@ import org.hl7.fhir.dstu3.model.Coding;
  * Models a icdCode code entry in a claim.
  */
 abstract class IcdCode {
+	/**
+	 * The {@link Coding#getSystem()} used for ICD-9 diagnosis codes.
+	 */
+	static final String CODING_SYSTEM_ICD_9 = "http://hl7.org/fhir/sid/icd-9-cm";
+
+	/**
+	 * The {@link Coding#getSystem()} used for ICD-10 diagnosis codes.
+	 */
+	static final String CODING_SYSTEM_ICD_10 = "http://hl7.org/fhir/sid/icd-10";
+
 	private final String icdCode;
 	private final Character icdVersionCode;
 
@@ -84,9 +94,9 @@ abstract class IcdCode {
 	protected String getFhirSystem() {
 		String system;
 		if (icdVersionCode == null || icdVersionCode.equals('9'))
-			system = "http://hl7.org/fhir/sid/icd-9-cm";
+			system = CODING_SYSTEM_ICD_9;
 		else if (icdVersionCode.equals('0'))
-			system = "http://hl7.org/fhir/sid/icd-10";
+			system = CODING_SYSTEM_ICD_10;
 		else
 			system = String.format("http://hl7.org/fhir/sid/unknown-icd-version/%s", icdVersionCode);
 		return system;
