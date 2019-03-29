@@ -65,7 +65,7 @@ public final class PagingArguments {
 	 *         exist but the startIndex does (paging is requested) default to
 	 *         pageSize of 10.
 	 * @throws InvalidRequestException
-	 *             HTTP 400: indicates a pageSize < 0 was provided
+	 *             HTTP 400: indicates a pageSize less than 0 was provided
 	 */
 	public int getPageSize() {
 		if (!isPagingRequested())
@@ -83,7 +83,7 @@ public final class PagingArguments {
 	 * @return Returns the startIndex as an integer. If the startIndex is not set,
 	 *         return 0.
 	 * @throws InvalidRequestException
-	 *             HTTP 400: indicates a startIndex < 0 was provided
+	 *             HTTP 400: indicates a startIndex less than 0 was provided
 	 */
 	public int getStartIndex() {
 		if (!isPagingRequested())
