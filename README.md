@@ -9,21 +9,33 @@ In order to use and/or modify this repository, a number of tools need to be inst
 
 ### Python
 
-This project requires Python 2.7. It can be installed as follows:
+This project requires Python 2.7. It can be installed as follows on Ubuntu:
 
     $ sudo apt-get install python
+
+Or on Cygwin:
+
+    $ apt-cyg install python
 
 ### virtualenv
 
 This project has some dependencies that have to be installed via `pip` (as opposed to `apt-get`). Accordingly, it's strongly recommended that you make use of a [Python virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to manage those dependencies.
 
-If it isn't already installed, install the `virtualenv` package. On Ubuntu, this is best done via:
+If it isn't already installed, install the `virtualenv` package and the development tools that will be needed to build the Python packages we'll be grabbing. On Ubuntu, this is best done via:
 
     $ sudo apt-get install python-virtualenv
+    $ sudo apt-get install build-essentials
+
+Or on Cygwin:
+
+    $ apt-cyg install python-setuptools
+    $ python -m ensurepip
+    $ pip install virtualenv
+    $ apt-cyg install python-devel libpq-devel gcc-g++
 
 Next, create a virtual environment for this project and install the project's dependencies into it:
 
-    $ cd bluebutton-ansible-playbooks-backend.git
+    $ cd bluebutton-ansible-playbooks-data.git
     $ virtualenv -p /usr/bin/python2.7 venv
     $ source venv/bin/activate
     $ pip install --upgrade setuptools
@@ -35,6 +47,42 @@ Be sure to update the `requirements.frozen.txt` file after `pip install`ing a ne
 
     $ pip freeze > requirements.frozen.txt
 
+### Cygwin SSL: GDIT Employees
+
+Many organizations use an intercepting HTTP/S proxy to inspect all traffic over their networks. GDIT is one such organization, and so if you are attempting to use Cygwin on such a system, you will first need to do the following:
+
+1. Export the proxy CA certificate using Chrome:
+    a. Open Chrome.
+    b. Browse to a site that gets intercepted by the proxy. For example: <https://galaxy.ansible.com/>
+    c. Click the SSL lock icon in the address bar and select **Certificate**.
+    d. Switch to the **Certification Path** tab
+    e. Export the "HQ100" certificate:
+        1. Select the root entry (i.e. "HQ100-ROOTCA") and click **View Certificate**.
+        2. Switch to the **Details** tab and click **Copy to File...**.
+        3. In the **Certificate Export Wizard**...
+            a. Click **Next** to proceed to the **Export File Format** screen.
+            b. Select **Base-64 encoded X.509** and click **Next** to proceed to the **File to Export** screen.
+            c. Save the file as `Downloads\gdit-mitm-ca-certificate-hq100.cer` and click **Next**.
+            d. Click **Finish** and then click **OK** however many times to get back to the **Certification Path** dialog.
+    e. Export the "HQ200" certificate:
+        1. Select the second entry (i.e. "n-HQ200-CAISS01") and click **View Certificate**.
+        2. Switch to the **Details** tab and click **Copy to File...**.
+        3. In the **Certificate Export Wizard**...
+            a. Click **Next** to proceed to the **Export File Format** screen.
+            b. Select **Base-64 encoded X.509** and click **Next** to proceed to the **File to Export** screen.
+            c. Save the file as `Downloads\gdit-mitm-ca-certificate-hq200.cer` and click **Next**.
+            d. Click **Finish** and then click **OK** however many times to close all those dialogs.
+2. Import the proxy CA certificate into Cygwin:
+    a. Open a Cygwin terminal.
+    b. Run the following:
+        
+        ```
+        $ cp /cygdrive/c/Users/<your-username>/Downloads/gdit-mitm-ca-certificate-*.cer /etc/pki/ca-trust/source/anchors/
+        $ update-ca-trust
+        ```
+        
+That should do it.
+
 ### Ansible Roles
 
 Run the following command to download and install the roles required by this project into `~/.ansible/roles/`:
@@ -43,13 +91,25 @@ Run the following command to download and install the roles required by this pro
         && ansible-galaxy remove karlmdavis.bluebutton_data_server \
         && ansible-galaxy install -r install_roles.yml
 
+### Ansible Vault Password
+
+The security-sensitive values used in these playbooks (e.g. usernames, passwords, etc.) are encrypted using [Ansible Vault](http://docs.ansible.com/ansible/playbooks_vault.html). In order to view these values or run the plays you will need a copy of the project's `vault.password` file. Please this file in the root of the project, and ensure that it is only readable by your user account. **Never** commit it to source control! (Git is configured to ignore it via [.gitignore](./.gitignore).)
+
 ### SSH
 
 These playbooks rely on SSH host aliases, which must be configured in your `~/.ssh/config` file. See how this file is created for Jenkins in the `roles/builds_jenkins/templates/ssh_config.j2` template. You'll need to speak with HealthAPT system admins to get the account, SSH access, and keys that will be needed for this to work.
 
-### Ansible Vault Password
+TODO: fix above paragraph to account for running play
 
-The security-sensitive values used in these playbooks (e.g. usernames, passwords, etc.) are encrypted using [Ansible Vault](http://docs.ansible.com/ansible/playbooks_vault.html). In order to view these values or run the plays you will need a copy of the project's `vault.password` file. Please this file in the root of the project, and ensure that it is only readable by your user account. **Never** commit it to source control! (Git is configured to ignore it via [.gitignore](./.gitignore).)
+To run that play locally on a Linux system:
+
+    $ ./ansible-playbook-wrapper bootstrap.yml --extra-vars "proxy_required=false ssh_config_dest=$HOME/.ssh/config ssh_config_uid=$(id --user) ssh_config_gid=$(id --group)"
+
+On Cygwin:
+
+    $ ./ansible-playbook-wrapper bootstrap.yml --extra-vars "proxy_required=false ssh_config_dest=$HOME/.ssh/config ssh_config_uid=$(id --user) ssh_config_gid=$(id --group) root_uid=$(id --user) root_gid=$(id --group)"
+
+If that play gets to, and then fails on, the "Configure Systems for Deploys - Fetch Jenkins SSH Public Key" then you're all set; that's as much of it as you need to succeed locally.
 
 ### AWS API Security Tokens
 

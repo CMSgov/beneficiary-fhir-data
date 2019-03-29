@@ -11,8 +11,8 @@
       lineinfile:
         path: /etc/ssh/ssh_known_hosts
         create: true
-        owner: root
-        group: root
+        owner: "{{ root_uid }}"
+        group: "{{ root_gid }}"
         mode: u=rw,g=r,o=r
         line: "{{ vault_ec2_instance.lss.builds.ip }} {{ vault_ec2_instance.lss.builds.ssh_host_key_public }}"
       become: true

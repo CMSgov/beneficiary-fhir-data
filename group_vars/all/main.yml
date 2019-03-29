@@ -8,6 +8,16 @@ limit_envs:
 
 aws_region: us-east-1
 
+# Note: Cygwin environments don't have a "root" user, as such. Instead, things
+# end up owned by the user that installed Cygwin (at least for the 
+# installed-per-user Cygwin setups that we tend to use).
+root_uid: 0
+root_gid: 0
+
+proxy_required: true
+proxy_url: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
+proxy_url_if_enabled: "{{ proxy_url if (proxy_required | bool) else '' }}"
+
 aws_subnets_ls:
   # Has: lscw10ap01 (Jenkins), lscw10ap02 (Foglight), lscw10dc01 (AD primary)
   - subnet_name: 'lscw10-app-1a'

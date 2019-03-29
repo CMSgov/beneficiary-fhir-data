@@ -8,3 +8,5 @@ boto3
 cryptography
 pycrypto
 awscli
+boto
+boto3
