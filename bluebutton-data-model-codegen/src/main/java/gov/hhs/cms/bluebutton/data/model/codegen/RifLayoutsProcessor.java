@@ -1011,7 +1011,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		for (String additionalDatabaseField : additionalDatabaseFields) {
 			if (additionalDatabaseField.contentEquals("hicnUnhashed")) {
 				RifField hicnUnhashed = new RifField("BENE_CRNT_HIC_NUM", RifColumnType.CHAR, Optional.of(64),
-						Optional.of(0), Boolean.FALSE, new URL(DATA_DICTIONARY_LINK + "benecrnthicnum"),
+						Optional.of(0), Boolean.TRUE, new URL(DATA_DICTIONARY_LINK + "benecrnthicnum"),
 						"BENE_CRNT_HIC_NUM",
 						"hicnUnhashed");
 				addlDatabaseFields.add(hicnUnhashed);
