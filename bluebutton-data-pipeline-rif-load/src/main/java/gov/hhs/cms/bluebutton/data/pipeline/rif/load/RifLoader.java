@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -627,7 +628,7 @@ public final class RifLoader {
 
 		Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
 		// set the unhashed Hicn
-		beneficiary.setHicnUnhashed(beneficiary.getHicn());
+		beneficiary.setHicnUnhashed(Optional.of(beneficiary.getHicn()));
 		// set the hashed Hicn
 		beneficiary.setHicn(computeHicnHash(options, secretKeyFactory, beneficiary.getHicn()));
 
@@ -662,7 +663,7 @@ public final class RifLoader {
 		BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
 
 		// set the unhashed Hicn
-		beneficiaryHistory.setHicnUnhashed(beneficiaryHistory.getHicn());
+		beneficiaryHistory.setHicnUnhashed(Optional.of(beneficiaryHistory.getHicn()));
 
 		// set the hashed Hicn
 		beneficiaryHistory.setHicn(computeHicnHash(options, secretKeyFactory, beneficiaryHistory.getHicn()));
