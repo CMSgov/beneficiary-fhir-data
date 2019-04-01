@@ -16,11 +16,15 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.DiagnosisComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ProcedureComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.stereotype.Component;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.justdavis.karl.misc.exceptions.unchecked.UncheckedIoException;
+
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 
 /**
  * A {@link Predicate} that, when <code>true</code>, indicates that an
@@ -38,6 +42,7 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	 * The {@link CSVFormat} used to parse the SAMHSA-related code CSV files.
 	 */
 	private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
+	private static final String DRG = TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
 	private final List<String> drgCodes;
 	private final List<String> cptCodes;
@@ -52,11 +57,13 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	 */
 	public SamhsaMatcher() {
 		this.drgCodes = Collections
-				.unmodifiableList(resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs"));
+				.unmodifiableList(resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs"))
+				.stream().map(SamhsaMatcher::normalizeDrgCode).collect(Collectors.toList());
 		this.cptCodes = Collections
 				.unmodifiableList(resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code"));
 		this.icd9ProcedureCodes = Collections.unmodifiableList(
-				resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM"));
+				resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM"))
+				.stream().map(SamhsaMatcher::normalizeIcd9DiagnosisCode).collect(Collectors.toList());
 		this.icd9DiagnosisCodes = Collections.unmodifiableList(
 				resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code")
 						.stream().map(SamhsaMatcher::normalizeIcd9DiagnosisCode).collect(Collectors.toList()));
@@ -192,9 +199,20 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	private boolean testInpatientClaim(ExplanationOfBenefit eob) {
 		if (TransformerUtils.getClaimType(eob) != ClaimType.INPATIENT)
 			throw new IllegalArgumentException();
+		
+		if (containsSamhsaIcdCode(eob.getDiagnosis()))
+			return true;
+		
+		if (containsSamhsaIcdProcedueCode(eob.getProcedure()))
+			return true;
+		
+		for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+			if (containsSamhsaProcedureCode(eobItem.getService()))
+				return true;
+		}
 
-		// FIXME finish implementing
-		return true;
+		// No blacklisted codes found: this claim isn't SAMHSA-related.
+		return false;
 	}
 
 	/**
@@ -252,7 +270,19 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	 *         do not
 	 */
 	private boolean containsSamhsaIcdCode(List<DiagnosisComponent> diagnoses) {
-		return diagnoses.stream().anyMatch(this::isSamhsaIcdDiagnosis);
+		return diagnoses.stream().anyMatch(this::isSamhsaDiagnosis);
+	}
+	
+	/**
+	 * @param procedure
+	 *            the {@link ProcedureComponent}s to check
+	 * @return <code>true</code> if any of the specified {@link ProcedureComponent}s
+	 *         match any of the {@link #icd9ProcedureCodes} or
+	 *         {@link #icd10ProcedureCodes} entries, <code>false</code> if they all
+	 *         do not
+	 */
+	private boolean containsSamhsaIcdProcedueCode(List<ProcedureComponent> procedure) {
+		return procedure.stream().anyMatch(this::isSamhsaIcdProcedure);
 	}
 
 	/**
@@ -260,10 +290,10 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	 *            the {@link DiagnosisComponent} to check
 	 * @return <code>true</code> if the specified {@link DiagnosisComponent} matches
 	 *         one of the {@link #icd9DiagnosisCodes} or
-	 *         {@link #icd10DiagnosisCodes} entries, <code>false</code> if it does
+	 *         {@link #icd10DiagnosisCodes}, or {@link #drgCodes} entries, <code>false</code> if it does
 	 *         not
 	 */
-	private boolean isSamhsaIcdDiagnosis(DiagnosisComponent diagnosis) {
+	private boolean isSamhsaDiagnosis(DiagnosisComponent diagnosis) {
 		CodeableConcept diagnosisConcept;
 		try {
 			diagnosisConcept = diagnosis.getDiagnosisCodeableConcept();
@@ -274,6 +304,8 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 			 */
 			throw new BadCodeMonkeyException(e);
 		}
+		
+	
 
 		for (Coding diagnosisCoding : diagnosisConcept.getCoding()) {
 			if (IcdCode.CODING_SYSTEM_ICD_9.equals(diagnosisCoding.getSystem())) {
@@ -287,10 +319,59 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 				return true;
 			}
 		}
+		
+		for (Coding packageCoding: diagnosis.getPackageCode().getCoding()) {
+			if (SamhsaMatcher.DRG.equals(packageCoding.getSystem())) {
+				if (isSamhsaDrgCode(packageCoding))
+					return true;
+			}
+			else {
+				// Fail safe: if we don't know the package coding system, assume the code is SAMHSA.
+				return true;
+			}
+		}
 
 		// No blacklisted diagnosis Codings found: this diagnosis isn't SAMHSA-related.
 		return false;
 	}
+	
+	/**
+	 * @param procedure
+	 *            the {@link ProcedureComponent} to check
+	 * @return <code>true</code> if the specified {@link ProcedureComponent} matches
+	 *         one of the {@link #icd9ProcedureCodes} or
+	 *         {@link #icd10ProcedureCodes} entries, <code>false</code> if it does
+	 *         not
+	 */
+	private boolean isSamhsaIcdProcedure(ProcedureComponent procedure) {
+		CodeableConcept concept;
+		try {
+			concept = procedure.getProcedureCodeableConcept();
+		} catch (FHIRException e) {
+			/*
+			 * This will only be thrown if the DiagnosisComponent doesn't have a
+			 * CodeableConcept, which isn't how we build ours.
+			 */
+			throw new BadCodeMonkeyException(e);
+		}
+
+		for (Coding coding : concept.getCoding()) {
+			if (IcdCode.CODING_SYSTEM_ICD_9.equals(coding.getSystem())) {
+				if (isSamhsaIcd9Procedure(coding))
+					return true;
+			} else if (IcdCode.CODING_SYSTEM_ICD_10.equals(coding.getSystem())) {
+				if (isSamhsaIcd10Procedure(coding))
+					return true;
+			} else {
+				// Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
+				return true;
+			}
+		}
+
+		// No blacklisted diagnosis Codings found: this diagnosis isn't SAMHSA-related.
+		return false;
+	}
+
 
 	/**
 	 * @param diagnosisCoding
@@ -308,6 +389,23 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		 */
 		return icd9DiagnosisCodes.contains(normalizeIcd9DiagnosisCode(diagnosisCoding.getCode()));
 	}
+	
+	/**
+	 * @param coding
+	 *            the procedure {@link Coding} to check
+	 * @return <code>true</code> if the specified procedure {@link Coding} matches
+	 *         one of the {@link #icd9ProcedureCodes} entries, <code>false</code> if
+	 *         it does not
+	 */
+	private boolean isSamhsaIcd9Procedure(Coding coding) {
+		if (!IcdCode.CODING_SYSTEM_ICD_9.equals(coding.getSystem()))
+			throw new IllegalArgumentException();
+
+		/*
+		 * Note: per XXX all codes in icd9DiagnosisCodes are already normalized.
+		 */
+		return icd9ProcedureCodes.contains(normalizeIcd9DiagnosisCode(coding.getCode()));
+	}
 
 	/**
 	 * @param icd9DiagnosisCode
@@ -321,6 +419,34 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		icd9DiagnosisCode = icd9DiagnosisCode.toUpperCase();
 
 		return icd9DiagnosisCode;
+	}
+	
+	/**
+	 * @param coding
+	 *            the code {@link Coding} to check
+	 * @return <code>true</code> if the specified code {@link Coding} matches
+	 *         one of the {@link #drgCodes} entries, <code>false</code> if
+	 *         it does not
+	 */
+	private boolean isSamhsaDrgCode(Coding coding) {
+		if (!SamhsaMatcher.DRG.equals(coding.getSystem()))
+			throw new IllegalArgumentException();
+
+		return drgCodes.contains(normalizeDrgCode(coding.getCode()));
+	}
+	
+	/**
+	 * Example input: MS-DRG 522
+	 * Example output: 522
+	 * 
+	 * @param code
+	 * @return the specified DRG code, but with the beginning text and space removed.
+	 */
+	private static String normalizeDrgCode(String code) {
+		code = code.trim();
+		String[] s = code.split(" ");
+		code = s[s.length-1];
+		return code;
 	}
 
 	/**
@@ -338,6 +464,16 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		 * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
 		 */
 		return icd10DiagnosisCodes.contains(normalizeIcd10DiagnosisCode(diagnosisCoding.getCode()));
+	}
+	
+	private boolean isSamhsaIcd10Procedure(Coding coding) {
+		if (!IcdCode.CODING_SYSTEM_ICD_10.equals(coding.getSystem()))
+			throw new IllegalArgumentException();
+
+		/*
+		 * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
+		 */
+		return icd10ProcedureCodes.contains(coding.getCode());
 	}
 
 	/**

@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.codahale.metrics.MetricRegistry;
 
+import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
@@ -32,12 +33,15 @@ import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
  */
 public final class SamhsaMatcherTest {
 	// TODO complete and verify that these exactly match real values in our DB
-	// static final String SAMPLE_SAMHSA_DRG_CODE = "TODO";
 	static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
 	static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
-	// static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "TODO";
+	static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
 	static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
-	// static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "TODO";
+	static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
+	static final String SAMPLE_SAMHSA_DRG_CODE = "522";
+	
+
+	private static final String DRG = TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
 	/**
 	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
@@ -188,6 +192,63 @@ public final class SamhsaMatcherTest {
 		ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
 		Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
 		sampleEobService.setCode(SAMPLE_SAMHSA_CPT_CODE);
+
+		Assert.assertTrue(matcher.test(sampleEob));
+	}
+	
+	/**
+	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
+	 * <code>true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s
+	 * that have SAMHSA-related ICD 9 diagnosis codes.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates problem with test data)
+	 */
+	@Test
+	public void matchInpatientClaimsByIcd9Procedure() throws FHIRException {
+		SamhsaMatcher matcher = new SamhsaMatcher();
+
+		ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
+		Coding sampleEobDiagnosis = sampleEob.getProcedureFirstRep().getProcedureCodeableConcept().getCodingFirstRep();
+		sampleEobDiagnosis.setSystem(IcdCode.CODING_SYSTEM_ICD_9).setCode(SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE);
+
+		Assert.assertTrue(matcher.test(sampleEob));
+	}
+
+	/**
+	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
+	 * <code>true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s
+	 * that have SAMHSA-related ICD 10 diagnosis codes.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates problem with test data)
+	 */
+	@Test
+	public void matchInpatientClaimsByIcd10Procedure() throws FHIRException {
+		SamhsaMatcher matcher = new SamhsaMatcher();
+
+		ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
+		Coding sampleEobDiagnosis = sampleEob.getProcedureFirstRep().getProcedureCodeableConcept().getCodingFirstRep();
+		sampleEobDiagnosis.setSystem(IcdCode.CODING_SYSTEM_ICD_10).setCode(SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE);
+
+		Assert.assertTrue(matcher.test(sampleEob));
+	}
+	
+	/**
+	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
+	 * <code>true</code> for {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit}s
+	 * that have SAMHSA-related drg codes.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates problem with test data)
+	 */
+	@Test
+	public void matchInpatientClaimsByDrg() throws FHIRException {
+		SamhsaMatcher matcher = new SamhsaMatcher();
+
+		ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
+		sampleEob.getDiagnosisFirstRep().getPackageCode().addCoding()
+				.setSystem(SamhsaMatcherTest.DRG).setCode(SAMPLE_SAMHSA_DRG_CODE);
 
 		Assert.assertTrue(matcher.test(sampleEob));
 	}

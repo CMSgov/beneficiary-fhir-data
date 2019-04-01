@@ -1533,7 +1533,7 @@ public final class TransformerUtils {
 		if (diagnosisRelatedGroupCd.isPresent()) {
 			/*
 			 * FIXME This is an invalid DiagnosisComponent, since it's missing a (required)
-			 * ICD code. Instead, stick the DRG on the claim's primary/first diagnosis.
+			 * ICD code. Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this field so if this is updated you'll need to update that as well.
 			 */
 			eob.addDiagnosis().setPackageCode(
 					createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd));
