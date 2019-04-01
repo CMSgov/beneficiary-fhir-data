@@ -42,6 +42,18 @@ public final class DataSetQueue {
 	private final S3TaskManager s3TaskManager;
 
 	/**
+	 * This {@link System#exit(int)} value should be used when the manifest RIF
+	 * version number is incorrect
+	 */
+	static final int EXIT_CODE_INCORRECT_MANIFEST_FORMAT = 1;
+
+	/**
+	 * This {@link System#exit(int)} value should be used when the manifest RIF file
+	 * type is incorrect
+	 */
+	static final int EXIT_CODE_INCORRECT_MANIFEST_RIF_FILE_TYPE = 2;
+
+	/**
 	 * The {@link DataSetManifest}s waiting to be processed, ordered by their
 	 * {@link DataSetManifestId} in ascending order such that the first element
 	 * represents the {@link DataSetManifest} that should be processed next.
@@ -110,12 +122,14 @@ public final class DataSetQueue {
 			try {
 				manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
 			} catch (JAXBException e) {
-				// Note: We intentionally don't log the full stack trace
-				// here, as it would add a lot of unneeded noise.
-				LOGGER.warn("Found data set with invalid manifest at '{}'. It will be skipped. Error: {}",
+				/*
+				 * We want to terminate the ETL load process if an invalid manifest was found
+				 * such as a incorrect version number
+				 */
+				LOGGER.error("Found data set with invalid manifest at '{}'. Load service will terminating. Error: {}",
 						manifestS3Key, e.toString());
 				knownInvalidManifests.add(manifestId);
-				return;
+				throw new RuntimeException(e);
 			}
 
 			// Finally, ensure that the manifest passes the options filter.
