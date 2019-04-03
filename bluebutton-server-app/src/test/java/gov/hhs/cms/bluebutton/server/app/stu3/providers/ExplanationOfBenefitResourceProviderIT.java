@@ -23,11 +23,8 @@ import org.junit.Test;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-<<<<<<< HEAD
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-=======
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
->>>>>>> 5ed2cc6... BLUEBUTTON-765: Edge case updates
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
