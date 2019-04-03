@@ -78,6 +78,37 @@ public final class PatientResourceProviderIT {
 	/**
 	 * Verifies that
 	 * {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging.
+	 */
+	@Test
+	public void searchForPatientByLogicalIdWithPaging() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Bundle searchResults = fhirClient.search().forResource(Patient.class)
+				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId())).count(1)
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Assert.assertEquals(1, searchResults.getTotal());
+
+		/*
+		 * Verify that only the first and last paging links exist, since there should
+		 * only be one page.
+		 */
+		Assert.assertNotNull(searchResults.getLink("first"));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNotNull(searchResults.getLink("last"));
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
 	 * works as expected for a {@link Patient} that does not exist in the DB.
 	 */
 	@Test
@@ -114,6 +145,40 @@ public final class PatientResourceProviderIT {
 		Assert.assertEquals(1, searchResults.getTotal());
 		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 		BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging.
+	 */
+	@Test
+	public void searchForExistingPatientByHicnHashWithPaging() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Bundle searchResults = fhirClient.search().forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly()
+						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+				.count(1).returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Assert.assertEquals(1, searchResults.getTotal());
+		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+		BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+
+		/*
+		 * Verify that only the first and last paging links exist, since there should
+		 * only be one page.
+		 */
+		Assert.assertNotNull(searchResults.getLink("first"));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNotNull(searchResults.getLink("last"));
 	}
 
 	/**
