@@ -25,13 +25,10 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -53,7 +50,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 @Component
 public final class ExplanationOfBenefitResourceProvider implements IResourceProvider {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
 	/**
 	 * A {@link Pattern} that will match the
 	 * {@link ExplanationOfBenefit#getId()}s used in this application.
@@ -230,15 +226,13 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		if (pagingArgs.isPagingRequested()) {
 			/*
-			 * A page size of 0 is odd enough that we should throw an exception.
+			 * FIXME: Due to a bug in HAPI-FHIR described here
+			 * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
+			 * working correctly. Review bluebutton-data-server PR #129 for necessary code
+			 * changes when this issue is resolved.
 			 */
-			if (pagingArgs.getPageSize() == 0) {
-				throw new InvalidRequestException("Invalid request - the page size should not be zero.");
-			}
-
-			int numToReturn = Math.min(pagingArgs.getPageSize(), eobs.size());
-			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(),
-					pagingArgs.getStartIndex() + numToReturn);
+			int endIndex = Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), eobs.size());
+			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(), endIndex);
 			bundle = addResourcesToBundle(bundle, resources);
 			addPagingLinks(bundle, pagingArgs, beneficiaryId, eobs.size());
 		} else {
@@ -308,20 +302,31 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		Integer startIndex = pagingArgs.getStartIndex();
 		String serverBase = pagingArgs.getServerBase();
 
+		bundle.addLink(new BundleLinkComponent().setRelation("first")
+				.setUrl(createPagingLink(serverBase, beneficiaryId, 0, pageSize)));
+
 		if (startIndex + pageSize < numTotalResults) {
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_NEXT)
 					.setUrl(createPagingLink(serverBase, beneficiaryId, startIndex + pageSize, pageSize)));
-
-			int start = (numTotalResults / pageSize - 1) * pageSize;
-			bundle.addLink(new BundleLinkComponent().setRelation("last")
-					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
 		}
 
 		if (startIndex > 0) {
-			int start = Math.max(0, startIndex - pageSize);
 			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
-					.setUrl(createPagingLink(serverBase, beneficiaryId, start, pageSize)));
+					.setUrl(createPagingLink(serverBase, beneficiaryId, Math.max(startIndex - pageSize, 0), pageSize)));
 		}
+
+		/*
+		 * This formula rounds numTotalResults down to the nearest multiple of pageSize
+		 * that's less than and not equal to numTotalResults
+		 */
+		int lastIndex;
+		try {
+			lastIndex = (numTotalResults - 1) / pageSize * pageSize;
+		} catch (ArithmeticException e) {
+			throw new InvalidRequestException(String.format("Cannot divide by zero: pageSize=%s", pageSize));
+		}
+		bundle.addLink(new BundleLinkComponent().setRelation("last")
+				.setUrl(createPagingLink(serverBase, beneficiaryId, lastIndex, pageSize)));
 	}
 
 	/**
@@ -392,92 +397,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			ExplanationOfBenefit eob = eobsIter.next();
 			if (samhsaMatcher.test(eob))
 				eobsIter.remove();
-		}
-	}
-
-	/*
-	 * PagingArguments encapsulates the arguments related to paging for an 
-	 * {@link ExplanationOfBenefit} request.
-	 */
-	private static final class PagingArguments {
-		private final Optional<Integer> pageSize;
-		private final Optional<Integer> startIndex;
-		private final String serverBase;
-
-		public PagingArguments(RequestDetails requestDetails) {
-			pageSize = parseIntegerParameters(requestDetails, "_count");
-			startIndex = parseIntegerParameters(requestDetails, "startIndex");
-			serverBase = requestDetails.getServerBaseForRequest();
-		}
-
-		/**
-		 * @param requestDetails
-		 *            the {@link RequestDetails} containing additional parameters for
-		 *            the URL in need of parsing out
-		 * @param parameterToParse
-		 *            the parameter to parse from requestDetails
-		 * @return Returns the parsed parameter as an Integer, null if the parameter is
-		 *         not found.
-		 */
-		private Optional<Integer> parseIntegerParameters(RequestDetails requestDetails, String parameterToParse) {
-			if (requestDetails.getParameters().containsKey(parameterToParse)) {
-				try {
-					return Optional.of(Integer.parseInt(requestDetails.getParameters().get(parameterToParse)[0]));
-				} catch (NumberFormatException e) {
-					LOGGER.warn("Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.",
-							e);
-					throw new InvalidRequestException(
-							"Invalid argument in request URL: " + parameterToParse + ". Cannot parse to Integer.");
-				}
-			}
-			return Optional.empty();
-		}
-
-		/*
-		 * @return Returns true if the pageSize or startIndex is present (i.e. paging is
-		 * 		   requested), false if they are not present, and throws an
-		 *         IllegalArgumentException if the arguments are mismatched.
-		 */
-		public boolean isPagingRequested() {
-			if (pageSize.isPresent())
-				return true;
-			else if (!pageSize.isPresent() && !startIndex.isPresent())
-				return false;
-			else
-				// It's better to let clients requesting mismatched options know they goofed
-				// than to try and guess their intent.
-				throw new IllegalArgumentException(String
-						.format("Mismatched paging arguments: pageSize='%s', startIndex='%s'", pageSize, startIndex));
-		}
-
-		/*
-		 * @return Returns the pageSize as an integer. Note: the pageSize must exist at
-		 * this point, otherwise paging would not have been requested.
-		 */
-		public int getPageSize() {
-			if (!isPagingRequested())
-				throw new BadCodeMonkeyException();
-			return pageSize.get();
-		}
-
-		/*
-		 * @return Returns the startIndex as an integer. If the startIndex is not set,
-		 * return 0.
-		 */
-		public int getStartIndex() {
-			if (!isPagingRequested())
-				throw new BadCodeMonkeyException();
-			if (startIndex.isPresent()) {
-				return startIndex.get();
-			}
-			return 0;
-		}
-
-		/*
-		 * @return Returns the serverBase.
-		 */
-		public String getServerBase() {
-			return serverBase;
 		}
 	}
 }

@@ -24,6 +24,7 @@ import org.junit.Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
@@ -388,10 +389,11 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify that no paging links (e.g. next, prev, last) exist in the bundle.
+		 * Verify that no paging links exist in the bundle.
 		 */
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("first"));
 		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
@@ -441,13 +443,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB, with
-	 * paging.
+	 * paging. This test uses a count of 2 to verify our code will not run into an
+	 * IndexOutOfBoundsException on odd bundle sizes.
 	 * 
 	 * @throws FHIRException
 	 *             (indicates test failure)
 	 */
 	@Test
-	public void searchForEobsByExistingPatientWithPaging() throws FHIRException {
+	public void searchForEobsByExistingPatientWithEvenPaging() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -467,34 +470,36 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		/*
 		 * Verify the bundle contains a key for total and that the value matches the
-		 * number of entries in the bundle
+		 * number of entries in the bundle.
 		 */
 		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
 				.filter(r -> !(r instanceof BeneficiaryHistory))
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify a link to the last page exists.
+		 * Verify links to the first and last page exist.
 		 */
 		Assert.assertNotNull(searchResults.getLink("last"));
+		Assert.assertNotNull(searchResults.getLink("first"));
 
+		/*
+		 * Verify that accessing all next links, eventually leading to the last page,
+		 * will not encounter an IndexOutOfBoundsException.
+		 */
 		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
 			searchResults = fhirClient.loadPage().next(searchResults).execute();
 			Assert.assertNotNull(searchResults);
 			Assert.assertTrue(searchResults.hasEntry());
 
 			/*
-			 * Each page after the first should have a previous link.
+			 * Each page after the first should have a first, previous, and last links.
 			 */
+			Assert.assertNotNull(searchResults.getLink("first"));
 			Assert.assertNotNull(searchResults.getLink(Bundle.LINK_PREV));
+			Assert.assertNotNull(searchResults.getLink("last"));
 
 			searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 		}
-
-		/*
-		 * While on the last page the bundle should not have a "last" link.
-		 */
-		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
 		 * Verify that the combined results are the same size as
@@ -555,14 +560,15 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	/**
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-	 * works as expected for a {@link Patient} that does exist in the DB, with a
-	 * page size of 50 with fewer (8) results.
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging. This test uses a count of 3 to verify our code will not run into an
+	 * IndexOutOfBoundsException on even bundle sizes.
 	 * 
 	 * @throws FHIRException
 	 *             (indicates test failure)
 	 */
 	@Test
-	public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
+	public void searchForEobsByExistingPatientWithOddPaging() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -571,7 +577,110 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.findFirst().get();
 
 		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(50)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(3)
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Assert.assertEquals(3, searchResults.getEntry().size());
+
+		/*
+		 * Verify that accessing all next links, eventually leading to the last page,
+		 * will not encounter an IndexOutOfBoundsException.
+		 */
+		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
+			searchResults = fhirClient.loadPage().next(searchResults).execute();
+			Assert.assertNotNull(searchResults);
+			Assert.assertTrue(searchResults.hasEntry());
+		}
+	}
+
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging, providing the startIndex but not the pageSize (count).
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsByExistingPatientWithPageSizeNotProvided() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Verify that no paging links exist in the bundle.
+		 */
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("first"));
+		Assert.assertNull(searchResults.getLink("last"));
+
+		/*
+		 * Access a created link of this bundle, providing the startIndex but not the
+		 * pageSize (count).
+		 */
+		Bundle pagedResults = fhirClient.loadPage()
+				.byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=4")
+				.andReturnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(pagedResults);
+
+		/*
+		 * Verify that paging links exist in this paged bundle.
+		 */
+		Assert.assertNull(pagedResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNotNull(pagedResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNotNull(pagedResults.getLink("first"));
+		Assert.assertNotNull(pagedResults.getLink("last"));
+
+		/*
+		 * Add the entries in the paged results to a list and verify that only the last
+		 * 4 entries in the original searchResults were returned in the pagedResults.
+		 */
+		List<IBaseResource> pagedEntries = new ArrayList<>();
+		pagedResults.getEntry().forEach(e -> pagedEntries.add(e.getResource()));
+		Assert.assertEquals(4, pagedEntries.size());
+	}
+
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging on a page size of 0.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		/*
+		 * FIXME: According the the FHIR spec, paging for _count=0 should not return any
+		 * claim entries in the bundle, but instead just a total for the number of
+		 * entries that match the search criteria. 
+		 * This functionality does no work
+		 * currently (see https://github.com/jamesagnew/hapi-fhir/issues/1074) and so
+		 * for now paging with _count=0 should behave as though paging was not
+		 * requested.
+		 */
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(0)
 				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
@@ -585,10 +694,11 @@ public final class ExplanationOfBenefitResourceProviderIT {
 				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
-		 * Verify that no paging links exist, since there should only be one page.
+		 * Verify that no paging links exist in the bundle.
 		 */
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
 		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNull(searchResults.getLink("first"));
 		Assert.assertNull(searchResults.getLink("last"));
 
 		/*
@@ -634,6 +744,129 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		SNFClaimTransformerTest.assertMatches(snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
 	}
 
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with a
+	 * page size of 50 with fewer (8) results.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(50)
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
+				.filter(r -> !(r instanceof BeneficiaryHistory))
+				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
+
+		/*
+		 * Verify that only the first and last links exist as there are no previous or
+		 * next pages.
+		 */
+		Assert.assertNotNull(searchResults.getLink("first"));
+		Assert.assertNotNull(searchResults.getLink("last"));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+
+		/*
+		 * Verify that each of the expected claims (one for every claim type) is present
+		 * and looks correct.
+		 */
+
+		CarrierClaim carrierClaim = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
+				.map(r -> (CarrierClaim) r).findFirst().get();
+		Assert.assertEquals(1, filterToClaimType(searchResults, ClaimType.CARRIER).size());
+		CarrierClaimTransformerTest.assertMatches(carrierClaim,
+				filterToClaimType(searchResults, ClaimType.CARRIER).get(0));
+
+		DMEClaim dmeClaim = loadedRecords.stream().filter(r -> r instanceof DMEClaim).map(r -> (DMEClaim) r).findFirst()
+				.get();
+		DMEClaimTransformerTest.assertMatches(dmeClaim, filterToClaimType(searchResults, ClaimType.DME).get(0));
+
+		HHAClaim hhaClaim = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r).findFirst()
+				.get();
+		HHAClaimTransformerTest.assertMatches(hhaClaim, filterToClaimType(searchResults, ClaimType.HHA).get(0));
+
+		HospiceClaim hospiceClaim = loadedRecords.stream().filter(r -> r instanceof HospiceClaim)
+				.map(r -> (HospiceClaim) r).findFirst().get();
+		HospiceClaimTransformerTest.assertMatches(hospiceClaim,
+				filterToClaimType(searchResults, ClaimType.HOSPICE).get(0));
+
+		InpatientClaim inpatientClaim = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
+				.map(r -> (InpatientClaim) r).findFirst().get();
+		InpatientClaimTransformerTest.assertMatches(inpatientClaim,
+				filterToClaimType(searchResults, ClaimType.INPATIENT).get(0));
+
+		OutpatientClaim outpatientClaim = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
+				.map(r -> (OutpatientClaim) r).findFirst().get();
+		OutpatientClaimTransformerTest.assertMatches(outpatientClaim,
+				filterToClaimType(searchResults, ClaimType.OUTPATIENT).get(0));
+
+		PartDEvent partDEvent = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
+				.findFirst().get();
+		PartDEventTransformerTest.assertMatches(partDEvent, filterToClaimType(searchResults, ClaimType.PDE).get(0));
+
+		SNFClaim snfClaim = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r).findFirst()
+				.get();
+		SNFClaimTransformerTest.assertMatches(snfClaim, filterToClaimType(searchResults, ClaimType.SNF).get(0));
+	}
+
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * paging, using negative values for page size and start index parameters. This
+	 * test expects to receive a BadRequestException, as negative values should
+	 * result in an HTTP 400.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test(expected = InvalidRequestException.class)
+	public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException
+	{
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		/*
+		 * FIXME: At this time we cannot check for negative page size parameters due to
+		 * the same bug described in
+		 * https://github.com/jamesagnew/hapi-fhir/issues/1074.
+		 */
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Access a created link of this bundle, providing the startIndex but not the
+		 * pageSize (count).
+		 */
+		fhirClient.loadPage().byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=-1")
+				.andReturnBundle(Bundle.class).execute();
+	}
 
 	/**
 	 * <p>
