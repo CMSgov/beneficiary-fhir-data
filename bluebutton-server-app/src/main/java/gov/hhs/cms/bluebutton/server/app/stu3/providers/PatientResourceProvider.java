@@ -16,12 +16,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 
@@ -172,7 +169,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (logicalId.getValueNotNull().isEmpty())
 			throw new InvalidRequestException("Unsupported query parameter value: " + logicalId.getValue());
 
-		List<Patient> patients;
+		List<IBaseResource> patients;
 		try {
 			patients = Arrays.asList(read(new IdType(logicalId.getValue())));
 		} catch (ResourceNotFoundException e) {
@@ -188,12 +185,12 @@ public final class PatientResourceProvider implements IResourceProvider {
 			 * working correctly.
 			 */
 			int endIndex = Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), patients.size());
-			List<Patient> resources = patients.subList(pagingArgs.getStartIndex(),
+			List<IBaseResource> resources = patients.subList(pagingArgs.getStartIndex(),
 					endIndex);
-			bundle = addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/Patient", "&_id=", logicalId.getValue(), patients.size());
+			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+			pagingArgs.addPagingLinks(bundle, "/Patient", Patient.SP_RES_ID, logicalId.getValue(), patients.size());
 		} else {
-			bundle = addResourcesToBundle(bundle, patients);
+			bundle = TransformerUtils.addResourcesToBundle(bundle, patients);
 		}
 
 		bundle.setTotal(patients.size());
@@ -244,7 +241,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (!SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
 			throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
-		List<Patient> patients;
+		List<IBaseResource> patients;
 		try {
 			patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue()));
 		} catch (NoResultException e) {
@@ -260,12 +257,13 @@ public final class PatientResourceProvider implements IResourceProvider {
 			 * working correctly.
 			 */
 			int numToReturn = Math.min(pagingArgs.getPageSize(), patients.size());
-			List<Patient> resources = patients.subList(pagingArgs.getStartIndex(),
+			List<IBaseResource> resources = patients.subList(pagingArgs.getStartIndex(),
 					pagingArgs.getStartIndex() + numToReturn);
-			bundle = addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/Patient", "&identifier=", identifier.getValue(), patients.size());
+			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+			pagingArgs.addPagingLinks(bundle, "/Patient", Patient.SP_IDENTIFIER, identifier.getValue(),
+					patients.size());
 		} else {
-			bundle = addResourcesToBundle(bundle, patients);
+			bundle = TransformerUtils.addResourcesToBundle(bundle, patients);
 		}
 
 		bundle.setTotal(patients.size());
@@ -339,24 +337,5 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
 		return patient;
-	}
-
-	/**
-	 * @param bunlde
-	 *            a {@link Bundle} to add the list of {@link ExplanationOfBenefit}
-	 *            resources to.
-	 * @param list
-	 *            a list of {@link Patient}, of which a portion will be added to the
-	 *            bundle based on the paging values
-	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may
-	 *         contain multiple matching resources, or may also be empty.
-	 */
-	private Bundle addResourcesToBundle(Bundle bundle, List<Patient> patients) {
-		for (IBaseResource res : patients) {
-			BundleEntryComponent entry = bundle.addEntry();
-			entry.setResource((Resource) res);
-		}
-
-		return bundle;
 	}
 }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -128,16 +129,16 @@ public final class PagingArguments {
 		Integer pageSize = getPageSize();
 		Integer startIndex = getStartIndex();
 
-		bundle.addLink(new BundleLinkComponent().setRelation("first")
+		bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_FIRST)
 				.setUrl(createPagingLink(resource, searchByDesc, identifier, 0, pageSize)));
 
 		if (startIndex + pageSize < numTotalResults) {
-			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_NEXT)
+			bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_NEXT)
 					.setUrl(createPagingLink(resource, searchByDesc, identifier, startIndex + pageSize, pageSize)));
 		}
 
 		if (startIndex > 0) {
-			bundle.addLink(new BundleLinkComponent().setRelation(Bundle.LINK_PREV)
+			bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_PREVIOUS)
 					.setUrl(createPagingLink(resource, searchByDesc, identifier, Math.max(startIndex - pageSize, 0),
 							pageSize)));
 		}
@@ -150,9 +151,9 @@ public final class PagingArguments {
 		try {
 			lastIndex = (numTotalResults - 1) / pageSize * pageSize;
 		} catch (ArithmeticException e) {
-			throw new InvalidRequestException(String.format("Cannot divide by zero: pageSize=%s", pageSize));
+			throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
 		}
-		bundle.addLink(new BundleLinkComponent().setRelation("last")
+		bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_LAST)
 				.setUrl(createPagingLink(resource, searchByDesc, identifier, lastIndex, pageSize)));
 	}
 
@@ -162,9 +163,9 @@ public final class PagingArguments {
 	private String createPagingLink(String resource, String descriptor, String id, int startIndex, int theCount) {
 		StringBuilder b = new StringBuilder();
 		b.append(serverBase + resource);
-		b.append("_count=" + theCount);
+		b.append(Constants.PARAM_COUNT + "=" + theCount);
 		b.append("&startIndex=" + startIndex);
-		b.append(descriptor + id);
+		b.append("&" + descriptor + "=" + id);
 
 		return b.toString();
 	}

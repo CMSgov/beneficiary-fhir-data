@@ -19,10 +19,8 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Component;
 
@@ -200,7 +198,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		String beneficiaryId = patient.getIdPart();
 
-		List<ExplanationOfBenefit> eobs = new ArrayList<ExplanationOfBenefit>();
+		List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 		/*
 		 * The way our JPA/SQL schema is setup, we have to run a separate search for
 		 * each claim type, then combine the results. It's not super efficient, but it's
@@ -230,11 +228,11 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			 * changes when this issue is resolved.
 			 */
 			int endIndex = Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), eobs.size());
-			List<ExplanationOfBenefit> resources = eobs.subList(pagingArgs.getStartIndex(), endIndex);
-			bundle = addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/ExplanationOfBenefit?", "&patient=", beneficiaryId, eobs.size());
+			List<IBaseResource> resources = eobs.subList(pagingArgs.getStartIndex(), endIndex);
+			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+			pagingArgs.addPagingLinks(bundle, "/ExplanationOfBenefit?", ExplanationOfBenefit.SP_PATIENT, beneficiaryId, eobs.size());
 		} else {
-			bundle = addResourcesToBundle(bundle, eobs);
+			bundle = TransformerUtils.addResourcesToBundle(bundle, eobs);
 		}
 
 		bundle.setTotal(eobs.size());
@@ -247,7 +245,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 * 
 	 * @param eob2 an {@link ExplanationOfBenefit} to be compared
 	 */
-	private static int compareByClaimIdThenClaimType(ExplanationOfBenefit eob1, ExplanationOfBenefit eob2) {
+	private static int compareByClaimIdThenClaimType(IBaseResource res1, IBaseResource res2) {
 		/*
 		 * In order for paging to be meaningful (and stable), the claims have to be
 		 * consistently sorted across different app server instances (in case page 1
@@ -256,30 +254,13 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 * type). TODO once we have metadata from BLUEBUTTON-XXX on when each claim was
 		 * first loaded into our DB, we should sort by that.
 		 */
+		ExplanationOfBenefit eob1 = (ExplanationOfBenefit) res1;
+		ExplanationOfBenefit eob2 = (ExplanationOfBenefit) res2;
 		if (TransformerUtils.getUnprefixedClaimId(eob1) == TransformerUtils.getUnprefixedClaimId(eob2)) {
 			return TransformerUtils.getClaimType(eob1).compareTo(TransformerUtils.getClaimType(eob2));
 		} else {
 			return TransformerUtils.getUnprefixedClaimId(eob1).compareTo(TransformerUtils.getUnprefixedClaimId(eob2));
 		}
-	}
-
-	/**
-	 * @param bunlde
-	 *            a {@link Bundle} to add the list of {@link ExplanationOfBenefit}
-	 *            resources to.
-	 * @param eobs
-	 *            a list of {@link ExplanationOfBenefit}, of which a portion will be
-	 *            added to the bundle based on the paging values
-	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may
-	 *         contain multiple matching resources, or may also be empty.
-	 */
-	private Bundle addResourcesToBundle(Bundle bundle, List<ExplanationOfBenefit> eobs) {
-		for (IBaseResource res : eobs) {
-			BundleEntryComponent entry = bundle.addEntry();
-			entry.setResource((Resource) res);
-		}
-
-		return bundle;
 	}
 
 	/**
@@ -331,10 +312,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 *            the {@link List} of {@link ExplanationOfBenefit} resources (i.e.
 	 *            claims) to filter
 	 */
-	private void filterSamhsa(List<ExplanationOfBenefit> eobs) {
-		ListIterator<ExplanationOfBenefit> eobsIter = eobs.listIterator();
+	private void filterSamhsa(List<IBaseResource> eobs) {
+		ListIterator<IBaseResource> eobsIter = eobs.listIterator();
 		while (eobsIter.hasNext()) {
-			ExplanationOfBenefit eob = eobsIter.next();
+			ExplanationOfBenefit eob = (ExplanationOfBenefit) eobsIter.next();
 			if (samhsaMatcher.test(eob))
 				eobsIter.remove();
 		}

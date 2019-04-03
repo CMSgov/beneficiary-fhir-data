@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -55,6 +57,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ReferralRequest;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponent;
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
@@ -62,6 +65,7 @@ import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -2908,5 +2912,24 @@ public final class TransformerUtils {
 		}
 
 		throw new BadCodeMonkeyException(String.format("Unhandled %s: %s", ClaimType.class, rifRecord.getClass()));
+	}
+
+	/**
+	 * @param bundle
+	 *            a {@link Bundle} to add the list of {@link ExplanationOfBenefit}
+	 *            resources to.
+	 * @param resources
+	 *            a list of {@link Patient}, of which a portion will be added to the
+	 *            bundle based on the paging values
+	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may
+	 *         contain multiple matching resources, or may also be empty.
+	 */
+	public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
+		for (IBaseResource res : resources) {
+			BundleEntryComponent entry = bundle.addEntry();
+			entry.setResource((Resource) res);
+		}
+
+		return bundle;
 	}
 }
