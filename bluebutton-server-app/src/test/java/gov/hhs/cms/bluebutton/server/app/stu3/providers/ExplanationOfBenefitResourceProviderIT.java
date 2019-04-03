@@ -690,7 +690,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * number of entries in the bundle
 		 */
 		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
-				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+				.filter(r -> !(r instanceof BeneficiaryHistory))
+				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), searchResults.getTotal());
 
 		/*
 		 * Verify that no paging links exist in the bundle.
