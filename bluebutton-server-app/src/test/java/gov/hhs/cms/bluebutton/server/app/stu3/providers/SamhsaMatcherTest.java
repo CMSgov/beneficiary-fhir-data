@@ -39,7 +39,6 @@ public final class SamhsaMatcherTest {
 	static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
 	static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
 	static final String SAMPLE_SAMHSA_DRG_CODE = "522";
-	
 
 	private static final String DRG = TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
@@ -87,8 +86,7 @@ public final class SamhsaMatcherTest {
 	 * <code>true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s
 	 * that have SAMHSA-related ICD 9 diagnosis codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchCarrierClaimsByIcd9Diagnosis() throws FHIRException {
@@ -106,8 +104,7 @@ public final class SamhsaMatcherTest {
 	 * <code>true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s
 	 * that have SAMHSA-related ICD 10 diagnosis codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchCarrierClaimsByIcd10Diagnosis() throws FHIRException {
@@ -125,8 +122,7 @@ public final class SamhsaMatcherTest {
 	 * <code>true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s
 	 * that have SAMHSA-related CPT procedure codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchCarrierClaimsByCptProcedure() throws FHIRException {
@@ -144,8 +140,7 @@ public final class SamhsaMatcherTest {
 	 * <code>true</code> for {@link ClaimType#DME} {@link ExplanationOfBenefit}s
 	 * that have SAMHSA-related ICD 9 diagnosis codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchDmeClaimsByIcd9Diagnosis() throws FHIRException {
@@ -163,8 +158,7 @@ public final class SamhsaMatcherTest {
 	 * <code>true</code> for {@link ClaimType#DME} {@link ExplanationOfBenefit}s
 	 * that have SAMHSA-related ICD 10 diagnosis codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchDmeClaimsByIcd10Diagnosis() throws FHIRException {
@@ -182,8 +176,7 @@ public final class SamhsaMatcherTest {
 	 * <code>true</code> for {@link ClaimType#DME} {@link ExplanationOfBenefit}s
 	 * that have SAMHSA-related CPT procedure codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchDmeClaimsByCptProcedure() throws FHIRException {
@@ -195,14 +188,13 @@ public final class SamhsaMatcherTest {
 
 		Assert.assertTrue(matcher.test(sampleEob));
 	}
-	
+
 	/**
 	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
-	 * <code>true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s
-	 * that have SAMHSA-related ICD 9 diagnosis codes.
+	 * <code>true</code> for {@link ClaimType#INPATIENT}
+	 * {@link ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchInpatientClaimsByIcd9Procedure() throws FHIRException {
@@ -217,11 +209,11 @@ public final class SamhsaMatcherTest {
 
 	/**
 	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
-	 * <code>true</code> for {@link ClaimType#CARRIER} {@link ExplanationOfBenefit}s
-	 * that have SAMHSA-related ICD 10 diagnosis codes.
+	 * <code>true</code> for {@link ClaimType#INPATIENT}
+	 * {@link ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis
+	 * codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchInpatientClaimsByIcd10Procedure() throws FHIRException {
@@ -233,30 +225,28 @@ public final class SamhsaMatcherTest {
 
 		Assert.assertTrue(matcher.test(sampleEob));
 	}
-	
+
 	/**
 	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
-	 * <code>true</code> for {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit}s
-	 * that have SAMHSA-related drg codes.
+	 * <code>true</code> for {@link ClaimType#INPATIENT}
+	 * {@link ExplanationOfBenefit}s that have SAMHSA-related drg codes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates problem with test data)
+	 * @throws FHIRException (indicates problem with test data)
 	 */
 	@Test
 	public void matchInpatientClaimsByDrg() throws FHIRException {
 		SamhsaMatcher matcher = new SamhsaMatcher();
 
 		ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
-		sampleEob.getDiagnosisFirstRep().getPackageCode().addCoding()
-				.setSystem(SamhsaMatcherTest.DRG).setCode(SAMPLE_SAMHSA_DRG_CODE);
+		sampleEob.getDiagnosisFirstRep().getPackageCode().addCoding().setSystem(SamhsaMatcherTest.DRG)
+				.setCode(SAMPLE_SAMHSA_DRG_CODE);
 
 		Assert.assertTrue(matcher.test(sampleEob));
 	}
 
 	/**
-	 * @param claimType
-	 *            the {@link ClaimType} to get a sample {@link ExplanationOfBenefit}
-	 *            for
+	 * @param claimType the {@link ClaimType} to get a sample
+	 *                  {@link ExplanationOfBenefit} for
 	 * @return a sample {@link ExplanationOfBenefit} of the specified
 	 *         {@link ClaimType} (derived from the
 	 *         {@link StaticRifResourceGroup#SAMPLE_A} sample RIF records)

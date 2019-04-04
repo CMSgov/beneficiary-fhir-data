@@ -72,6 +72,7 @@ while true; do
 	esac
 done
 
+# On my system (windows with cygwin) the javaHome variable was being parsed incorrectly. In order to get it to work I just hardcoded it here.
 #javaHome="C:\Program Files\Java\jdk1.8.0_181\jre"
 
 # Verify that all required options were specified.
