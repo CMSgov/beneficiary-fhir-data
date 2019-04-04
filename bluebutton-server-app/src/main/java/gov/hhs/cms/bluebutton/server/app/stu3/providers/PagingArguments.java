@@ -27,7 +27,7 @@ public final class PagingArguments {
 	private final String serverBase;
 
 	public PagingArguments(RequestDetails requestDetails) {
-		pageSize = parseIntegerParameters(requestDetails, "_count");
+		pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
 		startIndex = parseIntegerParameters(requestDetails, "startIndex");
 		serverBase = requestDetails.getServerBaseForRequest();
 	}

@@ -188,7 +188,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			List<IBaseResource> resources = patients.subList(pagingArgs.getStartIndex(),
 					endIndex);
 			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/Patient", Patient.SP_RES_ID, logicalId.getValue(), patients.size());
+			pagingArgs.addPagingLinks(bundle, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(), patients.size());
 		} else {
 			bundle = TransformerUtils.addResourcesToBundle(bundle, patients);
 		}
@@ -260,7 +260,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			List<IBaseResource> resources = patients.subList(pagingArgs.getStartIndex(),
 					pagingArgs.getStartIndex() + numToReturn);
 			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/Patient", Patient.SP_IDENTIFIER, identifier.getValue(),
+			pagingArgs.addPagingLinks(bundle, "/Patient?", Patient.SP_IDENTIFIER, identifier.getValue(),
 					patients.size());
 		} else {
 			bundle = TransformerUtils.addResourcesToBundle(bundle, patients);
