@@ -34,13 +34,13 @@ The following table details all of the fields in our system which can contain SA
 |Claim Type(s)|Codeset|RIF Column(s)|RIF Column Format|Notes|FHIR EOB Field(s)|FHIR EOB Field Format|
 |---|---|---|---|---|---|---|
 |Carrier, DME|DRG|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
-|Carrier, DME|CPT|`HCPCS_CD`|`\w{4-5}`|CPT codes are a subset ("Level I") of HCPCSs.|`ExplanationOfBenefit.item.service`|`"service": { "coding": [{ "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "version": "7", "code": "12345" }] }`|
+|Carrier, DME, Inpatient |CPT|`HCPCS_CD`|`\w{4-5}`|CPT codes are a subset ("Level I") of HCPCSs.|`ExplanationOfBenefit.item.service`|`"service": { "coding": [{ "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "version": "7", "code": "12345" }] }`|
 |Carrier, DME|CPT|`HCPCS_1ST_MDFR_CD`|`\w{2}`|Modifier codes provide additional information on the procedure performed.|_N/A_|_N/A_|
 |Carrier, DME|CPT|`HCPCS_2ND_MDFR_CD`|`\w{2}`|Modifier codes provide additional information on the procedure performed.|_N/A_|_N/A_|
 |Carrier, DME|CPT|`CARR_CLM_HCPCS_YR_CD`|`\w`|Identifies the HCPCS year/version in use.|_N/A_|_N/A_|
-|Carrier, DME|ICD Diagnosis|`PRNCPAL_DGNS_CD`|`\w{1-7}`|_N/A_|`ExplanationOfBenefit.diagnosis`|`"diagnosis": [{ "sequence": 1, "diagnosisCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10", "code": "A1234", "display": "SHORT DESCRIPTION" }] }, "type": [{ "coding": [{ "system": "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code": "principal", "display": "..." }] }] }]`|
-|Carrier, DME|ICD Diagnosis|`PRNCPAL_DGNS_VRSN_CD`|`\w`|Identifies the ICD version (9 or 10).|_N/A_|_N/A_|
-|Carrier, DME|ICD Diagnosis|`ICD_DGNS_CD[1-12]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
+|Carrier, DME, Inpatient|ICD Diagnosis|`PRNCPAL_DGNS_CD`|`\w{1-7}`|_N/A_|`ExplanationOfBenefit.diagnosis`|`"diagnosis": [{ "sequence": 1, "diagnosisCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10", "code": "A1234", "display": "SHORT DESCRIPTION" }] }, "type": [{ "coding": [{ "system": "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code": "principal", "display": "..." }] }] }]`|
+|Carrier, DME, Inpatient|ICD Diagnosis|`PRNCPAL_DGNS_VRSN_CD`|`\w`|Identifies the ICD version (9 or 10).|_N/A_|_N/A_|
+|Carrier, DME, Inpatient|ICD Diagnosis|`ICD_DGNS_CD[1-12]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
 |Carrier, DME|ICD Diagnosis|`ICD_DGNS_VRSN_CD[1-12]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Carrier, DME|ICD Diagnosis|`LINE_ICD_DGNS_CD`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but referenced via `EOB.item.diagnosisLinkId`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
 |Carrier, DME|ICD Diagnosis|`LINE_ICD_DGNS_VRSN_CD`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
@@ -53,9 +53,11 @@ The following table details all of the fields in our system which can contain SA
 |Hospice|CPT|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Hospice|ICD Diagnosis|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Hospice|ICD Procedure|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
-|Inpatient|DRG|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
-|Inpatient|CPT|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
-|Inpatient|ICD Diagnosis|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
+|Inpatient|DRG|`CLM_DRG_CD`|`\w{3}`|The diagnostic related group to which a hospital claim belongs for prospective payment purposes._|`ExplanationOfBenefit.diagnosis.packageCode`|_(TODO)_|
+|Inpatient|ICD Diagnosis|`ICD_DGNS_CD[1-25]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
+|Inpatient|ICD Diagnosis|`ICD_DGNS_VRSN_CD[1-25]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
+|Inpatient|ICD Procedure|`ICD_PRCDR_CD[1-25]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
+|Inpatient|ICD Procedure|`ICD_PRCDR_VRSN_CD[1-25]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Inpatient|ICD Procedure|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Outpatient|DRG|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Outpatient|CPT|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
@@ -92,7 +94,8 @@ Codes such as ICD-9 codes can be formatted differently in different situations. 
 -->
 
 * DRG Codes
-    * _TODO_
+   	* Strip all leading and trailing whitespace.
+   	* Strip all but last "word", aka 3 digit code.
 * CPT Codes
     * Strip all leading and trailing whitespace.
     * Convert to all-caps.
