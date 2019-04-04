@@ -2,8 +2,6 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.Optional;
 
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +10,6 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
 /*
  * PagingArguments encapsulates the arguments related to paging for the 
@@ -108,65 +105,5 @@ public final class PagingArguments {
 	 */
 	public String getServerBase() {
 		return serverBase;
-	}
-	
-	/**
-	 * @param bundle
-	 *            the {@link Bundle} to which links are being added
-	 * @param resource
-	 *            the {@link String} the resource being provided by the paging link
-	 * @param searchByDesc
-	 *            the {@link String} field the search is being performed on
-	 * @param identifier
-	 *            the {@link String} identifier being searched for
-	 * @param numTotalResults
-	 *            the number of total resources matching the
-	 *            {@link Beneficiary#getBeneficiaryId()}
-	 */
-	public void addPagingLinks(Bundle bundle, String resource, String searchByDesc, String identifier,
-			int numTotalResults) {
-
-		Integer pageSize = getPageSize();
-		Integer startIndex = getStartIndex();
-
-		bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_FIRST)
-				.setUrl(createPagingLink(resource, searchByDesc, identifier, 0, pageSize)));
-
-		if (startIndex + pageSize < numTotalResults) {
-			bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_NEXT)
-					.setUrl(createPagingLink(resource, searchByDesc, identifier, startIndex + pageSize, pageSize)));
-		}
-
-		if (startIndex > 0) {
-			bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_PREVIOUS)
-					.setUrl(createPagingLink(resource, searchByDesc, identifier, Math.max(startIndex - pageSize, 0),
-							pageSize)));
-		}
-
-		/*
-		 * This formula rounds numTotalResults down to the nearest multiple of pageSize
-		 * that's less than and not equal to numTotalResults
-		 */
-		int lastIndex;
-		try {
-			lastIndex = (numTotalResults - 1) / pageSize * pageSize;
-		} catch (ArithmeticException e) {
-			throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
-		}
-		bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_LAST)
-				.setUrl(createPagingLink(resource, searchByDesc, identifier, lastIndex, pageSize)));
-	}
-
-	/**
-	 * @return Returns the URL string for a paging link.
-	 */
-	private String createPagingLink(String resource, String descriptor, String id, int startIndex, int theCount) {
-		StringBuilder b = new StringBuilder();
-		b.append(serverBase + resource);
-		b.append(Constants.PARAM_COUNT + "=" + theCount);
-		b.append("&startIndex=" + startIndex);
-		b.append("&" + descriptor + "=" + id);
-
-		return b.toString();
 	}
 }

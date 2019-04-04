@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -74,6 +75,8 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.codebook.model.Value;
 import gov.hhs.cms.bluebutton.data.codebook.model.Variable;
@@ -2915,14 +2918,55 @@ public final class TransformerUtils {
 	}
 
 	/**
+	 * @param pagingArgs
+	 *            a {@link PagingArguments} used to determine if paging is requested
+	 *            and the parameters for doing so
+	 * @param resourceType
+	 *            the {@link String} the resource being provided by the paging link
+	 * @param identifier
+	 *            the {@link String} field the search is being performed on
+	 * @param value
+	 *            the {@link String} value of the identifier being searched for
+	 * @param resources
+	 *            a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or
+	 *            {@link Patient}s, of which a portion or all will be added to the
+	 *            bundle based on the paging values
+	 * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s,
+	 *         {@link Coverage}s, or {@link Patient}s, which may contain multiple
+	 *         matching resources, or may also be empty.
+	 */
+	public static Bundle createBundle(PagingArguments pagingArgs, String resourceType, String identifier, String value,
+			List<IBaseResource> resources) {
+		Bundle bundle = new Bundle();
+		if (pagingArgs.isPagingRequested()) {
+			/*
+			 * FIXME: Due to a bug in HAPI-FHIR described here
+			 * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
+			 * working correctly.
+			 */
+			int endIndex = Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), resources.size());
+			List<IBaseResource> resourcesSubList = resources.subList(pagingArgs.getStartIndex(), endIndex);
+			bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
+			TransformerUtils.addPagingLinks(pagingArgs, bundle, resourceType, identifier, value, resources.size());
+		} else {
+			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+		}
+
+		bundle.setTotal(resources.size());
+		return bundle;
+	}
+
+	/**
 	 * @param bundle
 	 *            a {@link Bundle} to add the list of {@link ExplanationOfBenefit}
 	 *            resources to.
 	 * @param resources
-	 *            a list of {@link Patient}, of which a portion will be added to the
+	 *            a list of either {@link ExplanationOfBenefit}s, {@link Coverage}s,
+	 *            or {@link Patient}s, of which a portion will be added to the
 	 *            bundle based on the paging values
-	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may
-	 *         contain multiple matching resources, or may also be empty.
+	 * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s,
+	 *         {@link Coverage}s, or {@link Patient}s, which may contain multiple
+	 *         matching resources, or may also be empty.
 	 */
 	public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
 		for (IBaseResource res : resources) {
@@ -2931,5 +2975,68 @@ public final class TransformerUtils {
 		}
 
 		return bundle;
+	}
+
+	/**
+	 * @param pagingArgs
+	 *            a {@link PagingArguments} used to determine if paging is requested
+	 *            and the parameters for doing so
+	 * @param bundle
+	 *            the {@link Bundle} to which links are being added
+	 * @param resource
+	 *            the {@link String} the resource being provided by the paging link
+	 * @param searchByDesc
+	 *            the {@link String} field the search is being performed on
+	 * @param identifier
+	 *            the {@link String} identifier being searched for
+	 * @param numTotalResults
+	 *            the number of total resources matching the
+	 *            {@link Beneficiary#getBeneficiaryId()}
+	 */
+	public static void addPagingLinks(PagingArguments pagingArgs, Bundle bundle, String resource, String searchByDesc,
+			String identifier, int numTotalResults) {
+
+		Integer pageSize = pagingArgs.getPageSize();
+		Integer startIndex = pagingArgs.getStartIndex();
+		String serverBase = pagingArgs.getServerBase();
+
+		bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_FIRST)
+				.setUrl(createPagingLink(serverBase + resource, searchByDesc, identifier, 0, pageSize)));
+
+		if (startIndex + pageSize < numTotalResults) {
+			bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_NEXT).setUrl(createPagingLink(
+					serverBase + resource, searchByDesc, identifier, startIndex + pageSize, pageSize)));
+		}
+
+		if (startIndex > 0) {
+			bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_PREVIOUS).setUrl(createPagingLink(
+					serverBase + resource, searchByDesc, identifier, Math.max(startIndex - pageSize, 0), pageSize)));
+		}
+
+		/*
+		 * This formula rounds numTotalResults down to the nearest multiple of pageSize
+		 * that's less than and not equal to numTotalResults
+		 */
+		int lastIndex;
+		try {
+			lastIndex = (numTotalResults - 1) / pageSize * pageSize;
+		} catch (ArithmeticException e) {
+			throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
+		}
+		bundle.addLink(new BundleLinkComponent().setRelation(Constants.LINK_LAST)
+				.setUrl(createPagingLink(serverBase + resource, searchByDesc, identifier, lastIndex, pageSize)));
+	}
+
+	/**
+	 * @return Returns the URL string for a paging link.
+	 */
+	private static String createPagingLink(String baseURL, String descriptor, String id, int startIndex, int theCount) {
+		StringBuilder b = new StringBuilder();
+		b.append(baseURL);
+		b.append(Constants.PARAM_COUNT + "=" + theCount);
+		b.append("&startIndex=" + startIndex);
+		b.append("&" + descriptor + "=" + id);
+
+		return b.toString();
 	}
 }

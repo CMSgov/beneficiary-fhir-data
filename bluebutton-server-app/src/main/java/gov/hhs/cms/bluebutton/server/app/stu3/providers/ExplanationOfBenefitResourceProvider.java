@@ -218,25 +218,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
 		eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
-		Bundle bundle = new Bundle();
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
-		if (pagingArgs.isPagingRequested()) {
-			/*
-			 * FIXME: Due to a bug in HAPI-FHIR described here
-			 * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
-			 * working correctly. Review bluebutton-data-server PR #129 for necessary code
-			 * changes when this issue is resolved.
-			 */
-			int endIndex = Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), eobs.size());
-			List<IBaseResource> resources = eobs.subList(pagingArgs.getStartIndex(), endIndex);
-			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/ExplanationOfBenefit?", ExplanationOfBenefit.SP_PATIENT, beneficiaryId, eobs.size());
-		} else {
-			bundle = TransformerUtils.addResourcesToBundle(bundle, eobs);
-		}
-
-		bundle.setTotal(eobs.size());
-
+		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/ExplanationOfBenefit?",
+				ExplanationOfBenefit.SP_PATIENT, beneficiaryId, eobs);
 		return bundle;
 	}
 

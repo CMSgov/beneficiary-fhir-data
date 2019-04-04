@@ -176,25 +176,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 			patients = new LinkedList<>();
 		}
 
-		Bundle bundle = new Bundle();
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
-		if (pagingArgs.isPagingRequested()) {
-			/*
-			 * FIXME: Due to a bug in HAPI-FHIR described here
-			 * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
-			 * working correctly.
-			 */
-			int endIndex = Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), patients.size());
-			List<IBaseResource> resources = patients.subList(pagingArgs.getStartIndex(),
-					endIndex);
-			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(), patients.size());
-		} else {
-			bundle = TransformerUtils.addResourcesToBundle(bundle, patients);
-		}
-
-		bundle.setTotal(patients.size());
-
+		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(),
+				patients);
 		return bundle;
 	}
 
@@ -248,26 +232,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 			patients = new LinkedList<>();
 		}
 
-		Bundle bundle = new Bundle();
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
-		if (pagingArgs.isPagingRequested()) {
-			/*
-			 * FIXME: Due to a bug in HAPI-FHIR described here
-			 * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
-			 * working correctly.
-			 */
-			int numToReturn = Math.min(pagingArgs.getPageSize(), patients.size());
-			List<IBaseResource> resources = patients.subList(pagingArgs.getStartIndex(),
-					pagingArgs.getStartIndex() + numToReturn);
-			bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
-			pagingArgs.addPagingLinks(bundle, "/Patient?", Patient.SP_IDENTIFIER, identifier.getValue(),
-					patients.size());
-		} else {
-			bundle = TransformerUtils.addResourcesToBundle(bundle, patients);
-		}
-
-		bundle.setTotal(patients.size());
-
+		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_IDENTIFIER,
+				identifier.getValue(), patients);
 		return bundle;
 	}
 
