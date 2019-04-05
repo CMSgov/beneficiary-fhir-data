@@ -15,6 +15,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -26,9 +27,11 @@ import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -146,11 +149,18 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *            a {@link TokenParam} (with no system, per the spec) for the
 	 *            {@link Patient#getId()} to try and find a matching
 	 *            {@link Patient} for
+	 * @param startIndex
+	 *            an {@link OptionalParam} for the startIndex (or offset) used to
+	 *            determine pagination
+	 * @param requestDetails
+	 *            a {@link RequestDetails} containing the details of the request
+	 *            URL, used to parse out pagination values
 	 * @return Returns a {@link List} of {@link Patient}s, which may contain
 	 *         multiple matching resources, or may also be empty.
 	 */
 	@Search
-	public List<Patient> searchByLogicalId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId) {
+	public Bundle searchByLogicalId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId,
+			@OptionalParam(name = "startIndex") String startIndex, RequestDetails requestDetails) {
 		if (logicalId.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
@@ -159,11 +169,17 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (logicalId.getValueNotNull().isEmpty())
 			throw new InvalidRequestException("Unsupported query parameter value: " + logicalId.getValue());
 
+		List<IBaseResource> patients;
 		try {
-			return Arrays.asList(read(new IdType(logicalId.getValue())));
+			patients = Arrays.asList(read(new IdType(logicalId.getValue())));
 		} catch (ResourceNotFoundException e) {
-			return new LinkedList<>();
+			patients = new LinkedList<>();
 		}
+
+		PagingArguments pagingArgs = new PagingArguments(requestDetails);
+		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(),
+				patients);
+		return bundle;
 	}
 
 	/**
@@ -190,11 +206,18 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *            an {@link Identifier} {@link TokenParam} for the
 	 *            {@link Patient#getIdentifier()} to try and find a matching
 	 *            {@link Patient} for
+	 * @param startIndex
+	 *            an {@link OptionalParam} for the startIndex (or offset) used to
+	 *            determine pagination
+	 * @param requestDetails
+	 *            a {@link RequestDetails} containing the details of the request
+	 *            URL, used to parse out pagination values
 	 * @return Returns a {@link List} of {@link Patient}s, which may contain
 	 *         multiple matching resources, or may also be empty.
 	 */
 	@Search
-	public List<Patient> searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier) {
+	public Bundle searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier,
+			@OptionalParam(name = "startIndex") String startIndex, RequestDetails requestDetails) {
 		if (identifier.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
@@ -202,11 +225,17 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (!SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
 			throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
+		List<IBaseResource> patients;
 		try {
-			return Arrays.asList(queryDatabaseByHicnHash(identifier.getValue()));
+			patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue()));
 		} catch (NoResultException e) {
-			return new LinkedList<>();
+			patients = new LinkedList<>();
 		}
+
+		PagingArguments pagingArgs = new PagingArguments(requestDetails);
+		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_IDENTIFIER,
+				identifier.getValue(), patients);
+		return bundle;
 	}
 
 	/**

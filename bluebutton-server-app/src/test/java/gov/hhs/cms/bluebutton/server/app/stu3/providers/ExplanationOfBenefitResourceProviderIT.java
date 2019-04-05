@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -391,10 +392,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		/*
 		 * Verify that no paging links exist in the bundle.
 		 */
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
-		Assert.assertNull(searchResults.getLink("first"));
-		Assert.assertNull(searchResults.getLink("last"));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
 
 		/*
 		 * Verify that each of the expected claims (one for every claim type) is present
@@ -479,14 +480,14 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		/*
 		 * Verify links to the first and last page exist.
 		 */
-		Assert.assertNotNull(searchResults.getLink("last"));
-		Assert.assertNotNull(searchResults.getLink("first"));
+		Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+		Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
 
 		/*
 		 * Verify that accessing all next links, eventually leading to the last page,
 		 * will not encounter an IndexOutOfBoundsException.
 		 */
-		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
+		while (searchResults.getLink(Constants.LINK_NEXT) != null) {
 			searchResults = fhirClient.loadPage().next(searchResults).execute();
 			Assert.assertNotNull(searchResults);
 			Assert.assertTrue(searchResults.hasEntry());
@@ -494,9 +495,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			/*
 			 * Each page after the first should have a first, previous, and last links.
 			 */
-			Assert.assertNotNull(searchResults.getLink("first"));
-			Assert.assertNotNull(searchResults.getLink(Bundle.LINK_PREV));
-			Assert.assertNotNull(searchResults.getLink("last"));
+			Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+			Assert.assertNotNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+			Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
 
 			searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 		}
@@ -587,7 +588,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * Verify that accessing all next links, eventually leading to the last page,
 		 * will not encounter an IndexOutOfBoundsException.
 		 */
-		while (searchResults.getLink(Bundle.LINK_NEXT) != null) {
+		while (searchResults.getLink(Constants.LINK_NEXT) != null) {
 			searchResults = fhirClient.loadPage().next(searchResults).execute();
 			Assert.assertNotNull(searchResults);
 			Assert.assertTrue(searchResults.hasEntry());
@@ -621,10 +622,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		/*
 		 * Verify that no paging links exist in the bundle.
 		 */
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
-		Assert.assertNull(searchResults.getLink("first"));
-		Assert.assertNull(searchResults.getLink("last"));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
 
 		/*
 		 * Access a created link of this bundle, providing the startIndex but not the
@@ -639,10 +640,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		/*
 		 * Verify that paging links exist in this paged bundle.
 		 */
-		Assert.assertNull(pagedResults.getLink(Bundle.LINK_NEXT));
-		Assert.assertNotNull(pagedResults.getLink(Bundle.LINK_PREV));
-		Assert.assertNotNull(pagedResults.getLink("first"));
-		Assert.assertNotNull(pagedResults.getLink("last"));
+		Assert.assertNull(pagedResults.getLink(Constants.LINK_NEXT));
+		Assert.assertNotNull(pagedResults.getLink(Constants.LINK_PREVIOUS));
+		Assert.assertNotNull(pagedResults.getLink(Constants.LINK_FIRST));
+		Assert.assertNotNull(pagedResults.getLink(Constants.LINK_LAST));
 
 		/*
 		 * Add the entries in the paged results to a list and verify that only the last
@@ -696,10 +697,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		/*
 		 * Verify that no paging links exist in the bundle.
 		 */
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
-		Assert.assertNull(searchResults.getLink("first"));
-		Assert.assertNull(searchResults.getLink("last"));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
 
 		/*
 		 * Verify that each of the expected claims (one for every claim type) is present
@@ -780,10 +781,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * Verify that only the first and last links exist as there are no previous or
 		 * next pages.
 		 */
-		Assert.assertNotNull(searchResults.getLink("first"));
-		Assert.assertNotNull(searchResults.getLink("last"));
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_NEXT));
-		Assert.assertNull(searchResults.getLink(Bundle.LINK_PREV));
+		Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+		Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
 
 		/*
 		 * Verify that each of the expected claims (one for every claim type) is present

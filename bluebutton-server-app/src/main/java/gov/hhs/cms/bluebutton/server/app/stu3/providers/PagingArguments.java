@@ -7,12 +7,13 @@ import org.slf4j.LoggerFactory;
 
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /*
  * PagingArguments encapsulates the arguments related to paging for the 
- * {@link ExplanationOfBenefit} request.
+ * {@link ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
  */
 public final class PagingArguments {
 
@@ -23,7 +24,7 @@ public final class PagingArguments {
 	private final String serverBase;
 
 	public PagingArguments(RequestDetails requestDetails) {
-		pageSize = parseIntegerParameters(requestDetails, "_count");
+		pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
 		startIndex = parseIntegerParameters(requestDetails, "startIndex");
 		serverBase = requestDetails.getServerBaseForRequest();
 	}
