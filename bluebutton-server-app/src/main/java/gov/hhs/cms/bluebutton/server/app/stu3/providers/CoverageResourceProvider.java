@@ -142,6 +142,12 @@ public final class CoverageResourceProvider implements IResourceProvider {
 	 * @param beneficiary
 	 *            a {@link ReferenceParam} for the
 	 *            {@link Coverage#getBeneficiary()} to try and find matches for
+	 * @param startIndex
+	 *            an {@link OptionalParam} for the startIndex (or offset) used to
+	 *            determine pagination
+	 * @param requestDetails
+	 *            a {@link RequestDetails} containing the details of the request
+	 *            URL, used to parse out pagination values
 	 * @return Returns a {@link List} of {@link Coverage}s, which may contain
 	 *         multiple matching resources, or may also be empty.
 	 */
