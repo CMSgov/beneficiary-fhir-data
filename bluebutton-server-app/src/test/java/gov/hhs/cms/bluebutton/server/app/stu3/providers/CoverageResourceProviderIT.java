@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -118,6 +119,63 @@ public final class CoverageResourceProviderIT {
 		/*
 		 * Verify that each of the expected Coverages (one for every
 		 * MedicareSegment) is present and looks correct.
+		 */
+
+		Coverage partACoverageFromSearchResult = (Coverage) searchResults.getEntry().stream()
+				.filter(e -> e.getResource() instanceof Coverage).map(e -> (Coverage) e.getResource())
+				.filter(c -> TransformerConstants.COVERAGE_PLAN_PART_A.equals(c.getGrouping().getSubPlan())).findFirst()
+				.get();
+		CoverageTransformerTest.assertPartAMatches(beneficiary, partACoverageFromSearchResult);
+
+		Coverage partBCoverageFromSearchResult = (Coverage) searchResults.getEntry().stream()
+				.filter(e -> e.getResource() instanceof Coverage).map(e -> (Coverage) e.getResource())
+				.filter(c -> TransformerConstants.COVERAGE_PLAN_PART_B.equals(c.getGrouping().getSubPlan())).findFirst()
+				.get();
+		CoverageTransformerTest.assertPartBMatches(beneficiary, partBCoverageFromSearchResult);
+
+		Coverage partDCoverageFromSearchResult = (Coverage) searchResults.getEntry().stream()
+				.filter(e -> e.getResource() instanceof Coverage).map(e -> (Coverage) e.getResource())
+				.filter(c -> TransformerConstants.COVERAGE_PLAN_PART_D.equals(c.getGrouping().getSubPlan())).findFirst()
+				.get();
+		CoverageTransformerTest.assertPartDMatches(beneficiary, partDCoverageFromSearchResult);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Beneficiary} that does exist in the DB, with
+	 * paging.
+	 * 
+	 * @throws FHIRException
+	 *             (indicates test failure)
+	 */
+	@Test
+	public void searchByExistingBeneficiaryWithPaging() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Bundle searchResults = fhirClient.search().forResource(Coverage.class)
+				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary))).count(3)
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Assert.assertEquals(MedicareSegment.values().length, searchResults.getTotal());
+
+		/*
+		 * Verify that only the first and last paging links exist, since there should
+		 * only be one page.
+		 */
+		Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+		Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+
+		/*
+		 * Verify that each of the expected Coverages (one for every MedicareSegment) is
+		 * present and looks correct.
 		 */
 
 		Coverage partACoverageFromSearchResult = (Coverage) searchResults.getEntry().stream()
