@@ -117,6 +117,14 @@ public final class CoverageResourceProviderIT {
 		Assert.assertEquals(MedicareSegment.values().length, searchResults.getTotal());
 
 		/*
+		 * Verify that no paging links exist within the bundle.
+		 */
+		Assert.assertNull(searchResults.getLink(Constants.LINK_FIRST));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+		Assert.assertNull(searchResults.getLink(Constants.LINK_LAST));
+
+		/*
 		 * Verify that each of the expected Coverages (one for every
 		 * MedicareSegment) is present and looks correct.
 		 */
