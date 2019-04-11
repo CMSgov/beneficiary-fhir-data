@@ -142,7 +142,29 @@ public final class EndpointJsonResponseComparatorIT {
 		// Call the server endpoint and save its result out to a file corresponding to
 		// the endpoint Id.
 		String endpointResponse = endpointOperation.get();
-		writeFile(endpointResponse, generateFileName(approvedResponseDir, endpointId));
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter();
+		JsonNode jsonNode = null;
+		try {
+			jsonNode = mapper.readTree(endpointResponse);
+		} catch (IOException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
+		}
+
+		/*
+		 * TODO: Replace ignored fields with filler text here.
+		 */
+
+		String jsonResponse = null;
+		try {
+			jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+		} catch (JsonProcessingException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
+		}
+		writeFile(jsonResponse, generateFileName(approvedResponseDir, endpointId));
 	}
 
 	/**
