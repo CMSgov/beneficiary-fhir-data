@@ -293,27 +293,32 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 			throw new BadCodeMonkeyException(e);
 		}
 
-		for (Coding diagnosisCoding : diagnosisConcept.getCoding()) {
-			if (IcdCode.CODING_SYSTEM_ICD_9.equals(diagnosisCoding.getSystem())) {
-				if (isSamhsaIcd9Diagnosis(diagnosisCoding))
+		if (diagnosisConcept != null) {
+			for (Coding diagnosisCoding : diagnosisConcept.getCoding()) {
+				if (IcdCode.CODING_SYSTEM_ICD_9.equals(diagnosisCoding.getSystem())) {
+					if (isSamhsaIcd9Diagnosis(diagnosisCoding))
+						return true;
+				} else if (IcdCode.CODING_SYSTEM_ICD_10.equals(diagnosisCoding.getSystem())) {
+					if (isSamhsaIcd10Diagnosis(diagnosisCoding))
+						return true;
+				} else {
+					// Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
 					return true;
-			} else if (IcdCode.CODING_SYSTEM_ICD_10.equals(diagnosisCoding.getSystem())) {
-				if (isSamhsaIcd10Diagnosis(diagnosisCoding))
-					return true;
-			} else {
-				// Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
-				return true;
+				}
 			}
 		}
 
-		for (Coding packageCoding : diagnosis.getPackageCode().getCoding()) {
-			if (SamhsaMatcher.DRG.equals(packageCoding.getSystem())) {
-				if (isSamhsaDrgCode(packageCoding))
+		CodeableConcept packageConcept = diagnosis.getPackageCode();
+		if (packageConcept != null) {
+			for (Coding packageCoding : packageConcept.getCoding()) {
+				if (SamhsaMatcher.DRG.equals(packageCoding.getSystem())) {
+					if (isSamhsaDrgCode(packageCoding))
+						return true;
+				} else {
+					// Fail safe: if we don't know the package coding system, assume the code is
+					// SAMHSA.
 					return true;
-			} else {
-				// Fail safe: if we don't know the package coding system, assume the code is
-				// SAMHSA.
-				return true;
+				}
 			}
 		}
 
