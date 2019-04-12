@@ -74,8 +74,8 @@ public final class SamhsaMatcherTest {
 			return TransformerUtils.transformRifRecordToEob(new MetricRegistry(), r);
 		}).filter(ExplanationOfBenefit.class::isInstance).collect(Collectors.toList());
 
-//		for (ExplanationOfBenefit sampleEob : sampleEobs)
-//			Assert.assertFalse("Unexpected SAMHSA filtering of EOB: " + sampleEob.getId(), matcher.test(sampleEob));
+		for (ExplanationOfBenefit sampleEob : sampleEobs)
+			Assert.assertFalse("Unexpected SAMHSA filtering of EOB: " + sampleEob.getId(), matcher.test(sampleEob));
 	}
 
 	/**
