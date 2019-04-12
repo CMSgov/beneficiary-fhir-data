@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -53,7 +54,7 @@ final class CoverageTransformer {
 	 * @return the FHIR {@link Coverage} resources that can be generated from the
 	 *         specified {@link Beneficiary}
 	 */
-	public static List<Coverage> transform(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+	public static List<IBaseResource> transform(MetricRegistry metricRegistry, Beneficiary beneficiary) {
 		return Arrays.stream(MedicareSegment.values()).map(s -> transform(metricRegistry, s, beneficiary))
 				.collect(Collectors.toList());
 	}

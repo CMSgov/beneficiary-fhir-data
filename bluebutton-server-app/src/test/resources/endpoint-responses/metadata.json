@@ -31,7 +31,9 @@
         "name" : "beneficiary",
         "type" : "reference",
         "documentation" : "Covered party"
-      } ]
+      }, {
+        "name" : "startIndex",
+        "type" : "string"} ]
     }, {
       "type" : "ExplanationOfBenefit",
       "profile" : {
@@ -79,7 +81,12 @@
         "name" : "identifier",
         "type" : "token",
         "documentation" : "A patient identifier"
-      } ]
+      }, {
+        "name" : "startIndex",
+        "type" : "string"
+      }, {
+        "name" : "startIndex",
+        "type" : "string"} ]
     }, {
       "type" : "StructureDefinition",
       "profile" : {

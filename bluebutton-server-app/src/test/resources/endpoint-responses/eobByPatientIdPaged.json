@@ -8,6 +8,14 @@
   "total": 8,
   "link": [
     {
+      "relation": "first",
+      "url": "https://localhost:9800/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient=567834"
+    },
+    {
+      "relation": "last",
+      "url": "https://localhost:9800/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient=567834"
+    },
+    {
       "relation": "self",
       "url": "https://localhost:9800/v1/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2F567834"
     }

@@ -14,6 +14,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,9 +25,11 @@ import com.codahale.metrics.Timer;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -139,17 +142,30 @@ public final class CoverageResourceProvider implements IResourceProvider {
 	 * @param beneficiary
 	 *            a {@link ReferenceParam} for the
 	 *            {@link Coverage#getBeneficiary()} to try and find matches for
+	 * @param startIndex
+	 *            an {@link OptionalParam} for the startIndex (or offset) used to
+	 *            determine pagination
+	 * @param requestDetails
+	 *            a {@link RequestDetails} containing the details of the request
+	 *            URL, used to parse out pagination values
 	 * @return Returns a {@link List} of {@link Coverage}s, which may contain
 	 *         multiple matching resources, or may also be empty.
 	 */
 	@Search
-	public List<Coverage> searchByBeneficiary(@RequiredParam(name = Coverage.SP_BENEFICIARY) ReferenceParam beneficiary) {
+	public Bundle searchByBeneficiary(@RequiredParam(name = Coverage.SP_BENEFICIARY) ReferenceParam beneficiary,
+			@OptionalParam(name = "startIndex") String startIndex, RequestDetails requestDetails) {
+		List<IBaseResource> coverages;
 		try {
 			Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart());
-			return CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
+			coverages = CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
 		} catch (NoResultException e) {
-			return new LinkedList<>();
+			coverages = new LinkedList<IBaseResource>();
 		}
+
+		PagingArguments pagingArgs = new PagingArguments(requestDetails);
+		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Coverage?", Coverage.SP_BENEFICIARY,
+				beneficiary.getIdPart(), coverages);
+		return bundle;
 	}
 
 	/**
