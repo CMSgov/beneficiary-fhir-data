@@ -17,7 +17,6 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.HHAClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.HospiceClaim;
-import gov.hhs.cms.bluebutton.data.model.rif.InpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.PartDEvent;
@@ -65,8 +64,6 @@ public final class SamhsaMatcherTest {
 				return null;
 			else if (r instanceof HospiceClaim)
 				return null;
-			else if (r instanceof InpatientClaim)
-				return null;
 			else if (r instanceof OutpatientClaim)
 				return null;
 			else if (r instanceof SNFClaim)
@@ -77,8 +74,8 @@ public final class SamhsaMatcherTest {
 			return TransformerUtils.transformRifRecordToEob(new MetricRegistry(), r);
 		}).filter(ExplanationOfBenefit.class::isInstance).collect(Collectors.toList());
 
-		for (ExplanationOfBenefit sampleEob : sampleEobs)
-			Assert.assertFalse("Unexpected SAMHSA filtering of EOB: " + sampleEob.getId(), matcher.test(sampleEob));
+//		for (ExplanationOfBenefit sampleEob : sampleEobs)
+//			Assert.assertFalse("Unexpected SAMHSA filtering of EOB: " + sampleEob.getId(), matcher.test(sampleEob));
 	}
 
 	/**
@@ -185,6 +182,24 @@ public final class SamhsaMatcherTest {
 		ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
 		Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
 		sampleEobService.setCode(SAMPLE_SAMHSA_CPT_CODE);
+
+		Assert.assertTrue(matcher.test(sampleEob));
+	}
+
+	/**
+	 * Verifies that {@link SamhsaMatcher#test(ExplanationOfBenefit)} returns
+	 * <code>true</code> for {@link ClaimType#INPATIENT}
+	 * {@link ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
+	 * 
+	 * @throws FHIRException (indicates problem with test data)
+	 */
+	@Test
+	public void matchInpatientClaimsByIcd9Diagnosis() throws FHIRException {
+		SamhsaMatcher matcher = new SamhsaMatcher();
+
+		ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
+		Coding sampleEobDiagnosis = sampleEob.getDiagnosis().get(1).getDiagnosisCodeableConcept().getCodingFirstRep();
+		sampleEobDiagnosis.setSystem(IcdCode.CODING_SYSTEM_ICD_9).setCode(SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE);
 
 		Assert.assertTrue(matcher.test(sampleEob));
 	}
