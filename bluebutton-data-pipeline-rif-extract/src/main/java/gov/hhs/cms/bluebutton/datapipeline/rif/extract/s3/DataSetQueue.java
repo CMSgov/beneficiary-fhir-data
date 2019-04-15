@@ -42,18 +42,6 @@ public final class DataSetQueue {
 	private final S3TaskManager s3TaskManager;
 
 	/**
-	 * This {@link System#exit(int)} value should be used when the manifest RIF
-	 * version number is incorrect
-	 */
-	static final int EXIT_CODE_INCORRECT_MANIFEST_FORMAT = 1;
-
-	/**
-	 * This {@link System#exit(int)} value should be used when the manifest RIF file
-	 * type is incorrect
-	 */
-	static final int EXIT_CODE_INCORRECT_MANIFEST_RIF_FILE_TYPE = 2;
-
-	/**
 	 * The {@link DataSetManifest}s waiting to be processed, ordered by their
 	 * {@link DataSetManifestId} in ascending order such that the first element
 	 * represents the {@link DataSetManifest} that should be processed next.
