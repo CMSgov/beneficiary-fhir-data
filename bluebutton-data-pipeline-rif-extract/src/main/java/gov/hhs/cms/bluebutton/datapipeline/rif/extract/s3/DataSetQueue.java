@@ -110,12 +110,14 @@ public final class DataSetQueue {
 			try {
 				manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
 			} catch (JAXBException e) {
-				// Note: We intentionally don't log the full stack trace
-				// here, as it would add a lot of unneeded noise.
-				LOGGER.warn("Found data set with invalid manifest at '{}'. It will be skipped. Error: {}",
+				/*
+				 * We want to terminate the ETL load process if an invalid manifest was found
+				 * such as a incorrect version number
+				 */
+				LOGGER.error("Found data set with invalid manifest at '{}'. Load service will terminating. Error: {}",
 						manifestS3Key, e.toString());
 				knownInvalidManifests.add(manifestId);
-				return;
+				throw new RuntimeException(e);
 			}
 
 			// Finally, ensure that the manifest passes the options filter.
