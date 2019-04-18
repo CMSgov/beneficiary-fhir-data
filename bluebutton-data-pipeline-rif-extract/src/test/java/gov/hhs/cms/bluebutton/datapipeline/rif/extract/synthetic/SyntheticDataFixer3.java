@@ -24,7 +24,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.RifParsingUtils;
 import gov.hhs.cms.bluebutton.datapipeline.rif.extract.LocalRifFile;
 
 /**
- * A one-off utility application for modifying the fixed-with-negative-ids the
+ * A one-off utility application for modifying the fixed-with-negative-ids
  * sample data that was produced on 2017-11-27 and then fixed by
  * {@link SyntheticDataFixer}. This class adds additional beneficiary columns
  * from the BSF file.
