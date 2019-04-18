@@ -96,6 +96,7 @@ Codes such as ICD-9 codes can be formatted differently in different situations. 
 * DRG Codes
    	* Strip all leading and trailing whitespace.
    	* Strip all but last "word", aka 3 digit code.
+   	* (Note: the DRG values in the CCW are already normalized; these normalization are only applied to our list of SAMHSA-related DRG codes.) 
 * CPT Codes
     * Strip all leading and trailing whitespace.
     * Convert to all-caps.
