@@ -1,7 +1,7 @@
 {
   "resourceType" : "CapabilityStatement",
   "status" : "active",
-  "date" : "2019-04-18T08:52:09-05:00",
+  "date" : "IGNORED FIELD",
   "publisher" : "Centers for Medicare & Medicaid Services",
   "kind" : "instance",
   "software" : {

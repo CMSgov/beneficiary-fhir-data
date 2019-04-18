@@ -158,6 +158,9 @@ public final class EndpointJsonResponseComparatorIT {
 		replaceIgnoredFieldsWithFillerText(jsonNode, "url", Optional.of(Pattern.compile("https://localhost")));
 		replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
 
+		if (endpointId == "metadata")
+			replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
+
 		String jsonResponse = null;
 		try {
 			jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
