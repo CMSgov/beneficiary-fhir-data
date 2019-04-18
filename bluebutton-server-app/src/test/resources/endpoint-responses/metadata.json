@@ -1,7 +1,7 @@
 {
   "resourceType" : "CapabilityStatement",
   "status" : "active",
-  "date" : "2019-04-11T08:45:19-05:00",
+  "date" : "2019-04-18T08:52:09-05:00",
   "publisher" : "Centers for Medicare & Medicaid Services",
   "kind" : "instance",
   "software" : {
@@ -10,7 +10,7 @@
   },
   "implementation" : {
     "description" : "gov.hhs.cms.bluebutton.fhir:bluebutton-server-app",
-    "url" : "https://localhost:9163/v1/fhir"
+    "url" : "IGNORED FIELD"
   },
   "fhirVersion" : "3.0.1",
   "acceptUnknown" : "extensions",

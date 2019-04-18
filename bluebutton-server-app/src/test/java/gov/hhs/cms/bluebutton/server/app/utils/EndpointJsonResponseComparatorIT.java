@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -144,7 +145,6 @@ public final class EndpointJsonResponseComparatorIT {
 		String endpointResponse = endpointOperation.get();
 
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.writerWithDefaultPrettyPrinter();
 		JsonNode jsonNode = null;
 		try {
 			jsonNode = mapper.readTree(endpointResponse);
@@ -153,9 +153,10 @@ public final class EndpointJsonResponseComparatorIT {
 					"Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
 		}
 
-		/*
-		 * TODO: Replace ignored fields with filler text here.
-		 */
+		replaceIgnoredFieldsWithFillerText(jsonNode, "id", Optional
+				.of(Pattern.compile("[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
+		replaceIgnoredFieldsWithFillerText(jsonNode, "url", Optional.of(Pattern.compile("https://localhost")));
+		replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
 
 		String jsonResponse = null;
 		try {
@@ -165,6 +166,33 @@ public final class EndpointJsonResponseComparatorIT {
 					"Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
 		}
 		writeFile(jsonResponse, generateFileName(approvedResponseDir, endpointId));
+	}
+
+	/**
+	 * @param parent
+	 *            the {@link JsonNode} on which to perform the replacement
+	 * @param fieldName
+	 *            the {@link String} name of the field that is being replaced
+	 * @param pattern
+	 *            an optional {@link Pattern} pattern to correctly identify fields
+	 *            needing to be replaced
+	 */
+	private static void replaceIgnoredFieldsWithFillerText(JsonNode parent, String fieldName,
+			Optional<Pattern> pattern) {
+		if (parent.has(fieldName)) {
+			if (pattern.isPresent()) {
+				Pattern p = pattern.get();
+				Matcher m = p.matcher(parent.get(fieldName).toString());
+				if (m.find())
+					((ObjectNode) parent).put(fieldName, "IGNORED FIELD");
+			} else
+				((ObjectNode) parent).put(fieldName, "IGNORED FIELD");
+		}
+
+		// Now, recursively invoke this method on all properties
+		for (JsonNode child : parent) {
+			replaceIgnoredFieldsWithFillerText(child, fieldName, pattern);
+		}
 	}
 
 	/**

@@ -1,14 +1,14 @@
 {
   "resourceType" : "Bundle",
-  "id" : "493d76ad-b6ff-45e4-af39-4545831c02f2",
+  "id" : "IGNORED FIELD",
   "meta" : {
-    "lastUpdated" : "2019-04-11T08:45:29.020-05:00"
+    "lastUpdated" : "IGNORED FIELD"
   },
   "type" : "searchset",
   "total" : 1,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:9163/v1/fhir/Patient?_format=json&identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
+    "url" : "IGNORED FIELD"
   } ],
   "entry" : [ {
     "resource" : {

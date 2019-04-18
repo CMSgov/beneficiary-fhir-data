@@ -1,20 +1,20 @@
 {
   "resourceType" : "Bundle",
-  "id" : "08c63c2c-cc7c-4f7a-8f28-9a909881d738",
+  "id" : "IGNORED FIELD",
   "meta" : {
-    "lastUpdated" : "2019-04-11T08:45:39.411-05:00"
+    "lastUpdated" : "IGNORED FIELD"
   },
   "type" : "searchset",
   "total" : 8,
   "link" : [ {
     "relation" : "first",
-    "url" : "https://localhost:9163/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient=567834"
+    "url" : "IGNORED FIELD"
   }, {
     "relation" : "last",
-    "url" : "https://localhost:9163/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient=567834"
+    "url" : "IGNORED FIELD"
   }, {
     "relation" : "self",
-    "url" : "https://localhost:9163/v1/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2F567834"
+    "url" : "IGNORED FIELD"
   } ],
   "entry" : [ {
     "resource" : {

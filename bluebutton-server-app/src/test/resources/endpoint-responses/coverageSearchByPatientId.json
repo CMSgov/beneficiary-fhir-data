@@ -1,14 +1,14 @@
 {
   "resourceType" : "Bundle",
-  "id" : "99774694-b51e-4d31-84e3-2ee3f106f865",
+  "id" : "IGNORED FIELD",
   "meta" : {
-    "lastUpdated" : "2019-04-11T08:45:32.928-05:00"
+    "lastUpdated" : "IGNORED FIELD"
   },
   "type" : "searchset",
   "total" : 3,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:9163/v1/fhir/Coverage?_format=json&beneficiary=Patient%2F567834"
+    "url" : "IGNORED FIELD"
   } ],
   "entry" : [ {
     "resource" : {
