@@ -8,7 +8,7 @@
   "total" : 1,
   "link" : [ {
     "relation" : "self",
-    "url" : "IGNORED FIELD"
+    "url" : "https://localhost:IGNORED FIELD/v1/fhir/Patient?_format=json&_id=%7"
   } ],
   "entry" : [ {
     "resource" : {

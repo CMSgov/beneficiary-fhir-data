@@ -8,13 +8,13 @@
   "total" : 8,
   "link" : [ {
     "relation" : "first",
-    "url" : "IGNORED FIELD"
+    "url" : "https://localhost:IGNORED FIELD/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient"
   }, {
     "relation" : "last",
-    "url" : "IGNORED FIELD"
+    "url" : "https://localhost:IGNORED FIELD/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient"
   }, {
     "relation" : "self",
-    "url" : "IGNORED FIELD"
+    "url" : "https://localhost:IGNORED FIELD/v1/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2"
   } ],
   "entry" : [ {
     "resource" : {

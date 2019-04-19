@@ -8,7 +8,7 @@
   "total" : 3,
   "link" : [ {
     "relation" : "self",
-    "url" : "IGNORED FIELD"
+    "url" : "https://localhost:IGNORED FIELD/v1/fhir/Coverage?_format=json&beneficiary=Patient%2"
   } ],
   "entry" : [ {
     "resource" : {

@@ -8,7 +8,7 @@
   "total" : 8,
   "link" : [ {
     "relation" : "self",
-    "url" : "IGNORED FIELD"
+    "url" : "https://localhost:IGNORED FIELD/v1/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2"
   } ],
   "entry" : [ {
     "resource" : {

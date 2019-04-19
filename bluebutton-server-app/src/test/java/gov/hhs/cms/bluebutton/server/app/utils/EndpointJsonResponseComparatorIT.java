@@ -94,6 +94,7 @@ public final class EndpointJsonResponseComparatorIT {
 
 	private final String endpointId;
 	private final Supplier<String> endpointOperation;
+	private static final String ignoredFieldText = "IGNORED FIELD";
 
 	/**
 	 * Parameterized test constructor: JUnit will construct a new instance of this
@@ -187,9 +188,15 @@ public final class EndpointJsonResponseComparatorIT {
 				Pattern p = pattern.get();
 				Matcher m = p.matcher(parent.get(fieldName).toString());
 				if (m.find())
-					((ObjectNode) parent).put(fieldName, "IGNORED FIELD");
+					if (fieldName == "url") {
+						// Only replace the port numbers on urls
+						String[] url = parent.get(fieldName).toString().split("[0-9]{4}");
+						String replacementUrl = url[0] + ignoredFieldText + url[1];
+						((ObjectNode) parent).put(fieldName, replacementUrl.substring(1, replacementUrl.length() - 1));
+					} else
+						((ObjectNode) parent).put(fieldName, ignoredFieldText);
 			} else
-				((ObjectNode) parent).put(fieldName, "IGNORED FIELD");
+				((ObjectNode) parent).put(fieldName, ignoredFieldText);
 		}
 
 		// Now, recursively invoke this method on all properties
