@@ -422,13 +422,12 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 	 * Example input: MS-DRG 522 Example output: 522
 	 * 
 	 * @param code
-	 * @return the specified DRG code, but with the beginning text and space
+	 * @return the specified DRG code, but with the "MS-DRG" prefix and space
 	 *         removed.
 	 */
 	private static String normalizeDrgCode(String code) {
 		code = code.trim();
-		String[] s = code.split(" ");
-		code = s[s.length - 1];
+		code = code.replace("MS-DRG ", "");
 		return code;
 	}
 

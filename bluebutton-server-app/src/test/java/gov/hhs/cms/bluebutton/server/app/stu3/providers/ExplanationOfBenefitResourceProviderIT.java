@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -554,8 +555,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * paging. This test uses a count of 3 to verify our code will not run into an
 	 * IndexOutOfBoundsException on even bundle sizes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatientWithOddPaging() throws FHIRException {
@@ -590,8 +590,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link Patient} that does exist in the DB, with
 	 * paging, providing the startIndex but not the pageSize (count).
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatientWithPageSizeNotProvided() throws FHIRException {
@@ -621,8 +620,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * pageSize (count).
 		 */
 		Bundle pagedResults = fhirClient.loadPage()
-				.byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=4")
-				.andReturnBundle(Bundle.class).execute();
+				.byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=4").andReturnBundle(Bundle.class)
+				.execute();
 
 		Assert.assertNotNull(pagedResults);
 
@@ -649,8 +648,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link Patient} that does exist in the DB, with
 	 * paging on a page size of 0.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
@@ -663,8 +661,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		/*
 		 * FIXME: According the the FHIR spec, paging for _count=0 should not return any
 		 * claim entries in the bundle, but instead just a total for the number of
-		 * entries that match the search criteria. 
-		 * This functionality does no work
+		 * entries that match the search criteria. This functionality does no work
 		 * currently (see https://github.com/jamesagnew/hapi-fhir/issues/1074) and so
 		 * for now paging with _count=0 should behave as though paging was not
 		 * requested.
@@ -825,12 +822,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * test expects to receive a BadRequestException, as negative values should
 	 * result in an HTTP 400.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test(expected = InvalidRequestException.class)
-	public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException
-	{
+	public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -856,7 +851,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		fhirClient.loadPage().byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=-1")
 				.andReturnBundle(Bundle.class).execute();
 	}
-  
+
 	/**
 	 * <p>
 	 * Verifies that
@@ -1007,6 +1002,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
 		ServerTestUtils.cleanDatabaseServer();
+		// FIXME temporary workaround to free up ram
+		SessionFactoryRegistry.INSTANCE.clearRegistrations();
 	}
 
 	/**
