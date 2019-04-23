@@ -156,7 +156,7 @@ public final class EndpointJsonResponseComparatorIT {
 
 		replaceIgnoredFieldsWithFillerText(jsonNode, "id", Optional
 				.of(Pattern.compile("[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
-		replaceIgnoredFieldsWithFillerText(jsonNode, "url", Optional.of(Pattern.compile("https://localhost")));
+		replaceIgnoredFieldsWithFillerText(jsonNode, "url", Optional.of(Pattern.compile("https://localhost:[0-9]{4}")));
 		replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
 
 		if (endpointId == "metadata")
@@ -189,10 +189,10 @@ public final class EndpointJsonResponseComparatorIT {
 				Matcher m = p.matcher(parent.get(fieldName).toString());
 				if (m.find())
 					if (fieldName == "url") {
-						// Only replace the port numbers on urls
-						String[] url = parent.get(fieldName).toString().split("[0-9]{4}");
-						String replacementUrl = url[0] + IGNORED_FIELD_TEXT + url[1];
-						((ObjectNode) parent).put(fieldName, replacementUrl.substring(1, replacementUrl.length() - 1));
+						// Only replace the port numbers on url
+						String[] url = parent.get(fieldName).toString().split(pattern.get().toString());
+						String replacementUrl = "https://localhost:" + IGNORED_FIELD_TEXT + url[1];
+						((ObjectNode) parent).put(fieldName, replacementUrl.substring(0, replacementUrl.length() - 1));
 					} else
 						((ObjectNode) parent).put(fieldName, IGNORED_FIELD_TEXT);
 			} else
