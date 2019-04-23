@@ -53,14 +53,16 @@ The following table details all of the fields in our system which can contain SA
 |Hospice|CPT|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Hospice|ICD Diagnosis|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Hospice|ICD Procedure|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
-|Inpatient|DRG|`CLM_DRG_CD`|`\w{3}`|The diagnostic related group to which a hospital claim belongs for prospective payment purposes._|`ExplanationOfBenefit.diagnosis.packageCode`|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
+|Inpatient|DRG|`CLM_DRG_CD`|`\w{3}`|The diagnostic related group to which a hospital claim belongs for prospective payment purposes._|`ExplanationOfBenefit.diagnosis.packageCode`|`"packageCode": { "coding": [{ "system": "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "code": "123" }] }`|
+|Inpatient|ICD Diagnosis|`ADMTG_DGNS_CD`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
+|Inpatient|ICD Diagnosis|`ADMTG_DGNS_VRSN_CD`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Inpatient|ICD Diagnosis|`ICD_DGNS_CD[1-25]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
 |Inpatient|ICD Diagnosis|`ICD_DGNS_VRSN_CD[1-25]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Inpatient|ICD Diagnosis|`FST_DGNS_E_CD`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
 |Inpatient|ICD Diagnosis|`FST_DGNS_E_VRSN_CD`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Inpatient|ICD Diagnosis|`ICD_DGNS_E_CD[1-12]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
 |Inpatient|ICD Diagnosis|`ICD_DGNS_E_VRSN_CD[1-12]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
-|Inpatient|ICD Procedure|`ICD_PRCDR_CD[1-25]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
+|Inpatient|ICD Procedure|`ICD_PRCDR_CD[1-25]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|`ExplanationOfBenefit.procedure`|`"procedure": [{ "sequence": 1, "procedureCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10", "code": "A1234", "display": "SHORT DESCRIPTION" }] }, "type": [{ "coding": [{ "system": "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code": "principal", "display": "..." }] }] }]`|
 |Inpatient|ICD Procedure|`ICD_PRCDR_VRSN_CD[1-25]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Inpatient|ICD Procedure|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
 |Outpatient|DRG|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|_(TODO)_|
