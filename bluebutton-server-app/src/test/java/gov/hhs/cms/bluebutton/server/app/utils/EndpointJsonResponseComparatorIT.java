@@ -28,7 +28,6 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -136,7 +135,6 @@ public final class EndpointJsonResponseComparatorIT {
 	 * by commenting out the <code>@Ignore</code> annotation and running this method
 	 * as JUnit.
 	 */
-	@Ignore
 	@Test
 	public void generateApprovedResponseFiles() {
 		Path approvedResponseDir = getApprovedResponseDir();
@@ -156,7 +154,8 @@ public final class EndpointJsonResponseComparatorIT {
 
 		replaceIgnoredFieldsWithFillerText(jsonNode, "id", Optional
 				.of(Pattern.compile("[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
-		replaceIgnoredFieldsWithFillerText(jsonNode, "url", Optional.of(Pattern.compile("https://localhost:[0-9]{4}")));
+		replaceIgnoredFieldsWithFillerText(jsonNode, "url",
+				Optional.of(Pattern.compile("(https://localhost:)([0-9]{4})(.*)")));
 		replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
 
 		if (endpointId == "metadata")
@@ -189,9 +188,8 @@ public final class EndpointJsonResponseComparatorIT {
 				Matcher m = p.matcher(parent.get(fieldName).toString());
 				if (m.find())
 					if (fieldName == "url") {
-						// Only replace the port numbers on url
-						String[] url = parent.get(fieldName).toString().split(pattern.get().toString());
-						String replacementUrl = "https://localhost:" + IGNORED_FIELD_TEXT + url[1];
+						// Only replace the port numbers (m.group(2)) on urls
+						String replacementUrl = m.group(1) + IGNORED_FIELD_TEXT + m.group(3);
 						((ObjectNode) parent).put(fieldName, replacementUrl.substring(0, replacementUrl.length() - 1));
 					} else
 						((ObjectNode) parent).put(fieldName, IGNORED_FIELD_TEXT);
