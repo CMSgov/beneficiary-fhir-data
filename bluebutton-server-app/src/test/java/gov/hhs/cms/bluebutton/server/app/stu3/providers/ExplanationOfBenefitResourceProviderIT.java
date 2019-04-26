@@ -953,6 +953,50 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
 			entityManager.merge(inpatientRifRecord);
 			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A Outpatient claim such that it's SAMHSA-related.
+			OutpatientClaim outpatientRifRecord = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
+					.map(r -> (OutpatientClaim) r).findFirst().get();
+
+			entityManager.getTransaction().begin();
+			outpatientRifRecord = entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
+			outpatientRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(outpatientRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A HHA claim such that it's SAMHSA-related.
+			HHAClaim hhaRifRecord = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r)
+					.findFirst().get();
+
+			entityManager.getTransaction().begin();
+			hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
+			hhaRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(hhaRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A Hospice claim such that it's SAMHSA-related.
+			HospiceClaim hospiceRifRecord = loadedRecords.stream().filter(r -> r instanceof HospiceClaim)
+					.map(r -> (HospiceClaim) r).findFirst().get();
+
+			entityManager.getTransaction().begin();
+			hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
+			hospiceRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(hospiceRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A SNF claim such that it's SAMHSA-related.
+			SNFClaim snfRifRecord = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r)
+					.findFirst().get();
+
+			entityManager.getTransaction().begin();
+			snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
+			snfRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(snfRifRecord);
+			entityManager.getTransaction().commit();
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
@@ -989,7 +1033,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			else if (claimType.equals(ClaimType.SNF))
 				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
 			else if (claimType.equals(ClaimType.PDE))
-				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+				// PDE Claims do not contain SAMHSA fields and thus won't be filtered.
+				Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
 			else
 				Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
 		}

@@ -164,8 +164,16 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		if (TransformerUtils.getClaimType(eob) != ClaimType.HHA)
 			throw new IllegalArgumentException();
 
-		// FIXME finish implementing
-		return true;
+		if (containsSamhsaIcdCode(eob.getDiagnosis()))
+			return true;
+
+		for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+			if (containsSamhsaProcedureCode(eobItem.getService()))
+				return true;
+		}
+
+		// No blacklisted codes found: this claim isn't SAMHSA-related.
+		return false;
 	}
 
 	/**
@@ -179,8 +187,16 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		if (TransformerUtils.getClaimType(eob) != ClaimType.HOSPICE)
 			throw new IllegalArgumentException();
 
-		// FIXME finish implementing
-		return true;
+		if (containsSamhsaIcdCode(eob.getDiagnosis()))
+			return true;
+
+		for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+			if (containsSamhsaProcedureCode(eobItem.getService()))
+				return true;
+		}
+
+		// No blacklisted codes found: this claim isn't SAMHSA-related.
+		return false;
 	}
 
 	/**
@@ -220,8 +236,19 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		if (TransformerUtils.getClaimType(eob) != ClaimType.OUTPATIENT)
 			throw new IllegalArgumentException();
 
-		// FIXME finish implementing
-		return true;
+		if (containsSamhsaIcdCode(eob.getDiagnosis()))
+			return true;
+
+		if (containsSamhsaIcdProcedueCode(eob.getProcedure()))
+			return true;
+
+		for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+			if (containsSamhsaProcedureCode(eobItem.getService()))
+				return true;
+		}
+
+		// No blacklisted codes found: this claim isn't SAMHSA-related.
+		return false;
 	}
 
 	/**
@@ -234,8 +261,19 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		if (TransformerUtils.getClaimType(eob) != ClaimType.SNF)
 			throw new IllegalArgumentException();
 
-		// FIXME finish implementing
-		return true;
+		if (containsSamhsaIcdCode(eob.getDiagnosis()))
+			return true;
+
+		if (containsSamhsaIcdProcedueCode(eob.getProcedure()))
+			return true;
+
+		for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+			if (containsSamhsaProcedureCode(eobItem.getService()))
+				return true;
+		}
+
+		// No blacklisted codes found: this claim isn't SAMHSA-related.
+		return false;
 	}
 
 	/**
@@ -248,8 +286,8 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 		if (TransformerUtils.getClaimType(eob) != ClaimType.PDE)
 			throw new IllegalArgumentException();
 
-		// FIXME finish implementing
-		return true;
+		// There are no SAMHSA fields in PDE claims
+		return false;
 	}
 
 	/**
