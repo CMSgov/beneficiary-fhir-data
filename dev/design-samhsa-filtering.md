@@ -39,14 +39,14 @@ The following table details all of the fields in our system which can contain SA
 |Carrier, DME, Outpatient, HHA, Hospice|CPT|`HCPCS_2ND_MDFR_CD`|`\w{2}`|Modifier codes provide additional information on the procedure performed.|_N/A_|_N/A_|
 |Carrier, DME|CPT|`CARR_CLM_HCPCS_YR_CD`|`\w`|Identifies the HCPCS year/version in use.|_N/A_|_N/A_|
 |Carrier, DME, Inpatient, Outpatient, SNF, HHA, Hospice|ICD Diagnosis|`PRNCPAL_DGNS_CD`|`\w{1-7}`|_N/A_|`ExplanationOfBenefit.diagnosis`|`"diagnosis": [{ "sequence": 1, "diagnosisCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10", "code": "A1234", "display": "SHORT DESCRIPTION" }] }, "type": [{ "coding": [{ "system": "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code": "principal", "display": "..." }] }] }]`|
-|Carrier, DME, Inpatient, SNF, HHA, Hospice|ICD Diagnosis|`PRNCPAL_DGNS_VRSN_CD`|`\w`|Identifies the ICD version (9 or 10).|_N/A_|_N/A_|
+|Carrier, DME, Inpatient, Outpatient, SNF, HHA, Hospice|ICD Diagnosis|`PRNCPAL_DGNS_VRSN_CD`|`\w`|Identifies the ICD version (9 or 10).|_N/A_|_N/A_|
 |Carrier, DME|ICD Diagnosis|`ICD_DGNS_CD[1-12]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
 |Carrier, DME|ICD Diagnosis|`ICD_DGNS_VRSN_CD[1-12]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Carrier, DME|ICD Diagnosis|`LINE_ICD_DGNS_CD`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but referenced via `EOB.item.diagnosisLinkId`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
 |Carrier, DME|ICD Diagnosis|`LINE_ICD_DGNS_VRSN_CD`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Carrier, DME|ICD Procedure|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
 |HHA|ICD Procedure|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
-|Hospice|DRG|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
+|Hospice, Outpatient, HHA|DRG|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
 |Hospice|ICD Procedure|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
 |Inpatient, SNF|DRG|`CLM_DRG_CD`|`\w{3}`|The diagnostic related group to which a hospital claim belongs for prospective payment purposes._|`ExplanationOfBenefit.diagnosis.packageCode`|`"packageCode": { "coding": [{ "system": "https://bluebutton.cms.gov/resources/variables/clm_drg_cd", "code": "123" }] }`|
 |Inpatient, SNF|ICD Diagnosis|`ADMTG_DGNS_CD`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
@@ -59,6 +59,8 @@ The following table details all of the fields in our system which can contain SA
 |Inpatient, Outpatient, SNF, HHA, Hospice|ICD Diagnosis|`ICD_DGNS_E_VRSN_CD[1-12]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Inpatient, Outpatient, SNF|ICD Procedure|`ICD_PRCDR_CD[1-25]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|`ExplanationOfBenefit.procedure`|`"procedure": [{ "sequence": 1, "procedureCodeableConcept": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10", "code": "A1234", "display": "SHORT DESCRIPTION" }] }, "type": [{ "coding": [{ "system": "https://bluebutton.cms.gov/resources/codesystem/procedure-type", "code": "principal", "display": "..." }] }] }]`|
 |Inpatient, Outpatient, SNF|ICD Procedure|`ICD_PRCDR_VRSN_CD[1-25]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
+|Outpatient|ICD Diagnosis|`RSN_VISIT_CD[1-3]`|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD`)_|_(same as `PRNCPAL_DGNS_CD` but without `type`)_|
+|Outpatient|ICD Diagnosis|`RSN_VISIT_VRSN_CD[1-3]`|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|_(same as `PRNCPAL_DGNS_VRSN_CD`)_|
 |Part D Events|DRG|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
 |Part D Events|CPT|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
 |Part D Events|ICD Diagnosis|_(none)_|_(none)_|_(none)_|_(none)_|_(none)_|
