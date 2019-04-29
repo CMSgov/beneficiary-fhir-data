@@ -160,7 +160,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 */
 	@Search
 	public Bundle searchByLogicalId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId,
-			@OptionalParam(name = "startIndex") String startIndex, RequestDetails requestDetails) {
+			@OptionalParam(name = "startIndex") String startIndex,
+			@OptionalParam(name = "includeIdentifiers") String includeIdentifiers, RequestDetails requestDetails) {
 		if (logicalId.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
@@ -175,6 +176,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 		} catch (ResourceNotFoundException e) {
 			patients = new LinkedList<>();
 		}
+
+		if (Boolean.parseBoolean(includeIdentifiers) == true)
+			addUnhashedHicnAndMbi(patients);
 
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(),
@@ -217,7 +221,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 */
 	@Search
 	public Bundle searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier,
-			@OptionalParam(name = "startIndex") String startIndex, RequestDetails requestDetails) {
+			@OptionalParam(name = "startIndex") String startIndex,
+			@OptionalParam(name = "includeIdentifiers") String includeIdentifiers, RequestDetails requestDetails) {
 		if (identifier.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
@@ -231,6 +236,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 		} catch (NoResultException e) {
 			patients = new LinkedList<>();
 		}
+
+		if (Boolean.parseBoolean(includeIdentifiers) == true)
+			addUnhashedHicnAndMbi(patients);
 
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_IDENTIFIER,
@@ -304,5 +312,25 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
 		return patient;
+	}
+
+	/**
+	 * @param hicnHash
+	 *            the {@link Beneficiary#getHicn()} hash value to match
+	 */
+	private void addUnhashedHicnAndMbi(List<IBaseResource> patients) {
+
+		for (IBaseResource res : patients) {
+			Patient patient = (Patient) res;
+			Beneficiary beneficiary = entityManager.find(Beneficiary.class, patient.getId());
+			if (beneficiary == null) {
+				throw new NoResultException();
+			}
+
+			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
+					.setValue(beneficiary.getHicnUnhashed().get());
+			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID)
+					.setValue(beneficiary.getMedicareBeneficiaryId().get());
+		}
 	}
 }

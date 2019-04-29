@@ -82,6 +82,12 @@
         "type" : "token",
         "documentation" : "A patient identifier"
       }, {
+        "name" : "includeIdentifiers",
+        "type" : "string"
+      }, {
+        "name" : "includeIdentifiers",
+        "type" : "string"
+      }, {
         "name" : "startIndex",
         "type" : "string"
       }, {
