@@ -22,6 +22,8 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistoryParser;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory_new;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory_newParser;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryParser;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimParser;
@@ -85,6 +87,9 @@ public final class RifFilesProcessor {
 		} else if (file.getFileType() == RifFileType.BENEFICIARY_HISTORY) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildBeneficiaryHistoryEvent;
+		} else if (file.getFileType() == RifFileType.BENEFICIARY_HISTORY_NEW) {
+			isGrouped = false;
+			recordParser = RifFilesProcessor::buildBeneficiaryHistoryNewEvent;
 		} else if (file.getFileType() == RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY) {
 			isGrouped = false;
 			recordParser = RifFilesProcessor::buildMedicareBeneficiaryIdHistoryEvent;
@@ -187,6 +192,29 @@ public final class RifFilesProcessor {
 	 *            {@link RifFileType#BENEFICIARY_HISTORY} {@link RifFile}
 	 * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
 	 */
+	private static RifRecordEvent<BeneficiaryHistory_new> buildBeneficiaryHistoryNewEvent(RifFileEvent fileEvent,
+			List<CSVRecord> csvRecords) {
+		if (csvRecords.size() != 1)
+			throw new BadCodeMonkeyException();
+		CSVRecord csvRecord = csvRecords.get(0);
+
+		if (LOGGER.isTraceEnabled())
+			LOGGER.trace(csvRecord.toString());
+
+		RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
+		BeneficiaryHistory_new beneficiaryHistoryNewRow = BeneficiaryHistory_newParser.parseRif(csvRecords);
+		return new RifRecordEvent<BeneficiaryHistory_new>(fileEvent, recordAction, beneficiaryHistoryNewRow);
+	}
+
+	/**
+	 * @param fileEvent
+	 *            the {@link RifFileEvent} being processed
+	 * @param csvRecords
+	 *            the {@link CSVRecord} to be mapped (in a single-element
+	 *            {@link List}), which must be from a
+	 *            {@link RifFileType#BENEFICIARY_HISTORY} {@link RifFile}
+	 * @return a {@link RifRecordEvent} built from the specified {@link CSVRecord}s
+	 */
 	private static RifRecordEvent<BeneficiaryHistory> buildBeneficiaryHistoryEvent(RifFileEvent fileEvent,
 			List<CSVRecord> csvRecords) {
 		if (csvRecords.size() != 1)
@@ -200,6 +228,7 @@ public final class RifFilesProcessor {
 		BeneficiaryHistory beneficiaryHistoryRow = BeneficiaryHistoryParser.parseRif(csvRecords);
 		return new RifRecordEvent<BeneficiaryHistory>(fileEvent, recordAction, beneficiaryHistoryRow);
 	}
+
 
 	/**
 	 * @param fileEvent
