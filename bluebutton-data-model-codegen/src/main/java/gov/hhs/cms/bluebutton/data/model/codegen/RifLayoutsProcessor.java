@@ -202,6 +202,19 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiaryHistoryNewSheet()))
+					.setHeaderEntity("BeneficiaryHistory_new").setHeaderTable("BeneficiariesHistory_new")
+					.setHeaderEntityGeneratedIdField("beneficiaryHistoryId")
+					.setHeaderEntityTransientFields("stateCode", "countyCode", "postalCode", "race",
+							"entitlementCodeOriginal", "entitlementCodeCurrent", "endStageRenalDiseaseCode",
+							"medicareEnrollmentStatusCode", "partATerminationCode", "partBTerminationCode",
+							"nameSurname", "nameGiven", "nameMiddleInitial")
+					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
+							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
+					.setHasLines(false));
+
+
+			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
 					.setHeaderEntity("MedicareBeneficiaryIdHistory").setHeaderTable("MedicareBeneficiaryIdHistory")
 					.setHeaderEntityIdField("medicareBeneficiaryIdKey").setHasLines(false));
