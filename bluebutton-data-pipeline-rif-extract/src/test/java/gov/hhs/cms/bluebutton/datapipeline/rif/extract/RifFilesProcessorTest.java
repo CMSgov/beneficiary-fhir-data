@@ -69,7 +69,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("123", beneRow.getCountyCode());
 		Assert.assertEquals("12345", beneRow.getPostalCode());
 		Assert.assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBirthDate());
-		Assert.assertEquals(('M'), beneRow.getSex());
+		Assert.assertEquals(('1'), beneRow.getSex());
 		Assert.assertEquals(new Character('1'), beneRow.getRace().get());
 		Assert.assertEquals(new Character('1'), beneRow.getEntitlementCodeOriginal().get());
 		Assert.assertEquals(new Character('1'), beneRow.getEntitlementCodeCurrent().get());
@@ -113,7 +113,7 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals(RecordAction.INSERT, rifRecordEvent0.getRecordAction());
 		Assert.assertEquals("567834", beneficiaryHistory0.getBeneficiaryId());
 		Assert.assertEquals(LocalDate.of(1979, Month.MARCH, 17), beneficiaryHistory0.getBirthDate());
-		Assert.assertEquals(('F'), beneficiaryHistory0.getSex());
+		Assert.assertEquals(('2'), beneficiaryHistory0.getSex());
 		Assert.assertEquals("543217066Z", beneficiaryHistory0.getHicn());
 
 		/*
@@ -130,7 +130,7 @@ public final class RifFilesProcessorTest {
 			Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
 			Assert.assertEquals("567834", beneficiaryHistory.getBeneficiaryId());
 			Assert.assertEquals(LocalDate.of(1980, Month.MARCH, 17), beneficiaryHistory.getBirthDate());
-			Assert.assertEquals(('M'), beneficiaryHistory.getSex());
+			Assert.assertEquals(('1'), beneficiaryHistory.getSex());
 			Assert.assertEquals("543217066T", beneficiaryHistory.getHicn());
 		}
 	}
