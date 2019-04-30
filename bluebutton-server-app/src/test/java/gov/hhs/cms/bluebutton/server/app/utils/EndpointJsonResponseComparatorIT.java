@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -135,6 +136,7 @@ public final class EndpointJsonResponseComparatorIT {
 	 * by commenting out the <code>@Ignore</code> annotation and running this method
 	 * as JUnit.
 	 */
+	@Ignore
 	@Test
 	public void generateApprovedResponseFiles() {
 		Path approvedResponseDir = getApprovedResponseDir();
