@@ -59,10 +59,10 @@ final class BeneficiaryTransformer {
 		}
 
 		switch (beneficiary.getSex()) {
-		case ('M'):
+		case ('1'):
 			patient.setGender((AdministrativeGender.MALE));
 			break;
-		case ('F'):
+		case ('2'):
 			patient.setGender((AdministrativeGender.FEMALE));
 			break;
 		default:
