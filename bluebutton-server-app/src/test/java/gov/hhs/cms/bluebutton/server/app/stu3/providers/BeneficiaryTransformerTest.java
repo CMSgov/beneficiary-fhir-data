@@ -74,9 +74,9 @@ public final class BeneficiaryTransformerTest {
 		Assert.assertEquals(beneficiary.getCountyCode(), patient.getAddress().get(0).getDistrict());
 		Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
 		Assert.assertEquals(Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
-		if (beneficiary.getSex() == '1')
+		if (beneficiary.getSex() == Sex.MALE.getCode())
 			Assert.assertEquals("MALE", patient.getGender().toString().trim());
-		else if (beneficiary.getSex() == '2')
+		else if (beneficiary.getSex() == Sex.FEMALE.getCode())
 			Assert.assertEquals("FEMALE", patient.getGender().toString().trim());
 		TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
 		Assert.assertEquals(beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());

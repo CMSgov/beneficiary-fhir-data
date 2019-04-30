@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 
@@ -58,17 +59,16 @@ final class BeneficiaryTransformer {
 			patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
 		}
 
-		switch (beneficiary.getSex()) {
-		case ('1'):
+		char sex = beneficiary.getSex();
+		if (sex == Sex.MALE.getCode())
 			patient.setGender((AdministrativeGender.MALE));
-			break;
-		case ('2'):
+		else if (sex == Sex.FEMALE.getCode())
 			patient.setGender((AdministrativeGender.FEMALE));
-			break;
-		default:
+		else if (sex == Sex.UNKNOWN.getCode())
 			patient.setGender((AdministrativeGender.UNKNOWN));
-			break;
-		}
+		else
+			throw new InvalidRequestException(
+					String.format("Invalid code for sex - expected '0', '1', or '2', was: %s", sex));
 
 		if (beneficiary.getRace().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.RACE,
