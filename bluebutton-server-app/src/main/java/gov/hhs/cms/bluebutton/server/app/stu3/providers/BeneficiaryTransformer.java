@@ -9,9 +9,9 @@ import org.hl7.fhir.dstu3.model.Patient;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 
 /**
  * Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient}
@@ -67,8 +67,8 @@ final class BeneficiaryTransformer {
 		else if (sex == Sex.UNKNOWN.getCode())
 			patient.setGender((AdministrativeGender.UNKNOWN));
 		else
-			throw new InvalidRequestException(
-					String.format("Invalid code for sex - expected '0', '1', or '2', was: %s", sex));
+			throw new InvalidRifValueException(
+					String.format("Unexpected value encountered - expected '0', '1', or '2': %s", sex));
 
 		if (beneficiary.getRace().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.RACE,
