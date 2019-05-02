@@ -2,7 +2,7 @@
 
 ## BLUEBUTTON-898: Correct `Patient.gender` codings
 
-Changes to the BeneficiaryTransformer to check the sex field for the correct values of 0/1/2 (as the data is stored in our database) versus M/F.
+Fixed the `Patient.gender` codings to be correct. Previously, all beneficiaries had reported a value of `unknown` in this field.
 
 ## BLUEBUTTON-150: Display NPI code displays in EOB
 
