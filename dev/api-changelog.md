@@ -1,5 +1,9 @@
 # API Changelog
 
+## BLUEBUTTON-898: Update BeneficiaryTransformer to check for correct sex value characters
+
+Changes to the BeneficiaryTransformer to check the sex field for the correct values of 0/1/2 (as the data is stored in our database) versus M/F.
+
 ## BLUEBUTTON-150: Display NPI code displays in EOB
 
 Several changes have been made to these entries:
