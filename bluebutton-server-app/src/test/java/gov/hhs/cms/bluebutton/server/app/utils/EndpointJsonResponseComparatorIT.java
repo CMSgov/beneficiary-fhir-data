@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -93,6 +94,7 @@ public final class EndpointJsonResponseComparatorIT {
 
 	private final String endpointId;
 	private final Supplier<String> endpointOperation;
+	private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
 
 	/**
 	 * Parameterized test constructor: JUnit will construct a new instance of this
@@ -142,7 +144,65 @@ public final class EndpointJsonResponseComparatorIT {
 		// Call the server endpoint and save its result out to a file corresponding to
 		// the endpoint Id.
 		String endpointResponse = endpointOperation.get();
-		writeFile(endpointResponse, generateFileName(approvedResponseDir, endpointId));
+
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode jsonNode = null;
+		try {
+			jsonNode = mapper.readTree(endpointResponse);
+		} catch (IOException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
+		}
+
+		replaceIgnoredFieldsWithFillerText(jsonNode, "id", Optional
+				.of(Pattern.compile("[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}")));
+		replaceIgnoredFieldsWithFillerText(jsonNode, "url",
+				Optional.of(Pattern.compile("(https://localhost:)([0-9]{4})(.*)")));
+		replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
+
+		if (endpointId == "metadata")
+			replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
+
+		String jsonResponse = null;
+		try {
+			jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+		} catch (JsonProcessingException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + endpointResponse, e);
+		}
+		writeFile(jsonResponse, generateFileName(approvedResponseDir, endpointId));
+	}
+
+	/**
+	 * @param parent
+	 *            the {@link JsonNode} on which to perform the replacement
+	 * @param fieldName
+	 *            the {@link String} name of the field that is being replaced
+	 * @param pattern
+	 *            an optional {@link Pattern} pattern to correctly identify fields
+	 *            needing to be replaced
+	 */
+	private static void replaceIgnoredFieldsWithFillerText(JsonNode parent, String fieldName,
+			Optional<Pattern> pattern) {
+		if (parent.has(fieldName)) {
+			if (pattern.isPresent()) {
+				Pattern p = pattern.get();
+				Matcher m = p.matcher(parent.get(fieldName).toString());
+				if (m.find())
+					if (fieldName == "url") {
+						// Only replace the port numbers (m.group(2)) on urls
+						String replacementUrl = m.group(1) + IGNORED_FIELD_TEXT + m.group(3);
+						((ObjectNode) parent).put(fieldName, replacementUrl.substring(0, replacementUrl.length() - 1));
+					} else
+						((ObjectNode) parent).put(fieldName, IGNORED_FIELD_TEXT);
+			} else
+				((ObjectNode) parent).put(fieldName, IGNORED_FIELD_TEXT);
+		}
+
+		// Now, recursively invoke this method on all properties
+		for (JsonNode child : parent) {
+			replaceIgnoredFieldsWithFillerText(child, fieldName, pattern);
+		}
 	}
 
 	/**
