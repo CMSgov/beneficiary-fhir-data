@@ -34,7 +34,7 @@ public @interface RifLayoutsGenerator {
 	 * @return the name of the sheet in the Excel file that contains the RIF layout
 	 *         for beneficiary history data
 	 */
-	String beneficiaryHistoryNewSheet();
+	String beneficiaryHistoryTempSheet();
 
 	/**
 	 * @return the name of the sheet in the Excel file that contains the RIF layout

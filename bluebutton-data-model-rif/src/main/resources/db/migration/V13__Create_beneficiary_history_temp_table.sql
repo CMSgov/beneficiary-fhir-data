@@ -7,7 +7,7 @@
 
 ${logic.tablespaces-escape} SET default_tablespace = pg_default;
 
-create table "BeneficiariesHistory_new" (
+create table "BeneficiariesHistoryTemp" (
   "beneficiaryHistoryId" bigint not null,
   "beneficiaryId" varchar(15) not null,
   "birthDate" date not null,
@@ -15,7 +15,7 @@ create table "BeneficiariesHistory_new" (
   "sex" char(1) not null,
   "hicnUnhashed" varchar(11),
   "medicareBeneficiaryId" varchar(11),
-  constraint "BeneficiariesHistory_new_pkey" primary key ("beneficiaryHistoryId")
+  constraint "BeneficiariesHistoryTemp_pkey" primary key ("beneficiaryHistoryId")
 )
 
 ;
@@ -24,7 +24,7 @@ create table "BeneficiariesHistory_new" (
  * FIXME For consistency, sequence names should be mixed-case, but can't be, due
  * to https://hibernate.atlassian.net/browse/HHH-9431.
  */
-create sequence beneficiaryHistory_new_beneficiaryHistoryId_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 50;
+create sequence beneficiaryHistoryTemp_beneficiaryHistoryId_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 50;
 
-create index "BeneficiariesHistory_new_hicn_idx"
-  on "BeneficiariesHistory_new" ("hicn");
+create index "BeneficiariesHistoryTemp_hicn_idx"
+  on "BeneficiariesHistoryTemp" ("hicn");

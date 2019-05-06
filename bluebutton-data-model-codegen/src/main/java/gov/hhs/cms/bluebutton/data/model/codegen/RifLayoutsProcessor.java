@@ -202,8 +202,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
-					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiaryHistoryNewSheet()))
-					.setHeaderEntity("BeneficiaryHistory_new").setHeaderTable("BeneficiariesHistory_new")
+					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.beneficiaryHistoryTempSheet()))
+					.setHeaderEntity("BeneficiaryHistoryTemp").setHeaderTable("BeneficiariesHistoryTemp")
 					.setHeaderEntityGeneratedIdField("beneficiaryHistoryId")
 					.setHeaderEntityTransientFields("stateCode", "countyCode", "postalCode", "race",
 							"entitlementCodeOriginal", "entitlementCodeCurrent", "endStageRenalDiseaseCode",
