@@ -8,6 +8,8 @@ public enum RifFileType {
 
 	BENEFICIARY_HISTORY(BeneficiaryHistoryColumn.class, null),
 
+	BENEFICIARY_HISTORY_TEMP(BeneficiaryHistoryTempColumn.class, null),
+
 	MEDICARE_BENEFICIARY_ID_HISTORY(MedicareBeneficiaryIdHistoryColumn.class,
 			MedicareBeneficiaryIdHistoryColumn.BENE_MBI_ID),
 

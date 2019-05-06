@@ -32,6 +32,12 @@ public @interface RifLayoutsGenerator {
 
 	/**
 	 * @return the name of the sheet in the Excel file that contains the RIF layout
+	 *         for beneficiary history data
+	 */
+	String beneficiaryHistoryTempSheet();
+
+	/**
+	 * @return the name of the sheet in the Excel file that contains the RIF layout
 	 *         for medicare beneficiary id data
 	 */
 	String medicareBeneficiaryIdSheet();
