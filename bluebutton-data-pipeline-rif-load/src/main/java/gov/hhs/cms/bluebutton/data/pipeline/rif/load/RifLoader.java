@@ -59,6 +59,7 @@ import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryCsvWriter;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistoryTemp;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimCsvWriter;
 import gov.hhs.cms.bluebutton.data.model.rif.CarrierClaimLine;
@@ -424,6 +425,9 @@ public final class RifLoader {
 		} else if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
 			for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
 				hashBeneficiaryHistoryHicn(fileEventMetrics, rifRecordEvent);
+		} else if (rifFileType == RifFileType.BENEFICIARY_HISTORY_TEMP) {
+			for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+				hashBeneficiaryHistoryTempHicn(fileEventMetrics, rifRecordEvent);
 		}
 
 		// Only one of each failure/success Timer.Contexts will be applied.
@@ -667,6 +671,42 @@ public final class RifLoader {
 
 		// set the hashed Hicn
 		beneficiaryHistory.setHicn(computeHicnHash(options, secretKeyFactory, beneficiaryHistory.getHicn()));
+
+		timerHashing.stop();
+	}
+
+	/**
+	 * <p>
+	 * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a
+	 * {@link BeneficiaryHistoryTemp}, switches the
+	 * {@link BeneficiaryHistoryTemp#getHicn()} property to a cryptographic hash of
+	 * its current value. This is done for security purposes, and the Blue Button
+	 * API frontend applications know how to compute the exact same hash, which
+	 * allows the two halves of the system to interoperate.
+	 * </p>
+	 * <p>
+	 * All other {@link RifRecordEvent}s are left unmodified.
+	 * </p>
+	 *
+	 * @param metrics
+	 *            the {@link MetricRegistry} to use
+	 * @param rifRecordEvent
+	 *            the {@link RifRecordEvent} to (possibly) modify
+	 */
+	private void hashBeneficiaryHistoryTempHicn(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+		if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY_TEMP)
+			return;
+
+		Timer.Context timerHashing = metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "hicnsHashed"))
+				.time();
+
+		BeneficiaryHistoryTemp beneficiaryHistoryTemp = (BeneficiaryHistoryTemp) rifRecordEvent.getRecord();
+
+		// set the unhashed Hicn
+		beneficiaryHistoryTemp.setHicnUnhashed(Optional.of(beneficiaryHistoryTemp.getHicn()));
+
+		// set the hashed Hicn
+		beneficiaryHistoryTemp.setHicn(computeHicnHash(options, secretKeyFactory, beneficiaryHistoryTemp.getHicn()));
 
 		timerHashing.stop();
 	}
