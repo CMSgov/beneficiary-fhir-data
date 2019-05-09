@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -53,8 +54,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link CarrierClaim}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingCarrierClaim() throws FHIRException {
@@ -89,11 +89,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	/**
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-	 * works as expected for a {@link DMEClaim}-derived
-	 * {@link ExplanationOfBenefit} that does exist in the DB.
+	 * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit}
+	 * that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingDMEClaim() throws FHIRException {
@@ -113,8 +112,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	/**
 	 * Verifies that
 	 * {@link ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-	 * works as expected for a {@link DMEClaim}-derived
-	 * {@link ExplanationOfBenefit} that does not exist in the DB.
+	 * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit}
+	 * that does not exist in the DB.
 	 */
 	@Test(expected = ResourceNotFoundException.class)
 	public void readEobForMissingDMEClaim() {
@@ -131,8 +130,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for an {@link HHAClaim}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingHHAClaim() throws FHIRException {
@@ -170,8 +168,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link HospiceClaim}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingHospiceClaim() throws FHIRException {
@@ -209,8 +206,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for an {@link InpatientClaim}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingInpatientClaim() throws FHIRException {
@@ -248,8 +244,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for an {@link OutpatientClaim}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingOutpatientClaim() throws FHIRException {
@@ -287,8 +282,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link PartDEvent}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingPartDEvent() throws FHIRException {
@@ -326,8 +320,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for an {@link SNFClaim}-derived
 	 * {@link ExplanationOfBenefit} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void readEobForExistingSNFClaim() throws FHIRException {
@@ -364,8 +357,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
 	 * works as expected for a {@link Patient} that does exist in the DB.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatient() throws FHIRException {
@@ -447,8 +439,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * paging. This test uses a count of 2 to verify our code will not run into an
 	 * IndexOutOfBoundsException on odd bundle sizes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatientWithEvenPaging() throws FHIRException {
@@ -461,9 +452,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 		List<IBaseResource> combinedResults = new ArrayList<>();
 		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
-				.count(2).returnBundle(Bundle.class).execute();
-		
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary))).count(2)
+				.returnBundle(Bundle.class).execute();
+
 		searchResults.getEntry().forEach(e -> combinedResults.add(e.getResource()));
 
 		Assert.assertNotNull(searchResults);
@@ -508,8 +499,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 */
 		Assert.assertEquals(loadedRecords.stream().filter(r -> !(r instanceof Beneficiary))
 				.filter(r -> !(r instanceof BeneficiaryHistory))
-				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(),
-				combinedResults.size());
+				.filter(r -> !(r instanceof MedicareBeneficiaryIdHistory)).count(), combinedResults.size());
 
 		/*
 		 * Verify that each of the expected claims (one for every claim type) is present
@@ -565,8 +555,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * paging. This test uses a count of 3 to verify our code will not run into an
 	 * IndexOutOfBoundsException on even bundle sizes.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatientWithOddPaging() throws FHIRException {
@@ -601,8 +590,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link Patient} that does exist in the DB, with
 	 * paging, providing the startIndex but not the pageSize (count).
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatientWithPageSizeNotProvided() throws FHIRException {
@@ -632,8 +620,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		 * pageSize (count).
 		 */
 		Bundle pagedResults = fhirClient.loadPage()
-				.byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=4")
-				.andReturnBundle(Bundle.class).execute();
+				.byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=4").andReturnBundle(Bundle.class)
+				.execute();
 
 		Assert.assertNotNull(pagedResults);
 
@@ -660,8 +648,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link Patient} that does exist in the DB, with
 	 * paging on a page size of 0.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
@@ -674,8 +661,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		/*
 		 * FIXME: According the the FHIR spec, paging for _count=0 should not return any
 		 * claim entries in the bundle, but instead just a total for the number of
-		 * entries that match the search criteria. 
-		 * This functionality does no work
+		 * entries that match the search criteria. This functionality does no work
 		 * currently (see https://github.com/jamesagnew/hapi-fhir/issues/1074) and so
 		 * for now paging with _count=0 should behave as though paging was not
 		 * requested.
@@ -751,8 +737,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * works as expected for a {@link Patient} that does exist in the DB, with a
 	 * page size of 50 with fewer (8) results.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
@@ -837,12 +822,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * test expects to receive a BadRequestException, as negative values should
 	 * result in an HTTP 400.
 	 * 
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test(expected = InvalidRequestException.class)
-	public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException
-	{
+	public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -879,8 +862,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * This is a regression test case for TODO.
 	 * </p>
 	 *
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	// @Test
 	public void searchForEobsHasNoDupes() throws FHIRException {
@@ -889,8 +871,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
 		loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r).forEach(beneficiary -> {
-			Bundle searchResults = fhirClient.search()
-					.forResource(ExplanationOfBenefit.class)
+			Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
 					.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
 					.returnBundle(Bundle.class).execute();
 			Assert.assertNotNull(searchResults);
@@ -936,19 +917,18 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	 * with <code>excludeSAMHSA=true</code> properly filters out SAMHSA-related
 	 * claims.
 	 *
-	 * @throws FHIRException
-	 *             (indicates test failure)
+	 * @throws FHIRException (indicates test failure)
 	 */
 	@Test
 	public void searchForEobsWithSamhsaFiltering() throws FHIRException {
-		//Load the SAMPLE_A resources normally.
+		// Load the SAMPLE_A resources normally.
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
 		// Tweak the SAMPLE_A Carrier claim such that it's SAMHSA-related.
 		CarrierClaim carrierRifRecord = loadedRecords.stream().filter(r -> r instanceof CarrierClaim)
-				.map(r -> (CarrierClaim) r)
-				.findFirst().get();
+				.map(r -> (CarrierClaim) r).findFirst().get();
+
 		LoadAppOptions loadAppOptions = ServerTestUtils.createRifLoaderOptions();
 		EntityManagerFactory entityManagerFactory = null;
 		EntityManager entityManager = null;
@@ -961,6 +941,61 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			carrierRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
 			carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
 			entityManager.merge(carrierRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A Inpatient claim such that it's SAMHSA-related.
+			InpatientClaim inpatientRifRecord = loadedRecords.stream().filter(r -> r instanceof InpatientClaim)
+					.map(r -> (InpatientClaim) r).findFirst().get();
+
+			entityManager.getTransaction().begin();
+			inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
+			inpatientRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(inpatientRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A Outpatient claim such that it's SAMHSA-related.
+			OutpatientClaim outpatientRifRecord = loadedRecords.stream().filter(r -> r instanceof OutpatientClaim)
+					.map(r -> (OutpatientClaim) r).findFirst().get();
+
+			entityManager.getTransaction().begin();
+			outpatientRifRecord = entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
+			outpatientRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(outpatientRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A HHA claim such that it's SAMHSA-related.
+			HHAClaim hhaRifRecord = loadedRecords.stream().filter(r -> r instanceof HHAClaim).map(r -> (HHAClaim) r)
+					.findFirst().get();
+
+			entityManager.getTransaction().begin();
+			hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
+			hhaRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(hhaRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A Hospice claim such that it's SAMHSA-related.
+			HospiceClaim hospiceRifRecord = loadedRecords.stream().filter(r -> r instanceof HospiceClaim)
+					.map(r -> (HospiceClaim) r).findFirst().get();
+
+			entityManager.getTransaction().begin();
+			hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
+			hospiceRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(hospiceRifRecord);
+			entityManager.getTransaction().commit();
+
+			// Tweak the SAMPLE_A SNF claim such that it's SAMHSA-related.
+			SNFClaim snfRifRecord = loadedRecords.stream().filter(r -> r instanceof SNFClaim).map(r -> (SNFClaim) r)
+					.findFirst().get();
+
+			entityManager.getTransaction().begin();
+			snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
+			snfRifRecord.setDiagnosis2Code(Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+			snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+			entityManager.merge(snfRifRecord);
 			entityManager.getTransaction().commit();
 		} finally {
 			if (entityManager.getTransaction().isActive())
@@ -998,7 +1033,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			else if (claimType.equals(ClaimType.SNF))
 				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
 			else if (claimType.equals(ClaimType.PDE))
-				Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+				// PDE Claims do not contain SAMHSA fields and thus won't be filtered.
+				Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
 			else
 				Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
 		}
@@ -1011,13 +1047,13 @@ public final class ExplanationOfBenefitResourceProviderIT {
 	@After
 	public void cleanDatabaseServerAfterEachTestCase() {
 		ServerTestUtils.cleanDatabaseServer();
+		// FIXME temporary workaround to free up ram
+		SessionFactoryRegistry.INSTANCE.clearRegistrations();
 	}
 
 	/**
-	 * @param bundle
-	 *            the {@link Bundle} to filter
-	 * @param claimType
-	 *            the {@link ClaimType} to use as a filter
+	 * @param bundle    the {@link Bundle} to filter
+	 * @param claimType the {@link ClaimType} to use as a filter
 	 * @return a filtered {@link List} of the {@link ExplanationOfBenefit}s from the
 	 *         specified {@link Bundle} that match the specified {@link ClaimType}
 	 */
@@ -1033,8 +1069,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
 	private static List<ExplanationOfBenefit> filterToClaimTypeFromList(List<IBaseResource> resources,
 			ClaimType claimType) {
-		List<ExplanationOfBenefit> results = resources.stream()
-				.filter(r -> r instanceof ExplanationOfBenefit)
+		List<ExplanationOfBenefit> results = resources.stream().filter(r -> r instanceof ExplanationOfBenefit)
 				.map(e -> (ExplanationOfBenefit) e).filter(e -> {
 					return TransformerTestUtils.isCodeInConcept(e.getType(),
 							TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, claimType.name());

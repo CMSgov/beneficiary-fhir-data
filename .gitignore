@@ -11,3 +11,6 @@
 
 # OSX system files
 .DS_Store
+
+# Ignore build files
+bin

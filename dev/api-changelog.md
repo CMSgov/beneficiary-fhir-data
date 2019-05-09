@@ -1,5 +1,9 @@
 # API Changelog
 
+## BLUEBUTTON-898: Correct `Patient.gender` codings
+
+Fixed the `Patient.gender` codings to be correct. Previously, all beneficiaries had reported a value of `unknown` in this field.
+
 ## BLUEBUTTON-150: Display NPI code displays in EOB
 
 Several changes have been made to these entries:

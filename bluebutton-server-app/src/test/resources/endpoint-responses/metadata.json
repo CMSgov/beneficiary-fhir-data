@@ -1,7 +1,7 @@
 {
   "resourceType" : "CapabilityStatement",
   "status" : "active",
-  "date" : "2019-03-12T12:30:26-05:00",
+  "date" : "IGNORED_FIELD",
   "publisher" : "Centers for Medicare & Medicaid Services",
   "kind" : "instance",
   "software" : {
@@ -10,7 +10,7 @@
   },
   "implementation" : {
     "description" : "gov.hhs.cms.bluebutton.fhir:bluebutton-server-app",
-    "url" : "https://localhost:8482/v1/fhir"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir"
   },
   "fhirVersion" : "3.0.1",
   "acceptUnknown" : "extensions",
@@ -33,7 +33,8 @@
         "documentation" : "Covered party"
       }, {
         "name" : "startIndex",
-        "type" : "string"} ]
+        "type" : "string"
+      } ]
     }, {
       "type" : "ExplanationOfBenefit",
       "profile" : {
@@ -92,7 +93,8 @@
         "type" : "string"
       }, {
         "name" : "startIndex",
-        "type" : "string"} ]
+        "type" : "string"
+      } ]
     }, {
       "type" : "StructureDefinition",
       "profile" : {

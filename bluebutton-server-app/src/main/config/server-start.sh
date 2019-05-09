@@ -72,12 +72,15 @@ while true; do
 	esac
 done
 
+# On my system (windows with cygwin) the javaHome variable was being parsed incorrectly. In order to get it to work I just hardcoded it here.
+#javaHome="C:\Program Files\Java\jdk1.8.0_181\jre"
+
 # Verify that all required options were specified.
 if [[ -z "${targetDirectory}" ]]; then >&2 echo 'The -t option is required.'; exit 1; fi
 
 # In Cygwin, some of those paths will come in as Windows-formatted. Fix that.
 if [[ "${cygwin}" = true ]]; then
-	if [[ ! -z "${javaHome}" ]]; then javaHome="$(cygpath --unix ${javaHome})"; fi
+	if [[ ! -z "${javaHome}" ]]; then javaHome="$(cygpath --unix "${javaHome}")"; fi
 	if [[ ! -z "${visualVm}" ]]; then visualVm="$(cygpath --unix ${visualVm})"; fi
 	if [[ ! -z "${targetDirectory}" ]]; then targetDirectory="$(cygpath --unix ${targetDirectory})"; fi
 fi
