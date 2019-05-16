@@ -102,7 +102,10 @@ What percentage of the Blue Button Data/backend team gets involved in RFCs, on a
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-No unresolved questions exist at this time beyond, "does this end up working well for us?"
+The following unresolved questions were identified during review of this RFC:
+
+1. How much shouldn't-be-public information might we _want_ to include in this process?
+2. How might we protect that shouldn't-be-public information to keep it private, while still (largely) using this open process?
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
