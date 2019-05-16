@@ -86,6 +86,15 @@ If we don't adopt _some_ formal process, we'll likely continue largely with our 
 That's not ideal.
 This is better.
 
+# Addendums
+[addendums]: #addendums
+
+The following addendums are required reading before voting on this proposal:
+
+* (none at this time)
+
+Please note that some of these addendums may be encrypted. If you are unable to decrypt the files, you are not authorized to vote on this proposal.
+
 # Prior art
 [prior-art]: #prior-art
 
@@ -106,6 +115,7 @@ The following unresolved questions were identified during review of this RFC:
 
 1. How much shouldn't-be-public information might we _want_ to include in this process?
 2. How might we protect that shouldn't-be-public information to keep it private, while still (largely) using this open process?
+    * I suspect that [git-crypt](https://github.com/AGWA/git-crypt) and/or [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html) are reasonable choices.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities

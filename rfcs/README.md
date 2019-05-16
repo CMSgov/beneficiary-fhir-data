@@ -33,7 +33,19 @@ When (reasonably) in doubt, create an RFC first, as the lack of one might hold u
 ## Before Creating an RFC
 [Before Creating an RFC]: #before-creating-an-rfc
 
-There'a no harm in throwing up an RFC as a "trial balloon" but a much faster way to get feedback on an idea first... is to _talk about it_ with others. Accordingly, folks are always encouraged to start a conversation (e.g. in Slack) before putting too much work into an RFC.
+Things to do _before_ drafting your RFC:
+
+1. Have a conversation with your company or program Information System Security Officer (ISSO) about your proposal.
+    1. Which parts of the proposal might be _For Official Use Only (FOUO)_? Those parts will need to be excluded, or instead put into a separate, encrypted addenda.
+    2. Which parts of the proposal might be _System Configuration Management Information (SCMI)_? Those parts will need to be excluded, or instead put into a separate, encrypted addenda.
+2. Have a conversation with your company and program tech leads.
+    1. Would they be likely to support your proposal?
+    2. If not, what objections would you need to overcome to get them to vote in favor of it?
+3. Have a conversation with other relevant program and/or community members.
+    1. Would they be likely to support your proposal?
+    2. If not, what objections would you need to overcome to get them to vote in favor of it?
+
+There'a no harm in throwing up an RFC as a "trial balloon" but a much faster way to get feedback on an idea first... is to _talk about it_ with others. Accordingly, you need to have these conversations (e.g. in Slack) first, **before** publishing your RFC.
 
 ## The RFC Process
 [The RFC Process]: #the-rfc-process

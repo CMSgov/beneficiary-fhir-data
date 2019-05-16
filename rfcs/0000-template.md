@@ -53,6 +53,15 @@ Why should we *not* do this?
 - What other designs have been considered and what is the rationale for not choosing them?
 - What is the impact of not doing this?
 
+# Addendums
+[addendums]: #addendums
+
+The following addendums are required reading before voting on this proposal:
+
+* (none at this time)
+
+Please note that some of these addendums may be encrypted. If you are unable to decrypt the files, you are not authorized to vote on this proposal.
+
 # Prior art
 [prior-art]: #prior-art
 
