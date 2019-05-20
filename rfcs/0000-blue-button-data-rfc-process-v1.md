@@ -72,6 +72,19 @@ Why should we *not* do this?
 * Have similar attempts by other communities failed in any spectacular ways that the proposed process doesn't account for?
     * Karl's opinion: Not that I know of. Worst failure case I've seen is folks using the RFC process to float bad ideas and being sad when people reject or ignore them.
 
+# Compensatory steps
+[compensatory-steps]: #compensatory-steps
+
+What do we have to take care in doing, and perhaps do differently than if this were conducted on Confluence?
+
+* No information we wouldn't be comfortable having included as part of a news article (say one by Brian Krebs) should be useed unencrypted -- public data needs to be truly public in nature, not just obscurely comfortable.
+* No information that rises to FIPS 199 moderate levels without an internal agreement to reclassify it as public.
+* All team members will agree to the initial, and any on-going, training for posting public information in their official capacities (likely find out whatever the Office of Communication uses and use that).
+* For each RFC designate an individual (and backup) to review the changes for any information that needs to be removed / reported as a security incident for spillage / breach.
+* Agree to not include, even in encrypted format, data that would present significant technical, financial, etc... risks to CMS or beneficiaries as loss of control of the encryption keys would, in most scenarios, remain unmitigated due to the nature of git.
+* Update system's security documentation in CFACTS and subject it to audit / review since this would be part of how we operate Blue Button.
+* Revisit these steps for addition/modification if the approach changes significantly (i.e. private repo, etc... vs. zero access control)
+
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
@@ -116,6 +129,7 @@ The following unresolved questions were identified during review of this RFC:
 1. How much shouldn't-be-public information might we _want_ to include in this process?
 2. How might we protect that shouldn't-be-public information to keep it private, while still (largely) using this open process?
     * I suspect that [git-crypt](https://github.com/AGWA/git-crypt) and/or [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html) are reasonable choices.
+3. Does our first and second tier management support this approach overall and have guidance on reassessing any impact levels for Blue Button Daa Systems specific operations info.
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
