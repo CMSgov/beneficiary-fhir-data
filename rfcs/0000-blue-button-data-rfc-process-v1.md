@@ -82,6 +82,7 @@ What do we have to take care in doing, and perhaps do differently than if this w
 * All team members will agree to the initial, and any on-going, training for posting public information in their official capacities (likely find out whatever the Office of Communication uses and use that).
 * For each RFC designate an individual (and backup) to review the changes for any information that needs to be removed / reported as a security incident for spillage / breach.
 * Agree to not include, even in encrypted format, data that would present significant technical, financial, etc... risks to CMS or beneficiaries as loss of control of the encryption keys would, in most scenarios, remain unmitigated due to the nature of git.
+    * *OR* Use a non-public repo that can be linked to (Github or internal CMS system ideally) for the actual storage of the encrypted content to reduce risk of accidental/incident related release.
 * Update system's security documentation in CFACTS and subject it to audit / review since this would be part of how we operate Blue Button.
 * Revisit these steps for addition/modification if the approach changes significantly (i.e. private repo, etc... vs. zero access control)
 
