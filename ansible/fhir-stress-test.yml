@@ -2,6 +2,8 @@
 - name: Prepare
   hosts: localhost
   gather_facts: true
+  vars_files: 
+    - vars/{{ target_env }}.yml
   tasks:
     # This generates a new results folder for each test execution
     - name: Create results path variable
@@ -30,6 +32,8 @@
 
 - name: Configure Systems for Ansible Pipelining
   hosts: client:servers
+  vars_files: 
+    - vars/{{ target_env }}.yml
   vars:
     ansible_ssh_pipelining: false
   roles:
@@ -39,6 +43,8 @@
   hosts: client:servers
   become: True
   gather_facts: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   roles:
     - common
@@ -47,6 +53,8 @@
   hosts: client
   become: True
   gather_facts: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   roles:
     - client 
@@ -55,6 +63,8 @@
   hosts: servers
   become: True
   gather_facts: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   roles:
     - server 
@@ -62,6 +72,8 @@
 - name: Launch JMeter servers
   hosts: servers
   become: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   gather_facts: True
   handlers:
@@ -102,6 +114,8 @@
 - name: Launch JMeter client and start tests
   hosts: client
   become: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   gather_facts: True
   
@@ -146,6 +160,8 @@
 
 - name: Cleanup localhost
   hosts: localhost
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   gather_facts: false
   

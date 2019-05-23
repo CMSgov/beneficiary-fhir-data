@@ -1,0 +1,25 @@
+ec2_key_name: chrishayes.pem
+profile: default
+mfa_sn: arn:aws:iam::225542912595:mfa/christopher.hayes
+mfa: 923996
+num_servers: 1
+
+# URI of FHIR server under test
+fhir_server: "https://internal-dpbb10lb01-604385722.us-east-1.elb.amazonaws.com/v1/fhir"
+
+##################################################################################
+# AWS configuration
+##################################################################################
+
+# template-21-encrypted
+# Base hardened AMI
+ami_id_rhel: ami-3a934c40
+
+
+subnet_id: subnet-c8a7c9ac
+
+security_group_ids:
+  - sg-5a4ac311
+  - sg-a378eed6
+
+#dpcw10sg04, dpbb10sg01, dpbb10sg03, dpbb10sg06, dpbb10sg07.

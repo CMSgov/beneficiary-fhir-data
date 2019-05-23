@@ -24,8 +24,6 @@ jmeter_server_port: 1099
 jmeter_server_rmi_local_port: 4000 
 # jmeter client remote method invocation(RMI) port, used for jmeter client communication
 jmeter_client_rmi_local_port: 4001
-# URI of FHIR server under test
-fhir_server: "https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir"
 # remote user to run jmeter
 remote_jmeter_user: bb-jmeter
 

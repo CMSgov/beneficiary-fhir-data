@@ -8,6 +8,8 @@
   connection: local
   gather_facts: false
 
+  vars_files: 
+    - vars/{{ target_env }}.yml
   vars:
     # "Compute Optimized" with 4 vCPUs, 7.5 GB RAM, $0.209/hour
     ec2_instance_type: "c4.xlarge"
@@ -97,11 +99,13 @@
         - "{{ ec2_client.instances }}"
         - "{{ ec2_servers.instances }}"
 
-- import_playbook: fhir-stress-test.yml
+#- import_playbook: fhir-stress-test.yml
 
 - name: Terminate instances
   hosts: localhost
   connection: local
+  vars_files: 
+    - vars/{{ target_env }}.yml
   tasks:
     - name: Terminate instances that were previously launched
       ec2:
