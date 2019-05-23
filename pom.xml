@@ -7,7 +7,7 @@
 
 	<groupId>gov.hhs.cms.bluebutton</groupId>
 	<artifactId>bluebutton-parent</artifactId>
-	<version>1.1.1</version>
+	<version>1.1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>bluebutton-parent</name>
@@ -67,7 +67,7 @@
 		<connection>scm:git:git@github.com:karlmdavis/bluebutton-parent-pom.git</connection>
 		<developerConnection>scm:git:git@github.com:karlmdavis/bluebutton-parent-pom.git</developerConnection>
 		<url>https://github.com/karlmdavis/bluebutton-parent-pom</url>
-		<tag>bluebutton-parent-1.1.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<repositories>
