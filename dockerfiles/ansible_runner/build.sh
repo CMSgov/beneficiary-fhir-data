@@ -19,8 +19,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo "Script Directory: '${scriptDirectory}'"
 
 # Copy the needed build source files.
-cp "${scriptDirectory}/../../requirements.txt" "${scriptDirectory}/"
-cp "${scriptDirectory}/../../install_roles.yml" "${scriptDirectory}/"
+cp "${scriptDirectory}/../../ansible/requirements.txt" "${scriptDirectory}/"
 
 # Run the Docker build.
 sudo docker build --tag ansible_runner "${scriptDirectory}/"

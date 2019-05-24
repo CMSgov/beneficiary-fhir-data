@@ -19,8 +19,9 @@
 
 properties([
 	parameters([
-		booleanParam(name: 'deploy_from_non_master', description: 'Whether to run the Ansible plays for builds of this project\'s non-master branches.', defaultValue: false),
-		booleanParam(name: 'bootstrap_jenkins', description: 'Whether to run the Ansible plays to bootstrap some pre-req Jenkins config.', defaultValue: true),
+		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: false),
+		booleanParam(name: 'test_dpr', description: 'Whether to run the test against the DPR environment', defaultValue: false),
+		booleanParam(name: 'test_prod', description: 'Whether to run the test against the Prod environment', defaultValue: false)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -40,160 +41,56 @@ stage('Prepare') {
 			sh 'ansible --version'
 
 			// Verify the play's syntax before we run it.
-			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
+			sh 'ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=test" --syntax-check'
 		}
 	}
 }
 
-def shouldDeploy = params.deploy_from_non_master || env.BRANCH_NAME == "master"
-
-def dataPipelineVersion = '0.1.0-SNAPSHOT'
-def dataServerVersion = '1.0.0-SNAPSHOT'
-
-stage('Bootstrap Jenkins') {
-	if (shouldDeploy && params.bootstrap_jenkins) {
-		lock(resource: 'env_lss', inversePrecendence: true) {
-			milestone(label: 'stage_bootstrap_start')
-
-			node {
-				def jenkinsUid = sh(script: 'id --user', returnStdout: true).trim()
-				def jenkinsGid = sh(script: 'id --group', returnStdout: true).trim()
-				insideAnsibleContainer {
-					/*
-					 * Bootstrap this system: SSH known_hosts, config, etc. Note
-					 * that the `.ssh/config` path is customized to ensure that the
-					 * 'real' version of the file for the Jenkin's user is created/
-					 * updated, rather than the copy of it that is used inside the
-					 * Docker container. (If the file is created/modified here, you
-					 * will likely the job a second time after it goes boom.)
-					 */
-					sh "./ansible-playbook-wrapper bootstrap.yml --extra-vars 'ssh_config_dest=/root/.ssh_jenkins/config ssh_config_uid=${jenkinsUid} ssh_config_gid=${jenkinsGid}'"
-				}
-			}
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Bootstrap Jenkins')
-	}
-}
-
-stage('Deploy to LSS') {
-	if (shouldDeploy && params.deploy_to_lss) {
-		lock(resource: 'env_lss', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_lss_start')
-
-			node {
-				insideAnsibleContainer {
-					// Run the play against the LSS environment.
-					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
-					{
-						"limit_envs": [
-							"ls"
-						]
-					}
-					""".stripIndent()
-					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_lss --extra-vars "@extra_vars.json"'
-				}
-			}
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to LSS')
-	}
-}
-
-stage('Deploy to TEST') {
-	if (shouldDeploy) {
+stage('Test the Test ENV') {
+	if (params.test_test) {
 		lock(resource: 'env_test', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_test_start')
+			milestone(label: 'stage_test_test_start')
 
 			node {
 				insideAnsibleContainer {
-					// Run the play against the test environment.
-					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
-					{
-						"limit_envs": [
-							"ts"
-						],
-						"data_pipeline_version": "${dataPipelineVersion}",
-						"data_server_version": "${dataServerVersion}"
-					}
-					""".stripIndent()
-					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_test --extra-vars "@extra_vars.json"'
+					sh 'ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=test"'
 				}
 			}
 		}
 	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to TEST')
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Test the Test ENV')
 	}
 }
 
-stage('Manual Approval') {
-	if (shouldDeploy) {
-		/*
-		 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
-		 * deploying to production environments.
-		 */
-		if (!params.deploy_to_prod) {
-			/*
-			 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-			 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-			 * the build will be aborted.
-			 */
-			input 'Deploy to PROD?'
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
-	}
-}
-
-stage('Deploy to DPR') {
-	if (shouldDeploy) {
+stage('Test the DPR ENV') {
+	if (params.test_dpr) {
 		lock(resource: 'env_dpr', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_dpr_start')
+			milestone(label: 'stage_test_dpr_start')
 
 			node {
 				insideAnsibleContainer {
-					// Run the play against the prod environment.
-					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
-					{
-						"limit_envs": [
-							"dp"
-						],
-						"data_pipeline_version": "${dataPipelineVersion}",
-						"data_server_version": "${dataServerVersion}"
-					}
-					""".stripIndent()
-					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_dpr --extra-vars "@extra_vars.json"'
+					sh 'ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=dpr"'
 				}
 			}
 		}
 	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to DPR')
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Test the DPR ENV')
 	}
 }
 
-stage('Deploy to PROD') {
-	if (shouldDeploy) {
+stage('Test the Prod ENV') {
+	if (params.test_prod) {
 		lock(resource: 'env_prod', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_prod_start')
+			milestone(label: 'stage_test_prod_start')
 
 			node {
 				insideAnsibleContainer {
-					// Run the play against the prod environment.
-					writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
-					{
-						"limit_envs": [
-							"pd"
-						],
-						"data_pipeline_version": "${dataPipelineVersion}",
-						"data_server_version": "${dataServerVersion}"
-					}
-					""".stripIndent()
-					sh './ansible-playbook-wrapper backend.yml --limit=localhost:env_prod --extra-vars "@extra_vars.json"'
+					sh 'ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=prod"'
 				}
 			}
 		}
 	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to PROD')
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Test the Prod ENV')
 	}
 }
 
