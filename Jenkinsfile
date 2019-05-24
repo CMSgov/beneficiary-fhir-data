@@ -19,7 +19,7 @@
 
 properties([
 	parameters([
-		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: false),
+		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: true),
 		booleanParam(name: 'test_dpr', description: 'Whether to run the test against the DPR environment', defaultValue: false),
 		booleanParam(name: 'test_prod', description: 'Whether to run the test against the Prod environment', defaultValue: false)
 	]),
