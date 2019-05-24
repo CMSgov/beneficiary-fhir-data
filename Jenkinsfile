@@ -118,7 +118,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 
 	// Ensure that the Ansible container can open the Ansible Vault files
 	// for this project.
-	withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
+	withCredentials([file(credentialsId: 'bluebutton-data-server-perf-tests-vault-password', variable: 'vaultPasswordFile')]) {
 
 		// Run the container as root, not as the random unbound user that
 		// Jenkins defaults to (as that will cause Python/Ansible errors).
