@@ -15,7 +15,7 @@ fhir_server: "https://internal-tsbb10lb01-758855236.us-east-1.elb.amazonaws.com/
 
 # template-21-encrypted
 # Base hardened AMI
-ami_id_rhel: ami-2051294a
+ami_id_rhel: ami-04b26a38e3c892add
 
 
 subnet_id: subnet-10a02474
