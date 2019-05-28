@@ -88,20 +88,20 @@
     
     - name: Create inventory group 'client'
       add_host:
-        hostname: "{{ item.public_dns_name }}"
+        hostname: "{{ item.private_dns_name }}"
         groupname: client
       with_items: "{{ ec2_client.instances }}"
 
     - name: Create inventory group 'servers'
       add_host:
-        hostname: "{{ item.public_dns_name }}"
+        hostname: "{{ item.private_dns_name }}"
         groupname: servers
       with_items: "{{ ec2_servers.instances }}"
 
     - name: Wait for SSH to come up
       wait_for:
         timeout: 320
-        host: "{{ item.public_dns_name }}"
+        host: "{{ item.private_dns_name }}"
         port: 22
         state: started
       with_flattened:
