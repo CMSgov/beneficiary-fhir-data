@@ -166,7 +166,7 @@ public final class CoverageResourceProviderIT {
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 		Bundle searchResults = fhirClient.search().forResource(Coverage.class)
-				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary))).count(3)
+				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary))).count(4)
 				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);

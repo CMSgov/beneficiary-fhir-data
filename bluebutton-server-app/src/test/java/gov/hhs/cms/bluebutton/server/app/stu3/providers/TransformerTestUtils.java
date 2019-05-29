@@ -898,10 +898,12 @@ final class TransformerTestUtils {
 	 */
 	static void assertNoEncodedOptionals(Resource resource) {
 		FhirContext fhirContext = FhirContext.forDstu3();
-		String encodedResource = fhirContext.newXmlParser().encodeResourceToString(resource);
-		System.out.println(encodedResource);
+		String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource);
+		String encodedResourceJson = fhirContext.newJsonParser().encodeResourceToString(resource);
+		System.out.println(encodedResourceXml);
+		System.out.println(encodedResourceJson);
 
-		Assert.assertFalse(encodedResource.contains("Optional"));
+		Assert.assertFalse(encodedResourceXml.contains("Optional"));
 	}
 
 	/**

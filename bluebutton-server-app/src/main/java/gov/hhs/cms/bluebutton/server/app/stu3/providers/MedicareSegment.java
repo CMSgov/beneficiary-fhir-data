@@ -12,6 +12,8 @@ public enum MedicareSegment {
 
 	PART_B("part-b"),
 
+	PART_C("part-c"),
+
 	PART_D("part-d");
 
 	private final String urlPrefix;
