@@ -43,6 +43,16 @@ public final class CodebookVariableReader {
 			} else if (Arrays.asList("BENE_ID", "DOB_DT", "GNDR_CD").contains(id)) {
 				Variable variable = variablesForId.get(0);
 				variablesMappedById.put(variable.getId(), variable);
+				/*
+				 * FIXME The code books for part a/b/d and a/b/c/d have
+				 * overlapping fields between them. They also have fields that
+				 * aren't in the other code book so we need to include both code
+				 * books ..codebook-mbsf-abd.pdf and codebook-mbsf-abcd.pdf.
+				 * Thus the reason to allow duplicate fields below.
+				 */
+			} else if (variablesForId.size() == 2) {
+				Variable variable = variablesForId.get(0);
+				variablesMappedById.put(variable.getId(), variable);
 			} else
 				throw new IllegalStateException(String.format("%s with duplicates found: %s", id, variablesForId));
 		}
