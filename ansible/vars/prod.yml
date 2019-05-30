@@ -21,6 +21,5 @@ subnet_id: subnet-6aa0240e
 security_group_ids:
   - sg-8c42cbc7
   - sg-997a8aec
-  - sg-bf7bd5f6
 
 # pdcw10sg10, pdbb10sg06, pdbb10sg01, pdcw10sg04, pdbb10sg03.
