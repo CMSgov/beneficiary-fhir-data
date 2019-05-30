@@ -71,3 +71,5 @@ security_group_ids:
   - sg-c254c582
   - sg-00934127d109774ad
 ###
+
+ansible_ssh_private_key_file: /home/perf-tests.pem
