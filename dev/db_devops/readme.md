@@ -1,6 +1,9 @@
 # DB scripts
 
 ## Weekly PG_DUMP Scripts
+
+The entire database dump process takes over 24 hours to dump the database and save the files into S3. It involves several scripts.
+
 1. `weekly_pg_dump_backup_schedule.txt`
    This is the Unix Cron Schedule
    It runs every Tuesday at 5pm EST
@@ -16,7 +19,14 @@
 4. `fhirdb_pg_dump_all_tabs_20190514.sh`
    This is the script that has been generated for May 14, 2019.
    It runs all the pg_dump concurrently, so they can complete in a reasonable time. It waits until all pg_dump are done, upload to AW S3 and sent a report out to a distribution list.
-   
+
+5. `db_backup.sh`
+    This script takes a saved pg_dump file and stores it into S3 for safe keeping. To run this script, AWS CLI and the AWS KMS key id for this S3 bucket is required.
+
+### Prerequisites
+- *TODO Access groups*
+- *TODO Environment variables*
+
 ## PG_RESTORE Scripts
 
 *TODO*
