@@ -1,6 +1,6 @@
-# DevOps db manager scripts
+# DB scripts
 
-## Weekly PG_DUMP scripts
+## Weekly PG_DUMP Scripts
 1. `weekly_pg_dump_backup_schedule.txt`
    This is the Unix Cron Schedule
    It runs every Tuesday at 5pm EST
@@ -11,11 +11,16 @@
    This is to ensure that new tables added to the database are backup without editing script.
 
 3. `pg_dump_fhir_tables.sh`
-   This is the script that actually runs the pg_dump. 
-   It takes a table name as parameter
+   This is the script that actually runs the pg_dump. It takes a table name as parameter
    
 4. `fhirdb_pg_dump_all_tabs_20190514.sh`
    This is the script that has been generated for May 14, 2019.
-   It runs all the pg_dump concurrently.
-   It waits until all pg_dump are done, upload to AW S3 and sent a report out to a distribution list.
+   It runs all the pg_dump concurrently, so they can complete in a reasonable time. It waits until all pg_dump are done, upload to AW S3 and sent a report out to a distribution list.
    
+## PG_RESTORE scripts
+
+*ToDo*
+
+## Replica Promote Scripts
+
+*ToDo*
