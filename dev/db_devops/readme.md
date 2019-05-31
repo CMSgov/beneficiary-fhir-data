@@ -17,10 +17,10 @@
    This is the script that has been generated for May 14, 2019.
    It runs all the pg_dump concurrently, so they can complete in a reasonable time. It waits until all pg_dump are done, upload to AW S3 and sent a report out to a distribution list.
    
-## PG_RESTORE scripts
+## PG_RESTORE Scripts
 
-*ToDo*
+*TODO*
 
 ## Replica Promote Scripts
 
-*ToDo*
+*TODO*
