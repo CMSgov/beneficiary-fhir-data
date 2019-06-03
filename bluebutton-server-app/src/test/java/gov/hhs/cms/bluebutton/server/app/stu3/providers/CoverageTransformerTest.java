@@ -2,6 +2,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
@@ -45,6 +46,10 @@ public final class CoverageTransformerTest {
 				beneficiary);
 		assertPartBMatches(beneficiary, partBCoverage);
 
+		Coverage partCCoverage = CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_C,
+				beneficiary);
+		assertPartCMatches(beneficiary, partCCoverage);
+
 		Coverage partDCoverage = CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_D,
 				beneficiary);
 		assertPartDMatches(beneficiary, partDCoverage);
@@ -62,6 +67,8 @@ public final class CoverageTransformerTest {
 	 *            the {@link Coverage} to verify
 	 */
 	static void assertPartAMatches(Beneficiary beneficiary, Coverage coverage) {
+		TransformerTestUtils.assertNoEncodedOptionals(coverage);
+
 		Assert.assertNotNull(coverage);
 
 		Assert.assertEquals(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary).getIdPart(),
@@ -69,6 +76,10 @@ public final class CoverageTransformerTest {
 		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
 		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN_PART_A, coverage.getGrouping().getSubPlan());
 		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+
+		if (beneficiary.getMedicareCoverageStartDate().isPresent())
+			TransformerTestUtils.assertPeriodEquals(beneficiary.getMedicareCoverageStartDate(), Optional.empty(),
+					coverage.getPeriod());
 
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
 			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(),
@@ -83,8 +94,12 @@ public final class CoverageTransformerTest {
 			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.ESRD_IND, beneficiary.getEndStageRenalDiseaseCode(),
 					coverage);
 		if (beneficiary.getPartATerminationCode().isPresent())
-			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.A_TRM_CD, beneficiary.getPartATerminationCode(),
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.A_TRM_CD,
+					beneficiary.getPartATerminationCode(),
 					coverage);
+		if (beneficiary.getEntitlementBuyInAprInd().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.BUYIN04,
+					beneficiary.getEntitlementBuyInAprInd(), coverage);
 	}
 
 	/**
@@ -107,12 +122,55 @@ public final class CoverageTransformerTest {
 		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN_PART_B, coverage.getGrouping().getSubPlan());
 		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
 
+		if (beneficiary.getMedicareCoverageStartDate().isPresent())
+			TransformerTestUtils.assertPeriodEquals(beneficiary.getMedicareCoverageStartDate(), Optional.empty(),
+					coverage.getPeriod());
+
 		if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
 			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(),
 					coverage);
 		if (beneficiary.getPartBTerminationCode().isPresent())
 			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.B_TRM_CD, beneficiary.getPartBTerminationCode(),
 					coverage);
+
+		if (beneficiary.getEntitlementBuyInAprInd().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.BUYIN04,
+					beneficiary.getEntitlementBuyInAprInd(), coverage);
+	}
+
+	/**
+	 * Verifies that the specified {@link MedicareSegment#PART_C}
+	 * {@link Coverage} "looks like" it should, if it were produced from the
+	 * specified {@link Beneficiary}.
+	 * 
+	 * @param beneficiary
+	 *            the {@link Beneficiary} that the specified {@link Coverage}
+	 *            should match
+	 * @param coverage
+	 *            the {@link Coverage} to verify
+	 */
+	static void assertPartCMatches(Beneficiary beneficiary, Coverage coverage) {
+		Assert.assertNotNull(coverage);
+
+		Assert.assertEquals(TransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary).getIdPart(),
+				coverage.getIdElement().getIdPart());
+		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
+		Assert.assertEquals(TransformerConstants.COVERAGE_PLAN_PART_C, coverage.getGrouping().getSubPlan());
+		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+
+		if (beneficiary.getPartCContractNumberAugId().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PTC_CNTRCT_ID_08,
+					beneficiary.getPartCContractNumberAugId(), coverage);
+		if (beneficiary.getPartCPbpNumberAugId().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PTC_PBP_ID_08,
+					beneficiary.getPartCPbpNumberAugId(), coverage);
+		if (beneficiary.getPartCPlanTypeAugCode().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PTC_PLAN_TYPE_CD_08,
+					beneficiary.getPartCPlanTypeAugCode(), coverage);
+
+		if (beneficiary.getHmoIndicatorFebInd().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.HMO_IND_02,
+					beneficiary.getHmoIndicatorFebInd(), coverage);
 	}
 
 	/**
@@ -138,5 +196,22 @@ public final class CoverageTransformerTest {
 			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(),
 					coverage);
 		Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+
+		if (beneficiary.getPartDContractNumberAugId().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PTDCNTRCT08,
+					beneficiary.getPartDContractNumberAugId(), coverage);
+		if (beneficiary.getPartDPbpNumberAugId().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.PTDPBPID08,
+					beneficiary.getPartDPbpNumberAugId(), coverage);
+		if (beneficiary.getPartDSegmentNumberAugId().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.SGMTID08,
+					beneficiary.getPartDSegmentNumberAugId(), coverage);
+
+		if (beneficiary.getPartDLowIncomeCostShareGroupFebCode().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.CSTSHR02,
+					beneficiary.getPartDLowIncomeCostShareGroupFebCode(), coverage);
+		if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent())
+			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.RDSIND01,
+					beneficiary.getPartDRetireeDrugSubsidyJanInd(), coverage);
 	}
 }

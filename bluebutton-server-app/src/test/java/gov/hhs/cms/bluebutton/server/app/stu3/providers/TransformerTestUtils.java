@@ -642,6 +642,26 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * 
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} that the expected
+	 *            {@link Extension} / {@link Coding} are for
+	 * @param expectedDateYear
+	 *            the expected {@link Coding#getCode()}
+	 * @param actualElement
+	 *            the FHIR element to find and verify the {@link Extension} of
+	 */
+	static void assertExtensionDateYearEquals(CcwCodebookVariable ccwVariable, Optional<?> expectedDateYear,
+			IBaseHasExtensions actualElement) {
+		String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+		String expectedCodingSystem = expectedExtensionUrl;
+		Optional<? extends IBaseExtension<?, ?>> extensionForUrl = actualElement.getExtension().stream()
+				.filter(e -> e.getUrl().equals(expectedExtensionUrl)).findFirst();
+
+		Assert.assertEquals(expectedDateYear.isPresent(), extensionForUrl.isPresent());
+	}
+
+	/**
 	 * @param expectedSystem
 	 *            the expected {@link Coding#getSystem()} value
 	 * @param expectedCode
@@ -898,10 +918,12 @@ final class TransformerTestUtils {
 	 */
 	static void assertNoEncodedOptionals(Resource resource) {
 		FhirContext fhirContext = FhirContext.forDstu3();
-		String encodedResource = fhirContext.newXmlParser().encodeResourceToString(resource);
-		System.out.println(encodedResource);
+		String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource);
+		String encodedResourceJson = fhirContext.newJsonParser().encodeResourceToString(resource);
+		System.out.println(encodedResourceXml);
+		System.out.println(encodedResourceJson);
 
-		Assert.assertFalse(encodedResource.contains("Optional"));
+		Assert.assertFalse(encodedResourceXml.contains("Optional"));
 	}
 
 	/**

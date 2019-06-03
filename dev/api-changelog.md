@@ -1,5 +1,9 @@
 # API Changelog
 
+## BLUEBUTTON-926: Exposing additional beneficiary coverage fields
+
+Additional beneficiary coverage fields have been added to the Blue Button database therefore we are exposing these fields.    Many coverage fields are broken out into monthly fields.   These monthly values are active as of the "Reference year" field.
+
 ## BLUEBUTTON-898: Correct `Patient.gender` codings
 
 Fixed the `Patient.gender` codings to be correct. Previously, all beneficiaries had reported a value of `unknown` in this field.
