@@ -85,9 +85,10 @@ public final class RifFilesProcessorTest {
 		Assert.assertEquals("3456789", beneRow.getMedicareBeneficiaryId().get());
 		Assert.assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBeneficiaryDateOfDeath().get());
 		Assert.assertEquals(LocalDate.of(1963, Month.OCTOBER, 3), beneRow.getMedicareCoverageStartDate().get());
-		Assert.assertEquals(new Character('D'), beneRow.getHmoIndicatorAprInd().get());
+		Assert.assertEquals(new Character('1'), beneRow.getHmoIndicatorAprInd().get());
 		Assert.assertEquals(new BigDecimal(5), beneRow.getPartDMonthsCount().get());
-		Assert.assertEquals("BB", beneRow.getPartDLowIncomeCostShareGroupDecCode().get());
+		Assert.assertEquals("00", beneRow.getPartDLowIncomeCostShareGroupFebCode().get());
+		Assert.assertEquals(new Character('N'), beneRow.getPartDRetireeDrugSubsidyDecInd().get());
 	}
 
 	/**
