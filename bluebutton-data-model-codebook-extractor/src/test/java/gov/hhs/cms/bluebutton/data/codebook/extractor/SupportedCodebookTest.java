@@ -69,7 +69,7 @@ public class SupportedCodebookTest {
 		Assert.assertTrue(duplicatedVariableIds.contains("GNDR_CD"));
 
 		// Blow up if anything more than those known problems appears.
-		Assert.assertEquals(3, duplicatedVariableIds.size());
+		Assert.assertEquals(87, duplicatedVariableIds.size());
 	}
 
 	/**

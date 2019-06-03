@@ -9,6 +9,10 @@ public enum SupportedCodebook {
 	BENEFICIARY_SUMMARY("codebook-mbsf-abd.pdf", "Master Beneficiary Summary File - Base With Medicare Part A/B/D",
 			"May 2017, Version 1.0"),
 
+	BENEFICIARY_SUMMARY_PARTC("codebook-mbsf-abcd.pdf",
+			"Master Beneficiary Summary File - Base With Medicare Part A/B/C/D",
+			"April 2019, Version 1.2"),
+
 	FFS_CLAIMS("codebook-ffs-claims.pdf", "Medicare Fee-For-Service Claims (for Version K)",
 			"December 2017, Version 1.4"),
 
