@@ -9,6 +9,8 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -101,6 +103,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.OutpatientClaimLine;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
+import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
@@ -865,6 +868,34 @@ public final class TransformerUtils {
 		Identifier identifier = new Identifier().setSystem(calculateVariableReferenceUrl(ccwVariable))
 				.setValue(identifierValue);
 		return identifier;
+	}
+
+	/**
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} being mapped
+	 * @param dateYear
+	 *            the value to use for {@link Coding#getCode()} for the
+	 *            resulting {@link Coding}
+	 * @return the output {@link Extension}, with {@link Extension#getValue()}
+	 *         set to represent the specified input values
+	 */
+	static Extension createExtensionDate(CcwCodebookVariable ccwVariable, Optional<BigDecimal> dateYear) {
+
+		Extension extension = null;
+		try {
+			String stringDate = dateYear.get().toString() + "-01-01";
+			Date date1 = new SimpleDateFormat("yyyy-MM-dd").parse(stringDate);
+			DateType dateYearValue = new DateType(date1, TemporalPrecisionEnum.YEAR);
+			String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+			extension = new Extension(extensionUrl, dateYearValue);
+
+		} catch (ParseException e) {
+			throw new InvalidRifValueException(String.format("Unable to parse reference year: '%s'.", dateYear.get()),
+					e);
+		}
+
+		return extension;
+
 	}
 
 	/**

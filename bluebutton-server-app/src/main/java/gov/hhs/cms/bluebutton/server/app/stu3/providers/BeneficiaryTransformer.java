@@ -80,6 +80,12 @@ final class BeneficiaryTransformer {
 		if (beneficiary.getNameMiddleInitial().isPresent())
 			name.addGiven(String.valueOf(beneficiary.getNameMiddleInitial().get()));
 
+		// The reference year of the enrollment data
+		if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+			patient.addExtension(TransformerUtils.createExtensionDate(CcwCodebookVariable.RFRNC_YR,
+					beneficiary.getBeneEnrollmentReferenceYear()));
+		}
+
 		// Monthly Medicare-Medicaid dual eligibility codes
 		if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_01,

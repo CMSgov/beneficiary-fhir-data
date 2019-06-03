@@ -89,5 +89,8 @@ public final class BeneficiaryTransformerTest {
 		if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
 			TransformerTestUtils.assertExtensionCodingEquals(CcwCodebookVariable.DUAL_02,
 					beneficiary.getMedicaidDualEligibilityFebCode(), patient);
+		if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
+			TransformerTestUtils.assertExtensionDateYearEquals(CcwCodebookVariable.RFRNC_YR,
+					beneficiary.getBeneEnrollmentReferenceYear(), patient);
 	}
 }

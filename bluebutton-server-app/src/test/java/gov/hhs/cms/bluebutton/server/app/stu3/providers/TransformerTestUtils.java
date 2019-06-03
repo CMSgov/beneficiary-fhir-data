@@ -642,6 +642,26 @@ final class TransformerTestUtils {
 	}
 
 	/**
+	 * 
+	 * @param ccwVariable
+	 *            the {@link CcwCodebookVariable} that the expected
+	 *            {@link Extension} / {@link Coding} are for
+	 * @param expectedDateYear
+	 *            the expected {@link Coding#getCode()}
+	 * @param actualElement
+	 *            the FHIR element to find and verify the {@link Extension} of
+	 */
+	static void assertExtensionDateYearEquals(CcwCodebookVariable ccwVariable, Optional<?> expectedDateYear,
+			IBaseHasExtensions actualElement) {
+		String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+		String expectedCodingSystem = expectedExtensionUrl;
+		Optional<? extends IBaseExtension<?, ?>> extensionForUrl = actualElement.getExtension().stream()
+				.filter(e -> e.getUrl().equals(expectedExtensionUrl)).findFirst();
+
+		Assert.assertEquals(expectedDateYear.isPresent(), extensionForUrl.isPresent());
+	}
+
+	/**
 	 * @param expectedSystem
 	 *            the expected {@link Coding#getSystem()} value
 	 * @param expectedCode

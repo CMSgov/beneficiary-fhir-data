@@ -9,6 +9,9 @@
       "display" : "White"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+    "valueDate" : "2019"
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/dual_01",
