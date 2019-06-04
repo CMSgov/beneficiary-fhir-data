@@ -2,7 +2,47 @@
 
 ## BLUEBUTTON-926: Exposing additional beneficiary coverage fields
 
-Additional beneficiary coverage fields have been added to the Blue Button database therefore we are exposing these fields.    Many coverage fields are broken out into monthly fields.   These monthly values are active as of the "Reference year" field.
+A number of additional data fields have been added, mostly related to coverage and enrollment:
+
+* The beneficiary's effective/coverage-start date.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/covstart>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part [AB]$/)].period.start`
+* The "reference year" for beneficiary enrollment data, which identifies the calendar year that most `Patient` and `Coverage` data is from. Will always be the latest year that we have data for.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/rfrnc_yr>
+    * Found at: `Patient.extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/rfrnc_yr/].valueDate`
+* Monthly Part C Contract Number: The Medicare Part C contract number for the beneficiary’s Medicare Advantage (MA) plan for a given month.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part C$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/ptc_cntrct_id_\d\d/].valueCoding.code`
+* Monthly Part C PBP Number: The Medicare Part C plan benefit package (PBP) for the beneficiary’s Medicare Advantage (MA) plan for a given month.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part C$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/ptc_pbp_id_\d\d/].valueCoding.code`
+* Monthly Part C Plan Type Code: The type of Medicare Part C plan for the beneficiary for a given month.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part C$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/ptc_plan_type_cd_\d\d/].valueCoding.code`
+* Monthly Part D Contract Number: The Part D contract number for the beneficiary’s Part D plan for a given month. CMS assigns an identifier to each contract that a Part D plan has with CMS.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/ptdcntrct01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part D$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/ptdcntrct\d\d/].valueCoding.code`
+* Monthly Part D Plan Benefit Package Number: The Part D plan benefit package (PBP) for the beneficiary’s Part D plan for a given month. CMS assigns an identifier to each PBP within a contract that a Part D plan sponsor has with CMS.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/ptdpbpid01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part D$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/ptdpbpid\d\d/].valueCoding.code`
+* Monthly Part D Market Segment Identifier: This variable is the segment number that CMS assigns to identify a geographic market segment or subdivision of a Part D plan; the segment number allows you to determine the market area covered by the plan. The variable describes the market segment for a given month.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/sgmtid01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part D$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/sgmtid\d\d/].valueCoding.code`
+* Monthly Medicare Entitlement/Buy-In Indicators: Whether the beneficiary was entitled to Part A, Part B, or both for a given month. Also indicates whether the beneficiary’s state of residence paid his/her monthly premium for Part B coverage (and Part A if necessary). State Medicaid programs can pay those premiums for certain dual eligibles; this action is called "buying in" and so this variable is the "buy-in code."
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/buyin01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part [AB]$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/buyin\d\d/].valueCoding.code`
+* Monthly Medicare Advantage (MA) enrollment indicators: Whether the beneficiary was enrolled in a Medicare Advantage (MA) plan during a given month.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/hmo_ind_01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part C$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/hmo_ind_\d\d/].valueCoding.code`
+* Monthly Medicare-Medicaid dual eligibility codes: Whether the beneficiary was eligible for both Medicare and Medicaid in a given month.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/dual_01>
+    * Found at: `Patient.extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/dual_\d\d/].valueCoding.code`
+* Monthly cost sharing group under Part D low-income subsidy: The beneficiary’s Part D low-income subsidy cost sharing group for a given month. The Part D benefit requires enrollees to pay both premiums and cost-sharing, but the program also has a low-income subsidy (LIS) that covers some or all of those costs for certain low-income individuals, including deductibles and cost-sharing during the coverage gap.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/cstshr01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part D$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/cstshr\d\d/].valueCoding.code`
+* Monthly Part D Retiree Drug Subsidy Indicators: Indicates if the beneficiary was enrolled in an employer-sponsored prescription drug plan that qualified for Part D’s retiree drug subsidy (RDS) for a given month.
+    * Documentation: <https://bluebutton.cms.gov/resources/variables/rdsind01>
+    * Found at: `Coverage[?(grouping.subPlan =~ /^Part D$/)].extension[?url =~ /https:\/\/bluebutton.cms.gov\/resources\/variables\/rdsind\d\d/].valueCoding.code`
 
 ## BLUEBUTTON-898: Correct `Patient.gender` codings
 
