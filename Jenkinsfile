@@ -38,10 +38,10 @@ stage('Prepare') {
 			sh 'cat /etc/passwd'
 			sh 'echo $USER && echo $UID && echo $HOME && whoami'
 			sh 'pwd && ls -la'
-			sh 'ansible --version'
+			sh 'cd ansible && ansible --version'
 
 			// Verify the play's syntax before we run it.
-			sh 'ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=test" --syntax-check'
+			sh 'cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e "target_env=test" --syntax-check'
 		}
 	}
 }
