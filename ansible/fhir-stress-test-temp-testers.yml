@@ -119,7 +119,6 @@
     - vars/{{ target_env }}.yml
   tasks:
     - name: Terminate instances that were previously launched
-      timeout: 320
       ec2:
         state: 'absent'
         region: "{{ region }}"
