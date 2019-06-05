@@ -175,7 +175,11 @@ public enum StaticRifResource {
 			140176),
 
 	SYNTHETIC_PDE_2016(remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2016.rif"),
-			RifFileType.PDE, 145526);
+			RifFileType.PDE, 145526),
+
+	SAMPLE_MCT_BENES(resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
+
+	SAMPLE_MCT_PDE(resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, 40);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
