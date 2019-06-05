@@ -110,7 +110,7 @@
         - "{{ ec2_client.instances }}"
         - "{{ ec2_servers.instances }}"
 
-#- import_playbook: fhir-stress-test.yml
+- import_playbook: fhir-stress-test.yml
 
 - name: Terminate instances
   hosts: localhost
@@ -119,6 +119,7 @@
     - vars/{{ target_env }}.yml
   tasks:
     - name: Terminate instances that were previously launched
+      timeout: 320
       ec2:
         state: 'absent'
         region: "{{ region }}"
