@@ -1,6 +1,7 @@
 ---
 - name: Prepare
   hosts: localhost
+  connection: local
   gather_facts: true
   vars_files: 
     - vars/{{ target_env }}.yml
@@ -160,6 +161,7 @@
 
 - name: Cleanup localhost
   hosts: localhost
+  connection: local
   vars_files: 
     - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
