@@ -123,6 +123,15 @@ public final class RifLoaderIT {
 	}
 
 	/**
+	 * Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_MCT}
+	 * data.
+	 */
+	@Test
+	public void loadSampleMctData() {
+		loadSample(StaticRifResourceGroup.SAMPLE_MCT);
+	}
+
+	/**
 	 * Runs {@link RifLoader} against the specified
 	 * {@link StaticRifResourceGroup}.
 	 * 
