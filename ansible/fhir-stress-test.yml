@@ -3,6 +3,12 @@
   hosts: localhost
   connection: local
   gather_facts: true
+  
+  environment:
+    no_proxy: 'localhost,169.254.169.254'
+    http_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
+    https_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
+    
   vars_files: 
     - vars/{{ target_env }}.yml
   tasks:
