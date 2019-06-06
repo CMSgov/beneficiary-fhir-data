@@ -24,5 +24,6 @@ security_group_ids:
   - sg-6333c316
   - sg-4a5bd201
   - sg-fa6bc5b3
+  - sg-5984922d
   
   # tsbb10sg07, tsbb10sg01, tscw10sg04, tsbb10sg03, tsbb10sg06. view inbound rules. 

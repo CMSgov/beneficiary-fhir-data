@@ -21,5 +21,7 @@ subnet_id: subnet-c8a7c9ac
 security_group_ids:
   - sg-5a4ac311
   - sg-a378eed6
+  - sg-18b91751
+  - sg-00160774
 
 #dpcw10sg04, dpbb10sg01, dpbb10sg03, dpbb10sg06, dpbb10sg07.
