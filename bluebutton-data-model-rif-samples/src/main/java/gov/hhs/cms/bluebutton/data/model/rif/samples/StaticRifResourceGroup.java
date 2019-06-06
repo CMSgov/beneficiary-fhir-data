@@ -38,7 +38,9 @@ public enum StaticRifResourceGroup {
 			StaticRifResource.SYNTHETIC_INPATIENT_2000_2001, StaticRifResource.SYNTHETIC_INPATIENT_2000_2002,
 			StaticRifResource.SYNTHETIC_INPATIENT_2014_2014, StaticRifResource.SYNTHETIC_INPATIENT_2014_2015,
 			StaticRifResource.SYNTHETIC_INPATIENT_2014_2016, StaticRifResource.SYNTHETIC_PDE_2014,
-			StaticRifResource.SYNTHETIC_PDE_2015, StaticRifResource.SYNTHETIC_PDE_2016);
+			StaticRifResource.SYNTHETIC_PDE_2015, StaticRifResource.SYNTHETIC_PDE_2016),
+
+	SAMPLE_MCT(StaticRifResource.SAMPLE_MCT_BENES, StaticRifResource.SAMPLE_MCT_PDE);
 
 	private final StaticRifResource[] resources;
 
