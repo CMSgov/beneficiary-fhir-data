@@ -39,6 +39,7 @@
 
 - name: Configure Systems for Ansible Pipelining
   hosts: client:servers
+  become: True
   vars_files: 
     - vars/{{ target_env }}.yml
   vars:
