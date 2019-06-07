@@ -72,4 +72,4 @@ security_group_ids:
   - sg-00934127d109774ad
 ###
 
-ansible_ssh_private_key_file: "/home/perf-tests.pem"
+ansible_ssh_private_key_file: "~/../perf-tests.pem"
