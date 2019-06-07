@@ -6,5 +6,5 @@
     dest: /etc/sudoers
     regexp: '^Defaults\s+requiretty'
     replace: '# Defaults  requiretty'
-  #become: true
+  become: true
 
