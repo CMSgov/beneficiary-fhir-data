@@ -7,7 +7,6 @@ data_pipeline_idempotency_required: true
 
 # These systems are m4.xlarge (4 vCPUs, 16 GB RAM).
 data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
-data_server_db_connections_max: 400
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.

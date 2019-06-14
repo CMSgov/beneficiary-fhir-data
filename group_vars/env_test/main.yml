@@ -1,7 +1,7 @@
 ---
 # This system is an m4.2xlarge (8 vCPUs, 32 GB RAM).
 data_pipeline_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
-data_pipeline_ec2_instance_type_vcpu: 64
+data_pipeline_ec2_instance_type_vcpu: 8
 
 # There is no ongoing data refresh here: if we're loading data in test, it should be an initial
 # load.
@@ -9,7 +9,6 @@ data_pipeline_idempotency_required: false
 
 # These systems are m4.large (2 vCPUs, 8 GB RAM).
 data_server_ec2_instance_type_mem_mib: "{{ 8 * 1024 }}"
-data_server_db_connections_max: 800
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
