@@ -46,6 +46,26 @@ stage('Prepare') {
 	}
 }
 
+/**
+ * Runs Maven with the specified arguments.
+ *
+ * @param args the arguments to pass to <code>mvn</code>
+ */
+def mvn(args) {
+	// This tool must be setup and named correctly in the Jenkins config.
+	def mvnHome = tool 'maven-3'
+
+	// Run the build, using Maven, with the appropriate config.
+	configFileProvider(
+			[
+				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
+				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
+			]
+	) {
+		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
+	}
+}
+
 stage('Build') {
 	node {
 		milestone(label: 'stage_build_start')
