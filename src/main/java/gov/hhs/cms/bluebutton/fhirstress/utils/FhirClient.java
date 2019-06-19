@@ -1,9 +1,9 @@
 package gov.hhs.cms.bluebutton.fhirstress.utils;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.io.InputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,15 +15,15 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.TrustManager;
-
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import org.apache.http.client.HttpClient;
+
 import org.apache.http.HttpHost;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -31,26 +31,25 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.IGenericClient;
-
+import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.log4j.BasicConfigurator;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 /**
- * A class that simplifies connecting to FHIR backend server(s) that require a secure connection(X509).
+ * A class that simplifies connecting to FHIR backend server(s) that require a
+ * secure connection(X509).
  */
 public final class FhirClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FhirClient.class);
 
 	/**
-	 * @param fhirServerUrlText
-	 *            a {@link String} for the URL of the FHIR server to create a client
-	 *            for
-	 * @param clientKeystoreDirText
-	 *            a {@link String} path to the client keystore directory
+	 * @param fhirServerUrlText     a {@link String} for the URL of the FHIR server
+	 *                              to create a client for
+	 * @param clientKeystoreDirText a {@link String} path to the client keystore
+	 *                              directory
 	 * @return a new FHIR {@link IGenericClient} for use
 	 */
 	public static IGenericClient create(String fhirServerUrlText, String clientKeystoreDirText) {
@@ -58,16 +57,14 @@ public final class FhirClient {
 	}
 
 	/**
-	 * @param fhirServerUrlText
-	 *            a {@link String} for the URL of the FHIR server to create a client
-	 *            for
-	 * @param clientKeystoreDirText
-	 *            a {@link String} path to the client keystore directory
-	 * @param proxyHost
-	 *            a {@link String} to a proxy hostname to use for the client
-	 *            connection
-	 * @param proxyPort
-	 *            a {@link int} to the proxy port to use for the client connection
+	 * @param fhirServerUrlText     a {@link String} for the URL of the FHIR server
+	 *                              to create a client for
+	 * @param clientKeystoreDirText a {@link String} path to the client keystore
+	 *                              directory
+	 * @param proxyHost             a {@link String} to a proxy hostname to use for
+	 *                              the client connection
+	 * @param proxyPort             a {@link int} to the proxy port to use for the
+	 *                              client connection
 	 * @return a new FHIR {@link IGenericClient} for use
 	 */
 	@SuppressWarnings("deprecation")
@@ -171,10 +168,8 @@ public final class FhirClient {
 	}
 
 	/**
-	 * @param storeDir
-	 *            a {@link String} for the path to the key store
-	 * @param storeName
-	 *            a {@link String} for the filename of the key store
+	 * @param storeDir  a {@link String} for the path to the key store
+	 * @param storeName a {@link String} for the filename of the key store
 	 * @return the local {@link Path} to the key store that FHIR clients should use
 	 */
 	private static Path getClientKeyStorePath(String storeDir, String storeName) throws IllegalStateException {

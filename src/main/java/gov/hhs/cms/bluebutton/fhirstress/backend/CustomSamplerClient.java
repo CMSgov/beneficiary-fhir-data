@@ -15,9 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 //import gov.hhs.cms.bluebutton.data.model.rif.RifFileType;
 import gov.hhs.cms.bluebutton.fhirstress.utils.FhirClient;
 import gov.hhs.cms.bluebutton.fhirstress.utils.RifParser;
@@ -77,7 +76,7 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 			this.client = FhirClient.create(context.getParameter(PARAM_SERVER), context.getParameter(KEYSTORE_DIR),
 					context.getParameter(PROXY_HOST), Integer.parseInt(context.getParameter(PROXY_PORT)));
 		}
-		
+
 //		try {
 //			this.parser = new RifParser(context.getParameter(RIFFILE), RifFileType.valueOf(context.getParameter(RIFTYPE).toUpperCase()));
 //		} catch (URISyntaxException e) {
