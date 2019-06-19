@@ -1,4 +1,8 @@
 ---
+- name: Adjust yum timeout
+  lineinfile:
+    path: /etc/yum.conf
+    line: timeout=60
 
 - name: Install Pre-requisites
   yum:
