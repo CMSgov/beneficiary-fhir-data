@@ -91,7 +91,7 @@ stage('Test the Test ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh 'cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e "target_env=test"'
+					sh 'cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e "target_env=test" -vvv'
 				}
 			}
 		}
