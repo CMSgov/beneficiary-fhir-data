@@ -109,6 +109,15 @@
     mode: u=rw,g=rw,o=r
   become: true
 
+- name: Configure App Server Roles
+  template:
+    src: 'templates/server-roles.properties.j2'
+    dest: "{{ data_server_dir }}/bluebutton-appserver-roles.properties"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=rw,o=r
+  become: true
+
 # Need to ensure service is running (and has been restarted if needed) before config, as it needs the server to be available.
 - meta: flush_handlers
 
