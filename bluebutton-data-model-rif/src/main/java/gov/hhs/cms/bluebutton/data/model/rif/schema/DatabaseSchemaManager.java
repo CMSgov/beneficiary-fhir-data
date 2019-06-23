@@ -94,6 +94,7 @@ public final class DatabaseSchemaManager {
 			if (connection.getMetaData().getDatabaseProductName().equals("HSQL Database Engine")) {
 				placeholders.put("type.int4", "integer");
 				placeholders.put("logic.tablespaces-escape", "--");
+				placeholders.put("logic.drop-tablespaces-escape", "--");
 				placeholders.put("logic.alter-column-type", "");
 				placeholders.put("logic.index-create-concurrently", "");
 				placeholders.put("logic.sequence-start", "start with");
@@ -101,6 +102,7 @@ public final class DatabaseSchemaManager {
 			} else {
 				placeholders.put("type.int4", "int4");
 				placeholders.put("logic.tablespaces-escape", "--");
+				placeholders.put("logic.drop-tablespaces-escape", "");
 				placeholders.put("logic.alter-column-type", "type");
 				placeholders.put("logic.index-create-concurrently", "concurrently");
 				placeholders.put("logic.sequence-start", "start");
