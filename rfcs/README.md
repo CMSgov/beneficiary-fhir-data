@@ -103,3 +103,6 @@ It is normal and expected (but not at all required!) that folks other than propo
 This RFC process is largely derived from the following:
 
 * [Rust RFCs](https://github.com/rust-lang/rfcs)
+* [Swift Programming Language Evolution](https://github.com/apple/swift-evolution)
+    * [Swift Evolution Process](https://github.com/apple/swift-evolution/blob/master/process.md)
+    * [Swift Evolution Proposal Template](https://github.com/apple/swift-evolution/blob/master/proposal-templates/0000-swift-template.md)
