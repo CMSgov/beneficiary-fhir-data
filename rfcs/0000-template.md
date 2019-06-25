@@ -1,6 +1,9 @@
-# RFC Proposal
+# Proposal: `0000-my-awesome-feature` (fill me in with a unique ident)
 
-* RFC Proposal ID: `0000-my-awesome-feature` (fill me in with a unique ident)
+[header-and-summary]: #header-and-summary
+
+Metadata:
+
 * Start Date: (fill me in with today's date, YYYY-MM-DD)
 * RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
 * JIRA Ticket(s):
@@ -15,23 +18,25 @@ For any such not-needed section, simply write in "N/A".
 ## Table of Contents
 [table-of-contents]: #table-of-contents
 
-* [RFC Proposal]
-* [Table of Contents]
-* [Motivation]
-* [Proposed Solution]
-    * [Proposed Solution: Detailed Design]
-    * [Proposed Solution: Unresolved Questions]
-    * [Proposed Solution: Drawbacks]
-    * [Proposed Solution: Notable Alternatives]
-* [Prior Art]
-* [Future Possibilities]
-* [Addendums]
+* [Header and Summary](#header-and-summary)
+* [Table of Contents](#table-of-contents)
+* [Motivation](#motivation)
+* [Proposed Solution](#proposed-solution)
+    * [Proposed Solution: Detailed Design](#proposed-solution-detailed-design)
+    * [Proposed Solution: Unresolved Questions](#proposed-solution-unresolved-questions)
+    * [Proposed Solution: Drawbacks](#proposed-solution-drawbacks)
+    * [Proposed Solution: Notable Alternatives](#proposed-solution-notable-alternatives)
+* [Prior Art](#prior-art)
+* [Future Possibilities](#future-possibilities)
+* [Addendums](#addendums)
 
 # Motivation
+[motivation]: #motivation
 
 Why are we doing this? What use cases does it support? What is the expected outcome? Why is now the appropriate time to address this?
 
 # Proposed Solution
+[proposed-solution]: #proposed-solution
 
 Explain the proposal as if it was already implemented and shipped, and you were just explaining it to another developer or user.
 That generally means:
@@ -52,6 +57,7 @@ That generally means:
   If so, draft them now! Include the draft as a subsection or addendum.
 
 ## Proposed Solution: Detailed Design
+[proposed-solution-detailed-design]: #proposed-solution-detailed-design
 
 This is the technical portion of the RFC. Explain the design in sufficient detail that:
 
@@ -62,6 +68,7 @@ This is the technical portion of the RFC. Explain the design in sufficient detai
 The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
 
 ## Proposed Solution: Unresolved Questions
+[proposed-solution-unresolved-questions]: #proposed-solution-unresolved-questions
 
 Collect a list of action items to be resolved or officially deferred before this RFC is submitted for final comment, including:
 
@@ -70,16 +77,19 @@ Collect a list of action items to be resolved or officially deferred before this
 * What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
 
 ## Proposed Solution: Drawbacks
+[proposed-solution-drawbacks]: #proposed-solution-drawbacks
 
 Why should we *not* do this?
 
 ## Proposed Solution: Notable Alternatives
+[proposed-solution-notable-alternatives]: #proposed-solution-notable-alternatives
 
 * Why is this design the best in the space of possible designs?
 * What other designs have been considered and what is the rationale for not choosing them?
 * What is the impact of not doing this?
 
 # Prior Art
+[prior-art]: #prior-art
 
 Discuss prior art, both the good and the bad, in relation to this proposal.
 A few examples of what this can include are:
@@ -103,6 +113,7 @@ Note that while precedent set by other programs is some motivation, it does not 
 Please also take into consideration that we (and the government in general) sometimes intentionally diverge from common "best practices".
 
 # Future Possibilities
+[future-possibilities]: #future-possibilities
 
 Think about what the natural extension and evolution of your proposal would be and how it would affect the language and project as a whole in a holistic way.
 Try to use this section as a tool to more fully consider all possible interactions with the project and language in your proposal.
@@ -117,6 +128,7 @@ Note that having something written down in the future-possibilities section is n
 The section merely provides additional information.
 
 # Addendums
+[addendums]: #addendums
 
 The following addendums are required reading before voting on this proposal:
 
