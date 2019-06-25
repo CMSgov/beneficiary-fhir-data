@@ -1,17 +1,16 @@
-# Proposal: `0001-beneficiary-fhir-server-rfc-process-v1`
-[header-and-summary]: #header-and-summary
+# RFC Proposal
+[RFC Proposal]: #rfc-proposal
 
-Metadata:
-
+* RFC Proposal ID: `0001-beneficiary-fhir-server-rfc-process-v1`
 * Start Date: 2019-05-15
 * RFC PR: [bluebutton-data-model/rfcs#0001](https://github.com/CMSgov/bluebutton-data-model/pull/53)
 * JIRA Ticket(s):
     * [BLUEBUTTON-948](https://jira.cms.gov/browse/BLUEBUTTON-948)
 
 ## Table of Contents
-[table-of-contents]: #table-of-contents
+[Table of Contents]: #table-of-contents
 
-* [Header and Summary](#header-and-summary)
+* [RFC Proposal](#rfc-proposal)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
@@ -27,7 +26,7 @@ Metadata:
 The Blue Button Data/backend team should have an informal-as-is-reasonable process for managing and evaluating major proposals.
 
 # Motivation
-[motivation]: #motivation
+[Motivation]: #motivation
 
 Why are we doing this? I mean... alll the cool kids are doing it:
 
@@ -42,7 +41,7 @@ More seriously, we want to move from the current process where these proposals a
 3. A historical record of our thought process and decisions, making it easier for new team members to get up to speed.
 
 # Proposed Solution
-[proposed-solution]: #proposed-solution
+[Proposed Solution]: #proposed-solution
 
 This very-first RFC is a "process only" RFC, in which the team will detail, discuss, and agree on a formal process for making major decisions,
   e.g. on architecture, process (like this!), and major features.
@@ -69,7 +68,7 @@ Questions to consider when evaluating this particular RFC:
 * Does this RFC follow the proposed process well enough to validate the process and associated templates?
 
 ## Proposed Solution: Detailed Design
-[proposed-solution-detailed-design]: #proposed-solution-detailed-design
+[Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
 Are these two documents correct and sufficient?:
 
@@ -79,7 +78,7 @@ Are these two documents correct and sufficient?:
     * Intended to be copy-pasted for each new proposed RFC.
 
 # Proposed Solution: Compensatory Steps
-[proposed-solution-compensatory-steps]: #proposed-solution-compensatory-steps
+[Proposed Solution: Compensatory Steps]: #proposed-solution-compensatory-steps
 
 What do we have to take care in doing, and perhaps do differently than if this were conducted on Confluence?
 
@@ -101,7 +100,7 @@ What do we have to take care in doing, and perhaps do differently than if this w
     (i.e. private repo, etc... vs. zero access control).
 
 ## Proposed Solution: Unresolved Questions
-[proposed-solution-unresolved-questions]: #proposed-solution-unresolved-questions
+[Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
 The following unresolved questions were identified during review of this RFC:
 
@@ -111,7 +110,7 @@ The following unresolved questions were identified during review of this RFC:
 3. Does our first and second tier management support this approach overall and have guidance on reassessing any impact levels for Blue Button Daa Systems specific operations info.
 
 ## Proposed Solution: Drawbacks
-[proposed-solution-drawbacks]: #proposed-solution-drawbacks
+[Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
 Why should we *not* do this?
 
@@ -123,7 +122,7 @@ Why should we *not* do this?
     * Karl's opinion: Not that I know of. Worst failure case I've seen is folks using the RFC process to float bad ideas and being sad when people reject or ignore them.
 
 ## Proposed Solution: Notable Alternatives
-[proposed-solution-notable-alternatives]: #proposed-solution-notable-alternatives
+[Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
 
 This is very much intended to be, "at least a little bit better than what BCDA and the Blue Button Auth/frontend are doing."
 It's not a perfect process, nor does such a perfect process even exist.
@@ -138,7 +137,7 @@ That's not ideal.
 This is better.
 
 # Prior Art
-[prior-art]: #prior-art
+[Prior Art]: #prior-art
 
 As previously mentioned, there's lots of prior art here:
 
@@ -151,7 +150,7 @@ We should measure the success of this RFC's proposal against those by comparing 
 What percentage of the Blue Button Data/backend team gets involved in RFCs, on average?
 
 # Future Possibilities
-[future-possibilities]: #future-possibilities
+[Future Possibilities]: #future-possibilities
 
 No future changes to this process have (yet) been identified.
 
@@ -160,7 +159,7 @@ It *is* worth noting, though, that this process's main inspiration [Rust RFCs](h
   [Rust RFCs: README.md: History](https://github.com/rust-lang/rfcs/commits/master/README.md).
 
 # Addendums
-[addendums]: #addendums
+[Addendums]: #addendums
 
 The following addendums are required reading before voting on this proposal:
 
