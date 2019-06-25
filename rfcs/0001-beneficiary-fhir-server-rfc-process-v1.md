@@ -25,7 +25,7 @@
 
 The Blue Button Data/backend team should have an informal-as-is-reasonable process for managing and evaluating major proposals.
 
-# Motivation
+## Motivation
 [Motivation]: #motivation
 
 Why are we doing this? I mean... alll the cool kids are doing it:
@@ -40,7 +40,7 @@ More seriously, we want to move from the current process where these proposals a
 2. Formalize the currently-informal process, leading to clearer outcomes.
 3. A historical record of our thought process and decisions, making it easier for new team members to get up to speed.
 
-# Proposed Solution
+## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
 This very-first RFC is a "process only" RFC, in which the team will detail, discuss, and agree on a formal process for making major decisions,
@@ -67,7 +67,7 @@ Questions to consider when evaluating this particular RFC:
 * Are we all comfortable having these conversations in public, on GitHub?
 * Does this RFC follow the proposed process well enough to validate the process and associated templates?
 
-## Proposed Solution: Detailed Design
+### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
 Are these two documents correct and sufficient?:
@@ -77,7 +77,7 @@ Are these two documents correct and sufficient?:
 * [./0000-template.md](Template/Starter RFC)
     * Intended to be copy-pasted for each new proposed RFC.
 
-# Proposed Solution: Compensatory Steps
+### Proposed Solution: Compensatory Steps
 [Proposed Solution: Compensatory Steps]: #proposed-solution-compensatory-steps
 
 What do we have to take care in doing, and perhaps do differently than if this were conducted on Confluence?
@@ -99,7 +99,7 @@ What do we have to take care in doing, and perhaps do differently than if this w
 * Revisit these steps for addition/modification if the approach changes significantly
     (i.e. private repo, etc... vs. zero access control).
 
-## Proposed Solution: Unresolved Questions
+### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
 The following unresolved questions were identified during review of this RFC:
@@ -109,7 +109,7 @@ The following unresolved questions were identified during review of this RFC:
     * I suspect that [git-crypt](https://github.com/AGWA/git-crypt) and/or [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html) are reasonable choices.
 3. Does our first and second tier management support this approach overall and have guidance on reassessing any impact levels for Blue Button Daa Systems specific operations info.
 
-## Proposed Solution: Drawbacks
+### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
 Why should we *not* do this?
@@ -121,7 +121,7 @@ Why should we *not* do this?
 * Have similar attempts by other communities failed in any spectacular ways that the proposed process doesn't account for?
     * Karl's opinion: Not that I know of. Worst failure case I've seen is folks using the RFC process to float bad ideas and being sad when people reject or ignore them.
 
-## Proposed Solution: Notable Alternatives
+### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
 
 This is very much intended to be, "at least a little bit better than what BCDA and the Blue Button Auth/frontend are doing."
@@ -136,7 +136,7 @@ If we don't adopt _some_ formal process, we'll likely continue largely with our 
 That's not ideal.
 This is better.
 
-# Prior Art
+## Prior Art
 [Prior Art]: #prior-art
 
 As previously mentioned, there's lots of prior art here:
@@ -149,7 +149,7 @@ As previously mentioned, there's lots of prior art here:
 We should measure the success of this RFC's proposal against those by comparing the relevant team/community sizes vs. engagement in the RFC process.
 What percentage of the Blue Button Data/backend team gets involved in RFCs, on average?
 
-# Future Possibilities
+## Future Possibilities
 [Future Possibilities]: #future-possibilities
 
 No future changes to this process have (yet) been identified.
@@ -158,7 +158,7 @@ It *is* worth noting, though, that this process's main inspiration [Rust RFCs](h
   has seen tons of changes to it since the process was first formalized in 2014:
   [Rust RFCs: README.md: History](https://github.com/rust-lang/rfcs/commits/master/README.md).
 
-# Addendums
+## Addendums
 [Addendums]: #addendums
 
 The following addendums are required reading before voting on this proposal:
