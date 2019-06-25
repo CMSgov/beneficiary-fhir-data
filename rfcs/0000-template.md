@@ -1,4 +1,5 @@
 # Proposal: `0000-my-awesome-feature` (fill me in with a unique ident)
+
 [header-and-summary]: #header-and-summary
 
 Metadata:
