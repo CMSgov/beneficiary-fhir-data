@@ -1,7 +1,7 @@
 #!/bin/bash
 
 {{ remote_jmeter_dir }}/bin/jmeter -s \
--Djava.rmi.server.hostname={{ ansible_eth0.ipv4.address }} \
+-Djava.rmi.server.hostname=127.0.0.1 \
 -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} \
 -Dserver_port={{ jmeter_server_port }} \
 -j {{ remote_test_dir }}/log-jmeter.txt \
