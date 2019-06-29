@@ -50,6 +50,11 @@ public final class DatabaseSchemaManager {
 		// Trying to prevent career-limiting mistakes.
 		flyway.setCleanDisabled(true);
 
+		// Resolve https://jira.cms.gov/browse/BLUEBUTTON-1031: apply migration 15 after
+		// 16 & 17.
+		// FIXME: remove after that's been addressed
+		flyway.setOutOfOrder(true);
+
 		flyway.setDataSource(dataSource);
 		flyway.setPlaceholders(createScriptPlaceholdersMap(dataSource));
 		flyway.migrate();
