@@ -6,24 +6,23 @@
 #
 # Usage:
 #
-#     $ aws-mfa-refresh.sh --source-profile <source_profile_name> --mfa-serial <mfa_arn_id>
+#     $ aws-mfa-refresh.sh -p <source_profile_name> -m <mfa_arn_id>
 #
 # Arguments:
 #
-# * `--source-profile <source_profile_name>`: The name of a valid profile in
+# * `-p <source_profile_name>`: The name of a valid profile in
 #   `~/.aws/credentials`, for an access key that has MFA enabled. This is the
 #    user that an MFA/STS token will be activated for.
-# * `--mfa-serial <mfa_arn_id>`: An AWS MFA serial number, of the form
+# * `-m <mfa_arn_id>`: An AWS MFA serial number, of the form
 #   `arn:aws:iam::123456789123:mfa/iamusername`.
 ##
 
 set -e
 
-# Use GNU getopt to parse the options passed to this script.
+# Use getopt to parse the options passed to this script.
 TEMP=`getopt \
-  -o p:m:r:f: \
-  --long source-profile:,mfa-serial-number:,default-region:,default-output-format: \
-  -n 'test.sh' -- "$@"`
+  p:m:r:f: \
+  $*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 
@@ -77,7 +76,7 @@ fi
 if [ $generateSecurityToken = true ]; then
   read -p "Token code for MFA Device '${mfaId}': " mfaTokenCode
   echo "Generating new IAM STS Token..."
-  read -r accessKey sessionToken expiration accessKeyId < <(aws sts get-session-token --profile "${sourceProfile}" --output text --query 'Credentials.*' --serial-number "${mfaId}" --token-code "${mfaTokenCode}" --duration-seconds 129600)
+  read -r accessKeyId accessKey sessionToken expiration  < <(aws sts get-session-token --profile "${sourceProfile}" --output text --query 'Credentials.*' --serial-number "${mfaId}" --token-code "${mfaTokenCode}" --duration-seconds 129600)
   if [ $? -ne 0 ];then
     echo "An error occured. AWS credentials file not updated."
     exit 2
