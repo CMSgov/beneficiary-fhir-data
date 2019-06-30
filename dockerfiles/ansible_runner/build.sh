@@ -10,6 +10,9 @@
 #     your_dev_sys$ scp dockerfiles/ansible_runner/ansible_runner.tgz bluebutton-healthapt-lss-builds:
 #     your_dev_sys$ ssh bluebutton-healthapt-lss-builds
 #     jenkins_sys$ zcat ansible_runner.tgz | sudo docker load
+#
+# Or in one go:
+#     your_dev_sys$ cat dockerfiles/ansible_runner/ansible_runner.tgz | ssh bluebutton-healthapt-lss-builds "zcat - | sudo docker load"
 ##
 
 set -e
