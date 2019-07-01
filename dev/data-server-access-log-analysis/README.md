@@ -83,9 +83,9 @@ Here's a bunch of other random queries & commands that I see in my SQLite histor
     sqlite> .nullvalue NULL
     sqlite> SELECT * FROM access_log_percentiles_monthly4 WHERE request_operation_type = 'eob_by_patient_id_all';
     sqlite> SELECT avg(bytes), max(bytes) FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_all';
-    sqlite> SELECT avg(bytes), max(bytes) FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_all' AND timestamp LIKE '2018-12%';
+    sqlite> SELECT avg(bytes), max(bytes) FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_all' AND timestamp_month = '2018-12';
     sqlite> SELECT count(*) FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_all';
-    sqlite> SELECT duration_milliseconds, bytes FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_all' AND timestamp LIKE '2019-05%';
+    sqlite> SELECT duration_milliseconds, bytes FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_all' AND timestamp_month = '2019-05';
 
 ### `access_logs_parse_to_csv.awk.sh`
 
