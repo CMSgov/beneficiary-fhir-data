@@ -162,7 +162,24 @@
       ignore_errors: yes
       fetch: 
         src: "{{ remote_test_dir }}/log-jmeter.txt"
-        dest: "{{ hostvars['localhost']['results_path'].stdout }}/"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/client-log-jmeter.txt"
+        fail_on_missing: yes
+        flat: yes
+        
+- name: Collect server logs
+  hosts: servers
+  become: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
+  environment: "{{proxy_env}}"
+  gather_facts: True
+  
+  tasks:
+    - name: Collect Logs
+      ignore_errors: yes
+      fetch: 
+        src: "{{ remote_test_dir }}/log-jmeter.txt"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/sever-log-jmeter.txt"
         fail_on_missing: yes
         flat: yes
 
