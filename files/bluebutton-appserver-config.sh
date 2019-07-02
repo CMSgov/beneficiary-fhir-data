@@ -6,7 +6,7 @@
 #
 # Usage:
 # 
-# $ bluebutton-appserver-config.sh --serverhome /path-to-jboss --managementport 9090 --managementusername someadmin --managementpassword somepass --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password" --dbconnectionsmax 42
+# $ bluebutton-appserver-config.sh --serverhome /path-to-jboss --managementport 9090 --managementusername someadmin --managementpassword somepass --httpsport 443 --keystore /path-to-keystore --truststore /path-to-truststore --dburl "jdbc:something" --dbusername "some-db-user" --dbpassword "some-db-password" --dbconnectionsmax 42 --rolesprops=/path-to-roles-props
 ##
 
 # Constants.
@@ -18,8 +18,8 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o h:m:U:P:s:k:t:u:n:p:c: \
-	--long serverhome:,managementport:,managementusername:,managementpassword:,httpsport:,keystore:,truststore:,dburl:,dbusername:,dbpassword:,dbconnectionsmax: \
+	-o h:m:U:P:s:k:t:u:n:p:c:r: \
+	--long serverhome:,managementport:,managementusername:,managementpassword:,httpsport:,keystore:,truststore:,dburl:,dbusername:,dbpassword:,dbconnectionsmax:,rolesprops: \
 	-n 'bluebutton-appserver-config.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -38,6 +38,7 @@ dbUrl=
 dbUsername=""
 dbPassword=""
 dbConnectionsMax=
+rolesPropertiesPath=
 while true; do
 	case "$1" in
 		-h | --serverhome )
@@ -62,6 +63,8 @@ while true; do
 			dbPassword="$2"; shift 2 ;;
 		-c | --dbconnectionsmax )
 			dbConnectionsMax="$2"; shift 2 ;;
+		-r | --rolesprops )
+			rolesPropertiesPath="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -74,6 +77,7 @@ if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; e
 if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
 if [[ -z "${dbUrl}" ]]; then >&2 echo 'The --dburl option is required.'; exit 1; fi
 if [[ -z "${dbConnectionsMax}" ]]; then >&2 echo 'The --dbconnectionsmax option is required.'; exit 1; fi
+if [[ -z "${rolesPropertiesPath}" ]]; then >&2 echo 'The --rolesprops option is required.'; exit 1; fi
 
 # Exit immediately if something fails.
 error() {
@@ -92,7 +96,7 @@ error() {
 trap 'error ${LINENO}' ERR
 
 # Check for required files.
-for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}"; do
+for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}" "${rolesPropertiesPath}"; do
 	if [[ ! -f "${f}" ]]; then
 		>&2 echo "The following file is required but is missing: '${f}'."
 		exit 1
@@ -273,7 +277,7 @@ if (outcome == success) of /subsystem=security/security-domain=bluebutton-data-s
 	/subsystem=security/security-domain=bluebutton-data-server:remove
 end-if
 /subsystem=security/security-domain=bluebutton-data-server:add(cache-type="default")
-/subsystem=security/security-domain=bluebutton-data-server/authentication=classic:add(login-modules=[{"code"=>"CertificateRoles","flag"=>"required","module-options"=>[("securityDomain"=>"bluebutton-data-server"),("verifier"=>"org.jboss.security.auth.certs.AnyCertVerifier"),("rolesProperties"=>"file:\${bbfhir.roles}")]}])
+/subsystem=security/security-domain=bluebutton-data-server/authentication=classic:add(login-modules=[{"code"=>"CertificateRoles","flag"=>"required","module-options"=>[("securityDomain"=>"bluebutton-data-server"),("verifier"=>"org.jboss.security.auth.certs.AnyCertVerifier"),("rolesProperties"=>"file:${rolesPropertiesPath}")]}])
 /subsystem=security/security-domain=bluebutton-data-server/jsse=classic:add(truststore={password="changeit",url="file:${trustStore}"},keystore={password="changeit",url="file:${keyStore}"},client-auth=true)
 
 # Reload the server to apply those changes.
