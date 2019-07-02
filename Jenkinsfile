@@ -108,15 +108,6 @@ stage('Deploy to LSS') {
 	}
 }
 
-stage('Manual Approval for TEST') {
-	/*
-	 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-	 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-	 * the build will be aborted.
-	 */
-	input 'Deploy to TEST?'
-}
-
 stage('Deploy to TEST') {
 	if (shouldDeploy) {
 		lock(resource: 'env_test', inversePrecendence: true) {
