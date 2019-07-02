@@ -123,6 +123,7 @@ serverPortsFile="${workDirectory}/server-ports.properties"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bluebutton-server-app-.*\.war$')"
 keyStore="${scriptDirectory}/../../../../dev/ssl-stores/server-keystore.jks"
 trustStore="${scriptDirectory}/../../../../dev/ssl-stores/server-truststore.jks"
+rolesProps="${scriptDirectory}/../../../../dev/ssl-stores/server-roles.properties"
 serverHome="${workDirectory}/${serverInstall}"
 serverLog="${workDirectory}/server-console.log"
 
@@ -208,6 +209,9 @@ JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
 # for a debugger to connect when first launching the server.
 #JAVA_OPTS="\$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y"
 
+# Uncomment this next line to enable SSL debug logging. Watch out: it's super noisy.
+#JAVA_OPTS="\$JAVA_OPTS -Djavax.net.debug=all"
+
 # These ports are only used until the server is configured, but need to be
 # set anyways, as the defaults on first launch conflict with Jenkins and other 
 # such services.
@@ -215,7 +219,7 @@ JAVA_OPTS="\$JAVA_OPTS -Djboss.management.http.port=${serverPortManagement} -Djb
 
 # These properties are all referenced within the standalone.xml we'll be using.
 JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.db.url=${dbUrl}"
-JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.ssl.keystore.path=${keyStore} -Dbbfhir.ssl.truststore.path=${trustStore}"
+JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.ssl.keystore.path=${keyStore} -Dbbfhir.ssl.truststore.path=${trustStore} -Dbbfhir.roles=${rolesProps}"
 
 # Used in src/main/resources/logback.xml as the directory to write the app log to. Must have a trailing slash.
 JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.logs.dir=${workDirectory}/"
