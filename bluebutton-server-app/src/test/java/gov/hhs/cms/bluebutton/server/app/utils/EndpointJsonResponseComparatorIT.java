@@ -1,8 +1,9 @@
 package gov.hhs.cms.bluebutton.server.app.utils;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -756,12 +757,10 @@ public final class EndpointJsonResponseComparatorIT {
 	 *            the path to name the file
 	 */
 	private static void writeFile(String contents, Path fileName) {
-		try {
-			File jsonFile = new File(fileName.toString());
-			FileWriter fileWriter = new FileWriter(jsonFile);
-			fileWriter.write(contents);
-			fileWriter.flush();
-			fileWriter.close();
+		File jsonFile = new File(fileName.toString());
+		try (OutputStreamWriter streamWriter = new OutputStreamWriter(new FileOutputStream(jsonFile),
+				StandardCharsets.UTF_8);) {
+			streamWriter.write(contents);
 		} catch (IOException e) {
 			throw new UncheckedIOException("Could not write file at " + fileName.toString(), e);
 		}
