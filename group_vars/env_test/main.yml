@@ -18,6 +18,8 @@ data_server_ssl_client_certificate_test: 'files/client_data_server_local_test_en
 data_server_ssl_client_certificates:
   - alias: client_local_test_env_test
     certificate: "{{ lookup('file', 'files/client_data_server_local_test_env_test_certificate.pem') }}"
+  - alias: client_bluebutton_frontend_dev
+    certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_dev_certificate.pem') }}"
   - alias: client_bluebutton_frontend_test
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_performance_tester
