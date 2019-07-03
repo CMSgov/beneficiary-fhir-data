@@ -4,6 +4,7 @@ roles_external/
 
 # Ignore Eclipse metadata.
 .project
+.idea/*
 
 # Ignore the Ansible Vault password file.
 vault.password

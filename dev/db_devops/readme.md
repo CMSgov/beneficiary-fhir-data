@@ -29,7 +29,9 @@ The entire database dump process takes over 24 hours to dump the database and sa
 
 ## PG_RESTORE Scripts
 
-*TODO*
+The restore scripts are kept in the restore folder. Please see the README.MD file first for details on the process.  
+
+A full restore was done during the late June of 2019. The full process worked and was verified. It took a little more than 4 days. 
 
 ## Replica Promote Scripts
 
