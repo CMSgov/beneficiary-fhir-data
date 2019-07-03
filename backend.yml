@@ -58,7 +58,7 @@
         data_server_appserver_service: jboss
         data_server_appserver_installer_name: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
         data_server_appserver_local_dir: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
-        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m"
+        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:/u01/jboss/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution"
         data_server_appserver_management_port: "{{ vault_data_server_appserver_management_port }}"
         data_server_appserver_management_username: "{{ vault_data_server_appserver_management_username }}"
         data_server_appserver_management_password: "{{ vault_data_server_appserver_management_password }}"
