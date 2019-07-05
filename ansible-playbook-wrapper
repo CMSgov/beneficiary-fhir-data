@@ -26,7 +26,7 @@ if [ ! -f "${originalLog}" ]; then
 fi
 
 # Grab a timestamp now, which will be used later for the log.
-timestamp=$(date --iso-8601=seconds)
+timestamp=$(date +%Y-%m-%dT%H:%M:%S%z)
 
 # Call this function to rename the `ansible.log` file to include a timesatamp.
 timestampLog() {
@@ -49,10 +49,10 @@ errorCode=0
 
 # Run Ansible, as requested.
 if [ $errorCode -eq 0 ]; then
-  echo "$ ansible-playbook $@" >> "${originalLog}"
+  echo "$ ansible-playbook $*" >> "${originalLog}"
   ansible-playbook "$@"
   errorCode=$?
-  echo -e "\n" | tee --append "${originalLog}"
+  echo -e "\n" | tee -a "${originalLog}"
 fi
 
 timestampLog
