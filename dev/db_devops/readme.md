@@ -29,8 +29,13 @@ The entire database dump process takes over 24 hours to dump the database and sa
 
 ## PG_RESTORE Scripts
 
-*TODO*
+The restore scripts are kept in the restore folder. There are scripts to grab the *.dmp files from S3 and to load a db with this files. Please see the [README.MD](restore/readme.md) of the restore folder first for details on the process.  
+
+A full restore was done during late June of 2019. The full process worked and was verified. It took a little more than 4 days. 
 
 ## Replica Promote Scripts
 
-*TODO*
+Replica promotion was also practiced during the late June 2019. Make a new replica will take about 24 hours in our tests. The scripts and procedures are put in the [Replicate and Promote](TS03_Replicate_And_Promote.txt) file. Several procedures are outlined in the text. Including:
+- Promoting a replica to master
+- How to stop replication of master
+- How to setup replication from on server to another
