@@ -4,6 +4,12 @@
 -Djava.rmi.server.hostname={{ ansible_eth0.ipv4.address }} \
 -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} \
 -Dserver_port={{ jmeter_server_port }} \
+-Dsun.rmi.log.debug=true \
+-Dsun.rmi.server.exceptionTrace=true \
+-Dsun.rmi.loader.logLevel=verbose \
+-Dsun.rmi.dgc.logLevel=verbose \
+-Dsun.rmi.transport.logLevel=verbose \
+-Dsun.rmi.transport.tcp.logLevel=verbose \
 -H {{ vault_proxy_host }} \
 -P {{ vault_proxy_port }} \
 -j {{ remote_test_dir }}/log-jmeter.txt \
