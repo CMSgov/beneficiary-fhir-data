@@ -118,7 +118,10 @@ public final class PatientResourceProvider implements IResourceProvider {
 		Timer.Context timerBeneQuery = metricRegistry
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
 		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+
 		Root<Beneficiary> root = criteria.from(Beneficiary.class);
+		root.join(Beneficiary_.beneficiaryHistories);
+		root.join(Beneficiary_.medicareBeneficiaryIdHistories);
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
 
@@ -177,8 +180,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 			patients = new LinkedList<>();
 		}
 
-		if (Boolean.parseBoolean(includeIdentifiers) == true)
-			addUnhashedHicnAndMbi(patients);
+		// TODO: Remove unhashed HICN/MBI from resource
+		if (Boolean.parseBoolean(includeIdentifiers) == false)
+			;
 
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(),
@@ -237,8 +241,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 			patients = new LinkedList<>();
 		}
 
-		if (Boolean.parseBoolean(includeIdentifiers) == true)
-			addUnhashedHicnAndMbi(patients);
+		// TODO: Remove unhashed HICN/MBI from resource
+		if (Boolean.parseBoolean(includeIdentifiers) == false)
+			;
 
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_IDENTIFIER,
@@ -312,25 +317,5 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
 		return patient;
-	}
-
-	/**
-	 * @param hicnHash
-	 *            the {@link Beneficiary#getHicn()} hash value to match
-	 */
-	private void addUnhashedHicnAndMbi(List<IBaseResource> patients) {
-
-		for (IBaseResource res : patients) {
-			Patient patient = (Patient) res;
-			Beneficiary beneficiary = entityManager.find(Beneficiary.class, patient.getId());
-			if (beneficiary == null) {
-				throw new NoResultException();
-			}
-
-			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
-					.setValue(beneficiary.getHicnUnhashed().get());
-			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID)
-					.setValue(beneficiary.getMedicareBeneficiaryId().get());
-		}
 	}
 }

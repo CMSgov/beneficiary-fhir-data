@@ -11,6 +11,8 @@ import com.codahale.metrics.Timer;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 
 /**
@@ -51,6 +53,17 @@ final class BeneficiaryTransformer {
 				TransformerUtils.createIdentifier(CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
 		patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
 				.setValue(beneficiary.getHicn());
+
+		patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
+				.setValue(beneficiary.getHicnUnhashed().get());
+		for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
+			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
+					.setValue(beneHistory.getHicnUnhashed().get());
+		}
+		for (MedicareBeneficiaryIdHistory mbiHistory : beneficiary.getMedicareBeneficiaryIdHistories()) {
+			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID)
+					.setValue(mbiHistory.getMedicareBeneficiaryId().get());
+		}
 
 		patient.addAddress().setState(beneficiary.getStateCode()).setDistrict(beneficiary.getCountyCode())
 				.setPostalCode(beneficiary.getPostalCode());
