@@ -133,6 +133,7 @@
       # Command Line Docs: http://jmeter.apache.org/usermanual/get-started.html
       command: "{{ remote_jmeter_dir }}/bin/jmeter -n -X 
         -Dclient.rmi.localport={{ jmeter_client_rmi_local_port }} 
+        -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} 
         -Dserver_port={{ jmeter_server_port }} 
         -t{{ remote_test_dir }}/jmeter-fhir-test.jmx 
         -l{{ remote_test_dir }}/log.jtl 

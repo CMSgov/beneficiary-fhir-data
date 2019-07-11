@@ -3,6 +3,7 @@
 {{ remote_jmeter_dir }}/bin/jmeter -s \
 -Djava.rmi.server.hostname={{ ansible_default_ipv4.address }} \
 -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} \
+-Dclient.rmi.localport={{ jmeter_client_rmi_local_port }} \
 -Dserver_port={{ jmeter_server_port }} \
 -Dsun.rmi.log.debug=true \
 -Dsun.rmi.server.exceptionTrace=true \
