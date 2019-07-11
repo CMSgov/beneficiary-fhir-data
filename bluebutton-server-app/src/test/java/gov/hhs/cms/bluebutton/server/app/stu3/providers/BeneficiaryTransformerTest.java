@@ -34,7 +34,7 @@ public final class BeneficiaryTransformerTest {
 		Beneficiary beneficiary = parsedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 
-		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, "false");
 		assertMatches(beneficiary, patient);
 	}
 
@@ -51,7 +51,7 @@ public final class BeneficiaryTransformerTest {
 				.findFirst().get();
 		TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
 
-		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, "false");
 		assertMatches(beneficiary, patient);
 	}
 

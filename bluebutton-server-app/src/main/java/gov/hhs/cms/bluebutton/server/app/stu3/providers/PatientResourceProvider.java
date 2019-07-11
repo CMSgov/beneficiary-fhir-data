@@ -103,7 +103,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *         <code>null</code> if none exists.
 	 */
 	@Read(version = false)
-	public Patient read(@IdParam IdType patientId) {
+	public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
 		if (patientId == null)
 			throw new IllegalArgumentException();
 		if (patientId.getVersionIdPartAsLong() != null)
@@ -134,7 +134,10 @@ public final class PatientResourceProvider implements IResourceProvider {
 			timerBeneQuery.stop();
 		}
 
-		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
+		String includeIdentifiers = "false";
+		if ("true".equals(requestDetails.getHeader("IncludeIdentifiers")))
+			includeIdentifiers = "true";
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiers);
 		return patient;
 	}
 
@@ -163,8 +166,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 */
 	@Search
 	public Bundle searchByLogicalId(@RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId,
-			@OptionalParam(name = "startIndex") String startIndex,
-			@OptionalParam(name = "includeIdentifiers") String includeIdentifiers, RequestDetails requestDetails) {
+			@OptionalParam(name = "startIndex") String startIndex, RequestDetails requestDetails) {
 		if (logicalId.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + logicalId.getQueryParameterQualifier());
@@ -175,14 +177,10 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		List<IBaseResource> patients;
 		try {
-			patients = Arrays.asList(read(new IdType(logicalId.getValue())));
+			patients = Arrays.asList(read(new IdType(logicalId.getValue()), requestDetails));
 		} catch (ResourceNotFoundException e) {
 			patients = new LinkedList<>();
 		}
-
-		// TODO: Remove unhashed HICN/MBI from resource
-		if (Boolean.parseBoolean(includeIdentifiers) == false)
-			;
 
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(),
@@ -225,8 +223,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 */
 	@Search
 	public Bundle searchByIdentifier(@RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier,
-			@OptionalParam(name = "startIndex") String startIndex,
-			@OptionalParam(name = "includeIdentifiers") String includeIdentifiers, RequestDetails requestDetails) {
+			@OptionalParam(name = "startIndex") String startIndex, RequestDetails requestDetails) {
 		if (identifier.getQueryParameterQualifier() != null)
 			throw new InvalidRequestException(
 					"Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
@@ -236,14 +233,10 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		List<IBaseResource> patients;
 		try {
-			patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue()));
+			patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue(), requestDetails));
 		} catch (NoResultException e) {
 			patients = new LinkedList<>();
 		}
-
-		// TODO: Remove unhashed HICN/MBI from resource
-		if (Boolean.parseBoolean(includeIdentifiers) == false)
-			;
 
 		PagingArguments pagingArgs = new PagingArguments(requestDetails);
 		Bundle bundle = TransformerUtils.createBundle(pagingArgs, "/Patient?", Patient.SP_IDENTIFIER,
@@ -260,7 +253,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *             A {@link NoResultException} will be thrown if no matching
 	 *             {@link Beneficiary} can be found
 	 */
-	private Patient queryDatabaseByHicnHash(String hicnHash) {
+	private Patient queryDatabaseByHicnHash(String hicnHash, RequestDetails requestDetails) {
 		if (hicnHash == null || hicnHash.trim().isEmpty())
 			throw new IllegalArgumentException();
 
@@ -279,6 +272,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn", "current")).time();
 		CriteriaQuery<String> beneHicnQuery = builder.createQuery(String.class);
 		Root<Beneficiary> beneHicnQueryRoot = beneHicnQuery.from(Beneficiary.class);
+		beneHicnQueryRoot.join(Beneficiary_.beneficiaryHistories);
+		beneHicnQueryRoot.join(Beneficiary_.medicareBeneficiaryIdHistories);
 		beneHicnQuery.select(beneHicnQueryRoot.get(Beneficiary_.beneficiaryId));
 		beneHicnQuery.where(builder.equal(beneHicnQueryRoot.get(Beneficiary_.hicn), hicnHash));
 		matchingBeneficiaryIds.addAll(entityManager.createQuery(beneHicnQuery).getResultList());
@@ -315,7 +310,10 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new NoResultException();
 		}
 
-		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
+		String includeIdentifiers = "false";
+		if ("true".equals(requestDetails.getHeader("IncludeIdentifiers")))
+			includeIdentifiers = "true";
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiers);
 		return patient;
 	}
 }

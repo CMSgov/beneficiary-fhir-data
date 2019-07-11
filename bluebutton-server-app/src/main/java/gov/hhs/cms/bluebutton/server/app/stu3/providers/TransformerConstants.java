@@ -234,7 +234,7 @@ public final class TransformerConstants {
 	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
 	 * store the each Medicare beneficiaries' medicare beneficiary id.
 	 */
-	public static final String CODING_BBAPI_MEDICARE_BENEFICIARY_ID = BASE_URL_BBAPI_RESOURCES + "/identifier/mbi";
+	public static final String CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED = BASE_URL_BBAPI_RESOURCES + "/identifier/mbi-unhashed";
 
 	/**
 	 * The {@link #CODING_BBAPI_BENE_HICN_HASH} used in earlier versions of the API,

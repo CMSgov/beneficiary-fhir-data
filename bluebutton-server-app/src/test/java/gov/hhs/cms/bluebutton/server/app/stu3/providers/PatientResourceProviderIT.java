@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
@@ -34,6 +33,50 @@ public final class PatientResourceProviderIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Patient patient = fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
+
+		Assert.assertNotNull(patient);
+		BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} works
+	 * as expected for a {@link Patient} that does exist in the DB.
+	 */
+	@Test
+	public void readExistingPatientIncludeIdentifiersFalse() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers("false");
+		fhirClient.registerInterceptor(extraParamsInterceptor);
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Patient patient = fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
+
+		Assert.assertNotNull(patient);
+		BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} works
+	 * as expected for a {@link Patient} that does exist in the DB.
+	 */
+	@Test
+	public void readExistingPatientIncludeIdentifiersTrue() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers("true");
+		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
@@ -99,13 +142,15 @@ public final class PatientResourceProviderIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers("true");
+		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 		Bundle searchResults = fhirClient.search().forResource(Patient.class)
 				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
-				.and(new StringClientParam("includeIdentifiers").matches().value("true")).returnBundle(Bundle.class)
-				.execute();
+				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
 		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
@@ -120,7 +165,7 @@ public final class PatientResourceProviderIT {
 			Identifier identifier = identifiers.next();
 			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
 				hicnUnhashedPresent = true;
-			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID))
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
 				mbiUnhashedPresent = true;
 		}
 
@@ -220,14 +265,16 @@ public final class PatientResourceProviderIT {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers("true");
+		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
 		Bundle searchResults = fhirClient.search().forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly()
 						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
-				.and(new StringClientParam("includeIdentifiers").matches().value("true")).returnBundle(Bundle.class)
-				.execute();
+				.returnBundle(Bundle.class).execute();
 
 		Assert.assertNotNull(searchResults);
 		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
@@ -242,7 +289,7 @@ public final class PatientResourceProviderIT {
 			Identifier identifier = identifiers.next();
 			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
 				hicnUnhashedPresent = true;
-			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID))
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
 				mbiUnhashedPresent = true;
 		}
 

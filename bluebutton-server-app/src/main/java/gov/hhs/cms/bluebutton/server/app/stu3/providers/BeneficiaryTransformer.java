@@ -25,13 +25,14 @@ final class BeneficiaryTransformer {
 	 *            the {@link MetricRegistry} to use
 	 * @param beneficiary
 	 *            the CCW {@link Beneficiary} to transform
+	 * @param includeIdentifiers
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
-	public static Patient transform(MetricRegistry metricRegistry, Beneficiary beneficiary) {
+	public static Patient transform(MetricRegistry metricRegistry, Beneficiary beneficiary, String includeIdentifiers) {
 		Timer.Context timer = metricRegistry
 				.timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform")).time();
-		Patient patient = transform(beneficiary);
+		Patient patient = transform(beneficiary, includeIdentifiers);
 		timer.stop();
 
 		return patient;
@@ -40,10 +41,11 @@ final class BeneficiaryTransformer {
 	/**
 	 * @param beneficiary
 	 *            the CCW {@link Beneficiary} to transform
+	 * @param includeIdentifiers
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
-	private static Patient transform(Beneficiary beneficiary) {
+	private static Patient transform(Beneficiary beneficiary, String includeIdentifiers) {
 		Objects.requireNonNull(beneficiary);
 
 		Patient patient = new Patient();
@@ -54,15 +56,20 @@ final class BeneficiaryTransformer {
 		patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
 				.setValue(beneficiary.getHicn());
 
-		patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
-				.setValue(beneficiary.getHicnUnhashed().get());
-		for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
+		if (Boolean.parseBoolean(includeIdentifiers) == true) {
 			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
-					.setValue(beneHistory.getHicnUnhashed().get());
-		}
-		for (MedicareBeneficiaryIdHistory mbiHistory : beneficiary.getMedicareBeneficiaryIdHistories()) {
-			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID)
-					.setValue(mbiHistory.getMedicareBeneficiaryId().get());
+					.setValue(beneficiary.getHicnUnhashed().get());
+			for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
+				patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
+						.setValue(beneHistory.getHicnUnhashed().get());
+			}
+
+			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
+					.setValue(beneficiary.getMedicareBeneficiaryId().get());
+			for (MedicareBeneficiaryIdHistory mbiHistory : beneficiary.getMedicareBeneficiaryIdHistories()) {
+				patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
+						.setValue(mbiHistory.getMedicareBeneficiaryId().get());
+			}
 		}
 
 		patient.addAddress().setState(beneficiary.getStateCode()).setDistrict(beneficiary.getCountyCode())
