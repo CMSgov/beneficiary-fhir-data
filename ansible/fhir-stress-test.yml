@@ -139,6 +139,8 @@
         -l{{ remote_test_dir }}/log.jtl 
         -j{{ remote_test_dir }}/log-jmeter.txt 
         -R{{ hostvars | get_members(groups, 'servers') | map(attribute='ansible_fqdn') | list | join(',') }}
+        -H{{ vault_proxy_host }}
+        -P{{ vault_proxy_port }}
         -Jfhir_server={{ fhir_server }} 
         -Jthread_count={{ thread_count }} 
         -Jthread_loops={{ thread_loops }} 
