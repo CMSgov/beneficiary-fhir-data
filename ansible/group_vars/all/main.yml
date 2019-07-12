@@ -23,7 +23,7 @@ jmeter_server_port: 1099
 # jmeter server remote method invocation(RMI) port, used for jmeter server communication
 jmeter_server_rmi_local_port: 4000 
 # jmeter client remote method invocation(RMI) port, used for jmeter client communication
-jmeter_client_rmi_local_port: 4001
+jmeter_client_rmi_local_port: 4005
 # remote user to run jmeter
 remote_jmeter_user: bb-jmeter
 
