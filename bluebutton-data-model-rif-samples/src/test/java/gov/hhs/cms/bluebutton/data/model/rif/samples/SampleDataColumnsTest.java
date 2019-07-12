@@ -71,6 +71,8 @@ public final class SampleDataColumnsTest {
 	@Test
 	public void verifySampleMCTColumns() {
 		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT);
+		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
+		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
 	}
 
 	/**
