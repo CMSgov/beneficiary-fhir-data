@@ -158,6 +158,30 @@ echo "Server configured successfully (HTTPS enabled)."
 waitForServerReady
 
 # Use the Wildfly CLI to configure the server.
+# This has to be run first as until it's done and the server has reloaded, any
+# attempts to add the `security-domain` will fail.
+# (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
+echo "Configuring server (resetting security domain)..."
+cat <<EOF |
+# Reset the application's security domain.
+if (outcome == success) of /subsystem=security/security-domain=bluebutton-data-server:read-resource
+	/subsystem=security/security-domain=bluebutton-data-server:remove
+
+	# Reload the server to apply those changes.
+	:reload
+end-if
+EOF
+"${serverHome}/bin/jboss-cli.sh" \
+	--controller=localhost:${managementPort} \
+	--connect \
+	--timeout=${serverConnectTimeoutMilliseconds} \
+	${cliArgsAuthentication} \
+	--file=/dev/stdin \
+	&>> "${serverHome}/server-config.log"
+echo "Server configured successfully (HTTPS enabled)."
+waitForServerReady
+
+# Use the Wildfly CLI to configure the server.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
 echo "Configuring server (everything else)..."
 cat <<EOF |
@@ -269,9 +293,6 @@ end-if
 /subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l %u %t \\"%r\\" \\"?%q\\" %s %B %D %{i,BlueButton-OriginalQueryId} %{i,BlueButton-OriginalQueryCounter} [%{i,BlueButton-OriginalQueryTimestamp}] %{i,BlueButton-DeveloperId} \\"%{i,BlueButton-Developer}\\" %{i,BlueButton-ApplicationId} \\"%{i,BlueButton-Application}\\" %{i,BlueButton-UserId} \\"%{i,BlueButton-User}\\" %{i,BlueButton-BeneficiaryId}", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
 
 # Configure the application's security domain.
-if (outcome == success) of /subsystem=security/security-domain=bluebutton-data-server:read-resource
-	/subsystem=security/security-domain=bluebutton-data-server:remove
-end-if
 /subsystem=security/security-domain=bluebutton-data-server:add(cache-type="default")
 /subsystem=security/security-domain=bluebutton-data-server/authentication=classic:add(login-modules=[{"code"=>"CertificateRoles","flag"=>"required","module-options"=>[("securityDomain"=>"bluebutton-data-server"),("verifier"=>"org.jboss.security.auth.certs.AnyCertVerifier"),("rolesProperties"=>"file:\${bbfhir.roles}")]}])
 /subsystem=security/security-domain=bluebutton-data-server/jsse=classic:add(truststore={password="changeit",url="file:${trustStore}"},keystore={password="changeit",url="file:${keyStore}"},client-auth=true)
