@@ -179,7 +179,12 @@ public enum StaticRifResource {
 
 	SAMPLE_MCT_BENES(resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
 
-	SAMPLE_MCT_PDE(resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, 40);
+	SAMPLE_MCT_PDE(resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, 40),
+
+	SAMPLE_MCT_BENES_UPDATE(resourceUrl("rif-static-samples/sample-mct-beneficiaries-update.txt"),
+			RifFileType.BENEFICIARY, 8),
+
+	SAMPLE_MCT_PDE_UPDATE(resourceUrl("rif-static-samples/sample-mct-pde-update.txt"), RifFileType.PDE, 40);
 
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
