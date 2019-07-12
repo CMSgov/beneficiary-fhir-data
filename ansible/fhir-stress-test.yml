@@ -168,6 +168,14 @@
         dest: "{{ hostvars['localhost']['results_path'].stdout }}/client-log-jmeter.txt"
         fail_on_missing: yes
         flat: yes
+     
+    - name: Collect console Log
+      ignore_errors: yes
+      fetch: 
+        src: "{{ remote_test_dir }}/log-jmeter-console.txt"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/client-log-jmeter-console.txt"
+        fail_on_missing: yes
+        flat: yes
         
 - name: Collect server logs
   hosts: servers
@@ -183,6 +191,14 @@
       fetch: 
         src: "{{ remote_test_dir }}/log-jmeter.txt"
         dest: "{{ hostvars['localhost']['results_path'].stdout }}/sever-log-jmeter.txt"
+        fail_on_missing: yes
+        flat: yes
+        
+    - name: Collect console Log
+      ignore_errors: yes
+      fetch: 
+        src: "{{ remote_test_dir }}/log-jmeter-console.txt"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/sever-log-jmeter-console.txt"
         fail_on_missing: yes
         flat: yes
 

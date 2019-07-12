@@ -19,12 +19,12 @@
           </elementProp>
           <elementProp name="proxy_host" elementType="Argument">
             <stringProp name="Argument.name">proxy_host</stringProp>
-            <stringProp name="Argument.value">${__P(proxy_host,null)}</stringProp>
+            <stringProp name="Argument.value">${__P(proxy_host,nat)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="proxy_port" elementType="Argument">
             <stringProp name="Argument.name">proxy_port</stringProp>
-            <stringProp name="Argument.value">${__P(proxy_port,0)}</stringProp>
+            <stringProp name="Argument.value">${__P(proxy_port,3128)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="riffile" elementType="Argument">

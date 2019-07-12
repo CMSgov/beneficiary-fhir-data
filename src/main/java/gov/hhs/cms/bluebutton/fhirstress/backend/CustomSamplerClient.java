@@ -55,8 +55,8 @@ public abstract class CustomSamplerClient extends AbstractJavaSamplerClient {
 		Arguments defaultParameters = new Arguments();
 		defaultParameters.addArgument(PARAM_SERVER, "https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir");
 		defaultParameters.addArgument(KEYSTORE_DIR, "/usr/local/bluebutton-jmeter-service/dev/ssl-stores");
-		defaultParameters.addArgument(PROXY_HOST, "null");
-		defaultParameters.addArgument(PROXY_PORT, "0");
+		defaultParameters.addArgument(PROXY_HOST, "nat");
+		defaultParameters.addArgument(PROXY_PORT, "3128");
 		defaultParameters.addArgument(RIFFILE, "beneficiary_test.rif");
 		defaultParameters.addArgument(RIFTYPE, "BENEFICIARY");
 		return defaultParameters;
