@@ -112,7 +112,7 @@
         region: "{{ aws_region }}"
         ec2_elbs: "{{ item }}"
         instance_id: "{{ ansible_ec2_instance_id }}"
-        state: absent
+        state: present
       delegate_to: localhost
       loop: "{{ ec2_elbs }}"
 
