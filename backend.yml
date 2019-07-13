@@ -46,7 +46,30 @@
 
 - name: Configure Data Server System
   hosts: data_server_systems
+  serial: 1 # only take one Data Server out of rotation at a time
+
+  # Needs to be specified here, as it's not configured properly on the host
+  # itself. (Note: `169.254.169.254` is the EC2 instance metadata address, per
+  # <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html>.)
+  environment:
+    no_proxy: 'localhost,169.254.169.254'
+    http_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
+    https_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
+
   tasks:
+
+    # This will set a bunch of facts, including `ansible_ec2_instance_id`, which we need.
+    - name: Gather EC2 Facts for Data Server
+      ec2_metadata_facts:
+
+    # This will also set the `ec2_elbs` fact, which we'll need below to re-add this instance.
+    - name: Remove Data Server from Load Balancers
+      elb_instance:
+        region: "{{ aws_region }}"
+        instance_id: "{{ ansible_ec2_instance_id }}"
+        state: absent
+      delegate_to: localhost
+
     - name: Apply Blue Button Data Server Role
       import_role:
         name: karlmdavis.bluebutton_data_server
@@ -72,6 +95,7 @@
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
         data_server_db_connections_max: 400
+
     - name: Copy Local Test SSL Keypair
       copy:
         # Note: This PEM file is encrypted within the project via Ansible Vault, which will
@@ -82,6 +106,15 @@
         group: root
         mode: 'u=rw,g=,o='
       become: true
+
+    - name: Add Data Server Back to Load Balancers
+      elb_instance:
+        region: "{{ aws_region }}"
+        ec2_elbs: "{{ item }}"
+        instance_id: "{{ ansible_ec2_instance_id }}"
+        state: absent
+      delegate_to: localhost
+      loop: "{{ ec2_elbs }}"
 
 - name: Configure Load Balancers
   import_playbook: load_balancers.yml

@@ -130,6 +130,7 @@ stage('Deploy to TEST') {
 			}
 		}
 	} else {
+		echo 'Deployment skipped, likely due to being on a non-master branch.'
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to TEST')
 	}
 }
