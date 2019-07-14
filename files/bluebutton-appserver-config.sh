@@ -72,12 +72,12 @@ done
 
 # Verify that all required options were specified.
 if [[ -z "${serverHome}" ]]; then >&2 echo 'The --serverhome option is required.'; exit 1; fi
-if [[ -z "${httpsPort}" ]]; then >&2 echo 'The --httpsport option is required.'; exit 1; fi
-if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; exit 1; fi
-if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
-if [[ -z "${dbUrl}" ]]; then >&2 echo 'The --dburl option is required.'; exit 1; fi
-if [[ -z "${dbConnectionsMax}" ]]; then >&2 echo 'The --dbconnectionsmax option is required.'; exit 1; fi
-if [[ -z "${rolesPropertiesPath}" ]]; then >&2 echo 'The --rolesprops option is required.'; exit 1; fi
+if [[ -z "${httpsPort}" ]]; then echo 'The --httpsport option is required.' |& tee --append "${serverHome}/server-config.log"; exit 1; fi
+if [[ -z "${keyStore}" ]]; then echo 'The --keystore option is required.' |& tee --append "${serverHome}/server-config.log"; exit 1; fi
+if [[ -z "${trustStore}" ]]; then echo 'The --truststore option is required.' |& tee --append "${serverHome}/server-config.log"; exit 1; fi
+if [[ -z "${dbUrl}" ]]; then echo 'The --dburl option is required.' |& tee --append "${serverHome}/server-config.log"; exit 1; fi
+if [[ -z "${dbConnectionsMax}" ]]; then echo 'The --dbconnectionsmax option is required.' |& tee --append "${serverHome}/server-config.log"; exit 1; fi
+if [[ -z "${rolesPropertiesPath}" ]]; then echo 'The --rolesprops option is required.' |& tee --append "${serverHome}/server-config.log"; exit 1; fi
 
 # Exit immediately if something fails.
 error() {
@@ -86,9 +86,9 @@ error() {
 	local code="${3:-1}"
 
 	if [[ -n "$message" ]] ; then
-		>&2 echo "Error on or near line ${parent_lineno}: ${message}; exiting with status ${code}"
+		echo "Error on or near line ${parent_lineno}: ${message}; exiting with status ${code}" |& tee --append "${serverHome}/server-config.log"
 	else
-		>&2 echo "Error on or near line ${parent_lineno}; exiting with status ${code}"
+		echo "Error on or near line ${parent_lineno}; exiting with status ${code}" |& tee --append "${serverHome}/server-config.log"
 	fi
 
 	exit "${code}"
@@ -98,7 +98,7 @@ trap 'error ${LINENO}' ERR
 # Check for required files.
 for f in "${serverHome}/bin/jboss-cli.sh" "${keyStore}" "${trustStore}" "${rolesPropertiesPath}"; do
 	if [[ ! -f "${f}" ]]; then
-		>&2 echo "The following file is required but is missing: '${f}'."
+		echo "The following file is required but is missing: '${f}'." |& tee --append "${serverHome}/server-config.log"
 		exit 1
 	fi
 done
@@ -141,7 +141,7 @@ waitForServerReady
 # This has to be run first as until it's done and the server has reloaded, any 
 # attempts to add an `https-listener` will fail.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
-echo "Configuring server (enabling HTTPS)..."
+echo "Configuring server (enabling HTTPS)..." |& tee --append "${serverHome}/server-config.log"
 cat <<EOF |
 # Enable HTTPS.
 if (outcome != success) of /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:read-resource
@@ -158,14 +158,14 @@ EOF
 	${cliArgsAuthentication} \
 	--file=/dev/stdin \
 	&>> "${serverHome}/server-config.log"
-echo "Server configured successfully (HTTPS enabled)."
+echo "Server configured successfully (HTTPS enabled)." |& tee --append "${serverHome}/server-config.log"
 waitForServerReady
 
 # Use the Wildfly CLI to configure the server.
 # This has to be run first as until it's done and the server has reloaded, any
 # attempts to add the `security-domain` will fail.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
-echo "Configuring server (resetting security domain)..."
+echo "Configuring server (resetting security domain)..." |& tee --append "${serverHome}/server-config.log"
 cat <<EOF |
 # Reset the application's security domain.
 if (outcome == success) of /subsystem=security/security-domain=bluebutton-data-server:read-resource
@@ -182,12 +182,12 @@ EOF
 	${cliArgsAuthentication} \
 	--file=/dev/stdin \
 	&>> "${serverHome}/server-config.log"
-echo "Server configured successfully (HTTPS enabled)."
+echo "Server configured successfully (HTTPS enabled)." |& tee --append "${serverHome}/server-config.log"
 waitForServerReady
 
 # Use the Wildfly CLI to configure the server.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
-echo "Configuring server (everything else)..."
+echo "Configuring server (everything else)..." |& tee --append "${serverHome}/server-config.log"
 cat <<EOF |
 # Set applications to use SLF4J for the logging, rather than JBoss' builtin 
 # logger. See jboss-deployment-structure.xml for details.
@@ -311,6 +311,6 @@ EOF
 	${cliArgsAuthentication} \
 	--file=/dev/stdin \
 	&>> "${serverHome}/server-config.log"
-echo "Server configured successfully."
+echo "Server configured successfully." |& tee --append "${serverHome}/server-config.log"
 waitForServerReady
 
