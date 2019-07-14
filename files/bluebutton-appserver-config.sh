@@ -18,8 +18,8 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	-o h:m:U:P:s:k:t:u:n:p:c:r: \
-	--long serverhome:,managementport:,managementusername:,managementpassword:,httpsport:,keystore:,truststore:,dburl:,dbusername:,dbpassword:,dbconnectionsmax:,rolesprops: \
+	-o h:d:m:U:P:s:k:t:u:n:p:c:r: \
+	--long serverhome:,servicename:,managementport:,managementusername:,managementpassword:,httpsport:,keystore:,truststore:,dburl:,dbusername:,dbpassword:,dbconnectionsmax:,rolesprops: \
 	-n 'bluebutton-appserver-config.sh' -- "$@"`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -28,6 +28,7 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 serverHome=
+serviceName=
 managementPort=9990
 managementUsername=
 managementPassword=
@@ -43,6 +44,8 @@ while true; do
 	case "$1" in
 		-h | --serverhome )
 			serverHome="$2"; shift 2 ;;
+		-d | --servicename )
+			serviceName"$2"; shift 2 ;;
 		-m | --managementport )
 			managementPort="$2"; shift 2 ;;
 		-U | --managementusername )
@@ -72,6 +75,7 @@ done
 
 # Verify that all required options were specified.
 if [[ -z "${serverHome}" ]]; then >&2 echo 'The --serverhome option is required.'; exit 1; fi
+if [[ -z "${serviceName}" ]]; then echo 'The --servicename option is required.' |& tee --append "${serverHome}/server-config.log"; exit 1; fi
 if [[ -z "${httpsPort}" ]]; then >&2 echo 'The --httpsport option is required.'; exit 1; fi
 if [[ -z "${keyStore}" ]]; then >&2 echo 'The --keystore option is required.'; exit 1; fi
 if [[ -z "${trustStore}" ]]; then >&2 echo 'The --truststore option is required.'; exit 1; fi
@@ -133,46 +137,32 @@ waitForServerReady() {
 	done
 }
 
+# Define a function that can reload/restart the service and then wait for it to be ready.
+reloadServerAndWaitForReady() {
+	echo "Restarting '${serviceName}' service..." |& tee --append "${serverHome}/server-config.log"
+	systemctl restart "${serviceName}"
+	echo "Restarted '${serviceName}' service." |& tee --append "${serverHome}/server-config.log"
+	waitForServerReady
+}
+
 # Wait for the server to be ready, in case this script is being called right
 # after the server is started/restarted.
 waitForServerReady
 
 # Use the Wildfly CLI to configure the server.
-# This has to be run first as until it's done and the server has reloaded, any 
-# attempts to add an `https-listener` will fail.
+# These have to be run first as until they're done and the server has reloaded,
+# parts of the next big chunk of config may fail.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
 echo "Configuring server (enabling HTTPS)..."
 cat <<EOF |
 # Enable HTTPS.
 if (outcome != success) of /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:read-resource
 	/core-service=management/security-realm=ApplicationRealm/server-identity=ssl:add(keystore-path="${keyStore}",keystore-password="changeit",key-password="changeit")
-
-	# Reload the server to apply those changes.
-	:reload
 end-if
-EOF
-"${serverHome}/bin/jboss-cli.sh" \
-	--controller=localhost:${managementPort} \
-	--connect \
-	--timeout=${serverConnectTimeoutMilliseconds} \
-	${cliArgsAuthentication} \
-	--file=/dev/stdin \
-	&>> "${serverHome}/server-config.log"
-echo "Server configured successfully (HTTPS enabled)."
-waitForServerReady
 
-# Use the Wildfly CLI to configure the server.
-# This has to be run first as until it's done and the server has reloaded, any
-# attempts to add the `security-domain` will fail.
-# (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
-echo "Configuring server (resetting security domain)..."
-cat <<EOF |
 # Reset the application's security domain.
 if (outcome == success) of /subsystem=security/security-domain=bluebutton-data-server:read-resource
 	/subsystem=security/security-domain=bluebutton-data-server:remove
-
-	# Reload the server to apply those changes.
-	:reload
 end-if
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
@@ -183,7 +173,7 @@ EOF
 	--file=/dev/stdin \
 	&>> "${serverHome}/server-config.log"
 echo "Server configured successfully (HTTPS enabled)."
-waitForServerReady
+reloadServerAndWaitForReady
 
 # Use the Wildfly CLI to configure the server.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
@@ -300,9 +290,6 @@ end-if
 /subsystem=security/security-domain=bluebutton-data-server:add(cache-type="default")
 /subsystem=security/security-domain=bluebutton-data-server/authentication=classic:add(login-modules=[{"code"=>"CertificateRoles","flag"=>"required","module-options"=>[("securityDomain"=>"bluebutton-data-server"),("verifier"=>"org.jboss.security.auth.certs.AnyCertVerifier"),("rolesProperties"=>"file:${rolesPropertiesPath}")]}])
 /subsystem=security/security-domain=bluebutton-data-server/jsse=classic:add(truststore={password="changeit",url="file:${trustStore}"},keystore={password="changeit",url="file:${keyStore}"},client-auth=true)
-
-# Reload the server to apply those changes.
-:reload
 EOF
 "${serverHome}/bin/jboss-cli.sh" \
 	--controller=localhost:${managementPort} \
@@ -312,5 +299,5 @@ EOF
 	--file=/dev/stdin \
 	&>> "${serverHome}/server-config.log"
 echo "Server configured successfully."
-waitForServerReady
+reloadServerAndWaitForReady
 
