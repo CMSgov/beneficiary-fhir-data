@@ -173,7 +173,7 @@ EOF
 	--file=/dev/stdin \
 	&>> "${serverHome}/server-config.log"
 echo "Server configured successfully (enabled HTTPS and created security domain)." |& tee --append "${serverHome}/server-config.log"
-waitForServerReady
+reloadServerAndWaitForReady
 
 # Use the Wildfly CLI to configure the server.
 # (Note: This interesting use of heredocs is documented here: http://unix.stackexchange.com/a/168434)
