@@ -145,6 +145,8 @@ waitForServerReady
 # Notes:
 # * This interesting use of heredocs is documented here: <http://unix.stackexchange.com/a/168434>.
 # * The `:reload` CLI command must be called after (some) config changes.
+#     * It must be the last command in a config script, and
+#       `waitForServerReady` must be called right afterwards.
 #     * It may not be called from within an `if ... end-if` block, or any other
 #       block, as this will cause intermittent race condition errors.
 #     * A service restart may not be substituted for it, as that may cause
@@ -180,6 +182,8 @@ waitForServerReady
 # Notes:
 # * This interesting use of heredocs is documented here: <http://unix.stackexchange.com/a/168434>.
 # * The `:reload` CLI command must be called after (some) config changes.
+#     * It must be the last command in a config script, and
+#       `waitForServerReady` must be called right afterwards.
 #     * It may not be called from within an `if ... end-if` block, or any other
 #       block, as this will cause intermittent race condition errors.
 #     * A service restart may not be substituted for it, as that may cause
