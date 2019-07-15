@@ -1,6 +1,9 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -58,18 +61,26 @@ final class BeneficiaryTransformer {
 				.setValue(beneficiary.getHicn());
 
 		if (includeIdentifiers) {
-			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
-					.setValue(beneficiary.getHicnUnhashed().get());
+			List<String> unhashedHicns = new ArrayList<String>();
+			unhashedHicns.add(beneficiary.getHicnUnhashed().get());
 			for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
+				unhashedHicns.add(beneHistory.getHicnUnhashed().get());
+			}
+			List<String> unhashedHicnsNoDupes = unhashedHicns.stream().distinct().collect(Collectors.toList());
+			for (String hicn : unhashedHicnsNoDupes) {
 				patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
-						.setValue(beneHistory.getHicnUnhashed().get());
+						.setValue(hicn);
 			}
 
-			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-					.setValue(beneficiary.getMedicareBeneficiaryId().get());
+			List<String> unhashedMbis = new ArrayList<String>();
+			unhashedMbis.add(beneficiary.getMedicareBeneficiaryId().get());
 			for (MedicareBeneficiaryIdHistory mbiHistory : beneficiary.getMedicareBeneficiaryIdHistories()) {
+				unhashedMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
+			}
+			List<String> unhashedMbisNoDupes = unhashedMbis.stream().distinct().collect(Collectors.toList());
+			for (String mbi : unhashedMbisNoDupes) {
 				patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-						.setValue(mbiHistory.getMedicareBeneficiaryId().get());
+						.setValue(mbi);
 			}
 		}
 
