@@ -45,7 +45,7 @@ while true; do
 		-h | --serverhome )
 			serverHome="$2"; shift 2 ;;
 		-d | --servicename )
-			serviceName"$2"; shift 2 ;;
+			serviceName="$2"; shift 2 ;;
 		-m | --managementport )
 			managementPort="$2"; shift 2 ;;
 		-U | --managementusername )
