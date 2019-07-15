@@ -132,6 +132,7 @@
       ignore_errors: yes
       # Command Line Docs: http://jmeter.apache.org/usermanual/get-started.html
       command: "{{ remote_jmeter_dir }}/bin/jmeter -n -X 
+        -Djava.rmi.server.hostname={{ ansible_default_ipv4.address }}
         -Dclient.rmi.localport={{ jmeter_client_rmi_local_port }} 
         -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} 
         -Dserver_port={{ jmeter_server_port }} 
@@ -169,7 +170,7 @@
         fail_on_missing: yes
         flat: yes
      
-    - name: Collect console Log
+    - name: Collect console Logs
       ignore_errors: yes
       fetch: 
         src: "{{ remote_test_dir }}/log-jmeter-console.txt"
