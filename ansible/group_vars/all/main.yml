@@ -21,7 +21,7 @@ remote_jmeter_dir: "{{ remote_test_dir }}/apache-jmeter-{{ jmeter_version }}"
 # remote jmeter server port 
 jmeter_server_port: 1099
 # jmeter server remote method invocation(RMI) port, used for jmeter server communication
-jmeter_server_rmi_local_port: 4000 
+jmeter_server_rmi_local_port: 1099 
 # jmeter client remote method invocation(RMI) port, used for jmeter client communication
 jmeter_client_rmi_local_port: 4005
 # remote user to run jmeter
