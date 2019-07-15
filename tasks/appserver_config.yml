@@ -30,7 +30,7 @@
   become_user: "{{ data_server_user }}"
   no_log: true  # Ensure that the key args aren't logged if this command fails.
 
-# TODO: Export server's public cert and publish to S3 or somesuch (s0 the frontend and others can pick it up).
+# TODO: Export server's public cert and publish to S3 or somesuch (so the frontend and others can pick it up).
 
 - name: Secure App Server SSL Keystore
   file:
