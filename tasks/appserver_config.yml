@@ -118,6 +118,12 @@
     mode: u=rw,g=rw,o=r
   become: true
 
+- name: Start App Server Service
+  service:
+    name: "{{ data_server_appserver_service }}"
+    state: started
+  become: true
+
 # Need to ensure service is running (and has been restarted if needed) before config, as it needs the server to be available.
 - meta: flush_handlers
 
