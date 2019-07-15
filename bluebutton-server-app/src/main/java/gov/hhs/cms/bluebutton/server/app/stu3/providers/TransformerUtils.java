@@ -2854,7 +2854,11 @@ public final class TransformerUtils {
 	 */
 	public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
-		if (claimDrugCode.isEmpty())
+		/*
+		 * Handle bad data (e.g. our random test data) if drug code is empty or
+		 * length is less than 9 characters
+		 */
+		if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9)
 			return null;
 
 		/*
@@ -2869,10 +2873,8 @@ public final class TransformerUtils {
 		}
 
 		String claimDrugCodeReformatted = null;
-		// Handle bad data (e.g. our random test data).
-		if (claimDrugCode.length() == 9) {
-			claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
-		}
+
+		claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
 
 		if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
 			String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
