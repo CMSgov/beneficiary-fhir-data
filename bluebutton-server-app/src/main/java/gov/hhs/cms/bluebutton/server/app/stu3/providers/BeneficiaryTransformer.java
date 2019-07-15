@@ -29,7 +29,8 @@ final class BeneficiaryTransformer {
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
-	public static Patient transform(MetricRegistry metricRegistry, Beneficiary beneficiary, String includeIdentifiers) {
+	public static Patient transform(MetricRegistry metricRegistry, Beneficiary beneficiary,
+			Boolean includeIdentifiers) {
 		Timer.Context timer = metricRegistry
 				.timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform")).time();
 		Patient patient = transform(beneficiary, includeIdentifiers);
@@ -45,7 +46,7 @@ final class BeneficiaryTransformer {
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
-	private static Patient transform(Beneficiary beneficiary, String includeIdentifiers) {
+	private static Patient transform(Beneficiary beneficiary, Boolean includeIdentifiers) {
 		Objects.requireNonNull(beneficiary);
 
 		Patient patient = new Patient();
@@ -56,7 +57,7 @@ final class BeneficiaryTransformer {
 		patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
 				.setValue(beneficiary.getHicn());
 
-		if (Boolean.parseBoolean(includeIdentifiers) == true) {
+		if (includeIdentifiers) {
 			patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
 					.setValue(beneficiary.getHicnUnhashed().get());
 			for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {

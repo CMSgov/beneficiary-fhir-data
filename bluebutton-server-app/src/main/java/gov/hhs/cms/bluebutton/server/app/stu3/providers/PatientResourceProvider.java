@@ -134,9 +134,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 			timerBeneQuery.stop();
 		}
 
-		String includeIdentifiers = "false";
+		Boolean includeIdentifiers = false;
 		if ("true".equals(requestDetails.getHeader("IncludeIdentifiers")))
-			includeIdentifiers = "true";
+			includeIdentifiers = true;
 		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiers);
 		return patient;
 	}
@@ -310,9 +310,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 			throw new NoResultException();
 		}
 
-		String includeIdentifiers = "false";
+		Boolean includeIdentifiers = false;
 		if ("true".equals(requestDetails.getHeader("IncludeIdentifiers")))
-			includeIdentifiers = "true";
+			includeIdentifiers = true;
 		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiers);
 		return patient;
 	}

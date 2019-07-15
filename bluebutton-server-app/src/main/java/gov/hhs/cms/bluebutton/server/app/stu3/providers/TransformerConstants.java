@@ -228,13 +228,14 @@ public final class TransformerConstants {
 	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
 	 * store the unhashed version of each Medicare beneficiaries' HICN.
 	 */
-	public static final String CODING_BBAPI_BENE_HICN_UNHASHED = BASE_URL_BBAPI_RESOURCES + "/identifier/hicn-unhashed";
+	public static final String CODING_BBAPI_BENE_HICN_UNHASHED = "http://hl7.org/fhir/sid/us-medicare";
 
 	/**
 	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
-	 * store the each Medicare beneficiaries' medicare beneficiary id.
+	 * store the unhashed version of each Medicare beneficiaries' medicare
+	 * beneficiary id.
 	 */
-	public static final String CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED = BASE_URL_BBAPI_RESOURCES + "/identifier/mbi-unhashed";
+	public static final String CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED = "http://hl7.org/fhir/sid/us-mbi";
 
 	/**
 	 * The {@link #CODING_BBAPI_BENE_HICN_HASH} used in earlier versions of the API,

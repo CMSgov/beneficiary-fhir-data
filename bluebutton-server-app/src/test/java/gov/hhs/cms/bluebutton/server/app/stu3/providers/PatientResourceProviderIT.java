@@ -48,28 +48,6 @@ public final class PatientResourceProviderIT {
 	 * as expected for a {@link Patient} that does exist in the DB.
 	 */
 	@Test
-	public void readExistingPatientIncludeIdentifiersFalse() {
-		List<Object> loadedRecords = ServerTestUtils
-				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-		extraParamsInterceptor.setIncludeIdentifiers("false");
-		fhirClient.registerInterceptor(extraParamsInterceptor);
-
-		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
-				.findFirst().get();
-		Patient patient = fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
-
-		Assert.assertNotNull(patient);
-		BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
-	}
-
-	/**
-	 * Verifies that
-	 * {@link PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} works
-	 * as expected for a {@link Patient} that does exist in the DB.
-	 */
-	@Test
 	public void readExistingPatientIncludeIdentifiersTrue() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -84,6 +62,62 @@ public final class PatientResourceProviderIT {
 
 		Assert.assertNotNull(patient);
 		BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+
+		/*
+		 * Ensure the unhashed values for HICN and MBI are present.
+		 */
+		Boolean hicnUnhashedPresent = false;
+		Boolean mbiUnhashedPresent = false;
+		Iterator<Identifier> identifiers = patient.getIdentifier().iterator();
+		while (identifiers.hasNext()) {
+			Identifier identifier = identifiers.next();
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
+				hicnUnhashedPresent = true;
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+				mbiUnhashedPresent = true;
+		}
+
+		Assert.assertTrue(hicnUnhashedPresent);
+		Assert.assertTrue(mbiUnhashedPresent);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} works
+	 * as expected for a {@link Patient} that does exist in the DB.
+	 */
+	@Test
+	public void readExistingPatientIncludeIdentifiersFalse() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers("false");
+		fhirClient.registerInterceptor(extraParamsInterceptor);
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Patient patient = fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
+
+		Assert.assertNotNull(patient);
+		BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+
+		/*
+		 * Ensure the unhashed values for HICN and MBI are *not* present.
+		 */
+		Boolean hicnUnhashedPresent = false;
+		Boolean mbiUnhashedPresent = false;
+		Iterator<Identifier> identifiers = patient.getIdentifier().iterator();
+		while (identifiers.hasNext()) {
+			Identifier identifier = identifiers.next();
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
+				hicnUnhashedPresent = true;
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+				mbiUnhashedPresent = true;
+		}
+
+		Assert.assertFalse(hicnUnhashedPresent);
+		Assert.assertFalse(mbiUnhashedPresent);
 	}
 
 	/**
@@ -138,7 +172,7 @@ public final class PatientResourceProviderIT {
 	 * identifiers to return the unhashed HICN and MBI.
 	 */
 	@Test
-	public void searchForExistingPatientByLogicalIdIncludeIdentifiers() {
+	public void searchForExistingPatientByLogicalIdIncludeIdentifiersTrue() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -171,6 +205,48 @@ public final class PatientResourceProviderIT {
 
 		Assert.assertTrue(hicnUnhashedPresent);
 		Assert.assertTrue(mbiUnhashedPresent);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, including
+	 * identifiers to return the unhashed HICN and MBI.
+	 */
+	@Test
+	public void searchForExistingPatientByLogicalIdIncludeIdentifiersFalse() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers("false");
+		fhirClient.registerInterceptor(extraParamsInterceptor);
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Bundle searchResults = fhirClient.search().forResource(Patient.class)
+				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+
+		/*
+		 * Ensure the unhashed values for HICN and MBI are *not* present.
+		 */
+		Boolean hicnUnhashedPresent = false;
+		Boolean mbiUnhashedPresent = false;
+		Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
+		while (identifiers.hasNext()) {
+			Identifier identifier = identifiers.next();
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
+				hicnUnhashedPresent = true;
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+				mbiUnhashedPresent = true;
+		}
+
+		Assert.assertFalse(hicnUnhashedPresent);
+		Assert.assertFalse(mbiUnhashedPresent);
 	}
 
 	/**
@@ -261,7 +337,7 @@ public final class PatientResourceProviderIT {
 	 * identifiers to return the unhashed HICN and MBI.
 	 */
 	@Test
-	public void searchForExistingPatientByHicnHashIncludeIdentifiers() {
+	public void searchForExistingPatientByHicnHashIncludeIdentifiersTrue() {
 		List<Object> loadedRecords = ServerTestUtils
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
@@ -295,6 +371,49 @@ public final class PatientResourceProviderIT {
 
 		Assert.assertTrue(hicnUnhashedPresent);
 		Assert.assertTrue(mbiUnhashedPresent);
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, including
+	 * identifiers to return the unhashed HICN and MBI.
+	 */
+	@Test
+	public void searchForExistingPatientByHicnHashIncludeIdentifiersFalse() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers("false");
+		fhirClient.registerInterceptor(extraParamsInterceptor);
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Bundle searchResults = fhirClient.search().forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly()
+						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+		Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+
+		/*
+		 * Ensure the unhashed values for HICN and MBI are *not* present.
+		 */
+		Boolean hicnUnhashedPresent = false;
+		Boolean mbiUnhashedPresent = false;
+		Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
+		while (identifiers.hasNext()) {
+			Identifier identifier = identifiers.next();
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
+				hicnUnhashedPresent = true;
+			if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+				mbiUnhashedPresent = true;
+		}
+
+		Assert.assertFalse(hicnUnhashedPresent);
+		Assert.assertFalse(mbiUnhashedPresent);
 	}
 
 	/**
