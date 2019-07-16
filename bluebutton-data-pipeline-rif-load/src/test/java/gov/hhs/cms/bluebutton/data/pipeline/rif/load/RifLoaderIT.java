@@ -129,6 +129,8 @@ public final class RifLoaderIT {
 	@Test
 	public void loadSampleMctData() {
 		loadSample(StaticRifResourceGroup.SAMPLE_MCT);
+		loadSample(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
+		loadSample(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
 	}
 
 	/**
