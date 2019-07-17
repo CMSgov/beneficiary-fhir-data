@@ -142,7 +142,7 @@
         -R{{ hostvars | get_members(groups, 'servers') | map(attribute='ansible_fqdn') | list | join(',') }}
         -H{{ vault_proxy_host }}
         -P{{ vault_proxy_port }}
-        -Jfhir_server={{ fhir_server }} 
+        -Gfhir_server={{ fhir_server }} 
         -Jthread_count={{ thread_count }} 
         -Jthread_loops={{ thread_loops }} 
         -Gcontinue_forever={{ continue_forever | bool | lower }} 
