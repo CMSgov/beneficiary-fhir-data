@@ -123,8 +123,11 @@ final class SNFClaimTransformer {
 				claimGroup.getAttendingPhysicianNpi(), claimGroup.getTotalChargeAmount(),
 				claimGroup.getPrimaryPayerPaidAmount(), claimGroup.getFiscalIntermediaryNumber());
 
-		TransformerUtils.addDiagnosisCode(eob, Diagnosis.from(claimGroup.getDiagnosisAdmittingCode(),
-				claimGroup.getDiagnosisAdmittingCodeVersion(), DiagnosisLabel.ADMITTING).get());
+		Optional<Diagnosis> admittingDiagnosis = Diagnosis.from(claimGroup.getDiagnosisAdmittingCode(),
+				claimGroup.getDiagnosisAdmittingCodeVersion(), DiagnosisLabel.ADMITTING);
+		if (admittingDiagnosis.isPresent()) {
+			TransformerUtils.addDiagnosisCode(eob, admittingDiagnosis.get());
+		}
 
 		for (Diagnosis diagnosis : TransformerUtils.extractDiagnoses1Thru12(claimGroup.getDiagnosisPrincipalCode(),
 				claimGroup.getDiagnosisPrincipalCodeVersion(), claimGroup.getDiagnosis1Code(),
