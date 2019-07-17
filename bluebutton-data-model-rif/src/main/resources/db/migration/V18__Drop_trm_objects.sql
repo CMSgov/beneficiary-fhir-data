@@ -1,5 +1,6 @@
 /*
- * Drops all trm objects
+ * Drops all trm objects  
+ * These tables are from HAPI's JPA layer, which we're no longer using. 
  */
 
 -- DROP trm_* TABLES FROM PROD------------------------------
