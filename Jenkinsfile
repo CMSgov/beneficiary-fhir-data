@@ -131,10 +131,6 @@ stage('Test the Prod ENV') {
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Test the Prod ENV')
 	}
 }
-    
-stage('Process Results') {
-	archiveArtifacts artifacts: 'ansible/results/**/*', fingerprint: true
-}
 
 
 /**
