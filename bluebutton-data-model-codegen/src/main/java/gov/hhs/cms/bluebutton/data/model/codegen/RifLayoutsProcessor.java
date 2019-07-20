@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,8 +56,6 @@ import javax.tools.StandardLocation;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
@@ -185,9 +184,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntityAdditionalDatabaseFields(
 							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
 					.setInnerJoinRelationship(Arrays.asList(
-							new InnerJoinRelationship("beneficiaryId", "beneficiaryId", "BeneficiaryHistory",
+							new InnerJoinRelationship("beneficiaryId", null, "BeneficiaryHistory",
 									"beneficiaryHistories"),
-							new InnerJoinRelationship("beneficiaryId", "beneficiaryId", "MedicareBeneficiaryIdHistory",
+							new InnerJoinRelationship("beneficiaryId", null, "MedicareBeneficiaryIdHistory",
 									"medicareBeneficiaryIdHistories")))
 					.setHasLines(false));
 			/*
@@ -565,18 +564,27 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				ClassName childEntity = mappingSpec.getClassName(relationship.getChildEntity());
 				String childFieldName = relationship.getChildField();
 
-				ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
-						childEntity);
+				Class<?> fieldDeclaredType;
+				Class<?> fieldActualType;
+				if (orderBy != null) {
+					fieldDeclaredType = List.class;
+					fieldActualType = LinkedList.class;
+				} else {
+					fieldDeclaredType = Set.class;
+					fieldActualType = HashSet.class;
+				}
 
+				ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(fieldDeclaredType),
+						childEntity);
 				FieldSpec.Builder childField = FieldSpec.builder(childFieldType, childFieldName, Modifier.PRIVATE)
-						.initializer("new $T<>()", LinkedList.class);
+						.initializer("new $T<>()", fieldActualType);
 				childField.addAnnotation(AnnotationSpec.builder(OneToMany.class).addMember("mappedBy", "$S", mappedBy)
-						.addMember("orphanRemoval", "$L", false).addMember("cascade", "$T.ALL", CascadeType.class)
+						.addMember("orphanRemoval", "$L", false).addMember("fetch", "$T.LAZY", FetchType.class)
+						.addMember("cascade", "$T.ALL", CascadeType.class)
 						.build());
-				childField.addAnnotation(AnnotationSpec.builder(LazyCollection.class)
-						.addMember("value", "$T.FALSE", LazyCollectionOption.class).build());
-				childField.addAnnotation(
-						AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", orderBy + " ASC").build());
+				if (orderBy != null)
+					childField.addAnnotation(
+							AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", orderBy + " ASC").build());
 				headerEntityClass.addField(childField.build());
 
 				MethodSpec childGetter = MethodSpec.methodBuilder("get" + capitalize(childFieldName))
