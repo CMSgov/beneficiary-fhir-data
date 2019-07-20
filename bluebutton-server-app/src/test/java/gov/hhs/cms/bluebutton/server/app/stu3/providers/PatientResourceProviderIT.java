@@ -18,6 +18,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 
 /**
  * Integration tests for {@link PatientResourceProvider}.
@@ -53,7 +54,7 @@ public final class PatientResourceProviderIT {
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-		extraParamsInterceptor.setIncludeIdentifiers("true");
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
 		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -92,7 +93,7 @@ public final class PatientResourceProviderIT {
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-		extraParamsInterceptor.setIncludeIdentifiers("false");
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
 		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -177,7 +178,7 @@ public final class PatientResourceProviderIT {
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-		extraParamsInterceptor.setIncludeIdentifiers("true");
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
 		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -219,7 +220,7 @@ public final class PatientResourceProviderIT {
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-		extraParamsInterceptor.setIncludeIdentifiers("false");
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
 		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -342,7 +343,7 @@ public final class PatientResourceProviderIT {
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-		extraParamsInterceptor.setIncludeIdentifiers("true");
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
 		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
@@ -385,7 +386,7 @@ public final class PatientResourceProviderIT {
 				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-		extraParamsInterceptor.setIncludeIdentifiers("false");
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
 		fhirClient.registerInterceptor(extraParamsInterceptor);
 
 		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)

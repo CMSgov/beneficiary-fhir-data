@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 
 /**
  * An interceptor class to add headers to requests for supplying additional
@@ -15,11 +16,12 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
  */
 public class ExtraParamsInterceptor implements IClientInterceptor {
 
-	private String includeIdentifiers = "false";
+	private IncludeIdentifiersMode includeIdentifiersMode = IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS;
 
 	@Override
 	public void interceptRequest(IHttpRequest theRequest) {
-		theRequest.addHeader("IncludeIdentifiers", this.includeIdentifiers);
+		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS)
+			theRequest.addHeader(IncludeIdentifiersMode.HEADER_NAME_INCLUDE_IDENTIFIERS, Boolean.TRUE.toString());
 	}
 
 	@Override
@@ -28,8 +30,7 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
 
 	}
 
-	public void setIncludeIdentifiers(String includeIdentifiers) {
-		this.includeIdentifiers = includeIdentifiers;
+	public void setIncludeIdentifiers(IncludeIdentifiersMode includeIdentifiersMode) {
+		this.includeIdentifiersMode = includeIdentifiersMode;
 	}
-
 }

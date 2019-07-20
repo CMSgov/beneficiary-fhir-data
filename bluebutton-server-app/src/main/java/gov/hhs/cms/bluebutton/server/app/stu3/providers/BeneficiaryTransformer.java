@@ -17,6 +17,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 
 /**
  * Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient}
@@ -24,32 +25,29 @@ import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
  */
 final class BeneficiaryTransformer {
 	/**
-	 * @param metricRegistry
-	 *            the {@link MetricRegistry} to use
-	 * @param beneficiary
-	 *            the CCW {@link Beneficiary} to transform
-	 * @param includeIdentifiers
+	 * @param metricRegistry         the {@link MetricRegistry} to use
+	 * @param beneficiary            the CCW {@link Beneficiary} to transform
+	 * @param includeIdentifiersMode the {@link IncludeIdentifiersMode} to use
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
 	public static Patient transform(MetricRegistry metricRegistry, Beneficiary beneficiary,
-			Boolean includeIdentifiers) {
+			IncludeIdentifiersMode includeIdentifiersMode) {
 		Timer.Context timer = metricRegistry
 				.timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform")).time();
-		Patient patient = transform(beneficiary, includeIdentifiers);
+		Patient patient = transform(beneficiary, includeIdentifiersMode);
 		timer.stop();
 
 		return patient;
 	}
 
 	/**
-	 * @param beneficiary
-	 *            the CCW {@link Beneficiary} to transform
-	 * @param includeIdentifiers
+	 * @param beneficiary            the CCW {@link Beneficiary} to transform
+	 * @param includeIdentifiersMode the {@link IncludeIdentifiersMode} to use
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
-	private static Patient transform(Beneficiary beneficiary, Boolean includeIdentifiers) {
+	private static Patient transform(Beneficiary beneficiary, IncludeIdentifiersMode includeIdentifiersMode) {
 		Objects.requireNonNull(beneficiary);
 
 		Patient patient = new Patient();
@@ -60,7 +58,7 @@ final class BeneficiaryTransformer {
 		patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
 				.setValue(beneficiary.getHicn());
 
-		if (includeIdentifiers) {
+		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
 			List<String> unhashedHicns = new ArrayList<String>();
 			unhashedHicns.add(beneficiary.getHicnUnhashed().get());
 			for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {

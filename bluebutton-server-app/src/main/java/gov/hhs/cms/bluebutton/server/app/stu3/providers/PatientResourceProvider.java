@@ -113,15 +113,21 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (beneIdText == null || beneIdText.trim().isEmpty())
 			throw new IllegalArgumentException();
 
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-
 		Timer.Context timerBeneQuery = metricRegistry
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
-		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
 
+		IncludeIdentifiersMode includeIdentifiersMode = IncludeIdentifiersMode
+				.determineIncludeIdentifiersMode(requestDetails);
+
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
 		Root<Beneficiary> root = criteria.from(Beneficiary.class);
-		root.join(Beneficiary_.beneficiaryHistories);
-		root.join(Beneficiary_.medicareBeneficiaryIdHistories);
+		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			// For efficiency, grab these relations in the same query.
+			// For security, only grab them when needed.
+			root.fetch(Beneficiary_.beneficiaryHistories);
+			root.fetch(Beneficiary_.medicareBeneficiaryIdHistories);
+		}
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
 
@@ -134,10 +140,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 			timerBeneQuery.stop();
 		}
 
-		Boolean includeIdentifiers = false;
-		if ("true".equals(requestDetails.getHeader("IncludeIdentifiers")))
-			includeIdentifiers = true;
-		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiers);
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersMode);
 		return patient;
 	}
 
@@ -305,15 +308,53 @@ public final class PatientResourceProvider implements IResourceProvider {
 		 * table, we watch out for cases where a matching Beneficiary can't be found
 		 * (again: data is always dirty).
 		 */
-		Beneficiary beneficiary = entityManager.find(Beneficiary.class, matchingBeneficiaryIds.iterator().next());
-		if (beneficiary == null) {
-			throw new NoResultException();
+		String beneIdText = matchingBeneficiaryIds.iterator().next();
+		IncludeIdentifiersMode includeIdentifiersMode = IncludeIdentifiersMode
+				.determineIncludeIdentifiersMode(requestDetails);
+		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+		Root<Beneficiary> root = criteria.from(Beneficiary.class);
+		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			// For efficiency, grab these relations in the same query.
+			// For security, only grab them when needed.
+			root.fetch(Beneficiary_.beneficiaryHistories);
+			root.fetch(Beneficiary_.medicareBeneficiaryIdHistories);
+		}
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
+		Beneficiary beneficiary = null;
+		try {
+			beneficiary = entityManager.createQuery(criteria).getSingleResult();
+		} catch (NoResultException e) {
+			throw new ResourceNotFoundException(beneIdText);
 		}
 
-		Boolean includeIdentifiers = false;
-		if ("true".equals(requestDetails.getHeader("IncludeIdentifiers")))
-			includeIdentifiers = true;
-		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiers);
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersMode);
 		return patient;
+	}
+
+	/**
+	 * Enumerates the supported "should we include unique beneficiary identifiers"
+	 * options.
+	 */
+	public static enum IncludeIdentifiersMode {
+		INCLUDE_HICNS_AND_MBIS,
+
+		OMIT_HICNS_AND_MBIS;
+
+		/**
+		 * The header key used to determine which {@link IncludeIdentifiersMode} mode should
+		 * be used. See {@link #determineIncludeIdentifiersMode(RequestDetails)} for
+		 * details.
+		 */
+		public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
+
+		static IncludeIdentifiersMode determineIncludeIdentifiersMode(RequestDetails requestDetails) {
+			String includeIdentifiersValue = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
+			if (Boolean.parseBoolean(includeIdentifiersValue) == true) {
+				return INCLUDE_HICNS_AND_MBIS;
+			} else {
+				return OMIT_HICNS_AND_MBIS;
+			}
+		}
 	}
 }
