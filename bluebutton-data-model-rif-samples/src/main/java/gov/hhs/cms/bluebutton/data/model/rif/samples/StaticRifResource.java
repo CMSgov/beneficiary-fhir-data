@@ -184,8 +184,14 @@ public enum StaticRifResource {
 	SAMPLE_MCT_BENES_UPDATE(resourceUrl("rif-static-samples/sample-mct-beneficiaries-update.txt"),
 			RifFileType.BENEFICIARY, 8),
 
-	SAMPLE_MCT_PDE_UPDATE(resourceUrl("rif-static-samples/sample-mct-pde-update.txt"), RifFileType.PDE, 40);
+	SAMPLE_MCT_PDE_UPDATE(resourceUrl("rif-static-samples/sample-mct-pde-update.txt"), RifFileType.PDE, 40),
+	
+	SAMPLE_HICN_MULT_BENES(resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaries.txt"),
+			RifFileType.BENEFICIARY, 9),
 
+	SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY(resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaryhistory.txt"),
+			RifFileType.BENEFICIARY_HISTORY, 7);
+	
 	private final Supplier<URL> resourceUrlSupplier;
 	private final RifFileType rifFileType;
 	private final int recordCount;

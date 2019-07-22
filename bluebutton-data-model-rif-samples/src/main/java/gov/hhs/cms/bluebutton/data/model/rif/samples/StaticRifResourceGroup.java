@@ -44,7 +44,10 @@ public enum StaticRifResourceGroup {
 
 	SAMPLE_MCT_UPDATE_1(StaticRifResource.SAMPLE_MCT_BENES_UPDATE),
 
-	SAMPLE_MCT_UPDATE_2(StaticRifResource.SAMPLE_MCT_PDE_UPDATE);
+	SAMPLE_MCT_UPDATE_2(StaticRifResource.SAMPLE_MCT_PDE_UPDATE),
+	
+	SAMPLE_HICN_MULT_BENES(StaticRifResource.SAMPLE_HICN_MULT_BENES,
+			StaticRifResource.SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY);
 
 	private final StaticRifResource[] resources;
 
