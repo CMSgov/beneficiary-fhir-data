@@ -14,7 +14,7 @@
  */
 create table "BeneficiariesHistoryInvalidBeneficiaries" (
   "beneficiaryHistoryId" bigint not null,
-  "beneficiaryId" varchar(15) not null,
+  "beneficiaryId" varchar(15),
   "birthDate" date not null,
   "hicn" varchar(64) not null,
   "sex" char(1) not null,
@@ -26,22 +26,22 @@ ${logic.tablespaces-escape} tablespace "beneficiaries_ts"
 ;
 insert into "BeneficiariesHistoryInvalidBeneficiaries"
   select
-    "beneficiaryHistoryId",
-  	"beneficiaryId",
-  	"birthDate",
-  	"hicn",
-  	"sex",
-  	"hicnUnhashed",
-  	"medicareBeneficiaryId"
+    "BeneficiariesHistory"."beneficiaryHistoryId",
+  	"Beneficiaries"."beneficiaryId",
+  	"BeneficiariesHistory"."birthDate",
+  	"BeneficiariesHistory"."hicn",
+  	"BeneficiariesHistory"."sex",
+  	"BeneficiariesHistory"."hicnUnhashed",
+  	"BeneficiariesHistory"."medicareBeneficiaryId"
     from "BeneficiariesHistory"
     left join "Beneficiaries"
       on "BeneficiariesHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId"
     where "Beneficiaries"."beneficiaryId" is NULL;
 delete
   from "BeneficiariesHistory"
-  where not exists (select "beneficiaryId"
-  					from "Beneficiaries"
-  					where "BeneficiariesHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId");
+  where exists (select 1 
+  				from "BeneficiariesHistoryInvalidBeneficiaries"
+  				where "BeneficiariesHistoryInvalidBeneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId");
 
 alter table "BeneficiariesHistory" 
   add constraint "BeneficiariesHistory_beneficiaryId_to_Beneficiary" 
@@ -52,7 +52,7 @@ alter table "BeneficiariesHistory"
 -- record to a separate table, just as we did with BeneficiariesHistory entries above.
 create table "MedicareBeneficiaryIdHistoryInvalidBeneficiaries" (
   "medicareBeneficiaryIdKey" numeric not null,
-  "beneficiaryId" numeric,
+  "beneficiaryId" varchar(15),
   "claimAccountNumber" varchar(9),
   "beneficiaryIdCode" varchar(2),
   "mbiSequenceNumber" numeric,
@@ -73,31 +73,31 @@ ${logic.tablespaces-escape} tablespace "beneficiaries_ts"
 ;
 insert into "MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
   select
-    "medicareBeneficiaryIdKey",
-  	"beneficiaryId",
-  	"claimAccountNumber",
-  	"beneficiaryIdCode",
-  	"mbiSequenceNumber",
- 	"medicareBeneficiaryId",
- 	"mbiEffectiveDate",
- 	"mbiEndDate",
- 	"mbiEffectiveReasonCode",
- 	"mbiEndReasonCode",
- 	"mbiCardRequestDate",
-	"mbiAddUser",
- 	"mbiAddDate",
- 	"mbiUpdateUser",
-	"mbiUpdateDate",
- 	"mbiCrntRecIndId"
+    "MedicareBeneficiaryIdHistory"."medicareBeneficiaryIdKey",
+  	"Beneficiaries"."beneficiaryId",
+  	"MedicareBeneficiaryIdHistory"."claimAccountNumber",
+  	"MedicareBeneficiaryIdHistory"."beneficiaryIdCode",
+  	"MedicareBeneficiaryIdHistory"."mbiSequenceNumber",
+ 	"MedicareBeneficiaryIdHistory"."medicareBeneficiaryId",
+ 	"MedicareBeneficiaryIdHistory"."mbiEffectiveDate",
+ 	"MedicareBeneficiaryIdHistory"."mbiEndDate",
+ 	"MedicareBeneficiaryIdHistory"."mbiEffectiveReasonCode",
+ 	"MedicareBeneficiaryIdHistory"."mbiEndReasonCode",
+ 	"MedicareBeneficiaryIdHistory"."mbiCardRequestDate",
+	"MedicareBeneficiaryIdHistory"."mbiAddUser",
+ 	"MedicareBeneficiaryIdHistory"."mbiAddDate",
+ 	"MedicareBeneficiaryIdHistory"."mbiUpdateUser",
+	"MedicareBeneficiaryIdHistory"."mbiUpdateDate",
+ 	"MedicareBeneficiaryIdHistory"."mbiCrntRecIndId"
     from "MedicareBeneficiaryIdHistory"
     left join "Beneficiaries"
       on "MedicareBeneficiaryIdHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId"
     where "Beneficiaries"."beneficiaryId" is NULL;
 delete
   from "MedicareBeneficiaryIdHistory"
-  where not exists (select "beneficiaryId"
-  					from "Beneficiaries"
-  					where "MedicareBeneficiaryIdHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId");
+  where exists (select 1
+  				from "MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
+  				where "MedicareBeneficiaryIdHistoryInvalidBeneficiaries"."beneficiaryId" = "MedicareBeneficiaryIdHistory"."beneficiaryId");
 
 alter table "MedicareBeneficiaryIdHistory" 
    add constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary" 
