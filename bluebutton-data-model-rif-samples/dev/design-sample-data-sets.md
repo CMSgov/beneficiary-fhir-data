@@ -16,7 +16,7 @@ Some notes:
     * It's very important to have "safe" sample/test data in production! This enables all sorts of best practices around testing code in its actual habitat.
     * Note that most of our sample/test data sets do not yet conform to this best practice.
 
-### Identifier Ranges    
+### Identifier Ranges
 
 The following table details the key ranges for all known sample and production data sets.
 
@@ -44,6 +44,8 @@ The following table details the ideal/desired key ranges for all known sample an
 |Random      |`T10000000A` - `T99999999A`                       |`-10000000` - `-99999999`|`-1000000000` - `-999999999999`|`-1000000000` - `-999999999999`|
 |Synthetic   |`T01000000A` - `T01999999A`                       | `-1000000` -  `-1999999`| `-100000000` -    `-199999999`| `-100000000` -    `-199999999`|
 |`SAMPLE_MCT`|`MBP000201A` - `MBP000210A`                       |     `-201` -      `-210`|       `-240` -          `-279`|       `-240` -          `-279`|
+|`SAMPLE_MCT_RRB_PRE1964`|`{0099190316`|`-99190316`|`-300 - -301`|`-300 - -301`|
+|`SAMPLE_MCT_RRB_POST1964`|`B3499290814`|`3499290814`|`-302 - -305`|`-302 - -305`|
 
 ## Sample Data Set Details
 
@@ -66,7 +68,7 @@ It was created via the following process:
 **Location**: The synthetic data is large enough that it needs to be stored in S3. Because it's certified as not containing PII or PHI, it's stored in a *public* S3 bucket. There have been multiple iterations of this data set:
 
 1. The original data set can be downloaded using the following command:
-    
+
     ```
     $ wget \
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z/0_manifest.xml \
@@ -95,9 +97,9 @@ It was created via the following process:
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z/synthetic-pde-2015.rif \
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z/synthetic-pde-2016.rif
     ```
-    
+
 2. A "fixed" version was produced via the [SyntheticDataFixer](https://github.com/CMSgov/bluebutton-data-pipeline/blob/master/bluebutton-data-pipeline-rif-extract/src/test/java/gov/hhs/cms/bluebutton/datapipeline/rif/extract/synthetic/SyntheticDataFixer.java) utility. That data set can be downloaded using the following command:
-    
+
     ```
     $ wget \
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed/0_manifest.xml \
@@ -126,9 +128,9 @@ It was created via the following process:
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed/synthetic-pde-2015.rif \
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed/synthetic-pde-2016.rif
     ```
-    
+
 3. A "fixed with negative IDs" version was produced via the [SyntheticDataFixer2](https://github.com/CMSgov/bluebutton-data-pipeline/blob/master/bluebutton-data-pipeline-rif-extract/src/test/java/gov/hhs/cms/bluebutton/datapipeline/rif/extract/synthetic/SyntheticDataFixer2.java) utility. That data set can be downloaded using the following command:
-    
+
     ```
     $ wget \
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed-with-negative-ids/0_manifest.xml \
@@ -157,7 +159,7 @@ It was created via the following process:
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed-with-negative-ids/synthetic-pde-2015.rif \
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed-with-negative-ids/synthetic-pde-2016.rif
     ```
-    
+
 
 The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/bluebutton-data-model:bluebutton-data-model-rif-samples/dev](https://github.com/CMSgov/bluebutton-data-model/tree/master/bluebutton-data-model-rif-samples/dev).
 
