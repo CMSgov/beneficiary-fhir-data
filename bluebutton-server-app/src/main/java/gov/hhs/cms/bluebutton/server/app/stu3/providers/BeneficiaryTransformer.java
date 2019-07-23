@@ -6,7 +6,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import com.codahale.metrics.MetricRegistry;
@@ -59,26 +61,36 @@ final class BeneficiaryTransformer {
 				.setValue(beneficiary.getHicn());
 
 		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			Extension currentIdentifier = TransformerUtils
+					.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
+			
+			addUnhashedIdentifier(patient, beneficiary.getHicnUnhashed().get(),
+					TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, currentIdentifier);
+
+			addUnhashedIdentifier(patient, beneficiary.getMedicareBeneficiaryId().get(),
+					TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, currentIdentifier);
+
+			Extension historicalIdentifier = TransformerUtils
+					.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+
 			List<String> unhashedHicns = new ArrayList<String>();
-			unhashedHicns.add(beneficiary.getHicnUnhashed().get());
 			for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
 				unhashedHicns.add(beneHistory.getHicnUnhashed().get());
 			}
 			List<String> unhashedHicnsNoDupes = unhashedHicns.stream().distinct().collect(Collectors.toList());
 			for (String hicn : unhashedHicnsNoDupes) {
-				patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED)
-						.setValue(hicn);
+				addUnhashedIdentifier(patient, hicn, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+						historicalIdentifier);
 			}
 
 			List<String> unhashedMbis = new ArrayList<String>();
-			unhashedMbis.add(beneficiary.getMedicareBeneficiaryId().get());
 			for (MedicareBeneficiaryIdHistory mbiHistory : beneficiary.getMedicareBeneficiaryIdHistories()) {
 				unhashedMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
 			}
 			List<String> unhashedMbisNoDupes = unhashedMbis.stream().distinct().collect(Collectors.toList());
 			for (String mbi : unhashedMbisNoDupes) {
-				patient.addIdentifier().setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-						.setValue(mbi);
+				addUnhashedIdentifier(patient, mbi, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+						historicalIdentifier);
 			}
 		}
 
@@ -111,5 +123,29 @@ final class BeneficiaryTransformer {
 			name.addGiven(String.valueOf(beneficiary.getNameMiddleInitial().get()));
 
 		return patient;
+	}
+
+	/**
+	 * @param patient
+	 *            the FHIR {@link Patient} resource to add the {@link Identifier} to
+	 * @param value
+	 *            the value for {@link Identifier#getValue()}
+	 * @param system
+	 *            the value for {@link Identifier#getSystem()}
+	 * @param identifierCurrencyExtension
+	 *            the {@link Extension} to add to the {@link Identifier}
+	 */
+	private static void addUnhashedIdentifier(Patient patient, String value, String system,
+			Extension identifierCurrencyExtension) {
+		patient.addIdentifier().setSystem(system).setValue(value).addExtension(identifierCurrencyExtension);
+	}
+
+	/**
+	 * Enumerates the options for the currency of an {@link Identifier}.
+	 */
+	public static enum CurrencyIdentifier {
+		CURRENT,
+
+		HISTORIC;
 	}
 }

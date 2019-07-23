@@ -154,6 +154,12 @@ public final class TransformerConstants {
 	 * helpful documentation at the URL.)
 	 */
 	static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
+	
+	/**
+	 * Used as the {@link Coding#getSystem()} for determining the currency of an
+	 * {@link Identifier}.
+	 */
+	static final String CODING_SYSTEM_IDENTIFIER_CURRENCY = BASE_URL_BBAPI_RESOURCES + "/codesystem/identifier-currency";
 
 	/**
 	 * The standard {@link Money#getSystem()} for currency. (It looks odd that it

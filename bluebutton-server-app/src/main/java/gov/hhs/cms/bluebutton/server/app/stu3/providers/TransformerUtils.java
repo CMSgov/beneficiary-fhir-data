@@ -102,6 +102,7 @@ import gov.hhs.cms.bluebutton.data.model.rif.SNFClaim;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimColumn;
 import gov.hhs.cms.bluebutton.data.model.rif.SNFClaimLine;
 import gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
@@ -3038,5 +3039,28 @@ public final class TransformerUtils {
 		b.append("&" + descriptor + "=" + id);
 
 		return b.toString();
+	}
+
+	/**
+	 * @param currencyIdentifier
+	 *            the {@link CurrencyIdentifier} indicating the currency of an
+	 *            {@link Identifier}.
+	 * @return Returns an {@link Extension} describing the currency of an
+	 *         {@link Identifier}.
+	 */
+	public static Extension createIdentifierCurrencyExtension(CurrencyIdentifier currencyIdentifier) {
+		String system = TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY;
+		String code = "historic";
+		String display = "Historic";
+		if (currencyIdentifier.equals(CurrencyIdentifier.CURRENT)) {
+			code = "current";
+			display = "Current";
+		}
+
+		Coding currentValueCoding = new Coding(system, code, display);
+		Extension currencyIdentifierExtension = new Extension(TransformerConstants.CODING_SYSTEM_IDENTIFIER_CURRENCY,
+				currentValueCoding);
+
+		return currencyIdentifierExtension;
 	}
 }
