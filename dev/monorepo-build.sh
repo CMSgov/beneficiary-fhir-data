@@ -67,12 +67,6 @@ do
   git merge "${sourceName}" --allow-unrelated-histories -m "Migrated '${sourceName}' to monorepo."
   git branch -D "${sourceName}"
 
-  # The following alternate disabled approach works, but results in a less useful `git blame`, where every line is marked as having been modified during the migration.
-  #git merge -s ours --no-commit --allow-unrelated-histories "${sourceName}/master"
-  #git read-tree --prefix="${sourceName}" -u "${sourceName}/master"
-  #git add "${sourceName}"
-  #git commit -m "Migrated '${sourceName}' into monorepo subdir."
-
   git remote remove "${sourceName}"
   echo "Migrated '${sourceName}'."
 done
