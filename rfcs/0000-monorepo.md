@@ -8,7 +8,7 @@
     * [BLUEBUTTON-1086: Switch BFS to monorepo](https://jira.cms.gov/browse/BLUEBUTTON-1086)
 
 The Beneficiary FHIR Server systems should move from being split across 11 Git repositories to a single, combined repository: a "monorepo".
-This has a numer of benefits: simpler onboarding, better testing of changes, and more efficient day-to-day operations.
+This has a number of benefits: simpler onboarding, better testing of changes, and more efficient day-to-day operations.
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
