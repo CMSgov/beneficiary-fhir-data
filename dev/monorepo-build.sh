@@ -10,7 +10,8 @@
 #
 # Usage:
 #
-#     $ monorepo-build.sh
+#     $ mkdir beneficiary-fhir-server.git && cd beneficiary-fhir-server.git && git init
+#     $ ./monorepo-build.sh
 #
 # References/credit:
 # * <https://medium.com/lgtm/migrating-to-the-monorepo-582106142654'
