@@ -5,7 +5,7 @@
 * Start Date: 2019-07-20
 * RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
 * JIRA Ticket(s):
-    * [BLUEBUTTON-0000](https://jira.cms.gov/browse/BLUEBUTTON-0000)
+    * [BLUEBUTTON-1086: Switch BFS to monorepo](https://jira.cms.gov/browse/BLUEBUTTON-1086)
 
 Write a brief summary here: a one paragraph explanation of the feature. Try to structure it like an "elevator pitch": it should provide readers with a high-level understanding of the goals and proposed solution.
 
