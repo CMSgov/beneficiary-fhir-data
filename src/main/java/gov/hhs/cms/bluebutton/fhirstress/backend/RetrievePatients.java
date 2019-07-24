@@ -34,7 +34,7 @@ public final class RetrievePatients extends CustomSamplerClient {
 //		}
 
 		// query a patient record
-		client.search().forResource(Patient.class).withIdAndCompartment(bim.nextId(), "").execute();
+		client.search().forResource(Patient.class).withIdAndCompartment("Patient/" + bim.nextId(), "").execute();
 		// }
 	}
 }
