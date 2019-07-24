@@ -38,7 +38,7 @@ public final class RetrieveCoverages extends CustomSamplerClient {
 
 		// query coverage for a benefit id
 		client.search().forResource(Coverage.class)
-				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId("5303418")))
-				.returnBundle(Bundle.class).execute();
+				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId("567834"))).returnBundle(Bundle.class)
+				.execute();
 	}
 }

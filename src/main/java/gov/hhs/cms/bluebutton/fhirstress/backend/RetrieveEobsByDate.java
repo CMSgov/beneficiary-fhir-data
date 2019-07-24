@@ -37,7 +37,7 @@ public final class RetrieveEobsByDate extends CustomSamplerClient {
 
 		// TODO - query EOBs for a patient filtering by date
 		client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId("5303418")))
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId("567834")))
 				.returnBundle(Bundle.class).execute();
 		// }
 	}

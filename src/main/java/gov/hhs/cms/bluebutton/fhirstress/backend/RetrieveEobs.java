@@ -36,7 +36,7 @@ public final class RetrieveEobs extends CustomSamplerClient {
 //		}
 
 		client.search().forResource(ExplanationOfBenefit.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId("5303418")))
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId("567834")))
 				.returnBundle(Bundle.class).execute();
 	}
 }
