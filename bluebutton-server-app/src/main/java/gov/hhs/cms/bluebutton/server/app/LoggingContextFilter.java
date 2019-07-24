@@ -76,6 +76,10 @@ public final class LoggingContextFilter implements Filter {
 	 *         <code>null</code> if that's not available
 	 */
 	private static String getClientSslPrincipalDistinguishedName(HttpServletRequest request) {
+		/*
+		 * Note: Now that Wildfly/JBoss is properly configured with a security realm,
+		 * this method is equivalent to calling `request.getRemoteUser()`.
+		 */
 		X509Certificate clientCert = getClientCertificate(request);
 		if (clientCert == null || clientCert.getSubjectX500Principal() == null) {
 			LOGGER.debug("No client SSL principal available: {}", clientCert);

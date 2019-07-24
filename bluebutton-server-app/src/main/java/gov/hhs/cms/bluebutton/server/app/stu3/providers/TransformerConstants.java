@@ -217,6 +217,12 @@ public final class TransformerConstants {
 
 	/**
 	 * The {@link Coverage#getGrouping()} {@link GroupComponent#getSubPlan()}
+	 * value for Part C.
+	 */
+	public static final String COVERAGE_PLAN_PART_C = "Part C";
+
+	/**
+	 * The {@link Coverage#getGrouping()} {@link GroupComponent#getSubPlan()}
 	 * value for Part D.
 	 */
 	public static final String COVERAGE_PLAN_PART_D = "Part D";

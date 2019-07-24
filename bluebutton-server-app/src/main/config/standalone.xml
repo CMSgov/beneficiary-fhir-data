@@ -326,6 +326,24 @@
                         <policy-module code="Delegating" flag="required"/>
                     </authorization>
                 </security-domain>
+                <security-domain name="bluebutton-data-server" cache-type="default">
+                    <!-- This is the security realm that the Blue Button Data Server will be
+                        hardcoded to use for its client authentication, in its jboss-web.xml file. -->
+                    <authentication>
+                        <login-module code="CertificateRoles" flag="required">
+                            <module-option name="securityDomain" value="bluebutton-data-server" />
+                            <module-option name="verifier" value="org.jboss.security.auth.certs.AnyCertVerifier"/>
+                            <module-option name="rolesProperties" value="file:${bbfhir.roles}" />
+                        </login-module>
+                    </authentication>
+                    <jsse
+                        keystore-password="${bbfhir.ssl.keystore.storepassword:changeit}"
+                        keystore-url="file:${bbfhir.ssl.keystore.path}"
+                        truststore-password="${bbfhir.ssl.truststore.storepassword:changeit}"
+                        truststore-url="file:${bbfhir.ssl.truststore.path}"
+                        client-auth="true"
+                    />
+                </security-domain>
             </security-domains>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:transactions:2.0">
@@ -342,7 +360,7 @@
                 <https-listener name="https" socket-binding="https" record-request-start-time="true" security-realm="ApplicationRealm" verify-client="REQUIRED" enabled-cipher-suites="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" enabled-protocols="TLSv1.2"/>
                 <host name="default-host" alias="localhost">
                     <location name="/" handler="welcome-content"/>
-                    <access-log pattern="%h %l %u %t &quot;%r&quot; &quot;?%q&quot; %s %B %D %{i,BlueButton-OriginalQueryId} %{i,BlueButton-OriginalQueryCounter} [%{i,BlueButton-OriginalQueryTimestamp}] %{i,BlueButton-DeveloperId} &quot;%{i,BlueButton-Developer}&quot; %{i,BlueButton-ApplicationId} &quot;%{i,BlueButton-Application}&quot; %{i,BlueButton-UserId} &quot;%{i,BlueButton-User}&quot; %{i,BlueButton-BeneficiaryId}" directory="${jboss.server.log.dir}" prefix="access" suffix=".log"/>
+                    <access-log pattern="%h %l %u [%t] &quot;%r&quot; &quot;?%q&quot; %s %B %D %{i,BlueButton-OriginalQueryId} %{i,BlueButton-OriginalQueryCounter} [%{i,BlueButton-OriginalQueryTimestamp}] %{i,BlueButton-DeveloperId} &quot;%{i,BlueButton-Developer}&quot; %{i,BlueButton-ApplicationId} &quot;%{i,BlueButton-Application}&quot; %{i,BlueButton-UserId} &quot;%{i,BlueButton-User}&quot; %{i,BlueButton-BeneficiaryId}" directory="${jboss.server.log.dir}" prefix="access" suffix=".log"/>
                     <filter-ref name="server-header"/>
                     <filter-ref name="x-powered-by-header"/>
                 </host>
