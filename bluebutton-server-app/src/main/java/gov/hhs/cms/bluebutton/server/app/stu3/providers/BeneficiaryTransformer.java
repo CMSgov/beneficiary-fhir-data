@@ -5,24 +5,26 @@ import java.util.Objects;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
-import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 
 /**
  * Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient}
  * resources.
  */
 final class BeneficiaryTransformer {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(BeneficiaryTransformer.class);
+
 	/**
-	 * @param metricRegistry
-	 *            the {@link MetricRegistry} to use
-	 * @param beneficiary
-	 *            the CCW {@link Beneficiary} to transform
+	 * @param metricRegistry the {@link MetricRegistry} to use
+	 * @param beneficiary    the CCW {@link Beneficiary} to transform
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
@@ -36,8 +38,7 @@ final class BeneficiaryTransformer {
 	}
 
 	/**
-	 * @param beneficiary
-	 *            the CCW {@link Beneficiary} to transform
+	 * @param beneficiary the CCW {@link Beneficiary} to transform
 	 * @return a FHIR {@link Patient} resource that represents the specified
 	 *         {@link Beneficiary}
 	 */
@@ -66,9 +67,10 @@ final class BeneficiaryTransformer {
 			patient.setGender((AdministrativeGender.FEMALE));
 		else if (sex == Sex.UNKNOWN.getCode())
 			patient.setGender((AdministrativeGender.UNKNOWN));
-		else
-			throw new InvalidRifValueException(
-					String.format("Unexpected value encountered - expected '0', '1', or '2': %s", sex));
+		else {
+			LOGGER.warn(String.format("Unexpected value encountered - expected '0', '1', or '2': %s", sex));
+			patient.setGender((AdministrativeGender.UNKNOWN));
+		}
 
 		if (beneficiary.getRace().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.RACE,
@@ -89,51 +91,51 @@ final class BeneficiaryTransformer {
 		// Monthly Medicare-Medicaid dual eligibility codes
 		if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_01,
-							beneficiary.getMedicaidDualEligibilityJanCode()));
+					beneficiary.getMedicaidDualEligibilityJanCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_02,
-							beneficiary.getMedicaidDualEligibilityFebCode()));
+					beneficiary.getMedicaidDualEligibilityFebCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_03,
-							beneficiary.getMedicaidDualEligibilityMarCode()));
+					beneficiary.getMedicaidDualEligibilityMarCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_04,
-							beneficiary.getMedicaidDualEligibilityAprCode()));
+					beneficiary.getMedicaidDualEligibilityAprCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_05,
-							beneficiary.getMedicaidDualEligibilityMayCode()));
+					beneficiary.getMedicaidDualEligibilityMayCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_06,
-							beneficiary.getMedicaidDualEligibilityJunCode()));
+					beneficiary.getMedicaidDualEligibilityJunCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_07,
-							beneficiary.getMedicaidDualEligibilityJulCode()));
+					beneficiary.getMedicaidDualEligibilityJulCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_08,
-							beneficiary.getMedicaidDualEligibilityAugCode()));
+					beneficiary.getMedicaidDualEligibilityAugCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_09,
-							beneficiary.getMedicaidDualEligibilitySeptCode()));
+					beneficiary.getMedicaidDualEligibilitySeptCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_10,
-							beneficiary.getMedicaidDualEligibilityOctCode()));
+					beneficiary.getMedicaidDualEligibilityOctCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_11,
-							beneficiary.getMedicaidDualEligibilityNovCode()));
+					beneficiary.getMedicaidDualEligibilityNovCode()));
 		}
 		if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
 			patient.addExtension(TransformerUtils.createExtensionCoding(patient, CcwCodebookVariable.DUAL_12,
-							beneficiary.getMedicaidDualEligibilityDecCode()));
+					beneficiary.getMedicaidDualEligibilityDecCode()));
 		}
 
 		return patient;
