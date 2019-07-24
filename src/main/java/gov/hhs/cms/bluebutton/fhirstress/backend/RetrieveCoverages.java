@@ -22,7 +22,7 @@ public final class RetrieveCoverages extends CustomSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
-		bim = new BenefitIdMgr(1, 1, 10000, "19990000000001", "%05d");
+		bim = new BenefitIdMgr(1, 1, 10000, "199900000", "%05d");
 	}
 
 	/**

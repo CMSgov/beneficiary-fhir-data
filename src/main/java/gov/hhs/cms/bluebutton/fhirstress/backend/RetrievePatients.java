@@ -19,7 +19,7 @@ public final class RetrievePatients extends CustomSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
-		bim = new BenefitIdMgr(1, 1, 10000, "19990000000001", "%05d");
+		bim = new BenefitIdMgr(1, 1, 10000, "199900000", "%05d");
 	}
 
 	/**
@@ -34,7 +34,7 @@ public final class RetrievePatients extends CustomSamplerClient {
 //		}
 
 		// query a patient record
-		client.search().forResource(Patient.class).withIdAndCompartment("Patient/" + bim.nextId(), "").execute();
+		client.search().forResource(Patient.class).withIdAndCompartment(bim.nextId(), "").execute();
 		// }
 	}
 }
