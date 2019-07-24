@@ -1,12 +1,10 @@
 package gov.hhs.cms.bluebutton.fhirstress.backend;
 
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 
 //import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
 /**
  * This JMeter sampler will run query for a FHIR {@link Patient} using the
@@ -36,8 +34,7 @@ public final class RetrievePatients extends CustomSamplerClient {
 //		}
 
 		// query a patient record
-		client.search().forResource(Patient.class)
-				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(bim.nextId()))).execute();
+		client.read().resource(Patient.class).withId(bim.nextId()).execute();
 		// }
 	}
 }
