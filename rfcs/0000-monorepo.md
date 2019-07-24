@@ -33,6 +33,15 @@ Having 11 repositories makes everything harder: we keep having to split up what 
 Aside from the hassle of the extra moving pieces, it makes it effectively impossible to test such multi-PR changesets in our AWS TEST environment.
 Given our team's current focus on major architectural changes, the sooner we make the switch to a monorepo, the better.
 
+Initially, everything was split out to support goals that are no longer relevant:
+
+* It was expected that we'd be using a more traditional named-version release strategy,
+    where being able to tag things individually is important.
+  However, we have long since moved to a Continuous Deployment strategy,
+    where the separate repositories are more of a liability than a benefit.
+* The approach was also intended to allow for more code sharing between projects (i.e. between BFS and BB2),
+    which is awkward with monolithic repositories.
+
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
