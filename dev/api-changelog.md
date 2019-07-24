@@ -1,5 +1,38 @@
 # API Changelog
 
+## BLUEBUTTON-865: Adding plaintext HICN/MBI to Patient resource
+
+The Patient resource will now return plaintext HICN/MBI (both current and historical) values when a BCDA-only header (IncludeIdentifiers) is included in the request. The added fields will look like:
+
+	'''{
+      "extension": [
+        {
+          "url": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+          "valueCoding": {
+            "system": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            "code": "current",
+            "display": "Current"
+          }
+        }
+      ],
+      "system": "http://hl7.org/fhir/sid/us-medicare",
+      "value": "543217066U"
+    },
+    {
+      "extension": [
+        {
+          "url": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+          "valueCoding": {
+            "system": "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            "code": "current",
+            "display": "Current"
+          }
+        }
+      ],
+      "system": "http://hl7.org/fhir/sid/us-mbi",
+      "value": "3456789"
+    }```
+
 ## BLUEBUTTON-898: Correct `Patient.gender` codings
 
 Fixed the `Patient.gender` codings to be correct. Previously, all beneficiaries had reported a value of `unknown` in this field.
