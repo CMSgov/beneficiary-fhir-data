@@ -1,17 +1,17 @@
 package gov.hhs.cms.bluebutton.fhirstress.backend;
 
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
-
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
 //import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
 /**
- *  This JMeter sampler will run query for a FHIR {@link ExplanationOfBenefit} using the specified benefit id.
+ * This JMeter sampler will run query for a FHIR {@link ExplanationOfBenefit}
+ * using the specified benefit id.
  */
 public final class RetrieveCoverages extends CustomSamplerClient {
 	private BenefitIdMgr bim;
@@ -22,7 +22,7 @@ public final class RetrieveCoverages extends CustomSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
-		bim = new BenefitIdMgr(1, 1, 10000, "201400000", "%05d");
+		bim = new BenefitIdMgr(1, 1, 10000, "19990000000001", "%05d");
 	}
 
 	/**
