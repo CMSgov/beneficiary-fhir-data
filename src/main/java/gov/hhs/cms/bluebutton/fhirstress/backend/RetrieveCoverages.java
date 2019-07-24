@@ -1,12 +1,12 @@
 package gov.hhs.cms.bluebutton.fhirstress.backend;
 
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
 //import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
 import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
-import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
 /**
@@ -37,6 +37,8 @@ public final class RetrieveCoverages extends CustomSamplerClient {
 //		}
 
 		// query coverage for a benefit id
-		client.read(Coverage.class, TransformerUtils.buildCoverageId(MedicareSegment.PART_A, bim.nextId()));
+		client.search().forResource(Coverage.class)
+				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(bim.nextId())))
+				.returnBundle(Bundle.class).execute();
 	}
 }
