@@ -21,7 +21,7 @@ public final class RetrieveEobsByDate extends CustomSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
-		bim = new BenefitIdMgr(1, 1, 10000, "199900000", "%05d");
+		bim = new BenefitIdMgr(1, 1, 10000, "200000000", "%05d");
 	}
 
 	/**
