@@ -30,7 +30,7 @@ remote_jmeter_user: bb-jmeter
 
 # NOTE: As configured, a sampler thread will run until the time duration has elapsed, the thread_loop count is ignored because continue_forever is set to true.
 # Number of threads within the JMeter Thread Group (https://jmeter.apache.org/api/org/apache/jmeter/threads/AbstractThreadGroup.html#NUM_THREADS)
-thread_count: 1
+thread_count: 10
 # When true the sampler threads run forever, when false the thread_loops variable is enabled for each sampler thread
 continue_forever: true
 # Number of times to run each thread.  Only enabled when continue_forever is set to false.
