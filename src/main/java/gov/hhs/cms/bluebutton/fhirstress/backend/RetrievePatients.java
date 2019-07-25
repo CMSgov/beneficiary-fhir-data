@@ -34,7 +34,7 @@ public final class RetrievePatients extends CustomSamplerClient {
 //		}
 
 		// query a patient record
-		client.read().resource(Patient.class).withId("567834").execute();
+		client.read().resource(Patient.class).withId("12162").execute();
 		// }
 	}
 }
