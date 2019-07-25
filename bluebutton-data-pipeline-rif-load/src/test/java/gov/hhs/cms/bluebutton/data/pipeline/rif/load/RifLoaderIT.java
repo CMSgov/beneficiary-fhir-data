@@ -76,6 +76,9 @@ public final class RifLoaderIT {
 			List<BeneficiaryHistory> beneficiaryHistoryEntries = entityManager.createQuery(
 					beneficiaryHistoryCriteria.select(beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
 					.getResultList();
+			for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
+				Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
+			}
 			Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
 			Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
