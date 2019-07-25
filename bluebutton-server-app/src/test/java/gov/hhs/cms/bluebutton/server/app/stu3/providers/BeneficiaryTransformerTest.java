@@ -4,6 +4,8 @@ import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -14,9 +16,12 @@ import com.codahale.metrics.MetricRegistry;
 
 import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
+import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 
 /**
  * Unit tests for {@link BeneficiaryTransformer}.
@@ -29,13 +34,64 @@ public final class BeneficiaryTransformerTest {
 	 */
 	@Test
 	public void transformSampleARecord() {
+		Beneficiary beneficiary = loadSampleABeneficiary();
+
+		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary,
+				IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+		assertMatches(beneficiary, patient);
+		Assert.assertEquals(2, patient.getIdentifier().size());
+	}
+
+	/**
+	 * Verifies that {@link BeneficiaryTransformer#transform(Beneficiary)} works as
+	 * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES}
+	 * {@link Beneficiary}, in the
+	 * {@link IncludeIdentifiersMode#INCLUDE_HICNS_AND_MBIS} mode.
+	 */
+	@Test
+	public void transformSampleARecordWithIdentifiers() {
+		Beneficiary beneficiary = loadSampleABeneficiary();
+
+		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary,
+				IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+		assertMatches(beneficiary, patient);
+		Assert.assertEquals(7, patient.getIdentifier().size());
+	}
+
+	/**
+	 * @return the {@link StaticRifResourceGroup#SAMPLE_A} {@link Beneficiary}
+	 *         record, with the {@link Beneficiary#getBeneficiaryHistories()} and
+	 *         {@link Beneficiary#getMedicareBeneficiaryIdHistories()} fields
+	 *         populated.
+	 */
+	private static Beneficiary loadSampleABeneficiary() {
 		List<Object> parsedRecords = ServerTestUtils
 				.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+		// Pull out the base Beneficiary record and fix its HICN fields.
 		Beneficiary beneficiary = parsedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
 				.findFirst().get();
+		beneficiary.setHicnUnhashed(Optional.of(beneficiary.getHicn()));
+		beneficiary.setHicn("somehash");
 
-		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary);
-		assertMatches(beneficiary, patient);
+		// Add the HICN history records to the Beneficiary, and fix their HICN fields.
+		Set<BeneficiaryHistory> beneficiaryHistories = parsedRecords.stream()
+				.filter(r -> r instanceof BeneficiaryHistory).map(r -> (BeneficiaryHistory) r)
+				.filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId())).collect(Collectors.toSet());
+		beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
+		for (BeneficiaryHistory beneficiaryHistory : beneficiary.getBeneficiaryHistories()) {
+			beneficiaryHistory.setHicnUnhashed(Optional.of(beneficiaryHistory.getHicn()));
+			beneficiaryHistory.setHicn("somehash");
+		}
+
+		// Add the MBI history records to the Beneficiary.
+		Set<MedicareBeneficiaryIdHistory> beneficiaryMbis = parsedRecords.stream()
+				.filter(r -> r instanceof MedicareBeneficiaryIdHistory).map(r -> (MedicareBeneficiaryIdHistory) r)
+				.filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId().orElse(null)))
+				.collect(Collectors.toSet());
+		beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
+
+		return beneficiary;
 	}
 
 	/**
@@ -51,7 +107,8 @@ public final class BeneficiaryTransformerTest {
 				.findFirst().get();
 		TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
 
-		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary,
+				IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
 		assertMatches(beneficiary, patient);
 	}
 
