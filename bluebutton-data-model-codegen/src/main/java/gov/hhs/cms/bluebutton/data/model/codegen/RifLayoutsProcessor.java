@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -183,11 +182,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntityIdField("beneficiaryId")
 					.setHeaderEntityAdditionalDatabaseFields(
 							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
-					.setInnerJoinRelationship(Arrays.asList(
-							new InnerJoinRelationship("beneficiaryId", null, "BeneficiaryHistory",
-									"beneficiaryHistories"),
-							new InnerJoinRelationship("beneficiaryId", null, "MedicareBeneficiaryIdHistory",
-									"medicareBeneficiaryIdHistories")))
 					.setHasLines(false));
 			/*
 			 * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
@@ -553,45 +547,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			MethodSpec childGetter = MethodSpec.methodBuilder("getLines").addModifiers(Modifier.PUBLIC)
 					.addStatement("return $N", "lines").returns(childFieldType).build();
 			headerEntityClass.addMethod(childGetter);
-		}
-
-		// Add the parent-to-child join field and accessor for an inner join
-		// relationship
-		if (mappingSpec.getHasInnerJoinRelationship()) {
-			for (InnerJoinRelationship relationship : mappingSpec.getInnerJoinRelationship()) {
-				String mappedBy = relationship.getMappedBy();
-				String orderBy = relationship.getOrderBy();
-				ClassName childEntity = mappingSpec.getClassName(relationship.getChildEntity());
-				String childFieldName = relationship.getChildField();
-
-				Class<?> fieldDeclaredType;
-				Class<?> fieldActualType;
-				if (orderBy != null) {
-					fieldDeclaredType = List.class;
-					fieldActualType = LinkedList.class;
-				} else {
-					fieldDeclaredType = Set.class;
-					fieldActualType = HashSet.class;
-				}
-
-				ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(fieldDeclaredType),
-						childEntity);
-				FieldSpec.Builder childField = FieldSpec.builder(childFieldType, childFieldName, Modifier.PRIVATE)
-						.initializer("new $T<>()", fieldActualType);
-				childField.addAnnotation(AnnotationSpec.builder(OneToMany.class).addMember("mappedBy", "$S", mappedBy)
-						.addMember("orphanRemoval", "$L", false).addMember("fetch", "$T.LAZY", FetchType.class)
-						.addMember("cascade", "$T.ALL", CascadeType.class)
-						.build());
-				if (orderBy != null)
-					childField.addAnnotation(
-							AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", orderBy + " ASC").build());
-				headerEntityClass.addField(childField.build());
-
-				MethodSpec childGetter = MethodSpec.methodBuilder("get" + capitalize(childFieldName))
-						.addModifiers(Modifier.PUBLIC).addStatement("return $N", childFieldName).returns(childFieldType)
-						.build();
-				headerEntityClass.addMethod(childGetter);
-			}
 		}
 
 		TypeSpec headerEntityFinal = headerEntityClass.build();
