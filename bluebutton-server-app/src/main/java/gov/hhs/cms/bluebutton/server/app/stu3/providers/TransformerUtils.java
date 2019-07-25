@@ -2855,7 +2855,11 @@ public final class TransformerUtils {
 	 */
 	public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
-		if (claimDrugCode.isEmpty())
+		/*
+		 * Handle bad data (e.g. our random test data) if drug code is empty or
+		 * length is less than 9 characters
+		 */
+		if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9)
 			return null;
 
 		/*
@@ -2869,18 +2873,20 @@ public final class TransformerUtils {
 			ndcProductMap = readFDADrugCodeFile();
 		}
 
-		String claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
-	    
+		String claimDrugCodeReformatted = null;
+
+		claimDrugCodeReformatted = claimDrugCode.substring(0, 5) + "-" + claimDrugCode.substring(5, 9);
+
 		if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
 			String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
 			return ndcSubstanceName;
 		}
 
 		// log which NDC codes we couldn't find a match for in our downloaded NDC file
-		if (!drugCodeLookupMissingFailures.contains(claimDrugCodeReformatted)) {
-			drugCodeLookupMissingFailures.add(claimDrugCodeReformatted);
+		if (!drugCodeLookupMissingFailures.contains(claimDrugCode)) {
+			drugCodeLookupMissingFailures.add(claimDrugCode);
 			LOGGER.info("No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
-					claimDrugCodeReformatted, "fda_products_utf8.tsv");
+					claimDrugCode, "fda_products_utf8.tsv");
 		}
 
 		return null;
