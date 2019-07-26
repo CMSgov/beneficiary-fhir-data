@@ -12,6 +12,7 @@
  * first place: we can't use them, and they prevent us from having a foreign key (and JPA 
  * relationship) on this table.
  */
+
 create table "BeneficiariesHistoryInvalidBeneficiaries" (
   "beneficiaryHistoryId" bigint not null,
   "beneficiaryId" varchar(15),
@@ -24,24 +25,18 @@ create table "BeneficiariesHistoryInvalidBeneficiaries" (
 )
 ${logic.tablespaces-escape} tablespace "beneficiaries_ts"
 ;
+
 insert into "BeneficiariesHistoryInvalidBeneficiaries"
-  select
-    "BeneficiariesHistory"."beneficiaryHistoryId",
-  	"Beneficiaries"."beneficiaryId",
-  	"BeneficiariesHistory"."birthDate",
-  	"BeneficiariesHistory"."hicn",
-  	"BeneficiariesHistory"."sex",
-  	"BeneficiariesHistory"."hicnUnhashed",
-  	"BeneficiariesHistory"."medicareBeneficiaryId"
+  select "BeneficiariesHistory".*
     from "BeneficiariesHistory"
     left join "Beneficiaries"
       on "BeneficiariesHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId"
     where "Beneficiaries"."beneficiaryId" is NULL;
 delete
   from "BeneficiariesHistory"
-  where exists (select 1 
-  				from "BeneficiariesHistoryInvalidBeneficiaries"
-  				where "BeneficiariesHistoryInvalidBeneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId");
+  where "beneficiaryHistoryId" in (
+    select "beneficiaryHistoryId" from "BeneficiariesHistoryInvalidBeneficiaries"
+  );
 
 alter table "BeneficiariesHistory" 
   add constraint "BeneficiariesHistory_beneficiaryId_to_Beneficiary" 
@@ -71,33 +66,18 @@ create table "MedicareBeneficiaryIdHistoryInvalidBeneficiaries" (
 )
 ${logic.tablespaces-escape} tablespace "beneficiaries_ts"
 ;
+
 insert into "MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
-  select
-    "MedicareBeneficiaryIdHistory"."medicareBeneficiaryIdKey",
-  	"Beneficiaries"."beneficiaryId",
-  	"MedicareBeneficiaryIdHistory"."claimAccountNumber",
-  	"MedicareBeneficiaryIdHistory"."beneficiaryIdCode",
-  	"MedicareBeneficiaryIdHistory"."mbiSequenceNumber",
- 	"MedicareBeneficiaryIdHistory"."medicareBeneficiaryId",
- 	"MedicareBeneficiaryIdHistory"."mbiEffectiveDate",
- 	"MedicareBeneficiaryIdHistory"."mbiEndDate",
- 	"MedicareBeneficiaryIdHistory"."mbiEffectiveReasonCode",
- 	"MedicareBeneficiaryIdHistory"."mbiEndReasonCode",
- 	"MedicareBeneficiaryIdHistory"."mbiCardRequestDate",
-	"MedicareBeneficiaryIdHistory"."mbiAddUser",
- 	"MedicareBeneficiaryIdHistory"."mbiAddDate",
- 	"MedicareBeneficiaryIdHistory"."mbiUpdateUser",
-	"MedicareBeneficiaryIdHistory"."mbiUpdateDate",
- 	"MedicareBeneficiaryIdHistory"."mbiCrntRecIndId"
+  select "MedicareBeneficiaryIdHistory".*
     from "MedicareBeneficiaryIdHistory"
     left join "Beneficiaries"
       on "MedicareBeneficiaryIdHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId"
     where "Beneficiaries"."beneficiaryId" is NULL;
 delete
   from "MedicareBeneficiaryIdHistory"
-  where exists (select 1
-  				from "MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
-  				where "MedicareBeneficiaryIdHistoryInvalidBeneficiaries"."beneficiaryId" = "MedicareBeneficiaryIdHistory"."beneficiaryId");
+  where "medicareBeneficiaryIdKey" in (
+    select "medicareBeneficiaryIdKey" from "MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
+  );
 
 alter table "MedicareBeneficiaryIdHistory" 
    add constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary" 
