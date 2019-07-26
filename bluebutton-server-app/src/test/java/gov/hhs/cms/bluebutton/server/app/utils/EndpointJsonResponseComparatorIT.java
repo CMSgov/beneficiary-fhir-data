@@ -353,7 +353,7 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
-		return jsonInterceptor.getResponse();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
 	}
 
 	/**
@@ -396,7 +396,7 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.search().forResource(Patient.class)
 				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
 				.returnBundle(Bundle.class).execute();
-		return jsonInterceptor.getResponse();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
 	}
 
 	/**
@@ -442,7 +442,7 @@ public final class EndpointJsonResponseComparatorIT {
 				.where(Patient.IDENTIFIER.exactly()
 						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
 				.returnBundle(Bundle.class).execute();
-		return jsonInterceptor.getResponse();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
 	}
 
 	/**

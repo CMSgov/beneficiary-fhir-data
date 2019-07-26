@@ -110,11 +110,11 @@
         }
       } ],
       "identifier" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/bene_id",
-        "value" : "567834"
-      }, {
         "system" : "https://bluebutton.cms.gov/resources/identifier/hicn-hash",
         "value" : "99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/variables/bene_id",
+        "value" : "567834"
       } ],
       "name" : [ {
         "use" : "usual",
