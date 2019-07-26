@@ -154,6 +154,12 @@ public final class TransformerConstants {
 	 * helpful documentation at the URL.)
 	 */
 	static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
+	
+	/**
+	 * Used as the {@link Coding#getSystem()} for determining the currency of an
+	 * {@link Identifier}.
+	 */
+	static final String CODING_SYSTEM_IDENTIFIER_CURRENCY = BASE_URL_BBAPI_RESOURCES + "/codesystem/identifier-currency";
 
 	/**
 	 * The standard {@link Money#getSystem()} for currency. (It looks odd that it
@@ -229,6 +235,19 @@ public final class TransformerConstants {
 	 * now.
 	 */
 	public static final String CODING_BBAPI_BENE_HICN_HASH = BASE_URL_BBAPI_RESOURCES + "/identifier/hicn-hash";
+	
+	/**
+	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
+	 * store the unhashed version of each Medicare beneficiaries' HICN.
+	 */
+	public static final String CODING_BBAPI_BENE_HICN_UNHASHED = "http://hl7.org/fhir/sid/us-medicare";
+
+	/**
+	 * The {@link Identifier#getSystem()} used in {@link Patient} resources to
+	 * store the unhashed version of each Medicare beneficiaries' medicare
+	 * beneficiary id.
+	 */
+	public static final String CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED = "http://hl7.org/fhir/sid/us-mbi";
 
 	/**
 	 * The {@link #CODING_BBAPI_BENE_HICN_HASH} used in earlier versions of the API,
