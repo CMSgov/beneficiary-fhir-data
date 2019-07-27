@@ -90,6 +90,17 @@ Small side note: by default, `git log <somefile>` does not show history across f
   but `git blame` does. Adding the `--follow` flag to `git log`,
   e.g. `git log --follow <somefile>` solves this.
 
+In addition to the migration and refactoring contained in the script,
+  a number of additional reorganization/refactoring items will be attempted manually
+  as part of the overall migration process.
+A working list of ideas for these items is contained in comments at the bottom of the script.
+In a number of cases, our code is split up across more modules than necessary,
+  which just makes things harder to do than necessary.
+These tasks need to be performed manually as there aren't great command line options for many of the steps,
+  e.g. changing a Maven project's `groupId`, `artifactId`, etc.
+To some extent, these changes will be limited to those that can be completed within a reasonable time
+  as the project will be in a pseudo code freeze for the duration of the process.
+
 One drawback to this approach is that it can only migrate the `master` branch of each original repository;
   non-`master` branches, such as those for unmerged pull requests, will not be moved automatically.
 Any pull requests that can be merged prior to the move, should be.
@@ -106,15 +117,18 @@ A one-time manual recreation of all remaining branches will have to be performed
 Once the migration has been completed, the original repositories should be archived,
   via the Settings page for each repository in GitHub.
 
-A brief post about the transition should also be published to the Blue Button site and Google Group.
+During the migration, developers should be encouraged to spend time updating Confluence, JIRA, etc.
+A full "code freeze" would be excessive, but at the same time,
+  patches made against the old projects will likely not apply cleanly against the new ones.
+
+Afterwards, a brief post about the transition should also be published to the Blue Button site and Google Group.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
 The following questions need to be resolved before this RFC is submitted for final comment:
 
-* Will we try to sneak in any renames/refactorings as part of this?
-    * Probably should! It'd be a great time to standardize project names, package names, etc.
+* (none at this time)
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
