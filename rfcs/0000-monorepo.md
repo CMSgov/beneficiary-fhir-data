@@ -113,9 +113,6 @@ A brief post about the transition should also be published to the Blue Button si
 
 The following questions need to be resolved before this RFC is submitted for final comment:
 
-* We have some tasks we want to run in Jenkins manually, e.g. performance tests.
-  How will we structure those, given that by default, there's only one Jenkins job per repo?
-    * Could always have one giant `Jenkinsfile` and select sub-jobs/-tasks via job parameters.
 * Will we try to sneak in any renames/refactorings as part of this?
     * Probably should! It'd be a great time to standardize project names, package names, etc.
 
@@ -124,6 +121,17 @@ The following questions need to be resolved before this RFC is submitted for fin
 
 Given our continuous deployment approach, this doesn't really apply,
   but it's worth noting that monorepos don't lend themselves to tagging releases of individual subprojects.
+
+In addition, Jenkins' multibranch pipeline job type is the default choice these days (for good reason: it's excellent)
+  but doesn't really support the concept of multiple joba from/for a single repo.
+To some extent, that's fine: we _want_ to build everything anytime anything changes,
+  as this will allow us to test and deploy all pieces of our code when we branch.
+It will be a bit awkward for tasks that make sense to run in Jenkins
+  but aren't really part of our default build workflow,
+  e.g. full performance tests or Jenkins-as-cron kind of items.
+At least one option for managing that is having a Jenkins job parameter
+  such as "`jobType`" that the Jenkinsfile uses to select which _actual_ job code to go run.
+Other options exist as well, so this drawback feels manageable.
 
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
