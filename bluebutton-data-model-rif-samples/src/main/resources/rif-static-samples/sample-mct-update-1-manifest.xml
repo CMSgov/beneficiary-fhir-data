@@ -2,6 +2,6 @@
 <dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v8" 
 	timestamp="2019-07-01T13:00:00Z" sequenceId="0">
 
-	<entry name="sample-mct-beneficiaries-update.txt" type="BENEFICIARY" />
+	<entry name="sample-mct-update-1-beneficiaries.txt" type="BENEFICIARY" />
 
 </dataSetManifest>
