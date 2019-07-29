@@ -73,6 +73,7 @@ public final class SampleDataColumnsTest {
 		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT);
 		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
 		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
+		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
 	}
 
 	/**
