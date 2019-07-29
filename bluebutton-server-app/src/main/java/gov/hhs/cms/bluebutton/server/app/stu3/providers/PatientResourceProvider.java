@@ -12,6 +12,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
@@ -279,8 +280,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 		 * SELECT
 		 *     *   -- Retrieved columns are dynamic, based on JPA fetch groups and IncludeIdentifiers.
 		 *   FROM "Beneficiaries"
-		 *   INNER JOIN "BeneficiariesHistory" ON "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId"
-		 *   INNER JOIN "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" = "MedicareBeneficiaryIdHistory"."beneficiaryId"  -- Might be omitted, if JPA is smart enough.
+		 *   LEFT JOIN "BeneficiariesHistory" ON "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId"
+		 *   LEFT JOIN "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" = "MedicareBeneficiaryIdHistory"."beneficiaryId"  -- Might be omitted, if JPA is smart enough.
 		 *   WHERE
 		 *     "Beneficiaries"."hicn" = $1
 		 *     OR "BeneficiariesHistory"."hicn" = $1
@@ -298,7 +299,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
 		Root<Beneficiary> rootBenes = criteria.from(Beneficiary.class);
-		SetJoin<Beneficiary, BeneficiaryHistory> joinHistory = rootBenes.join(Beneficiary_.beneficiaryHistories);
+		SetJoin<Beneficiary, BeneficiaryHistory> joinHistory = rootBenes.join(Beneficiary_.beneficiaryHistories,
+				JoinType.LEFT);
 		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
 			// For efficiency, grab these relations in the same query.
 			// For security, only grab them when needed.

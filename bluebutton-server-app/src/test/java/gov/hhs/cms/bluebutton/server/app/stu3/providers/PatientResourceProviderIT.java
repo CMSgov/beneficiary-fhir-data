@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
+import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResource;
 import gov.hhs.cms.bluebutton.data.model.rif.samples.StaticRifResourceGroup;
 import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
@@ -475,6 +476,30 @@ public final class PatientResourceProviderIT {
 					Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
 					Assert.assertEquals(h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
 				});
+	}
+
+	/**
+	 * Verifies that
+	 * {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 * works as expected for HICNs associated with {@link Beneficiary}s that have
+	 * <strong>no</strong> {@link BeneficiaryHistory} records.
+	 */
+	@Test
+	public void searchForExistingPatientWithNoHistory() {
+		List<Object> loadedRecords = ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r).forEach(h -> {
+			Bundle searchResults = fhirClient.search().forResource(Patient.class)
+					.where(Patient.IDENTIFIER.exactly()
+							.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, h.getHicn()))
+					.returnBundle(Bundle.class).execute();
+
+			Assert.assertNotNull(searchResults);
+			Assert.assertEquals(1, searchResults.getTotal());
+			Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+			Assert.assertEquals(h.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+		});
 	}
 
 	/**
