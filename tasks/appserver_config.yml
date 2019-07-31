@@ -118,12 +118,17 @@
     mode: u=rw,g=rw,o=r
   become: true
 
-# Note: We always REstart here, because JBoss occassionally needs it. See BLUEBUTTON-1110 for an example.
-- name: Retart App Server Service
+# Note: We always Restart here, because JBoss occassionally needs it. See BLUEBUTTON-1110 for an example.
+- name: Restart App Server Service
   service:
     name: "{{ data_server_appserver_service }}"
     state: restarted
   become: true
+
+- name: Wait for App Server to Be Ready
+  script: files/bluebutton-appserver-wait.sh
+  become: true
+  become_user: "{{ data_server_user }}"
 
 # Need to ensure service is running (and has been restarted if needed) before config, as it needs the server to be available.
 - meta: flush_handlers
