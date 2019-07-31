@@ -1,5 +1,59 @@
 # API Changelog
 
+## BLUEBUTTON-865: Adding plaintext HICN/MBI to Patient resource
+
+A new optional flag has been added that will return all of a beneficiary's known HICNs and MBIs (in plaintext, both current and historical).
+This feature is primarily intended for BCDA, whose ACO users need this data for patient matching purposes.
+To enable this, set an "`IncludeIdentifiers: true`" HTTP header in the `/Patient` request.
+
+The added fields will look like:
+
+```
+"resource" : {
+  "resourceType" : "Patient",
+  ...
+  "identifier" : [
+  ... ,
+  {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+        "code" : "current",
+        "display" : "Current"
+      }
+    } ],
+    "system" : "http://hl7.org/fhir/sid/us-medicare",
+    "value" : "543217066U"
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+        "code" : "current",
+        "display" : "Current"
+      }
+    } ],
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "value" : "3456789"
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+        "code" : "historic",
+        "display" : "Historic"
+      }
+    } ],
+    "system" : "http://hl7.org/fhir/sid/us-medicare",
+    "value" : "543217066T"
+  },
+  ...
+  ],
+  ...
+}
+```
+
 ## BLUEBUTTON-926: Exposing additional beneficiary coverage fields
 
 A number of additional data fields have been added, mostly related to coverage and enrollment:

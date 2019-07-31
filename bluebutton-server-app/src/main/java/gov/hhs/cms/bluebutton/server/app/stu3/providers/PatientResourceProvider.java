@@ -1,10 +1,9 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -13,7 +12,10 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -103,7 +105,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *         <code>null</code> if none exists.
 	 */
 	@Read(version = false)
-	public Patient read(@IdParam IdType patientId) {
+	public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
 		if (patientId == null)
 			throw new IllegalArgumentException();
 		if (patientId.getVersionIdPartAsLong() != null)
@@ -113,12 +115,21 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (beneIdText == null || beneIdText.trim().isEmpty())
 			throw new IllegalArgumentException();
 
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-
 		Timer.Context timerBeneQuery = metricRegistry
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
+
+		IncludeIdentifiersMode includeIdentifiersMode = IncludeIdentifiersMode
+				.determineIncludeIdentifiersMode(requestDetails);
+
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
 		Root<Beneficiary> root = criteria.from(Beneficiary.class);
+		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			// For efficiency, grab these relations in the same query.
+			// For security, only grab them when needed.
+			root.fetch(Beneficiary_.beneficiaryHistories);
+			root.fetch(Beneficiary_.medicareBeneficiaryIdHistories);
+		}
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
 
@@ -131,7 +142,14 @@ public final class PatientResourceProvider implements IResourceProvider {
 			timerBeneQuery.stop();
 		}
 
-		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
+		// Null out the unhashed HICNs and MBIs if we're not supposed to be returning
+		// those.
+		if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			beneficiary.setHicnUnhashed(Optional.empty());
+			beneficiary.setMedicareBeneficiaryId(Optional.empty());
+		}
+
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersMode);
 		return patient;
 	}
 
@@ -171,7 +189,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		List<IBaseResource> patients;
 		try {
-			patients = Arrays.asList(read(new IdType(logicalId.getValue())));
+			patients = Arrays.asList(read(new IdType(logicalId.getValue()), requestDetails));
 		} catch (ResourceNotFoundException e) {
 			patients = new LinkedList<>();
 		}
@@ -227,7 +245,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		List<IBaseResource> patients;
 		try {
-			patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue()));
+			patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue(), requestDetails));
 		} catch (NoResultException e) {
 			patients = new LinkedList<>();
 		}
@@ -247,7 +265,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 	 *             A {@link NoResultException} will be thrown if no matching
 	 *             {@link Beneficiary} can be found
 	 */
-	private Patient queryDatabaseByHicnHash(String hicnHash) {
+	private Patient queryDatabaseByHicnHash(String hicnHash, RequestDetails requestDetails) {
 		if (hicnHash == null || hicnHash.trim().isEmpty())
 			throw new IllegalArgumentException();
 
@@ -256,53 +274,93 @@ public final class PatientResourceProvider implements IResourceProvider {
 		 * BeneficiaryHistory records. Accordingly, we need to search for matching HICNs
 		 * in both the Beneficiary and the BeneficiaryHistory records. Once a match is
 		 * found, we return the Beneficiary data for the matched `beneficiaryId`.
+		 *
+		 * We want to run this query:
+		 *
+		 * SELECT
+		 *     *   -- Retrieved columns are dynamic, based on JPA fetch groups and IncludeIdentifiers.
+		 *   FROM "Beneficiaries"
+		 *   LEFT JOIN "BeneficiariesHistory" ON "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId"
+		 *   LEFT JOIN "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" = "MedicareBeneficiaryIdHistory"."beneficiaryId"  -- Might be omitted, if JPA is smart enough.
+		 *   WHERE
+		 *     "Beneficiaries"."hicn" = $1
+		 *     OR "BeneficiariesHistory"."hicn" = $1
+		 *
+		 *  And then, in app logic:
+		 *  * Verify that it only contains a single distinct "beneficiaryId".
+		 *  * Null out the unhashed identifiers if IncludeIdentifiers isn't enabled.
 		 */
-
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		Set<String> matchingBeneficiaryIds = new HashSet<>();
-
-		// Search the Beneficiary records for HICN matches.
+		
+		// First, find all matching Beneficiary records.
+		IncludeIdentifiersMode includeIdentifiersMode = IncludeIdentifiersMode
+				.determineIncludeIdentifiersMode(requestDetails);
 		Timer.Context timerHicnQuery = metricRegistry
-				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn", "current")).time();
-		CriteriaQuery<String> beneHicnQuery = builder.createQuery(String.class);
-		Root<Beneficiary> beneHicnQueryRoot = beneHicnQuery.from(Beneficiary.class);
-		beneHicnQuery.select(beneHicnQueryRoot.get(Beneficiary_.beneficiaryId));
-		beneHicnQuery.where(builder.equal(beneHicnQueryRoot.get(Beneficiary_.hicn), hicnHash));
-		matchingBeneficiaryIds.addAll(entityManager.createQuery(beneHicnQuery).getResultList());
-		timerHicnQuery.stop();
-
-		// Search the BeneficiaryHistory records for HICN matches.
-		Timer.Context timerHicnHistoryQuery = metricRegistry
-				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn", "history")).time();
-		CriteriaQuery<String> beneHistoryHicnQuery = builder.createQuery(String.class);
-		Root<BeneficiaryHistory> beneHistoryHicnQueryRoot = beneHistoryHicnQuery.from(BeneficiaryHistory.class);
-		beneHistoryHicnQuery.select(beneHistoryHicnQueryRoot.get(BeneficiaryHistory_.beneficiaryId));
-		beneHistoryHicnQuery.where(builder.equal(beneHistoryHicnQueryRoot.get(BeneficiaryHistory_.hicn), hicnHash));
-		matchingBeneficiaryIds.addAll(entityManager.createQuery(beneHistoryHicnQuery).getResultList());
-		timerHicnHistoryQuery.stop();
-
-		/*
-		 * Because data is always dirty, we watch out for and throw an error if no
-		 * matches are found or if more than one match is found.
-		 */
-		if (matchingBeneficiaryIds.size() <= 0) {
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn")).time();
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+		Root<Beneficiary> rootBenes = criteria.from(Beneficiary.class);
+		SetJoin<Beneficiary, BeneficiaryHistory> joinHistory = rootBenes.join(Beneficiary_.beneficiaryHistories,
+				JoinType.LEFT);
+		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			// For efficiency, grab these relations in the same query.
+			// For security, only grab them when needed.
+			rootBenes.fetch(Beneficiary_.beneficiaryHistories);
+			rootBenes.fetch(Beneficiary_.medicareBeneficiaryIdHistories);
+		}
+		criteria.select(rootBenes);
+		Predicate beneHicnMatches = builder.equal(rootBenes.get(Beneficiary_.hicn), hicnHash);
+		Predicate beneHistoryHicnMatches = builder.equal(joinHistory.get(BeneficiaryHistory_.hicn), hicnHash);
+		criteria.where(builder.or(beneHicnMatches, beneHistoryHicnMatches));
+		List<Beneficiary> beneficiaries;
+		try {
+			beneficiaries = entityManager.createQuery(criteria).getResultList();
+		} finally {
+			timerHicnQuery.stop();
+		}
+		
+		// Then, if we found more than one distinct BENE_ID, or 0, throw an error.
+		long distinctBeneIds = beneficiaries.stream().map(b->b.getBeneficiaryId()).distinct().count();
+		if (distinctBeneIds <= 0) {
 			throw new NoResultException();
-		} else if (matchingBeneficiaryIds.size() > 1) {
+		} else if (distinctBeneIds > 1) {
 			throw new NonUniqueResultException();
 		}
-
-		/*
-		 * Try to pull the Beneficiary record for the (sole) matching beneficiaryId.
-		 * Because the BeneficiaryHistory table doesn't have a FK to the Beneficiary
-		 * table, we watch out for cases where a matching Beneficiary can't be found
-		 * (again: data is always dirty).
-		 */
-		Beneficiary beneficiary = entityManager.find(Beneficiary.class, matchingBeneficiaryIds.iterator().next());
-		if (beneficiary == null) {
-			throw new NoResultException();
+		
+		// Then, null out the HICNs and MBIs if we're not supposed to be returning
+		// those.
+		Beneficiary beneficiary = beneficiaries.get(0);
+		if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			beneficiary.setHicnUnhashed(Optional.empty());
+			beneficiary.setMedicareBeneficiaryId(Optional.empty());
 		}
 
-		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary);
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersMode);
 		return patient;
+	}
+
+	/**
+	 * Enumerates the supported "should we include unique beneficiary identifiers"
+	 * options.
+	 */
+	public static enum IncludeIdentifiersMode {
+		INCLUDE_HICNS_AND_MBIS,
+
+		OMIT_HICNS_AND_MBIS;
+
+		/**
+		 * The header key used to determine which {@link IncludeIdentifiersMode} mode should
+		 * be used. See {@link #determineIncludeIdentifiersMode(RequestDetails)} for
+		 * details.
+		 */
+		public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
+
+		static IncludeIdentifiersMode determineIncludeIdentifiersMode(RequestDetails requestDetails) {
+			String includeIdentifiersValue = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
+			if (Boolean.parseBoolean(includeIdentifiersValue) == true) {
+				return INCLUDE_HICNS_AND_MBIS;
+			} else {
+				return OMIT_HICNS_AND_MBIS;
+			}
+		}
 	}
 }

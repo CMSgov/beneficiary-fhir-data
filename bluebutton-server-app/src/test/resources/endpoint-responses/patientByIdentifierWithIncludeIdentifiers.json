@@ -8,7 +8,7 @@
   "total" : 1,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/Patient?_format=json&_id=%7C567834"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/Patient?_format=json&identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fhicn-hash%7C99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
   } ],
   "entry" : [ {
     "resource" : {
@@ -110,6 +110,61 @@
         }
       } ],
       "identifier" : [ {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            "code" : "current",
+            "display" : "Current"
+          }
+        } ],
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "value" : "3456789"
+      }, {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            "code" : "historic",
+            "display" : "Historic"
+          }
+        } ],
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "value" : "9AB2WW3GR44"
+      }, {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            "code" : "historic",
+            "display" : "Historic"
+          }
+        } ],
+        "system" : "http://hl7.org/fhir/sid/us-medicare",
+        "value" : "543217066T"
+      }, {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            "code" : "current",
+            "display" : "Current"
+          }
+        } ],
+        "system" : "http://hl7.org/fhir/sid/us-medicare",
+        "value" : "543217066U"
+      }, {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            "code" : "historic",
+            "display" : "Historic"
+          }
+        } ],
+        "system" : "http://hl7.org/fhir/sid/us-medicare",
+        "value" : "543217066Z"
+      }, {
         "system" : "https://bluebutton.cms.gov/resources/identifier/hicn-hash",
         "value" : "99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
       }, {

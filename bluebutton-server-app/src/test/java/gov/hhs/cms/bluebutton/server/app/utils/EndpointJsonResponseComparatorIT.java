@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -59,8 +60,10 @@ import gov.hhs.cms.bluebutton.server.app.ServerTestUtils;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.ClaimType;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.CoverageResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.ExplanationOfBenefitResourceProvider;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.ExtraParamsInterceptor;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.MedicareSegment;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerConstants;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
@@ -76,8 +79,14 @@ public final class EndpointJsonResponseComparatorIT {
 	public static Object[][] data() {
 		return new Object[][] { { "metadata", (Supplier<String>) EndpointJsonResponseComparatorIT::metadata },
 				{ "patientRead", (Supplier<String>) EndpointJsonResponseComparatorIT::patientRead },
+				{ "patientReadWithIncludeIdentifiers",
+						(Supplier<String>) EndpointJsonResponseComparatorIT::patientReadWithIncludeIdentifiers },
 				{ "patientSearchById", (Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchById },
+				{ "patientSearchByIdWithIncludeIdentifiers",
+						(Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchByIdWithIncludeIdentifiers },
 				{ "patientByIdentifier", (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifier },
+				{ "patientByIdentifierWithIncludeIdentifiers",
+						(Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifierWithIncludeIdentifiers },
 				{ "coverageRead", (Supplier<String>) EndpointJsonResponseComparatorIT::coverageRead },
 				{ "coverageSearchByPatientId",
 						(Supplier<String>) EndpointJsonResponseComparatorIT::coverageSearchByPatientId },
@@ -344,7 +353,30 @@ public final class EndpointJsonResponseComparatorIT {
 		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
 		fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
-		return jsonInterceptor.getResponse();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
+	}
+
+	/**
+	 * @return the results of the
+	 *         {@link PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+	 *         operation when
+	 *         {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersMode)}
+	 *         set to {@link IncludeIdentifiersMode#INCLUDE_HICNS_AND_MBIS}
+	 */
+	public static String patientReadWithIncludeIdentifiers() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+		fhirClient.registerInterceptor(extraParamsInterceptor);
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+		fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
 	}
 
 	/**
@@ -364,7 +396,32 @@ public final class EndpointJsonResponseComparatorIT {
 		fhirClient.search().forResource(Patient.class)
 				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
 				.returnBundle(Bundle.class).execute();
-		return jsonInterceptor.getResponse();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
+	}
+
+	/**
+	 * @return the results of the
+	 *         {@link PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)}
+	 *         operation when
+	 *         {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersMode)}
+	 *         set to {@link IncludeIdentifiersMode#INCLUDE_HICNS_AND_MBIS}
+	 */
+	public static String patientSearchByIdWithIncludeIdentifiers() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+		fhirClient.registerInterceptor(extraParamsInterceptor);
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+		fhirClient.search().forResource(Patient.class)
+				.where(Patient.RES_ID.exactly().systemAndIdentifier(null, beneficiary.getBeneficiaryId()))
+				.returnBundle(Bundle.class).execute();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
 	}
 
 	/**
@@ -385,8 +442,100 @@ public final class EndpointJsonResponseComparatorIT {
 				.where(Patient.IDENTIFIER.exactly()
 						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
 				.returnBundle(Bundle.class).execute();
-		return jsonInterceptor.getResponse();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
 	}
+
+	/**
+	 * @return the results of the
+	 *         {@link PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+	 *         operation when
+	 *         {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersMode)}
+	 *         set to {@link IncludeIdentifiersMode#INCLUDE_HICNS_AND_MBIS}
+	 */
+	public static String patientByIdentifierWithIncludeIdentifiers() {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+
+		IGenericClient fhirClient = createFhirClientAndSetEncoding();
+		ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+		extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+		fhirClient.registerInterceptor(extraParamsInterceptor);
+		JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+		fhirClient.search().forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly()
+						.systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+				.returnBundle(Bundle.class).execute();
+		return sortPatientIdentifiers(jsonInterceptor.getResponse());
+	}
+
+	/**
+	 * @param unsortedResponse the JSON to fix up
+	 * @return the same JSON, but with the contents of
+	 *         <code>Patient.identifiers</code> sorted
+	 */
+	private static String sortPatientIdentifiers(String unsortedResponse) {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter();
+		JsonNode parsedJson = null;
+		try {
+			parsedJson = mapper.readTree(unsortedResponse);
+		} catch (IOException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+		}
+
+		// Is this a Bundle or a single Patient? If a Bundle, grab the (single) Patient
+		// from it.
+		JsonNode rootResourceType = parsedJson.at("/resourceType");
+		JsonNode patient;
+		if(rootResourceType.asText().equals("Patient")) {
+			patient = parsedJson;
+		} else if (rootResourceType.asText().equals("Bundle")) {
+			JsonNode entries = parsedJson.at("/entry");
+			Assert.assertEquals(1, entries.size());
+			patient = entries.at("/0/resource");
+			Assert.assertEquals("Patient", patient.get("resourceType").asText());
+		} else {
+			throw new IllegalArgumentException("Unsupported resourceType: " + rootResourceType.asText());
+		}
+
+		// Grab the Patient.identifiers node.
+		JsonNode identifiers = patient.at("/identifier");
+
+		// Pull out an unsorted List all of the identifier entries.
+		List<JsonNode> identiferEntries = new ArrayList<JsonNode>();
+		identifiers.elements().forEachRemaining(identiferEntries::add);
+
+		/*
+		 * Sort that List of identifier entries in a stable fashion: first, compare
+		 * identifier.system, then identifier.value, then (if present) identifier.extension[0].valueCoding.code.
+		 */
+		Comparator<JsonNode> systemComparator = Comparator.comparing(e -> e.at("/system").asText());
+		Comparator<JsonNode> valueComparator = Comparator.comparing(e -> e.at("/value").asText());
+		Comparator<JsonNode> codeComparator = Comparator.comparing(e -> e.at("/extension/0/valueCoding/code").asText());
+		Comparator<JsonNode> identifiersComparator = systemComparator.thenComparing(valueComparator)
+				.thenComparing(codeComparator);
+		identiferEntries = identiferEntries.stream().sorted(identifiersComparator)
+				.collect(Collectors.toList());
+
+		((ArrayNode) identifiers).removeAll();
+		for (int i = 0; i < identiferEntries.size(); i++) {
+			((ArrayNode) identifiers).add(identiferEntries.get(i));
+		}
+
+		String jsonResponse = null;
+		try {
+			jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
+		} catch (JsonProcessingException e) {
+			throw new UncheckedIOException(
+					"Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+		}
+		return jsonResponse;
+	}
+
 
 	/**
 	 * @return the results of the
