@@ -13,7 +13,7 @@
   become: true
 
 - name: Wait for App Server to Be Ready
-  script: files/bluebutton-appserver-wait.sh
+  script: "files/bluebutton-appserver-wait.sh --serverhome {{ data_server_dir }}/{{ data_server_appserver_name }} --managementport {{ data_server_appserver_management_port }} --managementusername \"{{ data_server_appserver_management_username }}\" --managementpassword \"{{ data_server_appserver_management_password }}\""
   become: true
   become_user: "{{ data_server_user }}"
 
