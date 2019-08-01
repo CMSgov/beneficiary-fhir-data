@@ -11,7 +11,7 @@ test_plan: "../jmeter-project/jmeter-fhir-test.jmx"
 # location of local keystore used in test
 test_keystore: "../dev/ssl-stores/client.keystore"
 # location of local csv file with bene ids
-test_ids: "../dev/test-bene-id.csv"
+test_ids: "../src/main/resources/{{ target_env }}/bene-ids.csv"
 # remote directory to store jmeter test
 remote_test_dir: "/usr/local/bluebutton-jmeter-service"
 # location of local jmeter properties file overrides
