@@ -16,7 +16,7 @@ public class CsvBenefitIdManager implements BenefitIdManager {
 	File f;
 
 	public CsvBenefitIdManager() {
-		f = Paths.get("test-bene-id.csv").toFile();
+		f = Paths.get("/usr/local/bluebutton-jmeter-service/test-bene-id.csv").toFile();
 		init();
 	}
 

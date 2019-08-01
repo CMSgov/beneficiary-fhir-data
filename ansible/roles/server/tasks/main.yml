@@ -20,3 +20,11 @@
     owner: "{{ remote_jmeter_user }}"
     group: "{{ remote_jmeter_user }}"
     mode: 0664
+
+- name: Copy Test IDs 
+  copy: 
+    src: "{{ test_ids }}"
+    dest: "{{ remote_test_dir }}"
+    owner: "{{ remote_jmeter_user }}"
+    group: "{{ remote_jmeter_user }}"
+    mode: 0664
