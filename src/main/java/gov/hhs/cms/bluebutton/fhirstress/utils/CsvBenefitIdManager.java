@@ -10,13 +10,25 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import com.google.common.base.Strings;
+
 public class CsvBenefitIdManager implements BenefitIdManager {
 	CSVParser parser;
 	Iterator<CSVRecord> i;
 	File f;
 
 	public CsvBenefitIdManager() {
-		f = Paths.get("/usr/local/bluebutton-jmeter-service/bene-ids.csv").toFile();
+		this("");
+	}
+
+	public CsvBenefitIdManager(String prefix) {
+		f = Paths.get("/usr/local/bluebutton-jmeter-service/" + (Strings.isNullOrEmpty(prefix) ? "" : prefix + "-")
+				+ "bene-ids.csv").toFile();
+		init();
+	}
+
+	public CsvBenefitIdManager(File f) {
+		this.f = f;
 		init();
 	}
 
