@@ -1,11 +1,9 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -14,6 +12,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -312,80 +311,66 @@ public final class PatientResourceProvider implements IResourceProvider {
 
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
-		// First, find all matching HICNs from Beneficiaries.
-		CriteriaQuery<String> beneMatches = builder.createQuery(String.class);
-		Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-		beneMatches.select(beneMatchesRoot.get(Beneficiary_.beneficiaryId));
-		beneMatches.where(builder.equal(beneMatchesRoot.get(Beneficiary_.hicn), hicnHash));
-		List<String> beneMatchesResults;
-		Timer.Context beneMatchesTimer = metricRegistry.timer(
-				MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn", "hicns_from_beneficiaries"))
-				.time();
-		try {
-			beneMatchesResults = entityManager.createQuery(beneMatches).getResultList();
-		} finally {
-			beneMatchesTimer.stop();
-		}
-
-		// Then, find all matching HICNs from BeneficiariesHistory.
+		// First, find all matching HICNs from BeneficiariesHistory.
 		CriteriaQuery<String> beneHistoryMatches = builder.createQuery(String.class);
 		Root<BeneficiaryHistory> beneHistoryMatchesRoot = beneHistoryMatches.from(BeneficiaryHistory.class);
 		beneHistoryMatches.select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId));
 		beneHistoryMatches.where(builder.equal(beneHistoryMatchesRoot.get(BeneficiaryHistory_.hicn), hicnHash));
-		List<String> beneHistoryMatchesResults;
-		Timer.Context beneHistoryMatchesTimer = metricRegistry.timer(MetricRegistry.name(getClass().getSimpleName(), "query",
-				"bene_by_hicn", "hicns_from_beneficiarieshistory")).time();
+		List<String> matchingIdsFromBeneHistory;
+		Timer.Context beneHistoryMatchesTimer = metricRegistry.timer(MetricRegistry.name(getClass().getSimpleName(),
+				"query", "bene_by_hicn", "hicns_from_beneficiarieshistory")).time();
 		try {
-			beneHistoryMatchesResults = entityManager.createQuery(beneHistoryMatches).getResultList();
+			matchingIdsFromBeneHistory = entityManager.createQuery(beneHistoryMatches).getResultList();
 		} finally {
 			beneHistoryMatchesTimer.stop();
 		}
 
-		// Then, if we found more than one distinct BENE_ID, or none, throw an error.
-		Set<String> matchingBeneIds = new HashSet<>();
-		matchingBeneIds.addAll(beneMatchesResults);
-		matchingBeneIds.addAll(beneHistoryMatchesResults);
-		if (matchingBeneIds.size() <= 0) {
-			throw new NoResultException();
-		} else if (matchingBeneIds.size() > 1) {
-			throw new NonUniqueResultException();
+		// Then, find all Beneficiary records that match the HICN or those BENE_IDs.
+		CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
+		Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
+		IncludeIdentifiersMode includeIdentifiersMode = IncludeIdentifiersMode
+				.determineIncludeIdentifiersMode(requestDetails);
+		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			// For efficiency, grab these relations in the same query.
+			// For security, only grab them when needed.
+			beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories);
+			beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories);
+		}
+		beneMatches.select(beneMatchesRoot);
+		Predicate beneHicnMatches = builder.equal(beneMatchesRoot.get(Beneficiary_.hicn), hicnHash);
+		if (!matchingIdsFromBeneHistory.isEmpty()) {
+			Predicate beneHistoryHicnMatches = beneMatchesRoot.get(Beneficiary_.beneficiaryId)
+					.in(matchingIdsFromBeneHistory);
+			beneMatches.where(builder.or(beneHicnMatches, beneHistoryHicnMatches));
+		} else {
+			beneMatches.where(beneHicnMatches);
+		}
+		List<Beneficiary> macthingBenes;
+		Timer.Context timerHicnQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn")).time();
+		try {
+			macthingBenes = entityManager.createQuery(beneMatches).getResultList();
+		} finally {
+			timerHicnQuery.stop();
 		}
 
-		// Finally, go grab the matching bene and return it.
-		String beneId = matchingBeneIds.iterator().next();
-		return read(new IdType(beneId), requestDetails);
+		// Then, if we found more than one distinct BENE_ID, or none, throw an error.
+		long distinctBeneIds = macthingBenes.stream().map(b->b.getBeneficiaryId()).distinct().count();
+		if (distinctBeneIds <= 0) {
+			throw new NoResultException();
+		} else if (distinctBeneIds > 1) {
+			throw new NonUniqueResultException();
+		}
+		
+		// Then, null out the HICN and MBI if we're not supposed to be returning those.
+		Beneficiary beneficiary = macthingBenes.get(0);
+		if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+			beneficiary.setHicnUnhashed(Optional.empty());
+			beneficiary.setMedicareBeneficiaryId(Optional.empty());
+		}
 
-
-//		/*
-//		 * Need an application-managed EntityManager, so we can unwrap a Hibernate
-//		 * Session from it, so we can use some of Hibernate's more advanced native query
-//		 * functionality.
-//		 */
-//		EntityManager unmanagedEntityManager = null;
-//		Session unmanagedSession = null;
-//		List<Beneficiary> beneficiaries;
-//		try {
-//			unmanagedEntityManager = entityManager.getEntityManagerFactory().createEntityManager();
-//			unmanagedSession = unmanagedEntityManager.unwrap(Session.class);
-//
-//			NativeQuery beneficiariesQuery = unmanagedSession.createNativeQuery(
-//					"SELECT b.*, h.*, m.* FROM (SELECT DISTINCT \"beneficiaryId\" FROM \"Beneficiaries\" WHERE \"hicn\" = :hicn_hash UNION SELECT DISTINCT \"beneficiaryId\" FROM \"BeneficiariesHistory\" WHERE \"hicn\" = :hicn_hash) AS matching_benes INNER JOIN \"Beneficiaries\" b ON matching_benes.\"beneficiaryId\" = b.\"beneficiaryId\" LEFT JOIN \"BeneficiariesHistory\" h ON b.\"beneficiaryId\" = h.\"beneficiaryId\" LEFT JOIN \"MedicareBeneficiaryIdHistory\" m ON b.\"beneficiaryId\" = m.\"beneficiaryId\"");
-//			beneficiariesQuery.addEntity("b", Beneficiary.class);
-//			beneficiariesQuery.addJoin("h", "b.beneficiaryHistories");
-//			beneficiariesQuery.addJoin("m", "b.medicareBeneficiaryIdHistories");
-//			beneficiariesQuery.setResultTransformer(Criteria.ROOT_ENTITY);
-//			beneficiariesQuery.setParameter("hicn_hash", hicnHash);
-//			try {
-//				beneficiaries = beneficiariesQuery.getResultList();
-//			} finally {
-//				timerHicnQuery.stop();
-//			}
-//		} finally {
-//			if (unmanagedSession != null && unmanagedSession.isOpen())
-//				unmanagedSession.close();
-//			if (unmanagedEntityManager != null && unmanagedEntityManager.isOpen())
-//				unmanagedEntityManager.close();
-//		}
+		Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersMode);
+		return patient;
 	}
 
 	/**
