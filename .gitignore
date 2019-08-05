@@ -14,3 +14,9 @@ vault.password
 
 # Ignore Ansible log files.
 logs/
+
+# Ignore Terraform compiles files and modules
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+.terraform/
