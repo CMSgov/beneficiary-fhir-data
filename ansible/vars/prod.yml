@@ -23,6 +23,6 @@ security_group_ids:
   - sg-997a8aec
   - sg-8d7bd5c4
   - sg-953120e1
-  - sg-08f209788d94dd290
+  - sg-0499559a542b4b387
 
 # pdcw10sg10, pdbb10sg06, pdbb10sg01, pdcw10sg04, pdbb10sg03.
