@@ -4,7 +4,7 @@
 
 Infrastructure definitions are split up by environment and by service.
 
-Shared components should be defined under the `terraform/common` directory (e.g., S3 buckets, IAM roles or policies, etc. that are used across the AWS account).
+Shared components should be defined under the `terraform/global` directory (e.g., S3 buckets, IAM roles or policies, etc. that are used across the AWS account).
 
 The `terraform/env` directory contains sub directories for each of the deployment environments: `mgmt`, `test`, `prod-sbx` and `prod`. Within each environment, configurations are divided by service (e.g., KMS, IAM, RDS, ELB, etc.).
 
