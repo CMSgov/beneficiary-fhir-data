@@ -12,6 +12,7 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -125,8 +126,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
 			// For efficiency, grab these relations in the same query.
 			// For security, only grab them when needed.
-			root.fetch(Beneficiary_.beneficiaryHistories);
-			root.fetch(Beneficiary_.medicareBeneficiaryIdHistories);
+			root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+			root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 		}
 		criteria.select(root);
 		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
@@ -333,8 +334,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
 			// For efficiency, grab these relations in the same query.
 			// For security, only grab them when needed.
-			beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories);
-			beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories);
+			beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+			beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 		}
 		beneMatches.select(beneMatchesRoot);
 		Predicate beneHicnMatches = builder.equal(beneMatchesRoot.get(Beneficiary_.hicn), hicnHash);
