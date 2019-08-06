@@ -295,10 +295,10 @@ public final class PatientResourceProvider implements IResourceProvider {
 		 * ... with the returned columns and JOINs being dynamic, depending on
 		 * IncludeIdentifiers.
 		 *
-		 * In lieu of that, we run three queries: one to find HICN matches in
-		 * Beneficiaries, another to find HICN matches in BeneficiariesHistory,
-		 * and a third to return the selected bene with all their data. This is bad and
-		 * dumb but I can't find a better working alternative.
+		 * In lieu of that, we run two queries: one to find HICN matches in
+		 * BeneficiariesHistory, and a second to find BENE_ID or HICN matches in
+		 * Beneficiaries (with all of their data, so we're ready to return the result).
+		 * This is bad and dumb but I can't find a better working alternative.
 		 *
 		 * (I'll just note that I did also try JPA/Hibernate native SQL queries but
 		 * couldn't get the joins or fetch groups to work with them.)
@@ -345,17 +345,17 @@ public final class PatientResourceProvider implements IResourceProvider {
 		} else {
 			beneMatches.where(beneHicnMatches);
 		}
-		List<Beneficiary> macthingBenes;
+		List<Beneficiary> matchingBenes;
 		Timer.Context timerHicnQuery = metricRegistry
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn")).time();
 		try {
-			macthingBenes = entityManager.createQuery(beneMatches).getResultList();
+			matchingBenes = entityManager.createQuery(beneMatches).getResultList();
 		} finally {
 			timerHicnQuery.stop();
 		}
 
 		// Then, if we found more than one distinct BENE_ID, or none, throw an error.
-		long distinctBeneIds = macthingBenes.stream().map(b->b.getBeneficiaryId()).distinct().count();
+		long distinctBeneIds = matchingBenes.stream().map(b -> b.getBeneficiaryId()).distinct().count();
 		if (distinctBeneIds <= 0) {
 			throw new NoResultException();
 		} else if (distinctBeneIds > 1) {
@@ -363,7 +363,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 		}
 		
 		// Then, null out the HICN and MBI if we're not supposed to be returning those.
-		Beneficiary beneficiary = macthingBenes.get(0);
+		Beneficiary beneficiary = matchingBenes.get(0);
 		if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
 			beneficiary.setHicnUnhashed(Optional.empty());
 			beneficiary.setMedicareBeneficiaryId(Optional.empty());
