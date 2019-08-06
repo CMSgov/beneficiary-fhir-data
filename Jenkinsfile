@@ -107,7 +107,7 @@ stage('Test the DPR ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh 'cd ansible && ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=dpr" --connection=paramiko'
+					sh 'cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e "target_env=dpr" --connection=paramiko'
 				}
 			}
 		}
@@ -123,7 +123,7 @@ stage('Test the Prod ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh 'cd ansible && ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=prod" --connection=paramiko'
+					sh 'cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e "target_env=prod" --connection=paramiko'
 				}
 			}
 		}
