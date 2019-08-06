@@ -296,7 +296,7 @@ end-if
 if (outcome == success) of /subsystem=undertow/server=default-server/host=default-host/setting=access-log:read-resource
 	/subsystem=undertow/server=default-server/host=default-host/setting=access-log:remove
 end-if
-/subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l %u %t \\"%r\\" \\"?%q\\" %s %B %D %{i,BlueButton-OriginalQueryId} %{i,BlueButton-OriginalQueryCounter} [%{i,BlueButton-OriginalQueryTimestamp}] %{i,BlueButton-DeveloperId} \\"%{i,BlueButton-Developer}\\" %{i,BlueButton-ApplicationId} \\"%{i,BlueButton-Application}\\" %{i,BlueButton-UserId} \\"%{i,BlueButton-User}\\" %{i,BlueButton-BeneficiaryId}", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
+/subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l \\"%u\\" %t \\"%r\\" \\"?%q\\" %s %B %D %{i,BlueButton-OriginalQueryId} %{i,BlueButton-OriginalQueryCounter} [%{i,BlueButton-OriginalQueryTimestamp}] %{i,BlueButton-DeveloperId} \\"%{i,BlueButton-Developer}\\" %{i,BlueButton-ApplicationId} \\"%{i,BlueButton-Application}\\" %{i,BlueButton-UserId} \\"%{i,BlueButton-User}\\" %{i,BlueButton-BeneficiaryId}", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
 
 # Configure the application's security domain.
 /subsystem=security/security-domain=bluebutton-data-server:add(cache-type="default")
