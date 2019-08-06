@@ -14,7 +14,7 @@ resource "aws_db_instance" "default" {
   monitoring_role_arn    = "${var.monitoring_role_arn}"
   engine                 = "postgres"
   engine_version         = "9.6.6"
-  username               = "bfdmaster"
+  username               = ""
   storage_encrypted      = true
   copy_tags_to_snapshot  = true
   skip_final_snapshot    = true
