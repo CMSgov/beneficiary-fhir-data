@@ -43,6 +43,7 @@ public final class MappingSpec {
 	private String lineTable;
 	private List<String> headerEntityTransientFields;
 	private List<RifField> headerEntityAdditionalDatabaseFields;
+	private List<InnerJoinRelationship> innerJoinRelationship;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -55,6 +56,7 @@ public final class MappingSpec {
 		this.packageName = packageName;
 		this.headerEntityTransientFields = new ArrayList<>();
 		this.headerEntityAdditionalDatabaseFields = new ArrayList<RifField>();
+		this.innerJoinRelationship = new ArrayList<InnerJoinRelationship>();
 	}
 
 	/**
@@ -351,5 +353,41 @@ public final class MappingSpec {
 		builder.append(lineTable);
 		builder.append("]");
 		return builder.toString();
+	}
+
+	/**
+	 * @return <code>true</code> if the RIF layout has an inner join relationship
+	 *         <code>false</code> if not
+	 */
+	public Boolean getHasInnerJoinRelationship() {
+		return this.innerJoinRelationship.size() != 0;
+	}
+
+	/**
+	 * @param innerJoinRelationship
+	 *            a list of {@link String} parameters defining the inner join
+	 *            relationship for the entity
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
+	 */
+	public MappingSpec setInnerJoinRelationship(List<InnerJoinRelationship> innerJoinRelationship) {
+		this.innerJoinRelationship = innerJoinRelationship;
+		return this;
+	}
+
+	/**
+	 * @return the list of {@link #innerJoinRelationship}s
+	 */
+	public List<InnerJoinRelationship> getInnerJoinRelationship() {
+		return this.innerJoinRelationship;
+	}
+
+	/**
+	 * @param entity
+	 *            the {@link String} entity for which to return the
+	 *            {@link ClassName} for
+	 * @return the {@link ClassName} of the provided {@link String} entity
+	 */
+	public ClassName getClassName(String entity) {
+		return ClassName.get(packageName, entity);
 	}
 }
