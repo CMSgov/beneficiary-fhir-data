@@ -161,7 +161,7 @@ deployment_environment_ts:
 deployment_environment_dp:
   env_name: 'dp'
   data_server_elb:
-    elb_name: 'dpbb10lb01'
+    elb_name: 'dpcwelb01'
     vpc_name: 'dpcw10vc01'
     security_group_names: "{{ aws_security_groups_dp | selectattr('vpc_name', 'equalto', 'dpcw10vc01') | selectattr('description', 'equalto', 'HTTP Class Services') | map(attribute='sg_name') | list }}"
     internet_facing: false
@@ -173,7 +173,7 @@ deployment_environment_dp:
 deployment_environment_pd:
   env_name: 'pd'
   data_server_elb:
-    elb_name: 'pdbb10lb01'
+    elb_name: 'pdcw10lb01'
     vpc_name: 'pdcw10vc01'
     security_group_names: "{{ aws_security_groups_pd | selectattr('vpc_name', 'equalto', 'pdcw10vc01') | selectattr('description', 'equalto', 'HTTP Class Services') | map(attribute='sg_name') | list }}"
     internet_facing: false
