@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary_;
+import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link Coverage}
@@ -180,19 +181,25 @@ public final class CoverageResourceProvider implements IResourceProvider {
 	 */
 	private Beneficiary findBeneficiaryById(String beneficiaryId)
 			throws NoResultException {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+		Root<Beneficiary> root = criteria.from(Beneficiary.class);
+		criteria.select(root);
+		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
+
+		Beneficiary beneficiary = null;
+		Long beneByIdQueryNanoSeconds = null;
 		Timer.Context timerBeneQuery = metricRegistry
 				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
 		try {
-			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-			CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
-			Root<Beneficiary> root = criteria.from(Beneficiary.class);
-			criteria.select(root);
-			criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
-
-			Beneficiary beneficiaryEntity = entityManager.createQuery(criteria).getSingleResult();
-			return beneficiaryEntity;
+			beneficiary = entityManager.createQuery(criteria).getSingleResult();
 		} finally {
-			timerBeneQuery.stop();
+			beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+			TransformerUtils.recordQueryInMdc(
+					String.format("bene_by_id.%s", IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS.name().toLowerCase()),
+					beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
 		}
+
+		return beneficiary;
 	}
 }

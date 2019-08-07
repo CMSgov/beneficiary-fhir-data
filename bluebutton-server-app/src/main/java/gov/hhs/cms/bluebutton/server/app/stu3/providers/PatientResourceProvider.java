@@ -114,9 +114,6 @@ public final class PatientResourceProvider implements IResourceProvider {
 		if (beneIdText == null || beneIdText.trim().isEmpty())
 			throw new IllegalArgumentException();
 
-		Timer.Context timerBeneQuery = metricRegistry
-				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
-
 		IncludeIdentifiersMode includeIdentifiersMode = IncludeIdentifiersMode
 				.determineIncludeIdentifiersMode(requestDetails);
 
@@ -133,12 +130,18 @@ public final class PatientResourceProvider implements IResourceProvider {
 		criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
 
 		Beneficiary beneficiary = null;
+		Long beneByIdQueryNanoSeconds = null;
+		Timer.Context timerBeneQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
 		try {
 			beneficiary = entityManager.createQuery(criteria).getSingleResult();
 		} catch (NoResultException e) {
 			throw new ResourceNotFoundException(patientId);
 		} finally {
-			timerBeneQuery.stop();
+			beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+			TransformerUtils.recordQueryInMdc(
+					String.format("bene_by_id.%s", includeIdentifiersMode.name().toLowerCase()),
+					beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
 		}
 
 		// Null out the unhashed HICNs and MBIs if we're not supposed to be returning
@@ -317,13 +320,17 @@ public final class PatientResourceProvider implements IResourceProvider {
 		Root<BeneficiaryHistory> beneHistoryMatchesRoot = beneHistoryMatches.from(BeneficiaryHistory.class);
 		beneHistoryMatches.select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId));
 		beneHistoryMatches.where(builder.equal(beneHistoryMatchesRoot.get(BeneficiaryHistory_.hicn), hicnHash));
-		List<String> matchingIdsFromBeneHistory;
+		List<String> matchingIdsFromBeneHistory = null;
+		Long hicnsFromHistoryQueryNanoSeconds = null;
 		Timer.Context beneHistoryMatchesTimer = metricRegistry.timer(MetricRegistry.name(getClass().getSimpleName(),
 				"query", "bene_by_hicn", "hicns_from_beneficiarieshistory")).time();
 		try {
 			matchingIdsFromBeneHistory = entityManager.createQuery(beneHistoryMatches).getResultList();
 		} finally {
-			beneHistoryMatchesTimer.stop();
+			hicnsFromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
+			TransformerUtils.recordQueryInMdc("bene_by_hicn.hicns_from_beneficiarieshistory",
+					hicnsFromHistoryQueryNanoSeconds,
+					matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
 		}
 
 		// Then, find all Beneficiary records that match the HICN or those BENE_IDs.
@@ -346,13 +353,19 @@ public final class PatientResourceProvider implements IResourceProvider {
 		} else {
 			beneMatches.where(beneHicnMatches);
 		}
-		List<Beneficiary> matchingBenes;
+		List<Beneficiary> matchingBenes = null;
+		Long benesByHicnOrIdQueryNanoSeconds = null;
 		Timer.Context timerHicnQuery = metricRegistry
-				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn")).time();
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_hicn", "bene_by_hicn_or_id"))
+				.time();
 		try {
 			matchingBenes = entityManager.createQuery(beneMatches).getResultList();
 		} finally {
-			timerHicnQuery.stop();
+			benesByHicnOrIdQueryNanoSeconds = timerHicnQuery.stop();
+			TransformerUtils.recordQueryInMdc(
+					String.format("bene_by_hicn.bene_by_hicn_or_id.%s", includeIdentifiersMode.name().toLowerCase()),
+					benesByHicnOrIdQueryNanoSeconds,
+					matchingBenes == null ? 0 : matchingBenes.size());
 		}
 
 		// Then, if we found more than one distinct BENE_ID, or none, throw an error.

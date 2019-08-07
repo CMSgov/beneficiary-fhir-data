@@ -15,8 +15,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SingularAttribute;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -131,8 +129,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			throw new ResourceNotFoundException(eobId);
 		String eobIdClaimIdText = eobIdMatcher.group(2);
 
-		Timer.Context timerEobQuery = metricRegistry
-				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id")).time();
 		Class<?> entityClass = eobIdType.get().getEntityClass();
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery criteria = builder.createQuery(entityClass);
@@ -142,12 +138,16 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		criteria.where(builder.equal(root.get(eobIdType.get().getEntityIdAttribute()), eobIdClaimIdText));
 
 		Object claimEntity = null;
+		Long eobByIdQueryNanoSeconds = null;
+		Timer.Context timerEobQuery = metricRegistry
+				.timer(MetricRegistry.name(getClass().getSimpleName(), "query", "eob_by_id")).time();
 		try {
 			claimEntity = entityManager.createQuery(criteria).getSingleResult();
 		} catch (NoResultException e) {
 			throw new ResourceNotFoundException(eobId);
 		} finally {
-			timerEobQuery.stop();
+			eobByIdQueryNanoSeconds = timerEobQuery.stop();
+			TransformerUtils.recordQueryInMdc("eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
 		}
 
 		ExplanationOfBenefit eob = eobIdType.get().getTransformer().apply(metricRegistry, claimEntity);
@@ -256,23 +256,28 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked"})
 	private <T> List<T> findClaimTypeByPatient(ClaimType claimType, String patientId) {
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery criteria = criteriaBuilder.createQuery((Class) claimType.getEntityClass());
+		Root root = criteria.from(claimType.getEntityClass());
+		claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch(a));
+		criteria.select(root).distinct(true);
+		criteria.where(criteriaBuilder.equal(root.get(claimType.getEntityBeneficiaryIdAttribute()), patientId));
+
+		List claimEntities = null;
+		Long eobsByBeneIdQueryNanoSeconds = null;
 		Timer.Context timerEobQuery = metricRegistry.timer(MetricRegistry
-				.name(metricRegistry.getClass().getSimpleName(), "query", "eobs", claimType.name().toLowerCase()))
+				.name(metricRegistry.getClass().getSimpleName(), "query", "eobs_by_bene_id",
+						claimType.name().toLowerCase()))
 				.time();
 		try {
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-			CriteriaQuery criteria = criteriaBuilder.createQuery((Class) claimType.getEntityClass());
-			Root root = criteria.from((Class) claimType.getEntityClass());
-			claimType.getEntityLazyAttributes().stream().forEach(a -> root.fetch((PluralAttribute) a));
-			criteria.select(root).distinct(true);
-			criteria.where(criteriaBuilder
-					.equal(root.get((SingularAttribute) claimType.getEntityBeneficiaryIdAttribute()), patientId));
-
-			List claimEntities = entityManager.createQuery(criteria).getResultList();
-			return claimEntities;
+			claimEntities = entityManager.createQuery(criteria).getResultList();
 		} finally {
-			timerEobQuery.stop();
+			eobsByBeneIdQueryNanoSeconds = timerEobQuery.stop();
+			TransformerUtils.recordQueryInMdc(String.format("eobs_by_bene_id.%s", claimType.name().toLowerCase()),
+					eobsByBeneIdQueryNanoSeconds, claimEntities == null ? 0 : claimEntities.size());
 		}
+
+		return claimEntities;
 	}
 
 	/**

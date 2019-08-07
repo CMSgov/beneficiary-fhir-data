@@ -181,6 +181,12 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
+		<dependency>
+			<!-- Used to proxy JDBC usage, for monitoring. -->
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
+			<version>1.5.1</version>
+		</dependency>
 
 		<dependency>
 			<!-- The test framework used for unit and integration tests. -->

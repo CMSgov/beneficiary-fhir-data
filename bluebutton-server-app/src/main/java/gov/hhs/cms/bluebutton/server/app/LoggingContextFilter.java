@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import ch.qos.logback.classic.ClassicConstants;
 import ch.qos.logback.classic.helpers.MDCInsertingServletFilter;
 
 /**
@@ -56,14 +55,14 @@ public final class LoggingContextFilter implements Filter {
 		if (request instanceof HttpServletRequest) {
 			HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
-			MDC.put(ClassicConstants.REQUEST_METHOD, httpServletRequest.getMethod());
-			MDC.put(ClassicConstants.REQUEST_REQUEST_URI, httpServletRequest.getRequestURI());
-			StringBuffer requestURL = httpServletRequest.getRequestURL();
-			if (requestURL != null)
-				MDC.put(ClassicConstants.REQUEST_REQUEST_URL, requestURL.toString());
-			else
-				MDC.put(ClassicConstants.REQUEST_REQUEST_URL, null);
-			MDC.put(ClassicConstants.REQUEST_QUERY_STRING, httpServletRequest.getQueryString());
+//			MDC.put(ClassicConstants.REQUEST_METHOD, httpServletRequest.getMethod());
+//			MDC.put(ClassicConstants.REQUEST_REQUEST_URI, httpServletRequest.getRequestURI());
+//			StringBuffer requestURL = httpServletRequest.getRequestURL();
+//			if (requestURL != null)
+//				MDC.put(ClassicConstants.REQUEST_REQUEST_URL, requestURL.toString());
+//			else
+//				MDC.put(ClassicConstants.REQUEST_REQUEST_URL, null);
+//			MDC.put(ClassicConstants.REQUEST_QUERY_STRING, httpServletRequest.getQueryString());
 			MDC.put("req.clientSSL.DN", getClientSslPrincipalDistinguishedName(httpServletRequest));
 		}
 	}
