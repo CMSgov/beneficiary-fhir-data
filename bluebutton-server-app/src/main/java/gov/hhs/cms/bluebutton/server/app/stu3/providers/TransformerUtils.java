@@ -3112,7 +3112,7 @@ public final class TransformerUtils {
 	 *                                 entities) returned by the query
 	 */
 	public static void recordQueryInMdc(String queryId, long queryDurationNanoseconds, long recordCount) {
-		String keyPrefix = String.format("jpa_queries.%s", queryId);
+		String keyPrefix = String.format("jpa_query.%s", queryId);
 		MDC.put(String.format("%s.duration_nanoseconds", keyPrefix), Long.toString(queryDurationNanoseconds));
 		MDC.put(String.format("%s.duration_milliseconds", keyPrefix),
 				Long.toString(queryDurationNanoseconds / 1000000));
