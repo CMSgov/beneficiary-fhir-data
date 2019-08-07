@@ -18,7 +18,11 @@ resource "aws_s3_bucket" "state_bucket" {
             "Principal": "*",
             "Action": "s3:PutObject",
             "Resource": "arn:aws:s3:::bfd-tf-state/*",
-
+            "Condition": {
+              "StringNotEquals": {
+                "s3:x-amz-server-side-encryption": "aws:kms"
+              }
+            }
         },
         {
             "Sid": "JenkinsGetObject",
@@ -29,6 +33,9 @@ resource "aws_s3_bucket" "state_bucket" {
             "Condition": {
                 "ArnEquals": {
                     "aws:userid": "arn:aws:iam::755619740999:user/Jenkins"
+                }
+                "StringNotEquals": {
+                    "s3:x-amz-server-side-encryption": "aws:kms"
                 }
             }
         }

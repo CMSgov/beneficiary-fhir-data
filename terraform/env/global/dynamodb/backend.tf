@@ -4,7 +4,7 @@ terraform {
     key            = "global/dynamodb/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
-    encrypt        = "1"
+    encrypt        = true
     kms_key_id     = "alias/bfd-tf-state"
   }
 }
