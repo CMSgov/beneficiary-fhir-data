@@ -22,3 +22,5 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_prod_certificate.pem') }}"
   - alias: client_mct_prod
     certificate: "{{ lookup('file', 'files/client_data_server_mct_prod_certificate.pem') }}"
+  - alias: client_performance_tester
+    certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
