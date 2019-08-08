@@ -46,6 +46,8 @@ import gov.hhs.cms.bluebutton.data.model.rif.schema.DatabaseSchemaManager;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.CoverageResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider;
+import net.ttddyy.dsproxy.support.ProxyDataSource;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 /**
  * The main Spring {@link Configuration} for the Blue Button API Backend
@@ -110,7 +112,11 @@ public class SpringConfiguration {
 			configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
 		}
 
-		return poolingDataSource;
+		// Wrap the pooled DataSource in a proxy that records performance data.
+		ProxyDataSource proxyDataSource = ProxyDataSourceBuilder.create(poolingDataSource).name("BFD-Data")
+				.listener(new QueryLoggingListener()).proxyResultSet().build();
+
+		return proxyDataSource;
 	}
 
 	/**
