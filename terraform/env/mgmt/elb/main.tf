@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "elb" {
-  source = "../../modules/elb"
+  source = "../../modules/resources/elb"
 
   name               = "bfd-mgmt-clb-1"
   env                = "mgmt"

@@ -3,6 +3,6 @@ provider "aws" {
 }
 
 module "iam" {
-  source = "../../modules/iam"
+  source = "../../modules/resources/iam"
   env = "mgmt"
 }
