@@ -149,7 +149,7 @@ file = /u01/jboss/jboss-eap-7.0/standalone/log/server.log*
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfs/{{ env_name_std }}/data-server/access
+log_group_name = /bfd/{{ env_name_std }}/data-server/access
 
 [bfs_app_access]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
@@ -157,7 +157,7 @@ file = /u01/jboss/bluebutton-server-app-log-access.json
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfs/{{ env_name_std }}/data-server/access
+log_group_name = /bfd/{{ env_name_std }}/data-server/access
 
 [bfs_app_database_query]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
@@ -165,7 +165,7 @@ file = /u01/jboss/bluebutton-server-app-log-database.json
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfs/{{ env_name_std }}/data-server/database
+log_group_name = /bfd/{{ env_name_std }}/data-server/database
 
 [bfs_app_message_txt]
 datetime_format = %Y-%m-%d %H:%M:%S,%f
@@ -173,7 +173,7 @@ file = /u01/jboss/bluebutton-server-app.log
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfs/{{ env_name_std }}/data-server/message.txt
+log_group_name = /bfd/{{ env_name_std }}/data-server/message.txt
 
 [bfs_app_message_ndjson]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
@@ -181,7 +181,7 @@ file = /u01/jboss/bluebutton-server-app-log.json
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfs/{{ env_name_std }}/data-server/message.json
+log_group_name = /bfd/{{ env_name_std }}/data-server/message.json
 
 [bfs_app_gc]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
@@ -189,5 +189,5 @@ file = /u01/jboss/bluebutton-server-app-log.json
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfs/{{ env_name_std }}/data-server/message.json
+log_group_name = /bfd/{{ env_name_std }}/data-server/message.json
 multi_line_start_pattern = ^[^\d]
