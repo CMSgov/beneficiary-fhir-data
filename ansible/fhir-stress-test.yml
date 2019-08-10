@@ -1,7 +1,16 @@
 ---
 - name: Prepare
   hosts: localhost
+  connection: local
   gather_facts: true
+  
+  environment:
+    no_proxy: 'localhost,169.254.169.254'
+    http_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
+    https_proxy: "http://{{ vault_proxy_host }}:{{ vault_proxy_port }}"
+    
+  vars_files: 
+    - vars/{{ target_env }}.yml
   tasks:
     # This generates a new results folder for each test execution
     - name: Create results path variable
@@ -30,6 +39,9 @@
 
 - name: Configure Systems for Ansible Pipelining
   hosts: client:servers
+  gather_facts: no
+  vars_files: 
+    - vars/{{ target_env }}.yml
   vars:
     ansible_ssh_pipelining: false
   roles:
@@ -39,6 +51,8 @@
   hosts: client:servers
   become: True
   gather_facts: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   roles:
     - common
@@ -47,6 +61,8 @@
   hosts: client
   become: True
   gather_facts: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   roles:
     - client 
@@ -55,6 +71,8 @@
   hosts: servers
   become: True
   gather_facts: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   roles:
     - server 
@@ -62,6 +80,8 @@
 - name: Launch JMeter servers
   hosts: servers
   become: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   gather_facts: True
   handlers:
@@ -102,6 +122,8 @@
 - name: Launch JMeter client and start tests
   hosts: client
   become: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   gather_facts: True
   
@@ -110,13 +132,17 @@
       ignore_errors: yes
       # Command Line Docs: http://jmeter.apache.org/usermanual/get-started.html
       command: "{{ remote_jmeter_dir }}/bin/jmeter -n -X 
+        -Djava.rmi.server.hostname={{ ansible_default_ipv4.address }}
         -Dclient.rmi.localport={{ jmeter_client_rmi_local_port }} 
+        -Dserver.rmi.localport={{ jmeter_server_rmi_local_port }} 
         -Dserver_port={{ jmeter_server_port }} 
         -t{{ remote_test_dir }}/jmeter-fhir-test.jmx 
         -l{{ remote_test_dir }}/log.jtl 
         -j{{ remote_test_dir }}/log-jmeter.txt 
         -R{{ hostvars | get_members(groups, 'servers') | map(attribute='ansible_fqdn') | list | join(',') }}
-        -Jfhir_server={{ fhir_server }} 
+        -H{{ vault_proxy_host }}
+        -P{{ vault_proxy_port }}
+        -Gfhir_server={{ fhir_server }} 
         -Jthread_count={{ thread_count }} 
         -Jthread_loops={{ thread_loops }} 
         -Gcontinue_forever={{ continue_forever | bool | lower }} 
@@ -125,7 +151,7 @@
 
       # Added async and polling  because some servers will disconnect the ssh 
       # connection prior to test completion causing the ansible script to fail
-      async: "{{ duration + (2*poll) }}" 
+      async: "{{ duration + (4*poll) }}" 
       poll: "{{ poll }}" 
 
     - name: Collect Results
@@ -140,12 +166,48 @@
       ignore_errors: yes
       fetch: 
         src: "{{ remote_test_dir }}/log-jmeter.txt"
-        dest: "{{ hostvars['localhost']['results_path'].stdout }}/"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/client-log-jmeter.txt"
+        fail_on_missing: yes
+        flat: yes
+     
+    - name: Collect console Logs
+      ignore_errors: yes
+      fetch: 
+        src: "{{ remote_test_dir }}/log-jmeter-console.txt"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/client-log-jmeter-console.txt"
+        fail_on_missing: yes
+        flat: yes
+        
+- name: Collect server logs
+  hosts: servers
+  become: True
+  vars_files: 
+    - vars/{{ target_env }}.yml
+  environment: "{{proxy_env}}"
+  gather_facts: True
+  
+  tasks:
+    - name: Collect Logs
+      ignore_errors: yes
+      fetch: 
+        src: "{{ remote_test_dir }}/log-jmeter.txt"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/sever-log-jmeter.txt"
+        fail_on_missing: yes
+        flat: yes
+        
+    - name: Collect console Log
+      ignore_errors: yes
+      fetch: 
+        src: "{{ remote_test_dir }}/log-jmeter-console.txt"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/sever-log-jmeter-console.txt"
         fail_on_missing: yes
         flat: yes
 
 - name: Cleanup localhost
   hosts: localhost
+  connection: local
+  vars_files: 
+    - vars/{{ target_env }}.yml
   environment: "{{proxy_env}}"
   gather_facts: false
   

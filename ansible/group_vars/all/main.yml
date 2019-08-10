@@ -21,11 +21,9 @@ remote_jmeter_dir: "{{ remote_test_dir }}/apache-jmeter-{{ jmeter_version }}"
 # remote jmeter server port 
 jmeter_server_port: 1099
 # jmeter server remote method invocation(RMI) port, used for jmeter server communication
-jmeter_server_rmi_local_port: 4000 
+jmeter_server_rmi_local_port: 1099 
 # jmeter client remote method invocation(RMI) port, used for jmeter client communication
-jmeter_client_rmi_local_port: 4001
-# URI of FHIR server under test
-fhir_server: "https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir"
+jmeter_client_rmi_local_port: 4005
 # remote user to run jmeter
 remote_jmeter_user: bb-jmeter
 
@@ -41,7 +39,7 @@ thread_loops: 1000
 scheduler: true
 # The duration in seconds for a sampler thread to run.
 # The duration is used to set the async timeout duration (even if scheduler is false) 
-duration: 300
+duration: 60
 # Poll interval(in seconds) to check for test completion.  Used because some servers will disconnect the ssh connection prior to test completion causing the ansible script to fail,
 poll: 30
 
@@ -73,3 +71,5 @@ security_group_ids:
   - sg-c254c582
   - sg-00934127d109774ad
 ###
+
+ansible_ssh_private_key_file: "./perf-tests.pem"
