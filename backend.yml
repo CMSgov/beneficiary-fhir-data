@@ -116,5 +116,16 @@
       delegate_to: localhost
       loop: "{{ ec2_elbs }}"
 
+    - name: Configure CloudWatch Logs Agent
+      template:
+        src: awslogs.conf.data-server.j2
+        dest: '/var/awslogs/etc/awslogs.conf'
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+      become: true
+      notify:
+        - Restart awslogs Service
+
 - name: Configure Load Balancers
   import_playbook: load_balancers.yml
