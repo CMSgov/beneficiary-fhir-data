@@ -15,6 +15,14 @@ data "aws_iam_role" "rds_monitoring" {
   name = "rds-monitoring-role"
 }
 
+# Build a RDS with the following
+#   - Encryption using a Customer Managed Key
+#   - Autoscale storage size
+#   - Single AZ with replication to multiple az
+#   - Monitoring to cloud watch
+#   - Automatic backups and maintenence windows
+#   - deletition protection in prod environments
+#
 resource "aws_db_instance" "db" {
   max_allocated_storage  = local.is_master ? var.db_config.allocated_storage : null
   allocated_storage      = local.is_master ? 100 : null
