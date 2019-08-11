@@ -30,4 +30,6 @@ variable "replicate_source_db" {
   type        = string
 }
 
-
+variable "kms_key_id" {
+  type        = string
+}

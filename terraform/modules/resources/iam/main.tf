@@ -1,10 +1,10 @@
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "bfd-${var.env}-app-profile"
-  role = "${aws_iam_role.instance.name}"
+  name = "bfd-${var.env_config.env}-app-profile"
+  role = aws_iam_role.instance.name
 }
 
 resource "aws_iam_role" "instance" {
-  name = "bfd-${var.env}-app-role"
+  name = "bfd-${var.env_config.env}-app-role"
   path = "/"
 
   assume_role_policy = <<EOF

@@ -2,6 +2,12 @@ terraform {
   required_version = "~> 0.12"
 }
 
+#
+# Build the stateful resources for an environment.
+#
+# This script also builds the associated KMS and IAM needed by the stateful and stateless resources
+#
+
 locals {
   azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id }
@@ -24,6 +30,8 @@ data "aws_vpc" "main" {
 
 # DNS
 #
+# Build a VPC private local zone for CNAME records
+#
 resource "aws_route53_zone" "local_zone" {
   name    = "bfd-${var.env_config.env}.local"
   vpc {
@@ -31,8 +39,25 @@ resource "aws_route53_zone" "local_zone" {
   }
 }
 
+# IAM roles
+# 
+module "iam" {
+  source      = "../resources/iam"
+  env_config  = var.env_config
+}
+
+# KMS 
+#
+# The customer master key is created outside of this script
+#
+data "aws_kms_key" "master_key" {
+  key_id = "alias/bfd-${var.env_config.env}-cmk"
+}
+
 # Subnets
 # 
+# Subnets are created by CCS VPC setup
+#
 data "aws_subnet" "subnets" {
   count     = 3 
   vpc_id    = data.aws_vpc.main.id
@@ -80,7 +105,7 @@ resource "aws_security_group" "db" {
   }
 }
 
-# Security Groups
+# Other Security Groups
 #
 # Find the security group for the Cisco VPN
 #
@@ -109,21 +134,22 @@ data "aws_security_group" "management" {
   }
 }
 
-# Master
+# Master Database
 #
 module "master" {
   source              = "../resources/rds"
   db_config           = var.db_config
   env_config          = local.env_config
   role                = "master"
-  availability_zone   = local.azs[0]
+  availability_zone   = local.azs[1]
   replicate_source_db = ""
   subnet_group        = aws_db_subnet_group.db.name
+  kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
 }
 
-# Replicas 
+# Replicas Database 
 # 
 # No count on modules yet
 #
@@ -135,6 +161,7 @@ module "replica1" {
   availability_zone   = local.azs[0]
   replicate_source_db = module.master.identifier
   subnet_group        = aws_db_subnet_group.db.name
+  kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
 }
@@ -147,6 +174,7 @@ module "replica2" {
   availability_zone   = local.azs[1]
   replicate_source_db = module.master.identifier
   subnet_group        = aws_db_subnet_group.db.name
+  kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
 }
@@ -159,6 +187,7 @@ module "replica3" {
   availability_zone   = local.azs[2]
   replicate_source_db = module.master.identifier
   subnet_group        = aws_db_subnet_group.db.name
+  kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
 }

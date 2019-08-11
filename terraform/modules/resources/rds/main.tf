@@ -28,7 +28,7 @@ resource "aws_db_instance" "db" {
   name                   = local.is_master ? "bfdtemp" : null
   username               = local.is_master ? "bfduser" : null
   password               = local.is_master ? "changeme!" : null
-  # kms_key_id             = var.kms_key_id
+  kms_key_id             = var.kms_key_id
   db_subnet_group_name   = local.is_master ? var.subnet_group : null
   vpc_security_group_ids = var.vpc_security_group_ids
   tags                   = local.tags
