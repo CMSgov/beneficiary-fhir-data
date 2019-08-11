@@ -20,3 +20,6 @@ logs/
 *.tfstate.backup
 .terraform.tfstate.lock.info
 .terraform/
+
+# Ignore editor stuff
+.vscode
