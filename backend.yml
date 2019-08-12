@@ -54,6 +54,8 @@
       become: true
       notify:
         - Restart awslogs Service
+  handlers:
+    - import_tasks: handlers/main.yml
 
 - name: Configure Data Server System
   hosts: data_server_systems
@@ -137,6 +139,8 @@
       become: true
       notify:
         - Restart awslogs Service
+  handlers:
+    - import_tasks: handlers/main.yml
 
 - name: Configure Load Balancers
   import_playbook: load_balancers.yml
