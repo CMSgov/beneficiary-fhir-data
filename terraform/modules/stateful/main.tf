@@ -1,11 +1,7 @@
-terraform {
-  required_version = "~> 0.12"
-}
-
 #
 # Build the stateful resources for an environment.
 #
-# This script also builds the associated KMS and IAM needed by the stateful and stateless resources
+# This script also builds the associated KMS needed by the stateful and stateless resources
 #
 
 locals {
@@ -26,24 +22,6 @@ data "aws_vpc" "main" {
     name = "tag:Name"
     values = ["bfd-${var.env_config.env}-vpc"]
   }
-}
-
-# DNS
-#
-# Build a VPC private local zone for CNAME records
-#
-resource "aws_route53_zone" "local_zone" {
-  name    = "bfd-${var.env_config.env}.local"
-  vpc {
-    vpc_id = data.aws_vpc.main.id
-  }
-}
-
-# IAM roles
-# 
-module "iam" {
-  source      = "../resources/iam"
-  env_config  = var.env_config
 }
 
 # KMS 
@@ -67,12 +45,48 @@ data "aws_subnet" "subnets" {
   }
 }
 
-# Subnet Group
+# Other Security Groups
 #
-resource "aws_db_subnet_group" "db" {
-  name            = "bfd-${local.env_config.env}-subnet-group"
-  tags            = local.env_config.tags
-  subnet_ids      = [for s in data.aws_subnet.subnets: s.id]
+# Find the security group for the Cisco VPN
+#
+data "aws_security_group" "vpn" {
+  filter {
+    name        = "tag:Name"
+    values      = ["bfd-${var.env_config.env}-vpn-private"]
+  }
+}
+
+# Find the management group
+#
+data "aws_security_group" "tools" {
+  filter {
+    name        = "tag:Name"
+    values      = ["bfd-${var.env_config.env}-enterprise-tools"]
+  }
+}
+
+# Find the tools group 
+#
+data "aws_security_group" "management" {
+  filter {
+    name        = "tag:Name"
+    values      = ["bfd-${var.env_config.env}-remote-management"]
+  }
+}
+
+#
+# Start to build things
+#
+
+# DNS
+#
+# Build a VPC private local zone for CNAME records
+#
+resource "aws_route53_zone" "local_zone" {
+  name    = "bfd-${var.env_config.env}.local"
+  vpc {
+    vpc_id = data.aws_vpc.main.id
+  }
 }
 
 # DB Security group
@@ -105,33 +119,12 @@ resource "aws_security_group" "db" {
   }
 }
 
-# Other Security Groups
+# Subnet Group
 #
-# Find the security group for the Cisco VPN
-#
-data "aws_security_group" "vpn" {
-  filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-vpn-private"]
-  }
-}
-
-# Find the management group
-#
-data "aws_security_group" "tools" {
-  filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-enterprise-tools"]
-  }
-}
-
-# Find the tools group 
-#
-data "aws_security_group" "management" {
-  filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-remote-management"]
-  }
+resource "aws_db_subnet_group" "db" {
+  name            = "bfd-${local.env_config.env}-subnet-group"
+  tags            = local.env_config.tags
+  subnet_ids      = [for s in data.aws_subnet.subnets: s.id]
 }
 
 # Master Database
@@ -190,4 +183,24 @@ module "replica3" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
+}
+
+# S3 Admin bucket for logs and other adminstrative 
+#
+module "admin" {
+  source              = "../resources/s3"
+  role                = "admin"
+  env_config          = local.env_config
+  kms_key_id          = data.aws_kms_key.master_key.arn
+  acl                 = "log-delivery-write"
+}
+
+# S3 bucket for ETL files
+#
+module "etl" {
+  source              = "../resources/s3"
+  role                = "etl"
+  env_config          = local.env_config
+  kms_key_id          = data.aws_kms_key.master_key.arn
+  log_bucket          = module.admin.id
 }
