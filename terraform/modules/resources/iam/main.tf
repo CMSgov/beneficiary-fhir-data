@@ -3,6 +3,8 @@ resource "aws_iam_instance_profile" "instance_profile" {
   role = aws_iam_role.instance.name
 }
 
+# Allow access to passed in S3 buckets and the standard EC2 role things
+#
 resource "aws_iam_role" "instance" {
   name = "bfd-${var.env_config.env}-${var.name}-role"
   path = "/"
@@ -22,6 +24,7 @@ resource "aws_iam_role" "instance" {
       %{ for arn in var.s3_bucket_arns }
       ,{
         "Action": "s3:*",
+        "Effect": "Allow",
         "Resource": ["${arn}"]
       }
       %{ endfor }
