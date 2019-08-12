@@ -44,6 +44,19 @@
         data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
         #data_pipeline_idempotency_required: (see group_vars/env_*/main.yml)
 
+    - name: Configure CloudWatch Logs Agent
+      template:
+        src: awslogs.conf.data-pipeline.j2
+        dest: '/var/awslogs/etc/awslogs.conf'
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+      become: true
+      notify:
+        - Restart awslogs Service
+  handlers:
+    - import_tasks: handlers/main.yml
+
 - name: Configure Data Server System
   hosts: data_server_systems
   serial: 1 # only take one Data Server out of rotation at a time
@@ -115,6 +128,19 @@
         state: present
       delegate_to: localhost
       loop: "{{ ec2_elbs }}"
+
+    - name: Configure CloudWatch Logs Agent
+      template:
+        src: awslogs.conf.data-server.j2
+        dest: '/var/awslogs/etc/awslogs.conf'
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+      become: true
+      notify:
+        - Restart awslogs Service
+  handlers:
+    - import_tasks: handlers/main.yml
 
 - name: Configure Load Balancers
   import_playbook: load_balancers.yml
