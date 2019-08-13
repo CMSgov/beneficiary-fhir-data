@@ -1,4 +1,4 @@
-# Setup an S3 bucket. 
+# Setup an S3 bucket.
 #
 
 locals {
@@ -6,14 +6,14 @@ locals {
   is_prod                 = substr(var.env_config.env, 0, 4) == "prod" 
 }
 
-
 # Build a S3 bucket
 #   - Encryption using a Customer Managed Key
 #   - No versioning
 #   - deletition protection in prod environments
+#   - postfix with the account id to prevent global name conflicts
 #
 resource "aws_s3_bucket" "main" {
-  bucket                  = "bfd-${var.env_config.env}-${var.role}"
+  bucket                  = "bfd-${var.env_config.env}-${var.role}-${data.aws_caller_identity.current.account_id}"
   acl                     = var.acl
   tags                    = local.tags
 
