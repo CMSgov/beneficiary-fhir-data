@@ -21,7 +21,8 @@ properties([
 	parameters([
 		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: true),
 		booleanParam(name: 'test_dpr', description: 'Whether to run the test against the DPR environment', defaultValue: false),
-		booleanParam(name: 'test_prod', description: 'Whether to run the test against the Prod environment', defaultValue: false)
+		booleanParam(name: 'test_prod', description: 'Whether to run the test against the Prod environment', defaultValue: false),
+		string(name: 'env_num_servers', description: 'Number of JMeter Servers to use in the test.', defaultValue: '1')
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -41,7 +42,7 @@ stage('Prepare') {
 			sh 'cd ansible && ansible --version'
 
 			// Verify the play's syntax before we run it.
-			sh 'cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e "target_env=test" --syntax-check'
+			sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=test num_servers=${params.env_num_servers}\" --syntax-check"
 		}
 	}
 }
@@ -91,7 +92,7 @@ stage('Test the Test ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh 'cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e "target_env=test" -vvv --connection=paramiko'
+					sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=test num_servers=${params.env_num_servers}\" --connection=paramiko"
 				}
 			}
 		}
@@ -107,7 +108,7 @@ stage('Test the DPR ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh 'ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=dpr"'
+					sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=dpr num_servers=${params.env_num_servers}\" --connection=paramiko"
 				}
 			}
 		}
@@ -123,7 +124,7 @@ stage('Test the Prod ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh 'ansible-playbook ansible/fhir-stress-test-temp-testers.yml -e "target_env=prod"'
+					sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=prod num_servers=${params.env_num_servers}\" --connection=paramiko"
 				}
 			}
 		}

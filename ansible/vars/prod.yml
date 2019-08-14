@@ -2,10 +2,10 @@ ec2_key_name: perf-tests
 profile: default
 mfa_sn: arn:aws:iam::225542912595:mfa/christopher.hayes
 mfa: 923996
-num_servers: 1
+num_servers: "{{ num_servers }}"
 
 # URI of FHIR server under test
-fhir_server: "https://internal-pdbb10lb01-1234578100.us-east-1.elb.amazonaws.com /v1/fhir"
+fhir_server: "https://internal-pdcw10lb01-1951212262.us-east-1.elb.amazonaws.com/v1/fhir"
 
 ##################################################################################
 # AWS configuration
@@ -23,6 +23,6 @@ security_group_ids:
   - sg-997a8aec
   - sg-8d7bd5c4
   - sg-953120e1
-  - sg-08f209788d94dd290
+  - sg-0499559a542b4b387
 
 # pdcw10sg10, pdbb10sg06, pdbb10sg01, pdcw10sg04, pdbb10sg03.

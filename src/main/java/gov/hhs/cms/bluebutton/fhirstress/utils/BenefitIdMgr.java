@@ -4,7 +4,7 @@ package gov.hhs.cms.bluebutton.fhirstress.utils;
  * A utility method that helps manage an index into a RIF file containting
  *
  */
-public class BenefitIdMgr {
+public class BenefitIdMgr implements BenefitIdManager {
 	protected int currIndex;
 	protected int minIndex;
 	protected int maxIndex;

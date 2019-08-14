@@ -5,8 +5,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 
-//import gov.hhs.cms.bluebutton.data.model.rif.RifRecordEvent;
-import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdMgr;
+import gov.hhs.cms.bluebutton.fhirstress.utils.BenefitIdManager;
+import gov.hhs.cms.bluebutton.fhirstress.utils.CsvBenefitIdManager;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
 
 /**
@@ -14,7 +14,7 @@ import gov.hhs.cms.bluebutton.server.app.stu3.providers.TransformerUtils;
  * using the specified benefit id.
  */
 public final class RetrieveCoverages extends CustomSamplerClient {
-	private BenefitIdMgr bim;
+	private BenefitIdManager bim;
 
 	/**
 	 * @see org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient#setupTest(org.apache.jmeter.protocol.java.sampler.JavaSamplerContext)
@@ -22,7 +22,7 @@ public final class RetrieveCoverages extends CustomSamplerClient {
 	@Override
 	public void setupTest(JavaSamplerContext context) {
 		super.setupTest(context);
-		bim = new BenefitIdMgr(1, 1, 10000, "200000000", "%05d");
+		bim = new CsvBenefitIdManager();
 	}
 
 	/**
@@ -38,7 +38,8 @@ public final class RetrieveCoverages extends CustomSamplerClient {
 
 		// query coverage for a benefit id
 		client.search().forResource(Coverage.class)
-				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId("12162"))).returnBundle(Bundle.class)
+				.where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(bim.nextId())))
+				.returnBundle(Bundle.class)
 				.execute();
 	}
 }
