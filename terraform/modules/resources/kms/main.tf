@@ -1,21 +1,20 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
-resource "aws_kms_key" "app-config-key" {
-  description = "bfd-${var.env}-app-config"
+resource "aws_kms_key" "master_key" {
+  description = "bfd-${var.env_config.env}-master-key"
+  tags        = var.env_config.tags
 
   policy = <<POLICY
 {
   "Version": "2012-10-17",
-  "Id": "bfd-${var.env}-app-config-key-policy",
+  "Id": "bfd-${var.env_config.env}-master-key-policy",
   "Statement": [
     {
       "Sid": "Admin Permissions",
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          "arn:aws:iam::577373831711:user/VZG9"
+          "arn:aws:iam::577373831711:user/VZG9",
+          "arn:aws:iam::577373831711:user/HWRI",
+          "arn:aws:iam::577373831711:user/ECZK"
         ]
       },
       "Action": [
@@ -34,11 +33,12 @@ resource "aws_kms_key" "app-config-key" {
       ],
       "Resource": "*"
     },
-{
+    {
       "Sid": "User Permissions",
       "Effect": "Allow",
       "Principal": {
         "AWS": [
+          "arn:aws:iam::577373831711:user/HWRI",
           "arn:aws:iam::577373831711:user/VZG9"
         ]
       },
@@ -55,7 +55,7 @@ resource "aws_kms_key" "app-config-key" {
       "Sid": "Allow instance role to decrypt",
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::577373831711:role/bfd-${var.env}-app-role"
+        "AWS": "arn:aws:iam::577373831711:role/bfd-${var.env_config.env}-app-role"
       },
       "Action": "kms:Decrypt",
       "Resource": "*"
@@ -66,6 +66,6 @@ POLICY
 }
 
 resource "aws_kms_alias" "app-config-key-alias" {
-  name          = "alias/bfd-${var.env}-app-config"
-  target_key_id = "${aws_kms_key.app-config-key.key_id}"
+  name          = "alias/bfd-${var.env_config.env}-master-key"
+  target_key_id = aws_kms_key.master_key.key_id
 }

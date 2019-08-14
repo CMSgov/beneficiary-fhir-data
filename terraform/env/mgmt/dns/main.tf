@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "dns" {
-  source = "../../modules/dns"
+  source = "../../modules/resources/dns"
 
   vpc_id = ""
   env    = ""

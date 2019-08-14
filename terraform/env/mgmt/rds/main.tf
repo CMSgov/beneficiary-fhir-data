@@ -5,7 +5,7 @@ provider "aws" {
 #TODO jzulim
 
 module "rds" {
-  source = "../../modules/rds"
+  source = "../../modules/resources/rds"
 
   allocated_storage     =
   storage_type          =

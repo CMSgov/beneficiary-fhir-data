@@ -3,6 +3,6 @@ provider "aws" {
 }
 
 module "kms" {
-  source = "../../modules/kms"
+  source = "../../modules/resources/kms"
   env = "mgmt"
 }

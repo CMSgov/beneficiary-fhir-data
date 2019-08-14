@@ -44,7 +44,7 @@ resource "aws_ebs_volume" "jenkins_data" {
 }
 
 module "jenkins" {
-  source = "../../modules/jenkins"
+  source = "../../modules/resources/jenkins"
 
   vpc_id                = data.aws_vpc.shared_services.id
   app_subnets           = [data.aws_subnet_ids.app_subnets.ids]
