@@ -6,6 +6,8 @@ locals {
   is_prod                 = substr(var.env_config.env, 0, 4) == "prod" 
 }
 
+data "aws_caller_identity" "current" {}
+
 # Build a S3 bucket
 #   - Encryption using a Customer Managed Key
 #   - No versioning
