@@ -287,7 +287,7 @@ public class SpringConfiguration {
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
-		retVal.setDefaultTimeout(TRANSACTION_TIMEOUT);
+		// retVal.setDefaultTimeout(TRANSACTION_TIMEOUT);
 		return retVal;
 	}
 
