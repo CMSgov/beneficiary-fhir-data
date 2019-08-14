@@ -151,7 +151,7 @@
 
       # Added async and polling  because some servers will disconnect the ssh 
       # connection prior to test completion causing the ansible script to fail
-      async: "{{ duration + (4*poll) }}" 
+      async: "{{ 1.5*duration + (4*poll) }}" 
       poll: "{{ poll }}" 
 
     - name: Collect Results
