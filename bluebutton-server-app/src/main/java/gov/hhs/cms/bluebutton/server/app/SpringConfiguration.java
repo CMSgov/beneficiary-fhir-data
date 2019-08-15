@@ -272,7 +272,7 @@ public class SpringConfiguration {
 		 * possible.
 		 */
 		if (poolingDataSource.getJdbcUrl().contains("postgre"))
-			poolingDataSource.setConnectionInitSql("set enable_seqscan = true;");
+			poolingDataSource.setConnectionInitSql("set enable_seqscan = false;");
 
 		poolingDataSource.setRegisterMbeans(true);
 		poolingDataSource.setMetricRegistry(metricRegistry);
@@ -287,7 +287,7 @@ public class SpringConfiguration {
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
-		retVal.setDefaultTimeout(TRANSACTION_TIMEOUT);
+		// retVal.setDefaultTimeout(TRANSACTION_TIMEOUT);
 		return retVal;
 	}
 
