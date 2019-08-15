@@ -60,7 +60,7 @@ public class SpringConfiguration {
 	public static final String PROP_DB_USERNAME = "bbfhir.db.username";
 	public static final String PROP_DB_PASSWORD = "bbfhir.db.password";
 	public static final String PROP_DB_CONNECTIONS_MAX = "bbfhir.db.connections.max";
-	public static final int TRANSACTION_TIMEOUT = 1;
+	public static final int TRANSACTION_TIMEOUT = 2;
 
 	/**
 	 * This fake JDBC URL prefix indicates to {@link SpringConfiguration} and
@@ -287,7 +287,7 @@ public class SpringConfiguration {
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
-		// retVal.setDefaultTimeout(TRANSACTION_TIMEOUT);
+		retVal.setDefaultTimeout(TRANSACTION_TIMEOUT);
 		return retVal;
 	}
 
