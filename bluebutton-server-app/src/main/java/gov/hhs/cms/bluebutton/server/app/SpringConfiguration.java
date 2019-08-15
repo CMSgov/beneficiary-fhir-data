@@ -287,7 +287,6 @@ public class SpringConfiguration {
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
-		// retVal.setDefaultTimeout(TRANSACTION_TIMEOUT);
 		return retVal;
 	}
 
@@ -338,6 +337,11 @@ public class SpringConfiguration {
 		 */
 		// extraProperties.put(AvailableSettings.JMX_ENABLED, "true");
 		// extraProperties.put(AvailableSettings.JMX_DOMAIN_NAME, "hibernate");
+
+		// This limits how long each query will run before being terminated. We've seen
+		// long running queries cause the application to respond poorly to other
+		// requests.
+		extraProperties.put("javax.persistence.query.timeout", TRANSACTION_TIMEOUT * 1000);
 
 		return extraProperties;
 	}
