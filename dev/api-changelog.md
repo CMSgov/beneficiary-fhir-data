@@ -1,5 +1,43 @@
 # API Changelog
 
+## BLUEBUTTON-1191: Allow Filtering of EOB Searches by type
+
+A new optional query parameter has been added to `ExplanationOfBenefit` searches that will filter the returned results by `type`.
+At this time, only the `https://bluebutton.cms.gov/resources/codesystem/eob-type` codes are supported.
+
+Some examples:
+
+* If the new parameter is not included, all EOBs will still be returned:
+    
+    ```
+    /v1/fhir/ExplanationOfBenefit?patient=123
+    ```
+    
+* If only the code system is specified, all EOBs will also still be returned:
+    
+    ```
+    /v1/fhir/ExplanationOfBenefit?patient=123&type=https://bluebutton.cms.gov/resources/codesystem/eob-type|
+    ```
+    
+* If just a single code is specified, only EOBs matching that claim type will be returned:
+    
+    ```
+    /v1/fhir/ExplanationOfBenefit?patient=123&type=https://bluebutton.cms.gov/resources/codesystem/eob-type|pde
+    ```
+    
+* If just a single code is specified and no system or `|` separator is included, EOBs matching that single claim type will still be returned:
+    
+    ```
+    /v1/fhir/ExplanationOfBenefit?patient=123&type=pde
+    ```
+    
+* If multiple codes are specified, EOBs matching all of those claim type will be returned:
+    
+    ```
+    /v1/fhir/ExplanationOfBenefit?patient=123&type=carrier,dme,hha,hospice,inpatient,outpatient,snf
+    ```
+    
+
 ## BLUEBUTTON-865: Adding plaintext HICN/MBI to Patient resource
 
 A new optional flag has been added that will return all of a beneficiary's known HICNs and MBIs (in plaintext, both current and historical).

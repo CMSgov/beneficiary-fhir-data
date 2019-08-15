@@ -55,6 +55,9 @@
       }, {
         "name" : "startIndex",
         "type" : "string"
+      }, {
+        "name" : "type",
+        "type" : "token"
       } ]
     }, {
       "type" : "OperationDefinition",

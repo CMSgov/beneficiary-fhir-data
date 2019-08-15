@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -1038,6 +1039,41 @@ public final class ExplanationOfBenefitResourceProviderIT {
 			else
 				Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
 		}
+	}
+
+	/**
+	 * Verifies that
+	 * {@link ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+	 * works as expected for a {@link Patient} that does exist in the DB, with
+	 * filtering by claim type.
+	 *
+	 * @throws FHIRException (indicates test failure)
+	 */
+	@Test
+	public void searchForEobsByExistingPatientAndType() throws FHIRException {
+		List<Object> loadedRecords = ServerTestUtils
+				.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+		IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+		Beneficiary beneficiary = loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r)
+				.findFirst().get();
+		Bundle searchResults = fhirClient.search().forResource(ExplanationOfBenefit.class)
+				.where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+				.where(new TokenClientParam("type").exactly().code(ClaimType.PDE.name()))
+				.returnBundle(Bundle.class).execute();
+
+		Assert.assertNotNull(searchResults);
+
+		/*
+		 * Verify the bundle contains a key for total and that the value matches the
+		 * number of entries in the bundle
+		 */
+		Assert.assertEquals(loadedRecords.stream().filter(r -> (r instanceof PartDEvent))
+				.filter(r -> !(r instanceof BeneficiaryHistory)).count(), searchResults.getTotal());
+
+		PartDEvent partDEvent = loadedRecords.stream().filter(r -> r instanceof PartDEvent).map(r -> (PartDEvent) r)
+				.findFirst().get();
+		PartDEventTransformerTest.assertMatches(partDEvent, filterToClaimType(searchResults, ClaimType.PDE).get(0));
 	}
 
 	/**
