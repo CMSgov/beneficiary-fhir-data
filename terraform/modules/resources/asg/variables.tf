@@ -1,41 +1,33 @@
-variable "app" {}
 
-variable "stack" {}
-
-variable "env" {}
-
-variable "vpc_id" {}
-
-variable "key_name" {}
-
-variable "ami_id" {}
-
-variable "instance_type" {}
-
-variable "elb_name" {}
-
-variable "app_sg_id" {}
-
-variable "vpn_sg_id" {}
-
-variable "ent_tools_sg_id" {}
-
-variable "asg_min" {}
-
-variable "asg_max" {}
-
-variable "asg_desired" {}
-
-variable "app_config_bucket" {}
-
-variable "azs" {
-  type = "list"
+variable "env_config" {
+  description = "All high-level info for the whole vpc"
+  type        = object({env=string, tags=map(string), vpc_id=string, zone_id=string, azs=list(string)})
 }
 
-variable "ci_cidrs" {
-  type = "list"
+variable "role" {
+  type        = string
 }
 
-variable "sns_topic_arn" {
-  default = ""
+variable "layer" {
+  description = "app or data"
+  type        = string      
 }
+
+variable "asg_config" {
+  type        = object({min=number, max=number, desired=number, sns_topic_arn=string})
+}
+
+variable "lb_config" {
+  description = "Load balancer information"
+  type        = object({name=string, tg_arn=string, port=number})
+}
+
+variable "mgmt_config" {
+  type        = object({vpn_sg=string, tool_sg=string, remote_sg=string, ci_cidrs=list(string)})
+}
+
+variable "launch_config" {
+  type        = object({instance_type=string, ami_id=string, key_name=string, app_config_bucket=string})
+}
+
+
