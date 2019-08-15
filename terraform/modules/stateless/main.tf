@@ -73,13 +73,14 @@ data "aws_security_group" "remote" {
 # 
 # Create one for the FHIR server and one for the ETL
 module "fhir_iam" {
-  source      = "../resources/iam"
-  env_config  = local.env_config
-  name        = "fhir"
+  source = "../resources/iam"
+
+  env_config      = local.env_config
+  name            = "fhir"
 }
 
 module "etl_iam" {
-  source          = "../resources/iam"
+  source = "../resources/iam"
 
   env_config      = local.env_config
   name            = "etl"
@@ -87,7 +88,7 @@ module "etl_iam" {
 }
 
 
-# LB 
+# LB for the FHIR server
 #
 module "fhir_lb" {
   source = "../resources/lb"
@@ -101,7 +102,7 @@ module "fhir_lb" {
 }
 
 
-# Autoscale group 
+# Autoscale group for the FHIR server
 #
 module "fhir_asg" {
   source = "../resources/asg"
@@ -111,6 +112,7 @@ module "fhir_asg" {
   layer           = "app"
   lb_config       = module.fhir_lb.lb_config
 
+  # Initial size is one server per AZ
   asg_config      = {
     min           = length(local.azs)
     max           = 2*length(local.azs)
@@ -118,6 +120,7 @@ module "fhir_asg" {
     sns_topic_arn = ""
   }
 
+  # TODO: Dummy values to get started
   launch_config   = {
     instance_type = "m4.large" 
     ami_id        = "ami-0b898040803850657"

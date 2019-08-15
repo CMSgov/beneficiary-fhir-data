@@ -41,6 +41,7 @@ resource "aws_security_group" "ci" {
   name          = "bfd-${var.env_config.env}-${var.role}-ci"
   description   = "Allow CI access to app servers"
   vpc_id        = var.env_config.vpc_id
+  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-ci"}, local.tags)
 
   ingress {
     from_port   = 22
@@ -63,6 +64,7 @@ resource "aws_security_group" "app" {
   name          = "bfd-${var.env_config.env}-${var.role}-app"
   description   = "Allow access to app servers"
   vpc_id        = var.env_config.vpc_id
+  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
 
   egress {
     from_port   = 0
