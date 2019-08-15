@@ -1,9 +1,12 @@
 package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -15,6 +18,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.ServletRequest;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -33,6 +37,9 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
@@ -186,6 +193,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 	@Search
 	public Bundle findByPatient(
 			@RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient,
+			@OptionalParam(name = "type") TokenAndListParam type,
 			@OptionalParam(name = "startIndex") String startIndex,
 			@OptionalParam(name = "excludeSAMHSA") String excludeSamhsa,
 			RequestDetails requestDetails) {
@@ -197,6 +205,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 */
 
 		String beneficiaryId = patient.getIdPart();
+		Set<ClaimType> types = parseTypeParam(type);
 
 		List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 		/*
@@ -204,14 +213,24 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 		 * each claim type, then combine the results. It's not super efficient, but it's
 		 * also not so inefficient that it's worth fixing.
 		 */
-		eobs.addAll(transformToEobs(ClaimType.CARRIER, findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId)));
-		eobs.addAll(transformToEobs(ClaimType.DME, findClaimTypeByPatient(ClaimType.DME, beneficiaryId)));
-		eobs.addAll(transformToEobs(ClaimType.HHA, findClaimTypeByPatient(ClaimType.HHA, beneficiaryId)));
-		eobs.addAll(transformToEobs(ClaimType.HOSPICE, findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId)));
-		eobs.addAll(transformToEobs(ClaimType.INPATIENT, findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId)));
-		eobs.addAll(transformToEobs(ClaimType.OUTPATIENT, findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId)));
-		eobs.addAll(transformToEobs(ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId)));
-		eobs.addAll(transformToEobs(ClaimType.SNF, findClaimTypeByPatient(ClaimType.SNF, beneficiaryId)));
+		if (types.contains(ClaimType.CARRIER))
+			eobs.addAll(transformToEobs(ClaimType.CARRIER, findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId)));
+		if (types.contains(ClaimType.DME))
+			eobs.addAll(transformToEobs(ClaimType.DME, findClaimTypeByPatient(ClaimType.DME, beneficiaryId)));
+		if (types.contains(ClaimType.HHA))
+			eobs.addAll(transformToEobs(ClaimType.HHA, findClaimTypeByPatient(ClaimType.HHA, beneficiaryId)));
+		if (types.contains(ClaimType.HOSPICE))
+			eobs.addAll(transformToEobs(ClaimType.HOSPICE, findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId)));
+		if (types.contains(ClaimType.INPATIENT))
+			eobs.addAll(
+					transformToEobs(ClaimType.INPATIENT, findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId)));
+		if (types.contains(ClaimType.OUTPATIENT))
+			eobs.addAll(
+					transformToEobs(ClaimType.OUTPATIENT, findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId)));
+		if (types.contains(ClaimType.PDE))
+			eobs.addAll(transformToEobs(ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId)));
+		if (types.contains(ClaimType.SNF))
+			eobs.addAll(transformToEobs(ClaimType.SNF, findClaimTypeByPatient(ClaimType.SNF, beneficiaryId)));
 
 		if (Boolean.parseBoolean(excludeSamhsa) == true)
 			filterSamhsa(eobs);
@@ -308,5 +327,60 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 			if (samhsaMatcher.test(eob))
 				eobsIter.remove();
 		}
+	}
+
+	/**
+	 * @param type a {@link TokenAndListParam} for the "type" field in a search
+	 * @return The {@link ClaimType}s to be searched, as computed from the specified
+	 *         "type" {@link TokenAndListParam} search param
+	 */
+	static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
+		if (type == null)
+			type = new TokenAndListParam()
+					.addAnd(new TokenOrListParam().add(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE, null));
+
+		/*
+		 * This logic kinda' stinks, but HAPI forces us to handle some odd query
+		 * formulations, e.g. (in postfix notation):
+		 * "and(or(claimType==FOO, claimType==BAR), or(claimType==FOO))".
+		 */
+		Set<ClaimType> claimTypes = new HashSet<ClaimType>(Arrays.asList(ClaimType.values()));
+		for (TokenOrListParam typeToken : type.getValuesAsQueryTokens()) {
+			/*
+			 * Each OR entry is additive: we start with an empty set and add every (valid)
+			 * ClaimType that's encountered.
+			 */
+			Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
+			for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
+				if (codingToken.getModifier() != null)
+					throw new IllegalArgumentException();
+
+				/*
+				 * Per the FHIR spec (https://www.hl7.org/fhir/search.html), there are lots of
+				 * edge cases here: we could have null or wildcard or exact system, we can have
+				 * an exact or wildcard code. All of those need to be handled carefully -- see
+				 * the spec for details.
+				 */
+				Optional<ClaimType> claimType = codingToken.getValue() != null
+						? ClaimType.parse(codingToken.getValue().toLowerCase())
+						: Optional.empty();
+				if (codingToken.getSystem() != null
+						&& codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
+						&& !claimType.isPresent()) {
+					claimTypesInner.addAll(Arrays.asList(ClaimType.values()));
+				} else if (codingToken.getSystem() == null
+						|| codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
+					if (claimType.isPresent())
+						claimTypesInner.add(claimType.get());
+				}
+			}
+
+			/*
+			 * All multiple AND parameters will do is reduce the number of possible matches.
+			 */
+			claimTypes.retainAll(claimTypesInner);
+		}
+
+		return claimTypes;
 	}
 }
