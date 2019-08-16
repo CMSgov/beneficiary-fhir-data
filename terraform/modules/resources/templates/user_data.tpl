@@ -2,3 +2,4 @@
 
 set -e
 
+export env="${env}" 

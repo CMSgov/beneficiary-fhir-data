@@ -1,5 +1,6 @@
 locals {
   tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
+  is_prod     = substr(var.env_config.env, 0, 4) == "prod" 
 }
 
 ##
@@ -20,17 +21,17 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
-##
-# Security groups
-##
-
-# SSH access from management VPC
 #
-resource "aws_security_group" "ci" {
-  name          = "bfd-${var.env_config.env}-${var.role}-ci"
+# Security groups
+#
+
+# Base security includes management VPC access
+#
+resource "aws_security_group" "base" {
+  name          = "bfd-${var.env_config.env}-${var.role}-base"
   description   = "Allow CI access to app servers"
   vpc_id        = var.env_config.vpc_id
-  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-ci"}, local.tags)
+  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
 
   ingress {
     from_port   = 22
@@ -45,16 +46,6 @@ resource "aws_security_group" "ci" {
     protocol    = "tcp"
     security_groups = [var.mgmt_config.remote_sg,var.mgmt_config.vpn_sg,var.mgmt_config.tool_sg]
   }
-}
-
-# App access from the LB
-#
-resource "aws_security_group" "app" {
-  count         = var.lb_config == null ? 0 : 1
-  name          = "bfd-${var.env_config.env}-${var.role}-app"
-  description   = "Allow access to app servers"
-  vpc_id        = var.env_config.vpc_id
-  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
 
   egress {
     from_port   = 0
@@ -62,6 +53,16 @@ resource "aws_security_group" "app" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+# Callers access to the security
+#
+resource "aws_security_group" "app" {
+  count         = var.lb_config == null ? 0 : 1
+  name          = "bfd-${var.env_config.env}-${var.role}-app"
+  description   = "Allow access to app servers"
+  vpc_id        = var.env_config.vpc_id
+  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
 
   ingress {
     from_port       = var.lb_config.port
@@ -78,14 +79,15 @@ resource "aws_security_group" "app" {
 resource "aws_launch_configuration" "main" {
   # Generate a new config on every revision
   name_prefix                 = "bfd-${var.env_config.env}-${var.role}-"
-  security_groups             = concat([aws_security_group.ci.id], aws_security_group.app[*].id)
+  security_groups             = concat([aws_security_group.base.id], aws_security_group.app[*].id)
   key_name                    = var.launch_config.key_name
   image_id                    = var.launch_config.ami_id
   instance_type               = var.launch_config.instance_type
   associate_public_ip_address = false
   iam_instance_profile        = var.launch_config.profile
+  placement_tenancy           = local.is_prod ? "dedicated" : "default"
 
-  user_data                   = templatefile("${path.module}/templates/user_data.tpl", {
+  user_data                   = templatefile("${path.module}/../templates/user_data.tpl", {
     env    = var.env_config.env
   })
 

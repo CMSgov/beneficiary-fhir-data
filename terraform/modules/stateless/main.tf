@@ -136,3 +136,28 @@ module "fhir_asg" {
   }
 }
 
+# ETL server
+#
+module "etl_instance" {
+  source = "../resources/ec2"
+
+  env_config      = local.env_config
+  role            = "etl"
+  layer           = "data"
+  az              = "us-east-1b" # Same as the master db
+
+  # TODO: Dummy values to get started
+  launch_config   = {
+    instance_type = "m4.large" 
+    ami_id        = "ami-0b898040803850657" 
+    key_name      = "bfd-rick-test" 
+    profile       = module.etl_iam.profile
+  }
+
+  mgmt_config     = {
+    vpn_sg        = data.aws_security_group.vpn.id
+    tool_sg       = data.aws_security_group.tools.id
+    remote_sg     = data.aws_security_group.remote.id
+    ci_cidrs      = ["10.252.40.0/21"]
+  }
+}
