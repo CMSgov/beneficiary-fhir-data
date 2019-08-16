@@ -28,7 +28,7 @@ variable "mgmt_config" {
 }
 
 variable "launch_config" {
-  type        = object({instance_type=string, ami_id=string, key_name=string})
+  type        = object({instance_type=string, ami_id=string, key_name=string, profile=string})
 }
 
 

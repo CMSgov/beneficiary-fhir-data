@@ -125,6 +125,7 @@ module "fhir_asg" {
     instance_type = "m4.large" 
     ami_id        = "ami-0b898040803850657" 
     key_name      = "bfd-rick-test" 
+    profile       = module.fhir_iam.profile
   }
 
   mgmt_config     = {

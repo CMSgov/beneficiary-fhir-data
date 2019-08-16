@@ -83,7 +83,7 @@ resource "aws_launch_configuration" "main" {
   image_id                    = var.launch_config.ami_id
   instance_type               = var.launch_config.instance_type
   associate_public_ip_address = false
-  iam_instance_profile        = "bfd-${var.env_config.env}-${var.role}-profile"
+  iam_instance_profile        = var.launch_config.profile
 
   user_data                   = templatefile("${path.module}/templates/user_data.tpl", {
     env    = var.env_config.env
