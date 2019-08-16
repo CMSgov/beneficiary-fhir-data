@@ -14,4 +14,7 @@ module "stateless" {
     env               = "test"
     tags              = {application="bfd", business="oeda", stack="test", Environment="test"}
   }  
+
+  fhir_ami            = var.fhir_ami
+  etl_ami             = var.etl_ami
 }

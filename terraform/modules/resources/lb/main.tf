@@ -3,19 +3,20 @@
 # Create an internal application LB with TCP listeners. 
 #
 locals {
-  tags        = merge({layer=var.layer, role=var.role}, var.env_config.tags)
+  tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
 }
 
 # Subnets
 # 
 # Subnets are created by CCS VPC setup
 #
-data "aws_subnet" "subnets" {
-  count     = length(var.env_config.azs)
-  vpc_id    = var.env_config.vpc_id
+data "aws_subnet" "app_subnets" {
+  count             = length(var.env_config.azs)
+  vpc_id            = var.env_config.vpc_id
+  availability_zone = var.env_config.azs[count.index]
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-az${count.index+1}-${var.layer}" ] 
+    name    = "tag:Layer"
+    values  = [var.layer] 
   }
 }
 
@@ -28,7 +29,7 @@ resource "aws_lb" "main" {
   tags                = local.tags
   load_balancer_type  = "network"
   internal            = true
-  subnets             = data.aws_subnet.subnets[*].id
+  subnets             = data.aws_subnet.app_subnets[*].id
 
   enable_cross_zone_load_balancing = true
 }

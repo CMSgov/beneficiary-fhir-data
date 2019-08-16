@@ -20,6 +20,7 @@ variable "asg_config" {
 variable "lb_config" {
   description = "Load balancer information"
   type        = object({name=string, tg_arn=string, port=number})
+  default     = null
 }
 
 variable "mgmt_config" {
@@ -27,7 +28,7 @@ variable "mgmt_config" {
 }
 
 variable "launch_config" {
-  type        = object({instance_type=string, ami_id=string, key_name=string, app_config_bucket=string})
+  type        = object({instance_type=string, ami_id=string, key_name=string})
 }
 
 

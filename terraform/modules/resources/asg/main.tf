@@ -1,33 +1,22 @@
 locals {
-  tags        = merge({layer=var.layer, role=var.role}, var.env_config.tags)
+  tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
 }
 
 ##
 # Data providers
 ##
 
-/* TODO: hookup to CI pipeline when its ready
-data "aws_ami" "image" {
-  most_recent = true
-  owners      = ["self"]
-
-  filter {
-    name   = "image-id"
-    values = [var.launch_config.ami_id]
-  }
-}
-*/
-
 # Subnets
 # 
 # Subnets are created by CCS VPC setup
 #
 data "aws_subnet" "app_subnets" {
-  count     = length(var.env_config.azs)
-  vpc_id    = var.env_config.vpc_id
+  count             = length(var.env_config.azs)
+  vpc_id            = var.env_config.vpc_id
+  availability_zone = var.env_config.azs[count.index]
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-az${count.index+1}-${var.layer}" ] 
+    name    = "tag:Layer"
+    values  = [var.layer] 
   }
 }
 
@@ -61,6 +50,7 @@ resource "aws_security_group" "ci" {
 # App access from the LB
 #
 resource "aws_security_group" "app" {
+  count         = var.lb_config == null ? 0 : 1
   name          = "bfd-${var.env_config.env}-${var.role}-app"
   description   = "Allow access to app servers"
   vpc_id        = var.env_config.vpc_id
@@ -88,7 +78,7 @@ resource "aws_security_group" "app" {
 resource "aws_launch_configuration" "main" {
   # Generate a new config on every revision
   name_prefix                 = "bfd-${var.env_config.env}-${var.role}-"
-  security_groups             = [aws_security_group.ci.id, aws_security_group.app.id]
+  security_groups             = concat([aws_security_group.ci.id], aws_security_group.app[*].id)
   key_name                    = var.launch_config.key_name
   image_id                    = var.launch_config.ami_id
   instance_type               = var.launch_config.instance_type
@@ -97,7 +87,6 @@ resource "aws_launch_configuration" "main" {
 
   user_data                   = templatefile("${path.module}/templates/user_data.tpl", {
     env    = var.env_config.env
-    bucket = var.launch_config.app_config_bucket
   })
 
   lifecycle {
@@ -124,10 +113,10 @@ resource "aws_autoscaling_group" "main" {
   */
 
   health_check_grace_period = 300
-  health_check_type         = "ELB" # Failures of ELB healthchecks are asg failures
+  health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   launch_configuration      = aws_launch_configuration.main.name
-  target_group_arns         = [var.lb_config.tg_arn]
+  target_group_arns         = var.lb_config == null ? [] : [var.lb_config.tg_arn]
 
   enabled_metrics = [
     "GroupMinSize",

@@ -36,12 +36,13 @@ data "aws_kms_key" "master_key" {
 # 
 # Subnets are created by CCS VPC setup
 #
-data "aws_subnet" "subnets" {
-  count     = 3 
-  vpc_id    = data.aws_vpc.main.id
+data "aws_subnet" "app_subnets" {
+  count             = length(var.env_config.azs)
+  vpc_id            = var.env_config.vpc_id
+  availability_zone = var.env_config.azs[count.index]
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-az${count.index+1}-data" ] 
+    name    = "tag:Layer"
+    values  = ["data"] 
   }
 }
 
