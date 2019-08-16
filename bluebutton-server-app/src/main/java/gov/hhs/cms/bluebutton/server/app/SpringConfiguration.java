@@ -272,7 +272,7 @@ public class SpringConfiguration {
 		 * possible.
 		 */
 		if (poolingDataSource.getJdbcUrl().contains("postgre"))
-			poolingDataSource.setConnectionInitSql("set enable_seqscan = false;");
+			poolingDataSource.setConnectionInitSql("set enable_seqscan = true;");
 
 		poolingDataSource.setRegisterMbeans(true);
 		poolingDataSource.setMetricRegistry(metricRegistry);
