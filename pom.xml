@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<prerequisites>
@@ -7,7 +8,7 @@
 
 	<groupId>gov.hhs.cms.bluebutton</groupId>
 	<artifactId>bluebutton-parent</artifactId>
-	<version>1.1.1</version>
+	<version>1.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>bluebutton-parent</name>
@@ -67,7 +68,7 @@
 		<connection>scm:git:git@github.com:karlmdavis/bluebutton-parent-pom.git</connection>
 		<developerConnection>scm:git:git@github.com:karlmdavis/bluebutton-parent-pom.git</developerConnection>
 		<url>https://github.com/karlmdavis/bluebutton-parent-pom</url>
-		<tag>bluebutton-parent-1.1.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<repositories>
