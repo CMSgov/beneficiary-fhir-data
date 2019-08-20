@@ -17,7 +17,7 @@
     content: "{{ item.content }}"
   register: copy_ssl_build_key
   become: true
-#  no_log: true
+  no_log: true
   with_items:
     - dest_name: builds.key
       content: "{{ vault_ssl_build_key_private }}"
@@ -28,7 +28,7 @@
     content: "{{ item.content }}"
   register: copy_ssl_build_key
   become: true
-#  no_log: true
+  no_log: true
   with_items:
     - dest_name: builds.crt
       content: "{{ lookup('file', 'files/builds.bfd-mgmt.crt') }}"
