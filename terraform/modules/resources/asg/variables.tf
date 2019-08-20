@@ -17,6 +17,12 @@ variable "asg_config" {
   type        = object({min=number, max=number, desired=number, sns_topic_arn=string})
 }
 
+variable "db_config" {
+  description = "Setup a db ingress rules if defined"
+  type        = object({db_sg=string, role=string})
+  default     = null
+}
+
 variable "lb_config" {
   description = "Load balancer information"
   type        = object({name=string, tg_arn=string, port=number})

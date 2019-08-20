@@ -25,7 +25,7 @@ data "aws_subnet" "app_subnets" {
 # Security groups
 #
 
-# Base security includes management VPC access
+# Base security includes management SSH access
 #
 resource "aws_security_group" "base" {
   name          = "bfd-${var.env_config.env}-${var.role}-base"
@@ -40,13 +40,6 @@ resource "aws_security_group" "base" {
     cidr_blocks = var.mgmt_config.ci_cidrs
   }
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    security_groups = [var.mgmt_config.remote_sg,var.mgmt_config.vpn_sg,var.mgmt_config.tool_sg]
-  }
-
   egress {
     from_port   = 0
     protocol    = "-1"
@@ -55,7 +48,7 @@ resource "aws_security_group" "base" {
   }
 }
 
-# Callers access to the security
+# Callers access to the app
 #
 resource "aws_security_group" "app" {
   count         = var.lb_config == null ? 0 : 1
@@ -71,6 +64,20 @@ resource "aws_security_group" "app" {
     # TODO: Figure out what the real ingress rule should be
     cidr_blocks     = ["10.0.0.0/8"]
   } 
+}
+
+# App access to the database
+#
+resource "aws_security_group_rule" "allow_db_access" {
+  count                     = var.db_config == null ? 0 : 1
+  type                      = "ingress"
+  from_port                 = 5432
+  to_port                   = 5432
+  protocol                  = "tcp"
+  description               = "Allows access to the ${var.db_config.role} db"
+
+  security_group_id         = var.db_config.db_sg         # The SG associated with each replica
+  source_security_group_id  = aws_security_group.base.id  # Every instance in the ASG
 }
 
 ##

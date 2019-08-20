@@ -8,6 +8,9 @@ locals {
   env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
 }
 
+# Find resources defined outside this script 
+# 
+
 # VPC
 #
 data "aws_vpc" "main" {
@@ -34,6 +37,22 @@ data "aws_s3_bucket" "etl" {
 
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+}
+
+# RDS Replicas
+#
+data "aws_db_instance" "replica" {
+  count                   = 3
+  db_instance_identifier  = "bfd-${var.env_config.env}-replica${count.index+1}"
+}
+
+# RDS Security Group
+#
+data "aws_security_group" "db" {
+  filter {
+    name        = "tag:Name"
+    values      = ["bfd-${var.env_config.env}-rds"]
+  }
 }
 
 # Other Security Groups
@@ -126,6 +145,11 @@ module "fhir_asg" {
     ami_id        = "ami-0b898040803850657" 
     key_name      = "bfd-rick-test" 
     profile       = module.fhir_iam.profile
+  }
+
+  db_config       = {
+    db_sg         = data.aws_security_group.db.id
+    role          = "replica"
   }
 
   mgmt_config     = {
