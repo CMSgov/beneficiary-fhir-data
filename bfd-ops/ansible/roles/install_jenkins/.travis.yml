@@ -1,0 +1,62 @@
+---
+##
+# The Travis CI build for this project.
+#
+# Yes, it's ironic to build a Jenkins-installation role with its competitor.
+# But this is the best option, at least until this project is complete enough
+# to be capable of dogfooding itself.
+##
+
+language: python
+python: "2.7"
+
+# The tests will be run in Docker containers, to verify compatibility with
+# various OSes.
+sudo: required
+services:
+  - docker
+
+env:
+  global:
+    - ROLE=karlmdavis.jenkins2
+    - CONTAINER_PREFIX=ansible_test_jenkins2
+
+# Each list item here will be run as a separate test by Travis CI.
+matrix:
+  include:
+    - env: TEST_PLAY=test_basic.yml PLATFORM=ubuntu_16_04 ANSIBLE_SPEC="ansible"
+    - env: TEST_PLAY=test_basic.yml PLATFORM=ubuntu_16_04 ANSIBLE_SPEC="ansible==2.4.0.0"
+    - env: TEST_PLAY=test_basic.yml PLATFORM=ubuntu_14_04 ANSIBLE_SPEC="ansible"
+    # Testing against CentOS also (mostly) covers RHEL 7.
+    - env: TEST_PLAY=test_basic.yml PLATFORM=centos_7 ANSIBLE_SPEC="ansible"
+
+install:
+  # Generate an SSH key for use when connecting to Docker containers.
+  - ssh-keygen -t rsa -N '' -f /home/travis/.ssh/id_rsa
+
+  # Prepare to run the tests.
+  - ./test/pre-test.sh /home/travis/.ssh/id_rsa.pub
+
+script:
+  # Run the tests.
+  - test/test.sh
+
+after_script:
+  # Inspect the management host environment a bit post-test. Just to aid in debugging.
+  - pwd
+  - ls -la ../
+  - ls -la ./
+  - ls -la ./roles/
+
+  # Inspect the Docker container a bit post-test. Just to aid in debugging.
+  - docker exec ${CONTAINER_PREFIX}.${PLATFORM} ls -la /opt/jenkins
+  - docker exec ${CONTAINER_PREFIX}.${PLATFORM} ls -la /var/lib/jenkins
+  - docker exec ${CONTAINER_PREFIX}.${PLATFORM} ls -la /var/lib/jenkins-not-default
+  - docker exec ${CONTAINER_PREFIX}.${PLATFORM} ls -la /var/lib/jenkins-not-default/init.groovy.d
+  - docker exec ${CONTAINER_PREFIX}.${PLATFORM} cat /var/log/jenkins/jenkins.log
+
+  # Clean up after the test.
+  - test/post-test.sh
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
