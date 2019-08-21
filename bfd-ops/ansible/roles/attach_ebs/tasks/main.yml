@@ -9,7 +9,7 @@
 - name: Gather EBS facts of Jenkins Data Volume
   ec2_vol_facts:
     filters:
-      "tag:Name": bfd-mgmt-jenkins-data
+      "tag:Name": {{ bfd-jenkins-ebs_name }}
     region: "{{ ansible_ec2_placement_region }}"
   register: ec2_vol
 
