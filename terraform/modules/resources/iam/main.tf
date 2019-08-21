@@ -1,4 +1,4 @@
-resource "aws_iam_instance_profile" "instance_profile" {
+resource "aws_iam_instance_profile" "instance" {
   name = "bfd-${var.env_config.env}-${var.name}-profile"
   role = aws_iam_role.instance.name
 }

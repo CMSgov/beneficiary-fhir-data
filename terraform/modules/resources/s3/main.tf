@@ -19,10 +19,6 @@ resource "aws_s3_bucket" "main" {
   acl                     = var.acl
   tags                    = local.tags
 
-  versioning {
-    enabled               = false
-  }
-
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {

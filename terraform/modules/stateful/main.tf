@@ -13,6 +13,12 @@ locals {
     data.aws_security_group.tools.id,
     data.aws_security_group.management.id
   ]
+  master_db_sgs = [
+    aws_security_group.master_db.id,
+    data.aws_security_group.vpn.id,
+    data.aws_security_group.tools.id,
+    data.aws_security_group.management.id
+  ]
 }
 
 # VPC
@@ -36,12 +42,13 @@ data "aws_kms_key" "master_key" {
 # 
 # Subnets are created by CCS VPC setup
 #
-data "aws_subnet" "subnets" {
-  count     = 3 
-  vpc_id    = data.aws_vpc.main.id
+data "aws_subnet" "data_subnets" {
+  count             = length(local.azs)
+  vpc_id            = data.aws_vpc.main.id
+  availability_zone = local.azs[count.index]
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-az${count.index+1}-data" ] 
+    name    = "tag:Layer"
+    values  = ["data"] 
   }
 }
 
@@ -91,25 +98,13 @@ resource "aws_route53_zone" "local_zone" {
 
 # DB Security group
 #
-# Accept connections from anywhere in the VPC. This choice avoids
-# a dependency loop. 
-#
-# TODO: Use aws_security_group_rule to allow the DB to be created before the web instances. 
-#
 resource "aws_security_group" "db" {
   name        = "bfd-${var.env_config.env}-rds"
-  description = "Security group for DPC DB"
+  description = "Security group for replica DPC DB"
   vpc_id      = local.env_config.vpc_id
-  tags        = local.env_config.tags
+  tags        = merge({Name="bfd-${var.env_config.env}-rds"}, local.env_config.tags)
 
-  ingress {
-    from_port = 5432
-    protocol  = "tcp"
-    to_port   = 5432
-
-    cidr_blocks = ["10.0.0.0/8"]
-  }
-
+  # Ingress will come from security group rules defined later
   egress {
     from_port = 0
     protocol  = "-1"
@@ -119,12 +114,39 @@ resource "aws_security_group" "db" {
   }
 }
 
+resource "aws_security_group" "master_db" {
+  name        = "bfd-${var.env_config.env}-master-rds"
+  description = "Security group for master DPC DB"
+  vpc_id      = local.env_config.vpc_id
+  tags        = merge({Name="bfd-${var.env_config.env}-master-rds"}, local.env_config.tags)
+
+  # Ingress will come from security group rules defined later
+  egress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group_rule" "allow_master_access" {
+  type                      = "ingress"
+  from_port                 = 5432
+  to_port                   = 5432
+  protocol                  = "tcp"
+
+  description               = "Allow every replica db to call the master"
+  security_group_id         = aws_security_group.master_db.id  
+  source_security_group_id  = aws_security_group.db.id     
+}
+
 # Subnet Group
 #
 resource "aws_db_subnet_group" "db" {
   name            = "bfd-${local.env_config.env}-subnet-group"
   tags            = local.env_config.tags
-  subnet_ids      = [for s in data.aws_subnet.subnets: s.id]
+  subnet_ids      = [for s in data.aws_subnet.data_subnets: s.id]
 }
 
 # Master Database
@@ -139,12 +161,12 @@ module "master" {
   subnet_group        = aws_db_subnet_group.db.name
   kms_key_id          = data.aws_kms_key.master_key.arn
 
-  vpc_security_group_ids = local.db_sgs
+  vpc_security_group_ids = local.master_db_sgs
 }
 
 # Replicas Database 
 # 
-# No count on modules yet
+# No count on modules yet, so do build them one by one
 #
 module "replica1" {
   source              = "../resources/rds"
