@@ -36,7 +36,7 @@ module "asg" {
     desired     = 1
   }
 
-  mgmg_config   = {
+  mgmt_config   = {
     ci_cidrs    = ["1.2.3.4/32", "5.6.7.8/32"]
     tool_sg     = "sg-aabbccdd"
     vpn_sg      = "sb-eeffgghh"
