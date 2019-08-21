@@ -18,7 +18,7 @@ Project and Directory Structure
  6. Consider moving to Jenkins in Docker. 
 
 #### New Jenkins Installation
-__Name: build_jenkin.yml__<br>
+__Name: build_jenkins.yml__<br>
 __Summary:__ This playbook and associated roles configures a CCS Gold Image with specific prerequsities and then apache, jenkins and BFD specific configuration. 
 
 ##### High Level Usage Instructions
@@ -52,7 +52,7 @@ Visit Jenkins URL: https://builds.bfd-mgmt.cmscloud.local/jenkins and use creden
 
 #### Update Jenkins Installation 
 
-__Name: update_jenkin.yml__<br>
+__Name: update_jenkins.yml__<br>
 __Summary:__ This playbook and associated roles configures a CCS Gold Image with specific prerequsities and then apache, jenkins and BFD specific configuration. It essential applies all roles from the build_jenkins.yml playbook except for the configuration aspects which are stored on a persistent EBS volume and attached to this instance. 
 
 ##### High Level Usage Instructions

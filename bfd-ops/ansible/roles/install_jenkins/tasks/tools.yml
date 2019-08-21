@@ -1,0 +1,32 @@
+---
+###
+# Installs additional build and deploy tools
+###
+
+- name: Install tfenv to manage terrfaorm
+  git:
+    repo: https://github.com/tfutils/tfenv.git 
+    dest: ~/.tfenv
+
+- name: Create symlinks for tfenv
+  file:
+    src: ~/.tfenv/bin/tfenv
+    dest: /usr/bin/tfenv
+    mode: '0755'
+    state: link
+    
+- name: Link tfenv tf wrapper. 
+  file:
+    src: ~/.tfenv/bin/terraform
+    dest: /usr/bin/terraform
+    mode: '0755'
+    state: link
+
+- name: Install terraform 
+  shell: tfenv install 0.12.5
+  
+- name: Install packer
+  unarchive:
+    src: https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip
+    dest: /usr/bin
+    remote_src: yes
