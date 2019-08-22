@@ -1,0 +1,7 @@
+---
+###
+# Here we are installing the minimal security updates
+###
+- name: Apply security patches
+  become: yes
+  shell: yum update-minimal --security -y

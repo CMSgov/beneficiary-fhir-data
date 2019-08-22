@@ -1,0 +1,31 @@
+---
+##
+# Configures the LSS zone's build server (e.g. Jenkins).
+##
+- name: Update Build Server Jenkins
+  hosts: all
+  user: ec2-user
+  become: true
+  gather_facts: no
+  vars_files:
+    - host_vars/builds.bfd-mgmt.cmscloud.local/vault.yml
+  vars:
+    ansible_ssh_pipelining: no
+
+  tasks:
+    - import_role:
+        name: rhel_prep
+    - import_role:
+        name: install_epel_repo
+    - import_role:
+        name: base_patch
+    - import_role:
+        name: rhel_python_pip
+    - import_role: 
+        name: attach_ebs
+    - import_role:
+        name: build_install_apache
+    - import_role:
+        name: install_jenkins
+    - import_role:
+        name: install_docker
