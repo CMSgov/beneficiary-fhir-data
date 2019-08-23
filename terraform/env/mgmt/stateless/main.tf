@@ -11,8 +11,8 @@ module "stateless" {
   source = "../../../modules/mgmt_stateless"
 
   env_config = {
-    env               = "test"
-    tags              = {application="bfd", business="oeda", stack="test", Environment="test"}
+    env               = "mgmt"
+    tags              = {application="bfd", business="oeda", stack="mgmt", Environment="mgmt"}
   }  
 
   jenkins_ami            = var.jenkins_ami

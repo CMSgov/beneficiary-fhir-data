@@ -20,7 +20,7 @@ data "aws_vpc" "main" {
 
 # Subnets
 data "aws_subnet_ids" "app_subnets" {
-  vpc_id = data.aws_vpc.shared_services.id
+  vpc_id = data.aws_vpc.main.id
 
   tags = {
     Layer = "app"
@@ -84,15 +84,6 @@ resource "aws_route53_zone" "local_zone" {
   }
 }
 
-# Subnet Group
-#
-resource "aws_app_subnet_group" "app" {
-  name            = "bfd-${local.env_config.env}-subnet-group"
-  tags            = local.env_config.tags
-  subnet_ids      = [for s in data.aws_subnet.data_subnets: s.id]
-}
-
-
 # S3 Admin bucket for logs and other adminstrative 
 #
 module "admin" {
@@ -121,7 +112,7 @@ resource "aws_ebs_volume" "jenkins_data" {
   type              = "gp2"
 
   tags = {
-    Name       = "bfd-jenkins-data"
+    Name       = "bfd-mgmt-jenkins-data-master"
     cpm_backup = "4HR Daily Weekly Monthly"
   }
 }

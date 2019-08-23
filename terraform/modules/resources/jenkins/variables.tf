@@ -7,11 +7,6 @@ variable "app_subnets" {
   description = "Subnets to use for the jenkins application"
 }
 
-variable "elb_subnets" {
-  type        = "list"
-  description = "Subnets to use for the jenkins elb"
-}
-
 variable "vpn_security_group_id" {
   type        = "string"
   description = "Security group that provides access via VPN"
@@ -27,8 +22,14 @@ variable "key_name" {
   description = "The EC2 key pair name to assign to jenkins instances"
 }
 
-variable "instance_type" {
-  type        = "string"
-  description = "The EC2 instance size to use"
-  default     = "m5.xlarge"
+variable "asg_config" {
+  type        = object({min=number, max=number, desired=number, sns_topic_arn=string})
+}
+
+variable "mgmt_config" {
+  type        = object({vpn_sg=string, tool_sg=string, remote_sg=string, ci_cidrs=list(string)})
+}
+
+variable "launch_config" {
+  type        = object({instance_type=string, ami_id=string, key_name=string, profile=string})
 }
