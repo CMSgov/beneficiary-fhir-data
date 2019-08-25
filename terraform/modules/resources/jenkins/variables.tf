@@ -1,10 +1,16 @@
-variable "vpc_id" {}
-
-variable "tls_cert_arn" {}
+variable "env_config" {
+  description = "All high-level info for the whole vpc"
+  type        = object({env=string, tags=map(string), vpc_id=string, zone_id=string, azs=list(string)})
+}
 
 variable "app_subnets" {
   type        = "list"
-  description = "Subnets to use for the jenkins application"
+  description = "App Subnets to use for the jenkins application"
+}
+
+variable "elb_subnets" {
+  type        = "list"
+  description = "ELB Subnets to use for the jenkins application"
 }
 
 variable "vpn_security_group_id" {
@@ -32,4 +38,21 @@ variable "mgmt_config" {
 
 variable "launch_config" {
   type        = object({instance_type=string, ami_id=string, key_name=string, profile=string})
+}
+
+variable "layer" {
+  description = "app or data"
+  type        = string      
+}
+
+variable "role" {
+  type        = string
+}
+
+variable "vpc_id" {}
+  
+variable "lb_config" {
+  description = "Load balancer information"
+  type        = object({name=string, tg_arn=string, port=number})
+  default     = null
 }

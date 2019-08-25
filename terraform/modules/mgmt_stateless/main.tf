@@ -97,7 +97,7 @@ module "jenkins_lb" {
   layer           = "app"
   log_bucket      = data.aws_s3_bucket.admin.id
   ingress_port    = 443
-  egress_port     = 80
+  egress_port     = 443
 }
 // # Jenkins Module (ELB, ASG, EC2, IAM)
 // 
@@ -137,14 +137,18 @@ module "jenkins_lb" {
 
 module "jenkins" {
   source = "../resources/jenkins"
+  env_config            = local.env_config
   vpc_id                = data.aws_vpc.main.id
   app_subnets           = [data.aws_subnet_ids.app_subnets.ids]
-  // elb_subnets           = [data.aws_subnet_ids.dmz_subnets.ids]
+  elb_subnets           = [data.aws_subnet_ids.dmz_subnets.ids]
   vpn_security_group_id = var.vpn_security_group_id
   ami_id                = var.jenkins_ami
   key_name              = var.jenkins_key_name
   tls_cert_arn          = var.jenkins_tls_cert_arn
-
+  layer                 = "app"
+  role                  = "jenkins"
+  lb_config             = module.jenkins_lb.lb_config
+  
   # Initial size is one server per AZ
   asg_config      = {
     min           = 3/length(local.azs)
