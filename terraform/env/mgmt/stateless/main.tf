@@ -17,7 +17,6 @@ module "stateless" {
 
   jenkins_ami            = var.jenkins_ami
   vpn_security_group_id  = var.vpn_security_group_id
-  jenkins_tls_cert_arn   = var.jenkins_tls_cert_arn
   jenkins_key_name       = var.jenkins_key_name
   
 }

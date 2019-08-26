@@ -4,16 +4,13 @@ variable "env_config" {
 }
 
 variable "jenkins_ami" {
-  description       = "Jenkins server AMI"
   type              = string
+  description       = "Jenkins server AMI"
 }
 
 variable "vpn_security_group_id" {
   type              = string
   description       = "Security group that provides access via VPN"
-}
-
-variable "jenkins_tls_cert_arn" {
 }
 
 variable "jenkins_key_name" {
@@ -22,7 +19,13 @@ variable "jenkins_key_name" {
 }
 
 variable "instance_size" {
-  type              = "string"
+  type              = string
   description       = "The EC2 instance size to use"
   default           = "m5.xlarge"
+}
+
+variable "mgmt_network_ci_cidrs" {
+  type              = string
+  description       = "The CIDR of the MGMT Network"
+  default           = "10.252.40.0/21"
 }

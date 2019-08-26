@@ -144,16 +144,15 @@ module "jenkins" {
   vpn_security_group_id = var.vpn_security_group_id
   ami_id                = var.jenkins_ami
   key_name              = var.jenkins_key_name
-  tls_cert_arn          = var.jenkins_tls_cert_arn
   layer                 = "app"
   role                  = "jenkins"
   lb_config             = module.jenkins_lb.lb_config
   
   # Initial size is one server per AZ
   asg_config      = {
-    min           = 3/length(local.azs)
-    max           = 3/length(local.azs)
-    desired       = 3/length(local.azs)
+    min           = 1
+    max           = 1
+    desired       = 1
     sns_topic_arn = ""
   }
 
@@ -169,6 +168,6 @@ module "jenkins" {
     vpn_sg        = data.aws_security_group.vpn.id
     tool_sg       = data.aws_security_group.tools.id
     remote_sg     = data.aws_security_group.remote.id
-    ci_cidrs      = ["10.252.40.0/21"]
+    ci_cidrs      = [var.mgmt_network_ci_cidrs]
   }
 }
