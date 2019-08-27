@@ -6,6 +6,8 @@
 locals {
   azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  cw_period             = 60    # Seconds
+  cw_eval_periods       = 3
 }
 
 # Find resources defined outside this script 
@@ -37,6 +39,12 @@ data "aws_s3_bucket" "etl" {
 
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+}
+
+# CloudWatch
+#
+data "aws_sns_topic" "cloudwatch_alarms" {
+  name  = "bfd-${var.env_config.env}-cloudwatch-alarms"
 }
 
 # RDS Replicas
@@ -107,17 +115,34 @@ module "etl_iam" {
 }
 
 
-# LB for the FHIR server
+# NLB for the FHIR server (SSL terminated by the FHIR server)
 #
 module "fhir_lb" {
   source = "../resources/lb"
+  load_balancer_type = "network"
 
   env_config      = local.env_config
   role            = "fhir"
-  layer           = "app"
+  layer           = "dmz"
   log_bucket      = data.aws_s3_bucket.admin.id
   ingress_port    = 443
   egress_port     = 7443
+}
+
+module "lb_alarms" {
+  source = "../resources/lb_alarms"  
+
+  load_balancer_name            = module.fhir_lb.name
+  cloudwatch_notification_arn   = data.aws_sns_topic.cloudwatch_alarms.arn
+  env                           = var.env_config.env
+  app                           = "bfd"
+
+  # NLBs only have this metric to alarm on
+  healthy_hosts   = {
+    eval_periods  = local.cw_eval_periods
+    period        = local.cw_period
+    threshold     = 1     # Count
+  }
 }
 
 
@@ -185,3 +210,4 @@ module "etl_instance" {
     ci_cidrs      = ["10.252.40.0/21"]
   }
 }
+

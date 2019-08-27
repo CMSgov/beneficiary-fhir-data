@@ -7,6 +7,7 @@
 locals {
   azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id }
+  
   db_sgs = [
     aws_security_group.db.id,
     data.aws_security_group.vpn.id,
@@ -19,6 +20,12 @@ locals {
     data.aws_security_group.tools.id,
     data.aws_security_group.management.id
   ]
+
+  cw_period             = 60    # Seconds
+  cw_eval_periods       = 3
+  cw_disk_queue_depth   = 5
+  cw_replica_lag        = 600   # Seconds
+  cw_latency            = 0.2   # Seconds
 }
 
 # VPC
@@ -94,6 +101,14 @@ resource "aws_route53_zone" "local_zone" {
   vpc {
     vpc_id = data.aws_vpc.main.id
   }
+}
+
+# CloudWatch SNS Topic
+#
+resource "aws_sns_topic" "cloudwatch_alarms" {
+  name          = "bfd-${var.env_config.env}-cloudwatch-alarms"
+  display_name  = "BFD Cloudwatch Alarm. Created by Terraform."
+  tags          = var.env_config.tags
 }
 
 # DB Security group
@@ -207,9 +222,119 @@ module "replica3" {
   vpc_security_group_ids = local.db_sgs
 }
 
+# Cloud Watch alarms for each RDS instance
+#
+module "master_alarms" {
+  source              = "../resources/rds_alarms"
+  rds_name            = module.master.identifier
+  env                 = var.env_config.env
+  app                 = "bfd"
+
+  free_storage = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = 50000000000 # Bytes
+  }
+
+  write_latency = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_latency
+  }
+
+  disk_queue_depth = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_disk_queue_depth
+  }
+
+  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+}
+
+module "replica1_alarms" {
+  source              = "../resources/rds_alarms"
+  rds_name            = module.replica1.identifier
+  env                 = var.env_config.env
+  app                 = "bfd"
+
+  read_latency = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_latency
+  }
+
+  disk_queue_depth = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_disk_queue_depth
+  }
+
+  replica_lag = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_replica_lag
+  }
+
+  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+}
+
+module "replica2_alarms" {
+  source              = "../resources/rds_alarms"
+  rds_name            = module.replica2.identifier
+  env                 = var.env_config.env
+  app                 = "bfd"
+
+  read_latency = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_latency
+  }
+
+  disk_queue_depth = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_disk_queue_depth
+  }
+
+  replica_lag = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_replica_lag
+  }
+
+  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+}
+
+module "replica3_alarms" {
+  source              = "../resources/rds_alarms"
+  rds_name            = module.replica3.identifier
+  env                 = var.env_config.env
+  app                 = "bfd"
+
+  read_latency = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_latency
+  }
+
+  disk_queue_depth = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_disk_queue_depth
+  }
+
+  replica_lag = {
+    period            = local.cw_period
+    eval_periods      = local.cw_eval_periods
+    threshold         = local.cw_replica_lag
+  }
+
+  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+}
+
 # S3 Admin bucket for logs and other adminstrative 
 #
-module "admin" {
+module "admin" { 
   source              = "../resources/s3"
   role                = "admin"
   env_config          = local.env_config

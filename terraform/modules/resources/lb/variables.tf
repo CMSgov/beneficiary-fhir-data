@@ -8,6 +8,11 @@ variable "role" {
   type        = string
 }
 
+variable "load_balancer_type" {
+  type        = string
+  default     = "application"
+}
+
 variable "layer" {
   description = "app or data"
   type        = string 
@@ -24,5 +29,4 @@ variable "ingress_port" {
 variable "egress_port" {
   type        = number
 }
-
 

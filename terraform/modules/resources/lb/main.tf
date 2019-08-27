@@ -27,7 +27,7 @@ data "aws_subnet" "app_subnets" {
 resource "aws_lb" "main" {
   name                = "bfd-${var.env_config.env}-${var.role}"
   tags                = local.tags
-  load_balancer_type  = "network"
+  load_balancer_type  = var.load_balancer_type
   internal            = true
   subnets             = data.aws_subnet.app_subnets[*].id
 
