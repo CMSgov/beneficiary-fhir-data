@@ -3,28 +3,23 @@ variable "env_config" {
   type        = object({env=string, tags=map(string), vpc_id=string, zone_id=string, azs=list(string)})
 }
 
-variable "app_subnets" {
-  type        = "list"
-  description = "App Subnets to use for the jenkins application"
-}
-
-variable "elb_subnets" {
-  type        = "list"
-  description = "ELB Subnets to use for the jenkins application"
-}
+// variable "app_subnets" {
+//   type        = list(string)
+//   description = "App Subnets to use for the jenkins application"
+// }
 
 variable "vpn_security_group_id" {
-  type        = "string"
+  type        = string
   description = "Security group that provides access via VPN"
 }
 
 variable "ami_id" {
-  type        = "string"
+  type        = string
   description = "Jenkins base AMI ID to use."
 }
 
 variable "key_name" {
-  type        = "string"
+  type        = string
   description = "The EC2 key pair name to assign to jenkins instances"
 }
 

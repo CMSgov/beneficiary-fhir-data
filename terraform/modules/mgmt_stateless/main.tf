@@ -20,23 +20,6 @@ data "aws_vpc" "main" {
   }
 }
 
-# Subnets
-data "aws_subnet_ids" "app_subnets" {
-  vpc_id = data.aws_vpc.main.id
-
-  tags = {
-    Layer = "app"
-  }
-}
-
-data "aws_subnet_ids" "dmz_subnets" {
-  vpc_id = data.aws_vpc.main.id
-
-  tags = {
-    Layer = "dmz"
-  }
-}
-
 # DNS
 #
 data "aws_route53_zone" "local_zone" {
@@ -139,8 +122,6 @@ module "jenkins" {
   source = "../resources/jenkins"
   env_config            = local.env_config
   vpc_id                = data.aws_vpc.main.id
-  app_subnets           = [data.aws_subnet_ids.app_subnets.ids]
-  elb_subnets           = [data.aws_subnet_ids.dmz_subnets.ids]
   vpn_security_group_id = var.vpn_security_group_id
   ami_id                = var.jenkins_ami
   key_name              = var.jenkins_key_name
