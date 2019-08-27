@@ -1,0 +1,174 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton</groupId>
+		<artifactId>bluebutton-parent</artifactId>
+		<version>1.1.1-SNAPSHOT</version>
+	</parent>
+
+	<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+	<artifactId>bluebutton-data-pipeline</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>bluebutton-data-pipeline</name>
+	<description>
+		A parent POM for the CMS/MyMedicare.gov ETL: migrates data from the CCW data warehouse to the Blue Button FHIR server.
+	</description>
+	<url>https://github.com/HHSIDEAlab/bluebutton-data-pipeline</url>
+
+	<issueManagement>
+		<!-- There doesn't seem to be any tooling support for this yet, but it 
+			doesn't hurt to include it. -->
+		<system>GitHub Issues</system>
+		<url>https://github.com/HHSIDEAlab/bluebutton-data-pipeline/issues</url>
+	</issueManagement>
+
+	<ciManagement>
+		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
+			Sonar (at least) can use this information. -->
+		<system>jenkins</system>
+		<url>http://builds.hhsdevcloud.us/job/HHSIDEALab/job/bluebutton-data-pipeline/</url>
+	</ciManagement>
+
+	<scm>
+		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
+		<connection>scm:git:git@github.com:HHSIDEAlab/bluebutton-data-pipeline.git</connection>
+		<developerConnection>scm:git:git@github.com:HHSIDEAlab/bluebutton-data-pipeline.git</developerConnection>
+		<url>https://github.com/HHSIDEAlab/bluebutton-data-pipeline</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<modules>
+		<module>bluebutton-data-pipeline-rif-extract</module>
+		<module>bluebutton-data-pipeline-rif-load</module>
+		<module>bluebutton-data-pipeline-app</module>
+		<module>bluebutton-data-pipeline-benchmarks</module>
+	</modules>
+
+	<properties>
+		<!-- The version of the capsule library for the capsule-maven-plugin to 
+			use. We need to override the default, to avoid https://github.com/puniverse/capsule/issues/90, 
+			as this is seen in whichever version of the library is used by default in 
+			the 1.0.1 version of the plugin. -->
+		<capsule.version>1.0.1</capsule.version>
+
+		<!-- The version of the Blue Button API Data Model to use. -->
+		<bluebutton.data.model.version>1.0.0-SNAPSHOT</bluebutton.data.model.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Provides the JPA entities that are used to store the incoming RIF 
+					data, in the Blue Button API's database. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif</artifactId>
+				<version>${bluebutton.data.model.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Provides sample RIF data that mimics what will be received from 
+					the CCW. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif-samples</artifactId>
+				<version>${bluebutton.data.model.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Configure the dependency plugin such that it can be used to grab 
+						the Blue Button FHIR Server and its config, for manual testing or for use 
+						in integration tests. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.10</version>
+					<configuration>
+						<overWriteReleases>false</overWriteReleases>
+						<overWriteSnapshots>true</overWriteSnapshots>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<configuration>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- Used to build executable JARs, with all dependencies included in 
+						them. -->
+					<groupId>com.github.chrischristo</groupId>
+					<artifactId>capsule-maven-plugin</artifactId>
+					<version>1.0.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-scm-plugin</artifactId>
+					<configuration>
+						<!-- This default config is used in the Jenkinsfile CI build. -->
+						<tag>${project.artifactId}-${project.version}</tag>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<!-- This profile will only be active for builds inside of Eclipse (managed 
+				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<!--This plugin's configuration is used to store Eclipse m2e settings 
+								only. It has no influence on the Maven build itself. -->
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.apache.maven.plugins</groupId>
+												<artifactId>maven-dependency-plugin</artifactId>
+												<versionRange>[1.0.0,)</versionRange>
+												<goals>
+													<goal>copy</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<!-- Don't run this plugin inside m2e; necessary to disable a 
+													POM warning in Eclipse, caused by https://issues.apache.org/jira/browse/MDEP-187. -->
+												<ignore />
+											</action>
+										</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

@@ -1,0 +1,10 @@
+[Unit]
+Description=Blue Button FHIR Server
+
+[Service]
+WorkingDirectory=/usr/local/bluebutton-server-app
+ExecStart=/usr/local/bluebutton-server-app/wildfly-8.1.0.Final/bin/standalone.sh
+User=bb-fhir
+
+[Install]
+WantedBy=multi-user.target
