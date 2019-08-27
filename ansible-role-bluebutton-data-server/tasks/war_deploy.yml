@@ -1,0 +1,39 @@
+---
+
+# If the WAR is in S3, grab it from there.
+- name: Copy WAR from S3
+  s3:
+    mode: get
+    bucket: "{{ data_server_artifacts_s3_bucket }}"
+    object: "{{ item }}"
+    dest: "{{ data_server_dir }}/{{ item }}"
+  with_items:
+    - "{{ data_server_war_name }}"
+  register: copy_war
+  become: true
+  when: data_server_artifacts_mode == 's3'
+
+# If the WAR is being copied from local path, do so.
+- name: Copy WAR from Local Path
+  copy:
+    src: "{{ data_server_war_local_dir }}/{{ data_server_war_name }}"
+    dest: "{{ data_server_dir }}/{{ data_server_war_name }}"
+  register: copy_war
+  become: true
+  when: data_server_artifacts_mode == 'local'
+
+- name: Deploy WAR (without Authentication)
+  # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
+  command: "{{ data_server_dir }}/{{ data_server_appserver_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 \"deploy {{ data_server_dir }}/{{ data_server_war_name }} --name=ROOT.war --force\""
+  become: true
+  become_user: "{{ data_server_user }}"
+  when: copy_war.changed == true and data_server_appserver_management_username == ''
+
+- name: Deploy WAR (with Authentication)
+  # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
+  command: "{{ data_server_dir }}/{{ data_server_appserver_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 --user={{ data_server_appserver_management_username }} --password={{ data_server_appserver_management_password }} \"deploy {{ data_server_dir }}/{{ data_server_war_name }} --name=ROOT.war --force\""
+  become: true
+  become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure that credentials aren't logged if this command fails.
+  when: copy_war.changed == true and data_server_appserver_management_username != ''
+

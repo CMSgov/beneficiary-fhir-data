@@ -1,0 +1,36 @@
+---
+
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # Needed to supply `keytool` and also to run the app server.
+    - java-1.8.0-openjdk-devel
+  become: true
+
+- name: Install boto
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # Needed to use the `s3` module.
+    - python-boto
+  when: data_server_artifacts_mode == 's3'
+  become: true
+
+- name: Create Server User
+  user:
+    name: "{{ data_server_user }}"
+    shell: /bin/false
+  become: true
+
+- name: Create Server Directory
+  file:
+    path: "{{ data_server_dir }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+

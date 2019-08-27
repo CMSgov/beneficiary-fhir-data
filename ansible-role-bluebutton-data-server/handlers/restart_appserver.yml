@@ -1,0 +1,19 @@
+---
+
+##
+# Restarts the app server service, then waits for the app server to be ready. 
+# The ready check is necessary to avoid race conditions, in case multiple tasks 
+# restart the server asynchronously.
+##
+
+- name: Restart App Server Service
+  service:
+    name: "{{ data_server_appserver_service }}"
+    state: restarted
+  become: true
+
+- name: Wait for App Server to Be Ready
+  script: "files/bluebutton-appserver-wait.sh --serverhome {{ data_server_dir }}/{{ data_server_appserver_name }} --managementport {{ data_server_appserver_management_port }} --managementusername \"{{ data_server_appserver_management_username }}\" --managementpassword \"{{ data_server_appserver_management_password }}\""
+  become: true
+  become_user: "{{ data_server_user }}"
+

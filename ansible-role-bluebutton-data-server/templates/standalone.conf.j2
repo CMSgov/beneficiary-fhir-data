@@ -1,0 +1,11 @@
+## -*- shell-script -*- ######################################################
+##                                                                          ##
+##  JBoss Bootstrap Script Configuration                                    ##
+##                                                                          ##
+##############################################################################
+JAVA_OPTS="{{ data_server_appserver_jvmargs }} -Djava.net.preferIPv4Stack=true"
+JAVA_OPTS="$JAVA_OPTS -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
+
+# Just a command line marker, which makes it easier to identify what various Wildfly/JBoss processes are doing.
+JAVA_OPTS="$JAVA_OPTS -Dbluebutton-server"
+

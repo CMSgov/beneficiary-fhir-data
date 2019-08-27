@@ -1,0 +1,17 @@
+---
+
+- include: base_install.yml
+
+# Explicitly skip the entire Java app server installation process if it looks
+# like it might already be there. This lets us workaround the "manually install
+# JBoss" process used in the AWS dev/test/prod environments.
+- name: Check for Application Server
+  stat:
+    path: "{{ data_server_dir }}/{{ data_server_appserver_name }}"
+  register: stat_appserver_dir
+- include: appserver_install.yml
+  when: stat_appserver_dir.stat.isdir is undefined
+
+- include: appserver_config.yml
+- include: war_deploy.yml
+
