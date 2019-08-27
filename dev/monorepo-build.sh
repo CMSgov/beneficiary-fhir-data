@@ -83,11 +83,14 @@ git tag | xargs git tag -d
 # Reorganize the ops stuff.
 opsDir="ops"
 mkdir -p "${opsDir}/ansible"
-git mv bluebutton-ansible-playbooks-data "${opsDir}/ansible/ansible-playbooks-data"
-git mv bluebutton-ansible-playbooks-data-sandbox "${opsDir}/ansible/ansible-playbooks-data-sandbox"
+git mv bluebutton-ansible-playbooks-data/bfd-ops/packer "${opsDir}/packer"
+git mv bluebutton-ansible-playbooks-data/bfd-ops/ansible "${opsDir}/ansible/ansible-playbooks-data-ccs"
+git mv bluebutton-ansible-playbooks-data/bfd-ops "${opsDir}/ccs-ops-misc"
+git mv bluebutton-ansible-playbooks-data/terraform "${opsDir}/terraform"
+git mv bluebutton-ansible-playbooks-data "${opsDir}/ansible/ansible-playbooks-data-healthapt"
+git mv bluebutton-ansible-playbooks-data-sandbox "${opsDir}/ansible/ansible-playbooks-data-hhsdevcloud"
 git mv ansible-role-bluebutton-data-pipeline "${opsDir}/ansible/ansible-role-data-pipeline"
 git mv ansible-role-bluebutton-data-server "${opsDir}/ansible/ansible-role-data-server"
-git mv "${opsDir}/ansible/ansible-playbooks-data/terraform" "${opsDir}/terraform"
 git commit -m 'Reorganized ops projects.'
 
 # Reorganize the Java stuff.
