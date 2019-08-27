@@ -1,0 +1,243 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton</groupId>
+		<artifactId>bluebutton-parent</artifactId>
+		<version>1.1.1-SNAPSHOT</version>
+	</parent>
+
+	<groupId>gov.hhs.cms.bluebutton.fhirstress</groupId>
+	<artifactId>fhir-stress-test</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<description>
+		A set of stress tests for FHIR servers, intended to be run via Apache JMeter.
+	</description>
+	<url>https://github.com/HHSIDEAlab/fhir-stress-test</url>
+	<organization>
+		<name>Centers for Medicare &amp; Medicaid Services</name>
+	</organization>
+
+	<issueManagement>
+		<!-- There doesn't seem to be any tooling support for this yet, but it 
+			doesn't hurt to include it. -->
+		<system>GitHub Issues</system>
+		<url>https://github.com/HHSIDEAlab/fhir-stress-test/issues</url>
+	</issueManagement>
+
+	<scm>
+		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
+		<connection>scm:git:git@github.com:HHSIDEAlab/fhir-stress-test.git</connection>
+		<developerConnection>scm:git:git@github.com:HHSIDEAlab/fhir-stress-test.git</developerConnection>
+		<url>https://github.com/HHSIDEAlab/fhir-stress-test</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<repositories>
+		<repository>
+			<id>justdavis-nexus</id>
+			<url>https://justdavis.com/nexus/content/repositories/opensource-releases/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Ensure that this version, which hapi-fhir-* absolutely requires, 
+					gets included in the shaded Uber JAR. -->
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.1</version>
+			</dependency>
+			<dependency>
+				<!-- Ensure that this version, which hapi-fhir-* absolutely requires, 
+					gets included in the shaded Uber JAR. -->
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>4.4.4</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<dependencies>
+		<dependency>
+			<!-- The JMeter API for "Java Request" samplers, as documented on http://jmeter.apache.org/usermanual/component_reference.html#Java_Request. -->
+			<!-- Marked 'provided' as this project's uber JAR will end up being loaded 
+				into the same classpath as the JMeter server/client, which provides an implementation 
+				of this already. -->
+			<groupId>org.apache.jmeter</groupId>
+			<artifactId>ApacheJMeter_java</artifactId>
+			<version>2.13</version>
+			<scope>provided</scope>
+			<exclusions>
+				<!-- Excluding these only because they're not in the central repo. Fortunately, 
+					we don't need them to compile this project, only at runtime, and JMeter has 
+					them builtin so we're fine there. -->
+				<exclusion>
+					<groupId>commons-jexl</groupId>
+					<artifactId>commons-jexl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-math3</groupId>
+					<artifactId>commons-math3</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-pool2</groupId>
+					<artifactId>commons-pool2</artifactId>
+				</exclusion>
+				<!-- Exclude SLF4J bindings that are causing conflicts for the logger -->
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-nop</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+			<artifactId>bluebutton-server-app</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<classifier>classes</classifier>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<!-- Provides sample data used in tests. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<!-- Used for parsing JSON resources. -->
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>4.0</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Can be used to select which JDK to use (amongst other things). 
+						Options must be specified in `~/.m2/toolchains.xml`. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<configuration>
+						<toolchains>
+							<jdk>
+								<!-- Use a Java 8 JDK. -->
+								<version>1.8</version>
+							</jdk>
+						</toolchains>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- Builds an "uber" JAR for this project, which includes the project's 
+						output and all dependencies, baked into a single big JAR file. This is done 
+						to simplify this project's usage with JMeter: there's now only one JAR to 
+						include with JMeter, rather than the whole dependency tree. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>2.4.3</version>
+					<configuration>
+						<keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
+						<promoteTransitiveDependencies>false</promoteTransitiveDependencies>
+						<shadedArtifactAttached>true</shadedArtifactAttached>
+						<shadedClassifierName>uber</shadedClassifierName>
+						<filters>
+							<filter>
+								<!-- Exclude JAR signature files, per http://stackoverflow.com/a/6743609/1851299. -->
+								<artifact>*:*</artifact>
+								<excludes>
+									<exclude>META-INF/*.SF</exclude>
+									<exclude>META-INF/*.DSA</exclude>
+									<exclude>META-INF/*.RSA</exclude>
+								</excludes>
+							</filter>
+						</filters>
+						<relocations>
+							<relocation>
+								<!-- JMeter includes an old version of httpclient, but HAPI FHIR 
+									has a hard dependency on a newer version. Rewrite the bytecode to make it 
+									all work anyways. -->
+								<pattern>org.apache.http</pattern>
+								<shadedPattern>shaded.org.apache.http</shadedPattern>
+							</relocation>
+						</relocations>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<!-- Activate the toolchain specified above. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-toolchains-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>toolchain-default</id>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Builds an "uber" JAR. See above for details. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- This is to run the integration tests -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

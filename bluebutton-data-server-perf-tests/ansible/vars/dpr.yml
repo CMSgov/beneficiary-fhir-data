@@ -1,0 +1,28 @@
+ec2_key_name: perf-tests
+profile: default
+mfa_sn: arn:aws:iam::225542912595:mfa/christopher.hayes
+mfa: 923996
+num_servers: "{{ num_servers }}"
+
+# URI of FHIR server under test
+fhir_server: "https://internal-dpcwelb01-2074070868.us-east-1.elb.amazonaws.com/v1/fhir"
+
+##################################################################################
+# AWS configuration
+##################################################################################
+
+# template-21-encrypted
+# Base hardened AMI
+ami_id_rhel: ami-3a934c40
+
+
+subnet_id: subnet-c8a7c9ac
+
+security_group_ids:
+  - sg-5a4ac311
+  - sg-a378eed6
+  - sg-18b91751
+  - sg-00160774
+  - sg-0f01e60111660f549
+
+#dpcw10sg04, dpbb10sg01, dpbb10sg03, dpbb10sg06, dpbb10sg07.

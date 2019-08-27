@@ -1,0 +1,30 @@
+ec2_key_name: perf-tests
+profile: default
+mfa_sn: arn:aws:iam::225542912595:mfa/christopher.hayes
+mfa: 923996
+num_servers: "{{ num_servers }}"
+
+
+# URI of FHIR server under test
+fhir_server: "https://internal-tsbb10lb01-758855236.us-east-1.elb.amazonaws.com/v1/fhir"
+
+
+##################################################################################
+# AWS configuration
+##################################################################################
+
+# template-21-encrypted
+# Base hardened AMI
+ami_id_rhel: ami-04b26a38e3c892add
+
+
+subnet_id: subnet-10a02474
+
+security_group_ids:
+  - sg-6333c316
+  - sg-4a5bd201
+  - sg-fa6bc5b3
+  - sg-5984922d
+  - sg-08f209788d94dd290
+  
+  # tsbb10sg07, tsbb10sg01, tscw10sg04, tsbb10sg03, tsbb10sg06. view inbound rules. 

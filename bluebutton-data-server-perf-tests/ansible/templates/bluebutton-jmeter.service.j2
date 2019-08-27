@@ -1,0 +1,12 @@
+[Unit]
+Description=Blue Button JMeter Service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory={{ remote_test_dir }}
+ExecStart={{ remote_test_dir }}/bluebutton-jmeter.sh
+User={{ remote_jmeter_user }}
+
+[Install]
+WantedBy=multi-user.target
