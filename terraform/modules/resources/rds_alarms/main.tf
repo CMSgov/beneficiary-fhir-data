@@ -5,8 +5,8 @@
 ##
 
 locals {
-  alarm_actions       = var.cloudwatch_notification_arn == null ? [] : [var.cloudwatch_notification_arn]
-  ok_actions          = var.cloudwatch_notification_arn == null ? [] : [var.cloudwatch_notification_arn]
+  alarm_actions       = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
+  ok_actions          = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
@@ -165,7 +165,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_free_memory" {
 
 resource "aws_cloudwatch_metric_alarm" "rds_replica_lag" {
   count               = var.replica_lag == null ? 0 : 1
-  alarm_name          = "${var.rds_name}-rds-replica_lag"
+  alarm_name          = "${var.rds_name}-rds-replica-lag"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = var.replica_lag.eval_periods
   metric_name         = "ReplicaLag"

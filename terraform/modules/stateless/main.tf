@@ -47,6 +47,10 @@ data "aws_sns_topic" "cloudwatch_alarms" {
   name  = "bfd-${var.env_config.env}-cloudwatch-alarms"
 }
 
+data "aws_sns_topic" "cloudwatch_ok" {
+  name  = "bfd-${var.env_config.env}-cloudwatch-ok"
+}
+
 # RDS Replicas
 #
 data "aws_db_instance" "replica" {
@@ -133,7 +137,8 @@ module "lb_alarms" {
   source = "../resources/lb_alarms"  
 
   load_balancer_name            = module.fhir_lb.name
-  cloudwatch_notification_arn   = data.aws_sns_topic.cloudwatch_alarms.arn
+  alarm_notification_arn        = data.aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn           = data.aws_sns_topic.cloudwatch_ok.arn
   env                           = var.env_config.env
   app                           = "bfd"
 

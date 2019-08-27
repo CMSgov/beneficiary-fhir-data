@@ -1,5 +1,11 @@
-variable "cloudwatch_notification_arn" {
-  description = "The CloudWatch notification ARN."
+variable "alarm_notification_arn" {
+  description = "The CloudWatch Alarm notification ARN."
+  type        = "string"
+  default     = null
+}
+
+variable "ok_notification_arn" {
+  description = "The CloudWatch OK notification ARN."
   type        = "string"
   default     = null
 }
@@ -14,6 +20,10 @@ variable "env" {
 
 variable "rds_name" {
   type        = string
+}
+
+variable "tags" {
+  type    = map(string)
 }
 
 variable "high_cpu" {

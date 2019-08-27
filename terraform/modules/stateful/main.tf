@@ -111,6 +111,12 @@ resource "aws_sns_topic" "cloudwatch_alarms" {
   tags          = var.env_config.tags
 }
 
+resource "aws_sns_topic" "cloudwatch_ok" {
+  name          = "bfd-${var.env_config.env}-cloudwatch-ok"
+  display_name  = "BFD Cloudwatch OK notifications. Created by Terraform."
+  tags          = var.env_config.tags
+}
+
 # DB Security group
 #
 resource "aws_security_group" "db" {
@@ -229,6 +235,7 @@ module "master_alarms" {
   rds_name            = module.master.identifier
   env                 = var.env_config.env
   app                 = "bfd"
+  tags                = var.env_config.tags
 
   free_storage = {
     period            = local.cw_period
@@ -248,7 +255,8 @@ module "master_alarms" {
     threshold         = local.cw_disk_queue_depth
   }
 
-  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  alarm_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn = aws_sns_topic.cloudwatch_ok.arn
 }
 
 module "replica1_alarms" {
@@ -256,6 +264,7 @@ module "replica1_alarms" {
   rds_name            = module.replica1.identifier
   env                 = var.env_config.env
   app                 = "bfd"
+  tags                = var.env_config.tags
 
   read_latency = {
     period            = local.cw_period
@@ -275,7 +284,8 @@ module "replica1_alarms" {
     threshold         = local.cw_replica_lag
   }
 
-  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  alarm_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn = aws_sns_topic.cloudwatch_ok.arn
 }
 
 module "replica2_alarms" {
@@ -283,6 +293,7 @@ module "replica2_alarms" {
   rds_name            = module.replica2.identifier
   env                 = var.env_config.env
   app                 = "bfd"
+  tags                = var.env_config.tags
 
   read_latency = {
     period            = local.cw_period
@@ -302,7 +313,8 @@ module "replica2_alarms" {
     threshold         = local.cw_replica_lag
   }
 
-  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  alarm_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn = aws_sns_topic.cloudwatch_ok.arn
 }
 
 module "replica3_alarms" {
@@ -310,6 +322,7 @@ module "replica3_alarms" {
   rds_name            = module.replica3.identifier
   env                 = var.env_config.env
   app                 = "bfd"
+  tags                = var.env_config.tags
 
   read_latency = {
     period            = local.cw_period
@@ -329,7 +342,8 @@ module "replica3_alarms" {
     threshold         = local.cw_replica_lag
   }
 
-  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  alarm_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn = aws_sns_topic.cloudwatch_ok.arn
 }
 
 # S3 Admin bucket for logs and other adminstrative 
