@@ -1,0 +1,22 @@
+# Ignore the Python virtual environment and external roles.
+venv/
+roles_external/
+
+# Ignore Eclipse metadata.
+.project
+.idea/*
+
+# Ignore the Ansible Vault password file.
+vault.password
+
+# Ignore Ansible retry files.
+*.retry
+
+# Ignore Ansible log files.
+logs/
+
+# Ignore Terraform compiles files and modules
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+.terraform/

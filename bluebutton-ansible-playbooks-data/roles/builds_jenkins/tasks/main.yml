@@ -1,0 +1,13 @@
+---
+
+- name: Install Jenkins
+  import_tasks: install.yml
+
+- name: Install and Configure Docker
+  import_tasks: docker.yml
+
+- name: Configure Jenkins
+  import_tasks: config.yml
+
+- name: Create/Update Jenkins Jobs
+  import_tasks: jobs.yml

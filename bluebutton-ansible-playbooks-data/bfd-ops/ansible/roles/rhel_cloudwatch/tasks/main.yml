@@ -1,0 +1,7 @@
+---
+###
+# Future home of the cloudwatch agent installation and configuration playbook. More TODO
+###
+- name: Install Cloudwatch Agent for RHEL 
+  yum: 
+    name: https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm

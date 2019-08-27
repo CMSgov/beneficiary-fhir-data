@@ -1,0 +1,2 @@
+# Don't commit output files: they can be re-generated.
+output/

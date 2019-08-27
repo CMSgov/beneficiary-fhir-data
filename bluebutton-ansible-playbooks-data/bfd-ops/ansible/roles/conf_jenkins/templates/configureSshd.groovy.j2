@@ -1,0 +1,17 @@
+//
+// This script must be included in `$JENKINS_HOME/init.d.groovy`, as it's a
+// pre-req for the Jenkins CLI.
+//
+
+// These are the basic imports that Jenkin's interactive script console 
+// automatically includes.
+import jenkins.*;
+import jenkins.model.*;
+import hudson.*;
+import hudson.model.*;
+
+// Ensure that SSH access is enabled (on a randomized port).
+def sshModuleDescriptor = Jenkins.instance.getDescriptor("org.jenkinsci.main.modules.sshd.SSHD")
+sshModuleDescriptor.setPort(0)
+sshModuleDescriptor.getActualPort() // Not sure why, but seems to be needed.
+sshModuleDescriptor.save()
