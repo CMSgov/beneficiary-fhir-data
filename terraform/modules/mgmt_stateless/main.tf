@@ -75,6 +75,7 @@ data "aws_security_group" "remote" {
 // #
 module "jenkins_lb" {
   source = "../resources/lb"
+  load_balancer_type = "network"
   env_config      = local.env_config
   role            = "jenkins"
   layer           = "app"
