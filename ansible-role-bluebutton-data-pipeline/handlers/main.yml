@@ -1,0 +1,12 @@
+---
+
+- name: Enable Pipeline Service
+  command: /usr/bin/systemctl --system enable bluebutton-data-pipeline
+  become: true
+
+- name: Restart Pipeline Service
+  service:
+    name: bluebutton-data-pipeline
+    state: restarted
+  become: true
+

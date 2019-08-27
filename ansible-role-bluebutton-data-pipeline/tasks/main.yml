@@ -1,0 +1,130 @@
+---
+
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # Needed to run the ETL service.
+    - java-1.8.0-openjdk
+  become: true
+  notify:
+    - 'Restart Pipeline Service'
+
+- name: Create ETL Service User
+  user:
+    name: "{{ data_pipeline_user }}"
+    shell: /bin/false
+  become: true
+
+- name: Create ETL Service Directory
+  file:
+    path: "{{ data_pipeline_dir }}"
+    state: directory
+    owner: "{{ data_pipeline_user }}"
+    group: "{{ data_pipeline_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+# Create the temp directory iff it's missing. (Don't want to accidentally
+# change the permissions on /tmp.)
+- name: Check for Custom Temp Directory
+  stat:
+    path: "{{ data_pipeline_tmp_dir }}"
+  become: true
+  register: stat_tmp
+  when: data_pipeline_tmp_dir is defined
+
+- name: Create Custom Temp Directory
+  file:
+    path: "{{ data_pipeline_tmp_dir }}"
+    state: directory
+    owner: "{{ data_pipeline_user }}"
+    group: "{{ data_pipeline_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  when: data_pipeline_tmp_dir is defined and stat_tmp.stat.exists == false
+
+# If the app's JAR is in S3, grab it from there.
+- block:
+    ##
+    # Unfortunately, we can't use Ansible's aws_s3 module here, as some of its
+    # dependencies (e.g. boto3) aren't available via yum.
+    ##
+    - name: Install Prerequisites
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - unzip
+      become: true
+    - name: Download AWS CLI Bundled Installer
+      get_url:
+        url: 'https://s3.amazonaws.com/aws-cli/awscli-bundle.zip'
+        dest: '/tmp/awscli-bundle.zip'
+        mode: 'u=r,g=,o='
+      become: true
+    - name: Extract AWS CLI Bundled Installer
+      unarchive:
+        src: '/tmp/awscli-bundle.zip'
+        dest: '/tmp'
+        remote_src: true
+        mode: 'u=rx,g=,o='
+      become: true
+    - name: Install the AWS CLI
+      command: '/tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws'
+      args:
+        creates: '/usr/local/bin/aws'
+      become: true
+    - name: Download Pipeline Application
+      command: /usr/local/bin/aws s3 cp "s3://{{ data_pipeline_appjar_s3_bucket }}/{{ item }}" "{{ data_pipeline_dir }}/{{ item }}"
+      args:
+        creates: "{{ data_pipeline_dir }}/{{ item }}"
+      become: true
+      with_items:
+        - "{{ data_pipeline_appjar_name }}"
+      notify:
+        - 'Restart Pipeline Service'
+  when: data_pipeline_appjar_s3_bucket is defined
+
+# If the app's JAR is available locally, copy it over.
+- block:
+    - name: Copy Pipeline Application
+      copy:
+        src: "{{ data_pipeline_appjar_localpath }}/{{ data_pipeline_appjar_name }}"
+        dest: "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}"
+      become: true
+      notify:
+        - 'Restart Pipeline Service'
+  when: data_pipeline_appjar_localpath is defined
+
+- name: Configure Pipeline Application Permissions
+  file:
+    path: "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}"
+    owner: "{{ data_pipeline_user }}"
+    group: "{{ data_pipeline_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+
+- name: Create Pipeline Service Wrapper Script
+  template:
+    src: bluebutton-data-pipeline.sh.j2
+    dest: "{{ data_pipeline_dir }}/bluebutton-data-pipeline.sh"
+    owner: "{{ data_pipeline_user }}"
+    group: "{{ data_pipeline_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  notify:
+    - 'Restart Pipeline Service'
+
+- name: Create Pipeline Service Definition
+  template:
+    src: bluebutton-data-pipeline.service.j2
+    dest: /etc/systemd/system/bluebutton-data-pipeline.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify:
+    - 'Enable Pipeline Service'
+    - 'Restart Pipeline Service'
