@@ -1,0 +1,121 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton</groupId>
+		<artifactId>bluebutton-parent</artifactId>
+		<version>1.1.1-SNAPSHOT</version>
+	</parent>
+
+	<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+	<artifactId>bluebutton-server-parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>bluebutton-server-parent</name>
+	<description>
+		The CMS Blue Button API project provides Medicare beneficiaries with access
+        to their health care data, and supports an ecosystem of third-party 
+        applications that can leverage that data. This is the parent POM for 
+        the project.
+	</description>
+	<url>https://github.com/HHSIDEAlab/bluebutton-server</url>
+
+	<issueManagement>
+		<!-- There doesn't seem to be any tooling support for this yet, but it 
+			doesn't hurt to include it. -->
+		<system>GitHub Issues</system>
+		<url>https://github.com/HHSIDEAlab/bluebutton-server/issues</url>
+	</issueManagement>
+
+	<ciManagement>
+		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
+			Sonar (at least) can use this information. -->
+		<system>jenkins</system>
+		<url>http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bluebutton-server/</url>
+	</ciManagement>
+
+	<scm>
+		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
+		<connection>scm:git:git@github.com:HHSIDEAlab/bluebutton-server.git</connection>
+		<developerConnection>scm:git:git@github.com:HHSIDEAlab/bluebutton-server.git</developerConnection>
+		<url>https://github.com/HHSIDEAlab/bluebutton-server</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<modules>
+		<module>bluebutton-server-app</module>
+	</modules>
+
+	<properties>
+		<bluebutton-data-model.version>1.0.0-SNAPSHOT</bluebutton-data-model.version>
+		<bluebutton-data-pipeline.version>0.1.0-SNAPSHOT</bluebutton-data-pipeline.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Provides the JPA entities used to represent the Blue Button API 
+					backend's data in the database. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif</artifactId>
+				<version>${bluebutton-data-model.version}</version>
+			</dependency>
+
+			<dependency>
+				<!-- Used as a logging backed/target for SLF4J. -->
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>1.1.3</version>
+			</dependency>
+
+			<dependency>
+				<!-- The test framework used for unit and integration tests. -->
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- Provides sample data used in tests. -->
+				<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+				<artifactId>bluebutton-data-model-rif-samples</artifactId>
+				<version>${bluebutton-data-model.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- Used to load sample data in tests. -->
+				<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+				<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
+				<version>${bluebutton-data-pipeline.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-war-plugin</artifactId>
+					<configuration>
+						<attachClasses>true</attachClasses>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-scm-plugin</artifactId>
+					<configuration>
+						<!-- This default config is used in the Jenkinsfile CI build. -->
+						<tag>${project.artifactId}-${project.version}</tag>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

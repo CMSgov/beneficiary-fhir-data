@@ -1,0 +1,494 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
+		<artifactId>bluebutton-server-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>bluebutton-server-app</artifactId>
+	<packaging>war</packaging>
+
+	<description>
+		The primary WAR for the CMS Blue Button API project. Provides a FHIR API.
+	</description>
+
+	<properties>
+		<hapi-fhir.version>3.6</hapi-fhir.version>
+		<jersey.version>2.25.1</jersey.version>
+
+		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec
+			plugin. These settings are pulled out as POM properties so that they can
+			be adjusted via profiles. Note that the specific DB URL here is special-cased
+			by SpringConfiguration, which will launch an embedded HSQL DB to host it. -->
+		<its.bbfhir.server.jvmargs>-Xmx4g</its.bbfhir.server.jvmargs>
+		<its.bbfhir.db.url>jdbc:bluebutton-test:hsqldb:mem</its.bbfhir.db.url>
+
+		<!-- Should work out of the box on Linux, but likely needs to be customized
+			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
+			for details. -->
+		<bash.exe>bash</bash.exe>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- The hapi-fhir-structures-dstu3 dependency tries to pull in a too-early 
+					version of this library (1.1) that isn't compatible with our other dependencies. -->
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.11</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<!-- Hibernate's JPA implementation is used to read data from the Blue 
+				Button API's database. -->
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
+				for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides the JPA entities used to represent the Blue Button API backend's 
+				data in the database. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif</artifactId>
+		</dependency>
+		
+		<dependency>
+			<!-- At least one "structures" JAR must also be included -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		<dependency>
+			<!-- This dependency includes the server HAPI-FHIR classes -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		<dependency>
+			<!-- This dependency includes the client HAPI-FHIR classes -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+			<version>3.6.0</version>
+		</dependency>
+		
+		<dependency>
+			<!-- Needed for comparing JSON files to obtain the diff. See
+				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
+			<groupId>com.flipkart.zjsonpatch</groupId>
+			<artifactId>zjsonpatch</artifactId>
+			<version>0.4.6</version>
+		</dependency>
+
+		<dependency>
+			<!-- Needed for JEE/Servlet support -->
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<!-- Used for CORS support -->
+			<groupId>org.ebaysf.web</groupId>
+			<artifactId>cors-filter</artifactId>
+			<version>1.0.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<!-- We mostly use Spring to ensure that our JPA EntityManagers are properly 
+				managed. -->
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<dependency>
+			<!-- We're really not using much of the Spring Data JPA framework; we 
+				mostly just need its Hibernate JPA glue. -->
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Logging backend for WAR/application. Note: due to an incompatibility 
+				between Hibernate 5 and Wildfly 8, this application can't use Wildfly's logging 
+				and instead has to handle its own logging separately. See `jboss-deployment-structure.xml` 
+				for more details. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
+				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-json-classic</artifactId>
+			<version>0.1.5</version>
+		</dependency>
+		<dependency>
+			<!-- Required by logback-json-classic. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-jackson</artifactId>
+			<version>0.1.5</version>
+		</dependency>
+
+		<dependency>
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+				at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides a Servlet filter which has meters for status codes, a counter 
+				for the number of active requests, and a timer for request duration. Enabled 
+				via `web.xml`. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-servlet</artifactId>
+			<version>${metrics.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Provides servlets which dump/expose metrics data via HTTP/HTTPS. Enabled
+				via `web.xml`. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-servlets</artifactId>
+			<version>${metrics.version}</version>
+		</dependency>
+		
+		<dependency>
+			<!-- Used to parse and read various CSV data resources. -->
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<!-- The Blue Button API runs against PostgreSQL in production. -->
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Used to proxy JDBC usage, for monitoring. -->
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
+			<version>1.5.1</version>
+		</dependency>
+
+		<dependency>
+			<!-- The test framework used for unit and integration tests. -->
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- The builds for this and other Blue Button API projects use HSQL in 
+				tests. -->
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<!-- Only used by tests, but still has to be packaged in WAR. -->
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<!-- Provides sample data used in tests. -->
+			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used to load sample data in tests. -->
+			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
+			<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+   			 <groupId>commons-io</groupId>
+  			  <artifactId>commons-io</artifactId>
+  			  <version>2.5</version>
+		</dependency>	
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- When its 'attach-artifact' goal is run, this plugin will attach 
+						the server management scripts that should be used to run this project's WAR. 
+						This ensures that it is included in install, deploy, etc. operations. -->
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.12</version>
+				</plugin>
+				<plugin>
+					<!-- Configure the dependency plugin such that it can be used to grab 
+						the test dependency artifacts, for manual testing or for use in integration 
+						tests. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.10</version>
+					<configuration>
+						<artifactItems>
+							<artifactItem>
+								<!-- Wildfly 8.1 is the upstream release that JBoss EAP 7 is based 
+									on. Though our application will run in JBoss EAP in production, we test it 
+									against Wildfly here because Wildfly is available for unauthenticated download 
+									(and JBoss EAP isn't). -->
+								<groupId>org.wildfly</groupId>
+								<artifactId>wildfly-dist</artifactId>
+								<version>8.1.0.Final</version>
+								<type>tar.gz</type>
+								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
+							</artifactItem>
+						</artifactItems>
+						<overWriteReleases>false</overWriteReleases>
+						<overWriteSnapshots>true</overWriteSnapshots>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- The exec plugin can be used in child modules to run the 'src/main/config/server-*.sh'
+						scripts, which will start and stop the Blue Button API FHIR server for use 
+						in testing. -->
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.5.0</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Use the dependency plugin to copy the test dependency artifacts, 
+					for use in ITs. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>server-copy-artifacts</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- Reserve random available ports for Wildfly/JBoss to run on. -->
+						<id>reserve-server-ports</id>
+						<goals>
+							<goal>reserve-network-port</goal>
+						</goals>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<outputFile>${project.build.directory}/bluebutton-server/server-ports.properties</outputFile>
+							<minPortNumber>8000</minPortNumber>
+							<maxPortNumber>9999</maxPortNumber>
+							<randomPort>true</randomPort>
+							<portNames>
+								<portName>server.port.management</portName>
+								<portName>server.port.http</portName>
+								<portName>server.port.https</portName>
+							</portNames>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Launch a Java web server hosting the Blue Button FHIR server prior 
+					to running this project's integration tests, and stop it after the integration 
+					tests. The server will serve HTTPS on port 9094 (as configured in the script), 
+					and the FHIR server will be hosted at the root ("/") context. Alternatively, 
+					for manual testing, manually run `mvn package dependency:copy antrun:run 
+					org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start the server. -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>server-start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${bash.exe}</executable>
+							<arguments>
+								<argument>${project.basedir}/src/main/config/server-start.sh</argument>
+								<argument>-j</argument>
+								<argument>${java.home}</argument>
+								<argument>-m</argument>
+								<argument>${its.bbfhir.server.jvmargs}</argument>
+								<argument>-t</argument>
+								<argument>${project.build.directory}</argument>
+								<argument>-u</argument>
+								<argument>${its.bbfhir.db.url}</argument>
+							</arguments>
+
+							<!-- Don't start/stop the server if the ITs are being skipped. -->
+							<skip>${skipITs}</skip>
+						</configuration>
+					</execution>
+					<execution>
+						<id>server-stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${bash.exe}</executable>
+							<arguments>
+								<argument>${project.basedir}/src/main/config/server-stop.sh</argument>
+								<argument>-t</argument>
+								<argument>${project.build.directory}</argument>
+							</arguments>
+
+							<!-- Don't start/stop the server if the ITs are being skipped. -->
+							<skip>${skipITs}</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- This is to run the integration tests -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
+						process. -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>download-fda-drug-data</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp</mainClass>
+							<arguments>
+								<argument>${project.build.outputDirectory}</argument>
+							</arguments>
+							<systemProperties>
+								<systemProperty>
+									<key>http.proxyHost</key>
+									<value>${http.proxyHost}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>http.proxyPort</key>
+									<value>${http.proxyPort}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>https.proxyHost</key>
+									<value>${https.proxyHost}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>https.proxyPort</key>
+									<value>${https.proxyPort}</value>
+								</systemProperty>
+								<systemProperty>
+									<key>http.nonProxyHosts</key>
+									<value>${http.nonProxyHosts}</value>
+								</systemProperty>
+							</systemProperties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<!-- This profile will only be active for builds inside of Eclipse (managed
+				by m2e). It's primarily used to manage the execution of plugins in that environment. -->
+			<id>m2e-manage-executions</id>
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<!--This plugin's configuration is used to store Eclipse m2e settings
+								only. It has no influence on the Maven build itself. -->
+							<groupId>org.eclipse.m2e</groupId>
+							<artifactId>lifecycle-mapping</artifactId>
+							<version>1.0.0</version>
+							<configuration>
+								<lifecycleMappingMetadata>
+									<pluginExecutions>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.codehaus.mojo</groupId>
+												<artifactId>build-helper-maven-plugin</artifactId>
+												<versionRange>[1.12,)</versionRange>
+												<goals>
+													<goal>reserve-network-port</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<ignore></ignore>
+											</action>
+										</pluginExecution>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>org.codehaus.mojo</groupId>
+												<artifactId>exec-maven-plugin</artifactId>
+												<versionRange>[1.5.0,)</versionRange>
+												<goals>
+													<goal>java</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<execute>
+													<runOnIncremental>false</runOnIncremental>
+													<runOnConfiguration>true</runOnConfiguration>
+												</execute>
+											</action>
+										</pluginExecution>
+									</pluginExecutions>
+								</lifecycleMappingMetadata>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
+</project>
