@@ -1,0 +1,89 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton</groupId>
+		<artifactId>bluebutton-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>gov.hhs.cms.bluebutton.texttofhir</groupId>
+	<artifactId>bluebutton-text-to-fhir</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<description>
+		A parent POM for the CMS/MyMedicare.gov text file to FHIR utility.
+	</description>
+	<url>https://github.com/karlmdavis/bluebutton-text-to-fhir</url>
+	<organization>
+		<name>Centers for Medicare &amp; Medicaid Services</name>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://spdx.org/licenses/Apache-2.0</url>
+		</license>
+	</licenses>
+
+	<issueManagement>
+		<!-- There doesn't seem to be any tooling support for this yet, but it 
+			doesn't hurt to include it. -->
+		<system>GitHub Issues</system>
+		<url>https://github.com/karlmdavis/bluebutton-text-to-fhir/issues</url>
+	</issueManagement>
+
+	<ciManagement>
+		<!-- TODO per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
+			Sonar (at least) can use this information. -->
+		<system>jenkins</system>
+		<url><!-- TODO --></url>
+	</ciManagement>
+
+	<scm>
+		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
+		<connection>scm:git:git@github.com:karlmdavis/bluebutton-text-to-fhir.git</connection>
+		<developerConnection>scm:git:git@github.com:karlmdavis/bluebutton-text-to-fhir.git</developerConnection>
+		<url>https://github.com/karlmdavis/bluebutton-text-to-fhir</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<modules>
+		<module>bluebutton-text-to-fhir-app</module>
+	</modules>
+
+	<properties>
+		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Provides the FHIR client being used to create/push resources to 
+					the server. -->
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-base</artifactId>
+				<version>${hapi-fhir.version}</version>
+			</dependency>
+			<dependency>
+				<!-- At least one "structures" JAR must also be included -->
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+				<version>${hapi-fhir.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+		</pluginManagement>
+		<plugins>
+		</plugins>
+	</build>
+
+</project>
