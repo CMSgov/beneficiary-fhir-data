@@ -23,12 +23,6 @@ if [ "${cygwin}" = true ]; then
 	targetDb="$(cygpath --unix "${targetDb}")"
 fi
 
-# Verify that the target DB doesn't already exist.
-if [ -f "${targetDb}" ]; then
-	echo >&2 "Target DB already exists."
-	exit 1
-fi
-
 # Exit immediately if something fails.
 set -e
 error() {
@@ -119,6 +113,10 @@ CREATE VIEW access_log_extra
 		status_code,
 		bytes,
 		duration_milliseconds,
+		CASE
+			WHEN duration_milliseconds <= 0 THEN 0
+			ELSE bytes / duration_milliseconds
+		END bytes_per_millisecond,
 		original_query_id,
 		original_query_counter,
 		original_query_timestamp,
@@ -132,369 +130,13 @@ CREATE VIEW access_log_extra
 	FROM
 		access_log;
 
--- Calculates percentile response times for each 'request_operation_type', over all time.
-DROP VIEW IF EXISTS access_log_percentiles_all;
-CREATE VIEW
-	access_log_percentiles_all (
-		request_operation_type,
-		date_range_start,
-		date_range_end,
-		count,
-		duration_milliseconds_p50,
-		duration_milliseconds_p90,
-		duration_milliseconds_p99,
-		duration_milliseconds_p100
-	)
-	AS
-	WITH
-		requests_metadata(timestamp, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, request_operation_type, duration_milliseconds FROM access_log_extra WHERE request_operation_type = 'metadata' ORDER BY duration_milliseconds ASC),
-		requests_patient_by_id(timestamp, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, request_operation_type, duration_milliseconds FROM access_log_extra WHERE request_operation_type = 'patient_by_id' ORDER BY duration_milliseconds ASC),
-		requests_patient_by_identifier(timestamp, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, request_operation_type, duration_milliseconds FROM access_log_extra WHERE request_operation_type = 'patient_by_identifier' ORDER BY duration_milliseconds ASC),
-		requests_coverage_by_patient_id(timestamp, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, request_operation_type, duration_milliseconds FROM access_log_extra WHERE request_operation_type = 'coverage_by_patient_id' ORDER BY duration_milliseconds ASC),
-		requests_eob_by_patient_id_all(timestamp, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, request_operation_type, duration_milliseconds FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_all' ORDER BY duration_milliseconds ASC),
-		requests_eob_by_patient_id_paged(timestamp, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, request_operation_type, duration_milliseconds FROM access_log_extra WHERE request_operation_type = 'eob_by_patient_id_paged' ORDER BY duration_milliseconds ASC)
-	SELECT
-			request_operation_type,
-			MIN(timestamp),
-			MAX(timestamp),
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) - 1)
-		FROM requests_metadata
-	UNION ALL
-	SELECT
-			request_operation_type,
-			MIN(timestamp),
-			MAX(timestamp),
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id) - 1)
-		FROM requests_patient_by_id
-	UNION ALL
-	SELECT
-			request_operation_type,
-			MIN(timestamp),
-			MAX(timestamp),
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier) - 1)
-		FROM requests_patient_by_identifier
-	UNION ALL
-	SELECT
-			request_operation_type,
-			MIN(timestamp),
-			MAX(timestamp),
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id) - 1)
-		FROM requests_coverage_by_patient_id
-	UNION ALL
-	SELECT
-			request_operation_type,
-			MIN(timestamp),
-			MAX(timestamp),
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all) - 1)
-		FROM requests_eob_by_patient_id_all
-	UNION ALL
-	SELECT
-			request_operation_type,
-			MIN(timestamp),
-			MAX(timestamp),
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged) - 1)
-		FROM requests_eob_by_patient_id_paged;
-
--- Doesn't work. Not sure why, but SQLite throws odd errors.
-DROP VIEW IF EXISTS access_log_percentiles_monthly;
-CREATE VIEW
-	access_log_percentiles_monthly (
-		request_operation_type,
-		month,
-		count,
-		duration_milliseconds_p50,
-		duration_milliseconds_p90,
-		duration_milliseconds_p99,
-		duration_milliseconds_p100
-	)
-	AS
-	WITH
-		months(month, month_start, month_end) AS
-			(SELECT strftime('%Y-%m', timestamp), date(timestamp, 'start of month'), date(timestamp, 'start of month','+1 month','-1 day') FROM access_log GROUP BY strftime('%Y-%m', timestamp) ORDER BY timestamp ASC),
-		requests_metadata(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'metadata' ORDER BY duration_milliseconds ASC),
-		requests_eob_by_patient_id(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'eob_by_patient_id_all' ORDER BY duration_milliseconds ASC)
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata) - 1)
-		FROM requests_metadata
-	UNION ALL
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id AS inner
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id) - 1)
-		FROM requests_eob_by_patient_id;
-
--- Doesn't work. Not sure why, but SQLite throws odd errors.
-DROP VIEW IF EXISTS access_log_percentiles_monthly2;
-CREATE VIEW
-	access_log_percentiles_monthly2 (
-		request_operation_type,
-		month,
-		count,
-		duration_milliseconds_p50,
-		duration_milliseconds_p90,
-		duration_milliseconds_p99,
-		duration_milliseconds_p100
-	)
-	AS
-	WITH
-		months(month, month_start, month_end) AS
-			(SELECT strftime('%Y-%m', timestamp), date(timestamp, 'start of month'), date(timestamp, 'start of month','+1 month','-1 day') FROM access_log GROUP BY strftime('%Y-%m', timestamp) ORDER BY timestamp ASC),
-		requests_metadata(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'metadata' ORDER BY duration_milliseconds ASC),
-		requests_patient_by_id(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'patient_by_id' ORDER BY duration_milliseconds ASC),
-		requests_patient_by_identifier(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'patient_by_identifier' ORDER BY duration_milliseconds ASC),
-		requests_coverage_by_patient_id(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'coverage_by_patient_id' ORDER BY duration_milliseconds ASC),
-		requests_eob_by_patient_id_all(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'eob_by_patient_id_all' ORDER BY duration_milliseconds ASC),
-		requests_eob_by_patient_id_paged(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'eob_by_patient_id_paged' ORDER BY duration_milliseconds ASC)
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) - 1)
-		FROM requests_metadata AS outer
-		GROUP BY month
-	UNION ALL
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id AS inner WHERE inner.month = month) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id AS inner WHERE inner.month = month) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id AS inner WHERE inner.month = month) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_id AS inner WHERE inner.month = month) - 1)
-		FROM requests_patient_by_id AS outer
-		GROUP BY month
-	UNION ALL
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier AS inner WHERE inner.month = month) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier AS inner WHERE inner.month = month) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier AS inner WHERE inner.month = month) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_patient_by_identifier AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_patient_by_identifier AS inner WHERE inner.month = month) - 1)
-		FROM requests_patient_by_identifier AS outer
-		GROUP BY month
-	UNION ALL
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id AS inner WHERE inner.month = month) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id AS inner WHERE inner.month = month) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id AS inner WHERE inner.month = month) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_coverage_by_patient_id AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_coverage_by_patient_id AS inner WHERE inner.month = month) - 1)
-		FROM requests_coverage_by_patient_id AS outer
-		GROUP BY month
-	UNION ALL
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = month) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = month) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = month) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_all AS inner WHERE inner.month = month) - 1)
-		FROM requests_eob_by_patient_id_all AS outer
-		GROUP BY month
-	UNION ALL
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = month) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = month) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = month) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_eob_by_patient_id_paged AS inner WHERE inner.month = month) - 1)
-		FROM requests_eob_by_patient_id_paged AS outer
-		GROUP BY month;
-
--- Doesn't work. Not sure why, but SQLite throws odd errors.
-DROP VIEW IF EXISTS access_log_percentiles_monthly_for_metadata;
-CREATE VIEW
-	access_log_percentiles_monthly_for_metadata (
-		request_operation_type,
-		month,
-		count,
-		duration_milliseconds_p50,
-		duration_milliseconds_p90,
-		duration_milliseconds_p99,
-		duration_milliseconds_p100
-	)
-	AS
-	WITH
-		months(month, month_start, month_end) AS
-			(SELECT strftime('%Y-%m', timestamp), date(timestamp, 'start of month'), date(timestamp, 'start of month','+1 month','-1 day') FROM access_log GROUP BY strftime('%Y-%m', timestamp) ORDER BY timestamp ASC),
-		requests_metadata(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'metadata' ORDER BY duration_milliseconds ASC)
-	SELECT
-			request_operation_type,
-			month,
-			COUNT(*),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) * 50 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) * 90 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) * 99 / 100 - 1),
-			(SELECT inner.duration_milliseconds FROM requests_metadata AS inner WHERE inner.month = outer.month
-				LIMIT 1 OFFSET (SELECT COUNT(*) FROM requests_metadata AS inner WHERE inner.month = month) - 1)
-		FROM requests_metadata AS outer
-		GROUP BY month;
-
--- Doesn't work. Not sure why, but SQLite throws odd errors.
-DROP VIEW IF EXISTS access_log_percentiles_monthly_for_eob_by_patient_id_all;
-CREATE VIEW
-	access_log_percentiles_monthly_for_eob_by_patient_id_all (
-		request_operation_type,
-		month,
-		count,
-		duration_milliseconds_p99_index,
-		duration_milliseconds_p99
-	)
-	AS
-	WITH
-		months(month, month_start, month_end) AS
-			(SELECT strftime('%Y-%m', timestamp), date(timestamp, 'start of month'), date(timestamp, 'start of month','+1 month','-1 day') FROM access_log GROUP BY strftime('%Y-%m', timestamp) ORDER BY timestamp ASC),
-		requests_eob_by_patient_id_all(timestamp, month, request_operation_type, duration_milliseconds) AS
-			(SELECT timestamp, month, request_operation_type, duration_milliseconds FROM access_log_extra INNER JOIN months ON strftime('%Y-%m', access_log_extra.timestamp) = months.month WHERE request_operation_type = 'eob_by_patient_id_all' ORDER BY duration_milliseconds ASC)
-	SELECT
-			request_operation_type,
-			month,
-			count(*),
-			count(*) * 99 / 100 - 1,
-			(
-				SELECT
-					duration_milliseconds
-				FROM
-					(
-						SELECT
-							duration_milliseconds,
-							row_number() OVER (ORDER BY duration_milliseconds ASC) AS rn,
-							count(*) OVER (ORDER BY duration_milliseconds ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS rc
-						FROM requests_eob_by_patient_id_all AS inner
-						WHERE
-							inner.month = outer.month
-					)
-				WHERE
-					rn = rc * 99 / 100 - 1
-			)
-		FROM requests_eob_by_patient_id_all AS outer
-		GROUP BY outer.month;
-
--- Helper view that "bins" access_log_extra entries by 'month' and 'request_operation_type':
+-- Helper view that "bins" access_log_extra entries by 'timestamp_month' and 'request_operation_type':
 -- each entry within one of those bins gets an index assigned to it, ordered by 'duration_milliseconds'.
 -- This allows for simpler percentile calculations in other views.
-DROP VIEW IF EXISTS access_log_binned;
+DROP VIEW IF EXISTS access_log_binned_duration_milliseconds_by_month;
 CREATE VIEW
-	access_log_binned (
-		month,
+	access_log_binned_duration_milliseconds_by_month (
+		timestamp_month,
 		request_operation_type,
 		duration_milliseconds,
 		bin_index,
@@ -502,7 +144,7 @@ CREATE VIEW
 	)
 	AS
 	SELECT
-		strftime('%Y-%m', timestamp),
+		timestamp_month,
 		request_operation_type,
 		duration_milliseconds,
 		row_number() OVER binned_durations,
@@ -510,17 +152,17 @@ CREATE VIEW
 	FROM access_log_extra
 	WINDOW binned_durations AS (PARTITION BY timestamp_month, request_operation_type ORDER BY duration_milliseconds ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
 	ORDER BY
-		strftime('%Y-%m', timestamp) ASC,
+		timestamp_month ASC,
 		request_operation_type ASC,
 		duration_milliseconds ASC;
 
--- Helper view that "bins" access_log_extra entries by 'hour' and 'request_operation_type':
+-- Helper view that "bins" access_log_extra entries by 'timestamp_day' and 'request_operation_type':
 -- each entry within one of those bins gets an index assigned to it, ordered by 'duration_milliseconds'.
 -- This allows for simpler percentile calculations in other views.
-DROP VIEW IF EXISTS access_log_binned_hourly;
+DROP VIEW IF EXISTS access_log_binned_duration_milliseconds_by_day;
 CREATE VIEW
-	access_log_binned_hourly (
-		hour,
+	access_log_binned_duration_milliseconds_by_day (
+		timestamp_day,
 		request_operation_type,
 		duration_milliseconds,
 		bin_index,
@@ -528,7 +170,62 @@ CREATE VIEW
 	)
 	AS
 	SELECT
-		strftime('%Y-%m-%dT%H', timestamp),
+		timestamp_day,
+		request_operation_type,
+		duration_milliseconds,
+		row_number() OVER binned_durations,
+		count(*) OVER binned_durations
+	FROM access_log_extra
+	WINDOW binned_durations AS (PARTITION BY timestamp_day, request_operation_type ORDER BY duration_milliseconds ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+	ORDER BY
+		timestamp_day ASC,
+		request_operation_type ASC,
+		duration_milliseconds ASC;
+
+-- Helper view that "bins" access_log_extra entries by 'local_host_name', 'timestamp_day', 'request_operation_type':
+-- each entry within one of those bins gets an index assigned to it, ordered by 'duration_milliseconds'.
+-- This allows for simpler percentile calculations in other views.
+DROP VIEW IF EXISTS access_log_binned_duration_milliseconds_by_host_and_day;
+CREATE VIEW
+	access_log_binned_duration_milliseconds_by_host_and_day (
+		timestamp_day,
+		local_host_name,
+		request_operation_type,
+		duration_milliseconds,
+		bin_index,
+		bin_count
+	)
+	AS
+	SELECT
+		timestamp_day,
+		local_host_name,
+		request_operation_type,
+		duration_milliseconds,
+		row_number() OVER binned_durations,
+		count(*) OVER binned_durations
+	FROM access_log_extra
+	WINDOW binned_durations AS (PARTITION BY timestamp_day, local_host_name, request_operation_type ORDER BY duration_milliseconds ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+	ORDER BY
+		timestamp_day ASC,
+		local_host_name ASC,
+		request_operation_type ASC,
+		duration_milliseconds ASC;
+
+-- Helper view that "bins" access_log_extra entries by 'timestamp_hour' and 'request_operation_type':
+-- each entry within one of those bins gets an index assigned to it, ordered by 'duration_milliseconds'.
+-- This allows for simpler percentile calculations in other views.
+DROP VIEW IF EXISTS access_log_binned_duration_milliseconds_by_hour;
+CREATE VIEW
+	access_log_binned_duration_milliseconds_by_hour (
+		timestamp_hour,
+		request_operation_type,
+		duration_milliseconds,
+		bin_index,
+		bin_count
+	)
+	AS
+	SELECT
+		timestamp_hour,
 		request_operation_type,
 		duration_milliseconds,
 		row_number() OVER binned_durations,
@@ -536,175 +233,328 @@ CREATE VIEW
 	FROM access_log_extra
 	WINDOW binned_durations AS (PARTITION BY timestamp_hour, request_operation_type ORDER BY duration_milliseconds ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
 	ORDER BY
-		strftime('%Y-%m-%dT%H', timestamp) ASC,
+		timestamp_hour ASC,
 		request_operation_type ASC,
 		duration_milliseconds ASC;
 
--- Finally have a query that appears to work!
--- Unfortunately, it runs so slowly that it may never complete.  :-(
-DROP VIEW IF EXISTS access_log_percentiles_monthly3;
+-- Helper view that "bins" access_log_extra entries by 'timestamp_hour' and 'request_operation_type':
+-- each entry within one of those bins gets an index assigned to it, ordered by 'bytes_per_millisecond'.
+-- This allows for simpler percentile calculations in other views.
+DROP VIEW IF EXISTS access_log_binned_bytes_per_millisecond_by_hour;
 CREATE VIEW
-	access_log_percentiles_monthly3 (
+	access_log_binned_bytes_per_millisecond_by_hour (
+		timestamp_hour,
 		request_operation_type,
-		month,
-		count,
-		duration_milliseconds_p25_index,
-		duration_milliseconds_p25,
-		duration_milliseconds_p50_index,
-		duration_milliseconds_p50,
-		duration_milliseconds_p75_index,
-		duration_milliseconds_p75,
-		duration_milliseconds_p90_index,
-		duration_milliseconds_p90,
-		duration_milliseconds_p99_index,
-		duration_milliseconds_p99,
-		duration_milliseconds_p999_index,
-		duration_milliseconds_p999,
-		duration_milliseconds_p100_index,
-		duration_milliseconds_p100
+		bytes_per_millisecond,
+		bin_index,
+		bin_count
 	)
 	AS
 	SELECT
-		base.month,
-		base.request_operation_type,
-		base.bin_count,
-		max(1, CAST(0.25 * base.bin_count AS int)),
-		p25.duration_milliseconds,
-		max(1, CAST(0.50 * base.bin_count AS int)),
-		p50.duration_milliseconds,
-		max(1, CAST(0.75 * base.bin_count AS int)),
-		p75.duration_milliseconds,
-		max(1, CAST(0.90 * base.bin_count AS int)),
-		p90.duration_milliseconds,
-		max(1, CAST(0.99 * base.bin_count AS int)),
-		p99.duration_milliseconds,
-		max(1, CAST(0.999 * base.bin_count AS int)),
-		p999.duration_milliseconds,
-		base.bin_count,
-		p100.duration_milliseconds
-	FROM access_log_binned AS base
-	LEFT JOIN access_log_binned AS p25 ON p25.month = base.month AND p25.request_operation_type = base.request_operation_type AND base.bin_index = max(1, CAST(0.25 * base.bin_count AS int))
-	LEFT JOIN access_log_binned AS p50 ON p50.month = base.month AND p50.request_operation_type = base.request_operation_type AND base.bin_index = max(1, CAST(0.50 * base.bin_count AS int))
-	LEFT JOIN access_log_binned AS p75 ON p75.month = base.month AND p75.request_operation_type = base.request_operation_type AND base.bin_index = max(1, CAST(0.75 * base.bin_count AS int))
-	LEFT JOIN access_log_binned AS p90 ON p90.month = base.month AND p90.request_operation_type = base.request_operation_type AND base.bin_index = max(1, CAST(0.90 * base.bin_count AS int))
-	LEFT JOIN access_log_binned AS p99 ON p99.month = base.month AND p99.request_operation_type = base.request_operation_type AND base.bin_index = max(1, CAST(0.99 * base.bin_count AS int))
-	LEFT JOIN access_log_binned AS p999 ON p999.month = base.month AND p999.request_operation_type = base.request_operation_type AND base.bin_index = max(1, CAST(0.999 * base.bin_count AS int))
-	LEFT JOIN access_log_binned AS p100 ON p100.month = base.month AND p100.request_operation_type = base.request_operation_type AND base.bin_index = base.bin_count
-	GROUP BY
-		base.request_operation_type,
-		base.month,
-		base.bin_count
-	ORDER BY
-		base.month ASC,
-		base.request_operation_type ASC;
-
--- Calculates the percentiles of 'duration_milliseconds' for all responses, binned by 'month' + 'request_operation_type'.
--- Note: This view works! And reasonably quickly! Takes 486 seconds to query it, when run run on pdcw10ap01 with 16993177 access log entries from 2017-10-27 through 2018-12-17.
-DROP VIEW IF EXISTS access_log_percentiles_monthly4;
-CREATE VIEW
-	access_log_percentiles_monthly4 (
-		month,
+		timestamp_hour,
 		request_operation_type,
-		count,
-		duration_milliseconds_p25_index,
+		bytes_per_millisecond,
+		row_number() OVER bins,
+		count(*) OVER bins
+	FROM access_log_extra
+	WINDOW bins AS (PARTITION BY timestamp_hour, request_operation_type ORDER BY bytes_per_millisecond ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+	ORDER BY
+		timestamp_hour ASC,
+		request_operation_type ASC,
+		bytes_per_millisecond ASC;
+
+-- Helper view that "bins" access_log_extra entries by 'timestamp_minute' and 'request_operation_type':
+-- each entry within one of those bins gets an index assigned to it, ordered by 'duration_milliseconds'.
+-- This allows for simpler percentile calculations in other views.
+DROP VIEW IF EXISTS access_log_binned_duration_milliseconds_by_minute;
+CREATE VIEW
+	access_log_binned_duration_milliseconds_by_minute (
+		timestamp_minute,
+		request_operation_type,
+		duration_milliseconds,
+		bin_index,
+		bin_count
+	)
+	AS
+	SELECT
+		timestamp_minute,
+		request_operation_type,
+		duration_milliseconds,
+		row_number() OVER binned_durations,
+		count(*) OVER binned_durations
+	FROM access_log_extra
+	WINDOW binned_durations AS (PARTITION BY timestamp_minute, request_operation_type ORDER BY duration_milliseconds ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+	ORDER BY
+		timestamp_minute ASC,
+		request_operation_type ASC,
+		duration_milliseconds ASC;
+
+-- Calculates the percentiles of 'duration_milliseconds' for all responses, binned by 'timestamp_month' + 'request_operation_type'.
+DROP VIEW IF EXISTS access_log_duration_milliseconds_percentiles_by_month;
+CREATE VIEW
+	access_log_duration_milliseconds_percentiles_by_month (
+		timestamp_month,
+		request_operation_type,
+		count_for_all_operation_types,
+		count_for_operation_type,
 		duration_milliseconds_p25,
-		duration_milliseconds_p50_index,
 		duration_milliseconds_p50,
-		duration_milliseconds_p75_index,
 		duration_milliseconds_p75,
-		duration_milliseconds_p90_index,
 		duration_milliseconds_p90,
-		duration_milliseconds_p99_index,
 		duration_milliseconds_p99,
-		duration_milliseconds_p999_index,
 		duration_milliseconds_p999,
-		duration_milliseconds_p100_index,
 		duration_milliseconds_p100
 	)
 	AS
 	WITH
-		inner(month, request_operation_type, bin_count) AS
-			(SELECT month, request_operation_type, bin_count FROM access_log_binned GROUP BY month, request_operation_type, bin_count)
+		inner(timestamp_month, request_operation_type, bin_count) AS
+			(SELECT timestamp_month, request_operation_type, bin_count FROM access_log_binned_duration_milliseconds_by_month GROUP BY timestamp_month, request_operation_type, bin_count)
 	SELECT
-		inner.month,
+		inner.timestamp_month,
 		inner.request_operation_type,
+		sum(inner.bin_count) OVER bin_all_operation_types,
 		inner.bin_count,
-		max(1, CAST(0.25 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.25 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.50 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.50 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.75 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.75 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.90 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.90 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.99 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.99 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.999 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.999 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(inner.bin_count),
 		max(CASE outer.bin_index WHEN inner.bin_count THEN outer.duration_milliseconds END)
 	FROM inner
-	LEFT JOIN access_log_binned AS outer ON inner.month = outer.month AND inner.request_operation_type = outer.request_operation_type
+	LEFT JOIN access_log_binned_duration_milliseconds_by_month AS outer ON inner.timestamp_month = outer.timestamp_month AND inner.request_operation_type = outer.request_operation_type
 	GROUP BY
 		inner.request_operation_type,
-		inner.month,
+		inner.timestamp_month,
 		inner.bin_count
+	WINDOW bin_all_operation_types AS (PARTITION BY inner.timestamp_month ORDER BY inner.timestamp_month)
 	ORDER BY
-		inner.month ASC,
+		inner.timestamp_month ASC,
 		inner.request_operation_type ASC;
 
--- Calculates the percentiles of 'duration_milliseconds' for all responses, binned by 'hour' + 'request_operation_type'.
-DROP VIEW IF EXISTS access_log_percentiles_hourly;
+-- Calculates the percentiles of 'duration_milliseconds' for all responses, binned by 'local_host_name' + 'timestamp_day' + 'request_operation_type'.
+DROP VIEW IF EXISTS access_log_duration_milliseconds_percentiles_by_host_and_day;
 CREATE VIEW
-	access_log_percentiles_hourly (
-		hour,
+	access_log_duration_milliseconds_percentiles_by_host_and_day (
+		timestamp_day,
+		local_host_name,
 		request_operation_type,
-		count,
-		duration_milliseconds_p25_index,
+		count_for_all_operation_types,
+		count_for_operation_type,
 		duration_milliseconds_p25,
-		duration_milliseconds_p50_index,
 		duration_milliseconds_p50,
-		duration_milliseconds_p75_index,
 		duration_milliseconds_p75,
-		duration_milliseconds_p90_index,
 		duration_milliseconds_p90,
-		duration_milliseconds_p99_index,
 		duration_milliseconds_p99,
-		duration_milliseconds_p999_index,
 		duration_milliseconds_p999,
-		duration_milliseconds_p100_index,
 		duration_milliseconds_p100
 	)
 	AS
 	WITH
-		inner(hour, request_operation_type, bin_count) AS
-			(SELECT hour, request_operation_type, bin_count FROM access_log_binned_hourly GROUP BY hour, request_operation_type, bin_count)
+		inner(timestamp_day, local_host_name, request_operation_type, bin_count) AS
+			(SELECT timestamp_day, local_host_name, request_operation_type, bin_count FROM access_log_binned_duration_milliseconds_by_host_and_day GROUP BY timestamp_day, request_operation_type, bin_count)
 	SELECT
-		inner.hour,
+		inner.timestamp_day,
+		inner.local_host_name,
 		inner.request_operation_type,
+		sum(inner.bin_count) OVER bin_all_operation_types,
 		inner.bin_count,
-		max(1, CAST(0.25 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.25 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.50 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.50 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.75 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.75 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.90 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.90 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.99 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.99 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(1, CAST(0.999 * inner.bin_count AS int)),
 		max(CASE outer.bin_index WHEN max(1, CAST(0.999 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
-		max(inner.bin_count),
 		max(CASE outer.bin_index WHEN inner.bin_count THEN outer.duration_milliseconds END)
 	FROM inner
-	LEFT JOIN access_log_binned_hourly AS outer ON inner.hour = outer.hour AND inner.request_operation_type = outer.request_operation_type
+	LEFT JOIN access_log_binned_duration_milliseconds_by_host_and_day AS outer ON inner.local_host_name = outer.local_host_name AND inner.timestamp_day = outer.timestamp_day AND inner.request_operation_type = outer.request_operation_type
+	GROUP BY
+		inner.timestamp_day,
+		inner.local_host_name,
+		inner.request_operation_type,
+		inner.bin_count
+	WINDOW bin_all_operation_types AS (PARTITION BY inner.timestamp_day ORDER BY inner.timestamp_day)
+	ORDER BY
+		inner.timestamp_day ASC,
+		inner.local_host_name ASC,
+		inner.request_operation_type ASC;
+
+-- Calculates the percentiles of 'duration_milliseconds' for all responses, binned by 'timestamp_day' + 'request_operation_type'.
+DROP VIEW IF EXISTS access_log_duration_milliseconds_percentiles_by_day;
+CREATE VIEW
+	access_log_duration_milliseconds_percentiles_by_day (
+		timestamp_day,
+		request_operation_type,
+		count_for_all_operation_types,
+		count_for_operation_type,
+		duration_milliseconds_p25,
+		duration_milliseconds_p50,
+		duration_milliseconds_p75,
+		duration_milliseconds_p90,
+		duration_milliseconds_p99,
+		duration_milliseconds_p999,
+		duration_milliseconds_p100
+	)
+	AS
+	WITH
+		inner(timestamp_day, request_operation_type, bin_count) AS
+			(SELECT timestamp_day, request_operation_type, bin_count FROM access_log_binned_duration_milliseconds_by_day GROUP BY timestamp_day, request_operation_type, bin_count)
+	SELECT
+		inner.timestamp_day,
+		inner.request_operation_type,
+		sum(inner.bin_count) OVER bin_all_operation_types,
+		inner.bin_count,
+		max(CASE outer.bin_index WHEN max(1, CAST(0.25 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.50 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.75 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.90 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.99 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.999 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN inner.bin_count THEN outer.duration_milliseconds END)
+	FROM inner
+	LEFT JOIN access_log_binned_duration_milliseconds_by_day AS outer ON inner.timestamp_day = outer.timestamp_day AND inner.request_operation_type = outer.request_operation_type
 	GROUP BY
 		inner.request_operation_type,
-		inner.hour,
+		inner.timestamp_day,
 		inner.bin_count
+	WINDOW bin_all_operation_types AS (PARTITION BY inner.timestamp_day ORDER BY inner.timestamp_day)
 	ORDER BY
-		inner.hour ASC,
+		inner.timestamp_day ASC,
+		inner.request_operation_type ASC;
+
+-- Calculates the percentiles of 'duration_milliseconds' for all responses, binned by 'timestamp_hour' + 'request_operation_type'.
+DROP VIEW IF EXISTS access_log_duration_milliseconds_percentiles_by_hour;
+CREATE VIEW
+	access_log_duration_milliseconds_percentiles_by_hour (
+		timestamp_hour,
+		request_operation_type,
+		count_for_all_operation_types,
+		count_for_operation_type,
+		duration_milliseconds_mean,
+		duration_milliseconds_p25,
+		duration_milliseconds_p50,
+		duration_milliseconds_p75,
+		duration_milliseconds_p90,
+		duration_milliseconds_p99,
+		duration_milliseconds_p999,
+		duration_milliseconds_p100
+	)
+	AS
+	WITH
+		inner(timestamp_hour, request_operation_type, bin_count) AS
+			(SELECT timestamp_hour, request_operation_type, bin_count FROM access_log_binned_duration_milliseconds_by_hour GROUP BY timestamp_hour, request_operation_type, bin_count)
+	SELECT
+		inner.timestamp_hour,
+		inner.request_operation_type,
+		sum(inner.bin_count) OVER bin_all_operation_types,
+		inner.bin_count,
+		avg(outer.duration_milliseconds),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.25 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.50 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.75 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.90 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.99 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.999 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN inner.bin_count THEN outer.duration_milliseconds END)
+	FROM inner
+	LEFT JOIN access_log_binned_duration_milliseconds_by_hour AS outer ON inner.timestamp_hour = outer.timestamp_hour AND inner.request_operation_type = outer.request_operation_type
+	GROUP BY
+		inner.request_operation_type,
+		inner.timestamp_hour,
+		inner.bin_count
+	WINDOW bin_all_operation_types AS (PARTITION BY inner.timestamp_hour ORDER BY inner.timestamp_hour)
+	ORDER BY
+		inner.timestamp_hour ASC,
+		inner.request_operation_type ASC;
+
+-- Calculates the percentiles of 'bytes_per_millisecond' for all responses, binned by 'timestamp_hour' + 'request_operation_type'.
+DROP VIEW IF EXISTS access_log_bytes_per_millisecond_percentiles_by_hour;
+CREATE VIEW
+	access_log_bytes_per_millisecond_percentiles_by_hour (
+		timestamp_hour,
+		request_operation_type,
+		count_for_all_operation_types,
+		count_for_operation_type,
+		bytes_per_millisecond_mean,
+		bytes_per_millisecond_p25,
+		bytes_per_millisecond_p50,
+		bytes_per_millisecond_p75,
+		bytes_per_millisecond_p90,
+		bytes_per_millisecond_p99,
+		bytes_per_millisecond_p999,
+		bytes_per_millisecond_p100
+	)
+	AS
+	WITH
+		inner(timestamp_hour, request_operation_type, bin_count) AS
+			(SELECT timestamp_hour, request_operation_type, bin_count FROM access_log_binned_bytes_per_millisecond_by_hour GROUP BY timestamp_hour, request_operation_type, bin_count)
+	SELECT
+		inner.timestamp_hour,
+		inner.request_operation_type,
+		sum(inner.bin_count) OVER bin_all_operation_types,
+		inner.bin_count,
+		avg(outer.bytes_per_millisecond),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.25 * inner.bin_count AS int)) THEN outer.bytes_per_millisecond END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.50 * inner.bin_count AS int)) THEN outer.bytes_per_millisecond END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.75 * inner.bin_count AS int)) THEN outer.bytes_per_millisecond END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.90 * inner.bin_count AS int)) THEN outer.bytes_per_millisecond END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.99 * inner.bin_count AS int)) THEN outer.bytes_per_millisecond END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.999 * inner.bin_count AS int)) THEN outer.bytes_per_millisecond END),
+		max(CASE outer.bin_index WHEN inner.bin_count THEN outer.bytes_per_millisecond END)
+	FROM inner
+	LEFT JOIN access_log_binned_bytes_per_millisecond_by_hour AS outer ON inner.timestamp_hour = outer.timestamp_hour AND inner.request_operation_type = outer.request_operation_type
+	GROUP BY
+		inner.request_operation_type,
+		inner.timestamp_hour,
+		inner.bin_count
+	WINDOW bin_all_operation_types AS (PARTITION BY inner.timestamp_hour ORDER BY inner.timestamp_hour)
+	ORDER BY
+		inner.timestamp_hour ASC,
+		inner.request_operation_type ASC;
+
+-- Calculates the percentiles of 'duration_milliseconds' for all responses, binned by 'timestamp_minute' + 'request_operation_type'.
+DROP VIEW IF EXISTS access_log_duration_milliseconds_percentiles_by_minute;
+CREATE VIEW
+	access_log_duration_milliseconds_percentiles_by_minute (
+		timestamp_minute,
+		request_operation_type,
+		count_for_all_operation_types,
+		count_for_operation_type,
+		duration_milliseconds_mean,
+		duration_milliseconds_p25,
+		duration_milliseconds_p50,
+		duration_milliseconds_p75,
+		duration_milliseconds_p90,
+		duration_milliseconds_p99,
+		duration_milliseconds_p999,
+		duration_milliseconds_p100
+	)
+	AS
+	WITH
+		inner(timestamp_minute, request_operation_type, bin_count) AS
+			(SELECT timestamp_minute, request_operation_type, bin_count FROM access_log_binned_duration_milliseconds_by_minute GROUP BY timestamp_minute, request_operation_type, bin_count)
+	SELECT
+		inner.timestamp_minute,
+		inner.request_operation_type,
+		sum(inner.bin_count) OVER bin_all_operation_types,
+		inner.bin_count,
+		avg(outer.duration_milliseconds),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.25 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.50 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.75 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.90 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.99 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN max(1, CAST(0.999 * inner.bin_count AS int)) THEN outer.duration_milliseconds END),
+		max(CASE outer.bin_index WHEN inner.bin_count THEN outer.duration_milliseconds END)
+	FROM inner
+	LEFT JOIN access_log_binned_duration_milliseconds_by_minute AS outer ON inner.timestamp_minute = outer.timestamp_minute AND inner.request_operation_type = outer.request_operation_type
+	GROUP BY
+		inner.request_operation_type,
+		inner.timestamp_minute,
+		inner.bin_count
+	WINDOW bin_all_operation_types AS (PARTITION BY inner.timestamp_minute ORDER BY inner.timestamp_minute)
+	ORDER BY
+		inner.timestamp_minute ASC,
 		inner.request_operation_type ASC;
 EOF
 

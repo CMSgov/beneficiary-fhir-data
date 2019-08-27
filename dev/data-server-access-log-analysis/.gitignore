@@ -1,9 +1,2 @@
-# Don't commit DBs: they have PII & PHI!
-**/*.sqlite
-**/*.sqlite3
-**/*.db
-
-# Don't commit reports: they can be re-generated, as needed.
-**/*.csv
-**/*.xlsx
-**/*.hgram
+# Don't commit output files: they can be re-generated.
+output/

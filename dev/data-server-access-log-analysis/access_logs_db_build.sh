@@ -32,6 +32,23 @@ buildDatabaseViaSsh() {
   ssh -q bluebutton-healthapt-prod-data-server-b-1 "cat /u01/jboss/jboss-eap-7.0/standalone/log/access*" | parseToCsv
 }
 
+# Normally disabled, but sometimes useful for debugging.
+buildDatabaseViaScp() {
+  localHostname='pdcw10ap01'
+  currentCsv="/tmp/data-server-access-log-${localHostname}.csv"
+  if [ ! -r "${currentCsv}" ]; then
+    ssh -q bluebutton-healthapt-prod-data-server-a-1 "cat /u01/jboss/jboss-eap-7.0/standalone/log/access*" > "${currentCsv}"
+  fi
+  cat "${currentCsv}" | parseToCsv
+
+  localHostname='pdcw10ap02'
+  currentCsv="/tmp/data-server-access-log-${localHostname}.csv"
+  if [ ! -r "${currentCsv}" ]; then
+    ssh -q bluebutton-healthapt-prod-data-server-b-1 "cat /u01/jboss/jboss-eap-7.0/standalone/log/access*" > "${currentCsv}"
+  fi
+  cat "${currentCsv}" | parseToCsv
+}
+
 createSqliteDb() {
   if [ -f "${sqliteDb}" ]; then
     >&2 echo "Database file '${sqliteDb}' already exists. Aborting."
@@ -62,6 +79,7 @@ findGawk() {
 gawk="$(findGawk)"
 
 createSqliteDb
+#buildDatabaseViaScp
 buildDatabaseViaSsh
 
 echo "Access logs retrieved, parsed, and imported to DB: '${sqliteDb}'"

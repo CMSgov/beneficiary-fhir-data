@@ -2,7 +2,7 @@
 
 BEGIN {
   # Set the field pattern to handle the dumb quoted and bracketed fields thing going on.
-  FPAT = "([^ ]+)|(\"[^\"]+\")|(\\[[^\\]]+\\])"
+  FPAT = "(\"[^\"]+\")|(\\[[^\\]]+\\])|([^ ]+)"
 
   # Build a map of short-month-names (e.g. "Jan") to left-padded month-numbers (e.g. "01").
   split("Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec", monthShortNames, ",")
@@ -12,6 +12,32 @@ BEGIN {
 }
 
 {
+  ##
+  # Workaround https://jira.cms.gov/browse/BLUEBUTTON-1141, where the
+  # remoteAuthenticatedUser field is not properly quoted for many old records.
+  ##
+  if ($3 ~ /^EMAILADDRESS=/) {
+    # Prepend a quote to remoteAuthenticatedUser.
+    $3 = sprintf("\"%s", $3)
+
+    # Chomp until we hit the timestamp field, appending the fields to $3.
+    while ($4 !~ /^\[/) {
+      # Append the next field to remoteAuthenticatedUser.
+      $3 = sprintf("%s %s", $3, $4)
+
+      # Shift all the fields left.
+      for (i = 4; i <= NF; i++) {
+        nextField = i + 1
+        if (nextField <= NF) {
+          $i = $nextField
+        }
+      }
+    }
+
+    # Append a quote to remoteAuthenticatedUser.
+    $3 = sprintf("%s\"", $3)
+  }
+
   ##
   # Assign all of the fields a human friendly name.
   ##
