@@ -1,148 +1,12 @@
-resource "aws_elb" "elb" {
-  name     = "bfd-jenkins"
-  internal = true
-
-  subnets = flatten([
-    var.elb_subnets,
-  ])
-  security_groups = [
-    "${var.vpn_security_group_id}",
-    "${aws_security_group.elb.id}",
-  ]
-
-  listener {
-    instance_port     = 80
-    instance_protocol = "http"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
-
-  listener {
-    instance_port      = 80
-    instance_protocol  = "http"
-    lb_port            = 443
-    lb_protocol        = "https"
-    ssl_certificate_id = "${var.tls_cert_arn}"
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 5
-    timeout             = 5
-    target              = "HTTP:80/robots.txt"
-    interval            = 10
-  }
-
-  cross_zone_load_balancing   = true
-  idle_timeout                = 60
-  connection_draining         = true
-  connection_draining_timeout = 60
-
-  tags = {
-    Name = "bfd-jenkins"
-  }
+locals {
+  tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
+  is_prod     = substr(var.env_config.env, 0, 4) == "prod" 
 }
 
-resource "aws_autoscaling_group" "asg" {
-  name                      = "bfd-${aws_launch_configuration.lc.name}"
-  launch_configuration      = "${aws_launch_configuration.lc.name}"
-  max_size                  = 1
-  min_size                  = 1
-  health_check_grace_period = 600
-  health_check_type         = "ELB"
+# IAM: Setup Role, Profile and Policies for Jenkins
 
-  vpc_zone_identifier = flatten([
-    var.app_subnets,
-  ])
-
-  load_balancers = flatten([
-    aws_elb.elb.id,
-  ])
-
-  tag {
-    key                 = "Name"
-    value               = "bfd-jenkins"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "role"
-    value               = "jenkins"
-    propagate_at_launch = true
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_security_group" "elb" {
-  name        = "elb"
-  description = "ELB security group"
-  vpc_id      = "${var.vpc_id}"
-}
-
-resource "aws_security_group" "allow_elb" {
-  name        = "allow_elb"
-  description = "Allow traffic from ELB"
-  vpc_id      = "${var.vpc_id}"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-
-    security_groups = [
-      "${aws_security_group.elb.id}",
-    ]
-  }
-
-  ingress {
-    from_port = 8080
-    to_port   = 8080
-    protocol  = "tcp"
-
-    security_groups = [
-      "${aws_security_group.elb.id}",
-    ]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-}
-
-resource "aws_launch_configuration" "lc" {
-  image_id             = "${var.ami_id}"
-  instance_type        = "${var.instance_type}"
-  key_name             = "${var.key_name}"
-  name_prefix          = "bfd-jenkins-"
-  iam_instance_profile = "${aws_iam_instance_profile.jenkins.name}"
-  security_groups = [
-    "${aws_security_group.allow_elb.id}",
-    "${var.vpn_security_group_id}",
-  ]
-
-  ebs_block_device { # Jenkins Data
-    device_name                 = "/dev/sdb"
-    volume_type                 = "gp2"
-    volume_size                 = 10
-    iops                        = 200
-    encrypted                   = "true"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_iam_role" "jenkins_role" {
-  name = "bfd-jenkins"
+resource "aws_iam_role" "jenkins" {
+  name = "bfd-mgmt-jenkins"
 
   assume_role_policy = <<EOF
 {
@@ -351,5 +215,130 @@ resource "aws_security_group" "packer_sg" {
 
   tags = {
     Name = "packer_sg"
+  }
+}
+
+# Subnets are created by CCS VPC setup
+#
+data "aws_subnet" "app_subnets" {
+  count             = length(var.env_config.azs)
+  vpc_id            = var.env_config.vpc_id
+  availability_zone = var.env_config.azs[0]
+  filter {
+    name    = "tag:Layer"
+    values  = [var.layer] 
+  }
+}
+
+# Base security includes management SSH access
+#
+
+resource "aws_security_group" "base" {
+  name          = "bfd-${var.env_config.env}-${var.role}-base"
+  description   = "Allow CI access to app servers"
+  vpc_id        = var.env_config.vpc_id
+  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.mgmt_config.ci_cidrs
+  }
+
+  egress {
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Callers access to the app
+#
+resource "aws_security_group" "app" {
+  count         = var.lb_config == null ? 0 : 1
+  name          = "bfd-${var.env_config.env}-${var.role}-app"
+  description   = "Allow access to app servers"
+  vpc_id        = var.env_config.vpc_id
+  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
+
+  ingress {
+    from_port       = var.lb_config.port
+    to_port         = var.lb_config.port
+    protocol        = "tcp"
+    # TODO: Figure out what the real ingress rule should be
+    cidr_blocks     = ["10.0.0.0/8"]
+  } 
+}
+
+##
+# Launch configuration
+##
+
+resource "aws_launch_configuration" "main" {
+  # Generate a new config on every revision
+  name_prefix                 = "bfd-${var.env_config.env}-${var.role}-"
+  security_groups             = concat([aws_security_group.base.id], aws_security_group.app[*].id)
+  key_name                    = var.launch_config.key_name
+  image_id                    = var.launch_config.ami_id
+  instance_type               = var.launch_config.instance_type
+  associate_public_ip_address = false
+  iam_instance_profile        = var.launch_config.profile
+  placement_tenancy           = local.is_prod ? "dedicated" : "default"
+
+  user_data                   = templatefile("${path.module}/../templates/user_data.tpl", {
+    env    = var.env_config.env
+  })
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+##
+# Autoscaling group
+##
+resource "aws_autoscaling_group" "main" {
+  # Generate a new config on every revision
+  name_prefix               = "bfd-${aws_launch_configuration.main.name}"
+  desired_capacity          = var.asg_config.desired
+  max_size                  = var.asg_config.max
+  min_size                  = var.asg_config.min
+
+  min_elb_capacity          = var.asg_config.desired
+  wait_for_elb_capacity     = var.asg_config.desired
+  wait_for_capacity_timeout = "10m"
+
+  health_check_grace_period = 300
+  health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
+  vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
+  launch_configuration      = aws_launch_configuration.main.name
+  target_group_arns         = var.lb_config == null ? [] : [var.lb_config.tg_arn]
+
+  enabled_metrics = [
+    "GroupMinSize",
+    "GroupMaxSize",
+    "GroupDesiredCapacity",
+    "GroupInServiceInstances",
+    "GroupPendingInstances",
+    "GroupStandbyInstances",
+    "GroupTerminatingInstances",
+    "GroupTotalInstances",
+  ]
+
+  dynamic "tag" {
+    for_each = local.tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+
+  tag {
+    key                   = "Name"
+    value                 = "bfd-${var.env_config.env}-${var.role}"
+    propagate_at_launch   = true
   }
 }

@@ -68,4 +68,3 @@ resource "aws_lb_target_group" "main" {
     unhealthy_threshold = 5
   }
 }
-
