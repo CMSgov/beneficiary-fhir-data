@@ -1,0 +1,125 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.3</maven>
+	</prerequisites>
+
+	<parent>
+		<groupId>gov.hhs.cms.bluebutton</groupId>
+		<artifactId>bluebutton-parent</artifactId>
+		<version>1.1.1-SNAPSHOT</version>
+	</parent>
+
+	<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
+	<artifactId>bluebutton-data-model</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>bluebutton-data-model</name>
+	<description>
+		A parent POM for the CMS Blue Button API: represents the beneficiary and claims data that comes from the CCW data warehouse.
+	</description>
+	<url>https://github.com/HHSIDEAlab/bluebutton-data-model</url>
+
+	<issueManagement>
+		<!-- There doesn't seem to be any tooling support for this yet, but it 
+			doesn't hurt to include it. -->
+		<system>GitHub Issues</system>
+		<url>https://github.com/HHSIDEAlab/bluebutton-data-model/issues</url>
+	</issueManagement>
+
+	<ciManagement>
+		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
+			Sonar (at least) can use this information. -->
+		<system>jenkins</system>
+		<url>http://builds.hhsdevcloud.us/job/HHSIDEALab/job/bluebutton-data-model/</url>
+	</ciManagement>
+
+	<scm>
+		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
+		<connection>scm:git:git@github.com:HHSIDEAlab/bluebutton-data-model.git</connection>
+		<developerConnection>scm:git:git@github.com:HHSIDEAlab/bluebutton-data-model.git</developerConnection>
+		<url>https://github.com/HHSIDEAlab/bluebutton-data-model</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<modules>
+		<module>bluebutton-data-model-codebook-extractor</module>
+		<module>bluebutton-data-model-codebook-data</module>
+		<module>bluebutton-data-model-codegen-annotations</module>
+		<module>bluebutton-data-model-codegen</module>
+		<module>bluebutton-data-model-rif</module>
+		<module>bluebutton-data-model-rif-samples</module>
+	</modules>
+
+	<properties>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<!-- Provides various utilities, particularly for managing DB connections. -->
+				<groupId>com.justdavis.karl.jessentials</groupId>
+				<artifactId>jessentials-misc</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+
+			<dependency>
+				<!-- Provides a sane facade for the giant mess of incompatible logging 
+					frameworks in Java. -->
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>1.7.7</version>
+			</dependency>
+
+			<dependency>
+				<!-- Used to run our unit and integration tests. -->
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- In-memory database that is used in some tests to speed things up. -->
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>2.2.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>9.4.1208</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<configuration>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-scm-plugin</artifactId>
+					<configuration>
+						<!-- This default config is used in the Jenkinsfile CI build. -->
+						<tag>${project.artifactId}-${project.version}</tag>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+		</plugins>
+	</build>
+
+</project>
