@@ -3,6 +3,7 @@ package gov.hhs.cms.bluebutton.server.app.stu3.providers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -18,7 +19,6 @@ import gov.hhs.cms.bluebutton.data.codebook.data.CcwCodebookVariable;
 import gov.hhs.cms.bluebutton.data.model.rif.Beneficiary;
 import gov.hhs.cms.bluebutton.data.model.rif.BeneficiaryHistory;
 import gov.hhs.cms.bluebutton.data.model.rif.MedicareBeneficiaryIdHistory;
-import gov.hhs.cms.bluebutton.data.model.rif.parse.InvalidRifValueException;
 import gov.hhs.cms.bluebutton.server.app.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 
 /**
@@ -64,18 +64,24 @@ final class BeneficiaryTransformer {
 			Extension currentIdentifier = TransformerUtils
 					.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
 			
-			addUnhashedIdentifier(patient, beneficiary.getHicnUnhashed().get(),
-					TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, currentIdentifier);
+			Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
+			if (hicnUnhashedCurrent.isPresent())
+				addUnhashedIdentifier(patient, hicnUnhashedCurrent.get(), TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+						currentIdentifier);
 
-			addUnhashedIdentifier(patient, beneficiary.getMedicareBeneficiaryId().get(),
-					TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, currentIdentifier);
+			Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
+			if (mbiUnhashedCurrent.isPresent())
+				addUnhashedIdentifier(patient, mbiUnhashedCurrent.get(),
+						TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, currentIdentifier);
 
 			Extension historicalIdentifier = TransformerUtils
 					.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
 
 			List<String> unhashedHicns = new ArrayList<String>();
 			for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
-				unhashedHicns.add(beneHistory.getHicnUnhashed().get());
+				Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
+				if (hicnUnhashedHistoric.isPresent())
+					unhashedHicns.add(hicnUnhashedHistoric.get());
 			}
 			List<String> unhashedHicnsNoDupes = unhashedHicns.stream().distinct().collect(Collectors.toList());
 			for (String hicn : unhashedHicnsNoDupes) {
@@ -85,7 +91,9 @@ final class BeneficiaryTransformer {
 
 			List<String> unhashedMbis = new ArrayList<String>();
 			for (MedicareBeneficiaryIdHistory mbiHistory : beneficiary.getMedicareBeneficiaryIdHistories()) {
-				unhashedMbis.add(mbiHistory.getMedicareBeneficiaryId().get());
+				Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
+				if (mbiUnhashedHistoric.isPresent())
+					unhashedMbis.add(mbiUnhashedHistoric.get());
 			}
 			List<String> unhashedMbisNoDupes = unhashedMbis.stream().distinct().collect(Collectors.toList());
 			for (String mbi : unhashedMbisNoDupes) {
