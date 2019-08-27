@@ -18,6 +18,7 @@
 ##
 
 set -e
+set -o pipefail
 
 githubOrg='CMSgov'
 declare -a sourceNames=(
@@ -62,7 +63,7 @@ do
   # 4. Cleaning up the source repo branch and remote.
   git checkout -b "${sourceName}" "${sourceName}/master"
   mkdir "${sourceName}"
-  find . -maxdepth 1 -mindepth 1 -not -name .git -exec git mv {} "${sourceName}/" \;
+  find . -maxdepth 1 -mindepth 1 -not -name .git -not -name "${sourceName}" -exec git mv {} "${sourceName}/" \;
   git commit -m "Moved '${sourceName}' to monorepo subdir."
   git checkout master
   git merge "${sourceName}" --allow-unrelated-histories -m "Migrated '${sourceName}' to monorepo."
@@ -77,37 +78,46 @@ done
 ##
 
 # Remove the old tags, as they're pretty useless.
-git tag -d "$(git tag | grep -E '.')"
+git tag | xargs git tag -d
 
 # Reorganize the ops stuff.
-mkdir -p ops/ansible && mkdir ops/terraform
-git mv bluebutton-ansible-playbooks-data ops/ansible-playbooks-data
-git mv bluebutton-ansible-playbooks-data-sandbox ops/ansible-playbooks-data-sandbox
-git mv ansible-role-bluebutton-data-pipeline ops/ansible-role-data-pipeline
-git mv ansible-role-bluebutton-data-server ops/ansible-role-data-server
+opsDir="ops"
+mkdir -p "${opsDir}/ansible"
+git mv bluebutton-ansible-playbooks-data/bfd-ops/packer "${opsDir}/packer"
+git mv bluebutton-ansible-playbooks-data/bfd-ops/ansible "${opsDir}/ansible/ansible-playbooks-data-ccs"
+git mv bluebutton-ansible-playbooks-data/bfd-ops "${opsDir}/ccs-ops-misc"
+git mv bluebutton-ansible-playbooks-data/terraform "${opsDir}/terraform"
+git mv bluebutton-ansible-playbooks-data "${opsDir}/ansible/ansible-playbooks-data-healthapt"
+git mv bluebutton-ansible-playbooks-data-sandbox "${opsDir}/ansible/ansible-playbooks-data-hhsdevcloud"
+git mv ansible-role-bluebutton-data-pipeline "${opsDir}/ansible/ansible-role-data-pipeline"
+git mv ansible-role-bluebutton-data-server "${opsDir}/ansible/ansible-role-data-server"
 git commit -m 'Reorganized ops projects.'
 
 # Reorganize the Java stuff.
-mkdir bfs-data-apps
-git mv bluebutton-parent-pom/pom.xml bfs-data-apps/
-git mv bluebutton-data-server/.gitignore bfs-data-apps/  # Seems to be a superset of the others.
+javaDir="apps"
+mkdir "${javaDir}"
+git mv bluebutton-parent-pom/pom.xml "${javaDir}/"
+git mv bluebutton-data-server/.gitignore "${javaDir}/"  # Seems to be a superset of the others.
 git mv bluebutton-parent-pom/{README,LICENSE,CONTRIBUTING}.md ./
 git rm bluebutton-parent-pom/{.gitignore,Jenkinsfile}
 git mv bluebutton-parent-pom/dev ./
 rmdir bluebutton-parent-pom
 git rm bluebutton-data-model/.gitignore
-git mv bluebutton-data-model bfs-data-apps/bfs-data-model  # May want to pull all the sub-modules here up to top-level.
+git mv bluebutton-data-model "${javaDir}/bfd-model"  # May want to pull all the sub-modules here up to top-level.
+git mv "${javaDir}/bfd-model/rfcs" rfcs
+git rm --force "${javaDir}/bfd-model/dev/monorepo-build.sh"
 git rm bluebutton-data-pipeline/.gitignore
-git mv bluebutton-data-pipeline bfs-data-apps/bfs-data-pipeline
-git mv bluebutton-data-server bfs-data-apps/bfs-data-server
+git mv bluebutton-data-pipeline "${javaDir}/bfd-pipeline"
+git mv bluebutton-data-server "${javaDir}/bfd-server"
 git rm bluebutton-data-server-perf-tests/.gitignore
-git mv bluebutton-data-server-perf-tests bfs-data-apps/bfs-data-server-test-perf
+git mv bluebutton-data-server-perf-tests "${javaDir}/bfd-server-test-perf"
 git rm bluebutton-functional-tests/.gitignore
-git mv bluebutton-functional-tests bfs-data-apps/bfs-data-server-test-functions
+git mv bluebutton-functional-tests "${javaDir}/bfd-server-test-functions"
 git commit -m 'Reorganized Java app projects.'
 
 # Reorganize the CCW stuff.
-git mv bluebutton-data-ccw-db-extract ccw-extract
+mkdir ccw
+git mv bluebutton-data-ccw-db-extract ccw/rif-extract
 git commit -m 'Renamed CCW extract project.'
 
 # Remove deprecated projects.
@@ -115,6 +125,11 @@ git rm -r bluebutton-text-to-fhir
 git commit -m "Removed deprecated 'bluebutton-text-to-fhir' project."
 git rm -r bluebutton-csv-codesets
 git commit -m "Removed deprecated 'bluebutton-csv-codesets' project."
+
+# Remove duplicate files.
+find . -mindepth 2 -name CONTRIBUTING.md -exec git rm {} \;
+find . -mindepth 2 -name LICENSE.md -exec git rm {} \;
+git commit -m 'Removeed duplicate license/contribution files.'
 
 # Things to do (probably by hand, afterwards):
 #
