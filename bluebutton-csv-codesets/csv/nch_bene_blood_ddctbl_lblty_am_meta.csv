@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_bene_blood_ddctbl_lblty_am,NCH_BENE_BLOOD_DDCTBL_LBLTY_AM,NCH Beneficiary Blood Deductible Liability Amount,BLDDEDAM,NCH_BENE_BLOOD_DDCTBL_LBLTY_AM,NUM,12,NCH QA PROCESS,XXX.XX

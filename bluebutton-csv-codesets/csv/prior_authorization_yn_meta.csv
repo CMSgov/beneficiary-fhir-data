@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+prior_authorization_yn,PRIOR_AUTHORIZATION_YN,Prior Authorization Indicator,PRAUTHYN,PRIOR_AUTHORIZATION_YN,CHAR,2,PDE and Plan Characteristics (derived),

@@ -1,0 +1,4 @@
+value,description
+N,Diagnosis was not present at the time of admission
+W,Provider is unable to clinically determine whether condition was present on admission
+Z,Denotes the end of the POA indicators

@@ -1,0 +1,17 @@
+value,description
+1,"Paid standard hospital OPPS amount (status indicators K, S,T,V,X)"
+3,"Not paid (status indicator M,W,Y,E) or not paid under OPPS (status indicator B,C & Z)"
+5,Additional payment for drug or biological (status indicator G)
+7,Additional payment for new drug or new biological (status indicator J)
+9,"No additional payment, payment included in line items with APCs (status indicator N, or no HCPCS code and certain revenue center codes, or HCPCS codes G0176 (activity therapy), G0129 (occupational therapy) or G0177 (partial hospitalization program services) *********VALUES PRIOR TO 10/3/2005************** **********Service Status Indicator************** ********** 1st position *****************"
+C,Inpatient procedure
+F,Corneal tissue acquisition
+H,Device pass-through
+N,Packaged incidental service
+S,Significant procedure not subject to multiple procedure discounting
+V,Medical visit to clinic or emergency department
+1,"Paid standard hospital OPPS amount (service indicators S,T,V,X)"
+3,Not paid (service indicators C & E)
+5,Additional payment for current drug or biological (service indicator G)
+7,Additional payment for new drug or new biological (service indicator J)
+9,"No additional payment, payment included in line items with APCs (service indicator N, or no HCPCS code and certain revenue center codes, or HCPCS codes Q0082 (activity therapy), G0129 (occupational therapy) or G0172 (partial hospitalization training)"

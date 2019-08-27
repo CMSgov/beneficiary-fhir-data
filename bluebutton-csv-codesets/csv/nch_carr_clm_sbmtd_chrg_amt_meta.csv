@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_carr_clm_sbmtd_chrg_amt,NCH_CARR_CLM_SBMTD_CHRG_AMT,NCH Carrier Claim Submitted Charge Amount (sum of all line-level submitted charges),SBMTCHRG,NCH_CARR_CLM_SBMTD_CHRG_AMT,NUM,12,NCH QA Process,XXX.XX

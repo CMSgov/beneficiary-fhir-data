@@ -1,0 +1,15 @@
+value,description
+2,Surgery
+4,Diagnostic radiology
+6,Therapeutic radiology
+8,Assistant at surgery
+0,Whole blood
+D,Ambulance
+F,Ambulatory surgical center (facility usage for surgical services)
+J,Diabetic shoes
+L,ESRD supplies
+N,Kidney donor
+Q,Vision items or services
+S,Surgical dressings or other medical supplies
+U,Occupational therapy
+W,Physical therapy

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+fill_num,FILL_NUM,Number of drug fills,FILL_NUM,FILL_NUM,NUM,3,PDE,Possible values are 0 - 99

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_line_prvdr_type_cd,CARR_LINE_PRVDR_TYPE_CD,Carrier Line Provider Type Code,PRV_TYPE,CARR_LINE_PRVDR_TYPE_CD,CHAR,1,NCH,

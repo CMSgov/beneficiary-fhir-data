@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+bene_hospc_prd_cnt,BENE_HOSPC_PRD_CNT,Beneficiary's Hospice Period Count,HOSPCPRD,BENE_HOSPC_PRD_CNT,NUM,1,NCH,

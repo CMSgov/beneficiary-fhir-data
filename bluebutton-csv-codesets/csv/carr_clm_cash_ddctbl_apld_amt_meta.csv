@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_clm_cash_ddctbl_apld_amt,CARR_CLM_CASH_DDCTBL_APLD_AMT,Carrier Claim Cash Deductible Applied Amount (sum of all line-level deductible amounts),DEDAPPLY,CARR_CLM_CASH_DDCTBL_APLD_AMT,NUM,12,NCH,XXX.XX

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+pde_prscrbr_id_frmt_cd,PDE_PRSCRBR_ID_FRMT_CD,PDE Prescriber ID Format Code,PDE_PRSCRBR_ID_FRMT_CD,PDE_PRSCRBR_ID_FRMT_CD,CHAR,1,PDE (derived),

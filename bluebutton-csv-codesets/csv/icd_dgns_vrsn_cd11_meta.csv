@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+icd_dgns_vrsn_cd11,ICD_DGNS_VRSN_CD11,Claim Diagnosis Code XI Diagnosis Version Code (ICD-9 or ICD-10),ICD_DGNS_VRSN_CD11,ICD_DGNS_VRSN_CD11,CHAR,1,NCH,

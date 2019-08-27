@@ -1,0 +1,7 @@
+value,description
+B,EGHP insurance for an end-stage renal disease (ESRD) beneficiary
+D,No fault automobile insurance
+F,Public Health Service (PHS) or other Federal agency (other than VA)
+H,Black lung (BL) program
+L,Any liability insurance
+N,Override non-EGHP - Medicare is primary payer Blank / missing = No other primary payer

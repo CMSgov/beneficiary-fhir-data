@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+cnty_cd,CNTY_CD,County code for beneficiary (SSA code),CNTY_CD,BENE_COUNTY_CD,CHAR,3,CMS Enrollment Database (EDB),

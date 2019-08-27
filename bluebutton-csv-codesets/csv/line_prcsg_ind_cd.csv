@@ -1,0 +1,16 @@
+value,description
+B,Benefits exhausted
+D,Denied (from BMAD)
+L,CLIA
+N,Medically unnecessary
+P,Physician ownership denial
+R,Reprocessed--adjustments based on subsequent reprocessing of claim
+T,MSP cost avoided - IEQ contractor
+V,MSP cost avoided - litigation settlement
+Y,MSP cost avoided - IRS/SSA data match project
+00,MSP cost avoided - COB Contractor
+13,MSP cost avoided - Office of Personnel Management
+15,MSP cost avoided - Workman's Compensation Insurer Voluntary Data Sharing Agreements (WC VDSA) (eff. 4/2006)
+17,MSP cost avoided - No-Fault Insurer VDSA (eff.4/2006)
+21,MSP cost avoided - MIR Group Health Plan (eff.1/2009)
+25,MSP cost avoided - Recovery Audit Contractor - California (eff.10/2005)

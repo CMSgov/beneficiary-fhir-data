@@ -1,0 +1,4 @@
+value,description
+1,(rarely used)
+3,Number of services
+6,Drug dosage (valid 2004 and earlier) - Since early 1994 this value has incorrectly been placed on DMERC claims. The DMERCs were overriding the MTUS indicator with a '6' if the claim was submitted with an NDC code. NOTE: This problem has been corrected -- no date on when the correction became effective.

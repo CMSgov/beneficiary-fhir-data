@@ -1,0 +1,7 @@
+value,description
+CC,PDE occurred in catastrophic phase
+DD,PDE occurred in deductible phase
+DP,PDE straddled deductible and pre-ICL phases
+II,PDE occurred in ICL (coverage gap) phase
+PC,PDE straddled pre-ICL and catastrophic straddle phases
+PP,PDE occurred in pre-ICL phase

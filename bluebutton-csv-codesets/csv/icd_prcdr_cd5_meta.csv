@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+icd_prcdr_cd5,ICD_PRCDR_CD5,Claim Procedure Code V,ICD_PRCDR_CD5,ICD_PRCDR_CD5,CHAR,7,NCH,

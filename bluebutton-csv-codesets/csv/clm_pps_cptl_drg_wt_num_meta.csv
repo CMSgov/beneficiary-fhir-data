@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_pps_cptl_drg_wt_num,CLM_PPS_CPTL_DRG_WT_NUM,Claim PPS Capital DRG Weight Number,DRGWTAMT,CLM_PPS_CPTL_DRG_WT_NUM,NUM,8,NCH,

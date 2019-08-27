@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+line_1st_expns_dt,LINE_1ST_EXPNS_DT,Line First Expense Date,EXPNSDT1,LINE_1ST_EXPNS_DT,DATE,8,NCH,

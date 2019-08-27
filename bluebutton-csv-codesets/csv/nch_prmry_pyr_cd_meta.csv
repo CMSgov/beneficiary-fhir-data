@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_prmry_pyr_cd,NCH_PRMRY_PYR_CD,NCH Primary Payer Code (if not Medicare),PRPAY_CD,NCH_PRMRY_PYR_CD,CHAR,1,NCH,

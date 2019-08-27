@@ -1,0 +1,3 @@
+value,description
+B,"Critical Access Hospital outpatient claims are subject to the therapy cap for this date of service (this indicator will be used on institutional claims only). Note: Currently, Critical Access Hospital claims are not subject to any therapy cap policies. Indicator B is created here to prepare for possible future legislation to include these claims."
+D,"The $3,700 threshold for review therapy services no longer applies for this date of service (this indicator will be used on both institutional and professional claims)."

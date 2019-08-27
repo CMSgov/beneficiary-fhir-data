@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+days_suply_num,DAYS_SUPLY_NUM,Days Supply,DAYSSPLY,DAYS_SUPLY_NUM,NUM,3,PDE,Possible values are 0 – 999.

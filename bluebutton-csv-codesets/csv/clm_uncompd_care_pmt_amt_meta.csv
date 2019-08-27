@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_uncompd_care_pmt_amt,CLM_UNCOMPD_CARE_PMT_AMT,Claim Uncompensated Care Payment Amount,CLM_UNCOMPD_CARE_PMT_AMT,CLM_UNCOMPD_CARE_PMT_AMT,NUM,12,NCH,XXX.XX

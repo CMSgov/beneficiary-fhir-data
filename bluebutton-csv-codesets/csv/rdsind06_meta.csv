@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rdsind06,RDSIND06,Monthly Part D Retiree Drug Subsidy Indicator - June,RDSIND06,RDS_IND_06,CHAR,1,CMS Enrollment Database (EDB),

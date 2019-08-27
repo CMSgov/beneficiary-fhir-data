@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_pps_ind_cd,CLM_PPS_IND_CD,Claim PPS Indicator Code,PPS_IND,CLM_PPS_IND_CD,CHAR,1,NCH,

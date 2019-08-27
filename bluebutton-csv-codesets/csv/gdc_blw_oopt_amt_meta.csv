@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+gdc_blw_oopt_amt,GDC_BLW_OOPT_AMT,Gross Drug Cost Below Part D Out-of-Pocket Threshold (GDCB),GDCBOOPT,GDC_BLW_OOPT_AMT,NUM,10,PDE,

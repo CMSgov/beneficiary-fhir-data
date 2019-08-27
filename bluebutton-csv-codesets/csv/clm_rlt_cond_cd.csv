@@ -1,0 +1,76 @@
+value,description
+02,Employment related - Patient alleged that the medical condition causing this episode of care was due to environment/events resulting from employment.
+04,Health Maintenance Organization (HMO) enrollee - Medicare beneficiary is enrolled in an HMO. Hospital must also expect to receive payment from HMO.
+06,ESRD patient in 1st 30 months of entitlement covered by employer group health insurance.
+08,Beneficiary would not provide information concerning other insurance coverage.
+10,Patient and/or spouse is employed but no EGHP coverage exists or other employer sponsored/provided health insurance covering patient.
+12,Payer code - Reserved for internal use only by third party payers. CMS will assign as needed. Providers will not report them.
+14,Payer code - Reserved for internal use only by third party payers. CMS will assign as needed. Providers will not report them.
+16,SNF transition exemption - An exemption from the post-hospital requirement applies for this SNF stay or the qualifying stay dates are more than 30 days prior to the admission date.
+18,Maiden name retained - A dependent spouse entitled to benefits who does not use her husband's last name.
+20,"Beneficiary requested billing - Provider realizes the services on this bill are at a non-covered level of care or otherwise excluded from coverage, but the bene has requested formal determination"
+22,Patient on multiple drug regimen - A patient who is receiving multiple intravenous drugs while on home IV therapy
+24,Home IV patient also receiving HHA services - the patient is under care of HHA while receiving home IV drug therapy services
+26,VA eligible patient chooses to receive services in Medicare certified facility rather than a VA facility
+28,Patient and/or spouse's EGHP is secondary to Medicare - Qualifying EGHP for employers who have fewer than 20 employees.
+30,"Qualifying Clinical Trials - Non-research services provided to all patients, including managed care enrollees, enrolled in a Qualified Clinical Trial."
+32,Patient is student (cooperative/work study program)
+34,Patient is student (part time) - Patient declares that he or she is enrolled as a part time student.
+37,Ward accommodation at patient's request - Patient is assigned to ward accommodations at patient's request.
+39,Private room medically necessary - Patient needed a private room for medical reasons.
+41,"Partial hospitalization services. For OP services, this includes a variety of psychiatric programs."
+43,Continuing Care Not Provided Within Prescribed Post-discharge Window -continuing care was related to the inpatient admission but the prescribed care was not provided within the post-discharge window.(eff. 10/01)
+45,Reserved for national assignment.
+47,Reserved for TRICARE.
+49,Product Replacement within Product Lifecycle - replacement of a product earlier than the anticipated lifecycle due to an indication that the product is not functioning properly (eff. 4/2006)
+51,Reserved for national assignment.
+53,Reserved for national assignment.
+55,SNF bed not available - The patient's SNF admission was delayed more than 30 days after hospital discharge because a SNF bed was not available.
+57,SNF readmission - Patient previously received Medicare covered SNF care within 30 days of the current SNF admission.
+59,Non-primary ESRD Facility - ESRD beneficiary received non-scheduled or emergency dialysis services at a facility other than his/her primary ESRD dialysis facility. (eff.10/2004)
+61,Operating cost outlier - PRICER indicates this bill is a cost outlier (PPS)
+63,Payer Only Code - Reserved for internal payer use only. CMS assigns as needed. Providers do not report this code. Indicates services rendered to a prisoner or patient in State or local custody meeting requirements of 42 CFR 411.4(b)
+65,Non-PPS bill - The bill is not a prospective payment system bill.
+67,Beneficiary elects not to use Lifetime Reserve (LTR) days
+69,IME/DGME/N&A; Payment Only - providers request for request for a supplemental payment for IME/DGME/N&AH; (Indirect Medical Education/Graduate Medical Education/Nursing and Allied Health).
+71,Full care in unit - Billing is for a patient who received staff assisted dialysis services in a hospital or renal dialysis facility.
+73,Self-care training - Billing is for special dialysis services where the patient and helper (if necessary) were learning to perform dialysis.
+75,Home dialysis patient using a dialysis machine that was purchased under the 100% program.
+77,Provider accepts or is obligated/required due to contractual agreement or law to accept payment by the primary payer as payment in full - no Medicare payment is due.
+79,"CORF services provided off site - Code indicates that physical therapy, occupational therapy, or speech pathology services were provided off site."
+81-99,Reserved for state assignment.
+A1,EPSDT/CHAP - Early and periodic screening diagnosis and treatment special program indicator code.
+A3,Special federal funding - Designed for uniform use by state uniform billing committees. Special program indicator code
+A5,Disability - Designed for uniform use by state uniform billing committees.
+A7,Induced abortion to avoid danger to woman's life.
+A9,Second opinion surgery - Services requested to support second opinion on surgery. Part B deductible and coinsurance do not apply.
+AB,Abortion Performed due to Incest (eff. 10/1/02)
+AD,"Abortion Performed due to a Life Endangering Physical Condition Caused by, arising from or exacerbated by the Pregnancy itself (eff. 10/1/02)"
+AF,Abortion performed due to emotional/psychological health of mother (eff. 10/1/02)
+AH,Elective Abortion (eff. 10/1/02)
+AJ,Payer Responsible for copayment (4/1/03)
+AL,Specialized Treatment/bed Unavailable - For ambulance claims. Specialized treatment bed unavailable. Transported to alternate facility. (eff. 10/16/03)
+AN,Preadmission Screening Not Required – person meets the criteria for an exemption from preadmission screening. (eff. 1/1/04)
+B1,Beneficiary ineligible for demonstration program (eff. 1/02).
+B3,Pregnancy Indicator - Indicates the patient is pregnant. Required when mandated by law. (eff. 10/16/03)
+B5,Special program indicator Reserved for national assignment.
+B7,Special program indicator Reserved for national assignment.
+B9,Special program indicator Reserved for national assignment.
+C1,Approved as billed - Claim has been reviewed by the QIO and has been fully approved including any outlier.
+C3,Partial approval - some portion (days or services). From/Through dates of the approved portion of the stay are shown as code “M0” in FL 36. The hospital excludes grace days and any period at a non-covered level of care (code “77” in FL 36 or code “46” in FL 39-41).
+C5,"Post-payment review applicable - Any medical review will be completed after the claim is paid. This bill may be a day outlier, cost outlier, part of the sample review, reviewed for other reasons, or may not be reviewed."
+C7,Extended authorization - The QIO has authorized these services for an extended length of time but has not reviewed the services provided.
+C9,Reserved for national assignment. QIO approval indicator services
+D1,Changes in charges.
+D3,Second or subsequent interim PPS bill.
+D5,Cancel only to correct a beneficiary claim account number (HICN) or provider identification number.
+D7,Change to make Medicare the secondary payer.
+D9,Any other change.
+E0,Change in patient status.
+G0,Distinct Medical Visit - Report this code when multiple medical visits occurred on the same day in the same revenue center. The visits were distinct and constituted independent visits.
+M0,All-inclusive rate for outpatient services. Used by a Critical Access Hospital electing to be paid an all-inclusive rate for outpatient services.
+M2,HHA Payment Significantly Exceeds Total Charges - Used when payment to an HHA is significantly in excess of covered billed charges.
+MB,Pneumonia.
+MD,Myelodysplastic Syndrome.
+MF,Monoclonal Gammopathy.
+XX,Transgender/Hermaphrodite Beneficiaries (eff. 1/2/07)

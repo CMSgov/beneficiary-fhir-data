@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+buyin09,BUYIN09,Medicare Entitlement/Buy-In Indicator - September,BUYIN09,BENE_MDCR_ENTLMT_BUYIN_IND_09,CHAR,1,CMS Enrollment Database (EDB) CODE,

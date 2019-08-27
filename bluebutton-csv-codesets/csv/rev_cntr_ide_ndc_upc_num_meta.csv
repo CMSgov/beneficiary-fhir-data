@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rev_cntr_ide_ndc_upc_num,REV_CNTR_IDE_NDC_UPC_NUM,"Revenue Center IDE, NDC, or UPC Number",IDENDC,REV_CNTR_IDE_NDC_UPC_NUM,CHAR,24,NCH,

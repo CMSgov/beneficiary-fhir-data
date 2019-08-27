@@ -1,0 +1,60 @@
+value,description
+01,General practice
+03,Allergy/immunology
+05,Anesthesiology
+07,Dermatology
+09,Interventional Pain Management (IPM) (eff. 4/1/03)
+11,Internal medicine
+13,Neurology
+15,Speech / language pathology
+17,Hospice and Palliative Care
+19,Oral surgery (dentists only)
+21,Cardiac Electrophysiology
+24,Plastic and reconstructive surgery
+26,Psychiatry
+28,Colorectal surgery (formerly proctology)
+30,Diagnostic radiology
+32,Anesthesiologist Assistants (eff. 4/1/03--previously grouped with Certified Registered Nurse Anesthetists (CRNA))
+34,Urology
+36,Nuclear medicine
+38,Geriatric medicine
+40,Hand surgery
+42,Certified nurse midwife
+44,Infectious disease
+46,Endocrinology
+48,Podiatry
+50,Nurse practitioner
+52,Medical supply company with certified prosthetist (certified by American Board for Certification in Prosthetics and Orthotics)
+54,Medical supply company for DMERC (and not included in 51-53)
+56,Individual certified prosthetist
+58,Medical supply company with registered pharmacist
+60,"Public health or welfare agencies (federal, state, and local)"
+62,Psychologist (billing independently)
+64,Audiologist (billing independently)
+66,Rheumatology
+68,Clinical psychologist
+70,Multispecialty clinic or group practice
+72,Pain Management (eff. 1/1/02)
+74,Radiation Therapy Centers (prior to 4/2003 this included Independent Diagnostic Testing Facilities (IDTF)
+76,Peripheral vascular disease
+78,Cardiac surgery
+80,Licensed clinical social worker
+82,Hematology
+84,Preventive medicine
+86,Neuropsychiatry
+88,Unknown supplier/provider specialty
+90,Medical oncology
+92,Radiation oncology
+94,Interventional radiology
+96,Optician
+98,Gynecologist/oncologist
+A0,Hospital (DMERCs only)
+A2,Intermediate care nursing facility (DMERCs only)
+A4,Home Health Agency (DMERCs only)
+A6,Medical supply company with respiratory therapist (DMERCs only)
+A8,Grocery store (DMERC)
+B1,Supplier of oxygen and/or oxygen related equipment (eff. 10/2/07)
+B3,Medical Supply Company with pedorthic personnel (eff. 10/2/07)
+B5,Ocularist
+C1,Centralized flu
+C3,Interventional cardiology

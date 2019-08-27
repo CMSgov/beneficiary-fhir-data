@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+line_pmt_80_100_cd,LINE_PMT_80_100_CD,Line Payment 80% / 100% Code,PMTINDSW,LINE_PMT_80_100_CD,CHAR,1,NCH,

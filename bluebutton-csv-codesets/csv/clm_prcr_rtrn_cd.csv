@@ -1,0 +1,83 @@
+value,description
+01,Paid as a day outlier (Note: day outlier no longer being paid as of 10/1/97)
+03,Transfer paid on a per diem basis up to and including the full DRG
+06,Provider refused cost outlier
+12,"Post-acute transfer with specific DRGs. The following DRG's: 14, 113, 236, 263, 264, 429, 483"
+16,Paid as a cost outlier with per diem days = or > GM ALOS Inpatient Hospital Error return codes:
+52,Invalid MSA# in provider file
+54,"DRG < 001 or > 511, or = 214, 215, 221, 222, 438, 456, 457, 458"
+56,Invalid length of stay
+58,Total charges not numeric
+62,Invalid number of covered days
+67,Cost outlier with LOS > covered days ***Inpatient Rehab Facility (IRF) Pricer Return Codes*** IRF Payment return codes:
+01,Paid normal CMG payment with outlier
+03,Transfer paid on a per diem basis with outlier
+05,Blended CMG payment -- 2/3 Federal PPS rate + 1/3 provider specific rate -- with outlier
+07,Blended transfer payment -- 2/3 Federal PPS transfer rate + 1/3 provider specific rate -- with outlier
+11,Paid normal CMG payment with penalty with outlier
+13,Transfer paid on a per diem basis with penalty with outlier
+15,Blended CMG payment -- 2/3 Federal PPS rate + 1/3 provider specific rate -- with penalty with outlier
+17,Blended transfer payment -- 2/3 Federal PPS transfer rate + 1/3 provider specific rate -- with penalty with outlier IRF Error return codes:
+51,Provider record terminated
+53,Waiver state - not calculated by PPS
+55,Discharge date < provider effective start date or discharge date < MSA effective start date for PPS
+57,Provider specific rate zero when blended payment requested
+59,Provider specific record not found
+61,Lifetime reserve days not numeric or BILL-LTR-DAYS > 60
+65,Operating cost-to-charge ratio not numeric
+72,Invalid blend indicator (not 3 or 4)
+74,Provider FY begin date not in 2002 ***Long Term Care Hospital (LTCH) Pricer Return Codes*** LTCH Payment return codes:
+01,Normal DRG payment with outlier
+03,Short stay payment with outlier
+05,Blend year 1 - 80% facility rate plus 20% normal DRG payment with outlier
+07,Blend year 1 - 80% facility rate plus 20% short stay payment with outlier
+09,Blend year 2 - 60% facility rate plus 40% normal DRG payment with outlier
+11,Blend year 2 - 60% facility rate plus 40% short stay payment with outlier
+13,Blend year 3 - 40% facility rate plus 60% normal DRG payment with outlier
+15,Blend year 3 - 40% facility rate plus 60% short stay payment with outlier
+17,Blend year 4 - 20% facility rate plus 80% normal DRG payment with outlier
+19,Blend year 4 - 20% facility rate plus 80% short stay payment with outlier LTCH Error return codes:
+51,Provider record terminated
+53,Waiver state - not calculated by PPS
+55,Discharge date < provider effective start date or discharge date < MSA effective start date for PPS
+57,Provider specific rate zero when blended payment requested
+59,Provider specific record not found
+61,Lifetime reserve days not numeric or BILL-LTR-DAYS > 60
+65,Operating cost-to-charge ratio not numeric
+72,Invalid blend indicator (not 1 thru 5)
+74,Provider FY begin date not in 2002 *************SNF Pricer Return Codes********* *******************TOB 21X******************* SNF Payment return codes:
+20,Bad RUG code
+40,"Thru date < July 1, 1998 or invalid"
+60,Invalid Federal blend
+00,Home rate returned Hospice Error Return Codes:
+20,Bad units2 < 8
+40,Bad hospice wage index from MSA file
+51,"Bad provider number *******Home Health Pricer Return Codes************ *****TOB 32X or 33X, DOS 10/1/2000 and after****** Home Health Payment Return Codes:"
+01,Final payment where outlier applies
+04,"Initial percentage payment, 50%"
+06,LUPA payment only
+08,"Final payment, SCIC with outlier"
+11,"Final payment, PEP with outlier"
+13,"Final payment, SCIS within PEP with outlier Home Health Error Return Codes:"
+15,Invalid PEP Days
+20,PEP indicator invalid
+30,Invalid MSA code
+40,"Dates < October 1, 2000 or invalid"
+75,No HRG present in 1st occurrence
+85,No revenue code present on HH final claim/adjustment ************Outpatient PPS Pricer Return Codes****** Outpatient PPS Payment return codes:
+20,Line processed but payment = 0 bene deductible = > adjusted payment Outpatient PPS Error return codes:
+38,Missing or invalid discount factor
+41,Service indicator invalid for OPPS PRICER
+43,Payment indicator not = to 1 or 5 thru 9
+45,Packaging flag not = to 0
+not,0033 or 0034 or 0322 or 0323 or 0324 or 0325 or 0373 or 0374)) or line item action flag not = to 1
+48,Payment adjustment flag not valid
+50,Wage index not located
+52,Provider specific file wage index reclassification code invalid or missing
+54,Service from date < provider effective date or service from date > provider termination date ***End Stage Renal Disease (ESRD) Pricer Return Codes*** ESRD Payment return codes:
+01,ESRD facility rate > zero ESRD Error return codes:
+52,Provider type not = '40' or '41'
+54,Date of birth not numeric or = zero
+56,Patient height not numeric or = zero
+58,Condition code not = '73' or '74' or blank
+98,Claim through date before 4/1/2005 or not numeric

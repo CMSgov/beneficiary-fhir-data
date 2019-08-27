@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+prvdr_zip,PRVDR_ZIP,Carrier Line Performing Provider ZIP Code,PROVZIP,PRVDR_ZIP,CHAR,9,NCH,

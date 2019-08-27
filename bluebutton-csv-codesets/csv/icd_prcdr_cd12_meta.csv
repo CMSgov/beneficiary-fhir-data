@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+icd_prcdr_cd12,ICD_PRCDR_CD12,Claim Procedure Code XII,ICD_PRCDR_CD12,ICD_PRCDR_CD12,CHAR,7,NCH,

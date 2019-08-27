@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+prncpal_dgns_cd,PRNCPAL_DGNS_CD,Claim Principal Diagnosis Code,PRNCPAL_DGNS_CD,PRNCPAL_DGNS_CD,CHAR,7,NCH,

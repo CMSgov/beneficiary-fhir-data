@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+icd_dgns_vrsn_cd24,ICD_DGNS_VRSN_CD24,Claim Diagnosis Code XXIV Diagnosis Version Code (ICD-9 or ICD-10),ICD_DGNS_VRSN_CD24,ICD_DGNS_VRSN_CD24,CHAR,1,NCH,

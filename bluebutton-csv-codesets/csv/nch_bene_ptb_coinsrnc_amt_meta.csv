@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_bene_ptb_coinsrnc_amt,NCH_BENE_PTB_COINSRNC_AMT,NCH Beneficiary Part B Coinsurance Amount,PTB_COIN,NCH_BENE_PTB_COINSRNC_AMT,NUM,12,NCH QA PROCESS,XXX.XX

@@ -1,0 +1,3 @@
+value,description
+O,Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)
+V,"Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"

@@ -1,0 +1,5 @@
+value,description
+1,Charges are not subject to deductible
+3,Charges are not subject to deductible or coinsurance
+M,Override code; EGHP (employer group health plan) services involved
+X,Override code: MSP (Medicare is secondary payer) cost avoided

@@ -1,0 +1,11 @@
+value,description
+2,Inpatient or Home Health (covered on Part B)
+4,"Other (Part B) -- (Includes HHA medical and other health services, e.g., SNF osteoporosis-injectable drugs)"
+6,Intermediate care - level II
+8,Swing bed For facility type code 7 (clinics):
+2,Hospital based or independent renal dialysis facility
+4,Other Rehabilitation Facility (ORF)
+6,Community Mental Health Center (CMHC)
+1,Hospice (non-hospital based)
+3,Ambulatory surgical center (ASC) in hospital outpatient department
+5,Critical Access Hospital - Outpatient Services

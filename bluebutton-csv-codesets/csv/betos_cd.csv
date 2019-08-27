@@ -1,0 +1,54 @@
+value,description
+M1B,Office visits - established
+M2B,Hospital visit - subsequent
+M3,Emergency room visit
+M4B,Nursing home visit
+M5B,Specialist - psychiatry
+M5D,Specialist - other
+P0,Anesthesia
+P1B,Major procedure - colectomy
+P1D,Major procedure - turp
+P1F,Major procedure - explor/decompr/excisdisc
+P2A,"Major procedure, cardiovascular-CABG"
+P2C,"Major Procedure, cardiovascular-Thromboendarterectomy"
+P2E,"Major procedure, cardiovascular-Pacemaker insertion"
+P3A,"Major procedure, orthopedic - Hip fracture repair"
+P3C,"Major procedure, orthopedic - Knee replacement"
+P4A,Eye procedure - corneal transplant
+P4C,Eye procedure - retinal detachment
+P4E,Eye procedure - other
+P5B,Ambulatory procedures - musculoskeletal
+P5D,Ambulatory procedures - lithotripsy
+P6A,Minor procedures - skin
+P6C,Minor procedures - other (Medicare fee schedule)
+P7A,Oncology - radiation therapy
+P8A,Endoscopy - arthroscopy
+P8C,Endoscopy - sigmoidoscopy
+P8E,Endoscopy - cystoscopy
+P8G,Endoscopy - laparoscopic cholecystectomy
+P8I,Endoscopy - other
+P9B,Dialysis services (non-Medicare fee schedule)
+I1B,Standard imaging - musculoskeletal
+I1D,Standard imaging - contrast gastrointestinal
+I1F,Standard imaging - other
+I2B,Advanced imaging - CAT/CT/CTA: other
+I2D,Advanced imaging - MRI/MRA: other
+I3B,Echography/ultrasonography - abdomen/pelvis
+I3D,Echography/ultrasonography - carotid arteries
+I3F,Echography/ultrasonography - other
+I4B,Imaging/procedure - other
+T1B,Lab tests - automated general profiles
+T1D,Lab tests - blood counts
+T1F,Lab tests - bacterial cultures
+T1H,Lab tests - other (non-Medicare fee schedule)
+T2B,Other tests - cardiovascular stress tests
+T2D,Other tests - other
+D1B,Hospital beds
+D1D,Wheelchairs
+D1F,Prosthetic/Orthotic devices
+O1A,Ambulance
+O1C,Enteral and parenteral
+O1E,Other drugs
+O1G,Immunizations/Vaccinations
+Y2,Other - non-Medicare fee schedule
+Z2,Undefined codes

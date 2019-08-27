@@ -1,0 +1,21 @@
+value,description
+1,Physician/supplier
+3,Both physician/supplier and beneficiary
+5,Both hospital and beneficiary
+7,"Other entries (e.g. Employer, union)"
+9,PA service
+B,Physician/supplier under limitation of liability
+E,MSP cost avoided IRS/SSA/HCFA Data Match (after 01/2001 is First Claim Development)
+G,MSP cost avoided Litigation Settlement (after 1/2001 is Secondary Claims Investigation)
+J,MSP cost avoided Insurer Voluntary Reporting (eff. 7/3/00)
+P,Physician ownership denial
+T,MSP cost avoided - Initial Enrollment Questionnaire
+V,MSP cost avoided - litigation settlement
+Y,MSP cost avoided - IRS/SSA data match
+12,MSP cost avoided - BC/BS Voluntary Data Sharing Agreements (VDSA)
+14,MSP cost avoided - Workman's Compensation (WC) Data Match
+16,MSP cost avoided - Liability Insurer VDSA
+18,MSP cost avoided - Pharmacy Benefit Manager Data Sharing Agreement
+22,MSP cost avoided - MIR non-Group Health Plan
+26,MSP cost avoided - Recovery Audit Contractor – Florida
+43,MSP cost avoided - Medicare Part C/Medicare Advantage

@@ -1,0 +1,8 @@
+value,description
+71,Hospital prior stay dates – the from/thru dates of any hospital stay that ended within 60 days of this hospital or SNF admission.
+73,Benefit eligibility period – the inclusive dates during which CHAMPUS medical benefits are available to a sponsor's bene as shown on the bene's ID card.
+75,The from/thru dates of SNF level of care during IP hospital stay. Shows PRO approval of patient remaining in hospital because SNF bed not available. Not applicable to swing bed cases. PPS hospitals use in day outlier cases only.
+77,Provider liability (utilization charged) – The from/thru dates of period of non-covered care for which the provider is liable. Applies to provider liability where bene is charged with utilization and is liable for deductible/coinsurance
+79,"Provider Liability (non-utilization) (Payer code) – from/thru dates of period of non-covered care where bene is not charged with utilization, deductible, or coinsurance; and provider is liable. Non-covered period of care due to lack of medical necessity."
+M0,PRO/UR approved stay dates – the first and last days that were approved where not all of the stay was approved.
+M2,Dates of Inpatient Respite Care – from/thru dates of a period of inpatient respite care for hospice patients. (eff. 10/00)

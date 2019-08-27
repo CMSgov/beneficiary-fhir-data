@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_bene_ptb_ddctbl_amt,NCH_BENE_PTB_DDCTBL_AMT,NCH Beneficiary Part B Deductible Amount,PTB_DED,NCH_BENE_PTB_DDCTBL_AMT,NUM,12,NCH QA PROCESS,XXX.XX

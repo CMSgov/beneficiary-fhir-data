@@ -1,0 +1,11 @@
+value,description
+B,"A valid HCPCS code subject to the fee schedule payment. for the provider billed charges. NOTE: There is an exception for Critical Access Hospitals (provider numbers XX1300-XX1399) with reimbursement method 'J' (all-inclusive method) and dates of service on or after 7/1/01. In these situations, reimbursement for professional services (revenue codes 96X, 97X, 98X) is always at the fee schedule amount of logic is not applicable."
+D,A valid radiology HCPCS code subject to the Radiology Pricer and the rate is reflected as zeroes on the HCPCS file and cost report. The Radiology Pricer treats this HCPCS as a non-covered service. Reimbursement is calculated on provider submitted charges.
+F,A valid ESRD HCPCS code subject to the parameter rate. Reimbursement is the lesser of provider submitted charges or the fee schedule amount for non-dialysis HCPCS. Reimbursement is calculated on the provider file rates for dialysis HCPCS. NOTE: The ESRD Pricing Indicator is used when processing the ESRD claim. The non-ESRD pricing indicator is used only for Inpatient claims as follows: valid Hemophilia HCPCS for inpatient claim only and code is summed to parameter rate.
+H,"A valid DME HCPCS, code is subject to a fee schedule. The rates are reflected under the DME segment. Reimbursement is calculated either on a fee schedule, provider submitted charges or the lesser of provider submitted, or the fee schedule depending on the category of DME."
+J,"A valid DME HCPCS, no DME history is present, and a prescription is required before delivery. Claim must be reviewed by Medical Review."
+L,"A valid TENS HCPCS, rental period is six months or greater and must be reviewed by Medical Review. This code will be automatically set by the system."
+N,Paid based on the fee amount for non ESRD TOB's. NOTE: Fee amount is paid regardless of charges.
+R,A valid radiology HCPCS code and is subject to APC. The rate is reported on the cost report. Reimbursement is calculated on provider submitted charges.
+T,Valid HCPCS. A fee amount is present. The amount payable should be the lower of the billed charge or fee amount. The system should compute the fee amount by multiplying the covered units times the rate. The fee amount is not subject to coinsurance and deductible or provider's reimbursement rate.
+X,Unclassified drug as subject to manual pricing.

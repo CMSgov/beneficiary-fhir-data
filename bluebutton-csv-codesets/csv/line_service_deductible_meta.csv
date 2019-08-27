@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+line_service_deductible,LINE_SERVICE_DEDUCTIBLE,Line Service Deductible Indicator Switch,DED_SW,LINE_SERVICE_DEDUCTIBLE,CHAR,1,NCH,

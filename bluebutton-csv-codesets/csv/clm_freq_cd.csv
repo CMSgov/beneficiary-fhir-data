@@ -1,0 +1,8 @@
+value,description
+1,Admit thru discharge claim
+3,Interim – continuing claim
+5,Late charge(s) only claim
+8,Void/cancel prior claim
+G,Common Working File (NCH) generated adjustment claim
+I,"Misc. adjustment claim (e.g., initiated by intermediary or QIO)"
+M,Medicare secondary payer (MSP) adjustment

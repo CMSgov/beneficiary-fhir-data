@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+icd_prcdr_vrsn_cd3,ICD_PRCDR_VRSN_CD3,Claim Procedure Code III Claim Procedure Version Code (ICD-9 or ICD-10),ICD_PRCDR_VRSN_CD3,ICD_PRCDR_VRSN_CD3,CHAR,1,NCH,

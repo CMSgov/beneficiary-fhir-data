@@ -1,0 +1,30 @@
+value,description
+02,"No-fault insurance involved, including auto accident/other - The date of an accident where the state has applicable no-fault liability laws, (i.e., legal basis for settlement without admission or proof of guilt)."
+04,Accident/employment related - The date of an accident relating to the patient's employment.
+06,Crime victim - Code indicating the date on which a medical condition resulted from alleged criminal action committed by one or more parties.
+08,Reserved for national assignment.
+12,Date of onset for a chronically dependent individual - Code indicates the date the patient/bene became a chronically dependent individual.
+14,Reserved for national assignment.
+16,Reserved for national assignment.
+18,Date of retirement (patient/bene) - Code indicates the date of retirement for the patient/bene.
+20,Guarantee of payment began - The date on which the provider began claiming Medicare payment under the guarantee of payment provision.
+22,"Active care ended - The date on which a covered level of care ended in a SNF or general hospital, or date active care ended in a psychiatric or tuberculosis hospital or date on which patient was released on a trial basis from a residential facility. Code is not required if code ""21"" is used."
+24,Date insurance denied - The date the insurer's denial of coverage was received by a higher priority payer.
+26,Date skilled nursing facility (SNF) bed available - The date on which a SNF bed became available to a hospital inpatient who required only SNF level of care.
+27,Date home health plan established or last reviewed - Code indicating the date a home health plan of treatment was established or last reviewed. (Obsolete) not used by hospital unless owner of facility
+29,Date OPT plan established or last reviewed - the date a plan of treatment was established for outpatient physical therapy. Not used by hospital unless owner of facility
+31,Date bene notified of intent to bill (accommodations) - The date of the notice provided to the patient by the hospital stating that he no longer required a covered level of IP care.
+33,First day of the Medicare coordination period for ESRD bene - During which Medicare benefits are secondary to benefits payable under an EGHP. Required only for ESRD beneficiaries.
+35,Date treatment started for physical therapy - Code indicates the date services were initiated by the billing provider for physical therapy.
+37,The date of discharge for the IP hospital stay when patient received a non-covered transplant procedure - Hospital is billing for immunosuppressive drugs.
+39,Date discharged on a continuous course of IV therapy - Date the patient was discharged from the hospital on a continuous course of IV therapy.
+41,Date of First Test for Pre-admission Testing - The date on which the first outpatient diagnostic test was performed as part of a pre-admission testing (PAT) program. This code may only be used if a date of admission was scheduled prior to the administration of the test(s). (eff. 10/01)
+43,Scheduled Date of Canceled Surgery - date which ambulatory surgery was scheduled. (eff. 9/01)
+45,Date treatment started for speech therapy - Code indicates the date services were initiated by the billing provider for speech therapy.
+47,"Date Cost Outlier Status Begins - code indicates that this is the first day the cost outlier threshold is reached. For Medicare purposes, a bene must have regular coinsurance and/or lifetime reserve days available beginning on this date to allow coverage of additional daily charges for the purpose of making cost outlier payments. (eff. 9/01)"
+49,Payer code - Code reserved for internal use only by third party payers. CMS assigns as needed for your use. Providers will not report it.
+A1,"Birthdate, Insured A - The birthdate of the individual in whose name the insurance is carried."
+A3,Benefits exhausted - Code indicating the last date for which benefits are available and after which no payment can be made to payer A.
+B2,"Effective date, Insured B policy - A code indicating the first date insurance is in force."
+C1,"Birthdate, Insured C - The birthdate of the individual in whose name the insurance is carried."
+C3,Benefits exhausted - Code indicating the last date for which benefits are available and after which no payment can be made to payer C.

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_blood_pnts_frnshd_qty,NCH_BLOOD_PNTS_FRNSHD_QTY,NCH Blood Pints Furnished Quantity,BLDFRNSH,NCH_BLOOD_PNTS_FRNSHD_QTY,NUM,3,NCH,

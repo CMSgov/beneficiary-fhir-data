@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rlt_span_cd_seq,RLT_SPAN_CD_SEQ,Claim Related Span Code Sequence,RLTSPNSQ,RLT_SPAN_CD_SEQ,CHAR,2,CCW,

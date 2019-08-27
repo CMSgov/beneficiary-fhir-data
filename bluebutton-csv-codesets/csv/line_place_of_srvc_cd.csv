@@ -1,0 +1,32 @@
+value,description
+02,Unassigned. N/A
+04,"Homeless Shelter. A facility or location whose primary purpose is to provide temporary housing to homeless individuals (e.g., emergency shelters, individual or family shelters)."
+06,"Indian Health Service - Provider-based Facility. A facility or location, owned and operated by the Indian Health Service, which provides diagnostic, therapeutic (surgical and non-surgical), and rehabilitation services rendered by, or under the supervision of, physicians to American Indians and Alaska Natives admitted as inpatients or outpatients."
+08,"Tribal 638 Provider-based Facility. A facility or location owned and operated by a federally recognized American Indian or Alaska Native tribe or tribal organization under a 638 agreement, which provides diagnostic, therapeutic (surgical and non-surgical), and rehabilitation services to tribal members admitted as inpatients or outpatients."
+10,Unassigned. N/A
+12,"Home. Location, other than a hospital or other facility, where the patient receives care in a private residence."
+14,"Group Home. A residence, with shared living areas, where clients receive supervision and other services such as social and/or behavioral services, custodial service, and minimal services (e.g., medication administration)."
+16,"Temporary Lodging. A short term accommodation such as a hotel, camp ground, hostel, cruise ship or resort where the patient receives care, and which is not identified by any other POS code."
+18,Unassigned. N/A
+20,"Urgent Care Facility. Location, distinct from a hospital emergency room, an office, or a clinic, whose purpose is to diagnose and treat illness or injury for unscheduled, ambulatory patients seeking immediate medical attention."
+22,"Outpatient Hospital. A portion of a hospital which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization."
+24,"Ambulatory Surgical Center. A freestanding facility, other than a physician's office, where surgical and diagnostic services are provided on an ambulatory basis."
+26,Military Treatment Facility. A medical facility operated by one or more of the Uniformed Services. Military Treatment Facility (MTF) also refers to certain former U.S. Public Health Service (USPHS) facilities now designated as Uniformed Service Treatment Facilities (USTF).
+28,Unassigned. N/A
+30,Unassigned. N/A
+32,"Nursing Facility. A facility which primarily provides to residents skilled nursing care and related services for the rehabilitation of injured, disabled, or sick persons, or, on a regular basis, health-related care services above the level of custodial care to other than mentally retarded individuals."
+34,"Hospice. A facility, other than a patient's home, in which palliative and supportive care for terminally ill patients and their families are provided."
+41,"Ambulance - Land. A land vehicle specifically designed, equipped and staffed for lifesaving and transporting the sick or injured."
+43-48,Unassigned. N/A
+50,Fed Qualified Health Ctr. A facility located in a medically underserved area that provides Medicare beneficiaries preventive primary medical care under the general direction of a physician.
+52,"Psychiatric Facility - Partial Hospitalization. A facility for the diagnosis and treatment of mental illness that provides a planned therapeutic program for patients who do not require full time hospitalization, but who need broader programs than are possible from outpatient visits to a hospital-based or hospital-affiliated facility."
+54,Intermediate Care/Mentally Retarded Facility. A facility which primarily provides health-related care and services above the level of custodial care to mentally retarded individuals but does not provide the level of care or treatment available in a hospital or SNF.
+56,Psychiatric Residential Treatment Center. A facility or distinct part of a facility for psychiatric care which provides a total 24-hour therapeutically planned and professionally staffed group living and learning environment.
+58,Unassigned. N/A
+60,"Mass Immunization Center. A location where providers administer pneumococcal pneumonia and influenza virus vaccinations and submit these services as electronic media claims, paper claims, or using the roster billing method. This generally takes place in a mass immunization setting, such as, a public health center, pharmacy, or mall but may include a physician office setting."
+62,"Comprehensive Outpatient Rehabilitation Facility. A facility that provides comprehensive rehabilitation services under the supervision of a physician to outpatients with physical disabilities. Services include physical therapy, occupational therapy, and speech pathology services."
+64,Unassigned. N/A
+66-70,Unassigned. N/A
+72,Rural Health Clinic. A certified facility which is located in a rural medically underserved area that provides ambulatory primary medical care under the general direction of a physician.
+81,Independent Laboratory. A laboratory certified to perform diagnostic and/or clinical tests independent of an institution or a physician's office.
+99,Other Place of Service. Other place of service not identified above.

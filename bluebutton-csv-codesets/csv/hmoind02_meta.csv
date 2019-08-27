@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+hmoind02,HMOIND02,HMO Indicator - February,HMOIND02,BENE_HMO_IND_02,CHAR,1,CMS Enrollment Database (EDB),

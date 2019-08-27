@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+line_srvc_cnt,LINE_SRVC_CNT,Line Service Count,SRVC_CNT,LINE_SRVC_CNT,NUM,4,NCH,

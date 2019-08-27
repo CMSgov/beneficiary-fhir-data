@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+str,STR,Drug Strength Description,STR,STR,CHAR,10,First DataBank,"10-digit alpha/numeric value (e.g., 25MG, 1"

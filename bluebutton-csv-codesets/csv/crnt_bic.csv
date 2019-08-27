@@ -1,0 +1,105 @@
+value,description
+11,RRB Survivor joint annuitant reduced benefits taken to insure benefits for surviving spouse
+14,RRB Spouse of RR employee or annuitant husband or wife
+16,RRB Widow widower of RR annuitant
+43,RRB Child of RR employee or Widow of employee with a child in her care
+46,RRB Widow widower of RR employee
+83,RRB Widow of pensioner with a child in her care
+85,RRB Parent of pensioner
+A,Primary claimant
+B1,Aged husband age 62 or over 1st claimant
+B3,Aged wife 2nd claimant
+B5,Young wife 2nd claimant
+B7,Young wife 3rd claimant
+B9,Divorced wife 2nd claimant
+BD,Aged wife 5th claimant
+BH,Aged husband 4th claimant
+BK,Young wife 4th claimant
+BN,Divorced wife 3rd claimant
+BQ,Divorced wife 5th claimant
+BT,Divorced husband 2nd claimant
+BY,Young husband 1st claimant
+C2,Child includes minor student or disabled child 2nd claimant
+C4,Child includes minor student or disabled child 4th claimant
+C6,Child includes minor student or disabled child 6th claimant
+C8,Child includes minor student or disabled child 8th claimant
+CA,Child includes minor student or disabled child 10th claimant
+CC,Child includes minor student or disabled child 12th claimant
+CE,Child includes minor student or disabled child 14th claimant
+CG,Child includes minor student or disabled child 16th claimant
+CI,Child includes minor student or disabled child 18th claimant
+CK,Child includes minor student or disabled child 20th claimant
+CM,Child includes minor student or disabled child 22nd claimant
+CO,Child includes minor student or disabled child 24th claimant
+CQ,Child includes minor student or disabled child 26th claimant
+CS,Child includes minor student or disabled child 28th claimant
+CU,Child includes minor student or disabled child 30th claimant
+CW,Child includes minor student or disabled child 32nd claimant
+CY,Child includes minor student or disabled child 34th claimant
+D,Aged widow 60 or over 1st claimant
+D2,Aged widow 2nd claimant
+D4,Widow remarried after attainment of age 60 1st claimant
+D6,Surviving divorced wife age 60 or over 1st claimant
+D8,Aged widow 3rd claimant
+DA,Remarried widow 3rd claimant
+DD,Aged widow 4th claimant
+DH,Aged widower 3rd claimant
+DK,Aged widower 5th claimant
+DM,Surviving divorced husband 2nd claimant
+DP,Remarried widower 2nd claimant
+DR,Remarried widower 4th claimant
+DT,Remarried widower 5th claimant
+DW,Surviving divorced wife 4th claimant
+DY,Surviving divorced wife 5th claimant
+E,Mother widow 1st claimant
+E2,Mother widow 2nd claimant
+E4,Father widower 1st claimant
+E6,Father widower 2nd claimant
+E8,Mother widow 4th claimant
+EA,Mother widow 5th claimant
+EC,Surviving divorced mother 4th claimant
+EF,Father widower 3rd claimant
+EH,Father widower 5th claimant
+EK,Surviving divorced father 4th claimant
+F1,Father
+F3,Stepfather
+F5,Adopting father
+F7,Second alleged father
+J1,Primary prouty entitled to HIB less than 3 QC general fund
+J3,Primary prouty not entitled to HIB less than 3 QC general fund
+K1,Prouty wife entitled to HIB less than 3 QC general fund 1st claimant
+K3,Prouty wife not entitled to HIB less than 3 QC general fund 1st claimant
+K5,Prouty wife entitled to HIB less than 3 QC general fund 2nd claimant
+K7,Prouty wife not entitled to HIB less than 3 QC general fund 2nd claimant
+K9,Prouty wife entitled to HIB less than 3 QC general fund 3rd claimant
+KB,Prouty wife not entitled to HIB less than 3 QC general fund 3rd claimant
+KD,Prouty wife entitled to HIB less than 3 QC general fund 4th claimant
+KF,Prouty wife not entitled to HIB less than 3 QC 4th claimant
+KH,Prouty wife entitled to HIB less than 3 QC 5th claimant
+KL,Prouty wife not entitled to HIB less than 3 QC 5th claimant
+M,Uninsured not qualified for deemed HIB
+T,Uninsured entitled to HIB under deemed or renal provisions
+TB,MQGE aged spouse first claimant
+TD,MQGE aged widower first claimant
+TF,MQGE parent male
+TH,MQGE aged spouse third claimant
+TK,MQGE aged spouse fifth claimant
+TM,MQGE aged widower third claimant
+TP,MQGE aged widower fifth claimant
+TR,MQGE young widower second claimant
+TT,MQGE young widower fourth claimant
+TV,MQGE disabled widower fifth claimant
+TX,MQGE disabled widower second claimant
+TZ,MQGE disabled widower fourth claimant
+T3,Disabled child 3rd claimant
+T5,Disabled child 5th claimant
+T7,Disabled child 7th claimant
+T9,Disabled child 9th claimant
+W1,Disabled widower age 50 or over 1st claimant
+W3,Disabled widower 2nd claimant
+W5,Disabled widower 3rd claimant
+W7,Disabled surviving divorced wife 2nd claimant
+W9,Disabled widow 4th claimant
+WC,Disabled surviving divorced wife 4th claimant
+WG,Disabled widower 5th claimant
+WR,Disabled surviving divorced husband 1st claimant

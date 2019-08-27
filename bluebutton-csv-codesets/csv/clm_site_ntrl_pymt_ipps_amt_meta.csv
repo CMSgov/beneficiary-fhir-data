@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_site_ntrl_pymt_ipps_amt,CLM_SITE_NTRL_PYMT_IPPS_AMT,Claim Site Neutral Payment Based on Inpatient Prospective Payment System (IPPS) Amounts,CLM_SITE_NTRL_PYMT_IPPS_AMT,CLM_SITE_NTRL_PYMT_IPPS_AMT,NUM,12,NCH,XXX.XX

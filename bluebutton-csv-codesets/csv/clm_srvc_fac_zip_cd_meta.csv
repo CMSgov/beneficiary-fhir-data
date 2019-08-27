@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_srvc_fac_zip_cd,CLM_SRVC_FAC_ZIP_CD,Claim service facility ZIP code (where service was provided),CLM_SRVC_FAC_ZIP_CD,CLM_SRVC_FAC_ZIP_CD,CHAR,9,NCH,XXXXXXXXX

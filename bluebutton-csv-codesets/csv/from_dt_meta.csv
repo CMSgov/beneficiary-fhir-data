@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+from_dt,FROM_DT,Claim From Date,FROM_DT,CLM_FROM_DT,DATE,8,NCH,

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_prfrng_pin_num,CARR_PRFRNG_PIN_NUM,Carrier Line Performing Provider ID Number (PIN),PRF_PRFL,CARR_PRFRNG_PIN_NUM,CHAR,15,NCH,

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+carr_clm_blg_npi_num,CARR_CLM_BLG_NPI_NUM,Carrier Claim Billing NPI Number,CARR_CLM_BLG_NPI_NUM,CARR_CLM_BLG_NPI_NUM,CHAR,10,NCH,

@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rev_cntr_ddctbl_coinsrnc_cd,REV_CNTR_DDCTBL_COINSRNC_CD,Revenue Center Deductible Coinsurance Code,REVDEDCD,REV_CNTR_DDCTBL_COINSRNC_CD,CHAR,1,NCH,

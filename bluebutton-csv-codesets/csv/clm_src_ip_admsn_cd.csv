@@ -1,0 +1,13 @@
+value,description
+1,Non-Health Care Facility Point of Origin (Physician Referral) – The patient was admitted to this facility upon an order of a physician.
+3,"HMO referral - Reserved for national Prior to 3/08, HMO referral – The patient was admitted upon the recommendation of an health maintenance organization (HMO) physician."
+5,Transfer from a skilled nursing facility (SNF) or Intermediate Care Facility (ICF) – The patient was admitted to this facility as a transfer from a SNF or ICF where he or she was a resident.
+7,"Emergency room – The patient was admitted to this facility after receiving services in this facility's emergency room department (CMS discontinued this code 07/2010, although a small number of claims with this code appear after that time)."
+9,Information not available – The means by which the patient was admitted is not known.
+B,"Transfer from Another Home Health Agency – The patient was admitted to this home health agency as a transfer from another home health agency. (Discontinued July 1, 2010- See Condition Code 47)"
+D,Transfer from hospital inpatient in the same facility resulting in a separate claim to the payer – The patient was admitted to this facility as a transfer from hospital inpatient within this facility resulting in a separate claim to the payer.
+F,Transfer from hospice and is under a hospice plan of care or enrolled in hospice program For Newborn Type of Admission
+2,Premature delivery – A baby delivered with time and/or weight factors qualifying it for premature status.
+4,Extramural birth – A baby delivered in a nonsterile environment.
+6,Reserved for national assignment.
+8,Reserved for national assignment.

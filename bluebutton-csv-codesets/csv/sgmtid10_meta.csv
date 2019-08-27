@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+sgmtid10,SGMTID10,Monthly Part D Market Segment Identifier - October,SGMTID10,PTD_SGMT_ID_10,CHAR,3,CMS Enrollment Database (EDB),Null/missing or a 3-digit numeric value that includes leading zeros.

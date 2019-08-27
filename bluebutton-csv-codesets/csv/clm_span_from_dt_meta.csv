@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_span_from_dt,CLM_SPAN_FROM_DT,Claim Occurrence Span From Date,SPANFROM,CLM_SPAN_FROM_DT,DATE,8,NCH,

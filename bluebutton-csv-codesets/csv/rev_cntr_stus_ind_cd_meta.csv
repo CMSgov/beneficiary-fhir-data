@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rev_cntr_stus_ind_cd,REV_CNTR_STUS_IND_CD,Revenue Center Status Indicator Code,REVSTIND,REV_CNTR_STUS_IND_CD,CHAR,2,NCH,

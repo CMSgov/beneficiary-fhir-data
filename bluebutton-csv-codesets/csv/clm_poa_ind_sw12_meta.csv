@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_poa_ind_sw12,CLM_POA_IND_SW12,Claim Diagnosis Code XII Diagnosis Present on Admission (POA) Indicator Code,CLM_POA_IND_SW12,CLM_POA_IND_SW12,CHAR,1,NCH,

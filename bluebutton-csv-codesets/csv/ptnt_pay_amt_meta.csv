@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+ptnt_pay_amt,PTNT_PAY_AMT,Amount Paid by Patient,PTPAYAMT,PTNT_PAY_AMT,NUM,10,PDE,

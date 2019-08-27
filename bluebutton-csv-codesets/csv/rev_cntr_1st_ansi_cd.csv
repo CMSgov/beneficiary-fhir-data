@@ -1,0 +1,91 @@
+value,description
+CR,Corrections and Reversals -- this group code should be used for correcting a prior claim. It applies when there is a change to a previously adjudicated claim.
+PI,"Payer Initiated Reductions -- this group code should be used when, in the opinion of the payer, the adjustment is not the responsibility of the patient, but there is no supporting contract between the provider and the payer (i.e., medical review or professional review organization adjustments)."
+1,Deductible Amount
+3,Co-pay Amount
+5,The procedure code/bill type is inconsistent with the place of service.
+7,The procedure code is inconsistent with the patient's gender.
+9,The diagnosis is inconsistent with the patient's age.
+11,The diagnosis is inconsistent with the procedure.
+13,The date of death precedes the date of service.
+15,"Claim/service adjusted because the submitted authorization number is missing, invalid, or does not apply to the billed services or provider."
+17,Claim/service adjusted because requested information was not provided or was insufficient/incomplete.
+19,Claim denied because this is a work-related injury/illness and thus the liability of the Worker's Compensation Carrier.
+21,Claim denied because this injury/illness is the liability of the no-fault carrier.
+23,Claim adjusted because charges have been paid by another payer.
+25,Payment denied. Your Stop loss deductible has not been met.
+27,Expenses incurred after coverage terminated.
+29,The time limit for filing has expired.
+31,Claim denied as patient cannot be identified as our insured.
+33,Claim denied. Insured has no dependent coverage.
+35,Benefit maximum has been reached.
+37,Balance does not exceed deductible amount.
+39,Services denied at the time authorization/pre-certification was requested.
+41,Discount agreed to in Preferred Provider contract.
+43,Gramm-Rudman reduction.
+45,Charges exceed your contracted/legislated fee arrangement.
+47,"This (these) diagnosis(es) is(are) not covered, missing, or are invalid."
+49,These are non-covered services because this is a routine exam or screening procedure done in conjunction with a routine exam.
+51,These are non-covered services because this a pre-existing condition.
+53,Services by an immediate relative or a member of the same household are not covered.
+55,Claim/service denied because procedure/treatment is deemed experimental/investigational by the payer.
+57,"Claim/service adjusted because the payer deems the information submitted does not support this level of service, this many services, this length of service, or this dosage."
+59,Charges are adjusted based on multiple surgery rules or concurrent anesthesia rules.
+61,Charges adjusted as penalty for failure to obtain second surgical opinion.
+63,Correction to a prior claim. INACTIVE
+65,Procedure code was incorrect. This payment reflects the correct code. INACTIVE
+67,Lifetime reserve days. INACTIVE
+69,Day outlier amount.
+71,Primary Payer amount.
+73,Administrative days. INACTIVE
+75,Direct Medical Education Adjustment.
+77,Covered days. INACTIVE
+79,Cost report days. INACTIVE
+81,Discharges. INACTIVE
+83,Total visits. INACTIVE
+85,Interest amount. INACTIVE
+87,Transfer amounts.
+89,Professional fees removed from charges.
+91,Dispensing fee adjustment.
+93,No claim level adjustment. INACTIVE
+95,Benefits adjusted. Plan procedures not followed.
+97,Payment is included in allowance for another service/procedure.
+99,Medicare Secondary Payer Adjustment Amount. INACTIVE
+101,Predetermination: anticipated payment upon completion of services or claim adjudication.
+103,Provider promotional discount (i.e. Senior citizen discount).
+105,Tax withholding.
+107,Claim/service denied because the related or qualifying claim/service was not paid or identified on the claim.
+109,Claim not covered by this payer/contractor. You must send the claim to the correct payer/contractor.
+111,Not covered unless the provider accepts assignment.
+113,Claim denied because service/procedure was provided outside the United States or as a result of war.
+115,Claim/service adjusted as procedure postponed or canceled.
+117,Claim/service adjusted because transportation is only covered to the closest facility that can provide the necessary care.
+119,Benefit maximum for this time period has been reached.
+121,Indemnification adjustment.
+123,Payer refund due to overpayment. INACTIVE
+125,Claim/service adjusted due to a submission/billing error(s).
+127,Coinsurance - Major Medical.
+129,Claim denied - prior processing information appears incorrect.
+131,Claim specific negotiated discount.
+133,The disposition of this claim/service is pending further review.
+135,Claim denied. Interim bills cannot be processed.
+137,"Payment/Reduction for Regulatory Surcharges, Assessments, Allowances or Health Related Taxes."
+139,Contracted funding agreement - subscriber is employed by the provider of services.
+141,Claim adjustment because the claim spans eligible and ineligible periods of coverage.
+A0,Patient refund amount
+A2,Contractual adjustment.
+A4,Medicare Claim PPS Capital Day Outlier Amount.
+A6,Prior hospitalization or 30 day transfer requirement not met.
+A8,Claim denied; ungroupable DRG.
+B2,Covered visits. INACTIVE
+B4,Late filing penalty.
+B6,"This service/procedure is adjusted when performed/billed by this type of provider, by this type of facility, or by a provider of this specialty."
+B8,"Claim/service not covered/reduced because alternative services were available, and should have been utilized."
+B10,Allowed amount has been reduced because a component of the basic procedure/test was paid. The beneficiary is not liable for more than the charge limit for the basic procedure/test.
+B12,Services not documented in patients' medical records.
+B14,Claim/service denied because only one visit or consultation per physician per day is covered.
+B16,Claim/service adjusted because 'New Patient' qualifications were not met.
+B18,Claim/service denied because this procedure code/modifier was invalid on the date of service or claim submission.
+B20,Charges adjusted because procedure/service was partially or fully furnished by another provider.
+B22,This claim/service is adjusted based on the diagnosis.
+W1,Workers Compensation State Fee Schedule Adjustment.

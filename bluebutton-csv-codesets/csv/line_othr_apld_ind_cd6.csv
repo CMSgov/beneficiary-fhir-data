@@ -1,0 +1,10 @@
+value,description
+B,Interest addition
+D,Negative rounding adjustment (due to line item distribution from total claim reimbursement amount)
+F,Good cause
+H,Sequestration Reduction Amount
+J,ACO Payment Adjustment Amount (Pioneer ACO Reduction) - eff. 1/2014
+L,(unknown value)
+N,None
+P,(unknown value)
+S,Prior Authorization Reduction (eff. 10/2016)

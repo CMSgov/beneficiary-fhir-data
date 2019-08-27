@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+buyin_mo,BUYIN_MO,State Buy-In Coverage Count,BUYIN_MO,BENE_STATE_BUYIN_TOT_MONS,NUM,3,CMS Enrollment Database (EDB),0-12

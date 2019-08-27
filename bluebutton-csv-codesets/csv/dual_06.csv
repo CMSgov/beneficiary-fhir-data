@@ -1,0 +1,7 @@
+value,description
+NA,Non-Medicaid
+01,Qualified Medicare Beneficiary (QMB)-only
+03,Specified Low-Income Medicare Beneficiary (SLMB)-only
+05,Qualified Disabled Working Individual (QDWI)
+08,"Other dual eligible (not QMB, SLMB, QWDI, or QI) with full Medicaid coverage, including prescription drugs"
+99,Unknown

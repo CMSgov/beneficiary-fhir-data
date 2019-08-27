@@ -1,0 +1,16 @@
+value,description
+05,"Therapy change. Physician determined that a change in therapy was required – either the medication was used faster than expected, or a different dosage form is needed."
+08,Process compound for approved ingredients
+16,LTC emergency box (e box) /automated dispensing machine
+18,LTC patient admit/readmission indicator. This status required new dispensing of medication.
+21,LTC dispensing rule for <=14 day supply is not applicable due to CMS exclusion or the fact that the manufacturer’s packaging does not allow for special dispensing
+23,"LTC dispensing, 4-day supply"
+25,"LTC dispensing, 2-day supply"
+27,"LTC dispensing, 4-day supply, then 3-day supply"
+29,"LTC dispensing, daily during the week then multiple days (3) for weekend"
+31,"LTC dispensing, per medication pass"
+33,"LTC dispensing, other <=7 day cycle"
+35,"LTC dispensing, other 8-14 day dispensing not listed above"
+42,The prescriber ID submitted has been validated and is active (rarely populated)
+44,(Unknown value – rarely populated)
+Null,"Not applicable, beneficiary not in an LTC setting (or in the first two months of 2013, the presumption is there was greater than a 14-day supply)"

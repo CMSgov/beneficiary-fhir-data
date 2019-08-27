@@ -1,0 +1,60 @@
+value,description
+02,Hospital Has No Semi-Private Rooms - Entering this code requires $0.00 amount.
+04,Inpatient professional component charges which are combined billed - For use only by some all-inclusive rate hospitals.
+06,Medicare blood deductible - Total cash blood deductible (Part A blood deductible).
+08,Medicare Part A lifetime reserve amount in first calendar year -Lifetime reserve amount charged in the year of admission.
+10,Medicare Part A lifetime reserve amount in the second calendar year - Lifetime reserve amount charged in the year of discharge where the bill spans two calendar years.
+12,Amount is that portion of higher priority EGHP insurance payment made on behalf of aged bene provider applied to Medicare covered services on this bill. Six zeroes indicate provider claimed conditional Medicare payment.
+14,That portion of payment from higher priority no fault auto/other liability insurance made on behalf of bene provider applied to Medicare covered services on this bill. Six zeroes indicate provider claimed conditional payment
+16,That portion of a payment from higher priority PHS or other federal agency made on behalf of a bene the provider applied to Medicare covered services on this bill. Six zeroes indicate provider claimed conditional Medicare payment.
+18,Operating Disproportionate share amount - Providers do not report this. For payer internal use only. Indicates the disproportionate share amount applicable to the bill. Use the amount provided by the disproportionate share field in PRICER. (Do not include any PPS capital DSH adjustment in this entry).
+20,"Total payment sent provider for capital under PPS, including HSP, FSP, outlier, old capital, DSH adjustment, IME adjustment, and any exception amount."
+22,Surplus - Medicaid - Eligibility requirements to be determined at state level.
+24,Medicaid rate code - Medicaid - Eligibility requirements to be determined at state level.
+26,Prescription Drugs Offset to Patient (Payment Amount - Hearing and Ear Services) Hearing and ear services paid for out of a long term care facility resident/patient's funds in the billing period submitted (Statement covers period).
+28,Offset to the Patient (Payment Amount - Dental Services) - Dental services paid for out of a long term care facility resident/ patient's funds in the billing period submitted (Statement Covers Period).
+31,"Patient liability amount - Amount shown is that which you or the PRO approved to charge the bene for non-covered accommodations, diagnostic procedures or treatments."
+33,Offset to the Patient Payment Amount (Podiatric Services) --Podiatric services paid out of a long-term care facility resident/ patient's funds in the billing period submitted.
+35,Offset to the Patient Payment Amount (Health Insurance Premiums) --Other medical services paid out of a long-term care facility resident/ patient's funds in the billing period submitted.
+38,Blood deductible pints - The number of unreplaced pints of whole blood or units of packed red cells furnished for which the patient is responsible.
+40,New coverage not implemented by HMO - amount shown is for inpatient charges covered by HMO. (use this code when the bill includes inpatient charges for newly covered services which are not paid by HMO.)
+42,Amount is that portion of a payment from higher priority VA made on behalf of bene the provider applied to Medicare covered services on this bill. Six zeroes indicate the provider claimed conditional Medicare payment.
+44,"Amount provider agreed to accept from primary payer when amount less than charges but more than payment received - When a lesser amount is received and the received amount is less than charges, a Medicare secondary payment is due."
+46,"Number of grace days - Following the date of the PRO/UR determination, this is the number of days determined by the PRO/UR to be necessary to arrange for the patient's post-discharge care."
+48,Hemoglobin reading - The patient's most recent hemoglobin reading taken before the start of the billing period (eff. 1/3/2006). Prior to 1/3/2006 defined as the latest hemoglobin reading taken during the billing cycle.
+50,Physical therapy visits - Indicates the number of physical therapy visits from onset (at billing provider) through this billing period.
+52,Speech therapy visits - Indicates the number of speech therapy visits from onset (at billing provider) through this billing period.
+54,New birth weight in grams - Actual birth weight or weight at time of admission for an extramural birth. Required on all claims with type of admission of '4' and on other claims as required by law.
+56,Hours skilled nursing provided - The number of hours skilled nursing provided during the billing period. Count only hours spent in the home.
+58,Arterial blood gas - Arterial blood gas value at beginning of each reporting period for oxygen therapy. This value or value 59 will be required on the initial bill for oxygen therapy and on the fourth month's bill.
+60,HHA branch MSA - MSA in which HHA branch is located.
+62,Number of Part A home health visits accrued during a period of continuous care - necessitated by the change in payment basis under HH PPS (eff. 10/00)
+64,Amount of home health payments attributed to the Part A trust fund in a period of continuous care - necessitated by the change in payment basis under HH PPS (eff. 10/00)
+66,Medicare Spend-down Amount -- The dollar amount that was used to meet the recipient's spend-down liability for this claim.
+68,EPO drug - Number of units of EPO administered relating to the billing period.
+70,Interest amount - (Providers do not report this.) Report the amount applied to this bill.
+72,Flat rate surgery charge - Code indicates the amount of the charge for outpatient surgery where the hospital has such a charging structure.
+74,Drug coinsurance - (For internal use by third party payers only). Report the amount of drug coinsurance to be applied to the claim.
+76,"Report provider's percentage of billed charges interim rate during billing period. Applies to OP hospital, SNF and HHA claims where interim rate is applicable. Report to left of dollar/cents delimiter. (TP payers internal use only)"
+78,Payer code - This codes is set aside for payer use only. Providers do not report these codes.
+80,Covered Days
+82,Coinsurance Days
+84-99,Reserved for state assignment.
+A1,Deductible Payer A - The amount assumed by the provider to be applied to the patient's deductible amount to the involving the indicated payer. (eff. 10/93) - Prior value 07
+A3,Estimated Responsibility Payer A - The amount estimated by the provider to be paid by the indicated payer.
+A5,Covered self-administered drugs -- The amount included in covered charges for self-administrable drugs administered to the patient because the drug was not self-administered in the form and situation in which it was furnished to the patient.
+A7,Copayment A -- The amount assumed by the provider to be applied toward the patient's copayment amount involving the indicated payer.
+A9,Patient Height - Height of patient in centimeters. Report this data only when the health plan has a predefined change in reimbursement that is affected by height.
+AB,Other Assessments or Allowances (Payer A) -- The amount of other assessments or allowances pertaining to the indicated payer. (eff. 10/2003).
+B2,Coinsurance Payer B - the amount assumed by the provider to be applied to the patient's Part B coinsurance amount involving the indicated payer.
+B7,Copayment B -- The amount assumed by the provider to be applied toward the patient's copayment amount involving the indicated payer.
+BB,Other Assessments or Allowances (Payer B) -- The amount of other assessments or allowances pertaining to the indicated payer. (eff. 10/2003).
+C2,Coinsurance Payer C - The amount assumed by the provider to be applied to the patient's Part B coinsurance amount involving the indicated payer.
+C7,Copayment C -- The amount assumed by the provider to be applied toward the patient's copayment amount involving the indicated payer.
+CB,Other Assessments or Allowances (Payer C) -- The amount of other assessments or allowances pertaining to the indicated payer. (eff. 10/2003).
+D4,Clinical Trial Number Assigned by NLM/NIH - Eight digit numeric National Library of Medicine/National Institute of Health clinical trial registry number or a default number of '99999999' if the trial does not have an 8-digit registry number. (Eff. 10/1/07)
+FC,Patient Prior Payments
+G8,Facility Where Inpatient Hospice Service Is Delivered - MSA or Core Based Statistical Area (CBSA) number (or rural state code) of the facility where inpatient hospice is delivered. (Eff. 1/1/08)
+XY,"Total Charge Amount for all Part B visits on RIC 'U' claims - for Home Health claims containing both Part A and Part B services this code identifies the total charge amount for the Part B visits (based on revenue center codes 042X, 043X, 044X, 055X, 056X, & 057X). Code created internally in the NCHMQA system (eff. 10/31/01 with HHPPS)."
+Y1,Part A demo payment - Portion of the payment designated as reimbursement for Part A services under the demonstration. This amount is instead of the traditional prospective DRG payment (operating and capital) as well as any outlier payments that might have been applicable in the absence of the demonstration. No deductible or coinsurance has been applied. Payments for operating IME and DSH which are processed in the traditional manner are also not included in this amount.
+Y3,Part B coinsurance - Amount of Part B coinsurance applied by the intermediary to this demo claim. For demonstration claims this will be a fixed copayment unique to each hospital and DRG (or DRG/ procedure group).

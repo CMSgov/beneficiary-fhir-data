@@ -1,0 +1,14 @@
+value,description
+B,"Non-allowed item or service for OPPS; may be paid under a different bill type (e.g., CORF)"
+E,Non-allowed item or service (not paid by OPPS or any other Medicare payment system)
+G,Drug/biological pass-through (separate APC includes this pass-through amount)
+J,New drug or new biological pass-through
+K,"Non pass-through drug/biological, radio-pharmaceutical agent, certain brachytherapy sources (paid under OPPS; separate APC payment)"
+M,Service not billable to fiscal intermediary [now a MAC] (not paid under OPPS)
+P,Paid partial hospitalization per diem APC payment
+Q2,No separate payment made; OPPS - APC were packaged into payment for other services (effective 2009)
+R,Blood products
+T,Significant procedure subject to multiple procedure discounting
+V,Medical visit to clinic or emergency department
+X,Ancillary service
+Z,Valid revenue with blank HCPCS and no other SI assigned

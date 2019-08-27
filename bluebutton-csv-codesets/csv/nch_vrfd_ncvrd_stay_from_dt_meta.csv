@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+nch_vrfd_ncvrd_stay_from_dt,NCH_VRFD_NCVRD_STAY_FROM_DT,NCH Verified Non-covered Stay From Date,NCOVFROM,NCH_VRFD_NCVRD_STAY_FROM_DT,DATE,8,NCH QA Process,

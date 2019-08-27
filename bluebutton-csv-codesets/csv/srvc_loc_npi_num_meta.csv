@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+srvc_loc_npi_num,SRVC_LOC_NPI_NUM,Claim Service Location NPI Number,SRVC_LOC_NPI_NUM,SRVC_LOC_NPI_NUM,CHAR,22,NCH,

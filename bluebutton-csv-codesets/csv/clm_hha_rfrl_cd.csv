@@ -1,0 +1,7 @@
+value,description
+2,Clinic referral - The patient was admitted upon the recommendation of this facility's clinic physician.
+4,Transfer from hospital - The patient was admitted as an inpatient transfer from an acute care facility.
+6,Transfer from another health care facility - The patient was admitted as a transfer from a health care facility other than an acute care facility or SNF.
+8,Court/law enforcement - The patient was admitted upon the direction of a court of law or upon the request of a law enforcement agency's representative.
+A,Transfer from a Critical Access Hospital - patient was admitted/referred to this facility as a transfer from a Critical Access Hospital
+C,"Readmission to same HHA - If a beneficiary is discharged from an HHA and then readmitted within the original 60-day episode, the original episode must be closed early and a new one created."

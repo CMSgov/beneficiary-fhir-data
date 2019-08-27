@@ -1,0 +1,5 @@
+value,description
+1,Physicians or suppliers billing as solo practitioners for whom SSN's are shown in the physician ID code field.
+3,Suppliers (other than sole proprietorship) for whom employer identification (EI) numbers are used in coding the ID field.
+5,Institutional providers and independent laboratories for whom employer identification (EI) numbers are used in coding the ID field.
+7,"Clinics, groups, associations, or partnerships for whom employer identification (EI) numbers are used in coding the ID field."

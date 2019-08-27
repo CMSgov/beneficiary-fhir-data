@@ -1,0 +1,23 @@
+value,description
+01,Discharged to home/self-care (routine charge).
+03,"Discharged/transferred to skilled nursing facility (SNF) with Medicare certification in anticipation of covered skilled care -- (For hospitals with an approved swing bed arrangement, use Code 61 - swing bed. For reporting discharges/transfers to a non-certified SNF, the hospital must use Code 04 - ICF."
+05,"Discharged/transferred to another type of institution for inpatient care (including distinct parts). NOTE: Effective 1/2005, psychiatric hospital or psychiatric distinct part unit of a hospital will no longer be identified by this code. New code is '65'."
+07,Left against medical advice or discontinued care.
+09,"Admitted as an inpatient to this hospital (effective 3/1/91). In situations where a patient is admitted before midnight of the third day following the day of an outpatient service, the outpatient services are considered inpatient."
+21,Discharged/transferred to court/law enforcement.
+40,Expired at home (hospice claims only)
+42,Expired - place unknown (Hospice claims only)
+50,Discharged/transferred to a Hospice – home.
+61,Discharged/transferred within this institution to a hospital-based Medicare approved swing bed (eff. 9/01)
+63,Discharged/transferred to a long term care hospitals. (eff. 1/2002)
+65,Discharged/Transferred to a psychiatric hospital or psychiatric distinct unit of a hospital (these types of hospitals were pulled from patient/discharge status code '05' and given their own code). (eff. 1/2005).
+69,Discharged/transferred to a designated disaster alternative care site (starting 10/2013; applies only to particular MS-DRGs*)
+71,Discharged/transferred/referred to another institution for outpatient services as specified by the discharge plan of care (eff. 9/01) (discontinued effective 10/1/05)
+81,Discharged to home or self-care with a planned acute care hospital inpatient readmission.
+83,Discharged/transferred to a skilled nursing facility (SNF) with Medicare certification with a planned acute care hospital inpatient readmission.
+85,Discharged/transferred to a designated cancer center or children’s hospital with a planned acute care hospital inpatient readmission.
+87,Discharged/transferred to court/law enforcement with a planned acute care hospital inpatient readmission.
+89,Discharged/transferred to a hospital-based Medicare approved swing bed with a planned acute care hospital inpatient readmission.
+91,Discharged/transferred to a Medicare certified long term care hospital (LTCH) with a planned acute care hospital inpatient readmission.
+93,Discharged/transferred to a psychiatric distinct part unit of a hospital with a planned acute care hospital inpatient readmission.
+95,Discharged/transferred to another type of health care institution not defined elsewhere in this code list with a planned acute care hospital inpatient readmission.

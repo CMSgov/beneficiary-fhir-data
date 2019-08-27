@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+clm_span_thru_dt,CLM_SPAN_THRU_DT,Claim Occurrence Span Through Date,SPANTHRU,CLM_SPAN_THRU_DT,DATE,8,NCH,

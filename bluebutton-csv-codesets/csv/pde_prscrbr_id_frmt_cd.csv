@@ -1,0 +1,3 @@
+value,description
+D,PDE Prescriber ID has a DEA format: 9 alpha-numeric characters with the first two characters alpha and the last seven numeric
+X,"PDE Prescriber ID is none of the above formats. PDE Prescriber ID could be a valid State License number, an invalid prescriber identifier, or a missing Prescriber ID"

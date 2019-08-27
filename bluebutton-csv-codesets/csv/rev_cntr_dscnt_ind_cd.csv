@@ -1,0 +1,6 @@
+value,description
+2,(1.0+D(U-1))/U
+4,(1+D)/U
+6,TD/U
+8,2.0/U
+U,Number of units

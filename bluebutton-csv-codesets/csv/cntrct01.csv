@@ -1,0 +1,5 @@
+value,description
+H,"Managed care organizations other than a regional PPO (i.e., local MA-PDs, 1876 cost plans, Program of All-Inclusive Care for the Elderly (PACE) plans, private fee-for-service plans, or demonstration organization plans)"
+S,Stand-alone prescription drug plan (PDP)
+N,Not Part D Enrolled
+*,"Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated by 'X' for 2006-2009)"

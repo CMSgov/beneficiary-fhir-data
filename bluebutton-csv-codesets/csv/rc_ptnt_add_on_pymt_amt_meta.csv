@@ -1,0 +1,2 @@
+name,title,description,short_name,long_name,type,length,source,value_format
+rc_ptnt_add_on_pymt_amt,RC_PTNT_ADD_ON_PYMT_AMT,Revenue Center Patient/Initial Visit Add-On Payment Amount (for initial wellness visit),RC_PTNT_ADD_ON_PYMT_AMT,RC_PTNT_ADD_ON_PYMT_AMT,NUM,12,NCH,XXX.XX

@@ -1,0 +1,590 @@
+value,description
+0001,Photochemotherapy
+0003,Bone Marrow Biopsy/Aspiration
+0005,Level II Needle Biopsy /Aspiration Except Bone Marrow
+0007,Level II Incision & Drainage
+0009,Nail Procedures
+0011,Level II Destruction of Lesion
+0013,Level II Debridement & Destruction
+0015,Level IV Debridement & Destruction
+0017,Level VI Debridement & Destruction
+0019,Level I Excision/ Biopsy
+0021,Level III Excision/ Biopsy
+0023,Exploration Penetrating Wound
+0025,Level II Skin Repair
+0027,Level IV Skin Repair
+0029,Incision/Excision Breast (obsolete 12/00); Level II Incision/Excision Breast Effective 1/01)
+0031,Hyperbaric Oxygen (obsolete 1/01)
+0033,Partial Hospitalization
+0041,Arthroscopy
+0043,Closed Treatment Fracture Finger/Toe/Trunk
+0045,Bone/Joint Manipulation Under Anesthesia
+0047,Arthroplasty without Prosthesis
+0049,Level I Musculoskeletal Procedures Except Hand and Foot
+0051,Level III Musculoskeletal Procedures Except Hand and Foot
+0053,Level I Hand Musculoskeletal Procedures
+0055,Level I Foot Musculoskeletal Procedures
+0057,Bunion Procedures
+0059,Level II Strapping and Cast Application
+0070,Thoracentesis/Lavage Procedures
+0072,Level II Endoscopy Upper Airway
+0074,Level IV Endoscopy Upper Airway
+0076,Endoscopy Lower Airway
+0078,Level II Pulmonary Treatment
+0080,Diagnostic Cardiac Catheterization
+0082,Coronary Atherectomy
+0084,Level I Electrophysiologic Evaluation
+0086,Ablate Heart Dysrhythm Focus
+0088,Thrombectomy
+0090,Level II Implantation/Removal/Revision of Pacemaker AICD Vascular Device (obsolete 12/00); Insertion/Replacement of Permanent Pacemaker and Pulse Generator
+0092,Level II Vascular Ligation
+0094,Resuscitation and Cardioversion
+0096,Non-Invasive Vascular Studies
+0098,Injection of Sclerosing Solution
+0100,Stress test and continuous ECG
+0102,Electronic Analysis of Pacemakers/other Devices
+0104,Transcatheter Placement of Intracoronary Stents (eff. 1/01)
+0106,Insertion/Replacement/Repair of Pacemaker Electrode (eff. 1/01)
+0108,Insertion/Replacement/Repair of Cardioverter-Defibrillator Leads (eff. 1/01)
+0110,Transfusion
+0112,Extracorporeal Photopheresis
+0114,Thyroid/Lymphadenectomy Procedures
+0116,Chemotherapy Administration by Other Technique Except Infusion
+0118,Chemotherapy Administration by Both Infusion and Other Technique
+0120,Infusion Therapy Except Chemotherapy
+0122,Level II Tube changes and Repositioning
+0124,Revision of Implanted Infusion Pump (eff. 1/01)
+0131,Level II Laparoscopy
+0140,Esophageal Dilation without Endoscopy
+0142,Small Intestine Endoscopy
+0144,Diagnostic Anoscopy
+0146,Level I Sigmoidoscopy
+0148,Level I Anal/Rectal Procedure
+0150,Level III Anal/Rectal Procedure
+0152,Percutaneous Biliary Endoscopic Procedures
+0154,Hernia/Hydrocele Procedures
+0158,Colorectal Cancer Screening: Colonoscopy Not subject to National coinsurance. Minimum unadjusted coinsurance is 25% of the payment rate. Payment rate is lower of the HOPD payment rate or the Ambulatory Surgical Center payment.
+0160,Level I Cystourethroscopy and other Genitourinary Procedures
+0162,Level III Cystourethroscopy and other Genitourinary Procedures
+0164,Level I Urinary and Anal Procedures
+0166,Level I Urethral Procedures
+0168,Level III Urethral Procedures
+0170,Dialysis for Other Than ESRD Patients
+0181,Penile Procedures
+0183,Testes/Epididymis Procedures
+0190,Surgical Hysteroscopy
+0192,Level II Female RePRODuctive Procedures
+0194,Level IV Female RePRODuctive Procedures
+0196,Dilatation & Curettage
+0198,Pregnancy and Neonatal Care Procedures
+0200,Therapeutic Abortion
+0210,Spinal Tap
+0212,Level II Nervous System Injections
+0214,Electroencephalogram
+0216,Level II Nerve and Muscle Tests
+0220,Level I Nerve Procedures
+0222,Implantation of Neurological Device
+0224,Level II Revision/Removal Neurological Device (obsolete 12/00); Implantation of Reservoir/Pump/Shunt (eff. 1/01)
+0226,Implantation of Drug Infusion Reservior (eff. 1/01)
+0228,Creation of Lumbar Subarachnoid Shunt (eff. 1/01)
+0230,Level I Eye Tests
+0232,Level I Anterior Segment Eye
+0234,Level III Anterior Segment Eye Procedures
+0236,Level II Posterior Segment Eye Procedures
+0238,Level I Repair and Plastic Eye Procedures
+0240,Level III Repair and Plastic Eye Procedures
+0242,Level V Repair and Plastic Eye Procedures
+0244,Corneal Transplant
+0246,Cataract Procedures with IOL Insert
+0248,Laser Retinal Procedures
+0251,Level I ENT Procedures
+0253,Level III ENT Procedures
+0256,Level V ENT Procedures
+0258,Tonsil and Adenoid Procedures
+0261,Level II Plain Film Except Teeth Including Bone Density Measurement
+0263,Level I Miscellaneous Radiology Procedures
+0265,Level I Diagnostic Ultrasound Except Vascular
+0267,Vascular Ultrasound
+0269,Echocardiogram Except Transesophageal
+0271,Mammography
+0273,Level II Fluoroscopy
+0275,Arthrography
+0277,Level II Digestive Radiology
+0279,Level I Diagnostic Angiography and Venography Except Extremity
+0281,Venography of Extremity
+0283,Level II Computerized Axial Tomography
+0285,Positron Emission Tomography (PET)
+0290,Standard Non-Imaging Nuclear Medicine
+0292,Level II Diagnostic Nuclear Medicine Excluding Myocardial Scans
+0295,Level II Therapeutic Nuclear Medicine
+0297,Level II Therapeutic Radiologic Procedures
+0301,Level II Radiation Therapy
+0303,Treatment Device Construction
+0305,Level II Therapeutic Radiation Treatment Preparation
+0311,Radiation Physics Services
+0313,Brachytherapy
+0320,Electroconvulsive Therapy
+0322,Brief Individual Psychotherapy
+0324,Family Psychotherapy
+0330,Dental Procedures
+0341,Immunology Tests
+0343,Level II Pathology
+0345,Transfusion Laboratory Procedures Level I (eff. 1/01)
+0347,Transfusion Laboratory Procedures Level III (eff. 1/01)
+0349,Miscellaneous Laboratory Procedures (eff. 1/01)
+0355,Level I Immunizations
+0357,Level III Immunizations (obsolete 1/01)
+0359,Injections
+0361,Level II Alimentary Tests
+0363,Otorhinolaryngologic Function Tests
+0365,Level II Audiometry
+0367,Level I Pulmonary Test
+0369,Level III Pulmonary Test
+0371,Allergy Injections
+0373,Neuropsychological Testing
+0600,Low Level Clinic Visits
+0602,High Level Clinic Visits
+0610,Low Level Emergency Visits
+0612,High Level Emergency Visits
+0701,"Strontium (eligible for pass-through payments) (obsolete 12/00); SR 89 chloride, per mCi (eff. 1/01)"
+0704,IN 111 Satumomab Pendetide (eligible for pass-through payments)
+0725,Leucovorin Calcium (eligible for pass-through payments)
+0727,"Injection, Etidronate Disodium (eligible for pass-through payments)"
+0730,Pamidronate Disodium (eligible for pass-through payments)
+0732,Mesna (eligible for pass-through payments)
+0750,Dolasetron Mesylate 10 mg (eligible for pass-through payments)
+0755,Thiethylperazine Maleate (eligible for pass-through payments)
+0762,Dronabinol (elibible for pass-through payments)
+0764,"Granisetron HCL, 100 mcg (eligible for pass-through payments)"
+0768,Ondansetron Hydrochloride per 1 mg Injection (eligible for pass-through payments)
+0800,Leuprolide Acetate per 3.75 mg (eligible for pass-through payments)
+0802,Etoposide (eligible for pass-through payments)
+0807,Aldesleukin single use vial (eligible for pass-through payments)
+0810,"Goserelin Acetate Implant, per 3.6 mg (eligible for pass-through payments)"
+0812,Carmustine 100 mg (eligible for pass-through payments)
+0814,"Asparaginase, 10,000 units (eligible for pass-through payments)"
+0816,"Cyclophosphamide, Lyophilized 100 mg (eligible for pass-through payments)"
+0818,Dactinomycin 0.5 mg (eligible for pass-through payments)
+0820,Daunorubicin HCI 10 mg (eligible for pass-through payments)
+0822,Diethylstibestrol Diphosphate 250 mg (eligible for pass-through payments)
+0824,Etoposide 10 mg (eligible for pass-through payments)
+0827,Floxuridine injection 500mg
+0830,Irinotecan 20 mg (eligible for pass-through payments)
+0832,Idarubicin HCL injection 5 mg (eligible for pass-through payments)
+0834,"Interferon, Alfa-2A, Recombinant 3 million units (eligible for pass-through payments)"
+0838,"Interferon, Gamma 1-B injection, 3 million units (eligible for pass-through payments)"
+0840,Melphalan HCL 50 mg (eligible for pass-through payments)
+0842,Fludarabine Phosphate injection 50 mg (eligible for pass-through payments)
+0844,"Pentostatin injection, 10 mg (eligible for pass-through payments)"
+0849,"Rituximab, 100 mg (eligible for pass-through payments)"
+0851,"Thiotepa injection, 15 mg (eligible for pass-through payments)"
+0853,"Vinblastine Sulfate injection, 1 mg (eligible for pass-through payments)"
+0855,Vinorelbine Tartrate per 10 mg (eligible for pass-through payments)
+0857,Bleomycin Sulfate injection 15 units (eligible for pass-through payments)
+0859,Fluorouracil injection 500 mg
+0861,Leuprolide Acetate 1 mg (eligible for pass-through payments)
+0863,"Paclitaxel, 30mg (eligible for pass-through payments)"
+0865,"Interferon alfa-N3, 250,000 IU (eligible for pass-through payments)"
+0886,"Azathioprine, 50 mg oral (Not subject to national coinsurance)"
+0888,"Cyclosporine, Oral 100 mg (Not subject to national coinsurance)"
+0890,Lymphocyte Immune Globulin 250 mg (Not subject to national coinsurance)
+0892,"Daclizumab, Parenteral, 25 mg (obsolete 1/01) (eligible for pass-through payments)"
+0901,"Alpha I, Proteinase Inhibitor, Human per 10mg (eligible for pass-through payments)"
+0903,"CMV Immune Globulin (obsolete 12/00); Cytomegalovirus imm IV, vial (eligible for pass-through payments) (eff. 1/01)"
+0906,RSV-ivig 50 mg (eligible for pass-through payments)
+0908,"Tetanus Immune Globulin, injection up to 250 units (Not subject to national coinsurance)"
+0910,Interferon Beta - 1b 0.25 mg (eligible for pass-through payments)
+0913,Ganciclovir long act implant 4.5 mg (eligible for pass-through payments)
+0915,"Alteplase injection,recombinant, 10mg (Not subject to national coinsurance)"
+0917,"Dipyridamole, 10mg / Adenosine 6MG (Not subject to national coinsurance) (obsolete 1/01) Pharmalogic stresses (eff. 1/01)"
+0925,"Factor VIII (Antihemophilic Factor, Human) per iu (eligible for pass-through payments)"
+0927,"Factor VIII (Antihemophilic Factor, Recombinant) per iu (eligible for pass-through payments)"
+0929,Other Hemophilia Clotting Factors per iu (eligible for pass-through payments) (obsolete 1/01) Anti-inhibitor per iu (eff. 1/01)
+0931,"Factor IX (Antihemophilic Factor, Purified, Non-Recombinant) (eligible for pass-through payments)"
+0949,"Plasma, Pooled Multiple Donor, Solvent/Detergent Treated, Frozen (not subject to national coinsurance)"
+0952,Cryoprecipitate (not subject to national coinsurance)
+0954,Leukocyte Poor Blood (not subject to national coinsurance)
+0956,Plasma Protein Fraction (not subject to national coinsurance)
+0958,Platelet Rich Plasma (not subject to national coinsurance)
+0960,Washed Red Blood Cells (not subject to national coinsurance)
+0962,"Infusion, Albumin (Human) 25%, 50 ml (not subject to national coinsurance)"
+0971,New Technology - Level II ($50 - $100) (not subject to national coinsurance)
+0973,New Technology - Level IV ($200 - $300) (not subject to national coinsurance)
+0975,New Technology - Level VI ($500 - $750) (not subject to national coinsurance)
+0977,New Technology - Level VIII ($1000 - $1250) (not subject to national coinsurance)
+0979,New Technology - Level X ($1500 - $1750) (not subject to national coinsurance)
+0981,New Technology - Level XII ($2000 - $2500) (not subject to national coinsurance)
+0983,New Technology - Level XIV ($3500 - $5000) (not subject to national coinsurance)
+0987,New Device Technology - Level I ($0 - $250) (eff. 1/01)
+0989,New Device Technology - Level III ($500 - $750) (eff. 1/01)
+0991,New Device Technology - Level V ($1000 - $1500) (eff. 1/01)
+0993,New Device Technology - Level VII ($2000 - $3000) (eff. 1/01)
+0995,New Device Technology - Level IX ($4000 - $5000) (eff. 1/01)
+0997,New Device Technology - Level XI ($7000 - $9000) (eff. 1/01)
+1001,AcuNav-diagnostic ultrasound ca (eff. 1/01)
+1003,"Cath, ablation, livewire TC (eff. 1/01)"
+1006,ARRAY post chamb IOL (eff. 1/01) 1007 = Ams 700 penile prosthesis (eff. 1/01)
+1009,"Plasma, cryoprecipitate-reduced, unit (eff. 1/01)"
+1011,"Platelets, L/R, CMV-neg (eff. 1/01)"
+1013,"Platelet concentrate, L/R, unit (eff. 1/01)"
+1016,"Blood, L/R, froz/deglycerol/washed (eff. 1/01)"
+1018,"Blood, L/R, irradiated (eff. 1/01)"
+1024,Quinupristin 150 mg/dalfopriston 350 mg (eff. 1/01)
+1026,RF Perfrmr cath 5F RF Marinr (eff. 1/01)
+1028,Prcis Twst trnsvg anch sys (eff. 1/01)
+1030,"Cthtr:Mrshal, Blu Max Utr Dmnd (eff. 1/01)"
+1034,"SURPASS, Long30 SURPASS-cath (eff. 1/01)"
+1036,R port/reservior impl dev (eff. 1/01)
+1038,UltraCross Imaging Cath (eff. 1/01)
+1040,Wallstent/RP TIPS -- 20/40/60 (eff. 1/01)
+1045,I-131 MIBG (ioben-sulfate) 0.5 mCi (eff. 1/01)
+1048,NeuroCyberneticPros: gen (eff. 1/01)
+1053,EnSite 3000 catheter (eff. 1/01)
+1055,"Transesoph 210, 210-S Cath (eff. 1/01)"
+1057,Micromark Tissue Marker (eff. 1/01)
+1060,ACS multi-link tristor stent (eff. 1/01)
+1063,"EndoTak Endurance EZ, RX leads (eff. 1/01)"
+1068,Pulsar DDD pmkr (eff. 1/01)
+1071,"Pulsar Max, Pulsar SR pmkr (eff. 1/01)"
+1073,Gynecare Morcellator (eff. 1/01)
+1075,Guidant: lead (eff. 1/01)
+1077,"Ventak VR Prizm VR, sc defib (eff. 1/01)"
+1079,CO 57/58 0.5 mCi (eff. 1/01)
+1086,"Temozolomide, 5 mg (eff. 1/01)"
+1089,"CO 57, 0.5 mCi (eff. 1/01)"
+1091,"IN 111 Oxyquinoline, per 5 mCi (eff. 1/01)"
+1094,"TC 99M Albumin aggr, per vial"
+1096,"TC 99M Exametazime, per dose (eff. 1/01)"
+1098,"TC 99M Pentetate, per vial (eff. 1/01)"
+1100,Medtronic AVE GT1 guidewire (eff. 1/01)
+1102,Synergy Neurostim Genrtr (eff. 1/01)
+1104,RF ConductorAblative Cath (eff. 1/01)
+1106,SynergyEZ Pt Progmr (eff. 1/01)
+1108,Reveal Cardiac Recorder (eff. 1/01)
+1110,"Stable Mapper, cath electrd (eff. 1/01)"
+1112,AneuRx Stent graft/del cath (eff. 1/01)
+1114,TalntSprgStnt + Graf endo pros (eff. 1/01)
+1116,CapSureSP pacing lead (eff. 1/01)
+1118,"Sigma300DR LegIIDR, pacemkr (eff. 1/01)"
+1120,"Sprint6942, 6945 defi lead (eff. 1/01)"
+1122,TC 99M arcitumomab per dose (eff. 1/01)
+1124,InterStim Test Stim Kit (eff. 1/01)
+1126,Kappa 700 DR pacemkr (eff. 1/01)
+1128,"Kappa 700D, Ruby IID pmkr (eff. 1/01)"
+1130,"Sigma 200D, LGCY IID sc pmkr (eff. 1/01)"
+1132,Sigma 200SR Leg II:sc pac (eff. 1/01)
+1134,Sigma 300D pmker (eff. 1/01)
+1136,"Affinity DR 5330L/R, DC, pmkr (eff. 1/01)"
+1143,"AddVent mod 2060BL, VDD (eff. 1/01)"
+1145,"Angio-Seal 6fr, 8fr (eff. 1/01)"
+1148,Contour MD sc defib (eff. 1/01)
+1151,"Passiveplus DXlead, 10mdls (eff. 1/01)"
+1153,Regency SC+ 2402L pmkr (eff. 1/01)
+1155,Repliform 8 sq cm (eff. 1/01)
+1157,Trilogy DCT 23/8L pmkr (eff. 1/01)
+1159,"TVL RV02, RV06, RV07: lead (eff. 1/01)"
+1161,"Tendril DX, 1338 pacing lead (eff. 1/01)"
+1163,"Tendril SDX, 1488T pacing lead (eff. 1/01)"
+1166,"Cytarabine liposomal, 10 mg (eff. 1/01)"
+1171,Autosuture site marker stple (eff. 1/01)
+1173,"Cor stntS540, S670, o-wire stn (eff. 1/01)"
+1178,"Busulfan IV, 6 mg (eff. 1/01)"
+1181,"Meridian SSI, SC pmkr (eff. 1/01)"
+1183,"Jade IIS, Sigma 300S, SC, pmkr (eff. 1/01)"
+1188,"I 131, per mCi (eff. 1/01)"
+1201,"TC 99M succimer, per vial (eff. 1/01)"
+1203,Verteporfin for Injection (eff. 1/01)
+1207,Octreotide acetate depot 1 mg (eff. 1/01)
+1303,"CapSure Fix 6940/4068-110, lead (eff. 1/01)"
+1305,Apligraf (eff. 1/01)
+1311,Trilogy DR + DAO pmkr (eff. 1/01)
+1313,"Magic medium, radius 31mm (eff. 1/01)"
+1315,"Vigor DR, Meridian DR pmkr (eff. 1/01)"
+1317,"Discovery SR, pmkr (eff. 1/01)"
+1319,Wallstent/RP Enteral--60mm (eff. 1/01)
+1325,Pallidium - 103 seed (eff. 1/01)
+1328,ANS Renew NS trnsmtr (eff. 1/01)
+1334,"Crown, Mini-crown,CrossLC (eff. 1/01)"
+1336,Constant Flow Imp Pump (eff. 1/01)
+1348,I 131 per mCi solution (eff. 1/01)
+1351,CapSure (Fix) pacing lead (eff. 1/01)
+1353,Itrel Interstm neurostim + ext (eff. 1/01)
+1355,"Kappa 600 DR, Vita DR (eff. 1/01)"
+1357,Angstrom MD V-190HV3 sc defib (eff. 1/01)
+1359,"Pulsar, Pulsar Max DR, pmkr (eff. 1/01)"
+1364,Photon DR V-230HV3 DC defib (eff. 1/01)
+1366,"Guidewire, PTCA, Hi-Torque (eff. 1/01)"
+1369,ANS Renew Stim Sys recvr (eff. 1/01)
+1371,Symp Nitinol Transhep Bil Sys (eff. 1/01)
+1375,"Stent, corornary, NIR (eff. 1/01)"
+1377,Specify 3988 neuro lead (eff. 1/01)
+1379,Pisces-Quad 3887 lead (eff. 1/01)
+1401,Prochlorperazine maleate 5 mg (eff. 1/01)
+1403,Chlorpromazine hcl 10mg oral (eff. 1/01)
+1405,Thiethylperazine maleate 10 mg (eff. 1/01)
+1407,Hydroxyzine pamoate 25 mg (eff. 1/01)
+1410,Prosorba column (eff. 1/01)
+1420,StapleTac2 Bone w/Dermis (eff. 1/01)
+1450,Orthosphere Arthroplasty (eff. 1/01)
+1500,"Atherectomy sys, peripheral (eff. 1/01)"
+1601,"TC 99M medronate, per dose (eff. 1/01)"
+1603,"TL 201, mCi (eff. 1/01)"
+1605,"Abciximab injection, 10 mg (eff. 1/01)"
+1607,"Eptifibatide injection, 5 mg (eff. 1/01)"
+1609,"Rho(D) Immune globulin h, sd 100 iu (eff. 1/01)"
+1612,"Daclizumab, parenteral, 25 mg (eff. 1/01)"
+1614,"Valrubicin, 200 mg (eff. 1/01)"
+1616,"Histrelin Acetate, 0.5 mg (eff. 1/01)"
+1618,"Von Willebrand factor, per iu (eff. 1/01)"
+1620,"TC 99M Bicisate, per vial (eff. 1/01)"
+1622,"TC 99M Mertiatide, per vial (eff. 1/01)"
+1624,"P32 sodium, per mCi (eff. 1/01)"
+1626,"TC 99M Oxidronate, per vial (eff. 1/01)"
+1628,"P32 phosphate chromic,per mCi (eff. 1/01)"
+1701,Medtec MT-BT-5201-25 ndl (eff. 1/01) (obsolete 4/01)
+1703,Mentor Prostate Brachy (eff. 1/01) (obsolete 4/01)
+1705,Best Flexi Brachy Needle (eff. 1/01) (obsolete 4/01)
+1707,Varisource Implt Ndl (eff. 1/01) (obsolete 4/01)
+1709,Remington Brachytx Needle (eff. 1/01) (obsolete 4/01)
+1711,MD Tech brachytx needle (eff. 1/01) (obsolete 4/01)
+1713,"Anchor/screw bn/bn,tis/bn (eff. 4/01)"
+1715,Brachytherapy needle (eff. 4/01)
+1717,"Brachytx seed, HDR Ir-192 (eff. 4/01)"
+1719,"Brachytx seed, Non-HDR Ir-192 (eff. 4/01)"
+1721,"AICD, dual chamber (eff. 4/01)"
+1723,"Cath, ablation, non-cardiac (eff. 4/01)"
+1725,"Cath, translumin non-laser (eff. 4/01)"
+1727,"Cath, bal tis, dis, nonvas (eff. 4/01)"
+1729,"Cath, drainage, biliary (eff. 4/01)"
+1731,"Cath, EP, 20 or more elect (eff. 4/01)"
+1733,"Cath, EP, other than temp (eff. 4/01)"
+1751,"Cath, inf pr/cent/midline (eff. 4/01)"
+1753,"Cath, intravas ultrasound (eff. 4/01)"
+1755,"Catheter, intraspinal (eff. 4/01)"
+1757,"Cath, thrombectomy/embolect (eff. 4/01)"
+1759,"Cath, intra echocardiography (eff. 4/01)"
+1762,"Conn tiss, human (inc fascia) (eff. 4/01)"
+1764,"Event recorder, cardiac (eff. 4/01)"
+1768,"Graft, vascular (eff. 4/01)"
+1770,"Imaging coil, MR insertable (eff. 4/01)"
+1772,"Infusion pump, programmable (eff. 4/01)"
+1776,Joint device (implantable) (eff. 4/01)
+1778,"Lead, neurostimulator (eff. 4/01)"
+1780,"Lens, intraocular (eff. 4/01)"
+1782,Morcellator (eff. 4/01)
+1785,"Pmkr, dual, rate-resp (eff. 4/01)"
+1787,"Patient progr, neurostim (eff. 4/01)"
+1789,"Prosthesis, breast, imp. (eff. 4/01)"
+1791,"OncoSeed, Rapid Strand I-125 (eff. 1/01) (obsolete 4/01)"
+1793,Bard InterSource P-103 seed (eff. 1/01) (obsolete 4/01)
+1795,Bard BrachySource I-125 (eff. 1/01) (obsolete 4/01)
+1797,Draximage I-125 seed (eff. 1/01) (obsolete 4/01)
+1799,I-Plant I-125 Brachytx seed (eff. 1/01) (obsolete 4/01)
+1801,IoGold I-125 brachytx seed (eff. 1/01) (obsolete 4/01)
+1803,Best Iodine 125 brachytx seeds (eff. 1/01) (obsolete 4/01)
+1805,IsoStar Iodine-125 seeds (eff. 1/01) (obsolete 4/01)
+1810,D114S Dilatation Cath (eff. 1/01) (obsolete 4/01)
+1812,OBL Anchors (eff. 1/01) (obsolete 4/01)
+1815,"Pros, urinary sph, imp (eff. 4/01)"
+1817,Septal defect imp sys (eff. 4/01)
+1851,Repliform 24/28 sq cm (eff. 1/01) (obsolete 4/01)
+1853,"Suspend, per 8/14 sq cm (eff. 1/01) (obsolete 4/01)"
+1855,"Suspend, per 36 sq cm (eff. 1/01) (obsolete 4/01)"
+1857,"Suspend, per 84 sq cm (eff. 1/01) (obsolete 4/01)"
+1859,"DuraDerm, per 21/24 sq cm (eff. 1/01) (obsolete 4/01)"
+1861,"DuraDerm, per 36 sq cm (eff. 1/01) (obsolete 4/01)"
+1863,"DuraDerm, per 84 sq cm (eff. 1/01) (obsolete 4/01)"
+1865,"FasLata, per 8/14 sq cm (eff. 1/01) (obsolete 4/01)"
+1867,"FasLata, per 36/48 sq cm (eff. 1/01) (obsolete 4/01)"
+1869,Gore Thyroplasty Dev (eff. 1/01) (obsolete 4/01)
+1871,"DermMatrix, 32 or 64 sq cm (eff. 1/01) (obsolete 4/01)"
+1873,Bard 3DMax Mesh (eff. 1/01) (obsolete 4/01)
+1875,"Stent, coated/cov w/o del sys (eff. 4/01)"
+1877,"Stent, non-coated/cov w/o del (eff. 4/01)"
+1879,"Tissue marker, imp (eff. 4/01)"
+1881,Dialysis access system (eff. 4/01)
+1883,"Adapt/ext, pacing/neuro lead (eff. 4/01)"
+1887,"Catheter, guiding (eff. 4/01)"
+1892,"Intro/sheath, fixed, peel-away (eff. 4/01)"
+1894,"Intro/sheath, non-laser (eff. 4/01)"
+1896,"Lead, AICD, non sing/dual (eff. 4/01)"
+1898,"Lead, pmkr, other than trans (eff. 4/01)"
+1929,Maverick PTCA Cath (eff. 1/01) (obsolete 4/01)
+1931,Talon Dil Cath (eff. 1/01) (obsolete 4/01)
+1933,Opti-Plast XL/Centurion Cath (eff. 1/01) (obsolete 4/01)
+1935,Workhorse PTA Bal Cath (eff. 1/01) (obsolete 4/01)
+1937,Synergy Balloon Dil Cath (eff. 1/01) (obsolete 4/01)
+1939,"Raptur, Ninja PTCA Dil Cath (eff. 1/01) (obsolete 4/01)"
+1941,Jupiter PTA Dil Cath (eff. 1/01) (obsolete 4/01)
+1943,RXCrossSail OTW OpenSail (eff. 1/01) (obsolete 4/01)
+1945,Savvy PTA Dil Cath (eff. 1/01) (obsolete 4/01)
+1947,Gazelle Bal Dil Cath (eff. 1/01) (obsolete 4/01)
+1949,Oracle Megasonics Cath (eff. 1/01) (obsolete 4/01)
+1980,Atlantis SR Coronary Cath (eff. 1/01) (obsolete 4/01)
+2000,Orbiter ST Steerable Cath (eff. 1/01) (obsolete 4/01)
+2002,Irvine 5F Inquiry Diag EP Cath (eff. 1/01) (obsolete 4/01)
+2004,Biosense EP Cath -- Octapolar (eff. 1/01) (obsolete 4/01)
+2006,Biosense EP Cath -- Decapolar (eff. 1/01) (obsolete 4/01)
+2008,7F Luma-Cath EP Cath 81910-15 (eff. 1/01) (obsolete 4/01)
+2010,Fixed Curve EP Cath (eff. 1/01) (obsolete 4/01)
+2012,Celsius Abln Cath (eff. 1/01) (obsolete 4/01)
+2014,Celsius II Asym Abln Cath (eff. 1/01) (obsolete 4/01)
+2016,"Navi-Star DS, Navi-Star Ther (eff. 1/01) (obsolete 4/01)"
+2018,Polaris T Ablation Cath (eff. 1/01) (obsolete 4/01)
+2020,Blazer II XP Abln Cath (eff. 1/01) (obsolete 4/01)
+2022,CP Chilli Cooled Abln Cath (eff. 1/01) (obsolete 4/01)
+2100,CP CS Reference Cath (eff. 1/01) (obsolete 4/01)
+2103,CP Radii 7F EP Cath w/Track (eff. 1/01) (obsolete 4/01)
+2151,Veripath Guiding Cath (eff. 1/01) (obsolete 4/01)
+2153,Bard Viking Cath (eff. 1/01) (obsolete 4/01)
+2300,Varisource Stnd Catheters (eff. 1/01) (obsolete 4/01)
+2598,Clinicath 18/20/24-G single (eff. 1/01) (obsolete 4/01)
+2601,Bard DL Ureteral Cath (eff. 1/01) (obsolete 4/01)
+2603,Vitesse Laser Cath 2.0mm (eff. 1/01) (obsolete 4/01)
+2605,Extreme Laser Catheter (eff. 1/01) (obsolete 4/01)
+2607,SpineCath Intradiscal Cath (eff. 1/01) (obsolete 4/01)
+2609,Flexima Bil Draingage Cath (eff. 1/01) (obsolete 4/01)
+2611,AlgoLine Intraspinal Cath (eff. 1/01) (obsolete 4/01)
+2615,"Sealant, pulmonary, liquid (eff. 4/01)"
+2617,"Stent, non-cor, tem w/o del (eff. 4/01)"
+2619,"Pmkr, dual, non rate-resp (eff. 4/01)"
+2621,"Pmkr, other than single/dual (eff. 4/01)"
+2625,"Stent, non-cor , tem w/del sys (eff. 4/01)"
+2627,"Cath, suprapubic/cystoscopic (eff. 4/01)"
+2629,"Intro/sheath, laser (eff. 4/01)"
+2631,"Rep dev, urinary, w/o sling (eff. 4/01)"
+2701,Phylax XM SC defib (eff. 1/01) (obsolete 4/01)
+2703,Ventak Prizm VR HE Defib (eff. 1/01) (obsolete 4/01)
+2801,Defender IV DR 612 DC defib (eff. 1/01) (obsolete 4/01)
+2803,Ventak Prizm DR HE Defib (eff. 1/01) (obsolete 4/01)
+2805,Jewel AF 7250 Defib (eff. 1/01) (obsolete 4/01)
+2807,Contak CD 1823 (eff. 1/01) (obsolete 4/01)
+3001,Kainox SL/RV defib lead (eff. 1/01) (obsolete 4/01)
+3003,Endotak SQ Array XP lead (eff. 1/01) (obsolete 4/01)
+3400,"Siltex Spectrum, Contour Prof (eff. 1/01) (obsolete 4/01)"
+3500,Mentor alpha I Inf Penile Pros (eff. 1/01) (obsolete 4/01)
+3551,Choice/PT Graphix/Luge/Trooper (eff. 1/01) (obsolete 4/01)
+3553,Cordis guidewires (eff. 1/01) (obsolete 4/01)
+3555,Wholey Hi-Torque Plus GW (eff. 1/01) (obsolete 4/01)
+3557,HyTek guidewire (eff. 1/01) (obsolete 4/01)
+3801,Arrow/Microject PCAQ Sys (eff. 1/01) (obsolete 4/01)
+4000,"Opus G 4621, 4624 SC pmkr (eff. 1/01) (obsolete 4/01)"
+4002,Talent 113 SC pmkr (eff. 1/01) (obsolete 4/01)
+4004,"Actros SR, Actros SLR SC pmkr (eff. 1/01) (obsolete 4/01)"
+4006,Pulsar Max II SR pmkr (eff. 1/01) (obsolete 4/01)
+4008,Discovery II SSI pmkr (eff. 1/01) (obsolete 4/01)
+4300,Integrity AFx DR 5342 pmkr (eff. 1/01) (obsolete 4/01)
+4302,Affinity VDR 5430 DR (eff. 1/01) (obsolete 4/01)
+4304,"Brio 212, Talent 213/223 DC pmkr (eff. 1/01) (obsolete 4/01)"
+4306,Brio 220 DC pmkr (eff. 1/01) (obsolete 4/01)
+4308,"Inos2, Inos2+ DC pmkr (eff. 1/01) (obsolete 4/01)"
+4310,Actros DR-B DC pmkr (eff. 1/01) (obsolete 4/01)
+4312,Pulsar Max II DR pmkr (eff. 1/01) (obsolete 4/01)
+4314,Momentum DR pmkr (eff. 1/01) (obsolete 4/01)
+4316,Discovery II DR (eff. 1/01) (obsolete 4/01)
+4600,"Snynox, Polyrox, Elox, Retrox (eff. 1/01) (obsolete 4/01)"
+4603,Oscor/Flexion pmkr lead (eff. 1/01) (obsolete 4/01)
+4605,CapSure Epi pmkr lead (eff. 1/01) (obsolete 4/01)
+4607,"FinelineII/EZ, ThinlineII/EZ (eff. 1/01) (obsolete 4/01)"
+5001,"Memotherm Bil Stent, sm, med (eff. 1/01) (obsolete 4/01)"
+5003,"Memotherm Bil Stent, x-large (eff. 1/01) (obsolete 4/01)"
+5005,PalmazCorinthian IQ Trans/Bil (eff. 1/01) (obsolete 4/01)
+5007,PalmazTran XL Bil Stent--40mm (eff. 1/01) (obsolete 4/01)
+5009,VistaFlex Biliary Stent (eff. 1/01) (obsolete 4/01)
+5011,"IntraStent, IntraStent LP (eff. 1/01) (obsolete 4/01)"
+5013,IntraStent DoubleStrut XS (eff. 1/01) (obsolete 4/01)
+5015,"AVE/X3 Bridge Sys, 40-100 (eff. 1/010 (obsolete 4/01)"
+5017,WallstentRP Bil--20/40/60/68mm (eff. 1/01) (obsolete 4/01)
+5019,Flexima Bil Stent Sys (eff. 1/01) (obsolete 4/01)
+5021,Smart Nitinol Stent--40/60mm (eff. 1/01) (obsolete 4/01)
+5023,BX Velocity Stent--8/13mm (eff. 1/01) (obsolete 4/01)
+5025,BX Velocity Stent 23 mm (eff. 1/01) (obsolete 4/01)
+5027,BX Velocity Stent w/Hep--8/13mm (eff. 1/01) (obsolete 4/01)
+5029,BX Velocity Stent w/Hep--23mm (eff. 1/01) (obsolete 4/01)
+5031,"Stent, coronary, S660 15/18mm (eff. 1/01) (obsolete 4/01)"
+5033,"Niroyal Stent Sys, 9mm (eff. 1/01) (obsolete 4/01)"
+5035,"Niroyal Stent Sys, 18mm (eff. 1/01) (obsolete 4/01)"
+5037,"Niroyal Stent Sys, 31mm (eff. 1/01) (obsolete 4/01)"
+5039,IntraCoil Periph Stent--40mm (eff. 1/01) (obsolete 4/01)
+5041,BeStent Over-the-Wire 24/30mm (eff. 1/01) (obsolete 4/01)
+5043,BeStent Over-the-Wire 15mm (eff. 1/01) (obsolete 4/01)
+5045,Multilink Tetra Cor Stent Sys (eff. 1/01) (obsolete 4/01)
+5047,Niroyal Elite Cor Stent Sys (eff. 1/01) (obsolete 4/01)
+5130,Wilson-Cook Colonic Z-Stent (eff. 1/01) (obsolete 4/01)
+5132,Bard Colorectal Stent-80mm (eff. 1/01) (obsolete 4/01)
+5134,Enteral Wallstent-90mm (eff. 1/01) (obsolete 4/01)
+5280,Inlay Dbl Ureteral Stent (eff. 1/01) (obsolete 4/01)
+5282,Wallgraft Trach Sys 20/30/50 (eff. 1/01) (obsolete 4/01)
+5284,Wallstent TrachUltraFlex (eff. 1/01) (obsolete 4/01)
+5601,VasoSeal Model 1000 (eff. 1/01) (obsolete 4/01)
+6002,Composix Mesh 32 in (eff. 1/01) (obsolete 4/01)
+6004,Composix Mesh 80 in (eff. 1/01) (obsolete 4/01)
+6006,Composix Mesh 144 in (eff. 1/01) (obsolete 4/01)
+6013,Pelvicol Collagen 21/24/28 sq cm (eff. 1/01) (obsolete 4/01)
+6015,Pelvicol Collagen 48 sq cm (eff. 1/01) (obsolete 4/01)
+6017,Gore-Tex DualMesh 75/96 sq cm (eff. 1/01) (obsolete 4/01)
+6019,Gore-Tex DualMesh 285 sq cm (eff. 1/01) (obsolete 4/01)
+6021,Gore-Tex DualMesh 600 sq cm (eff. 1/01) (obsolete 4/01)
+6023,"Gore-TexPlus 1mm, 75/96 sq cm (eff. 1/01) (obsolete 4/01)"
+6025,"Gore-TexPlus 1mm, 285 sq cm (eff. 1/01) (obsolete 4/01)"
+6027,"Gore-TexPlus 1mm, 600 sq cm (eff. 1/01) (obsolete 4/01)"
+6029,"Gore-TexPlus 2mm, 150 sq cm (eff. 1/01) (obsolete 4/01)"
+6031,"Gore-TexPlus 2mm, 432 sq cm (eff. 1/01) (obsolete 4/01)"
+6033,"Gore-TexPlus 2mm, 884 sq cm (eff. 1/01) (obsolete 4/01)"
+6035,"Bard ePTFE: 150sqcm-1mm,75-2mm (eff. 1/01) (obsolete 4/01)"
+6037,"Bard ePTFE: 300 sq cm-1,2mm (eff. 1/01) (obsolete 4/01)"
+6039,Bard ePTFE: 884sq cm-1mm (eff. 1/01) (obsolete 4/01)
+6041,Bard ePTFE: 884sq cm -2mm (eff. 1/01) (obsolete 4/01)
+6051,"Stratasis Sling, 20/40 cm (eff. 1/01) (obsolete 4/01)"
+6053,Surgisis Soft Graft (eff. 1/01) (obsolete 4/01)
+6055,Surgisis Enhanced Tissue (eff. 1/01) (obsolete 4/01)
+6057,Surgisis Hernia Graft (eff. 1/01) (obsolete 4/01)
+6080,Male Sling Sys w/wo Matrial (eff. 1/01) (obsolete 4/01)
+6201,Impra Venaflo--10/20cm (eff. 1/01) (obsolete 4/01)
+6203,"Impra Venaflo--50 cm, vt45 (eff. 1/01) (obsolete 4/01)"
+6205,Impra Carboflo--10cm (eff. 1/01) (obsolete 4/01)
+6207,Impra Carboflo--30/35/40cm (eff. 1/01) (obsolete 4/01)
+6209,Impra Carboflo--ctrflex (eff. 1/01) (obsolete 4/01)
+6300,Vanguard III Endovas Graft (eff. 1/01) (obsolete 4/01)
+6501,Soft Tip Sheaths (eff. 1/01) (obsolete 4/01)
+6525,Spectranetics Laser Sheath (eff. 1/01) (obsolete 4/01)
+6650,Fast-Cath Guiding Introducer (eff. 1/01) (obsolete 4/01)
+6652,Bard Excalibur Introducer (eff. 1/01) (obsolete 4/01)
+7000,"Amifostine, 500 mg (eligible for pass-through payments)"
+7002,"Clonidine, HCl, 1 MG (eligible for pass-through payments) (obsolete 1/01)"
+7004,"Immune globulin intravenous human 5g, inj (eligible for pass-through payments)"
+7007,"Milrinone lacetate, per 5 ml, inj (not subject to national coinsurance)"
+7011,"Oprelevekin, inj, 5 mg (eligible for pass-through payments)"
+7014,"Fentanyl citrate, inj, up to 2 ml (eligible for pass-through payments)"
+7019,"Aprotinin, 10,000 kiu (eligible for pass-through payments)"
+7022,"Elliotts B Solution, per ml (eligible for pass-through payments)"
+7024,"Corticorelin ovine triflutate, 0.1 mg (eligible for pass-through payments)"
+7026,"Ethanolamine oleate, 1000 ml (eligible for pass-through payments)"
+7028,"Fosphenytoin, 50 mg (eligible for pass-through payments)"
+7030,"Hemin, 1 mg (eligible for pass-through payments)"
+7032,"Sermorelin acetate, 0.5 mg (eligible for pass-through payments)"
+7034,"Somatropin, 1 mg (eligible for pass-through payments)"
+7036,"Urokinase, inj, IV, 250,000 I.U. (not subject to national coinsurance)"
+7038,"Muromonab-CD3, 5 mg (eligible for pass-through payments)"
+7040,"Pentastarch 10% inj, 100 ml (eligible for pass-through payments)"
+7042,"Capecitabine, oral 150 mg (eligible for pass-through payments)"
+7045,Trimetrexate Glucoronate (eligible for pass-through payments)
+7047,Droperidol/fentanyl inj (eff. 1/01)
+7049,Filgrastim 480 mcg injection (eff. 1/01)
+8099,Spectranetics Lead Lock Dev (eff. 1/01) (obsolete 4/01)
+8102,SurgiVision Esoph Coil (eff. 1/01) (obsolete 4/01)
+9001,"Linezolid inj, 200mg (eff. 1/01)"
+9003,"Palivizumab, per 50 mg (eff. 1/01)"
+9005,"Reteplase inj, half-kit, 18.8 mg/vial (eff. 1/01)"
+9007,Baclofen Intrathecal kit-1amp (eff. 1/01)
+9009,Baclofen Refill Kit--2000mcg (eff. 1/01)
+9011,"Caffeine Citrate, inj, 1ml (eff. 1/01)"
+9013,"Co 57 Cobaltous Cl, 1 ml (eff. 4/01)"
+9102,"51 Na chromate, 50mCi (eff. 1/01)"
+9104,"Anti-thymocyte globin, 25 mg (eff. 1/01)"
+9106,Sirolimus 1 mg/ml (eff. 1/01)
+9108,"Thyrotropin Alfa, 1.1 mg (eff. 1/01)"
+9217,"Leuprolide acetate for depot suspension, 7.5 mg (eff. 1/01)"
+9501,"Platelets, pheresis, ea unit (eff. 1/01)"
+9503,"Fresh frozen plasma, ea unit (eff. 1/01)"
+9505,"RBC, irradiated, ea unit (eff. 1/01)"
