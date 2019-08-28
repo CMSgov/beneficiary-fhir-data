@@ -3,9 +3,3 @@
 # 
 #     $ ansible-galaxy install -r install_roles.yml 
 # 
-
-# https://github.com/HHSIDEAlab/bluebutton-ansible-role-data-pipeline
-# This Ansible role can be used to install and configure the [bluebutton-data-pipeline](https://github.com/HHSIDEAlab/bluebutton-data-pipeline) application on a system.
-- src: 'https://github.com/HHSIDEAlab/bluebutton-ansible-role-data-pipeline.git'
-  name: karlmdavis.bluebutton_data_pipeline
-

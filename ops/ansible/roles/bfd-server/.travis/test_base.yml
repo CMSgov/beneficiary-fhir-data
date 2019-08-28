@@ -26,5 +26,4 @@
 
     - name: Apply Ansible Role
       include_role:
-        name: karlmdavis.bluebutton_data_server
-
+        name: bfd-server
