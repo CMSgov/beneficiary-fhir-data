@@ -129,7 +129,7 @@
 									<classifier>capsule-fat</classifier>
 									<type>jar</type>
 									<outputDirectory>${project.build.directory}/pipeline-app</outputDirectory>
-									<destFileName>bluebutton-data-pipeline-app-capsule-fat.jar</destFileName>
+									<destFileName>bfd-pipeline-app-capsule-fat.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

@@ -87,7 +87,7 @@ public final class S3ToDatabaseLoadAppBenchmark {
 	 * The name of the optional {@link System#getProperty(String)} value that
 	 * can be specified, which will provide the path that the benchmarks will
 	 * write their results out to. If not specified, this will default to
-	 * <code>bluebutton-data-pipeline.git/dev/benchmark-data.csv</code>.
+	 * <code>bfd-pipeline/dev/benchmark-data.csv</code>.
 	 */
 	private static final String SYS_PROP_RESULTS_FILE = "benchmarkDataFile";
 

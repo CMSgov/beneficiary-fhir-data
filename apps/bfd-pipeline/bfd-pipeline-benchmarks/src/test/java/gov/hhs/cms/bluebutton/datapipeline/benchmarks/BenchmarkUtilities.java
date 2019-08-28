@@ -41,7 +41,7 @@ final class BenchmarkUtilities {
 	 * @return the {@link Path} to this project's <code>target</code> directory
 	 */
 	static Path findProjectTargetDir() {
-		Path targetDir = Paths.get(".", "bluebutton-data-pipeline-benchmarks", "target");
+		Path targetDir = Paths.get(".", "bfd-pipeline-benchmarks", "target");
 		if (!Files.isDirectory(targetDir))
 			targetDir = Paths.get(".", "target");
 		if (!Files.isDirectory(targetDir))

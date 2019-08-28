@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Karl M. Davis
-  description: This Ansible role can be used to install and configure the bluebutton-data-pipeline application on a system. 
+  description: This Ansible role can be used to install and configure the bfd-pipeline application on a system.
   company: Centers for Medicare and Medicaid Services
 
   license: 'Public Domain / CC0'

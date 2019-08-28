@@ -20,7 +20,7 @@ On `ExplanationOfBenefit` queries add an `excludeSAMHSA=true` query parameter:
 
 In order to determine which claims are SAMHSA-related, CMS has previously identified various diagnosis and procedure codes as being indicative of SAMHSA-related treatment. Any Part A or Part B claims referencing those codes are thus suppressed, which accomplishes the required SAMHSA filtering. This project takes the same approach:
 
-1. The `/bluebutton-server-app/src/main/resources/samhsa-related-codes/codes-*` CSV files store the designated SAMHSA-related codes.
+1. The `bfd-server/bfd-server-war/src/main/resources/samhsa-related-codes/codes-*` CSV files store the designated SAMHSA-related codes.
     * The data in these files was extracted (i.e. copy-pasted out of) [Claim and Claim Line Feed (CCLF) Information Packet (IP) v24.pdf](https://confluence.cms.gov/download/attachments/143373335/Claim%20and%20Claim%20Line%20Feed%20%28CCLF%29%20Information%20Packet%20%28IP%29%20v24.pdf?api=v2).
 2. The `gov.hhs.cms.bluebutton.server.app.stu3.providers.SamhsaMatcher` compares individual claims against those codes to determine which claims are SAMHSA-related.
 3. The `gov.hhs.cms.bluebutton.server.app.stu3.providers.ExplanationOfBenefitResourceProvider` class uses `SamhsaMatcher` when the `excludeSAMHSA=true` URL query parameter is passed to the `/ExplanationOfBenefit?...` search endpoint/operation.

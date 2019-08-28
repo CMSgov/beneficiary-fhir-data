@@ -61,7 +61,7 @@
   gather_facts: true
   roles:
     - role: karlmdavis.bluebutton_data_pipeline
-      data_pipeline_appjar_name: "bluebutton-data-pipeline-app-capsule-fat.jar"
+      data_pipeline_appjar_name: "bfd-pipeline-app-capsule-fat.jar"
       data_pipeline_appjar_s3_bucket: "{{ s3_benchmark_resources_bucket }}"
       data_pipeline_s3_bucket: "gov-hhs-cms-bluebutton-datapipeline-benchmark-iteration{{ iteration_index }}"
       data_pipeline_hicn_hash_iterations: 2  # NIST recommends at least 1000, but this isn't production.

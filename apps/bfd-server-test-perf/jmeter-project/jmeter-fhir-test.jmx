@@ -64,7 +64,7 @@
           </elementProp>
         </collectionProp>
       </elementProp>
-      <stringProp name="TestPlan.user_define_classpath">C:\bit9prog\dev\projects\bluebutton-data-server-perf-tests\target\fhir-stress-test-0.1.0-SNAPSHOT-uber.jar</stringProp>
+      <stringProp name="TestPlan.user_define_classpath">C:\bit9prog\dev\projects\beneficiary-fhir-data\apps\bfd-server-test-perf\target\bfd-server-test-perf-1.0.0-SNAPSHOT-uber.jar</stringProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
