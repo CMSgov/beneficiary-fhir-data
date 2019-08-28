@@ -290,7 +290,7 @@ public final class ServerTestUtils {
 		 */
 		Path serverRunDir = Paths.get("target", "bluebutton-server");
 		if (!Files.isDirectory(serverRunDir))
-			serverRunDir = Paths.get("bluebutton-data-server-app", "target", "bluebutton-server");
+			serverRunDir = Paths.get("bfd-server-war", "target", "bluebutton-server");
 		if (!Files.isDirectory(serverRunDir))
 			throw new IllegalStateException();
 

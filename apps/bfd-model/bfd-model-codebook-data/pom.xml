@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-		<artifactId>bluebutton-data-model</artifactId>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-model-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-model-codebook-data</artifactId>
+	<artifactId>bfd-model-codebook-data</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
@@ -18,22 +18,22 @@
 	<dependencies>
 		<dependency>
 			<!-- Provides the XML codebook data that this module's libraries use. -->
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-codebook-extractor</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-codebook-extractor</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Provides annotations that indicate where source code generation should 
 				be performed. -->
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-codegen-annotations</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-codegen-annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Uses the Codebook XML files from `bluebutton-data-model-codebook-extractor` 
 				to codegen related utility code. -->
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-codegen</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-codegen</artifactId>
 			<version>${project.version}</version>
 
 			<!-- Marked as provided to keep it (and its dependencies) out of our production 

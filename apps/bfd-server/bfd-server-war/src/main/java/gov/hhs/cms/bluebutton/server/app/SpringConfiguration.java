@@ -215,9 +215,9 @@ public class SpringConfiguration {
 	public static Path findTestDatabaseProperties() {
 		Path serverRunDir = Paths.get("target", "bluebutton-server");
 		if (!Files.isDirectory(serverRunDir))
-			serverRunDir = Paths.get("bluebutton-data-server-app", "target", "bluebutton-server");
+			serverRunDir = Paths.get("bfd-server-war", "target", "bluebutton-server");
 		if (!Files.isDirectory(serverRunDir))
-			throw new IllegalStateException("Unable to find 'bluebutton-server' directory. Working directory: "
+			throw new IllegalStateException("Unable to find 'bfd-server' directory. Working directory: "
 					+ Paths.get(".").toAbsolutePath());
 
 		Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");

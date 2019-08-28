@@ -2,31 +2,23 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<prerequisites>
-		<maven>3.3</maven>
-	</prerequisites>
-
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-		<artifactId>bluebutton-data-model</artifactId>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-model-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-model-rif-samples</artifactId>
+	<artifactId>bfd-model-rif-samples</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
-		Provides sample data in the RIF format that the CMS Blue Button API uses to extract
-		data from the CCW.
+		Provides sample data in the RIF format that BFD uses to extract data from the CCW.
 	</description>
-
-	<properties>
-	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

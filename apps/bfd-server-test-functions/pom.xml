@@ -7,12 +7,12 @@
 	</prerequisites>
 
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton</groupId>
+		<groupId>gov.cms.bfd</groupId>
 		<artifactId>bluebutton-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>gov.hhs.cms.bluebutton.tests</groupId>
+	<groupId>gov.cms.bfd</groupId>
 	<artifactId>bluebutton-functional-tests</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>

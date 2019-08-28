@@ -380,7 +380,7 @@ public final class S3ToDatabaseLoadAppIT {
 
 			Path buildTargetDir = Paths.get(".", "target");
 			Path appJar = Files.list(buildTargetDir)
-					.filter(f -> f.getFileName().toString().startsWith("bluebutton-data-pipeline-app-"))
+					.filter(f -> f.getFileName().toString().startsWith("bfd-pipeline-app-"))
 					.filter(f -> f.getFileName().toString().endsWith("-capsule-fat.jar")).findFirst().get();
 
 			return new String[] { javaBin.toString(), "-jar", appJar.toAbsolutePath().toString() };

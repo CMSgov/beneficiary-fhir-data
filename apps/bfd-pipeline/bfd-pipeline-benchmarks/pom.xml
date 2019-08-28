@@ -2,17 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<prerequisites>
-		<maven>3.3</maven>
-	</prerequisites>
-
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
-		<artifactId>bluebutton-data-pipeline</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-pipeline-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-pipeline-benchmarks</artifactId>
+	<artifactId>bfd-pipeline-benchmarks</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
@@ -28,8 +24,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-app</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-app</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -88,8 +84,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -128,7 +124,7 @@
 							<artifactItems>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>
-									<artifactId>bluebutton-data-pipeline-app</artifactId>
+									<artifactId>bfd-pipeline-app</artifactId>
 									<version>${project.version}</version>
 									<classifier>capsule-fat</classifier>
 									<type>jar</type>

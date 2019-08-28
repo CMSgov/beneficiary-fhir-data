@@ -2,17 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<prerequisites>
-		<maven>3.3</maven>
-	</prerequisites>
-
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
-		<artifactId>bluebutton-data-pipeline</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-pipeline-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
+	<artifactId>bfd-pipeline-rif-extract</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
@@ -20,13 +16,10 @@
 		pipeline. Designed to receive 'RIF' files from the CCW.
 	</description>
 
-	<properties>
-	</properties>
-
 	<dependencies>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif</artifactId>
 		</dependency>
 
 		<dependency>
@@ -99,8 +92,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

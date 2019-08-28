@@ -45,7 +45,7 @@ public final class ServerCapabilityStatementIT {
 		// Verify that our custom server metadata is correct.
 		Assert.assertEquals(BlueButtonStu3Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
 		Assert.assertEquals(BlueButtonStu3Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
-		Assert.assertEquals("gov.hhs.cms.bluebutton.fhir:bluebutton-server-app",
+		Assert.assertEquals("gov.cms.bfd:bfd-server-war",
 				capabilities.getImplementation().getDescription());
 		Assert.assertNotEquals(null, capabilities.getSoftware().getVersion());
 		Assert.assertNotEquals("", capabilities.getSoftware().getVersion());

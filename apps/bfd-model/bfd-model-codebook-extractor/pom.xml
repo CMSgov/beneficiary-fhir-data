@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-		<artifactId>bluebutton-data-model</artifactId>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-model-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-data-model-codebook-extractor</artifactId>
+	<artifactId>bfd-model-codebook-extractor</artifactId>
 	<packaging>jar</packaging>
 
 	<description>

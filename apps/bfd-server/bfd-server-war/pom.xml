@@ -3,23 +3,23 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-		<artifactId>bluebutton-server-parent</artifactId>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-server-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bluebutton-server-app</artifactId>
+	<artifactId>bfd-server-war</artifactId>
 	<packaging>war</packaging>
 
 	<description>
-		The primary WAR for the CMS Blue Button API project. Provides a FHIR API.
+		The primary WAR for the BFD Server project. Provides a FHIR API.
 	</description>
 
 	<properties>
 		<hapi-fhir.version>3.6</hapi-fhir.version>
 		<jersey.version>2.25.1</jersey.version>
 
-		<!-- Configure the Blue Button FHIR Server, as it will be run via the exec
+		<!-- Configure the BFD Server, as it will be run via the exec
 			plugin. These settings are pulled out as POM properties so that they can
 			be adjusted via profiles. Note that the specific DB URL here is special-cased
 			by SpringConfiguration, which will launch an embedded HSQL DB to host it. -->
@@ -46,8 +46,7 @@
 
 	<dependencies>
 		<dependency>
-			<!-- Hibernate's JPA implementation is used to read data from the Blue 
-				Button API's database. -->
+			<!-- Hibernate's JPA implementation is used to read data from the BFD database. -->
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 		</dependency>
@@ -58,10 +57,9 @@
 			<artifactId>HikariCP</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Provides the JPA entities used to represent the Blue Button API backend's 
-				data in the database. -->
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif</artifactId>
+			<!-- Provides the JPA entities used to represent the BFD data in the database. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif</artifactId>
 		</dependency>
 		
 		<dependency>
@@ -177,7 +175,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- The Blue Button API runs against PostgreSQL in production. -->
+			<!-- BFD runs against PostgreSQL in production. -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
@@ -195,8 +193,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- The builds for this and other Blue Button API projects use HSQL in 
-				tests. -->
+			<!-- The builds for this and other BFD projects use HSQL in tests. -->
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 			<!-- Only used by tests, but still has to be packaged in WAR. -->
@@ -204,14 +201,14 @@
 		</dependency>
 		<dependency>
 			<!-- Provides sample data used in tests. -->
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<!-- Used to load sample data in tests. -->
-			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-rif-load</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-rif-load</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -259,8 +256,7 @@
 				</plugin>
 				<plugin>
 					<!-- The exec plugin can be used in child modules to run the 'src/main/config/server-*.sh'
-						scripts, which will start and stop the Blue Button API FHIR server for use 
-						in testing. -->
+						scripts, which will start and stop the BFD Server for use in testing. -->
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>1.5.0</version>
@@ -316,7 +312,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Launch a Java web server hosting the Blue Button FHIR server prior 
+				<!-- Launch a Java web server hosting the BFD Server prior
 					to running this project's integration tests, and stop it after the integration 
 					tests. The server will serve HTTPS on port 9094 (as configured in the script), 
 					and the FHIR server will be hosted at the root ("/") context. Alternatively, 

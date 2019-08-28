@@ -9,7 +9,7 @@
     "version" : "1.0.0-SNAPSHOT"
   },
   "implementation" : {
-    "description" : "gov.hhs.cms.bluebutton.fhir:bluebutton-server-app",
+    "description" : "gov.cms.bfd:bfd-server-war",
     "url" : "https://localhost:IGNORED_FIELD/v1/fhir"
   },
   "fhirVersion" : "3.0.1",
