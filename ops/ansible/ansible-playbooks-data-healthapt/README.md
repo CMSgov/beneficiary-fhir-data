@@ -143,8 +143,8 @@ The playbooks can be run, as follows:
 
 The `extra-vars` in that command may need to be adjusted:
 
-* `data_pipeline_version`: The version of the `gov.hhs.cms.bluebutton.data.pipeline:bluebutton-data-pipeline-app` artifact to deploy.
-* `data_server_version`: The version of the `gov.hhs.cms.bluebutton.fhir:bluebutton-server-app` artifact to deploy.
+* `data_pipeline_version`: The version of the `gov.cms.bfd:bfd-pipeline-app` artifact to deploy.
+* `data_server_version`: The version of the `gov.cms.bfd:bfd-server-war` artifact to deploy.
 
 ## License
 

@@ -31,9 +31,12 @@ public class FhirClientIT extends TestCase {
 	 * Test FHIR server connectivity
 	 */
 	public void testFhirClient() {
+		// Disabled, as it only works in HealthAPT TEST environment.
+		/*
 		IGenericClient client = FhirClient.create(
 				"https://internal-tsbb10lb01-758855236.us-east-1.elb.amazonaws.com/v1/fhir", "./dev/ssl-stores");
 		Patient patient = client.read().resource(Patient.class).withId("567834").execute();
 		assertEquals("Doe", patient.getName().get(0).getFamily());
+		*/
 	}
 }

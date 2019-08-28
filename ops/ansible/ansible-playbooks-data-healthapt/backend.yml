@@ -29,8 +29,8 @@
         name: karlmdavis.bluebutton_data_pipeline
       vars:
         data_pipeline_dir: '/u01/bluebutton-data-pipeline'
-        data_pipeline_appjar_name: "bluebutton-data-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
-        data_pipeline_appjar_localpath: "~/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/{{ data_pipeline_version }}"
+        data_pipeline_appjar_name: "bfd-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
+        data_pipeline_appjar_localpath: "~/.m2/repository/gov/cms/bfd/bfd-pipeline-app/{{ data_pipeline_version }}"
         data_pipeline_jvm_args: "-Xmx{{ ((data_pipeline_ec2_instance_type_mem_mib | int) * 0.80) | int }}m -XX:+PreserveFramePointer"
         data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
         data_pipeline_loader_threads: "{{ data_pipeline_ec2_instance_type_vcpu * 25 }}"
@@ -99,8 +99,8 @@
         data_server_appserver_management_username: "{{ vault_data_server_appserver_management_username }}"
         data_server_appserver_management_password: "{{ vault_data_server_appserver_management_password }}"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
-        data_server_war_name: "bluebutton-server-app-{{ data_server_version }}.war"
-        data_server_war_local_dir: "~/.m2/repository/gov/hhs/cms/bluebutton/fhir/bluebutton-server-app/{{ data_server_version }}"
+        data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
+        data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
         data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
         # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
         # Secondary (i.e. read-only) DBs defined in `group_vars/env_<name>_az_<x>/vault.yml`:

@@ -29,5 +29,5 @@
         mode: put
         overwrite: different
       with_items:
-        - { src: "{{ maven_repo }}/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/{{ backend_etl_version }}/bluebutton-data-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar", dest_name: "bluebutton-data-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar" }
+        - { src: "{{ maven_repo }}/gov/cms/bfd/bfd-pipeline-app/{{ backend_etl_version }}/bfd-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar", dest_name: "bfd-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar" }
 

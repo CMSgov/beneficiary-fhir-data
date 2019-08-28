@@ -2,60 +2,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<prerequisites>
-		<maven>3.3</maven>
-	</prerequisites>
-
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton</groupId>
-		<artifactId>bluebutton-parent</artifactId>
-		<version>1.1.1-SNAPSHOT</version>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-	<artifactId>bluebutton-data-model</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<artifactId>bfd-model-parent</artifactId>
 	<packaging>pom</packaging>
 
-	<name>bluebutton-data-model</name>
 	<description>
-		A parent POM for the CMS Blue Button API: represents the beneficiary and claims data that comes from the CCW data warehouse.
+			A parent POM for the bfd-model-* projects, which provide shared/library code for the BFD applications.
 	</description>
-	<url>https://github.com/HHSIDEAlab/bluebutton-data-model</url>
-
-	<issueManagement>
-		<!-- There doesn't seem to be any tooling support for this yet, but it 
-			doesn't hurt to include it. -->
-		<system>GitHub Issues</system>
-		<url>https://github.com/HHSIDEAlab/bluebutton-data-model/issues</url>
-	</issueManagement>
-
-	<ciManagement>
-		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
-			Sonar (at least) can use this information. -->
-		<system>jenkins</system>
-		<url>http://builds.hhsdevcloud.us/job/HHSIDEALab/job/bluebutton-data-model/</url>
-	</ciManagement>
-
-	<scm>
-		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-		<connection>scm:git:git@github.com:HHSIDEAlab/bluebutton-data-model.git</connection>
-		<developerConnection>scm:git:git@github.com:HHSIDEAlab/bluebutton-data-model.git</developerConnection>
-		<url>https://github.com/HHSIDEAlab/bluebutton-data-model</url>
-		<tag>HEAD</tag>
-	</scm>
 
 	<modules>
-		<module>bluebutton-data-model-codebook-extractor</module>
-		<module>bluebutton-data-model-codebook-data</module>
-		<module>bluebutton-data-model-codegen-annotations</module>
-		<module>bluebutton-data-model-codegen</module>
-		<module>bluebutton-data-model-rif</module>
-		<module>bluebutton-data-model-rif-samples</module>
+		<module>bfd-model-codebook-extractor</module>
+		<module>bfd-model-codebook-data</module>
+		<module>bfd-model-codegen-annotations</module>
+		<module>bfd-model-codegen</module>
+		<module>bfd-model-rif</module>
+		<module>bfd-model-rif-samples</module>
 	</modules>
-
-	<properties>
-	</properties>
 
 	<dependencyManagement>
 		<dependencies>

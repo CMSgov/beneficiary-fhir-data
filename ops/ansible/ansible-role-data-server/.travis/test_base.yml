@@ -16,7 +16,7 @@
         artifact_id: wicket-examples
         version: 7.2.0
         extension: war
-        dest: /tmp/bluebutton-data-server.war
+        dest: /tmp/bfd-server-war.war
 
 - hosts: docker_container
   tasks:

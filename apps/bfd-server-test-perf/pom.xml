@@ -1,58 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<prerequisites>
-		<maven>3.3</maven>
-	</prerequisites>
-
 	<parent>
-		<groupId>gov.hhs.cms.bluebutton</groupId>
-		<artifactId>bluebutton-parent</artifactId>
-		<version>1.1.1-SNAPSHOT</version>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<groupId>gov.hhs.cms.bluebutton.fhirstress</groupId>
-	<artifactId>fhir-stress-test</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<artifactId>bfd-server-test-perf</artifactId>
 	<packaging>jar</packaging>
 
 	<description>
-		A set of stress tests for FHIR servers, intended to be run via Apache JMeter.
+		A set of stress tests for the BFD Server, using Apache JMeter and Ansible.
 	</description>
-	<url>https://github.com/HHSIDEAlab/fhir-stress-test</url>
-	<organization>
-		<name>Centers for Medicare &amp; Medicaid Services</name>
-	</organization>
-
-	<issueManagement>
-		<!-- There doesn't seem to be any tooling support for this yet, but it 
-			doesn't hurt to include it. -->
-		<system>GitHub Issues</system>
-		<url>https://github.com/HHSIDEAlab/fhir-stress-test/issues</url>
-	</issueManagement>
-
-	<scm>
-		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-		<connection>scm:git:git@github.com:HHSIDEAlab/fhir-stress-test.git</connection>
-		<developerConnection>scm:git:git@github.com:HHSIDEAlab/fhir-stress-test.git</developerConnection>
-		<url>https://github.com/HHSIDEAlab/fhir-stress-test</url>
-		<tag>HEAD</tag>
-	</scm>
-
-	<repositories>
-		<repository>
-			<id>justdavis-nexus</id>
-			<url>https://justdavis.com/nexus/content/repositories/opensource-releases/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 	<dependencyManagement>
 		<dependencies>
@@ -107,25 +68,25 @@
 		</dependency>
 
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.fhir</groupId>
-			<artifactId>bluebutton-server-app</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-server-war</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>gov.hhs.cms.bluebutton.data.pipeline</groupId>
-			<artifactId>bluebutton-data-pipeline-rif-extract</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-rif-extract</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<!-- Provides sample data used in tests. -->
-			<groupId>gov.hhs.cms.bluebutton.data.model</groupId>
-			<artifactId>bluebutton-data-model-rif-samples</artifactId>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rif-samples</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

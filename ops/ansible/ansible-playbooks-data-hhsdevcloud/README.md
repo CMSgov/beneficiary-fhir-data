@@ -91,9 +91,9 @@ This project has an unfortunately large amount of variables that must be specifi
 * `deploy_id_custom`: Optional. An ID for the deployment to be run, which will be used to tag AMIs, etc. in AWS. By default, a UTC timestamp is used.
 * `ec2_key_name`: The name of the SSH key (as it's labeled in EC2) that all newly-created EC2 instances should be associated with.
 * `maven_repo`: Path to the local Maven repository directory, from which the deployment resources will be pulled.
-* `bluebutton_server_version`: The version of the Blue Button Data Server artifact (`gov.hhs.cms.bluebutton.fhir:bluebutton-server-app:war` artifact (and related artifacts) to deploy as the Blue Button backend FHIR server.
+* `bluebutton_server_version`: The version of the Blue Button Data Server artifact (`gov.cms.bfd:bfd-server-war:war` artifact (and related artifacts) to deploy as the Blue Button backend FHIR server.
 * `wildfly_version`: The version of the `org.wildfly:wildfly-dist:tar.gz` artifact to deploy and use to host the Blue Button backend FHIR server.
-* `backend_etl_version`: The version of the Blue Button Data Pipeline artifact (`gov.hhs.cms.bluebutton.data.pipeline:bluebutton-data-pipeline-app:capsule-fat:jar`) to deploy.
+* `backend_etl_version`: The version of the Blue Button Data Pipeline artifact (`gov.cms.bfd:bfd-pipeline-app:capsule-fat:jar`) to deploy.
 
 ## Interacting with the Deployed Environment
 
