@@ -67,7 +67,7 @@ if [[ "${cygwin}" = true ]]; then targetDirectory=$(cygpath --unix "${targetDire
 cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
-workDirectory="${targetDirectory}/bluebutton-server"
+workDirectory="${targetDirectory}/server-work"
 serverPortsFile="${workDirectory}/server-ports.properties"
 bluebuttonServerIdFile="${workDirectory}/bluebutton-server-id.txt"
 serverHome="${workDirectory}/${serverInstall}"

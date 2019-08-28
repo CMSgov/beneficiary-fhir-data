@@ -209,15 +209,15 @@ public class SpringConfiguration {
 
 	/**
 	 * @return the {@link Path} to the {@link Properties} file in
-	 *         <code>target/bluebutton-server</code> that the test DB connection
+	 *         <code>target/server-work</code> that the test DB connection
 	 *         properties will be written out to
 	 */
 	public static Path findTestDatabaseProperties() {
-		Path serverRunDir = Paths.get("target", "bluebutton-server");
+		Path serverRunDir = Paths.get("target", "server-work");
 		if (!Files.isDirectory(serverRunDir))
-			serverRunDir = Paths.get("bfd-server-war", "target", "bluebutton-server");
+			serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
 		if (!Files.isDirectory(serverRunDir))
-			throw new IllegalStateException("Unable to find 'bfd-server' directory. Working directory: "
+			throw new IllegalStateException("Unable to find 'server-work' directory. Working directory: "
 					+ Paths.get(".").toAbsolutePath());
 
 		Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");

@@ -286,11 +286,11 @@ public final class ServerTestUtils {
 		/*
 		 * The working directory for tests will either be the module directory
 		 * or their parent directory. With that knowledge, we're searching for
-		 * the target/bluebutton-server directory.
+		 * the target/server-work directory.
 		 */
-		Path serverRunDir = Paths.get("target", "bluebutton-server");
+		Path serverRunDir = Paths.get("target", "server-work");
 		if (!Files.isDirectory(serverRunDir))
-			serverRunDir = Paths.get("bfd-server-war", "target", "bluebutton-server");
+			serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
 		if (!Files.isDirectory(serverRunDir))
 			throw new IllegalStateException();
 

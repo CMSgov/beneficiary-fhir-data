@@ -247,7 +247,7 @@
 								<artifactId>wildfly-dist</artifactId>
 								<version>8.1.0.Final</version>
 								<type>tar.gz</type>
-								<outputDirectory>${project.build.directory}/bluebutton-server</outputDirectory>
+								<outputDirectory>${project.build.directory}/server-work</outputDirectory>
 							</artifactItem>
 						</artifactItems>
 						<overWriteReleases>false</overWriteReleases>
@@ -298,7 +298,7 @@
 						</goals>
 						<phase>pre-integration-test</phase>
 						<configuration>
-							<outputFile>${project.build.directory}/bluebutton-server/server-ports.properties</outputFile>
+							<outputFile>${project.build.directory}/server-work/server-ports.properties</outputFile>
 							<minPortNumber>8000</minPortNumber>
 							<maxPortNumber>9999</maxPortNumber>
 							<randomPort>true</randomPort>

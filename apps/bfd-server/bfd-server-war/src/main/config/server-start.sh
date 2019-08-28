@@ -117,7 +117,7 @@ trap 'error ${LINENO}' ERR
 cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
-workDirectory="${targetDirectory}/bluebutton-server"
+workDirectory="${targetDirectory}/server-work"
 serverArtifact="${workDirectory}/wildfly-dist-${serverVersion}.tar.gz"
 serverPortsFile="${workDirectory}/server-ports.properties"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bfd-server-war-.*\.war$')"
