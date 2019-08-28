@@ -56,10 +56,10 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 @Configuration
 @ComponentScan(basePackageClasses = { BlueButtonServerInitializer.class })
 public class SpringConfiguration {
-	public static final String PROP_DB_URL = "bbfhir.db.url";
-	public static final String PROP_DB_USERNAME = "bbfhir.db.username";
-	public static final String PROP_DB_PASSWORD = "bbfhir.db.password";
-	public static final String PROP_DB_CONNECTIONS_MAX = "bbfhir.db.connections.max";
+	public static final String PROP_DB_URL = "bfdServer.db.url";
+	public static final String PROP_DB_USERNAME = "bfdServer.db.username";
+	public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
+	public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
 	public static final int TRANSACTION_TIMEOUT = 30;
 
 	/**
@@ -67,7 +67,7 @@ public class SpringConfiguration {
 	 * <code>ServerTestUtils</code> that a database should be created for the
 	 * integration tests being run.
 	 */
-	private static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bluebutton-test:";
+	private static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bfd-test:";
 
 	/**
 	 * The {@link Bean#name()} for the {@link List} of STU3

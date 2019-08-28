@@ -335,7 +335,7 @@ public final class ServerTestUtils {
 				Path heapDumpsDir = Paths.get(".", "heap-dumps");
 				Files.createDirectories(heapDumpsDir);
 				String heapDumpFileName = String
-						.format("bluebutton-tests-%s.hprof", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+						.format("bfd-server-tests-%s.hprof", DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
 						.replaceAll(":", "-");
 				Path heapDump = heapDumpsDir.resolve(heapDumpFileName);
 				LOGGER.info("Generating heap dump at: {}", heapDump.toAbsolutePath().toString());

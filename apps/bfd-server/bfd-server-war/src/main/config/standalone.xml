@@ -30,9 +30,9 @@
 
     <system-properties>
         <property name="org.jboss.logging.provider" value="slf4j"/>
-        <property name="bbfhir.db.url" value="${bbfhir.db.url}"/>
-        <property name="bbfhir.db.username" value="${bbfhir.db.username:}"/>
-        <property name="bbfhir.db.password" value="${bbfhir.db.password:}"/>
+        <property name="bfdServer.db.url" value="${bfdServer.db.url}"/>
+        <property name="bfdServer.db.username" value="${bfdServer.db.username:}"/>
+        <property name="bfdServer.db.password" value="${bfdServer.db.password:}"/>
     </system-properties>
 
 
@@ -50,11 +50,11 @@
             <security-realm name="ApplicationRealm">
                 <server-identities>
                     <ssl>
-                        <keystore path="${bbfhir.ssl.keystore.path}" keystore-password="${bbfhir.ssl.keystore.storepassword:changeit}" key-password="${bbfhir.ssl.keystore.keypassword:changeit}"/>
+                        <keystore path="${bfdServer.ssl.keystore.path}" keystore-password="${bfdServer.ssl.keystore.storepassword:changeit}" key-password="${bfdServer.ssl.keystore.keypassword:changeit}"/>
                     </ssl>
                 </server-identities>
                 <authentication>
-                    <truststore path="${bbfhir.ssl.truststore.path}" keystore-password="${bbfhir.ssl.truststore.storepassword:changeit}"/>
+                    <truststore path="${bfdServer.ssl.truststore.path}" keystore-password="${bfdServer.ssl.truststore.storepassword:changeit}"/>
                     <local default-user="$local" allowed-users="*" skip-group-loading="true"/>
                     <properties path="application-users.properties" relative-to="jboss.server.config.dir"/>
                 </authentication>
@@ -327,20 +327,20 @@
                     </authorization>
                 </security-domain>
                 <security-domain name="bluebutton-data-server" cache-type="default">
-                    <!-- This is the security realm that the Blue Button Data Server will be
+                    <!-- This is the security realm that the BFD Server will be
                         hardcoded to use for its client authentication, in its jboss-web.xml file. -->
                     <authentication>
                         <login-module code="CertificateRoles" flag="required">
                             <module-option name="securityDomain" value="bluebutton-data-server" />
                             <module-option name="verifier" value="org.jboss.security.auth.certs.AnyCertVerifier"/>
-                            <module-option name="rolesProperties" value="file:${bbfhir.roles}" />
+                            <module-option name="rolesProperties" value="file:${bfdServer.roles}" />
                         </login-module>
                     </authentication>
                     <jsse
-                        keystore-password="${bbfhir.ssl.keystore.storepassword:changeit}"
-                        keystore-url="file:${bbfhir.ssl.keystore.path}"
-                        truststore-password="${bbfhir.ssl.truststore.storepassword:changeit}"
-                        truststore-url="file:${bbfhir.ssl.truststore.path}"
+                        keystore-password="${bfdServer.ssl.keystore.storepassword:changeit}"
+                        keystore-url="file:${bfdServer.ssl.keystore.path}"
+                        truststore-password="${bfdServer.ssl.truststore.storepassword:changeit}"
+                        truststore-url="file:${bfdServer.ssl.truststore.path}"
                         client-auth="true"
                     />
                 </security-domain>
