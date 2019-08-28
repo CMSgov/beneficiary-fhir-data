@@ -74,7 +74,7 @@
   tasks:
     - name: Apply Blue Button Data Server Role
       include_role:
-        name: karlmdavis.bluebutton_data_server
+        name: bfd-server
       vars:
         data_server_artifacts_mode: local
         data_server_appserver_installer_name: "wildfly-dist-{{ wildfly_version }}.tar.gz"

@@ -143,7 +143,7 @@
 - name: Configure ETL
   hosts: backend_etl_new
   roles:
-    - role: karlmdavis.bluebutton_data_pipeline
+    - role: bfd-pipeline
       data_pipeline_appjar_name: "bfd-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar"
       data_pipeline_appjar_s3_bucket: "{{ s3_bucket_deployment }}"
       data_pipeline_s3_bucket: "{{ s3_bucket_etl_staging }}"

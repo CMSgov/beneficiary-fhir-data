@@ -9,14 +9,3 @@
 # https://galaxy.ansible.com/karlmdavis/jenkins2/
 # Installs and configures Jenkins 2.
 - src: karlmdavis.jenkins2
-
-# https://github.com/HHSIDEAlab/bluebutton-ansible-role-data-pipeline
-# This Ansible role can be used to install and configure the [bluebutton-data-pipeline](https://github.com/HHSIDEAlab/bluebutton-data-pipeline) application on a system.
-- src: 'https://github.com/HHSIDEAlab/bluebutton-ansible-role-data-pipeline.git'
-  name: karlmdavis.bluebutton_data_pipeline
-
-# https://github.com/HHSIDEAlab/bluebutton-ansible-role-data-server
-# This Ansible role can be used to install and configure the [Blue Button Data Server](https://github.com/HHSIDEAlab/bluebutton-server) application on a system.
-- src: 'https://github.com/HHSIDEAlab/bluebutton-ansible-role-data-server.git'
-  name: karlmdavis.bluebutton_data_server
-

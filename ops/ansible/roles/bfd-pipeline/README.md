@@ -1,7 +1,7 @@
-Blue Button Data Pipeline
-=========================
+Ansible Role for BFD Pipeline
+=============================
 
-This Ansible role can be used to install and configure the [bluebutton-data-pipeline](https://github.com/HHSIDEAlab/bluebutton-data-pipeline) application on a system.
+This Ansible role can be used to install and configure the [bfd-pipeline](../../../../apps/bfd-pipeline) application on a system.
 
 Requirements
 ------------
@@ -39,7 +39,7 @@ Here's an example of how to apply this role to the `etlbox` host in an Ansible p
     - hosts: pipeline_box
       tasks:
         - include_role:
-            name: karlmdavis.bluebutton_data_pipeline
+            name: bfd-pipeline
           vars:
             data_pipeline_appjar_name: bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar
             data_pipeline_appjar_localpath: /home/karlmdavis/workspaces/cms/beneficiary-fhir-data.git/apps/bfd-pipeline/bfd-pipeline-app/target
@@ -49,12 +49,3 @@ Here's an example of how to apply this role to the `etlbox` host in an Ansible p
             data_pipeline_db_url: 'jdbc:postgresql://mydbserver.example.com:5432/mydb'
             data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
             data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
-
-## License
-
-This project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):
-
-> This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
->
-> All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
-

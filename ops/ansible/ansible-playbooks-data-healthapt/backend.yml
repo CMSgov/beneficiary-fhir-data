@@ -26,7 +26,7 @@
   tasks:
     - name: Apply Blue Button Data Pipeline Role
       import_role:
-        name: karlmdavis.bluebutton_data_pipeline
+        name: bfd-pipeline
       vars:
         data_pipeline_dir: '/u01/bluebutton-data-pipeline'
         data_pipeline_appjar_name: "bfd-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
@@ -85,7 +85,7 @@
 
     - name: Apply Blue Button Data Server Role
       import_role:
-        name: karlmdavis.bluebutton_data_server
+        name: bfd-server
       vars:
         data_server_dir: /u01/jboss
         data_server_user: "{{ vault_data_server_user }}"
