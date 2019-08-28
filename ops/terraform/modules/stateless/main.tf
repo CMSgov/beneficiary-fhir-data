@@ -100,6 +100,13 @@ data "aws_security_group" "remote" {
 # Start to build stuff
 #
 
+# EC2 key pairs
+#
+resource "aws_key_pair" "ec2_key_pair" {
+  key_name   = "bfd-${var.env_config.env}"
+  public_key = file("../../../../keys/bfd-${var.env_config.env}.pub")
+}
+
 # IAM roles
 # 
 # Create one for the FHIR server and one for the ETL

@@ -68,6 +68,13 @@ data "aws_security_group" "remote" {
   }
 }
 
+# EC2 key pairs
+#
+resource "aws_key_pair" "ec2_key_pair" {
+  key_name   = "bfd-${var.env_config.env}"
+  public_key = file("../../../../keys/bfd-${var.env_config.env}.pub")
+}
+
 // #
 // # Start to build stuff
 // #
