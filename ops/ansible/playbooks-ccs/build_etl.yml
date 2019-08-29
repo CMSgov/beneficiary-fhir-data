@@ -1,0 +1,42 @@
+---
+##
+# Configures the LSS zone's build server (e.g. Jenkins).
+##
+
+- name: Configure ETL Server
+  hosts: all
+  become: true
+  remote_user: ec2-user
+  gather_facts: no
+  vars:
+    ansible_ssh_pipelining: no
+    env: "test"
+    # sub_zone: "app"
+    # sg_zone: "etl-server"
+    # splunk_target_layer: "app"
+    # repo: "https://github.com/CMSgov/changeme.git"
+    # version: "master"
+    # var_files:
+    #   - "environments/{{ env }}/000_cross_env_vars.yml"
+    #   - "environments/{{ env }}/group_vars/all/env_specific.yml"
+    #   - "environments/{{ env }}/group_vars/all/vault.yml"
+
+  tasks:
+    
+    - include_vars:
+        dir: environments/{{ env }}
+      
+    - import_role:
+        name: bfd-pipeline
+      vars:
+        data_pipeline_appjar_name: "bluebutton-data-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar"
+        data_pipeline_appjar_s3_bucket: "{{ s3_bucket_deployment }}"
+        data_pipeline_s3_bucket: "{{ s3_bucket_etl_staging }}"
+        data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
+        data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
+        data_pipeline_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/{{ backend_db_name }}"
+        data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
+        data_pipeline_db_password: "{{ vault_data_pipeline_db_username }}"
+        data_pipeline_appjar_localpath: "/Users/johnzulim/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/0.1.0-SNAPSHOT/bluebutton-data-pipeline-app-0.1.0-SNAPSHOT-capsule-fat.jar"
+        data_pipeline_tmp_dir: /tmp-data
+        #data_pipeline_loader_threads: (see group_vars/all/main.yml 
