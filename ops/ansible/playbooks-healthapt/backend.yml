@@ -5,7 +5,7 @@
 # stored in encrypted Ansible Vault files. Those files can be edited using the 
 # `ansible-vault` command, e.g.:
 # 
-#     $ `ansible-vault edit group_vars/env_prod/vault.yml`.
+#     $ pipenv run ansible-vault edit group_vars/env_prod/vault.yml
 ##
 
 - name: Add SSH Host Keys
@@ -29,8 +29,7 @@
         name: bfd-pipeline
       vars:
         data_pipeline_dir: '/u01/bluebutton-data-pipeline'
-        data_pipeline_appjar_name: "bfd-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
-        data_pipeline_appjar_localpath: "~/.m2/repository/gov/cms/bfd/bfd-pipeline-app/{{ data_pipeline_version }}"
+        # Note: The `data_pipeline_jar` variable should have been provided by `--extra-vars` on the command line.
         data_pipeline_jvm_args: "-Xmx{{ ((data_pipeline_ec2_instance_type_mem_mib | int) * 0.80) | int }}m -XX:+PreserveFramePointer"
         data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
         data_pipeline_loader_threads: "{{ data_pipeline_ec2_instance_type_vcpu * 25 }}"
@@ -89,7 +88,6 @@
       vars:
         data_server_dir: /u01/jboss
         data_server_user: "{{ vault_data_server_user }}"
-        data_server_artifacts_mode: local
         data_server_appserver_name: jboss-eap-7.0
         data_server_appserver_service: jboss
         data_server_appserver_installer_name: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
@@ -99,8 +97,7 @@
         data_server_appserver_management_username: "{{ vault_data_server_appserver_management_username }}"
         data_server_appserver_management_password: "{{ vault_data_server_appserver_management_password }}"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
-        data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
-        data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
+        # Note: the `data_server_war` variable should have been provided via `--extra-vars` on the command line.
         data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
         # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
         # Secondary (i.e. read-only) DBs defined in `group_vars/env_<name>_az_<x>/vault.yml`:

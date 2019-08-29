@@ -33,9 +33,10 @@ def mvn(args) {
 /**
  * Models the results of a call to {@link #build}: contains the paths to the artifacts that were built.
  */
-class BuildResult {
+class BuildResult implements Serializable {
 	String dataPipelineUberJar
 	String dataServerContainerZip
+	String dataServerContainerName
 	String dataServerWar
 }
 
@@ -60,8 +61,9 @@ def build() {
 	}
 
 	return new BuildResult(
-		dataPipelineUberJar: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT',
+		dataPipelineUberJar: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar',
 		dataServerContainerZip: 'apps/bfd-server/bfd-server-war/target/bfd-server/wildfly-dist-8.1.0.Final.tar.gz',
+		dataServerContainerName: 'wildfly-8.1.0.Final',
 		dataServerWar: 'apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war'
 	)
 }

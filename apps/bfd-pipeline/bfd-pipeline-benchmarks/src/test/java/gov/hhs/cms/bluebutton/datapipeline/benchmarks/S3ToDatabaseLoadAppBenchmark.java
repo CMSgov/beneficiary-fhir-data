@@ -111,14 +111,6 @@ public final class S3ToDatabaseLoadAppBenchmark {
 	private static final int MAX_ACTIVE_ENVIRONMENTS = 10;
 
 	/**
-	 * The name of the S3 {@link Bucket} that will be used to transfer benchmark
-	 * resources (e.g. the application being benchmarked) to the benchmark
-	 * systems. Note that this bucket name is also used by the Ansible scripts
-	 * -- if it's changed here it needs to be adjusted in the scripts, as well.
-	 */
-	private static final String BUCKET_BENCHMARK_RESOURCES = "gov-hhs-cms-bluebutton-datapipeline-benchmark-resources";
-
-	/**
 	 * The name of the S3 {@link Bucket} to store the original copy of the RIF
 	 * data set to benchmark the processing of in.
 	 */
@@ -186,20 +178,15 @@ public final class S3ToDatabaseLoadAppBenchmark {
 
 		// Upload the benchmark file resources to S3.
 		AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
-		Bucket resourcesBucket = null;
 		Bucket dataSetBucket = null;
 		List<BenchmarkResult> benchmarkResults;
 		try {
-			resourcesBucket = s3Client.createBucket(BUCKET_BENCHMARK_RESOURCES);
-			pushResourcesToS3(s3Client, resourcesBucket);
 			dataSetBucket = s3Client.createBucket(BUCKET_DATA_SET_MASTER);
 			pushDataSetToS3(s3Client, dataSetBucket, sampleResources);
 
 			benchmarkResults = runBenchmarkIterations(ec2KeyName, ec2KeyFilePath);
 		} finally {
 			// Clean up the benchmark resources from S3.
-			if (resourcesBucket != null)
-				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, resourcesBucket);
 			if (dataSetBucket != null)
 				DataSetTestUtilities.deleteObjectsAndBucket(s3Client, dataSetBucket);
 		}
@@ -339,34 +326,6 @@ public final class S3ToDatabaseLoadAppBenchmark {
 		}
 		benchmarkExecutorService.shutdown();
 		return benchmarkResults;
-	}
-
-	/**
-	 * Uploads the resources that will be used by the benchmark iterations to
-	 * S3. We do this here, once for all iterations, to cut down on the transfer
-	 * times (and costs).
-	 * 
-	 * @param s3Client
-	 *            the {@link AmazonS3} client to use
-	 * @param bucket
-	 *            the S3 {@link Bucket} to store the resources in
-	 * @throws IOException
-	 *             Any {@link IOException}s encountered will be bubbled up.
-	 */
-	private static void pushResourcesToS3(AmazonS3 s3Client, Bucket bucket) throws IOException {
-		/*
-		 * Upload all of the files in `target/pipeline-app/`.
-		 */
-		Path targetDir = BenchmarkUtilities.findProjectTargetDir();
-		Path[] directories = new Path[] { targetDir.resolve("pipeline-app") };
-		for (Path directory : directories) {
-			try (Stream<Path> files = Files.find(directory, 1, (f, a) -> Files.isRegularFile(f));) {
-				files.forEach(f -> s3Client
-						.putObject(new PutObjectRequest(bucket.getName(), f.getFileName().toString(), f.toFile())));
-			}
-		}
-
-		LOGGER.info("Resources uploaded to S3.");
 	}
 
 	/**

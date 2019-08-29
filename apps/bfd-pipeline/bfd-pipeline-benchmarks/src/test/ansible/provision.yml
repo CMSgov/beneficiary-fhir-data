@@ -131,35 +131,6 @@
         state: present
         create: true
     
-    - name: EC2 - Provision FHIR Server
-      ec2:
-        key_name: "{{ ec2_key_name }}"
-        group:
-          - default
-          - ssh-all
-        instance_type: "{{ ec2_instance_type_fhir }}"
-        image: "{{ ami_id }}"
-        region: "{{ region }}"
-        zone: "{{ zone }}"
-        wait: true
-        exact_count: 1
-        count_tag:
-          Name: "bluebutton-etl-benchmark-{{ iteration_index }}-fhir"
-          Application: "BlueButton"
-        instance_tags:
-          Name: "bluebutton-etl-benchmark-{{ iteration_index }}-fhir"
-          Application: "BlueButton"
-          CreatedBy: "{{ whoami.stdout }}"
-      register: ec2_fhir
-    
-    - name: EC2 - Add FHIR Server to Inventory
-      lineinfile:
-        dest: "../../../target/benchmark-iterations/{{ iteration_index }}/ansible_hosts"
-        regexp: '^fhir.*$'
-        line: "fhir ansible_host={{ ec2_fhir.instances[0].public_dns_name }} ec2_instance_id={{ ec2_fhir.instance_ids[0] }}"
-        state: present
-        create: true
-    
     - name: EC2 - Provision ETL Server
       ec2:
         key_name: "{{ ec2_key_name }}"
@@ -209,6 +180,3 @@
         timeout: 320
       with_flattened:
         - "{{ ec2_etl.instances }}"
-        - "{{ ec2_fhir.instances }}"
-
-

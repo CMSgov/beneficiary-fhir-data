@@ -48,22 +48,13 @@
         lc_ctype: 'C'
         template: 'template0'
 
-#- name: Configure and Start FHIR Server
-#  hosts: fhir
-#  user: "{{ ssh_user }}"
-#  gather_facts: true
-#  roles:
-#    - server_fhir
-
 - name: Configure ETL Server
   hosts: etl
   user: "{{ ssh_user }}"
   gather_facts: true
   roles:
     - role: bfd-pipeline
-      data_pipeline_appjar_name: "bfd-pipeline-app-capsule-fat.jar"
-      data_pipeline_appjar_s3_bucket: "{{ s3_benchmark_resources_bucket }}"
-      data_pipeline_s3_bucket: "gov-hhs-cms-bluebutton-datapipeline-benchmark-iteration{{ iteration_index }}"
+      data_pipeline_jar: "../../../target/pipeline-app/bfd-pipeline-app-capsule-fat.jar"
       data_pipeline_hicn_hash_iterations: 2  # NIST recommends at least 1000, but this isn't production.
       data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
       data_pipeline_db_url: "jdbc:postgresql://{{ hostvars['rds']['endpoint'] }}:{{ hostvars['rds']['port'] }}/fhirdb"

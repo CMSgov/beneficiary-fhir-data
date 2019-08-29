@@ -58,7 +58,7 @@
           healthy_threshold: 2
         #access_logs:
         #  interval: 5 # minutes (default is 60)
-        #  s3_location: "{{ s3_bucket_deployment }}"
+        #  s3_location: "{{ s3_bucket_staging }}"
         #  s3_prefix: 'elb-access-logs/bluebutton-backend'
         wait: true
       register: ec2_elb_lb_backend

@@ -18,7 +18,7 @@
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
 def deploy(String envId, String platinumAmiId, BuildResult appsBuildResult) {
-	dir ('ops/ansible/ansible-playbooks-data-healthapt') {
+	dir ('ops/ansible/playbooks-healthapt') {
 		// Ensure the Ansible image is ready to go.
 		insideAnsibleContainer {
 			// Just some general "what does the container look like" debug
@@ -63,9 +63,10 @@ def deploy(String envId, String platinumAmiId, BuildResult appsBuildResult) {
 				"limit_envs": [
 					"${envLimitName}"
 				],
-				"data_pipeline_jar": "../../${appsBuildResult.dataPipelineUberJar}",
-				"data_server_container": "../../${appsBuildResult.dataServerContainerZip}",
-				"data_server_war": "../../${appsBuildResult.dataServerWar}"
+				"data_pipeline_jar": "../../../${appsBuildResult.dataPipelineUberJar}",
+				"data_server_container": "../../../${appsBuildResult.dataServerContainerZip}",
+				"data_server_container_name": "${appsBuildResult.dataServerContainerName}",
+				"data_server_war": "../../../${appsBuildResult.dataServerWar}"
 			}
 			""".stripIndent()
 			sh "./ansible-playbook-wrapper backend.yml --limit=localhost:${envGroupName} --extra-vars \"@extra_vars.json\""

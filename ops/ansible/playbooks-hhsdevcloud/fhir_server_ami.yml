@@ -76,13 +76,10 @@
       include_role:
         name: bfd-server
       vars:
-        data_server_artifacts_mode: local
-        data_server_appserver_installer_name: "wildfly-dist-{{ wildfly_version }}.tar.gz"
-        data_server_appserver_name: "wildfly-{{ wildfly_version }}"
-        data_server_appserver_local_dir: "{{ maven_repo }}/org/wildfly/wildfly-dist/{{ wildfly_version }}"
+        # Note: The `data_server_container` variable is passed in via `--extra-args`.
+        # Note: The `data_server_container_name` variable is passed in via `--extra-args`.
         data_server_appserver_https_port: "{{ backend_fhir_port_internal }}"
-        data_server_war_name: "bfd-server-war-{{ bluebutton_server_version }}.war"
-        data_server_war_local_dir: "{{ maven_repo }}/gov/cms/bfd/bfd-server-war/{{ bluebutton_server_version }}"
+        # Note: The `data_server_war` variable is passed in via `--extra-args`.
         data_server_ssl_server_genkeypair_args: "-keyalg RSA -keysize 4096 -dname cn=*.fhir.{{ backend_domain }} -ext san=dns:fhir.{{ backend_domain }} -validity 3650"
         data_server_ssl_client_cas:
           - alias: bluebutton_frontend_ca

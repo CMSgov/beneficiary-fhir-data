@@ -15,6 +15,5 @@ export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
 java \
 	{{ data_pipeline_jvm_args }} \
 	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
-	-jar "{{ data_pipeline_dir }}/{{ data_pipeline_appjar_name }}" \
+	-jar "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}" \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
-
