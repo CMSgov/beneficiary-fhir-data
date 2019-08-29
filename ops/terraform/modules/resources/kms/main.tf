@@ -39,7 +39,8 @@ resource "aws_kms_key" "master_key" {
       "Principal": {
         "AWS": [
           "arn:aws:iam::577373831711:user/HWRI",
-          "arn:aws:iam::577373831711:user/VZG9"
+          "arn:aws:iam::577373831711:user/VZG9",
+          "arn:aws:iam::577373831711:policy/bfd-packer-s3"
         ]
       },
       "Action": [
