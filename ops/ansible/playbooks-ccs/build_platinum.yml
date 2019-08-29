@@ -14,8 +14,6 @@
   tasks:
     - import_role:
         name: rhel_prep
-    # - import_role:
-    #     name: install_epel_repo
     - import_role:
         name: base_patch
     - import_role: 
