@@ -37,6 +37,5 @@
         data_pipeline_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/{{ backend_db_name }}"
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_username }}"
-        data_pipeline_appjar_localpath: "/Users/johnzulim/.m2/repository/gov/hhs/cms/bluebutton/data/pipeline/bluebutton-data-pipeline-app/0.1.0-SNAPSHOT/bluebutton-data-pipeline-app-0.1.0-SNAPSHOT-capsule-fat.jar"
         data_pipeline_tmp_dir: /tmp-data
         #data_pipeline_loader_threads: (see group_vars/all/main.yml 
