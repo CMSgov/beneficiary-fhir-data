@@ -133,6 +133,16 @@ resource "aws_iam_policy" "jenkins_boundary" {
         "waf-regional:*"
       ],
       "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:GetParameter*"
+      ],
+      "Resource": [
+        "arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:parameter/*"
+      ]
     }
   ]
 }
