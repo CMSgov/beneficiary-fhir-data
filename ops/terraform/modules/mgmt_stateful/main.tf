@@ -162,11 +162,13 @@ resource "aws_iam_policy" "packer_s3" {
                 "s3:GetObjectVersionAcl",
                 "s3:GetObjectTagging",
                 "s3:ListBucket",
-                "s3:GetObjectVersion"
+                "s3:GetObjectVersion",
+                "ssm:GetParameter*"
             ],
             "Resource": [
                 "arn:aws:s3:::bfd-packages/*",
-                "arn:aws:s3:::bfd-packages"
+                "arn:aws:s3:::bfd-packages",
+                "arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:parameter/*"
             ]
         }
     ]
