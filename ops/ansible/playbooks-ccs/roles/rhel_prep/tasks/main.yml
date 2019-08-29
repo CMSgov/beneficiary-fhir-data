@@ -16,9 +16,9 @@
   become: yes 
   import_tasks: optional_rpms_repo.yml
   
-- name: Install EPEL Repo 
-  become: yes 
-  import_tasks: epel_repo.yml
+# - name: Install EPEL Repo 
+#   become: yes 
+#   import_tasks: epel_repo.yml
   
 - name: Install NTP 
   become: yes 

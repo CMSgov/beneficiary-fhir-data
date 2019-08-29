@@ -30,7 +30,6 @@
       "command": "./ansible-playbook-wrapper",
       "playbook_file": "./build_platinum.yml",
       "extra_arguments": [
-        "-vv",
         "--extra-vars",
         "ansible_python_interpreter=/usr/bin/python"
       ],
