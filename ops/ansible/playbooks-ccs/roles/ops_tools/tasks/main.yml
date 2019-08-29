@@ -1,0 +1,7 @@
+---
+# Ansible pipelining will not work if `requiretty` is forced for sudo. Please see rhel_prep role for details. 
+# Requires python and pip. 
+
+- name: Install Ansible via pip
+  pip: 
+    name: ansible 
