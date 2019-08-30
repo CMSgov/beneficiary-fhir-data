@@ -68,8 +68,11 @@ stage('Prepare') {
 		}
 		def scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
 
-		// Find the most current platinum AMI ID (if any).
-		def platinumAmiId = scriptForDeploys.findPlatinumAmiId()
+		// Find the most current AMI IDs (if any).
+		def amiIds = null
+		if (params.deploy_env == 'ccs') {
+			amiIds = scriptForDeploys.findAmis()
+		}
 
 		// These variables track our decision on whether or not to deploy to prod-like envs.
 		def canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
@@ -83,7 +86,7 @@ if (params.deploy_env == 'ccs') {
 			milestone(label: 'stage_build_platinum_ami_start')
 
 			node {
-				platinumAmiId = scriptForDeploys.buildPlatinumAmis()
+				amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 			}
 		} else {
 			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
@@ -91,17 +94,17 @@ if (params.deploy_env == 'ccs') {
 	}
 }
 
-stage('Deploy Jenkins') {
+stage('Deploy mgmt') {
 	if (canDeployToProdEnvs && params.deploy_jenkins) {
 		lock(resource: 'env_management', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_jenkins_start')
+			milestone(label: 'stage_management_jenkins_start')
 
 			node {
-				scriptForDeploy.deployJenkins(platinumAmiId)
+				scriptForDeploy.deployManagement(amiIds)
 			}
 		}
 	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy Jenkins')
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy mgmt')
 	}
 }
 
@@ -109,7 +112,7 @@ stage('Build Apps') {
 	milestone(label: 'stage_build_apps_start')
 
 	node {
-		def appsBuildResult = scriptForApps.build()
+		def appBuildResults = scriptForApps.build()
 	}
 }
 
@@ -118,7 +121,7 @@ if (params.deploy_env == 'ccs') {
 		milestone(label: 'stage_build_app_amis_start')
 
 		node {
-			scriptForDeploys.buildAppsAmis(platinumAmiId)
+			amiIds = scriptForDeploys.buildAppAmis(amiIds, appBuildResults)
 		}
 	}
 }
@@ -128,7 +131,7 @@ stage('Deploy to TEST') {
 		milestone(label: 'stage_deploy_test_start')
 
 		node {
-			scriptForDeploys.deploy('test', platinumAmiId, appsBuildResult)
+			scriptForDeploys.deploy('test', amiIds, appBuildResults)
 		}
 	}
 }
@@ -164,7 +167,7 @@ stage('Deploy to hhsdevcloud') {
 			milestone(label: 'stage_deploy_hhsdevcloud')
 
 			node {
-				scriptForDeploysHhsdevcloud.deploy(appsBuildResult)
+				scriptForDeploysHhsdevcloud.deploy(appBuildResults)
 			}
 		}
 	} else {
@@ -178,7 +181,7 @@ stage('Deploy to prod-stg') {
 			milestone(label: 'stage_deploy_prod_stg_start')
 
 			node {
-				scriptForDeploys.deploy('prod-stg', platinumAmiId, appsBuildResult)
+				scriptForDeploys.deploy('prod-stg', amiIds, appBuildResults)
 			}
 		}
 	} else {
@@ -192,7 +195,7 @@ stage('Deploy to prod') {
 			milestone(label: 'stage_deploy_prod_start')
 
 			node {
-				scriptForDeploys.deploy('prod', platinumAmiId, appsBuildResult)
+				scriptForDeploys.deploy('prod', amiIds, appBuildResults)
 			}
 		}
 	} else {

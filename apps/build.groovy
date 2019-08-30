@@ -33,7 +33,7 @@ def mvn(args) {
 /**
  * Models the results of a call to {@link #build}: contains the paths to the artifacts that were built.
  */
-class BuildResult implements Serializable {
+class AppBuildResults implements Serializable {
 	String dataPipelineUberJar
 	String dataServerContainerZip
 	String dataServerContainerName
@@ -43,7 +43,7 @@ class BuildResult implements Serializable {
 /**
  * Builds the Java applications and utilities in this directory: Data Pipeline, Data Server, etc.
  *
- * @return A {@link BuildResult} object containing the paths to the artifacts that were built.
+ * @return An {@link AppBuildResults} instance containing the paths to the artifacts that were built.
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
 def build() {
@@ -60,7 +60,7 @@ def build() {
 		archiveArtifacts artifacts: '**/target/*.jar,**/target/*.war,**/target/*.zip,**/target/*-reports/*.txt', allowEmptyArchive: true
 	}
 
-	return new BuildResult(
+	return new AppBuildResults(
 		dataPipelineUberJar: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar',
 		dataServerContainerZip: 'apps/bfd-server/bfd-server-war/target/bfd-server/wildfly-dist-8.1.0.Final.tar.gz',
 		dataServerContainerName: 'wildfly-8.1.0.Final',

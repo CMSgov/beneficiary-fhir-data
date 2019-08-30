@@ -10,14 +10,24 @@
 
 
 /**
+ * Deploys/redeploys Jenkins and related systems to the LSS environment.
+ *
+ * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
+ * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
+ */
+def deployManagement(AmiIds amiIds) {
+	echo('Deploying to the HealthAPT LSS environment is not implemented yet.')
+}
+
+/**
  * Deploys to the specified environment.
  *
  * @param envId the ID of the environment to deploy to
- * @param platinumAmiId (unused in the HealthAPT environments)
- * @param appsBuildResult the {@link BuildResult} containing the paths to the app binaries that were built
+ * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
+ * @param appBuildResults the {@link AppBuildResults} containing the paths to the app binaries that were built
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
-def deploy(String envId, String platinumAmiId, BuildResult appsBuildResult) {
+def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	dir ('ops/ansible/playbooks-healthapt') {
 		// Ensure the Ansible image is ready to go.
 		insideAnsibleContainer {
@@ -63,10 +73,10 @@ def deploy(String envId, String platinumAmiId, BuildResult appsBuildResult) {
 				"limit_envs": [
 					"${envLimitName}"
 				],
-				"data_pipeline_jar": "../../../${appsBuildResult.dataPipelineUberJar}",
-				"data_server_container": "../../../${appsBuildResult.dataServerContainerZip}",
-				"data_server_container_name": "${appsBuildResult.dataServerContainerName}",
-				"data_server_war": "../../../${appsBuildResult.dataServerWar}"
+				"data_pipeline_jar": "../../../${appBuildResults.dataPipelineUberJar}",
+				"data_server_container": "../../../${appBuildResults.dataServerContainerZip}",
+				"data_server_container_name": "${appBuildResults.dataServerContainerName}",
+				"data_server_war": "../../../${appBuildResults.dataServerWar}"
 			}
 			""".stripIndent()
 			sh "./ansible-playbook-wrapper backend.yml --limit=localhost:${envGroupName} --extra-vars \"@extra_vars.json\""
