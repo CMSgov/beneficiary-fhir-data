@@ -65,6 +65,10 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 			echo 'Production deploys not enabled yet.'
 			return
 		}
+		if (envId != "test") {
+			// Just in case that 'return' doesn't work as expected...
+			throw new IllegalStateException('do not deploy to prod yet')
+		}
 
 		// Run the deploy to the specified environment.
 		insideAnsibleContainer {
