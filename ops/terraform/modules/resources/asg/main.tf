@@ -37,7 +37,7 @@ resource "aws_security_group" "base" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.mgmt_config.ci_cidrs
+    security_groups = [var.mgmt_config.vpn_sg]
   }
 
   egress {
