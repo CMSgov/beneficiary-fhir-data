@@ -20,14 +20,22 @@ def mvn(args) {
 	def mvnHome = tool 'maven-3'
 
 	// Run the build, using Maven, with the appropriate config.
+	withCredentials([
+			string(credentialsId: 'proxy-host', variable: 'proxyHost'),
+			string(credentialsId: 'proxy-port', variable: 'proxyPort')
+	]) {
 	configFileProvider(
 			[
 				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
 				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
 			]
 	) {
-		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
-	}
+		def proxyArgs = ''
+		if (proxyHost?.trim() && proxyPort.trim()) {
+			proxyArgs = "-Dhttp.proxyHost=${proxyHost} -Dhttp.proxyPort=${proxyPort} -Dhttps.proxyHost=${proxyHost} -Dhttps.proxyPort=${proxyPort} -Dhttp.nonProxyHosts=localhost"
+		}
+		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args} ${proxyArgs}"
+	} }
 }
 
 /**
