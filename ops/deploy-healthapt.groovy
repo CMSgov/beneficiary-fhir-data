@@ -10,6 +10,12 @@
 
 
 /**
+ * Not used in the HealthAPT environment; just stubbed out to prevent errors.
+ */
+class AmiIds implements Serializable {
+}
+
+/**
  * Deploys/redeploys Jenkins and related systems to the LSS environment.
  *
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
