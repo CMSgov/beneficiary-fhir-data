@@ -1,8 +1,7 @@
 ---
 
 # Version of the ETL Jar to deploy 
-backend_etl_version: '0.1.0-SNAPSHOT'
-
+data_pipeline_version: '0.1.0-SNAPSHOT'
 
 # Bucket where deployment artifacts are located. 
 s3_bucket_deployment: 'bfd-mgmt-artifacts-577373831711'

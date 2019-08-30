@@ -1,6 +1,6 @@
 ---
 ##
-# Configures the LSS zone's build server (e.g. Jenkins).
+# Configures the ETL Server and data-pipeline app for CCS env
 ##
 
 - name: Configure ETL Server
@@ -11,31 +11,27 @@
   vars:
     ansible_ssh_pipelining: no
     env: "test"
-    # sub_zone: "app"
-    # sg_zone: "etl-server"
-    # splunk_target_layer: "app"
-    # repo: "https://github.com/CMSgov/changeme.git"
-    # version: "master"
-    # var_files:
-    #   - "environments/{{ env }}/000_cross_env_vars.yml"
-    #   - "environments/{{ env }}/group_vars/all/env_specific.yml"
-    #   - "environments/{{ env }}/group_vars/all/vault.yml"
 
   tasks:
     
-    - include_vars:
+    - name: Include env specific variables
+      include_vars:
         dir: environments/{{ env }}
       
-    - import_role:
+    - name: Apply Blue Button Data Pipeline Role
+      import_role:
         name: bfd-pipeline
       vars:
-        data_pipeline_appjar_name: "bluebutton-data-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar"
+        data_pipeline_dir: '/bluebutton-data-pipeline'
+        data_pipeline_appjar_name: "bfd-pipeline-app-{{ data_pipeline_version }}-capsule-fat.jar"
         data_pipeline_appjar_s3_bucket: "{{ s3_bucket_deployment }}"
         data_pipeline_s3_bucket: "{{ s3_bucket_etl_staging }}"
+        data_pipeline_jvm_args: "-Xmx{{ ((data_pipeline_ec2_instance_type_mem_mib | int) * 0.80) | int }}m -XX:+PreserveFramePointer"
+        data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
+        data_pipeline_loader_threads: "{{ data_pipeline_ec2_instance_type_vcpu * 25 }}"
         data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
         data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
-        data_pipeline_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/{{ backend_db_name }}"
+        data_pipeline_db_url: "{{ vault_data_db_primary_url }}"
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_username }}"
-        data_pipeline_tmp_dir: /tmp-data
         #data_pipeline_loader_threads: (see group_vars/all/main.yml 
