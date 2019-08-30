@@ -12,7 +12,6 @@ aws_vpc_subnet: 'subnet-7858b153'
 # The DNS domain that the Blue Button Backend services will be hosted under.
 backend_domain: 'backend.bluebutton.hhsdevcloud.us'
 
-s3_bucket_deployment: 'gov-hhs-cms-bluebutton-sandbox-deployment'
 s3_bucket_etl_staging: 'gov-hhs-cms-bluebutton-sandbox-etl-staging'
 
 ec2_tag_application: 'Blue Button Sandbox - Backend'
@@ -50,4 +49,3 @@ data_server_asg_max_size: 7  # Watch out that this (plus extra instances for nex
 # flame graphs can be collected. This will incur a performance penalty of 1%-
 # 3%, and so should be left disabled unless specifically needed.
 java_flame_graphs: false
-

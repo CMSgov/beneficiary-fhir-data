@@ -23,41 +23,40 @@ In order to use and/or modify this repository, a number of tools need to be inst
 
 ### Python
 
-This project requires Python 2.7. It can be installed as follows:
+This project requires Python 3.7. It can be installed as follows on MacOS (via Homebrew):
 
-    $ sudo apt-get install python
+    $ brew install python
 
-The following packages are also required by some of the Python modules that will be used:
+Additional packages are also required by some of the Python modules that will be used. To install them on MacOS (via Homebrew):
 
-    $ sudo apt-get install libpq-dev
+    $ brew install libpq
 
-### virtualenv
+To install those additional packages on RHEL 7:
 
-This project has some dependencies that have to be installed via `pip` (as opposed to `apt-get`). Accordingly, it's strongly recommended that you make use of a [Python virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to manage those dependencies.
+    $ sudo yum install postgresql-libs
 
-If it isn't already installed, install the `virtualenv` package. On Ubuntu, this is best done via:
+### pipenv
 
-    $ sudo apt-get install python-virtualenv
+This project has some Python dependencies that have to be installed. We use the `pipenv` tool to install and manage those dependencies in a segregated virtual environment (so that this project's dependencies don't conflict with dependencies from other projects).
 
-Next, create a virtual environment for this project and install the project's dependencies into it:
+If it isn't already installed, install the `pipenv` package and the development tools that will be needed to build the Python packages we'll be grabbing. On MacOs, this is best done via:
 
-    $ cd bluebutton-ansible-playbooks-data-sandbox.git
-    $ virtualenv -p /usr/bin/python2.7 venv
-    $ source venv/bin/activate
-    $ pip install --upgrade setuptools
-    $ pip install --requirement requirements.txt
+    $ brew install pipenv
 
-The `source` command above will need to be run every time you open a new terminal to work on this project.
+Next, initialize `pipenv` for this project:
 
-Be sure to update the `requirements.frozen.txt` file after `pip install`ing a new dependency for this project:
+    $ cd ops/ansible/playbooks-healthapt
+    $ pipenv install --three
 
-    $ pip freeze > requirements.frozen.txt
+When you want to run something that requires the Python dependencies, prefix the command with `pipenv run`.
+
+You can add, update, etc. the project's Python dependencies by editing the `Pipfile` in this directory and using `pipenv`, as documented here: <https://docs.pipenv.org/en/latest/>.
 
 ### Ansible Roles
 
 Run the following command to download and install the roles required by this project into `~/.ansible/roles/`:
 
-    $ ansible-galaxy install --role-file=install_roles.yml --force
+    $ pipenv run ansible-galaxy install --force --role-file=install_roles.yml
 
 ### AWS Credentials
 
@@ -72,28 +71,30 @@ Ensure that the EC2 key to be used is loaded into SSH Agent:
 
     $ ssh-add foo.pem
 
-### User Identity
-
-These plays need to know the identity of the user/system running them. Copy the identity template:
-
-    $ cp group_vars/all/management_user.yml.template group_vars/all/management_user.yml
-
-And then edit the resulting `group_vars/all/management_user.yml` file to fill in the required fields.
-
 ### Running the Playbooks
 
 The playbooks can be run, as follows:
 
-    $ ansible-playbook-wrapper sandbox.yml --extra-vars "ec2_key_name=<key-name> maven_repo=<local-repo-path> bluebutton_server_version=<version> wildfly_version=<version> backend_etl_version=<version>"
+    $ cat << EOF > extra_vars.json
+    {
+      "management_user": {
+        "cn": "John Doe",
+        "email": "jdoe@cms.hhs.gov"
+      },
+      "ec2_key_name": "somekeyname",
+      "data_pipeline_jar": "../../../apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar",
+      "data_server_container": "../../../apps/bfd-server/bfd-server-war/target/bfd-server/wildfly-dist-8.1.0.Final.tar.gz",
+      "data_server_container_name": "wildfly-8.1.0.Final",
+      "data_server_war": "../../../apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war"
+    }
+    EOF
+    $ pipenv run ./ansible-playbook-wrapper sandbox.yml --extra-vars "@extra_vars.json"
 
-This project has an unfortunately large amount of variables that must be specified for each run. Each of the `extra-vars` should be set, as follows:
+This project has a number of variables that must be specified for each run. Each of the `extra-vars` should be set, as follows:
 
 * `deploy_id_custom`: Optional. An ID for the deployment to be run, which will be used to tag AMIs, etc. in AWS. By default, a UTC timestamp is used.
+* `management_user`: The administrator contact that will be referenced in any notifications that are sent out.
 * `ec2_key_name`: The name of the SSH key (as it's labeled in EC2) that all newly-created EC2 instances should be associated with.
-* `maven_repo`: Path to the local Maven repository directory, from which the deployment resources will be pulled.
-* `bluebutton_server_version`: The version of the Blue Button Data Server artifact (`gov.cms.bfd:bfd-server-war:war` artifact (and related artifacts) to deploy as the Blue Button backend FHIR server.
-* `wildfly_version`: The version of the `org.wildfly:wildfly-dist:tar.gz` artifact to deploy and use to host the Blue Button backend FHIR server.
-* `backend_etl_version`: The version of the Blue Button Data Pipeline artifact (`gov.cms.bfd:bfd-pipeline-app:capsule-fat:jar`) to deploy.
 
 ## Interacting with the Deployed Environment
 
@@ -106,12 +107,3 @@ Ad-hoc queries can be run against the Blue Button backend Data Server, as follow
 ### Ansible Inventory
 
 Unlike most Ansible playbooks, this project does not use either a static inventory file or a scripted dynamic inventory. Instead, the inventory is generated at runtime, by the plays themselves.
-
-## License
-
-This project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):
-
-> This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
->
-> All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
-

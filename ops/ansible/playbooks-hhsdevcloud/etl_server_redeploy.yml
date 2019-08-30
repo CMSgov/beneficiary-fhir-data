@@ -144,8 +144,7 @@
   hosts: backend_etl_new
   roles:
     - role: bfd-pipeline
-      data_pipeline_appjar_name: "bfd-pipeline-app-{{ backend_etl_version }}-capsule-fat.jar"
-      data_pipeline_appjar_s3_bucket: "{{ s3_bucket_deployment }}"
+      # Note: `data_pipeline_jar` will be passed in via `--extra-args`.
       data_pipeline_s3_bucket: "{{ s3_bucket_etl_staging }}"
       data_pipeline_hicn_hash_iterations: 2  # NIST recommends at least 1000, but this isn't production.
       data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
@@ -153,4 +152,3 @@
       data_pipeline_db_username: "{{ backend_postgres_master_username }}"
       data_pipeline_db_password: "{{ backend_postgres_master_password }}"
       #data_pipeline_loader_threads: (see group_vars/all/main.yml)
-

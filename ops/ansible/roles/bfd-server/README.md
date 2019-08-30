@@ -17,13 +17,9 @@ This role is highly configurable, though it tries to provide reasonable defaults
 
 Variables that must be defined to use the role:
 
-* `data_server_artifacts_mode`: Set to "`s3`" if the WAR and app server should be copied from an AWS S3 bucket or "`local`" if they should be copied from a path local to the Ansible management host.
-* `data_server_artifacts_s3_bucket`: The name of the S3 bucket containing the artifacts to be deployed. Must be set if `data_server_artifacts_mode` is "`s3`".
-* `data_server_appserver_installer_name`: The name of the app server installation bundle to be deployed.
-* `data_server_appserver_name`: The name of the directory that will be unzipped by the app server installation bundle, e.g. "`wildfly-8.1.0.Final`".
-* `data_server_appserver_local_dir`: The local directory for the app server installation bundle to be deployed. Must be set if `data_server_artifacts_mode` is "`local`".
-* `data_server_war_name`: The name of the WAR file to be deployed (as saved in either S3 or a local directory).
-* `data_server_war_local_dir`: The local directory of the WAR file to be deployed. Must be set if `data_server_artifacts_mode` is "`local`".
+* `data_server_container`: The path (on the management system) to the app server installation bundle to be deployed.
+* `data_server_container_name`: The name of the directory that will be unzipped by the app server installation bundle, e.g. "`wildfly-8.1.0.Final`".
+* `data_server_war`: The path (on the management system) to the WAR file to be deployed.
 * `data_server_ssl_server_genkeypair_args`: The arguments to pass to the `keytool` command when generating a server keypair.
 * `data_server_ssl_client_cas`: A list of the SSL client certificate authorities that will be given access to the server.
     * `alias`: The alias to assign to the SSL client certificate authority in the server's Java trust store.

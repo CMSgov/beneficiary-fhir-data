@@ -5,9 +5,8 @@ After=network.target network-online.target
 
 [Service]
 WorkingDirectory={{ data_server_dir }}
-ExecStart={{ data_server_dir }}/{{ data_server_appserver_name }}/bin/standalone.sh
+ExecStart={{ data_server_dir }}/{{ data_server_container_name }}/bin/standalone.sh
 User={{ data_server_user }}
 
 [Install]
 WantedBy=multi-user.target
-
