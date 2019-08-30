@@ -42,6 +42,7 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 			sh 'cat /etc/passwd'
 			sh 'echo $USER && echo $UID && echo $HOME && whoami'
 			sh 'pwd && ls -la'
+			sh 'ls -la ../roles'
 			sh 'ansible --version'
 
 			// Verify the play's syntax before we run it.
