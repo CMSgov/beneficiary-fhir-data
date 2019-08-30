@@ -42,7 +42,7 @@ properties([
 	parameters([
 		choice(name: 'deploy_env', choices: ['healthapt', 'ccs'], defaultValue: 'healthapt', description: 'Which environment are we running in and deploying to?'),
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
-		booleanParam(name: 'deploy_jenkins', description: 'Whether to build and deploy Jenkins.', defaultValue: false),
+		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'deploy_hhsdevcloud', description: 'Whether to deploy to the hhsdevcloud/"old sandbox" environment.', defaultValue: false),
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
@@ -95,7 +95,7 @@ if (params.deploy_env == 'ccs') {
 }
 
 stage('Deploy mgmt') {
-	if (canDeployToProdEnvs && params.deploy_jenkins) {
+	if (canDeployToProdEnvs && params.deploy_management) {
 		lock(resource: 'env_management', inversePrecendence: true) {
 			milestone(label: 'stage_management_jenkins_start')
 
