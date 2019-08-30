@@ -13,8 +13,8 @@ module "stateful" {
   # Medium DB
   db_config = { 
     instance_class    = "db.m5.2xlarge"
-    iops              = 1000
-    allocated_storage = 1000
+    iops              = 4000
+    allocated_storage = 2000
   }
 
   env_config = {
