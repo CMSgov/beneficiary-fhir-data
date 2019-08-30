@@ -13,8 +13,8 @@ module "stateful" {
   # Large DB
   db_config = { 
     instance_class    = "db.m5.4xlarge"
-    iops              = 8000
-    allocated_storage = 12000
+    iops              = 5000
+    allocated_storage = 10000
   }
 
   env_config = {
