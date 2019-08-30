@@ -22,8 +22,8 @@ def mvn(args) {
 	// Run the build, using Maven, with the appropriate config.
 	configFileProvider(
 			[
-				configFile(fileId: 'bfd:settings.xml', variable: 'MAVEN_SETTINGS'),
-				configFile(fileId: 'bfd:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
+				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
+				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
 			]
 	) {
 		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
