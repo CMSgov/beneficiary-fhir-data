@@ -21,7 +21,7 @@ class AmiIds implements Serializable {
  * directory is needed.
  */
 @groovy.transform.Field
-def deployWorkingDir = 'ops/ansible/plays-healthapt'
+def deployWorkingDir = 'ops/ansible/playbooks-healthapt'
 
 /**
  * Deploys/redeploys Jenkins and related systems to the LSS environment.
