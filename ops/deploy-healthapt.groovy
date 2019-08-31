@@ -87,7 +87,7 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 
 	// Run the deploy to the specified environment.
 	insideAnsibleContainer {
-		writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
+		writeFile file: "${deployWorkingDir}/extra_vars.json", encoding: 'UTF-8', text: """\
 		{
 			"limit_envs": [
 				"${envLimitName}"
