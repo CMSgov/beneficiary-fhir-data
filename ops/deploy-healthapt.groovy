@@ -20,7 +20,7 @@ class AmiIds implements Serializable {
  * steps inside docker blocks should be prefixed with "cd <work_dir> && ...", if a different working
  * directory is needed.
  */
-@Field
+@groovy.transform.Field
 def deployWorkingDir = 'ops/ansible/plays-healthapt'
 
 /**
