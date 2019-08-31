@@ -15,6 +15,14 @@
 class AmiIds implements Serializable {
 }
 
+/*
+ * Note: due to JENKINS-33510, the 'dir' step is not yet supported inside Docker. As a workaround, all 'sh'
+ * steps inside docker blocks should be prefixed with "cd <work_dir> && ...", if a different working
+ * directory is needed.
+ */
+@Field
+def deployWorkingDir = 'ops/ansible/plays-healthapt'
+
 /**
  * Deploys/redeploys Jenkins and related systems to the LSS environment.
  *
@@ -34,6 +42,7 @@ def deployManagement(AmiIds amiIds) {
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
 def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
+
 	// Ensure the Ansible image is ready to go.
 	insideAnsibleContainer {
 		// Just some general "what does the container look like" debug
@@ -41,11 +50,11 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 		sh 'cat /etc/passwd'
 		sh 'echo $USER && echo $UID && echo $HOME && whoami'
 		sh 'pwd && ls -la'
-		sh 'ls -la ../roles'
+		sh 'ls -la ops/ansible/roles'
 		sh 'ansible --version'
 
 		// Verify the play's syntax before we run it.
-		sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
+		sh "cd ${deployWorkingDir} && ./ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check"
 	}
 
 	// Define env-specific variables.
@@ -89,7 +98,7 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 			"data_server_war": "../../../${appBuildResults.dataServerWar}"
 		}
 		""".stripIndent()
-		sh "./ansible-playbook-wrapper backend.yml --limit=localhost:${envGroupName} --extra-vars \"@extra_vars.json\""
+		sh "cd ${deployWorkingDir} && ./ansible-playbook-wrapper backend.yml --limit=localhost:${envGroupName} --extra-vars \"@extra_vars.json\""
 	}
 }
 
@@ -134,15 +143,13 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 
 		// Prepend the specified closure with some needed in-container setup.
 		def bodyWithSetup = {
-			dir ('ops/ansible/playbooks-healthapt') {
-				// Copy the SSH config and keys and fix permissions.
-				sh 'cp --recursive --no-target-directory /root/.ssh_jenkins /root/.ssh'
-				sh 'chmod -R u=rw,g=,o= /root/.ssh'
+			// Copy the SSH config and keys and fix permissions.
+			sh 'cp --recursive --no-target-directory /root/.ssh_jenkins /root/.ssh'
+			sh 'chmod -R u=rw,g=,o= /root/.ssh'
 
-				// Link the project's Ansible roles to where they're expected.
-				sh 'ln -s /etc/ansible/roles roles_external'
-				body.call()
-			}
+			// Link the project's Ansible roles to where they're expected.
+			sh "cd ${deployWorkingDir} && ln -s /etc/ansible/roles roles_external"
+			body.call()
 		}
 
 		// Now start the container with the above args and run the specified
