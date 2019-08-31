@@ -2,13 +2,13 @@
 
 - name: Copy App Server Installer from Local Path
   copy:
-    src: "{{ data_server_appserver_installer }}"
-    dest: "{{ data_server_dir }}/{{ data_server_appserver_installer | basename }}"
+    src: "{{ data_server_container }}"
+    dest: "{{ data_server_dir }}/{{ data_server_container | basename }}"
   become: true
 
 - name: Extract App Server
   unarchive:
-    src: "{{ data_server_dir }}/{{ data_server_appserver_installer | basename }}"
+    src: "{{ data_server_dir }}/{{ data_server_container | basename }}"
     dest: "{{ data_server_dir }}"
     copy: false
     owner: "{{ data_server_user }}"
