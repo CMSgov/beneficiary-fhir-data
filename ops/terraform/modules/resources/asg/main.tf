@@ -109,7 +109,7 @@ resource "aws_launch_configuration" "main" {
 ##
 resource "aws_autoscaling_group" "main" {
   # Generate a new group on every revision
-  name_prefix               = "${aws_launch_configuration.main.name}-"
+  name                      = aws_launch_configuration.main.name
   desired_capacity          = var.asg_config.desired
   max_size                  = var.asg_config.max
   min_size                  = var.asg_config.min

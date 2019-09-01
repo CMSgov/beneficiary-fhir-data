@@ -172,7 +172,7 @@ module "fhir_asg" {
 
   # TODO: Dummy values to get started
   launch_config   = {
-    instance_type = "m4.large" 
+    instance_type = "m5.large" 
     ami_id        = "ami-0b898040803850657" 
     key_name      = "bfd-rick-test" 
     profile       = module.fhir_iam.profile
@@ -204,7 +204,7 @@ module "etl_instance" {
 
   # TODO: Dummy values to get started
   launch_config   = {
-    instance_type = "m4.large" 
+    instance_type = "m5.large" 
     ami_id        = "ami-0b898040803850657" 
     key_name      = "bfd-rick-test" 
     profile       = module.etl_iam.profile
