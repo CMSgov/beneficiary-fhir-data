@@ -108,19 +108,16 @@ resource "aws_launch_configuration" "main" {
 # Autoscaling group
 ##
 resource "aws_autoscaling_group" "main" {
-  # Generate a new config on every revision
-  name_prefix               = "bfd-${var.env_config.env}-${var.role}-"
+  # Generate a new group on every revision
+  name_prefix               = "${aws_launch_configuration.main.name}-"
   desired_capacity          = var.asg_config.desired
   max_size                  = var.asg_config.max
   min_size                  = var.asg_config.min
 
-  # Make terraform wait for instances to join the ELB
-  # per https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#waiting-for-capacity
-  /* TODO: Wait for real AMI's before this step 
-  min_elb_capacity          = var.asg_config.desired
-  wait_for_elb_capacity     = var.asg_config.desired
-  wait_for_capacity_timeout = "10m"
-  */
+  # If an lb is defined, wait for the ELB 
+  min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
+  wait_for_elb_capacity     = var.lb_config == null ? null : var.asg_config.min
+  wait_for_capacity_timeout = var.lb_config == null ? null : "10m"
 
   health_check_grace_period = 300
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
