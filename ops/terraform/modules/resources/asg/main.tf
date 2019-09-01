@@ -37,7 +37,7 @@ resource "aws_security_group" "base" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    security_groups = [var.mgmt_config.vpn_sg]
+    cidr_blocks = ["10.0.0.0/8"]
   }
 
   egress {
@@ -94,8 +94,9 @@ resource "aws_launch_configuration" "main" {
   iam_instance_profile        = var.launch_config.profile
   placement_tenancy           = local.is_prod ? "dedicated" : "default"
 
-  user_data                   = templatefile("${path.module}/../templates/user_data.tpl", {
-    env    = var.env_config.env
+  user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
+    env   = var.env_config.env
+    port  = var.lb_config.port
   })
 
   lifecycle {

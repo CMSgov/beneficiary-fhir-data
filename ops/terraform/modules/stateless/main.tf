@@ -6,6 +6,7 @@
 locals {
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config      = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  port            = 7743
   cw_period       = 60    # Seconds
   cw_eval_periods = 3
 }
@@ -130,7 +131,7 @@ module "fhir_lb" {
   layer           = "dmz"
   log_bucket      = data.aws_s3_bucket.admin.id
   ingress_port    = 443
-  egress_port     = 7443
+  egress_port     = local.port
 }
 
 module "lb_alarms" {
@@ -175,6 +176,7 @@ module "fhir_asg" {
     ami_id        = "ami-0b898040803850657" 
     key_name      = "bfd-rick-test" 
     profile       = module.fhir_iam.profile
+    user_data_tpl = "simple_server.tpl"       # See templates directory for choices
   }
 
   db_config       = {
@@ -206,6 +208,7 @@ module "etl_instance" {
     ami_id        = "ami-0b898040803850657" 
     key_name      = "bfd-rick-test" 
     profile       = module.etl_iam.profile
+    user_data_tpl = "default.tpl"
   }
 
   mgmt_config     = {

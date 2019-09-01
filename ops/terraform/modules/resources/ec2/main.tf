@@ -80,7 +80,7 @@ resource "aws_instance" "main" {
   vpc_security_group_ids      = [aws_security_group.base.id]
   subnet_id                   = data.aws_subnet.main.id
 
-  user_data                   = templatefile("${path.module}/../templates/user_data.tpl", {
+  user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env    = var.env_config.env
   })
 }
