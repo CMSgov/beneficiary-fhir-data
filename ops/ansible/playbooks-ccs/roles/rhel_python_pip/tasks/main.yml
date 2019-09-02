@@ -1,4 +1,7 @@
 ---
+##
+# Installs Python, python-boto, pip and boto3 + botocore 
+###
 
 - name: Install Python 
   yum: 
@@ -18,4 +21,3 @@
 - name: Ensure botocore and boto3 modules are installed
   pip:
     name: [ "boto3", "botocore"]
-#    extra_args: "--user"

@@ -1,5 +1,5 @@
 ---
-- name: install the latest version of ntp
+- name: Install the latest version of ntp
   become: yes
   yum:
     name: ntp

@@ -1,5 +1,7 @@
 ---
-
+##
+# Performs misc. configuration tasks to prepare the GDIT RHEL Gold Image.
+##
 - name: Fix umask value
   become: yes
   vars:
