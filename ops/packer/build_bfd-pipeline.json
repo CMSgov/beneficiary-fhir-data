@@ -30,7 +30,6 @@
       "command": "./ansible-playbook-wrapper",
       "playbook_file": "./build_bfd-pipeline.yml",
       "extra_arguments": [
-        "-vv",
         "-e ansible_python_interpreter=/usr/bin/python",
         "-e env={{user `env`}}"
       ],
