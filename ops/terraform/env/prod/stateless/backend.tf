@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket         = "bfd-tf-state"
-    key            = "prod/iam/terraform.tfstate"
+    key            = "prod/stateless/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bfd-tf-table"
     encrypt        = "1"
