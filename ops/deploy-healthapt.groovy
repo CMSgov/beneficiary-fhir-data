@@ -74,17 +74,6 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 		throw new IllegalArgumentException("Unsupported environment ID: '${envId}'.")
 	}
 
-	// Seatbelt: don't deploy anywhere important until everything is tested.
-	// TODO: remove this when ready
-	if (envId != "test") {
-		echo 'Production deploys not enabled yet.'
-		return
-	}
-	if (envId != "test") {
-		// Just in case that 'return' doesn't work as expected...
-		throw new IllegalStateException('do not deploy to prod yet')
-	}
-
 	// Run the deploy to the specified environment.
 	insideAnsibleContainer {
 		writeFile file: "${deployWorkingDir}/extra_vars.json", encoding: 'UTF-8', text: """\
