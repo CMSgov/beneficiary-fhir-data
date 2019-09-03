@@ -24,8 +24,7 @@ data "aws_iam_role" "rds_monitoring" {
 #   - deletition protection in prod environments
 #
 resource "aws_db_instance" "db" {
-  max_allocated_storage  = local.is_master ? var.db_config.allocated_storage : null
-  allocated_storage      = local.is_master ? 100 : null
+  allocated_storage      = var.db_config.allocated_storage
   storage_type           = "io1" 
   iops                   = var.db_config.iops
   instance_class         = var.db_config.instance_class

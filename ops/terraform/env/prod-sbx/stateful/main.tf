@@ -10,7 +10,6 @@ provider "aws" {
 module "stateful" {
   source = "../../../modules/stateful"
 
-  # Medium DB
   db_config = { 
     instance_class    = "db.m5.2xlarge"
     iops              = 4000

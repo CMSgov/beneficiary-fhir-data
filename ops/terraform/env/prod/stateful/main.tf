@@ -10,11 +10,10 @@ provider "aws" {
 module "stateful" {
   source = "../../../modules/stateful"
 
-  # Large DB
   db_config = { 
     instance_class    = "db.r5.24xlarge"
-    iops              = 5000
-    allocated_storage = 10000
+    iops              = 32000
+    allocated_storage = 16000
   }
 
   env_config = {
