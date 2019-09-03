@@ -1,0 +1,56 @@
+pipeline {
+    agent {
+        any {
+            label ''
+        }
+    }
+
+    parameters {
+    string(
+      defaultValue: "",
+      description: 'The Jenkins ID for the config file managed by Jenkins.',
+      name: 'FILE_ID'
+    )
+    }
+
+    stages {
+
+        stage('Add config.json to Workspace') {
+            steps {
+                    configFileProvider([configFile(fileId: "${params.FILE_ID}", variable: 'JSON_CONFIG_FILE')]) {
+                        sh "cat $JSON_CONFIG_FILE > config.json"
+                    }
+                }
+        }
+
+        stage("Create parampush.sh") {
+            steps {
+                    script {
+                        writeFile file: "parampush.sh", text: '''#!/bin/bash
+                            set -e
+                            for row in $(jq -cr '.[] | .[]' config.json); do
+                                if [[ $row =~ '"Overwrite":true' ]]; then
+                                    aws ssm put-parameter \\
+                                    --region us-east-1 \\
+                                    --cli-input-json ${row};
+                                fi
+                            done'''
+                    }               
+                }
+            }
+
+        stage("Push Parameters to AWS Parameter Store") {
+            steps {
+                script {
+                    withAWS(region:'us-east-1') {
+                            sh """
+                            chown jenkins:jenkins ./parampush.sh
+                            chmod 755 ./parampush.sh
+                            ./parampush.sh
+                            """
+                    }
+                }    
+            }
+        }
+    }
+}
