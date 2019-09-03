@@ -96,9 +96,9 @@
     - name: Populate Lists of Data Servers by Env
       set_fact:
         data_servers_by_env:
-          ts: "{{ data_servers_by_env.ts if (item.tags.Name) not in deployment_environment_ts.data_server_elb.ec2_instance_names else (data_servers_by_env.ts + [item]) }}"
-          dp: "{{ data_servers_by_env.dp if (item.tags.Name) not in deployment_environment_dp.data_server_elb.ec2_instance_names else (data_servers_by_env.dp + [item]) }}"
-          pd: "{{ data_servers_by_env.pd if (item.tags.Name) not in deployment_environment_pd.data_server_elb.ec2_instance_names else (data_servers_by_env.pd + [item]) }}"
+          ts: "{{ data_servers_by_env.ts if (item.tags.Name | default('')) not in deployment_environment_ts.data_server_elb.ec2_instance_names else (data_servers_by_env.ts + [item]) }}"
+          dp: "{{ data_servers_by_env.dp if (item.tags.Name | default('')) not in deployment_environment_dp.data_server_elb.ec2_instance_names else (data_servers_by_env.dp + [item]) }}"
+          pd: "{{ data_servers_by_env.pd if (item.tags.Name | default('')) not in deployment_environment_pd.data_server_elb.ec2_instance_names else (data_servers_by_env.pd + [item]) }}"
       with_items: "{{ ec2_instances.instances }}"
 
     - name: Create EC2 Elastic Load Balancer (ELB) for Data Servers

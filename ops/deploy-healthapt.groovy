@@ -10,6 +10,20 @@
 
 
 /**
+ * Not used in the HealthAPT environment; just stubbed out to prevent errors.
+ */
+class AmiIds implements Serializable {
+}
+
+/*
+ * Note: due to JENKINS-33510, the 'dir' step is not yet supported inside Docker. As a workaround, all 'sh'
+ * steps inside docker blocks should be prefixed with "cd <work_dir> && ...", if a different working
+ * directory is needed.
+ */
+@groovy.transform.Field
+def deployWorkingDir = 'ops/ansible/playbooks-healthapt'
+
+/**
  * Deploys/redeploys Jenkins and related systems to the LSS environment.
  *
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
@@ -28,63 +42,52 @@ def deployManagement(AmiIds amiIds) {
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
 def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
-	dir ('ops/ansible/playbooks-healthapt') {
-		// Ensure the Ansible image is ready to go.
-		insideAnsibleContainer {
-			// Just some general "what does the container look like" debug
-			// logging. Useful for if/when things go sideways.
-			sh 'cat /etc/passwd'
-			sh 'echo $USER && echo $UID && echo $HOME && whoami'
-			sh 'pwd && ls -la'
-			sh 'ansible --version'
 
-			// Verify the play's syntax before we run it.
-			sh './ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check'
-		}
+	// Ensure the Ansible image is ready to go.
+	insideAnsibleContainer {
+		// Just some general "what does the container look like" debug
+		// logging. Useful for if/when things go sideways.
+		sh 'cat /etc/passwd'
+		sh 'echo $USER && echo $UID && echo $HOME && whoami'
+		sh 'pwd && ls -la'
+		sh 'ls -la ops/ansible/roles'
+		sh 'ansible --version'
 
-		// Define env-specific variables.
-		def envGroupName;
-		def envLimitName;
-		def extraVarsText;
-		if (envId == "test" ) {
-			envGroupName = 'env_test'
-			envLimitName = 'ts'
-		} else if (envId == "prod-stg") {
-			envGroupName = 'env_dor'
-			envLimitName = 'dp'
-		} else if (envId == "prod") {
-			envGroupName = 'env_prod'
-			envLimitName = 'pd'
-		} else {
-			throw new IllegalArgumentException("Unsupported environment ID: '${envId}'.")
-		}
+		// Verify the play's syntax before we run it.
+		sh "cd ${deployWorkingDir} && ./ansible-playbook-wrapper backend.yml --inventory=hosts_test --syntax-check"
+	}
 
-		// Seatbelt: don't deploy anywhere important until everything is tested.
-		// TODO: remove this when ready
-		if (envId != "test") {
-			echo 'Production deploys not enabled yet.'
-			return
-		}
-		if (envId != "test") {
-			// Just in case that 'return' doesn't work as expected...
-			throw new IllegalStateException('do not deploy to prod yet')
-		}
+	// Define env-specific variables.
+	def envGroupName;
+	def envLimitName;
+	def extraVarsText;
+	if (envId == "test" ) {
+		envGroupName = 'env_test'
+		envLimitName = 'ts'
+	} else if (envId == "prod-stg") {
+		envGroupName = 'env_dpr'
+		envLimitName = 'dp'
+	} else if (envId == "prod") {
+		envGroupName = 'env_prod'
+		envLimitName = 'pd'
+	} else {
+		throw new IllegalArgumentException("Unsupported environment ID: '${envId}'.")
+	}
 
-		// Run the deploy to the specified environment.
-		insideAnsibleContainer {
-			writeFile file: 'extra_vars.json', encoding: 'UTF-8', text: """\
-			{
-				"limit_envs": [
-					"${envLimitName}"
-				],
-				"data_pipeline_jar": "../../../${appBuildResults.dataPipelineUberJar}",
-				"data_server_container": "../../../${appBuildResults.dataServerContainerZip}",
-				"data_server_container_name": "${appBuildResults.dataServerContainerName}",
-				"data_server_war": "../../../${appBuildResults.dataServerWar}"
-			}
-			""".stripIndent()
-			sh "./ansible-playbook-wrapper backend.yml --limit=localhost:${envGroupName} --extra-vars \"@extra_vars.json\""
+	// Run the deploy to the specified environment.
+	insideAnsibleContainer {
+		writeFile file: "${deployWorkingDir}/extra_vars.json", encoding: 'UTF-8', text: """\
+		{
+			"limit_envs": [
+				"${envLimitName}"
+			],
+			"data_pipeline_jar": "../../../${appBuildResults.dataPipelineUberJar}",
+			"data_server_container": "unused-because-jboss-is-manually-installed",
+			"data_server_container_name": "jboss-eap-7.0",
+			"data_server_war": "../../../${appBuildResults.dataServerWar}"
 		}
+		""".stripIndent()
+		sh "cd ${deployWorkingDir} && ./ansible-playbook-wrapper backend.yml --limit=localhost:${envGroupName} --extra-vars \"@extra_vars.json\""
 	}
 }
 
@@ -122,7 +125,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 		dockerArgs += ' --volume=/etc/ssh:/etc/ssh:rw'
 
 		// Bind mount the `vault.password` file where it's needed.
-		dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/vault.password:ro"
+		dockerArgs += " --volume=${vaultPasswordFile}:${env.WORKSPACE}/ops/ansible/playbooks-healthapt/vault.password:ro"
 
 		// Ensure that Ansible uses Jenkins' Maven repo.
 		dockerArgs += ' --volume=/u01/jenkins/.m2:/root/.m2:ro'
@@ -134,7 +137,7 @@ public <V> V insideAnsibleContainer(Closure<V> body) {
 			sh 'chmod -R u=rw,g=,o= /root/.ssh'
 
 			// Link the project's Ansible roles to where they're expected.
-			sh 'ln -s /etc/ansible/roles roles_external'
+			sh "cd ${deployWorkingDir} && ln -s /etc/ansible/roles roles_external"
 			body.call()
 		}
 

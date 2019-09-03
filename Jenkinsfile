@@ -52,6 +52,14 @@ properties([
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
 
+// These variables are accessible throughout this file (except inside methods and classes).
+def scriptForApps
+def scriptForDeploys
+def scriptForDeploysHhsdevcloud
+def canDeployToProdEnvs
+def willDeployToProdEnvs
+def appBuildResults
+def amiIds
 
 stage('Prepare') {
 	node {
@@ -59,24 +67,23 @@ stage('Prepare') {
 		checkout scm
 
 		// Load the child Jenkinsfiles.
-		def scriptForApps = load('apps/build.groovy')
-		def scriptForDeploys;
+		scriptForApps = load('apps/build.groovy')
 		if (params.deploy_env == 'healthapt') {
 			scriptForDeploys = load('ops/deploy-healthapt.groovy')
 		} else if (params.deploy_env == 'ccs') {
 			scriptForDeploys = load('ops/deploy-ccs.groovy')
 		}
-		def scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
+		scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
 
 		// Find the most current AMI IDs (if any).
-		def amiIds = null
+		amiIds = null
 		if (params.deploy_env == 'ccs') {
 			amiIds = scriptForDeploys.findAmis()
 		}
 
 		// These variables track our decision on whether or not to deploy to prod-like envs.
-		def canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-		def willDeployToProdEnvs = false
+		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
+		willDeployToProdEnvs = false
 	}
 }
 
@@ -112,7 +119,7 @@ stage('Build Apps') {
 	milestone(label: 'stage_build_apps_start')
 
 	node {
-		def appBuildResults = scriptForApps.build()
+		appBuildResults = scriptForApps.build()
 	}
 }
 
