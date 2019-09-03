@@ -6,7 +6,7 @@
 
 locals {
   azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id }
+  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=module.local_zone.zone_id }
   
   db_sgs = [
     aws_security_group.db.id,
@@ -96,11 +96,10 @@ data "aws_security_group" "management" {
 #
 # Build a VPC private local zone for CNAME records
 #
-resource "aws_route53_zone" "local_zone" {
-  name    = "bfd-${var.env_config.env}.local"
-  vpc {
-    vpc_id = data.aws_vpc.main.id
-  }
+module "local_zone" {
+  source        = "../resources/dns"
+  env_config    = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id}
+  public        = false
 }
 
 # CloudWatch SNS Topic
