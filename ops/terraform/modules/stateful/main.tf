@@ -185,6 +185,7 @@ resource "aws_db_parameter_group" "import_mode" {
   parameter {
     name  = "max_wal_size"
     value = "256"
+    apply_method = "pending-reboot"
   }
 
   parameter {
@@ -200,6 +201,7 @@ resource "aws_db_parameter_group" "import_mode" {
   parameter {
     name  = "wal_buffers"
     value = "8192"
+    apply_method = "pending-reboot"
   }
 
   parameter {
