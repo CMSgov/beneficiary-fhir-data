@@ -245,7 +245,7 @@ module "replica1" {
 
   vpc_security_group_ids = local.db_sgs
 
-  apply_immediately    = false
+  apply_immediately    = var.db_import_mode.enabled ? true : false
   parameter_group_name = null
 }
 
@@ -261,7 +261,7 @@ module "replica2" {
 
   vpc_security_group_ids = local.db_sgs
 
-  apply_immediately    = false
+  apply_immediately    = var.db_import_mode.enabled ? true : false
   parameter_group_name = null
 }
 
@@ -277,7 +277,7 @@ module "replica3" {
 
   vpc_security_group_ids = local.db_sgs
 
-  apply_immediately    = false
+  apply_immediately    = var.db_import_mode.enabled ? true : false
   parameter_group_name = null
 }
 
