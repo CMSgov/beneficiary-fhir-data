@@ -183,7 +183,7 @@ resource "aws_db_parameter_group" "import_mode" {
   }
 
   parameter {
-    name  = "checkpoint_segments"
+    name  = "max_wal_size"
     value = "256"
   }
 
@@ -194,7 +194,7 @@ resource "aws_db_parameter_group" "import_mode" {
 
   parameter {
     name  = "synchronous_commit"
-    value = "0"
+    value = "off"
   }
 
   parameter {
