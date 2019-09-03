@@ -10,11 +10,15 @@ provider "aws" {
 module "stateful" {
   source = "../../../modules/stateful"
 
-  # Smallish DB
   db_config = { 
-    instance_class    = "db.m4.2xlarge"
-    iops              = 1000
-    allocated_storage = 1000
+    instance_class    = "db.r5.24xlarge"
+    iops              = 16000
+    allocated_storage = 12000
+  }
+
+  db_import_mode = {
+    enabled = true
+    maintenance_work_mem = "4194304"
   }
 
   env_config = {

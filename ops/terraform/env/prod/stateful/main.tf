@@ -10,11 +10,15 @@ provider "aws" {
 module "stateful" {
   source = "../../../modules/stateful"
 
-  # Large DB
   db_config = { 
     instance_class    = "db.r5.24xlarge"
-    iops              = 5000
-    allocated_storage = 10000
+    iops              = 16000
+    allocated_storage = 16000
+  }
+
+  db_import_mode = {
+    enabled = true
+    maintenance_work_mem = "4194304"
   }
 
   env_config = {

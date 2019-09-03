@@ -10,11 +10,15 @@ provider "aws" {
 module "stateful" {
   source = "../../../modules/stateful"
 
-  # Medium DB
   db_config = { 
     instance_class    = "db.m5.2xlarge"
     iops              = 4000
     allocated_storage = 2000
+  }
+
+  db_import_mode = {
+    enabled = true
+    maintenance_work_mem = "1048576"
   }
 
   env_config = {
