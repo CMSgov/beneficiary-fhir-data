@@ -1,16 +1,3 @@
-# Ignore Eclipse metadata files, but include .gitignore itself
-/.*
-!/.gitignore
-!/.gitattributes
-
-# Ignore Maven output folders
-/target*/
-
-# The Derby driver writes out these obnoxious files even when it's not being used.
-*/derby.log
-
-# OSX system files
-.DS_Store
-
-# Ignore build files
-bin
+# Ignore Maven output folders here and in children. Please note that if someone tries to create a
+# Java package named 'target', they're going to have a bad time as a result of this.
+**/target/

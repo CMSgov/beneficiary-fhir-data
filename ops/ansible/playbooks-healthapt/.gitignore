@@ -2,10 +2,6 @@
 venv/
 roles_external/
 
-# Ignore Eclipse metadata.
-.project
-.idea/*
-
 # Ignore the Ansible Vault password file.
 vault.password
 
@@ -14,12 +10,3 @@ vault.password
 
 # Ignore Ansible log files.
 logs/
-
-# Ignore Terraform compiles files and modules
-*.tfstate
-*.tfstate.backup
-.terraform.tfstate.lock.info
-.terraform/
-
-# Ignore editor stuff
-.vscode
