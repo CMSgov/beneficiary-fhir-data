@@ -11,14 +11,14 @@ module "stateful" {
   source = "../../../modules/stateful"
 
   db_config = { 
-    instance_class    = "db.m5.4xlarge"
+    instance_class    = "db.r5.24xlarge"
     iops              = 16000
-    allocated_storage = 8000
+    allocated_storage = 12000
   }
 
   db_import_mode = {
     enabled = true
-    maintenance_work_mem = "2097152"
+    maintenance_work_mem = "4194304"
   }
 
   env_config = {
