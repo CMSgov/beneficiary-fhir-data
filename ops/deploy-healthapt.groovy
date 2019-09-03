@@ -65,7 +65,7 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 		envGroupName = 'env_test'
 		envLimitName = 'ts'
 	} else if (envId == "prod-stg") {
-		envGroupName = 'env_dor'
+		envGroupName = 'env_dpr'
 		envLimitName = 'dp'
 	} else if (envId == "prod") {
 		envGroupName = 'env_prod'
