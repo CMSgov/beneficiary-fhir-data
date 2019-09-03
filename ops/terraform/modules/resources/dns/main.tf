@@ -26,7 +26,7 @@ resource "aws_route53_record" "parent" {
   records   = aws_route53_zone.main.name_servers[*]
 }
 
-# Create an apex record for the zone
+# Create an A apex record for the zone
 #
 resource "aws_route53_record" "apex" {
   count     = var.apex_record != null ? 1 : 0
@@ -41,7 +41,7 @@ resource "aws_route53_record" "apex" {
   }
 }
 
-# Create A records for the zone
+# Create A-records for the zone
 #
 resource "aws_route53_record" "a" {
   count     = length(var.a_records)
@@ -55,4 +55,3 @@ resource "aws_route53_record" "a" {
     evaluate_target_health = true
   }
 }
-
