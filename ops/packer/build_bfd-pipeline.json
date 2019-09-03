@@ -30,13 +30,17 @@
       "command": "./ansible-playbook-wrapper",
       "playbook_file": "./build_bfd-pipeline.yml",
       "extra_arguments": [
-        "-e ansible_python_interpreter=/usr/bin/python",
-        "-e env={{user `env`}}",
-        "-e data_pipeline_jar={{user `data_pipeline_jar`}}"
+        "--extra-vars '@extra_vars.json'",
+        "-e ansible_python_interpreter=/usr/bin/python"
       ],
       "ansible_env_vars": [
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
       ]
     }
-  ]
+  ],
+  "post-processors": [{
+    "type": "manifest",
+    "output": "manifest_data-pipeline.json",
+    "strip_path": true
+  }]
 }

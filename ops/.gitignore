@@ -8,6 +8,9 @@ vault.password
 # Ignore Ansible retry files.
 *.retry
 
+# Ignore packer manifest files
+manifest_*
+
 # Ignore Ansible log files.
 logs/
 

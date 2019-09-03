@@ -30,14 +30,17 @@
       "command": "./ansible-playbook-wrapper",
       "playbook_file": "./build_bfd-server.yml",
       "extra_arguments": [
-        "-e ansible_python_interpreter=/usr/bin/python",
-        "-e env={{user `env`}}",
-        "-e data_server_container={{user `data_server_container`}}",
-        "-e data_server_war={{user `data_server_war`}}"
+        "--extra-vars '@extra_vars.json'",
+        "-e ansible_python_interpreter=/usr/bin/python"
       ],
       "ansible_env_vars": [
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
       ]
     }
-  ]
+  ],
+  "post-processors": [{
+    "type": "manifest",
+    "output": "manifest_data-server.json",
+    "strip_path": true
+  }]
 }
