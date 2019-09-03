@@ -16,6 +16,11 @@ module "stateful" {
     allocated_storage = 8000
   }
 
+  db_import_mode = {
+    enabled = true
+    maintenance_work_mem = "2097152"
+  }
+
   env_config = {
     env               = "test"
     tags              = {application="bfd", business="oeda", stack="test", Environment="test"}

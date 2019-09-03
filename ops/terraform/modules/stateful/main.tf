@@ -170,6 +170,45 @@ resource "aws_db_subnet_group" "db" {
   subnet_ids      = [for s in data.aws_subnet.data_subnets: s.id]
 }
 
+# Parameter Group
+#
+resource "aws_db_parameter_group" "import_mode" {
+  name        = "bfd-${local.env_config.env}-import-mode-parameter-group"
+  family      = "postgres9.6"
+  description = "Sets parameters that optimize bulk data imports"
+
+  parameter {
+    name  = "maintenance_work_mem"
+    value = var.db_import_mode.maintenance_work_mem
+  }
+
+  parameter {
+    name  = "checkpoint_segments"
+    value = "256"
+  }
+
+  parameter {
+    name  = "checkpoint_timeout"
+    value = "1800"
+  }
+
+  parameter {
+    name  = "synchronous_commit"
+    value = "0"
+  }
+
+  parameter {
+    name  = "wal_buffers"
+    value = "8192"
+  }
+
+  parameter {
+    name  = "autovacuum"
+    value = "0"
+  }
+
+}
+
 # Master Database
 #
 module "master" {
@@ -183,6 +222,9 @@ module "master" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.master_db_sgs
+
+  apply_immediately    = var.db_import_mode.enabled ? true : false
+  parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : null
 }
 
 # Replicas Database 
@@ -200,6 +242,9 @@ module "replica1" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
+
+  apply_immediately    = false
+  parameter_group_name = null
 }
 
 module "replica2" {
@@ -213,6 +258,9 @@ module "replica2" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
+
+  apply_immediately    = false
+  parameter_group_name = null
 }
 
 module "replica3" {
@@ -226,6 +274,9 @@ module "replica3" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
+
+  apply_immediately    = false
+  parameter_group_name = null
 }
 
 # Cloud Watch alarms for each RDS instance

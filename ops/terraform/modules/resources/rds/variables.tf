@@ -33,3 +33,11 @@ variable "replicate_source_db" {
 variable "kms_key_id" {
   type        = string
 }
+
+variable "apply_immediately" {
+  type        = bool
+}
+
+variable "parameter_group_name" {
+  type        = string
+}

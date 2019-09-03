@@ -16,6 +16,11 @@ module "stateful" {
     allocated_storage = 2000
   }
 
+  db_import_mode = {
+    enabled = true
+    maintenance_work_mem = "1048576"
+  }
+
   env_config = {
     env               = "prod-sbx"
     tags              = {application="bfd", business="oeda", stack="prod-sbx", Environment="prod-sbx"}

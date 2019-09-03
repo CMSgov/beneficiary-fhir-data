@@ -54,6 +54,9 @@ resource "aws_db_instance" "db" {
   performance_insights_enabled    = false                     # Not supported in postgres 9.6
   final_snapshot_identifier       = local.deletion_protection ? "${local.name}-final" : null
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"] # Could add 'listener' and "audit"
+  # depends on the state of var.db_import_mode.enabled in the parent module
+  parameter_group_name = var.parameter_group_name
+  apply_immediately    = var.apply_immediately
 
   lifecycle {
     ignore_changes = ["password"]
