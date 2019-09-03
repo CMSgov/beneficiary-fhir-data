@@ -11,8 +11,8 @@ module "migration" {
   source = "../../../modules/migration"
 
   env_config = {
-    env               = "test"
-    tags              = {application="bfd", business="oeda", stack="test", Environment="test"}
+    env               = "prod-sbx"
+    tags              = {application="bfd", business="oeda", stack="prod-sbx", Environment="prod-sbx"}
   }  
 
   bb      = 0

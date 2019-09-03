@@ -37,7 +37,7 @@ resource "aws_route53_record" "apex" {
   alias {
     name                   = var.apex_record.alias
     zone_id                = var.apex_record.zone_id
-    evaluate_target_health = var.apex_record.health_check
+    evaluate_target_health = true
   }
 }
 
@@ -52,38 +52,7 @@ resource "aws_route53_record" "a" {
   alias {
     name                   = var.a_records[count.index].alias
     zone_id                = var.a_records[count.index].zone_id
-    evaluate_target_health = var.a_records[count.index].health_check
+    evaluate_target_health = true
   }
 }
 
-# Create weighted CNAME record pairs with 0-100 for weights. 
-#
-resource "aws_route53_record" "cname_a" {
-  count     = length(var.weighted_pairs)
-  zone_id   = aws_route53_zone.main.zone_id
-  name      = var.weighted_pairs[count.index].name
-  type      = "CNAME"
-  ttl       = 60 # Alias records have a 60 second TTL so doing less than that is wasteful
-
-  weighted_routing_policy {
-    weight  = min(100, var.weighted_pairs[count.index].weight)
-  }
-
-  set_identifier  = var.weighted_pairs[count.index].a_set
-  records         = [var.weighted_pairs[count.index].a_record]
-}
-
-resource "aws_route53_record" "cname_b" {
-  count     = length(var.weighted_pairs)
-  zone_id   = aws_route53_zone.main.zone_id
-  name      = var.weighted_pairs[count.index].name
-  type      = "CNAME"
-  ttl       = 60  # Alias records have a 60 second TTL so doing less than that is wasteful
-
-  weighted_routing_policy {
-    weight  = max(0, 100 - var.weighted_pairs[count.index].weight)
-  }
-
-  set_identifier  = var.weighted_pairs[count.index].b_set
-  records         = [var.weighted_pairs[count.index].b_record]
-}

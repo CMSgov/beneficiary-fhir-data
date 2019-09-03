@@ -41,17 +41,16 @@ data "aws_route53_zone" "parent" {
 # DNS zone and records
 #
 module "main" {
-  source      = "../resources/dns"
-  name        = local.env
-  parent      = {name=data.aws_route53_zone.parent.name, zone_id=data.aws_route53_zone.parent.zone_id}
-  public      = true
-  env_config  = local.env_config
+  source          = "../resources/dns"
+  name            = local.env
+  parent          = {name=data.aws_route53_zone.parent.name, zone_id=data.aws_route53_zone.parent.zone_id}
+  public          = true
+  env_config      = local.env_config
 
   # The apex record just goes the FHIR server
   apex_record = {
     alias         = data.aws_lb.fhir.dns_name 
     zone_id       = data.aws_lb.fhir.zone_id
-    health_check  = false
   }
 
   # The health-apt record goes to the health apt service
@@ -59,44 +58,31 @@ module "main" {
     name          = "health-apt"
     alias         = local.health_apt[local.env].dns
     zone_id       = local.health_apt[local.env].zone_id
-    health_check  = false
   }]
+}
 
-  # Create one pair of records per partner
-  weighted_pairs = [
-    { 
-      name        = "bb", 
-      weight      = var.bb
-      a_record    = local.name
-      a_set       = "ccs"
-      b_record    = "health-apt.${local.name}"
-      b_set       = "health-apt"
-    },
-    { 
-      name        = "bcda", 
-      weight      = var.bcda
-      a_record    = local.name
-      a_set       = "ccs"
-      b_record    = "health-apt.${local.name}"
-      b_set       = "health-apt"
-    },
-    { 
-      name        = "dpc", 
-      weight      = var.dpc
-      a_record    = local.name
-      a_set       = "ccs"
-      b_record    = "health-apt.${local.name}"
-      b_set       = "health-apt"
-    },
-    { 
-      name        = "mct", 
-      weight      = var.mct
-      a_record    = local.name
-      a_set       = "ccs"
-      b_record    = "health-apt.${local.name}"
-      b_set       = "health-apt"
-    },
-  ]
+# Create a CNAME pair
+#
+module "weighted_pairs" {
+  source          = "../resources/dns_pairs"
+  env_config      = local.env_config
+  zone_id         = module.main.zone_id
+
+  a_set           = "ccs"
+  a_alias         = data.aws_lb.fhir.dns_name 
+  a_zone_id       = data.aws_lb.fhir.zone_id
+
+  b_set           = "health-apt"
+  b_alias         = local.health_apt[local.env].dns
+  b_zone_id       = local.health_apt[local.env].zone_id
+
+  # Create one pair per partner
+  weights         = {
+    bb            = var.bb,
+    bcda          = var.bcda,
+    dpc           = var.dpc,
+    mct           = var.mct
+  }
 }
 
 

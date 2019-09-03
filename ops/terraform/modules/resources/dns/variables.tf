@@ -23,19 +23,12 @@ variable "public" {
 
 variable "apex_record" {
   description = "Create an APEX record for an AWS resource"
-  type        = object({alias=string, zone_id=string, health_check=bool})
+  type        = object({alias=string, zone_id=string})
   default     = null
 }
 
 variable "a_records" {
   description = "A list of A records that AWS resources"
-  type        = list(object({name=string, alias=string, zone_id=string, health_check=bool}))
-  default     = []
-}
-
-
-variable "weighted_pairs" {
-  description = "Create a pair of weighted CNAME records. Weights should be 0-100"
-  type        = list(object({name=string, weight=number, a_record=string, a_set=string, b_record=string, b_set=string}))
+  type        = list(object({name=string, alias=string, zone_id=string}))
   default     = []
 }
