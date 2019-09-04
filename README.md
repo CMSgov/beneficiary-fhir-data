@@ -28,6 +28,15 @@ Click "build" and wait for the job to finish.
 
 <h2>Preparing the config for the running the Pipeline</h2>
 
+<h3>Parameter naming</h3>
+
+The parameter names are made from the following:
+* Project Name
+* Environment (dev/prod/sandbox/etc)
+* Date that the value was added in MMDDYYYY format
+* Parameter key
+Example: /weapon-x/dev/01012019/subject
+
 <h3>Updating the exisiting config.json</h3>
 
 Go to "JsonConfig" in "Manage Jenkins" > "Managed files"
