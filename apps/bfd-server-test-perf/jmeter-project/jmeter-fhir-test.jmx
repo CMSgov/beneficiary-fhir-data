@@ -117,7 +117,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrievePatients</stringProp>
+          <stringProp name="classname">gov.cms.bfd.server.test.perf.backend.RetrievePatients</stringProp>
         </JavaSampler>
         <hashTree/>
         <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveEobs" enabled="true">
@@ -155,7 +155,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrieveEobs</stringProp>
+          <stringProp name="classname">gov.cms.bfd.server.test.perf.backend.RetrieveEobs</stringProp>
         </JavaSampler>
         <hashTree/>
         <JavaSampler guiclass="JavaTestSamplerGui" testclass="JavaSampler" testname="backend.RetrieveCoverages" enabled="true">
@@ -193,7 +193,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">gov.hhs.cms.bluebutton.fhirstress.backend.RetrieveCoverages</stringProp>
+          <stringProp name="classname">gov.cms.bfd.server.perf.test.backend.RetrieveCoverages</stringProp>
         </JavaSampler>
         <hashTree/>
       </hashTree>

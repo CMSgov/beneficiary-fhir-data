@@ -67,9 +67,9 @@ if [[ "${cygwin}" = true ]]; then targetDirectory=$(cygpath --unix "${targetDire
 cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
-workDirectory="${targetDirectory}/bluebutton-server"
+workDirectory="${targetDirectory}/server-work"
 serverPortsFile="${workDirectory}/server-ports.properties"
-bluebuttonServerIdFile="${workDirectory}/bluebutton-server-id.txt"
+bfdServerIdFile="${workDirectory}/bfd-server-id.txt"
 serverHome="${workDirectory}/${serverInstall}"
 serverLogRun="${workDirectory}/server-console.log"
 serverLogStop="${workDirectory}/server-stop.log"
@@ -82,12 +82,12 @@ for f in "${serverPortsFile}"; do
 	fi
 done
 
-# Read bluebuttonServerId from a file.
-bluebuttonServerId=
-if [[ -f "${bluebuttonServerIdFile}" ]]; then
-	bluebuttonServerId=$(cat "${bluebuttonServerIdFile}")
+# Read bfdServerId from a file.
+bfdServerId=
+if [[ -f "${bfdServerIdFile}" ]]; then
+	bfdServerId=$(cat "${bfdServerIdFile}")
 fi
-if [[ -z "${bluebuttonServerId}" ]]; then >&2 echo "No server ID found in '${bluebuttonServerIdFile}'."; exit 1; fi
+if [[ -z "${bfdServerId}" ]]; then >&2 echo "No server ID found in '${bfdServerIdFile}'."; exit 1; fi
 
 # Also try to read serverPortManagement from a file.
 if [[ -f "${serverPortsFile}" ]]; then
@@ -96,8 +96,8 @@ fi
 if [[ -z "${serverPortManagement}" ]]; then >&2 echo "Server management port not specified in '${serverPortsFile}'."; exit 1; fi
 
 # If the server isn't actually running, just exit.
-serverPids=$(pgrep -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*")
-if [[ -z "${serverPids}" ]]; then echo "No '-Dbluebutton-server-${bluebuttonServerId}' processes found to stop."; exit 0; fi
+serverPids=$(pgrep -f ".*java.*-Dbfd-server-${bfdServerId}.*jboss-modules\.jar.*")
+if [[ -z "${serverPids}" ]]; then echo "No '-Dbfd-server-${bfdServerId}' processes found to stop."; exit 0; fi
 
 # Use the Wildfly CLI to stop the server.
 "${serverHome}/bin/jboss-cli.sh" \
@@ -133,12 +133,12 @@ done
 # _said_ it stopped, but really didn't (I've observed this happening). So here,
 # we just double check via the process list, and kill it the mean way if 
 # needed.
-serverPids=$(pgrep -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*")
+serverPids=$(pgrep -f ".*java.*-Dbfd-server-${bfdServerId}.*jboss-modules\.jar.*")
 if [[ -z "${serverPids}" ]]; then
 	echo "Server did actually stop."
 	exit 0
 else
-	>&2 echo "Server processes still found. Sending KILL signal to all '-Dbluebutton-server-${bluebuttonServerId}' processes."
-	pkill -KILL -f ".*java.*-Dbluebutton-server-${bluebuttonServerId}.*jboss-modules\.jar.*"
+	>&2 echo "Server processes still found. Sending KILL signal to all '-Dbfd-server-${bfdServerId}' processes."
+	pkill -KILL -f ".*java.*-Dbfd-server-${bfdServerId}.*jboss-modules\.jar.*"
 	>&2 echo "Server processes sent KILL signal."
 fi

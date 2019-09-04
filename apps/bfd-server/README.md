@@ -18,12 +18,12 @@ Going to work on this project? Great! You can follow the instructions in [Develo
 
 This application has the following configuration parameters:
 
-* `bbfhir.logs.dir`: The directory that the application will write its log files out to, which defaults to `./target/bluebutton-server/`.
-* `bbfhir.db.url`: The JDBC URL of the database to use. Supports HSQL and PostgreSQL. Samples:
+* `bfdServer.logs.dir`: The directory that the application will write its log files out to, which defaults to `./target/bluebutton-server/`.
+* `bfdServer.db.url`: The JDBC URL of the database to use. Supports HSQL and PostgreSQL. Samples:
     * `jdbc:hsqldb:mem:test`
     * `jdbc:postgresql://example.com:5432/fhir`
-* `bbfhir.db.username`: The JDBC username to use with the database.
-* `bbfhir.db.password`: The JDBC password to use with the database.
+* `bfdServer.db.username`: The JDBC username to use with the database.
+* `bfdServer.db.password`: The JDBC password to use with the database.
 
 These parameters should be specified as Java system properties on the command line (i.e. "`-Dkey=val`" arguments).
 

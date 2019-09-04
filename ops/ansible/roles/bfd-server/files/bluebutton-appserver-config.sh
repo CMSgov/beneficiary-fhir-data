@@ -198,7 +198,7 @@ if (outcome == success) of /system-property=org.jboss.logging.provider:read-reso
 end-if
 /system-property=org.jboss.logging.provider:add(value="slf4j")
 
-# Set the Java system properties that are required to configure the FHIR server.
+# Remove the old and now-unused Java system properties.
 if (outcome == success) of /system-property=bbfhir.logs.dir:read-resource
 	/system-property=bbfhir.logs.dir:remove
 end-if
@@ -215,11 +215,28 @@ if (outcome == success) of /system-property=bbfhir.db.connections.max:read-resou
 	/system-property=bbfhir.db.connections.max:remove
 end-if
 
-/system-property=bbfhir.logs.dir:add(value="./")
-/system-property=bbfhir.db.url:add(value="${dbUrl}")
-/system-property=bbfhir.db.username:add(value="${dbUsername}")
-/system-property=bbfhir.db.password:add(value="${dbPassword}")
-/system-property=bbfhir.db.connections.max:add(value="${dbConnectionsMax}")
+# Set the Java system properties that are required to configure the FHIR server.
+if (outcome == success) of /system-property=bfdServer.logs.dir:read-resource
+	/system-property=bfdServer.logs.dir:remove
+end-if
+if (outcome == success) of /system-property=bbfdServer.db.url:read-resource
+	/system-property=bfdServer.db.url:remove
+end-if
+if (outcome == success) of /system-property=bfdServer.db.username:read-resource
+	/system-property=bfdServer.db.username:remove
+end-if
+if (outcome == success) of /system-property=bfdServer.db.password:read-resource
+	/system-property=bfdServer.db.password:remove
+end-if
+if (outcome == success) of /system-property=bfdServer.db.connections.max:read-resource
+	/system-property=bfdServer.db.connections.max:remove
+end-if
+
+/system-property=bfdServer.logs.dir:add(value="./")
+/system-property=bfdServer.db.url:add(value="${dbUrl}")
+/system-property=bfdServer.db.username:add(value="${dbUsername}")
+/system-property=bfdServer.db.password:add(value="${dbPassword}")
+/system-property=bfdServer.db.connections.max:add(value="${dbConnectionsMax}")
 
 # Configure HTTPS.
 /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:remove

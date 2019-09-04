@@ -54,7 +54,7 @@ javaHome=""
 maxHeapArg="-Xmx4g"
 visualVm=""
 targetDirectory=
-dbUrl="jdbc:bluebutton-test:hsqldb:mem"
+dbUrl="jdbc:bfd-test:hsqldb:mem"
 while true; do
 	case "$1" in
 		-j )
@@ -117,7 +117,7 @@ trap 'error ${LINENO}' ERR
 cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
-workDirectory="${targetDirectory}/bluebutton-server"
+workDirectory="${targetDirectory}/server-work"
 serverArtifact="${workDirectory}/wildfly-dist-${serverVersion}.tar.gz"
 serverPortsFile="${workDirectory}/server-ports.properties"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bfd-server-war-.*\.war$')"
@@ -165,8 +165,8 @@ if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified
 echo "Configured server to run on HTTPS port '${serverPortHttps}', HTTP port '${serverPortHttp}', and management port '${serverPortManagement}'."
 
 # Generate a random server ID and write it to a file.
-bluebuttonServerId=$RANDOM
-echo -n "${bluebuttonServerId}" > "${workDirectory}/bluebutton-server-id.txt"
+bfdServerId=$RANDOM
+echo -n "${bfdServerId}" > "${workDirectory}/bfd-server-id.txt"
 
 # Build the args to pass to the server for VisualVM (if any).
 if [[ -f "${visualVm}/profiler/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so" ]]; then
@@ -218,15 +218,15 @@ JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
 JAVA_OPTS="\$JAVA_OPTS -Djboss.management.http.port=${serverPortManagement} -Djboss.http.port=${serverPortHttp} -Djboss.https.port=${serverPortHttps}"
 
 # These properties are all referenced within the standalone.xml we'll be using.
-JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.db.url=${dbUrl}"
-JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.ssl.keystore.path=${keyStore} -Dbbfhir.ssl.truststore.path=${trustStore} -Dbbfhir.roles=${rolesProps}"
+JAVA_OPTS="\$JAVA_OPTS -DbfdServer.db.url=${dbUrl}"
+JAVA_OPTS="\$JAVA_OPTS -DbfdServer.ssl.keystore.path=${keyStore} -DbfdServer.ssl.truststore.path=${trustStore} -DbfdServer.roles=${rolesProps}"
 
 # Used in src/main/resources/logback.xml as the directory to write the app log to. Must have a trailing slash.
-JAVA_OPTS="\$JAVA_OPTS -Dbbfhir.logs.dir=${workDirectory}/"
+JAVA_OPTS="\$JAVA_OPTS -DbfdServer.logs.dir=${workDirectory}/"
 
 # This just adds a searchable bit of text to the command line, so we can 
 # determine which java processes were started by this script.
-JAVA_OPTS="\$JAVA_OPTS -Dbluebutton-server-${bluebuttonServerId}"
+JAVA_OPTS="\$JAVA_OPTS -Dbfd-server-${bfdServerId}"
 EOF
 
 # Swap out the original standalone.xml file for our customized one.

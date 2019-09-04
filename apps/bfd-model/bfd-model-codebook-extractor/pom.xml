@@ -71,7 +71,7 @@
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>1.6.0</version>
 					<configuration>
-						<mainClass>gov.hhs.cms.bluebutton.data.codebook.extractor.CodebookPdfToXmlApp</mainClass>
+						<mainClass>gov.cms.bfd.model.codebook.extractor.CodebookPdfToXmlApp</mainClass>
 						<arguments>
 							<argument>${project.build.outputDirectory}</argument>
 						</arguments>

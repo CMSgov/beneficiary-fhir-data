@@ -1,7 +1,7 @@
 <configuration scan="false">
 
 	<appender name="FILE_UNSTRUCTURED" class="ch.qos.logback.core.FileAppender">
-		<file>${bbfhir.logs.dir:-./target/server-work/}bluebutton-server-app.log</file>
+		<file>${bfdServer.logs.dir:-./target/server-work/}bluebutton-server-app.log</file>
 		<encoder>
 			<!-- As we transition to structured logs, we need to leave our unstructured
 				logs in place for a bit. Once the new logs are being pushed to CloudWatch
@@ -11,7 +11,7 @@
 	</appender>
 
 	<appender name="FILE_STRUCTURED" class="ch.qos.logback.core.FileAppender">
-		<file>${bbfhir.logs.dir:-./target/server-work/}bluebutton-server-app-log.json</file>
+		<file>${bfdServer.logs.dir:-./target/server-work/}bluebutton-server-app-log.json</file>
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<!-- We output the application log as newline-delimited JSON objects (NDJSON).
 				This allows us to easily parse and search our logs. More importantly, it
@@ -35,7 +35,7 @@
 	</appender>
 
 	<appender name="HTTP_ACCESS" class="ch.qos.logback.core.FileAppender">
-		<file>${bbfhir.logs.dir:-./target/server-work/}bluebutton-server-app-log-access.json</file>
+		<file>${bfdServer.logs.dir:-./target/server-work/}bluebutton-server-app-log-access.json</file>
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<!-- We output the log as newline-delimited JSON objects (NDJSON).
 				This allows us to easily parse and search it. More importantly, it
@@ -65,7 +65,7 @@
 	</logger>
 
 	<appender name="DATABASE_QUERY" class="ch.qos.logback.core.FileAppender">
-		<file>${bbfhir.logs.dir:-./target/server-work/}bluebutton-server-app-log-database.json</file>
+		<file>${bfdServer.logs.dir:-./target/server-work/}bluebutton-server-app-log-database.json</file>
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<!-- We output the log as newline-delimited JSON objects (NDJSON).
 				This allows us to easily parse and search it. -->
