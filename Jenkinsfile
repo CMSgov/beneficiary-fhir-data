@@ -128,7 +128,7 @@ if (params.deploy_env == 'ccs') {
 		milestone(label: 'stage_build_app_amis_start')
 
 		node {
-			amiIds = scriptForDeploys.buildAppAmis(amiIds, appBuildResults)
+			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
 		}
 	}
 }
@@ -182,6 +182,16 @@ stage('Deploy to hhsdevcloud') {
 	}
 }
 
+if (params.deploy_env == 'ccs') {
+	stage('Build App AMIs') {
+		milestone(label: 'stage_build_app_amis_start')
+
+		node {
+			amiIds = scriptForDeploys.buildAppAmis('prod-stg', amiIds, appBuildResults)
+		}
+	}
+}
+
 stage('Deploy to prod-stg') {
 	if (willDeployToProdEnvs) {
 		lock(resource: 'env_prod_stg', inversePrecendence: true) {
@@ -193,6 +203,16 @@ stage('Deploy to prod-stg') {
 		}
 	} else {
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-stg')
+	}
+}
+
+if (params.deploy_env == 'ccs') {
+	stage('Build App AMIs') {
+		milestone(label: 'stage_build_app_amis_start')
+
+		node {
+			amiIds = scriptForDeploys.buildAppAmis('prod', amiIds, appBuildResults)
+		}
 	}
 }
 
