@@ -280,9 +280,9 @@ public enum StaticRifResource {
 	private static Supplier<URL> localCopyOfS3Data(TestDataSetLocation dataSetLocation, String fileName) {
 		return () -> {
 			// Find the build output `target` directory.
-			Path targetDir = Paths.get(".", "bluebutton-data-model-rif-samples", "target");
+			Path targetDir = Paths.get(".", "bfd-model-rif-samples", "target");
 			if (!Files.exists(targetDir))
-				targetDir = Paths.get("..", "bluebutton-data-model-rif-samples", "target");
+				targetDir = Paths.get("..", "bfd-model-rif-samples", "target");
 			if (!Files.exists(targetDir))
 				targetDir = Paths.get(".", "target");
 			if (!Files.exists(targetDir))
