@@ -1,7 +1,33 @@
 ---
 ###
-# Future home of the cloudwatch agent installation and configuration playbook. More TODO
+# Installs legacy cloudwatch logs agent awslogs instead of the newer unified agent. 
 ###
-- name: Install Cloudwatch Agent for RHEL 
-  yum: 
-    name: https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm
+
+- name: awslogs | check if the service exists
+  stat: path=/etc/init.d/awslogs
+  register: service_status
+
+- name: awslogs | download the installation script
+  get_url:
+    dest: /tmp/awslogs-agent-setup.py
+    group: root
+    owner: root
+    mode: 0600
+    url: https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+  when: service_status.stat.exists == false
+  
+- name: awslogs | copy default config
+  copy: 
+    src=awslogs.conf
+    dest=/tmp/awslogs.conf
+    owner=root
+    group=root
+    mode=0644
+
+- name: "awslogs | discover EC2 facts"
+  action: ec2_metadata_facts
+
+- name: "awslogs | install the daemon"
+  shell: "python /tmp/awslogs-agent-setup.py -n -r {{ awslogs_region | default(ansible_ec2_placement_region) }} -c /tmp/awslogs.conf"
+  args:
+    creates: "/etc/init.d/awslogs"

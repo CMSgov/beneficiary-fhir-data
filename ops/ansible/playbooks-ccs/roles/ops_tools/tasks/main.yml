@@ -1,0 +1,15 @@
+---
+##
+# Ansible pipelining will not work if `requiretty` is forced for sudo. Please see rhel_prep role for details. 
+##
+  
+# Requires Python and pip
+- name: Install latest version of Ansible via pip
+  pip: 
+    name: ansible 
+
+- name: Install latest version of git
+  yum:
+    name: git
+    state: latest
+     
