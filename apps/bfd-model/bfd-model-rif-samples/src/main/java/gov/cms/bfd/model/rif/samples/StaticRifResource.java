@@ -416,7 +416,7 @@ public enum StaticRifResource {
 			Path tempDownloadPath = null;
 			InputStream tempDownloadStream = null;
 			try {
-				tempDownloadPath = Files.createTempFile("bluebutton-test-data-", ".rif");
+				tempDownloadPath = Files.createTempFile("bfd-test-data-", ".rif");
 				download(resource.getResourceUrl(), tempDownloadPath);
 
 				tempDownloadStream = new BufferedInputStream(new FileInputStream(tempDownloadPath.toFile()));
