@@ -16,6 +16,33 @@ Run the following commands to perform a release:
     $ mvn release:prepare release:perform
     $ git push --all && git push --tags
 
+## Parameter Store
+
+Parameters:
+
+FILE_ID: The Jenkins ID for the config file managed by Jenkins.
+Steps:
+
+Fill in the job parameters with appropriate values.
+Click "build" and wait for the job to finish.
+
+<h2>Preparing the config for the running the Pipeline</h2>
+
+<h3>Updating the exisiting config.json</h3>
+
+Go to "JsonConfig" in "Manage Jenkins" > "Managed files"
+* Click the edit button next to the JsonConfig, it looks like a piece of paper and pencil
+* Edit your parameters/secrets, if updating an existing parameter you will need to specify true for Overwrite
+* Click Submit
+
+<h2>Running the Pipeline</h2>
+
+Click the Jenkins Pipeline named "parameters"
+* Click "Build Now"
+* Once the build is complete, click the most recent build number in the "Build History"
+* Click "Console Output" to make sure the build ran successfully
+
+
 ## License
 
 This project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):
