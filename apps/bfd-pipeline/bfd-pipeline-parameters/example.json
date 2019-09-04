@@ -28,6 +28,7 @@
     "dah": [
     {
         "Name": "/project_name/dev/date/dah",
+        "Name": "/project_name/dev/dah",
         "Description": "",
         "Value": "",
         "Type": "SecureString",
