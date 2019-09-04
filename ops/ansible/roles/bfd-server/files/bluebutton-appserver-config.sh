@@ -219,7 +219,7 @@ end-if
 if (outcome == success) of /system-property=bfdServer.logs.dir:read-resource
 	/system-property=bfdServer.logs.dir:remove
 end-if
-if (outcome == success) of /system-property=bbfdServer.db.url:read-resource
+if (outcome == success) of /system-property=bfdServer.db.url:read-resource
 	/system-property=bfdServer.db.url:remove
 end-if
 if (outcome == success) of /system-property=bfdServer.db.username:read-resource
