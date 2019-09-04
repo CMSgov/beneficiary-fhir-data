@@ -2,7 +2,6 @@ package gov.cms.bfd.server.test.perf.backend;
 
 import java.io.StringWriter;
 import java.net.Inet4Address;
-//import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
@@ -14,7 +13,6 @@ import org.apache.jmeter.samplers.SampleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import gov.cms.bfd.server.test.perf.utils.FhirClient;
