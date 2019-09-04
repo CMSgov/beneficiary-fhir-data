@@ -1,0 +1,43 @@
+---
+##
+# Configures the ETL Server and data-pipeline app for CCS env
+##
+
+- name: Configure BFD Data Server
+  hosts: all
+  become: true
+  remote_user: ec2-user
+  gather_facts: no
+  vars:
+    ansible_ssh_pipelining: no
+    env: "test"
+
+  tasks:
+    
+    - name: Include env specific variables
+      include_vars:
+        dir: vars/{{ env }}
+      
+    - name: Apply Blue Button Data Pipeline Role
+      import_role:
+        name: bfd-server
+      vars:
+        data_server_dir: /jboss
+        data_server_user: "{{ vault_data_server_user }}"
+        data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
+        data_server_container_name: jboss-eap-7.0
+        data_server_appserver_service: jboss
+        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:/u01/jboss/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution"
+        data_server_appserver_management_port: "{{ vault_data_server_appserver_management_port }}"
+        data_server_appserver_management_username: "{{ vault_data_server_appserver_management_username }}"
+        data_server_appserver_management_password: "{{ vault_data_server_appserver_management_password }}"
+        data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
+        data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
+        data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
+        data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
+        # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
+        # Secondary (i.e. read-only) DBs defined in `group_vars/env_<name>_az_<x>/vault.yml`:
+        data_server_db_url: "{{ vault_data_db_secondary_url }}"
+        data_server_db_username: "{{ vault_data_server_db_username }}"
+        data_server_db_password: "{{ vault_data_server_db_password }}"
+        data_server_db_connections_max: 400
