@@ -165,7 +165,7 @@ The following instructions are to be executed from within the Eclipse IDE applic
 
 ### Eclipse JDK
 
-Verify Eclipse is using the correct JDK.
+Verify Eclipse is using the correct Java 8 JDK.
 
 1. Open **Window > Preferences**.
 1. Select **Java > Installed JREs**.
