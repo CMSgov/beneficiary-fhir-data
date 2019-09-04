@@ -1,7 +1,7 @@
 {
     "fus": [
     {
-        "Name": "/project_name/dev/fus",
+        "Name": "/project_name/dev/date/fus",
         "Description": "",
         "Value": "",
         "Type": "SecureString",
@@ -14,7 +14,7 @@
 
     "ro": [
     {
-        "Name": "/project_name/dev/ro",
+        "Name": "/project_name/dev/date/ro",
         "Description": "",
         "Value": "",
         "Type": "SecureString",
@@ -27,7 +27,7 @@
 
     "dah": [
     {
-        "Name": "/project_name/dev/dah",
+        "Name": "/project_name/dev/date/dah",
         "Description": "",
         "Value": "",
         "Type": "SecureString",
