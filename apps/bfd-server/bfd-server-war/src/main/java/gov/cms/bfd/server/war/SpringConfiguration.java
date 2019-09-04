@@ -54,7 +54,7 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
  * application.
  */
 @Configuration
-@ComponentScan(basePackageClasses = { BlueButtonServerInitializer.class })
+@ComponentScan(basePackageClasses = { ServerInitializer.class })
 public class SpringConfiguration {
 	public static final String PROP_DB_URL = "bfdServer.db.url";
 	public static final String PROP_DB_USERNAME = "bfdServer.db.username";

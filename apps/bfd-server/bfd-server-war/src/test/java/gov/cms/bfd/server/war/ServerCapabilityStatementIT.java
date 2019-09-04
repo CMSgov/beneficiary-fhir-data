@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.VersionUtil;
-import gov.cms.bfd.server.war.BlueButtonStu3Server;
+import gov.cms.bfd.server.war.Stu3Server;
 
 /**
  * <p>
@@ -44,8 +44,8 @@ public final class ServerCapabilityStatementIT {
 		Assert.assertNotNull(capabilities);
 
 		// Verify that our custom server metadata is correct.
-		Assert.assertEquals(BlueButtonStu3Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
-		Assert.assertEquals(BlueButtonStu3Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
+		Assert.assertEquals(Stu3Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
+		Assert.assertEquals(Stu3Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
 		Assert.assertEquals("gov.cms.bfd:bfd-server-war",
 				capabilities.getImplementation().getDescription());
 		Assert.assertNotEquals(null, capabilities.getSoftware().getVersion());

@@ -33,8 +33,8 @@ import com.codahale.metrics.servlets.MetricsServlet;
  * this class).
  * </p>
  */
-public final class BlueButtonServerInitializer implements WebApplicationInitializer {
-	private static final Logger LOGGER = LoggerFactory.getLogger(BlueButtonServerInitializer.class);
+public final class ServerInitializer implements WebApplicationInitializer {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
 
 	/**
 	 * @see org.springframework.web.WebApplicationInitializer#onStartup(javax.servlet.ServletContext)
@@ -59,7 +59,7 @@ public final class BlueButtonServerInitializer implements WebApplicationInitiali
 		servletContext.addListener(RequestContextListener.class);
 
 		// Register the Blue Button STU3 Server/Servlet.
-		BlueButtonStu3Server stu3Servlet = new BlueButtonStu3Server();
+		Stu3Server stu3Servlet = new Stu3Server();
 		ServletRegistration.Dynamic cxfServletReg = servletContext.addServlet("fhirStu3Servlet", stu3Servlet);
 		cxfServletReg.setLoadOnStartup(1);
 		cxfServletReg.addMapping("/v1/fhir/*");

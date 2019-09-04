@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
  * converts it to the proper FHIR format "on the fly".
  * </p>
  */
-public class BlueButtonStu3Server extends RestfulServer {
+public class Stu3Server extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,9 +43,9 @@ public class BlueButtonStu3Server extends RestfulServer {
 	static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 
 	/**
-	 * Constructs a new {@link BlueButtonStu3Server} instance.
+	 * Constructs a new {@link Stu3Server} instance.
 	 */
-	public BlueButtonStu3Server() {
+	public Stu3Server() {
 		super(FhirContext.forDstu3());
 		setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
 		configureServerInfoMetadata();
