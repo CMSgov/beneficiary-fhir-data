@@ -1,0 +1,40 @@
+{
+    "fus": [
+    {
+        "Name": "/project_name/dev/fus",
+        "Description": "",
+        "Value": "",
+        "Type": "SecureString",
+        "KeyId": "",
+        "Overwrite": false,
+        "AllowedPattern": "",
+        
+        "Tier": "Standard"
+    }],
+
+    "ro": [
+    {
+        "Name": "/project_name/dev/ro",
+        "Description": "",
+        "Value": "",
+        "Type": "SecureString",
+        "KeyId": "",
+        "Overwrite": false,
+        "AllowedPattern": "",
+        
+        "Tier": "Standard"
+    }],
+
+    "dah": [
+    {
+        "Name": "/project_name/dev/dah",
+        "Description": "",
+        "Value": "",
+        "Type": "SecureString",
+        "KeyId": "",
+        "Overwrite": false,
+        "AllowedPattern": "",
+        
+        "Tier": "Standard"
+    }]
+}
