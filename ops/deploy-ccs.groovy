@@ -1,5 +1,8 @@
 #!/usr/bin/env groovy
 
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
 /**
  * <p>
  * This script will be run by Jenkins when building this repository. Specifically, it
@@ -40,18 +43,14 @@ class AmiIds implements Serializable {
  *
  * @return a new {@link AmiIds} instance detailing the already-existing, latest AMIs (if any) that are now available for use
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
- */
+*/
 def findAmis() {
-	echo 'AMI finding in the CCS environment is not yet implemented.'
-	throw new UnsupportedOperationException('AMI finding in the CCS environment is not yet implemented.')
-
-	// In the brave, wonderful future, though, this would do something like the following:
-	// sh 'something dostuff'
-	// return new AmiIds(
-	// 	platinumAmiId: 'fizz, as captured/parsed from the AWS CLI or Anisble output',
-	// 	bfdPipelineAmiId: 'foo, as captured/parsed from the AWS CLI or Anisble output',
-	// 	bfdServerAmiId: 'bar, as captured/parsed from the AWS CLI or Anisble output'
-	// )
+   // Replace this lookup either with a lookup in SSM or in a build artifact.
+   return new AmiIds(
+       platinumAmiId: sh("aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-platinum-??????????????' 'Name=state,Values=available' --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"),
+       bfdPipelineAmiId: sh("aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-etl-??????????????' 'Name=state,Values=available' --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"),
+       bfdServerAmiId: sh("aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-fhir-??????????????' 'Name=state,Values=available' --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"),
+   )
 }
 
 /**
@@ -67,17 +66,20 @@ def findAmis() {
  * @return a new {@link AmiIds} instance detailing the shiny new AMI that is now available for use, and any other that were already available
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
+ 
 def buildPlatinumAmi(AmiIds amiIds) {
-	echo 'Platinum AMI building in the CCS environment is not yet implemented.'
-	throw new UnsupportedOperationException('Platinum AMI building in the CCS environment is not yet implemented.')
+   def goldAmi = sh("aws ec2 describe-images --filters 'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' 'Name=state,Values=available' --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'")
 
-	// In the brave, wonderful future, though, this would do something like the following:
-	// sh 'packer dostuff'
-	// return new AmiIds(
-	// 	platinumAmiId: 'foo, as captured/parsed from the Packer output',
-	// 	bfdPipelineAmiId: amiIds.bfdPipelineAmiId,
-	// 	bfdServerAmiId: amiIds.bfdServerAmiId
-	// )
+   // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
+   sh "cd ${workspace}/ops/ansible/playbooks-ccs"
+   sh "packer build -var 'source_ami=${goldAmi}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../ops/packer/build_bfd-platinum.json"
+
+   return new AmiIds(
+       // artifactId will be of the form $region:$amiId
+       platinumAmiId: extractAmiIdFromPackerManifest(new File("./manifest_platinum.json")),
+       bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
+       bfdServerAmiId: amiIds.bfdServerAmiId,
+   )
 }
 
 /**
@@ -99,17 +101,52 @@ def deployManagement(AmiIds amiIds) {
  * @return a new {@link AmiIds} instance detailing the shiny new AMIs that are now available for use
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
-def buildAppAmis(AmiIds amiIds, AppBuildResults appBuildResults) {
-	echo 'AMI building in the CCS environment is not yet implemented.'
-	throw new UnsupportedOperationException('AMI building in the CCS environment is not yet implemented.')
+ 
+def buildAppAmis(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
+	
+	// Define env-specific variables.
+	def envName;
 
-	// In the brave, wonderful future, though, this would do something like the following:
-	// sh 'packer dostuff'
-	// return new AmiIds(
-	// 	platinumAmiId: amiIds.platinumAmiId,
-	// 	bfdPipelineAmiId: 'foo, as captured/parsed from the Packer output',
-	// 	bfdServerAmiId: 'bar, as captured/parsed from the Packer output'
-	// )
+	if (envId == "test" ) {
+		envName = 'test'
+	} else if (envId == "prod-stg") {
+		envName = 'prod-sbx'
+	} else if (envId == "prod") {
+		envName = 'prod'
+	} else {
+		throw new IllegalArgumentException("Unsupported environment ID: '${envId}'.")
+	}
+
+  sh "cd ${workspace}/ops/ansible/playbooks-ccs"
+
+  // both packer builds expect additional variables in a file called `@extra_vars.json` in the current directory
+  def varsFile = new File("./@extra_vars.json")
+  def fhirWar = new File(appBuildResults.dataServerWar)
+  def appServer = new File(appBuildResults.dataServerContainerZip)
+
+  varsFile.write(JsonOutput.toJson([
+		  env: ${envName}
+      data_server_war_local_dir: fhirWar.getParent(),
+      data_server_war_name: fhirWar.getName(),
+      data_server_appserver_local_dir: appServer.getParent(),
+      data_server_appserver_installer_name: appServer.getName(),
+      data_server_appserver_name: appBuildResults.dataServerContainerName,
+      data_pipeline_jar: appBuildResults.dataPipelineUberJar,
+  ]))
+
+	withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
+    // build the ETL pipeline
+    sh "packer build -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../ops/packer/build_bfd-pipeline.json"
+
+    // build the FHIR server
+    sh "packer build -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../ops/packer/build_bfd-server.json"
+
+    return new AmiIds(
+        platinumAmiId: amiIds.platinumAmiId,
+        bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File("./manifest_data-pipeline.json")),
+        bfdServerAmiId: extractAmiIdFromPackerManifest(new File("./manifest_data-server.json")),
+  	)
+	}
 }
 
 /**
@@ -121,8 +158,23 @@ def buildAppAmis(AmiIds amiIds, AppBuildResults appBuildResults) {
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
 def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
-	echo 'Deploy to the CCS environment is not yet implemented.'
-	throw new UnsupportedOperationException('Deploy to the CCS environment is not yet implemented.')
+	
+	// Move to working TF directory
+	sh "cd ${workspace}/ops/terraform/${envName}/stateless"
+	
+	// Confirm and install (if not already) proper terraform version 
+	sh "tfenv install"
+	
+	// Debug output terraform version 
+	sh "terraform --version"
+	
+	// Initilize terraform 
+	sh "terraform init"
+	
+	// Gathering terraform plan 
+	sh "terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='fhir_ami=${amiIds.bfdPipelineAmiId}'"
+
 }
+
 
 return this
