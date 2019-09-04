@@ -55,7 +55,7 @@ The `SAMPLE_A` data set is our smallest data set: it aims to have exactly one be
 
 It was created via the following process:
 
-1. The [RIF layouts](https://github.com/CMSgov/bluebutton-data-model/blob/master/bluebutton-data-model-rif/src/main/java/gov/hhs/cms/bluebutton/data/model/rif/rif-layout-and-fhir-mapping.xlsx) were used to determine each column's type and size, and an arbitrary matching value was chosen.
+1. The [RIF layouts](../../bfd-model-rif/src/main/java/gov/cms/bfd/model/rif/rif-layout-and-fhir-mapping.xlsx) were used to determine each column's type and size, and an arbitrary matching value was chosen.
     * For example, the `Beneficiary.BENE_BIRTH_DT` column is listed as a `DATE` column of length `8`. The `SAMPLE_A` record has an arbitrary value of `17-MAR-1981` for this column.
 2. In some cases, a value was needed that conformed to the CCW coding/codebook for that field, so an arbitrary but valid entry was selected from the codebook.
     * For example, the `Beneficiary.BENE_SEX_IDENT_CD` column is listed as having a value of `0` ("Unknown"), `1` ("Male"), or `2` ("Female") in the [Master Beneficiary Summary - Base (A/B/C/D) codebook](https://www.ccwdata.org/documents/10280/19022436/codebook-mbsf-abcd.pdf). The `SAMPLE_A` record has an arbitrary value of `1` for this column.
@@ -96,7 +96,7 @@ It was created via the following process:
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z/synthetic-pde-2016.rif
     ```
 
-2. A "fixed" version was produced via the [SyntheticDataFixer](https://github.com/CMSgov/bluebutton-data-pipeline/blob/master/bluebutton-data-pipeline-rif-extract/src/test/java/gov/hhs/cms/bluebutton/datapipeline/rif/extract/synthetic/SyntheticDataFixer.java) utility. That data set can be downloaded using the following command:
+2. A "fixed" version was produced via the [SyntheticDataFixer](../../../bfd-pipeline/bfd-pipeline-rif-extract/src/test/java/gov/cms/bfd/pipeline/rif/extract/synthetic/SyntheticDataFixer.java) utility. That data set can be downloaded using the following command:
 
     ```
     $ wget \
@@ -127,7 +127,7 @@ It was created via the following process:
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed/synthetic-pde-2016.rif
     ```
 
-3. A "fixed with negative IDs" version was produced via the [SyntheticDataFixer2](https://github.com/CMSgov/bluebutton-data-pipeline/blob/master/bluebutton-data-pipeline-rif-extract/src/test/java/gov/hhs/cms/bluebutton/datapipeline/rif/extract/synthetic/SyntheticDataFixer2.java) utility. That data set can be downloaded using the following command:
+3. A "fixed with negative IDs" version was produced via the [SyntheticDataFixer2](../../../bfd-pipeline/bfd-pipeline-rif-extract/src/test/java/gov/cms/bfd/pipeline/rif/extract/synthetic/SyntheticDataFixer2.java) utility. That data set can be downloaded using the following command:
 
     ```
     $ wget \
@@ -159,7 +159,7 @@ It was created via the following process:
     ```
 
 
-The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/bluebutton-data-model:bluebutton-data-model-rif-samples/dev](https://github.com/CMSgov/bluebutton-data-model/tree/master/bluebutton-data-model-rif-samples/dev).
+The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/beneficiary-fhir-data:bfd-model-rif-samples/dev](./).
 
 It's important to note that the synthetic data set does not yet cover all supported claim types: it has carrier claims, inpatient claims, and Part D events but does not have DME claims, HHA claims, hospice claims, outpatient claims, or SNF claims. The synthetic data set has the following counts, by record type:
 

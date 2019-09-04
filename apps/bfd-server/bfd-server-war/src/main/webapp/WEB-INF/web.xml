@@ -10,7 +10,7 @@
 		access log is populated. -->
 	<filter>
 		<filter-name>RequestResponseLoggingFilter</filter-name>
-		<filter-class>gov.hhs.cms.bluebutton.server.app.RequestResponseLoggingFilter</filter-class>
+		<filter-class>gov.cms.bfd.server.war.RequestResponseLoggingFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>RequestResponseLoggingFilter</filter-name>

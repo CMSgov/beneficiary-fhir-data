@@ -394,7 +394,7 @@
 							<goal>java</goal>
 						</goals>
 						<configuration>
-							<mainClass>gov.hhs.cms.bluebutton.server.app.FDADrugDataUtilityApp</mainClass>
+							<mainClass>gov.cms.bfd.server.war.FDADrugDataUtilityApp</mainClass>
 							<arguments>
 								<argument>${project.build.outputDirectory}</argument>
 							</arguments>
