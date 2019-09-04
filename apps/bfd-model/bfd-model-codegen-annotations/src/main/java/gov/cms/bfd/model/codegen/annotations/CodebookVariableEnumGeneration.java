@@ -6,14 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Can be applied to a Java package to indicate that an {@link Enum} of all
- * known <code>Codebook</code> <code>Variable</code>s should be generated there.
+ * Can be applied to a Java package to indicate that an {@link Enum} of all known <code>Codebook
+ * </code> <code>Variable</code>s should be generated there.
  */
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.CLASS)
 public @interface CodebookVariableEnumGeneration {
-	/**
-	 * @return the {@link Class#getSimpleName()} of the {@link Enum} to generate
-	 */
-	String enumName() default "CcwCodebookVariable";
+  /** @return the {@link Class#getSimpleName()} of the {@link Enum} to generate */
+  String enumName() default "CcwCodebookVariable";
 }
