@@ -165,7 +165,7 @@ The following instructions are to be executed from within the Eclipse IDE applic
 
 ### Eclipse JDK
 
-Verify Eclipse is using the correct JDK.
+Verify Eclipse is using the correct Java 8 JDK.
 
 1. Open **Window > Preferences**.
 1. Select **Java > Installed JREs**.
@@ -187,8 +187,9 @@ If you're using Eclipse for development, you'll want to configure its preference
         * This configures the file, class, method, etc. comments on new items such that they match the existing style used in these projects.
     1. Enable the **Automatically add comments for new methods and types** option.
 1. Select **Java > Code Style > Formatter**.
-    1. Click **Import...** and select this project's [eclipse-formatter.xml](./eclipse-formatter.xml) file.
-        * This configures the Eclipse autoformatter (`ctrl+shift+f`) to match the existing style used in these projects.
+    1. Click **Import...** and select this project's [eclipse-java-google-style.xml](./eclipse-java-google-style.xml) file.
+        * This configures the Eclipse autoformatter (`ctrl+shift+f`) to (mostly) match the one used by the autoformatter that is applied during Maven builds.
+        * The [eclipse-java-google-style.xml](./eclipse-java-google-style.xml) file was originally acquired from here: <https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml>.
 1. Select **Java > Editor > Save Actions**.
     1. Enable the **Perform the selected actions on save** option.
     1. Enable the **Format source code** option.
