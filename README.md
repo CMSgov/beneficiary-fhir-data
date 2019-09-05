@@ -33,9 +33,9 @@ Click "build" and wait for the job to finish.
 The parameter names are made from the following:
 * Project Name
 * Environment (dev/prod/sandbox/etc)
-* Date that the value was added in MMDDYYYY format
+* Date that the value was added in YYYYMMDD format
 * Parameter key
-Example: /weapon-x/dev/01012019/subject
+Example: /weapon-x/dev/20190130/subject
 
 <h3>Updating the exisiting config.json</h3>
 
