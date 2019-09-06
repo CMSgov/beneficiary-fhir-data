@@ -60,8 +60,6 @@
     src: "{{ data_pipeline_jar }}"
     dest: "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}"
   become: true
-  notify:
-    - 'Restart Pipeline Service'
   tags: 
     - pre-ami
 
