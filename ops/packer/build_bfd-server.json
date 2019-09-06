@@ -1,7 +1,8 @@
 {
   "variables": {
     "source_ami": "",
-    "subnet_id": ""
+    "subnet_id": "",
+    "vault_password_file": ""
   },
   "builders": [{
       "type": "amazon-ebs",
@@ -27,14 +28,18 @@
   ],
   "provisioners": [{
       "type": "ansible",
-      "command": "./ansible-playbook-wrapper",
       "playbook_file": "./build_bfd-server.yml",
       "extra_arguments": [
-        "--extra-vars '@extra_vars.json'",
-        "-e ansible_python_interpreter=/usr/bin/python"
+        "-vvv",
+        "-e ansible_python_interpreter=/usr/bin/python",
+        "--extra-vars",
+        "@extra_vars.json",
+        "--tags",
+        "pre-ami"
       ],
       "ansible_env_vars": [
-        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
+        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
+        "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
       ]
     }
   ],

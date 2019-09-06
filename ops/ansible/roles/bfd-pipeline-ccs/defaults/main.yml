@@ -1,0 +1,7 @@
+---
+data_pipeline_dir: /usr/local/bluebutton-data-pipeline
+data_pipeline_user: bb-etl
+data_pipeline_loader_threads: 200
+data_pipeline_jvm_args: -Xmx64g
+data_pipeline_tmp_dir: /tmp
+data_pipeline_idempotency_required: true

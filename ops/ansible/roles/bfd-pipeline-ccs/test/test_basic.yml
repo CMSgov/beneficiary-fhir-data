@@ -1,0 +1,51 @@
+---
+##
+# Installs and verifies Jenkins on the container being used for the test case.
+##
+
+- hosts: localhost
+  tasks:
+    - name: Download Blue Button Data Pipeline JAR
+      # FIXME: Not actually available in Maven Central right now.
+      #maven_artifact:
+      #  group_id: 'gov.cms.bfd'
+      #  artifact_id: 'bfd-pipeline-app'
+      #  version: '1.0.0-SNAPSHOT'
+      #  extension: 'jar'
+      #  classifier: 'capsule-fat'
+      #  dest: /tmp/bfd-pipeline-app-capsule-fat.jar
+      copy:
+        src: bfd-pipeline-app-capsule-fat.jar
+        dest: /tmp/bfd-pipeline-app-capsule-fat.jar
+
+# Install Jenkins.
+- hosts: docker_container
+  tasks:
+    - import_role:
+        name: karlmdavis.bluebutton-data-pipeline
+      vars:
+        data_pipeline_jar: /tmp/bfd-pipeline-app-capsule-fat.jar
+        data_pipeline_s3_bucket: 'gov-hhs-cms-bluebutton-datapipeline-benchmark-dataset'  # Using because public. Structured incorrectly, so no data will be found -- which is actually a good thing.
+        data_pipeline_hicn_hash_iterations: '42'  # NIST recommends at least 1000
+        data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
+        data_pipeline_db_url: 'jdbc:hsqldb:mem:test'
+        data_pipeline_db_username: ""
+        data_pipeline_db_password: ""
+
+# Verify that things worked as expected.
+- hosts: docker_container
+  tasks:
+    - name: Ensure Service Is Running
+      service:
+        name: bluebutton-data-pipeline
+        state: started
+        enabled: yes
+      become: true
+    
+    - name: Grab Log Contents
+      command: cat /usr/local/bluebutton-data-pipeline/bluebutton-data-pipeline.log
+      register: command_cat_pipeline_log
+    
+    - name: Verify Log Contents
+      action: fail
+      when: "'Application starting up!' not in command_cat_pipeline_log.stdout"

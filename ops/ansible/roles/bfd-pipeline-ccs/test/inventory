@@ -1,0 +1,1 @@
+docker_container ansible_host=localhost ansible_port=13022 ansible_user=ansible_test

@@ -17,10 +17,11 @@
     - name: Include env specific variables
       include_vars:
         dir: vars/{{ env }}
+      tags: [pre-ami, post-ami]
       
     - name: Apply Blue Button Data Pipeline Role
       import_role:
-        name: bfd-server
+        name: bfd-server-ccs
       vars:
         data_server_dir: /jboss
         data_server_user: "{{ vault_data_server_user }}"

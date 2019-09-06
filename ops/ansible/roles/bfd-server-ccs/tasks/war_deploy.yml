@@ -1,0 +1,29 @@
+---
+
+- name: Copy WAR from Local Path
+  copy:
+    src: "{{ data_server_war }}"
+    dest: "{{ data_server_dir }}/{{ data_server_war | basename }}"
+  register: copy_war
+  become: true
+  tags: 
+    - pre-ami
+
+- name: Deploy WAR (without Authentication)
+  # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
+  command: "{{ data_server_dir }}/{{ data_server_container_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 \"deploy {{ data_server_dir }}/{{ data_server_war | basename }} --name=ROOT.war --force\""
+  become: true
+  become_user: "{{ data_server_user }}"
+  when: copy_war.changed == true and data_server_appserver_management_username == ''
+  tags: 
+    - post-ami
+
+- name: Deploy WAR (with Authentication)
+  # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
+  command: "{{ data_server_dir }}/{{ data_server_container_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 --user={{ data_server_appserver_management_username }} --password={{ data_server_appserver_management_password }} \"deploy {{ data_server_dir }}/{{ data_server_war | basename }} --name=ROOT.war --force\""
+  become: true
+  become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure that credentials aren't logged if this command fails.
+  when: copy_war.changed == true and data_server_appserver_management_username != ''
+  tags: 
+    - post-ami
