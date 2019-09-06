@@ -35,7 +35,7 @@
         "--extra-vars",
         "@extra_vars.json",
         "--tags",
-        "pre-ami"
+        "post-ami"
       ],
       "ansible_env_vars": [
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
