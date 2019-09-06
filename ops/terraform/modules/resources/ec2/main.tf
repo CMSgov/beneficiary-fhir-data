@@ -23,6 +23,13 @@ data "aws_subnet" "main" {
   }
 }
 
+# KMS 
+#
+# The customer master key is created outside of this script
+#
+data "aws_kms_key" "master_key" {
+  key_id = "alias/bfd-${var.env_config.env}-cmk"
+}
 
 ##
 # Resources
@@ -79,6 +86,14 @@ resource "aws_instance" "main" {
 
   vpc_security_group_ids      = [aws_security_group.base.id]
   subnet_id                   = data.aws_subnet.main.id
+
+  root_block_device {
+    volume_type               = "gp2"
+    volume_size               = var.launch_config.volume_size
+    delete_on_termination     = true
+    encrypted                 = true
+    kms_key_id                = data.aws_kms_key.master_key.key_id
+  }
 
   user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env    = var.env_config.env

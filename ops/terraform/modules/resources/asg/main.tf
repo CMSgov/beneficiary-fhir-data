@@ -21,6 +21,19 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
+# KMS 
+#
+# The customer master key is created outside of this script
+#
+data "aws_kms_key" "master_key" {
+  key_id = "alias/bfd-${var.env_config.env}-cmk"
+}
+
+
+##
+# Create Resources
+##
+
 #
 # Security groups
 #
@@ -98,6 +111,15 @@ resource "aws_launch_configuration" "main" {
     env   = var.env_config.env
     port  = var.lb_config.port
   })
+
+  root_block_device {
+    volume_type               = "gp2"
+    volume_size               = var.launch_config.volume_size
+    delete_on_termination     = true
+    encrypted                 = true
+    # not yet supported
+    # kms_key_id                = data.aws_kms_key.master_key.key_id
+  }
 
   lifecycle {
     create_before_destroy = true
