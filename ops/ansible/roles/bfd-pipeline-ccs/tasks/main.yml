@@ -83,8 +83,6 @@
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
-  notify:
-    - 'Restart Pipeline Service'
   tags: 
     - post-ami
 
