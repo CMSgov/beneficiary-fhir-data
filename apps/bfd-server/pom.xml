@@ -17,6 +17,8 @@
 
 	<modules>
 		<module>bfd-server-war</module>
+		<module>bfd-server-launcher-sample</module>
+		<module>bfd-server-launcher</module>
 	</modules>
 
 	<dependencyManagement>

@@ -1,0 +1,198 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>gov.cms.bfd</groupId>
+		<artifactId>bfd-server-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>bfd-server-launcher</artifactId>
+	<packaging>jar</packaging>
+
+	<description>
+		A Java Capsule JAR application that packages up a Jetty runtime/launcher for the BFD Server WAR.
+	</description>
+
+	<properties>
+		<jetty.version>9.4.19.v20190610</jetty.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<!-- Jetty is the embedded web server that this project uses to run WARs. -->
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Jetty is the embedded web server that this project uses to run WARs. -->
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+		<dependency>
+			<!-- Jetty is the embedded web server that this project uses to run WARs. -->
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-annotations</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+
+		<dependency>
+			<!-- Provides a sane facade for the giant mess of incompatible logging 
+				frameworks in Java. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Logback is used as the logging target/backend for SLF4J during runtime: 
+				all logging events will be sent to it. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides 
+				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-json-classic</artifactId>
+			<version>0.1.5</version>
+		</dependency>
+		<dependency>
+			<!-- Required by logback-json-classic. -->
+			<groupId>ch.qos.logback.contrib</groupId>
+			<artifactId>logback-jackson</artifactId>
+			<version>0.1.5</version>
+		</dependency>
+		<dependency>
+			<!-- Required by logback-jackson. -->
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.9</version>
+		</dependency>
+
+		<dependency>
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+				at runtime. -->
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to run our unit and integration tests. -->
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+				https://github.com/awaitility/awaitility -->
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!-- Configure the dependency plugin such that it can be used to grab 
+						the test dependency artifacts, for manual testing or for use in integration 
+						tests. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.10</version>
+					<configuration>
+						<artifactItems>
+							<artifactItem>
+								<groupId>${project.groupId}</groupId>
+								<artifactId>${project.artifactId}-sample</artifactId>
+								<version>${project.version}</version>
+								<type>war</type>
+								<outputDirectory>${project.build.directory}/sample</outputDirectory>
+							</artifactItem>
+						</artifactItems>
+						<overWriteReleases>false</overWriteReleases>
+						<overWriteSnapshots>true</overWriteSnapshots>
+					</configuration>
+				</plugin>
+				<plugin>
+					<!-- Used to build executable JARs, with all dependencies included in 
+						them. -->
+					<groupId>com.github.chrischristo</groupId>
+					<artifactId>capsule-maven-plugin</artifactId>
+					<version>1.0.1</version>
+					<configuration>
+						<appClass>gov.cms.bfd.server.launcher.DataServerLauncherApp</appClass>
+
+						<!-- Building the "really executable" .x files is tempting, but ultimately 
+							not very useful, as there's no way to pass JVM args into such launchers, 
+							which prevents customizing the heap size at runtime. -->
+						<chmod>false</chmod>
+
+						<types>fat</types>
+						<manifest>
+							<entry>
+								<!-- This will almost certainly be overridden on the command line; 
+									think of this as a bare-minimum default. -->
+								<key>JVM-Args</key>
+								<value>-Xmx1g</value>
+							</entry>
+							<entry>
+								<key>Min-Java-Version</key>
+								<value>1.8.0</value>
+							</entry>
+						</manifest>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<!-- Use the dependency plugin to copy the test dependency artifacts, 
+							for use in ITs. -->
+						<id>server-copy-artifacts</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Used to build executable JARs, with all dependencies included in 
+					them. -->
+				<groupId>com.github.chrischristo</groupId>
+				<artifactId>capsule-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Will run the `*IT.java` integration tests in this project, as part 
+					of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
