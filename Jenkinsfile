@@ -67,7 +67,10 @@ stage('Prepare') {
 		checkout scm
 
 		// Load the child Jenkinsfiles.
-		scriptForApps = load('apps/build.groovy')
+		if (params.deploy_env == 'healthapt') {
+			scriptForApps = load('apps/build.groovy')
+		} else if (params.deploy_env == 'ccs') {
+			scriptForApps = load('apps/build-ccs.groovy')
 		if (params.deploy_env == 'healthapt') {
 			scriptForDeploys = load('ops/deploy-healthapt.groovy')
 		} else if (params.deploy_env == 'ccs') {
@@ -83,7 +86,7 @@ stage('Prepare') {
 
 		// These variables track our decision on whether or not to deploy to prod-like envs.
 		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-		willDeployToProdEnvs = false
+		willDeployToProdEnvs = true
 	}
 }
 
@@ -123,24 +126,24 @@ stage('Build Apps') {
 	}
 }
 
+
 if (params.deploy_env == 'ccs') {
-	stage('Build App AMIs') {
+	stage('Build App AMIs for TEST') {
 		milestone(label: 'stage_build_app_amis_start')
 
 		node {
-			amiIds = scriptForDeploys.buildAppAmis(amiIds, appBuildResults)
+			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
 		}
 	}
 }
 
 stage('Deploy to TEST') {
-	lock(resource: 'env_test', inversePrecendence: true) {
-		milestone(label: 'stage_deploy_test_start')
+	milestone(label: 'stage_deploy_test_start')
 
-		node {
-			scriptForDeploys.deploy('test', amiIds, appBuildResults)
-		}
+	node {
+		scriptForDeploys.deploy('test', amiIds, appBuildResults)
 	}
+
 }
 
 stage('Manual Approval') {
@@ -182,6 +185,16 @@ stage('Deploy to hhsdevcloud') {
 	}
 }
 
+if (params.deploy_env == 'ccs') {
+	stage('Build App AMIs') {
+		milestone(label: 'stage_build_app_amis_start')
+
+		node {
+			amiIds = scriptForDeploys.buildAppAmis('prod-stg', amiIds, appBuildResults)
+		}
+	}
+}
+
 stage('Deploy to prod-stg') {
 	if (willDeployToProdEnvs) {
 		lock(resource: 'env_prod_stg', inversePrecendence: true) {
@@ -193,6 +206,16 @@ stage('Deploy to prod-stg') {
 		}
 	} else {
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-stg')
+	}
+}
+
+if (params.deploy_env == 'ccs') {
+	stage('Build App AMIs') {
+		milestone(label: 'stage_build_app_amis_start')
+
+		node {
+			amiIds = scriptForDeploys.buildAppAmis('prod', amiIds, appBuildResults)
+		}
 	}
 }
 
@@ -208,4 +231,5 @@ stage('Deploy to prod') {
 	} else {
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 	}
+}
 }
