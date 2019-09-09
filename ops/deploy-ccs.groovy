@@ -195,7 +195,7 @@ def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults)
 		sh "/usr/bin/terraform --version"
 		
 		// Turn off color output 
-		sh "export TF_CLI_ARGS="-no-color""
+		sh "export TF_CLI_ARGS='-no-color'"
 		
 		// Initilize terraform 
 		sh "/usr/bin/terraform init"
