@@ -167,16 +167,16 @@ def env = normalizeEnvironmentId(environmentId)
  dir("${workspace}/ops/terraform/${env}/stateless") {
 	
 	// Confirm and install (if not already) proper terraform version 
-	sh "tfenv install"
+	sh "/usr/bin/tfenv install"
 	
 	// Debug output terraform version 
-	sh "terraform --version"
+	sh "/usr/bin/terraform --version"
 	
 	// Initilize terraform 
-	sh "terraform init"
+	sh "/usr/bin/terraform init"
 	
 	// Gathering terraform plan 
-	sh "terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='fhir_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
+	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='fhir_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
  }
 }
 
