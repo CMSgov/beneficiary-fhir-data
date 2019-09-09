@@ -49,10 +49,8 @@ class AmiIds implements Serializable {
 def findAmis() {
     // Replace this lookup either with a lookup in SSM or in a build artifact.
     return new AmiIds(
-        platinumAmiId: sh(
-            returnStdout: true,
-            script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-platinum-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-        ).trim(),
+        platinumAmiId: sh "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-platinum-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+				.trim(),
         bfdPipelineAmiId: sh(
             returnStdout: true,
             script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-etl-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
@@ -165,9 +163,12 @@ def deployManagement(AmiIds amiIds) {
 def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
 def env = normalizeEnvironmentId(environmentId)
  dir("${workspace}/ops/terraform/env/${env}/stateless") {
-	 
+	
 	// Debug output terraform version 
 	sh "/usr/bin/terraform --version"
+	
+	// Turn off color output 
+	sh "export TF_CLI_ARGS="-no-color""
 	
 	// Initilize terraform 
 	sh "/usr/bin/terraform init"
@@ -175,8 +176,8 @@ def env = normalizeEnvironmentId(environmentId)
 	// Gathering terraform plan 
 	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
 	
-	// Apply Terraform 
-	sh "/usr/bin/terraform apply -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env} --auto-approve'"
+	// Apply Terraform plan
+	sh "/usr/bin/terraform apply -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env} -auto-approve'"
 
  }
 }
