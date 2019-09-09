@@ -118,13 +118,13 @@ stage('Deploy mgmt') {
 	}
 }
 
-stage('Build Apps') {
-	milestone(label: 'stage_build_apps_start')
-
-	node {
-		appBuildResults = scriptForApps.build()
-	}
-}
+// stage('Build Apps') {
+// 	milestone(label: 'stage_build_apps_start')
+// 
+// 	node {
+// 		appBuildResults = scriptForApps.build()
+// 	}
+// }
 
 
 if (params.deploy_env == 'ccs') {
