@@ -2,7 +2,6 @@
 
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
-import java.util.UUID
 
 /**
  * <p>
@@ -194,9 +193,6 @@ def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults)
 		// Debug output terraform version 
 		sh "/usr/bin/terraform --version"
 		
-		// Turn off color output 
-		sh "export TF_CLI_ARGS='-no-color'"
-		
 		// Initilize terraform 
 		sh "/usr/bin/terraform init"
 		
@@ -204,14 +200,15 @@ def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults)
 		sh "/usr/bin/terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
-		-var='ssh_key_name=bfd-${env}'"
+		-var='ssh_key_name=bfd-${env}' \
+		-no-color"
 		
 		// Apply Terraform plan
 		sh "/usr/bin/terraform apply \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
-		-var='ssh_key_name=bfd-${env} \
-		-auto-approve'"
+		-var='ssh_key_name=bfd-${env}' \
+		-no-color -auto-approve"
 	}
 }
 
