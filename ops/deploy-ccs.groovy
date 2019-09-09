@@ -165,15 +165,12 @@ def deployManagement(AmiIds amiIds) {
 def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
 def env = normalizeEnvironmentId(environmentId)
  dir("${workspace}/ops/terraform/${env}/stateless/") {
-	
-	// Confirm and install (if not already) proper terraform version 
-	sh "/var/lib/jenkins/tools/tfenv install"
-	
+	 
 	// Debug output terraform version 
-	sh "/usr/local/bin/terraform --version"
+	sh "/usr/bin/terraform --version"
 	
 	// Initilize terraform 
-	sh "/usr/local/bin/terraform init"
+	sh "/usr/bin/terraform init"
 	
 	// Gathering terraform plan 
 	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='fhir_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
