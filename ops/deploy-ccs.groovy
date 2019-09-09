@@ -177,6 +177,10 @@ def env = normalizeEnvironmentId(environmentId)
 	
 	// Gathering terraform plan 
 	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='fhir_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
+	
+	timeout(time: 2, unit: “HOURS”) {
+    input message: ‘Approve Deploy?’, ok: ‘Yes’
+}
  }
 }
 
