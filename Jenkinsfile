@@ -127,15 +127,15 @@ stage('Deploy mgmt') {
 // }
 
 
-if (params.deploy_env == 'ccs') {
-	stage('Build App AMIs for TEST') {
-		milestone(label: 'stage_build_app_amis_start')
-
-		node {
-			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
-		}
-	}
-}
+// if (params.deploy_env == 'ccs') {
+// 	stage('Build App AMIs for TEST') {
+// 		milestone(label: 'stage_build_app_amis_start')
+// 
+// 		node {
+// 			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
+// 		}
+// 	}
+// }
 
 stage('Deploy to TEST') {
 	milestone(label: 'stage_deploy_test_start')
