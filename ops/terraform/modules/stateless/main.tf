@@ -177,7 +177,7 @@ module "fhir_asg" {
     ami_id        = var.fhir_ami 
     key_name      = var.ssh_key_name 
     profile       = module.fhir_iam.profile
-    user_data_tpl = "simple_server.tpl"       # See templates directory for choices
+    user_data_tpl = "fhir_server.tpl"       # See templates directory for choices
   }
 
   db_config       = {

@@ -13,5 +13,5 @@
   when: stat_appserver_dir.stat.isdir is undefined
 
 - include: appserver_config.yml
- 
+
 - include: war_deploy.yml
