@@ -47,19 +47,19 @@ class AmiIds implements Serializable {
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
 */
 def findAmis() {
-    // Replace this lookup either with a lookup in SSM or in a build artifact.
-    return new AmiIds(
-        platinumAmiId: sh "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-platinum-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-				.trim(),
-        bfdPipelineAmiId: sh(
-            returnStdout: true,
-            script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-etl-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-        ).trim(),
-        bfdServerAmiId: sh(
-            returnStdout: true,
-            script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-fhir-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-        ).trim(),
-    )
+	// Replace this lookup either with a lookup in SSM or in a build artifact.
+	return new AmiIds(
+    platinumAmiId: sh ("/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-platinum-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'")
+		.trim(),
+    bfdPipelineAmiId: sh(
+        returnStdout: true,
+        script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-etl-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+    ).trim(),
+    bfdServerAmiId: sh(
+        returnStdout: true,
+        script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-fhir-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+    ).trim(),
+  )
 }
 
 /**
