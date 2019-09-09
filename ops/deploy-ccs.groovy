@@ -174,6 +174,9 @@ def env = normalizeEnvironmentId(environmentId)
 	
 	// Gathering terraform plan 
 	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
+	
+	// Apply Terraform 
+	sh "/usr/bin/terraform apply -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env} --auto-approve'"
 
  }
 }
