@@ -167,7 +167,7 @@ def env = normalizeEnvironmentId(environmentId)
  dir("${workspace}/ops/terraform/${env}/stateless") {
 	
 	// Confirm and install (if not already) proper terraform version 
-	sh "/var/lib/jenkins/tools/tfenv install"
+	sh "/var/lib/jenkins/tools/tfenv install min-required"
 	
 	// Debug output terraform version 
 	sh "/usr/local/bin/terraform --version"
