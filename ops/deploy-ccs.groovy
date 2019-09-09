@@ -47,17 +47,22 @@ class AmiIds implements Serializable {
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
 */
 def findAmis() {
-	// Replace this lookup either with a lookup in SSM or in a build artifact.
-	return new AmiIds(
-    platinumAmiId: sh ("/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-platinum-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'")
-		.trim(),
+  // Replace this lookup either with a lookup in SSM or in a build artifact.
+  return new AmiIds(
+    platinumAmiId: sh(
+      returnStdout: true,
+      script: "/usr/local/bin/aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-platinum-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+    ).trim(),
     bfdPipelineAmiId: sh(
-        returnStdout: true,
-        script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-etl-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+      returnStdout: true,
+      script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-etl-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
     bfdServerAmiId: sh(
-        returnStdout: true,
-        script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-fhir-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+      returnStdout: true,
+      script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-fhir-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
   )
 }
@@ -79,14 +84,14 @@ def findAmis() {
 def buildPlatinumAmi(AmiIds amiIds) {
 	withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
    def goldAmi = sh(
-       returnStdout: true,
-       script: "/usr/local/bin/aws ec2 describe-images --filters 'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+	   returnStdout: true,
+	   script: "/usr/local/bin/aws ec2 describe-images --filters 'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
    ).trim()
 
    //packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-	  dir('ops/ansible/playbooks-ccs'){
-			sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var source_ami=${goldAmi} -var subnet_id=subnet-06e6736253a5e5eda ../../packer/build_bfd-platinum.json"
-				}
+  dir('ops/ansible/playbooks-ccs'){
+		sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var source_ami=${goldAmi} -var subnet_id=subnet-06e6736253a5e5eda ../../packer/build_bfd-platinum.json"
+	}
    	return new AmiIds(
        platinumAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
        bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
