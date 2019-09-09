@@ -13,6 +13,5 @@
   when: stat_appserver_dir.stat.isdir is undefined
 
 - include: appserver_config.yml
-
-# Removed, to be done during launch of instance. 
-# - include: war_deploy.yml
+ 
+- include: war_deploy.yml

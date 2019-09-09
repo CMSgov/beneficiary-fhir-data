@@ -58,11 +58,17 @@ def findAmis() {
     ).trim(),
     bfdPipelineAmiId: sh(
       returnStdout: true,
-      script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-etl-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+      script: "/usr/local/bin/aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-etl-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \ 
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
     bfdServerAmiId: sh(
       returnStdout: true,
-      script: "/usr/local/bin/aws ec2 describe-images --owners self --filters 'Name=name,Values=bfd-fhir-??????????????' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+      script: "/usr/local/bin/aws ec2 describe-images --owners self --filters \
+			'Name=name,Values=bfd-fhir-??????????????' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
   )
 }
@@ -83,22 +89,26 @@ def findAmis() {
 
 def buildPlatinumAmi(AmiIds amiIds) {
 	withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-   def goldAmi = sh(
-	   returnStdout: true,
-	   script: "/usr/local/bin/aws ec2 describe-images --filters 'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' 'Name=state,Values=available' --region us-east-1 --output json | jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
-   ).trim()
+		def goldAmi = sh(
+			returnStdout: true,
+			script: "/usr/local/bin/aws ec2 describe-images --filters \ 
+			'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' \  'Name=state,Values=available' --region us-east-1 --output json | \ 
+			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
+			).trim()
 
-   //packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-  dir('ops/ansible/playbooks-ccs'){
-		sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var source_ami=${goldAmi} -var subnet_id=subnet-06e6736253a5e5eda ../../packer/build_bfd-platinum.json"
-	}
-   	return new AmiIds(
-       platinumAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
-       bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
-       bfdServerAmiId: amiIds.bfdServerAmiId,
-   	)
-
-}
+// packer is always run from $repoRoot/ops/ansible/playbooks-ccs
+		dir('ops/ansible/playbooks-ccs'){
+			sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} \ 
+			-var source_ami=${goldAmi} \ 
+			-var subnet_id=subnet-06e6736253a5e5eda \ 
+			../../packer/build_bfd-platinum.json"
+		}
+	  return new AmiIds(
+			platinumAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
+			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
+			bfdServerAmiId: amiIds.bfdServerAmiId,
+		)
+ 	}
 }
 
 /**
@@ -122,38 +132,49 @@ def deployManagement(AmiIds amiIds) {
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
  
- def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
-	 dir('ops/ansible/playbooks-ccs'){
-		 withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
+def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
+	dir('ops/ansible/playbooks-ccs'){
+		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
 
-	     // both packer builds expect additional variables in a file called `@extra_vars.json` in the current directory
-	     def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
-	     def fhirWar = new File(appBuildResults.dataServerWar)
-	     def appServer = new File(appBuildResults.dataServerContainerZip)
+	  // both packer builds expect additional variables in a file called `@extra_vars.json` in the current directory
+		
+	 		def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
+	  	def fhirWar = new File(appBuildResults.dataServerWar)
+	    def appServer = new File(appBuildResults.dataServerContainerZip)
 
-			 varsFile.write(JsonOutput.toJson([
-					 env: normalizeEnvironmentId(environmentId),
-					 data_server_war_local_dir: "${workspace}/${fhirWar.getParent()}",
-					 data_server_war: "${workspace}/${fhirWar.getParent()}/${fhirWar.getName()}",
-					 data_server_appserver_local_dir: "${workspace}/${appServer.getParent()}",
-					 data_server_container: "${workspace}/${fhirWar.getParent()}/server-work/${appServer.getName()}",
-					 data_server_container_name: appBuildResults.dataServerContainerName,
-					 data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
-			 ]))
+			varsFile.write(JsonOutput.toJson([
+				env: normalizeEnvironmentId(environmentId),
+				data_server_war_local_dir: "${workspace}/${fhirWar.getParent()}",
+				data_server_war: "${workspace}/${fhirWar.getParent()}/${fhirWar.getName()}",
+				data_server_appserver_local_dir: "${workspace}/${appServer.getParent()}",
+				data_server_container: "${workspace}/${fhirWar.getParent()}/server-work/${appServer.getName()}",
+				data_server_container_name: appBuildResults.dataServerContainerName,
+				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
+			]))
 			 
-	     // build the ETL pipeline
+	    // build the ETL pipeline
 			
-			 sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../packer/build_bfd-pipeline.json"
+			sh "/usr/bin/packer build -color=false \ 
+			-var vault_password_file=${vaultPasswordFile} \ 
+			-var 'source_ami=${amiIds.platinumAmiId}' \ 
+			-var 'subnet_id=subnet-06e6736253a5e5eda' \ 
+			../../packer/build_bfd-pipeline.json"
 
-	     // build the FHIR server
-			 sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../packer/build_bfd-server.json"
+	    // build the FHIR server
+			sh "/usr/bin/packer build -color=false \ 
+			-var vault_password_file=${vaultPasswordFile} \ 
+			-var 'source_ami=${amiIds.platinumAmiId}' \ 
+			-var 'subnet_id=subnet-06e6736253a5e5eda' \ 
+			../../packer/build_bfd-server.json"
 
-	     return new AmiIds(
-				   platinumAmiId: amiIds.platinumAmiId,
-	         bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
-	         bfdServerAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs//manifest_data-server.json")),
-	     )
-		 }
+	    return new AmiIds(
+			  platinumAmiId: amiIds.platinumAmiId,
+	      bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File(
+				"${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
+	      bfdServerAmiId: extractAmiIdFromPackerManifest(new File(
+				"${workspace}/ops/ansible/playbooks-ccs//manifest_data-server.json")),
+	    )
+		}
 	}
 }
 
@@ -166,58 +187,54 @@ def deployManagement(AmiIds amiIds) {
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
 def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
-def env = normalizeEnvironmentId(environmentId)
- dir("${workspace}/ops/terraform/env/${env}/stateless") {
+	def env = normalizeEnvironmentId(environmentId)
+		dir("${workspace}/ops/terraform/env/${env}/stateless") {
 	
-	// Debug output terraform version 
-	sh "/usr/bin/terraform --version"
-	
-	// Turn off color output 
-	sh "export TF_CLI_ARGS="-no-color""
-	
-	// Initilize terraform 
-	sh "/usr/bin/terraform init"
-	
-	// Gathering terraform plan 
-	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
-	
-	// Apply Terraform plan
-	sh "/usr/bin/terraform apply -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env} -auto-approve'"
-
- }
+		// Debug output terraform version 
+		sh "/usr/bin/terraform --version"
+		
+		// Turn off color output 
+		sh "export TF_CLI_ARGS="-no-color""
+		
+		// Initilize terraform 
+		sh "/usr/bin/terraform init"
+		
+		// Gathering terraform plan 
+		sh "/usr/bin/terraform plan \ 
+		-var='fhir_ami=${amiIds.bfdServerAmiId}' \ 
+		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \ 
+		-var='ssh_key_name=bfd-${env}'"
+		
+		// Apply Terraform plan
+		sh "/usr/bin/terraform apply \ 
+		-var='fhir_ami=${amiIds.bfdServerAmiId}' \ 
+		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \ 
+		-var='ssh_key_name=bfd-${env} \ 
+		-auto-approve'"
+	}
 }
 
 
 def extractAmiIdFromPackerManifest(File manifest) {
-dir('ops/ansible/playbooks-ccs'){
-   def manifestJson = new JsonSlurper().parseText(manifest.text)
+	dir('ops/ansible/playbooks-ccs'){
+		def manifestJson = new JsonSlurper().parseText(manifest.text)
 
-   // artifactId will be of the form $region:$amiId
-   return manifestJson.builds[0].artifact_id.split(":")[1]
- }
+   	// artifactId will be of the form $region:$amiId
+   	return manifestJson.builds[0].artifact_id.split(":")[1]
+	}
 }
 
 def normalizeEnvironmentId(String environmentId) {
-    switch (environmentId) {
-        case 'test':
-        case 'prod':
-        case 'prod-sbx':
-            return environmentId
-        case 'prod-stg':
-            return 'prod-sbx'
-        default:
-            throw new UnsupportedOperationException("Deploy to the CCS ${environmentId} environment is not yet implemented.")
-    }
-}
-
-def shellCommandOutput(command) {
-    def uuid = UUID.randomUUID()
-    def filename = "cmd-${uuid}"
-    echo filename
-    sh ("${command} > ${filename}")
-    def result = readFile(filename).trim()
-    sh "rm ${filename}"
-    return result
+	switch (environmentId) {
+		case 'test':
+		case 'prod':
+		case 'prod-sbx':
+		    return environmentId
+		case 'prod-stg':
+		    return 'prod-sbx'
+		default:
+		    throw new UnsupportedOperationException("Deploy to the CCS ${environmentId} environment is not yet implemented.")
+  }
 }
 
 return this
