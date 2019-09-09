@@ -173,7 +173,7 @@ def env = normalizeEnvironmentId(environmentId)
 	sh "/usr/bin/terraform init"
 	
 	// Gathering terraform plan 
-	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='fhir_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
+	sh "/usr/bin/terraform plan -var='fhir_ami=${amiIds.bfdServerAmiId}' -var='etl_ami=${amiIds.bfdPipelineAmiId}' -var='ssh_key_name=bfd-${env}'"
 
  }
 }
