@@ -118,24 +118,24 @@ stage('Deploy mgmt') {
 	}
 }
 
-// stage('Build Apps') {
-// 	milestone(label: 'stage_build_apps_start')
-// 
-// 	node {
-// 		appBuildResults = scriptForApps.build()
-// 	}
-// }
+stage('Build Apps') {
+	milestone(label: 'stage_build_apps_start')
+
+	node {
+		appBuildResults = scriptForApps.build()
+	}
+}
 
 
-// if (params.deploy_env == 'ccs') {
-// 	stage('Build App AMIs for TEST') {
-// 		milestone(label: 'stage_build_app_amis_start')
-// 
-// 		node {
-// 			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
-// 		}
-// 	}
-// }
+if (params.deploy_env == 'ccs') {
+	stage('Build App AMIs for TEST') {
+		milestone(label: 'stage_build_app_amis_start')
+
+		node {
+			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
+		}
+	}
+}
 
 stage('Deploy to TEST') {
 	milestone(label: 'stage_deploy_test_start')

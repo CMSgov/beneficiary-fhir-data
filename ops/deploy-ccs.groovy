@@ -86,9 +86,9 @@ def buildPlatinumAmi(AmiIds amiIds) {
    ).trim()
 
    //packer is always run from $repoRoot/ops/ansible/playbooks-ccs
-	  // dir('ops/ansible/playbooks-ccs'){
-		// 	sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var source_ami=${goldAmi} -var subnet_id=subnet-06e6736253a5e5eda ../../packer/build_bfd-platinum.json"
-		// 		}
+	  dir('ops/ansible/playbooks-ccs'){
+			sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var source_ami=${goldAmi} -var subnet_id=subnet-06e6736253a5e5eda ../../packer/build_bfd-platinum.json"
+				}
    	return new AmiIds(
        platinumAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
        bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
@@ -140,10 +140,10 @@ def deployManagement(AmiIds amiIds) {
 			 
 	     // build the ETL pipeline
 			
-			 // sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../packer/build_bfd-pipeline.json"
+			 sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../packer/build_bfd-pipeline.json"
 
 	     // build the FHIR server
-			 // sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../packer/build_bfd-server.json"
+			 sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} -var 'source_ami=${amiIds.platinumAmiId}' -var 'subnet_id=subnet-06e6736253a5e5eda' ../../packer/build_bfd-server.json"
 
 	     return new AmiIds(
 				   platinumAmiId: amiIds.platinumAmiId,
