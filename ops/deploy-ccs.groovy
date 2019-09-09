@@ -92,7 +92,8 @@ def buildPlatinumAmi(AmiIds amiIds) {
 		def goldAmi = sh(
 			returnStdout: true,
 			script: "/usr/local/bin/aws ec2 describe-images --filters \
-			'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' \ 'Name=state,Values=available' --region us-east-1 --output json | \
+			'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' \
+			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 			).trim()
 
