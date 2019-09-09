@@ -164,7 +164,7 @@ def deployManagement(AmiIds amiIds) {
  */
 def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
 def env = normalizeEnvironmentId(environmentId)
- dir("${workspace}/ops/terraform/${env}/stateless/") {
+ dir("${workspace}/ops/terraform/${env}/stateless") {
 	 
 	// Debug output terraform version 
 	sh "/usr/bin/terraform --version"
