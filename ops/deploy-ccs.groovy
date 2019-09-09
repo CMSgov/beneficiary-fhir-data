@@ -164,7 +164,7 @@ def deployManagement(AmiIds amiIds) {
  */
 def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
 def env = normalizeEnvironmentId(environmentId)
- dir("${workspace}/ops/terraform/${env}/stateless") {
+ dir("${workspace}/ops/terraform/${env}/stateless/") {
 	
 	// Confirm and install (if not already) proper terraform version 
 	sh "/var/lib/jenkins/tools/tfenv install min-required"
