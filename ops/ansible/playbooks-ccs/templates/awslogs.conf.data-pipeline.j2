@@ -137,9 +137,9 @@ log_group_name = /var/log/secure
 
 [bfd_data_pipeline_message_txt]
 datetime_format = %Y-%m-%d %H:%M:%S,%f
-file = /u01/bluebutton-data-pipeline/bluebutton-data-pipeline.log
+file = /bluebutton-data-pipeline/bluebutton-data-pipeline.log
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env_name_std }}/data-pipeline/message.txt
+log_group_name = /bfd/{{ env }}/data-pipeline/message.txt
 multi_line_start_pattern = ^[\d\d\d\d-\d\d-\d\d ]
