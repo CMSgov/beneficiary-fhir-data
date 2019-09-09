@@ -86,7 +86,7 @@ stage('Prepare') {
 
 		// These variables track our decision on whether or not to deploy to prod-like envs.
 		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-		willDeployToProdEnvs = false
+		willDeployToProdEnvs = true
 	}
 }
 
