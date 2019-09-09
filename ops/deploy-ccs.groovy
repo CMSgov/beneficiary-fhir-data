@@ -60,7 +60,7 @@ def findAmis() {
       returnStdout: true,
       script: "/usr/local/bin/aws ec2 describe-images --owners self --filters \
 			'Name=name,Values=bfd-etl-??????????????' \
-			'Name=state,Values=available' --region us-east-1 --output json | \ 
+			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
     bfdServerAmiId: sh(
@@ -91,16 +91,16 @@ def buildPlatinumAmi(AmiIds amiIds) {
 	withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
 		def goldAmi = sh(
 			returnStdout: true,
-			script: "/usr/local/bin/aws ec2 describe-images --filters \ 
-			'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' \  'Name=state,Values=available' --region us-east-1 --output json | \ 
+			script: "/usr/local/bin/aws ec2 describe-images --filters \
+			'Name=name,Values=\"EAST-RH 7-6 Gold Image V.1.10 (HVM) ??-??-??\"' \ 'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 			).trim()
 
 // packer is always run from $repoRoot/ops/ansible/playbooks-ccs
 		dir('ops/ansible/playbooks-ccs'){
-			sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} \ 
-			-var source_ami=${goldAmi} \ 
-			-var subnet_id=subnet-06e6736253a5e5eda \ 
+			sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} \
+			-var source_ami=${goldAmi} \
+			-var subnet_id=subnet-06e6736253a5e5eda \
 			../../packer/build_bfd-platinum.json"
 		}
 	  return new AmiIds(
@@ -154,17 +154,17 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 			 
 	    // build the ETL pipeline
 			
-			sh "/usr/bin/packer build -color=false \ 
-			-var vault_password_file=${vaultPasswordFile} \ 
-			-var 'source_ami=${amiIds.platinumAmiId}' \ 
-			-var 'subnet_id=subnet-06e6736253a5e5eda' \ 
+			sh "/usr/bin/packer build -color=false \
+			-var vault_password_file=${vaultPasswordFile} \
+			-var 'source_ami=${amiIds.platinumAmiId}' \
+			-var 'subnet_id=subnet-06e6736253a5e5eda' \
 			../../packer/build_bfd-pipeline.json"
 
 	    // build the FHIR server
-			sh "/usr/bin/packer build -color=false \ 
-			-var vault_password_file=${vaultPasswordFile} \ 
-			-var 'source_ami=${amiIds.platinumAmiId}' \ 
-			-var 'subnet_id=subnet-06e6736253a5e5eda' \ 
+			sh "/usr/bin/packer build -color=false \
+			-var vault_password_file=${vaultPasswordFile} \
+			-var 'source_ami=${amiIds.platinumAmiId}' \
+			-var 'subnet_id=subnet-06e6736253a5e5eda' \
 			../../packer/build_bfd-server.json"
 
 	    return new AmiIds(
@@ -200,16 +200,16 @@ def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults)
 		sh "/usr/bin/terraform init"
 		
 		// Gathering terraform plan 
-		sh "/usr/bin/terraform plan \ 
-		-var='fhir_ami=${amiIds.bfdServerAmiId}' \ 
-		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \ 
+		sh "/usr/bin/terraform plan \
+		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
+		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
 		-var='ssh_key_name=bfd-${env}'"
 		
 		// Apply Terraform plan
-		sh "/usr/bin/terraform apply \ 
-		-var='fhir_ami=${amiIds.bfdServerAmiId}' \ 
-		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \ 
-		-var='ssh_key_name=bfd-${env} \ 
+		sh "/usr/bin/terraform apply \
+		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
+		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
+		-var='ssh_key_name=bfd-${env} \
 		-auto-approve'"
 	}
 }
