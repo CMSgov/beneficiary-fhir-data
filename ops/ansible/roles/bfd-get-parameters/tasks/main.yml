@@ -13,20 +13,16 @@
     date: 20190905
     path: "/{{ project }}/{{ stage }}/{{ date }}/"
   tasks:
-  - name: return a dictionary of ssm parameters from a hierarchy path with shortened names
-    debug: msg="{{ lookup('aws_ssm', '{{ path }}', region="us-east-2", shortnames=true, bypath=true, recursive=true, decrypt=True ) }}"
-    register: vars_output
-### Need below to show each key/value pair
-  - name: return registered parameters
-    debug: msg="Output={{ item }}"
-      var: vars_output
+  - name: Set Facts
+    set_fact:
+      "{{ item.key|upper }}={{ item.value }}"
+    loop: "{{ lookup('aws_ssm', '{{ path }}', region='us-east-2', shortnames=true, bypath=true, recursive=true, decrypt=True)|dict2items }}"
 
-  - shell: "export {{ item.key }}={{ item.value }}"
-    loop: "{{ lookup('aws_ssm', '/bbrooks/dev/20190905/', region='us-east-2', shortnames=true, bypath=true, recursive=true, decrypt=True )|dict2items }}"
+  - name: Echo Fus
+    shell: "echo {{ FUS }}"
 
-  - name: Getting parameters from Parameter Store
-    shell: $(aws ssm get-parameters-by-path --with-decryption  --path {{ path }} | jq -r '.Parameters| .[] | "export " + .Name + "=\"" + .Value + "\""  ' | sed "s|/{{ project }}/{{ stage }}/{{ date }}/||g")
+  - name: Echo RO
+    shell: "echo {{ RO }}"
 
-#  - name: Registered Output
-#    debug: 
-#      var: vars_output
+  - name: Echo DAH
+    shell: "echo {{ DAH }}"
