@@ -40,7 +40,12 @@
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'",
         "ANSIBLE_VAULT_PASSWORD_FILE={{user `vault_password_file`}}"
       ]
-    }
+      },
+      {
+      "type": "file",
+      "source": "extra_vars.json",
+      "destination": "/tmp/extra_vars.json"
+      }
   ],
   "post-processors": [{
     "type": "manifest",

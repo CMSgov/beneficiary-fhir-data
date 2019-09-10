@@ -137,7 +137,7 @@ log_group_name = /var/log/secure
 
 [Jboss_Access_Log]
 datetime_format = %d/%b/%Y:%H:%M:%S
-file = /jboss/wildfly-8.1.0.Final/standalone/log/access*.log
+file = /{{ data_server_dir }}/{{ data_server_container_name }}/standalone/log/access*.log
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
@@ -145,7 +145,7 @@ log_group_name = {{ env }}_jboss_access
 
 [bfd_jboss_server]
 datetime_format = %Y-%m-%d %H:%M:%S,%f
-file = /jboss/wildfly-8.1.0.Final/standalone/log/server.log*
+file = /{{ data_server_dir }}/{{ data_server_container_name }}/standalone/log/server.log*
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
@@ -186,9 +186,9 @@ log_group_name = /bfd/{{ env }}/data-server/message.json
 
 [bfs_app_gc]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
-file = /jboss/bluebutton-server-app-log.json
+file = /jboss/gc.log
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env }}/data-server/message.json
+log_group_name = /bfd/{{ env }}/data-server/gc.log
 multi_line_start_pattern = ^[\d\d\d\d-\d\d-\d\dT]

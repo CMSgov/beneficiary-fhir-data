@@ -21,7 +21,7 @@
       
     - name: Apply Blue Button Data Pipeline Role
       import_role:
-        name: bfd-server-ccs
+        name: bfd-server
       vars:
         data_server_dir: /jboss
         data_server_user: "{{ vault_data_server_user }}"
@@ -42,3 +42,18 @@
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
         data_server_db_connections_max: 400
+        
+    - name: Configure CloudWatch Logs Agent
+      template:
+        src: awslogs.conf.data-server.j2
+        dest: '/var/awslogs/etc/awslogs.conf'
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+      become: true
+      notify:
+        - Restart awslogs Service
+        
+  handlers:
+    
+    - import_tasks: handlers/main.yml

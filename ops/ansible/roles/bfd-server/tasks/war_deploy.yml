@@ -6,6 +6,8 @@
     dest: "{{ data_server_dir }}/{{ data_server_war | basename }}"
   register: copy_war
   become: true
+  tags: 
+    - pre-ami
 
 - name: Deploy WAR (without Authentication)
   # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
@@ -13,6 +15,8 @@
   become: true
   become_user: "{{ data_server_user }}"
   when: copy_war.changed == true and data_server_appserver_management_username == ''
+  tags: 
+    - post-ami
 
 - name: Deploy WAR (with Authentication)
   # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
@@ -21,3 +25,5 @@
   become_user: "{{ data_server_user }}"
   no_log: true  # Ensure that credentials aren't logged if this command fails.
   when: copy_war.changed == true and data_server_appserver_management_username != ''
+  tags: 
+    - post-ami

@@ -17,25 +17,39 @@
  */
 def mvn(args) {
 	// This tool must be setup and named correctly in the Jenkins config.
-	def mvnHome = tool 'maven-3'
+	if (build_env == 'healthapt') {
+		def mvnHome = tool 'maven-3'
 
-	// Run the build, using Maven, with the appropriate config.
-	withCredentials([
-			string(credentialsId: 'proxy-host', variable: 'proxyHost'),
-			string(credentialsId: 'proxy-port', variable: 'proxyPort')
-	]) {
-	configFileProvider(
-			[
-				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
-				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
-			]
-	) {
-		def proxyArgs = ''
-		if (proxyHost?.trim() && proxyPort.trim()) {
-			proxyArgs = "-Dhttp.proxyHost=${proxyHost} -Dhttp.proxyPort=${proxyPort} -Dhttps.proxyHost=${proxyHost} -Dhttps.proxyPort=${proxyPort} -Dhttp.nonProxyHosts=localhost"
+		// Run the build, using Maven, with the appropriate config.
+		withCredentials([
+				string(credentialsId: 'proxy-host', variable: 'proxyHost'),
+				string(credentialsId: 'proxy-port', variable: 'proxyPort')
+		]) {
+		configFileProvider(
+				[
+					configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
+					configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
+				]
+		) {
+			def proxyArgs = ''
+			if (proxyHost?.trim() && proxyPort.trim()) {
+				proxyArgs = "-Dhttp.proxyHost=${proxyHost} -Dhttp.proxyPort=${proxyPort} -Dhttps.proxyHost=${proxyHost} -Dhttps.proxyPort=${proxyPort} -Dhttp.nonProxyHosts=localhost"
+			}
+			sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args} ${proxyArgs}"
 		}
-		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args} ${proxyArgs}"
-	} }
+	} } else if (build_env == 'ccs') {
+			def mvnHome = tool 'maven-3'
+
+			// Run the build, using Maven, with the appropriate config.
+			configFileProvider(
+					[
+						configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
+						configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
+					]
+			) {
+				sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
+			}
+		}
 }
 
 /**
@@ -54,9 +68,15 @@ class AppBuildResults implements Serializable {
  * @return An {@link AppBuildResults} instance containing the paths to the artifacts that were built.
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
-def build() {
+ 
+def build(String build_env) {
 	dir ('apps') {
-		mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify -Dhttp.nonProxyHosts=localhost"
+		if (build_env == 'healthapt') {
+			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify -Dhttp.nonProxyHosts=localhost"
+		} else if (build_env == 'ccs') {
+			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify"
+		} else 
+		UnsupportedOperationException("No Build Apps job available for ${params.dev_env} environment")
 	
 		/*
 		 * Fingerprint the output artifacts and archive the test results.

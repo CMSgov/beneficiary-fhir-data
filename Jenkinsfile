@@ -67,10 +67,7 @@ stage('Prepare') {
 		checkout scm
 
 		// Load the child Jenkinsfiles.
-		if (params.deploy_env == 'healthapt') {
-			scriptForApps = load('apps/build.groovy')
-		} else if (params.deploy_env == 'ccs') {
-			scriptForApps = load('apps/build-ccs.groovy')
+		scriptForApps = load('apps/build.groovy')
 		if (params.deploy_env == 'healthapt') {
 			scriptForDeploys = load('ops/deploy-healthapt.groovy')
 		} else if (params.deploy_env == 'ccs') {
@@ -86,7 +83,7 @@ stage('Prepare') {
 
 		// These variables track our decision on whether or not to deploy to prod-like envs.
 		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-		willDeployToProdEnvs = true
+		willDeployToProdEnvs = false
 	}
 }
 
@@ -122,14 +119,15 @@ stage('Build Apps') {
 	milestone(label: 'stage_build_apps_start')
 
 	node {
-		appBuildResults = scriptForApps.build()
+		build_env = params.deploy_env
+		appBuildResults = scriptForApps.build(build_env)
 	}
 }
 
 
 if (params.deploy_env == 'ccs') {
 	stage('Build App AMIs for TEST') {
-		milestone(label: 'stage_build_app_amis_start')
+		milestone(label: 'stage_build_app_amis_test_start')
 
 		node {
 			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
@@ -186,8 +184,8 @@ stage('Deploy to hhsdevcloud') {
 }
 
 if (params.deploy_env == 'ccs') {
-	stage('Build App AMIs') {
-		milestone(label: 'stage_build_app_amis_start')
+	stage('Build App AMIs for PROD-SBX') {
+		milestone(label: 'stage_build_app_amis_prod-sbx_start')
 
 		node {
 			amiIds = scriptForDeploys.buildAppAmis('prod-stg', amiIds, appBuildResults)
@@ -210,8 +208,8 @@ stage('Deploy to prod-stg') {
 }
 
 if (params.deploy_env == 'ccs') {
-	stage('Build App AMIs') {
-		milestone(label: 'stage_build_app_amis_start')
+	stage('Build App AMIs for PROD') {
+		milestone(label: 'stage_build_app_amis_prod_start')
 
 		node {
 			amiIds = scriptForDeploys.buildAppAmis('prod', amiIds, appBuildResults)
@@ -231,5 +229,4 @@ stage('Deploy to prod') {
 	} else {
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 	}
-}
 }
