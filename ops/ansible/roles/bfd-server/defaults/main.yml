@@ -36,9 +36,13 @@ env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 # Environment variables to set on the app server
 os_environment_variables:
   - key: NEW_RELIC_LICENSE_KEY 
-    value : {{ vault_new_relic_license }}
+    value : "{{ vault_new_relic_license }}"
   - key: NEW_RELIC_PROXY_HOST 
-    value : {{ vault_proxy_host }}
+    value : "{{ vault_proxy_host }}"
   - key: NEW_RELIC_PROXY_PORT 
+<<<<<<< HEAD
     value : {{ vault_proxy_port }}
 >>>>>>> Add New Relic to BFDS
+=======
+    value : "{{ vault_proxy_port }}"
+>>>>>>> Add quotes
