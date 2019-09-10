@@ -7,13 +7,12 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_kms_key" "bfd_ssm_kms_key" {
-  description             = "BFD KMS Key for SSM Parameter Store"
-  deletion_window_in_days = 10
-  enable_key_rotation     = true
+data "aws_kms_key" "master_key" {
+  description = "bfd-${var.env_config.env}-master-key"
+  tags        = var.env_config.tags
 }
 
-resource "aws_kms_alias" "bfd_ssm_kms_alias" {
-  name          = "alias/bfd-ssm-kms"
-  target_key_id = aws_kms_key.hub_ssm_kms_key.key_id
+data "aws_kms_alias" "app-config-key-alias" {
+  name          = "alias/bfd-${var.env_config.env}-master-key"
+  target_key_id = aws_kms_key.master_key.key_id
 }
