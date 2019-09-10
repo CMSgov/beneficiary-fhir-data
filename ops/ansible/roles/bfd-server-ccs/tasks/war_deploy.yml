@@ -9,6 +9,14 @@
   tags: 
     - pre-ami
 
+- name: Copy build vars from Local Path 
+  copy: 
+    src: "{{ env_vars_file }}"
+    dest: {{ data_server_dir }}
+  become: true 
+  tags:
+    - pre-ami
+
 - name: Deploy WAR (without Authentication)
   # Deploying to `ROOT.war` ensures that the WAR will be served from the app server's root context path, e.g. `https://foo.example.com/`.
   command: "{{ data_server_dir }}/{{ data_server_container_name }}/bin/jboss-cli.sh --controller=localhost:{{ data_server_appserver_management_port }} --connect --timeout=120 \"deploy {{ data_server_dir }}/{{ data_server_war | basename }} --name=ROOT.war --force\""
