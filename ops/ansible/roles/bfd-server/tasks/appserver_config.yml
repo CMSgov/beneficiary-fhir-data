@@ -178,5 +178,17 @@
   become: true
   become_user: "{{ data_server_user }}"
   no_log: true  # Ensure passwords aren't logged if this fails.
+<<<<<<< HEAD
   tags: 
     - post-ami
+=======
+
+- name: populate /etc/environment
+  lineinfile:
+    dest: "/etc/environment"
+    state: present
+    regexp: "^{{ item.key }}"
+    line: "{{ item.key }}={{ item.value }}"
+  with_items: "{{ os_environment_variables }}"
+
+>>>>>>> Add New Relic to BFDS
