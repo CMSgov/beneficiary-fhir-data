@@ -21,4 +21,21 @@ data_server_ssl_client_cas: []
 data_server_ssl_client_certificates: []
 
 # The max size of the DB connection pool for the Blue Button Data Server.
+<<<<<<< HEAD
 data_server_db_connections_max: 40
+=======
+data_server_db_max_connections: 100
+
+<<<<<<< HEAD
+env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
+=======
+# Environment variables to set on the app server
+os_environment_variables:
+  - key: NEW_RELIC_LICENSE_KEY 
+    value : {{ vault_new_relic_license }}
+  - key: NEW_RELIC_PROXY_HOST 
+    value : {{ vault_proxy_host }}
+  - key: NEW_RELIC_PROXY_PORT 
+    value : {{ vault_proxy_port }}
+>>>>>>> Add New Relic to BFDS
+>>>>>>> Add New Relic to BFDS

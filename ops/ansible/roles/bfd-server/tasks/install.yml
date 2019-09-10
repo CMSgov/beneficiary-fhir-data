@@ -195,5 +195,31 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
   become: true
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
   notify:
     - 'Restart BFD Server Service'
+=======
+  tags: 
+    - pre-ami
+
+- name: Run App Server Config Script
+  command: "{{ data_server_dir }}/bluebutton-appserver-config.sh --serverhome {{ data_server_dir }}/{{ data_server_container_name }} --managementport {{ data_server_appserver_management_port }} --managementusername \"{{ data_server_appserver_management_username }}\" --managementpassword \"{{ data_server_appserver_management_password }}\" --httpsport {{ data_server_appserver_https_port }} --keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks --truststore {{ data_server_dir }}/bluebutton-appserver-truststore.jks --dburl {{ data_server_db_url }} --dbusername {{ data_server_db_username }} --dbpassword {{ data_server_db_password }} --dbconnectionsmax {{ data_server_db_max_connections }} --rolesprops {{ data_server_dir }}/bluebutton-appserver-roles.properties"
+  changed_when: true
+  become: true
+  become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure passwords aren't logged if this fails.
+<<<<<<< HEAD
+  tags: 
+    - post-ami
+=======
+
+- name: populate /etc/environment
+  lineinfile:
+    dest: "/etc/environment"
+    state: present
+    regexp: "^{{ item.key }}"
+    line: "{{ item.key }}={{ item.value }}"
+  with_items: "{{ os_environment_variables }}"
+
+>>>>>>> Add New Relic to BFDS
+>>>>>>> Add New Relic to BFDS:ops/ansible/roles/bfd-server/tasks/appserver_config.yml
