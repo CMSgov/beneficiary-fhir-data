@@ -1,6 +1,6 @@
 ---
 ##
-# Builds a 'Platinum' AMI (updates) and installs program specific dependeicies 
+# Builds a 'Platinum' AMI (updates) and installs program specific dependencies 
 # from a base Gold Image in the CCS AWS Environment
 ##
 - name: Build Platinum AMI
