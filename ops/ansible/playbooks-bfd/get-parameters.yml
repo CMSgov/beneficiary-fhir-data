@@ -1,0 +1,17 @@
+- name: Pull Parameters from AWS SSM Parameter Store
+  hosts: all
+  remote_user: ec2-user
+  gather_facts: no
+  vars:
+    ansible_ssh_pipelining: no
+    env: "test"
+### Best if put in var file
+#    project: bbrooks
+#    stage: dev
+#    date: 20190905
+#    path: "/{{ project }}/{{ stage }}/{{ date }}/"
+  vars_files:
+    - "{{ variable_file }}"
+
+  roles:
+    - bfd.get-parameters

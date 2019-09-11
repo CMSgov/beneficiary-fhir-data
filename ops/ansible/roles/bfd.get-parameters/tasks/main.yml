@@ -2,17 +2,6 @@
 # tasks file for bfd-get-parameters
 ### This role has a few different ways of pulling configurations, secrets, key/value pairs, etc... from the AWS SSM Parameter Store.
 ### It is a proof of concept, not a final solution.
-- hosts: all
-### The block of name, hosts, and connection can be used for testing locally.
-#- name: Run playbook locally
-#  hosts: 127.0.0.1
-#  connection: local
-  vars:
-    project: bbrooks
-    stage: dev
-    date: 20190905
-    path: "/{{ project }}/{{ stage }}/{{ date }}/"
-  tasks:
   - name: Set Facts
     set_fact:
       "{{ item.key|upper }}={{ item.value }}"
