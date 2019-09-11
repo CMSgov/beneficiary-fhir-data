@@ -1,8 +1,0 @@
----
-
-- name: Enable App Server Service
-  include: enable_appserver.yml
-
-- name: Restart App Server Service
-  include: restart_appserver.yml
-
