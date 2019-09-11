@@ -90,6 +90,11 @@
 	<logger name="DATABASE_QUERY" level="INFO" additivity="false">
 		<appender-ref ref="DATABASE_QUERY" />
 	</logger>
+	
+	<!-- Enabling DEBUG level logging for hikari -->
+	<logger name="com.zaxxer.hikari" level="debug" additivity="false">
+		<appender-ref ref="STDOUT"/>
+	</logger>
 
 	<!-- Configure some specific logging levels. Unless FhirServerConfig.HIBERNATE_DETAILED_LOGGING 
 		is `true`, these four lines should generally be commented out. -->
