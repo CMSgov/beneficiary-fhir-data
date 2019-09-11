@@ -6,7 +6,7 @@
 
 locals {
   azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id }
+  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=module.local_zone.zone_id }
   
   db_sgs = [
     aws_security_group.db.id,
@@ -96,11 +96,10 @@ data "aws_security_group" "management" {
 #
 # Build a VPC private local zone for CNAME records
 #
-resource "aws_route53_zone" "local_zone" {
-  name    = "bfd-${var.env_config.env}.local"
-  vpc {
-    vpc_id = data.aws_vpc.main.id
-  }
+module "local_zone" {
+  source        = "../resources/dns"
+  env_config    = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id}
+  public        = false
 }
 
 # CloudWatch SNS Topic
@@ -170,6 +169,47 @@ resource "aws_db_subnet_group" "db" {
   subnet_ids      = [for s in data.aws_subnet.data_subnets: s.id]
 }
 
+# Parameter Group
+#
+resource "aws_db_parameter_group" "import_mode" {
+  name        = "bfd-${local.env_config.env}-import-mode-parameter-group"
+  family      = "postgres9.6"
+  description = "Sets parameters that optimize bulk data imports"
+
+  parameter {
+    name  = "maintenance_work_mem"
+    value = var.db_import_mode.maintenance_work_mem
+  }
+
+  parameter {
+    name  = "max_wal_size"
+    value = "256"
+    apply_method = "pending-reboot"
+  }
+
+  parameter {
+    name  = "checkpoint_timeout"
+    value = "1800"
+  }
+
+  parameter {
+    name  = "synchronous_commit"
+    value = "off"
+  }
+
+  parameter {
+    name  = "wal_buffers"
+    value = "8192"
+    apply_method = "pending-reboot"
+  }
+
+  parameter {
+    name  = "autovacuum"
+    value = "0"
+  }
+
+}
+
 # Master Database
 #
 module "master" {
@@ -183,6 +223,9 @@ module "master" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.master_db_sgs
+
+  apply_immediately    = var.db_import_mode.enabled
+  parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : null
 }
 
 # Replicas Database 
@@ -200,6 +243,9 @@ module "replica1" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
+
+  apply_immediately    = var.db_import_mode.enabled
+  parameter_group_name = null
 }
 
 module "replica2" {
@@ -213,6 +259,9 @@ module "replica2" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
+
+  apply_immediately    = var.db_import_mode.enabled
+  parameter_group_name = null
 }
 
 module "replica3" {
@@ -226,6 +275,9 @@ module "replica3" {
   kms_key_id          = data.aws_kms_key.master_key.arn
 
   vpc_security_group_ids = local.db_sgs
+
+  apply_immediately    = var.db_import_mode.enabled
+  parameter_group_name = null
 }
 
 # Cloud Watch alarms for each RDS instance

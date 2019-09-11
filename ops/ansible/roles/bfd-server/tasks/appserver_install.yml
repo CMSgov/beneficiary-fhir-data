@@ -1,0 +1,38 @@
+---
+
+- name: Copy App Server Installer from Local Path
+  copy:
+    src: "{{ data_server_container }}"
+    dest: "{{ data_server_dir }}/{{ data_server_container | basename }}"
+  become: true
+
+- name: Extract App Server
+  unarchive:
+    src: "{{ data_server_dir }}/{{ data_server_container | basename }}"
+    dest: "{{ data_server_dir }}"
+    copy: false
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rwx,o=rx
+  become: true
+
+- name: Create App Server Service Definition
+  template:
+    src: bluebutton-appserver.service.j2
+    dest: "/etc/systemd/system/{{ data_server_appserver_service }}.service"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify:
+    - 'Enable App Server Service'
+    - 'Restart App Server Service'
+
+- name: Create App Server Management User
+  shell: "{{ data_server_dir }}/{{ data_server_container_name }}/bin/add-user.sh --silent {{ data_server_appserver_management_username }} {{ data_server_appserver_management_password }} &> {{ data_server_dir }}/{{ data_server_container_name }}/server-config.log"
+  args:
+    executable: /bin/bash
+  become: true
+  become_user: "{{ data_server_user }}"
+  no_log: true  # Ensure that credentials aren't logged if this command fails.
+  when: data_server_appserver_management_username != ''

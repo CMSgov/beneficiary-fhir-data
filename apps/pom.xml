@@ -2,20 +2,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<prerequisites>
-		<maven>3.3</maven>
-	</prerequisites>
-
-	<groupId>gov.hhs.cms.bluebutton</groupId>
-	<artifactId>bluebutton-parent</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<groupId>gov.cms.bfd</groupId>
+	<artifactId>bfd-parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>bluebutton-parent</name>
+	<name>bfd-parent</name>
 	<description>
-		A parent POM for the CMS BlueButton projects to share.
+			A parent POM for the CMS Beneficiary FHIR Data projects/applications.
 	</description>
-	<url>https://github.com/karlmdavis/bluebutton-parent-pom</url>
+	<url>https://github.com/CMSgov/beneficiary-fhir-data</url>
 	<organization>
 		<name>Centers for Medicare &amp; Medicaid Services</name>
 	</organization>
@@ -26,48 +22,25 @@
 		</license>
 	</licenses>
 
-	<developers>
-		<developer>
-			<id>karlmdavis</id>
-			<name>Karl M. Davis</name>
-			<email>karl@justdavis.com</email>
-			<url>https://justdavis.com/karl</url>
-		</developer>
-	</developers>
-
 	<issueManagement>
 		<!-- There doesn't seem to be any tooling support for this yet, but it 
 			doesn't hurt to include it. -->
-		<system>GitHub Issues</system>
-		<url>https://github.com/karlmdavis/bluebutton-parent-pom/issues</url>
+		<system>JIRA</system>
+		<url>https://jira.cms.gov/browse/BLUEBUTTON</url>
 	</issueManagement>
 
 	<ciManagement>
 		<!-- Per http://stackoverflow.com/questions/14754372/whats-the-purpose-of-the-maven-3-cimanagement-configuration#comment20752353_14762245, 
 			Sonar (at least) can use this information. -->
 		<system>jenkins</system>
-		<url>http://builds.hhsdevcloud.us/job/HHSIDEAlab/job/bluebutton-parent-pom/</url>
+		<url>https://builds.bfd-management.oeda.cmscloud.local/jenkins</url>
 	</ciManagement>
-
-	<distributionManagement>
-		<!-- Deploy these open source projects to the public OSSRH repositories, 
-			per http://central.sonatype.org/pages/apache-maven.html. This helps ensure 
-			that the releases land in the Maven Central repos. -->
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 
 	<scm>
 		<!-- URL format taken from http://www.sonatype.com/people/2009/09/maven-tips-and-tricks-using-github/ -->
-		<connection>scm:git:git@github.com:karlmdavis/bluebutton-parent-pom.git</connection>
-		<developerConnection>scm:git:git@github.com:karlmdavis/bluebutton-parent-pom.git</developerConnection>
-		<url>https://github.com/karlmdavis/bluebutton-parent-pom</url>
+		<connection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</connection>
+		<developerConnection>scm:git:git@github.com:CMSgov/beneficiary-fhir-data.git</developerConnection>
+		<url>https://github.com/CMSgov/beneficiary-fhir-data</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -83,6 +56,14 @@
 			</snapshots>
 		</repository>
 	</repositories>
+
+	<modules>
+		<module>bfd-model</module>
+		<module>bfd-pipeline</module>
+		<module>bfd-server</module>
+		<module>bfd-server-test-perf</module>
+		<!-- <module>bfd-server-test-functions</module> -->
+	</modules>
 
 	<properties>
 		<!-- As specified in http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding, 
@@ -175,14 +156,14 @@
 
 			<dependency>
 				<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
-					Hibernate is used for that in the Blue Button API projects.) -->
+					Hibernate is used for that in our projects.) -->
 				<artifactId>hibernate-jpa-2.1-api</artifactId>
 				<groupId>org.hibernate.javax.persistence</groupId>
 				<version>1.0.0.Final</version>
 			</dependency>
 			<dependency>
 				<!-- Hibernate's JPA implementation is used to manage most database usage 
-					in the Blue Button API applications. -->
+					in our applications. -->
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
 				<version>${hibernate.version}</version>
@@ -238,7 +219,7 @@
 			<resource>
 				<!-- Enable Maven's resource filtering for text files in 'src/main/resources/'. 
 					This will replace properties in text files with their values, e.g. "${project.groupId}" 
-					will be replaced with "gov.hhs.cms.bluebutton.fhir". -->
+					will be replaced with "gov.cms.beneficiaryfhirdata". -->
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
@@ -247,7 +228,7 @@
 			<testResource>
 				<!-- Enable Maven's resource filtering for text files in 'src/test/resources/'. 
 					This will replace properties in text files with their values, e.g. "${project.groupId}" 
-					will be replaced with "gov.hhs.cms.bluebutton.fhir". -->
+					will be replaced with "gov.cms.beneficiaryfhirdata". -->
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
 			</testResource>
@@ -288,6 +269,50 @@
 					<artifactId>maven-resources-plugin</artifactId>
 					<!-- Don't use 2.7, due to https://issues.apache.org/jira/browse/MRESOURCES-192. -->
 					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<groupId>com.coveo</groupId>
+					<artifactId>fmt-maven-plugin</artifactId>
+					<version>2.9</version>
+				</plugin>
+				<plugin>
+					<groupId>io.github.phillipuniverse</groupId>
+					<artifactId>githook-maven-plugin</artifactId>
+					<version>1.0.4</version>
+					<configuration>
+						<hooks>
+							<pre-commit>
+#!/bin/sh
+set -e
+
+checkJavaFormat() {
+  echo 'Verifying Java source code format...'
+
+  if ! git diff --name-only --cached | grep -q '^apps/.*'; then
+    echo 'Verified Java source code format: no staged changes in app/.'
+    return 0
+  fi
+
+  cd apps
+
+  set +e
+  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&amp;1
+  checkResult=$?
+  set -e
+
+  if [ ${checkResult} -eq 0 ]; then
+    echo 'Verified Java source code format: a-okay.'
+  else
+    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.coveo:fmt-maven-plugin:check' for details or 'mvn com.coveo:fmt-maven-plugin:format' to automatically apply the required formatting."
+  fi
+
+  return ${checkResult}
+}
+
+checkJavaFormat
+							</pre-commit>
+						</hooks>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -451,6 +476,33 @@
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
+				<groupId>com.coveo</groupId>
+				<artifactId>fmt-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<!-- Use this plugin to run https://github.com/google/google-java-format
+								on every build, which will auto-format all of our Java source code. Note
+								that we have a Git pre-commit hook that will also do this. -->
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.github.phillipuniverse</groupId>
+				<artifactId>githook-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<inherited>false</inherited>
+						<goals>
+							<!-- Verify source code formatting prior to commit. -->
+							<goal>install</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<executions>
@@ -545,6 +597,34 @@
 											<action>
 												<!-- Don't run this plugin inside m2e; necessary to disable a 
 													POM warning in Eclipse. -->
+												<ignore />
+											</action>
+										</pluginExecution>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>com.coveo</groupId>
+												<artifactId>fmt-maven-plugin</artifactId>
+												<versionRange>[2.9,)</versionRange>
+												<goals>
+													<goal>format</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<!-- Don't run this plugin automatically on every build inside m2e. -->
+												<ignore />
+											</action>
+										</pluginExecution>
+										<pluginExecution>
+											<pluginExecutionFilter>
+												<groupId>io.github.phillipuniverse</groupId>
+												<artifactId>githook-maven-plugin</artifactId>
+												<versionRange>[1.0.4,)</versionRange>
+												<goals>
+													<goal>install</goal>
+												</goals>
+											</pluginExecutionFilter>
+											<action>
+												<!-- Don't run this plugin automatically on every build inside m2e. -->
 												<ignore />
 											</action>
 										</pluginExecution>

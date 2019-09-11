@@ -21,6 +21,19 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
+# KMS 
+#
+# The customer master key is created outside of this script
+#
+data "aws_kms_key" "master_key" {
+  key_id = "alias/bfd-${var.env_config.env}-cmk"
+}
+
+
+##
+# Create Resources
+##
+
 #
 # Security groups
 #
@@ -37,7 +50,7 @@ resource "aws_security_group" "base" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.mgmt_config.ci_cidrs
+    cidr_blocks = ["10.0.0.0/8"]
   }
 
   egress {
@@ -94,9 +107,19 @@ resource "aws_launch_configuration" "main" {
   iam_instance_profile        = var.launch_config.profile
   placement_tenancy           = local.is_prod ? "dedicated" : "default"
 
-  user_data                   = templatefile("${path.module}/../templates/user_data.tpl", {
-    env    = var.env_config.env
+  user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
+    env   = var.env_config.env
+    port  = var.lb_config.port
   })
+
+  root_block_device {
+    volume_type               = "gp2"
+    volume_size               = var.launch_config.volume_size
+    delete_on_termination     = true
+    encrypted                 = true
+    # not yet supported
+    # kms_key_id                = data.aws_kms_key.master_key.key_id
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -107,19 +130,16 @@ resource "aws_launch_configuration" "main" {
 # Autoscaling group
 ##
 resource "aws_autoscaling_group" "main" {
-  # Generate a new config on every revision
-  name_prefix               = "bfd-${var.env_config.env}-${var.role}-"
+  # Generate a new group on every revision
+  name                      = aws_launch_configuration.main.name
   desired_capacity          = var.asg_config.desired
   max_size                  = var.asg_config.max
   min_size                  = var.asg_config.min
 
-  # Make terraform wait for instances to join the ELB
-  # per https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#waiting-for-capacity
-  /* TODO: Wait for real AMI's before this step 
-  min_elb_capacity          = var.asg_config.desired
-  wait_for_elb_capacity     = var.asg_config.desired
-  wait_for_capacity_timeout = "10m"
-  */
+  # If an lb is defined, wait for the ELB 
+  min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
+  wait_for_elb_capacity     = var.lb_config == null ? null : var.asg_config.min
+  wait_for_capacity_timeout = var.lb_config == null ? null : "10m"
 
   health_check_grace_period = 300
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
