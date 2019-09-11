@@ -94,6 +94,56 @@ resource "aws_security_group_rule" "allow_db_access" {
 }
 
 ##
+# Launch template
+##
+resource "aws_launch_template" "main" {
+  # Generate a new config on every revision
+  name_prefix                   = "bfd-${var.env_config.env}-${var.role}-"
+  description                   = "Template for the ${var.env_config.env} environment ${var.role} servers"
+  vpc_security_group_ids        = concat([aws_security_group.base.id], aws_security_group.app[*].id)
+  key_name                      = var.launch_config.key_name
+  image_id                      = var.launch_config.ami_id
+  instance_type                 = var.launch_config.instance_type
+
+  network_interfaces {
+    associate_public_ip_address = false
+  }
+
+  iam_instance_profile {
+    name                        = var.launch_config.profile
+  }
+
+  placement {
+    tenancy                     = local.is_prod ? "dedicated" : "default"
+  }
+
+  monitoring {
+    enabled = true
+  }
+
+  block_device_mappings {
+    device_name = "/dev/sda1"
+    ebs {
+      volume_type               = "gp2"
+      volume_size               = var.launch_config.volume_size
+      delete_on_termination     = false
+      encrypted                 = true
+      kms_key_id                = data.aws_kms_key.master_key.arn
+    }
+  }
+
+  user_data                     = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
+    env   = var.env_config.env
+    port  = var.lb_config.port
+  })
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
+##
 # Launch configuration
 ##
 resource "aws_launch_configuration" "main" {
