@@ -95,7 +95,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 			).trim()
 
-		packer is always run from $repoRoot/ops/ansible/playbooks-ccs
+		// packer is always run from $repoRoot/ops/ansible/playbooks-ccs
 		dir('ops/ansible/playbooks-ccs'){
 			sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} \
 			-var source_ami=${goldAmi} \
