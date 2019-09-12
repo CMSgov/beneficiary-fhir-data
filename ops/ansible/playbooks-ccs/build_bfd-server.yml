@@ -17,8 +17,9 @@
     - name: Include env specific variables
       include_vars:
         dir: vars/{{ env }}
+      tags: [pre-ami, post-ami]
       
-    - name: Apply Blue Button Data Pipeline Role
+    - name: Apply Blue Button Data Server Role
       import_role:
         name: bfd-server
       vars:
@@ -41,3 +42,33 @@
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
         data_server_db_connections_max: 400
+        
+    - name: Copy Local Test SSL Keypair
+      copy:
+        # Note: This PEM file is encrypted within the project via Ansible Vault, which will
+        # automagically decrypt it as part of the copy operation.
+        src: "{{ data_server_ssl_client_certificate_test }}"
+        dest: '/jboss/bluebutton-backend-test-data-server-client-test-keypair.pem'
+        owner: root
+        group: root
+        mode: 'u=rw,g=,o='
+      become: true
+      tags:
+        - pre-ami
+      
+    - name: Configure CloudWatch Logs Agent
+      template:
+        src: awslogs.conf.data-server.j2
+        dest: '/var/awslogs/etc/awslogs.conf'
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+      become: true
+      notify:
+        - Restart awslogs Service
+      tags:
+        - pre-ami
+        
+  handlers:
+    
+    - import_tasks: handlers/main.yml

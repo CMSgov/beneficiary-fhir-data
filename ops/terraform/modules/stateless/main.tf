@@ -172,10 +172,12 @@ module "fhir_asg" {
 
   # TODO: Dummy values to get started
   launch_config   = {
-    instance_type = "m5.large" 
+
+    instance_type = "m5.2xlarge" 
     volume_size   = 100 # GB
-    ami_id        = "ami-0b898040803850657" 
-    key_name      = "bfd-rick-test" 
+    ami_id        = var.fhir_ami 
+    key_name      = var.ssh_key_name 
+
     profile       = module.fhir_iam.profile
     user_data_tpl = "simple_server.tpl"       # See templates directory for choices
   }
@@ -205,10 +207,12 @@ module "etl_instance" {
 
   # TODO: Dummy values to get started
   launch_config   = {
-    instance_type = "m5.large" 
-    volume_size   = 100 # GB
-    ami_id        = "ami-0b898040803850657" 
-    key_name      = "bfd-rick-test" 
+
+    instance_type = "m5.2xlarge"
+    volume_size   = 100 # GB 
+    ami_id        = var.etl_ami 
+
+    key_name      = var.ssh_key_name 
     profile       = module.etl_iam.profile
     user_data_tpl = "default.tpl"
   }
@@ -220,4 +224,3 @@ module "etl_instance" {
     ci_cidrs      = ["10.252.40.0/21"]
   }
 }
-

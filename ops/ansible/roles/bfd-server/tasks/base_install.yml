@@ -8,12 +8,16 @@
     # Needed to supply `keytool` and also to run the app server.
     - java-1.8.0-openjdk-devel
   become: true
+  tags: 
+    - pre-ami
 
 - name: Create Server User
   user:
     name: "{{ data_server_user }}"
     shell: /bin/false
   become: true
+  tags: 
+    - pre-ami
 
 - name: Create Server Directory
   file:
@@ -23,3 +27,5 @@
     group: "{{ data_server_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
+  tags: 
+    - pre-ami

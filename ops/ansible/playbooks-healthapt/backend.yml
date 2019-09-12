@@ -42,7 +42,7 @@
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
         #data_pipeline_idempotency_required: (see group_vars/env_*/main.yml)
-
+   
     - name: Configure CloudWatch Logs Agent
       template:
         src: awslogs.conf.data-pipeline.j2

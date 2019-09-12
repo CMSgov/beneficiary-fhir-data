@@ -17,4 +17,5 @@ module "stateless" {
 
   fhir_ami            = var.fhir_ami
   etl_ami             = var.etl_ami
+  ssh_key_name        = var.ssh_key_name
 }
