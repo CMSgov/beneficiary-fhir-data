@@ -212,7 +212,7 @@ module "etl_instance" {
     volume_size   = 100 # GB 
     ami_id        = var.etl_ami 
 
-    key_name      = "bfd-rick-test" 
+    key_name      = var.ssh_key_name 
     profile       = module.etl_iam.profile
     user_data_tpl = "default.tpl"
   }

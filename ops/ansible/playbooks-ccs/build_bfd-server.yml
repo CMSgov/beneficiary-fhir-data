@@ -43,6 +43,17 @@
         data_server_db_password: "{{ vault_data_server_db_password }}"
         data_server_db_connections_max: 400
         
+    - name: Copy Local Test SSL Keypair
+      copy:
+        # Note: This PEM file is encrypted within the project via Ansible Vault, which will
+        # automagically decrypt it as part of the copy operation.
+        src: "{{ data_server_ssl_client_certificate_test }}"
+        dest: '/jboss/bluebutton-backend-test-data-server-client-test-keypair.pem'
+        owner: root
+        group: root
+        mode: 'u=rw,g=,o='
+      become: true
+      
     - name: Configure CloudWatch Logs Agent
       template:
         src: awslogs.conf.data-server.j2
