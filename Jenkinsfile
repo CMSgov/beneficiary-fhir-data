@@ -135,14 +135,14 @@ if (params.deploy_env == 'ccs') {
 	}
 }
 
-// stage('Deploy to TEST') {
-// 	milestone(label: 'stage_deploy_test_start')
-// 
-// 	node {
-// 		scriptForDeploys.deploy('test', amiIds, appBuildResults)
-// 	}
-// 
-// }
+stage('Deploy to TEST') {
+	milestone(label: 'stage_deploy_test_start')
+
+	node {
+		scriptForDeploys.deploy('test', amiIds, appBuildResults)
+	}
+
+}
 
 stage('Manual Approval') {
 	if (canDeployToProdEnvs) {
