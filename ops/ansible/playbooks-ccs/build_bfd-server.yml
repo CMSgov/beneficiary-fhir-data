@@ -19,7 +19,7 @@
         dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
       
-    - name: Apply Blue Button Data Pipeline Role
+    - name: Apply Blue Button Data Server Role
       import_role:
         name: bfd-server
       vars:
