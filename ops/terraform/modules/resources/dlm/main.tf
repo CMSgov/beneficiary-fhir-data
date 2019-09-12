@@ -57,10 +57,14 @@ EOF
 #
 resource "aws_dlm_lifecycle_policy" "main" {
 <<<<<<< HEAD
+<<<<<<< HEAD
   description        = "BFDs snapshot policy"
 =======
   description        = "example DLM lifecycle policy"
 >>>>>>> Add DLM schedule
+=======
+  description        = "EBS volume snapshot and retention policy for BFD"
+>>>>>>> DLM is now a global policy
   execution_role_arn = aws_iam_role.dlm_lifecycle_role.arn
   state              = "ENABLED"
 
@@ -72,6 +76,7 @@ resource "aws_dlm_lifecycle_policy" "main" {
 
       create_rule {
 <<<<<<< HEAD
+<<<<<<< HEAD
         interval      = 24
         interval_unit = "HOURS"
         times         = [var.time]
@@ -80,6 +85,11 @@ resource "aws_dlm_lifecycle_policy" "main" {
         interval_unit = "HOURS"
         times         = ["23:45"]
 >>>>>>> Add DLM schedule
+=======
+        interval      = 24
+        interval_unit = "HOURS"
+        times         = [var.time]
+>>>>>>> DLM is now a global policy
       }
 
       retain_rule {
