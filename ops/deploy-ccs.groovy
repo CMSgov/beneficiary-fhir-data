@@ -101,7 +101,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 		// 	-var source_ami=${goldAmi} \
 		// 	-var subnet_id=subnet-06e6736253a5e5eda \
 		// 	../../packer/build_bfd-platinum.json"
-		}
+		// }
 	  return new AmiIds(
 			platinumAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
 			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
