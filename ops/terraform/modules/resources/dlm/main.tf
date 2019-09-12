@@ -56,7 +56,7 @@ EOF
 # DLM policy and schedule
 #
 resource "aws_dlm_lifecycle_policy" "main" {
-  description        = "example DLM lifecycle policy"
+  description        = "EBS volume snapshot and retention policy for BFD"
   execution_role_arn = aws_iam_role.dlm_lifecycle_role.arn
   state              = "ENABLED"
 
@@ -67,9 +67,9 @@ resource "aws_dlm_lifecycle_policy" "main" {
       name = "Daily snapshots of EC2 volumes which are marked for snapshots"
 
       create_rule {
-        interval      = var.interval
+        interval      = 24
         interval_unit = "HOURS"
-        times         = ["23:45"]
+        times         = [var.time]
       }
 
       retain_rule {
