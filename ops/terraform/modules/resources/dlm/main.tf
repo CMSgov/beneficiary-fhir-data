@@ -58,6 +58,7 @@ EOF
 resource "aws_dlm_lifecycle_policy" "main" {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   description        = "BFDs snapshot policy"
 =======
   description        = "example DLM lifecycle policy"
@@ -65,6 +66,9 @@ resource "aws_dlm_lifecycle_policy" "main" {
 =======
   description        = "EBS volume snapshot and retention policy for BFD"
 >>>>>>> DLM is now a global policy
+=======
+  description        = "BFDs snapshot policy"
+>>>>>>> Description change
   execution_role_arn = aws_iam_role.dlm_lifecycle_role.arn
   state              = "ENABLED"
 
