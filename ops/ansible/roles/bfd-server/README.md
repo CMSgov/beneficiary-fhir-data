@@ -15,15 +15,6 @@ Tags
 
 This role utilizes [Ansible Tags](https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html) so that the same role can be used during different build or deployment stages. For CCS we use pre-ami and post-ami for immutable ec2 instances. If you execute this role without specifying tags Ansible assumes all tags are to be run. 
 
-Post Role Execution
--------------------
-
-Due to this role being used for pre and post configuration tasks, a restart of the Pipeline Service is required, something like this should work:
-
--  name: Trigger Pipeline Service Restart handler
-   command: /bin/true
-   notify: 
-      - Restart Pipeline Service
 
 Role Variables
 --------------
