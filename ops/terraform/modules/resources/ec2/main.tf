@@ -86,6 +86,7 @@ resource "aws_instance" "main" {
   monitoring                  = true
   associate_public_ip_address = false
   tenancy                     = local.is_prod ? "dedicated" : "default"
+  ebs_optimized               = true
 
   vpc_security_group_ids      = [aws_security_group.base.id]
   subnet_id                   = data.aws_subnet.main.id
