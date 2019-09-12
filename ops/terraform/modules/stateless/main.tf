@@ -214,7 +214,7 @@ module "etl_instance" {
 
     key_name      = var.ssh_key_name 
     profile       = module.etl_iam.profile
-    user_data_tpl = "default.tpl"
+    user_data_tpl = "pipeline_server.tpl"
   }
 
   mgmt_config     = {
