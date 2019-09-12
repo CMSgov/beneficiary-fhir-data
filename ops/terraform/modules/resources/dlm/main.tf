@@ -56,7 +56,7 @@ EOF
 # DLM policy and schedule
 #
 resource "aws_dlm_lifecycle_policy" "main" {
-  description        = "EBS volume snapshot and retention policy for BFD"
+  description        = "BFDs snapshot policy"
   execution_role_arn = aws_iam_role.dlm_lifecycle_role.arn
   state              = "ENABLED"
 
