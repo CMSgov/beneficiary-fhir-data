@@ -1,0 +1,6 @@
+---
+
+ssh_users:
+  - username: nathandister
+    sudoer: true
+    public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCukJi0PsmHjoMixvbLVe04vdniyvQXcwncPEma+0EjOzjuL3GvBbqQV4JoiPS4vVlaVHUsP6CzugzYjaZhfSeWU1I4024ZTfQhYre2ta/wQJgOacY+KW0P3J9WckuXkym9dkpfBZHg9gzgdHD8JtvpLQJfOSySKG9DSDdSvdzjGb/5QCw1+KeH8JKiakH1ioYa+h9c5i8LjVt2yjLiVpW8L9HMGaj/6cCUk46QLAaSZRwgue4OVI2rCBrNZs07AZEF3dEpIjMHDPAwVA8h8vAeSpmi7V+zAZJbyOQtm60e81RL8oKu3b0cN8fbsWlfpIrt4Yt0gQVzkeWlAmFg1Jwv nathandister@NathanDstersMBP.net-router.home"
