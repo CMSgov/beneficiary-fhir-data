@@ -42,11 +42,6 @@
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
         #data_pipeline_idempotency_required: (see group_vars/env_*/main.yml)
-
-    -  name: Trigger Pipeline Service Restart handler
-       command: /bin/true
-       notify: 
-          - Restart Pipeline Service
    
     - name: Configure CloudWatch Logs Agent
       template:

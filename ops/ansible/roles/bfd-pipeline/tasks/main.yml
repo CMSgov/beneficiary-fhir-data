@@ -63,6 +63,14 @@
   tags: 
     - pre-ami
 
+- name: Restart App Server Service
+  service:
+    name: "{{ data_server_appserver_service }}"
+    state: restarted
+  become: true
+  tags:
+    - post-ami
+    
 - name: Configure Pipeline Application Permissions
   file:
     path: "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}"
