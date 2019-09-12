@@ -1,8 +1,6 @@
 ---
-##
-# Builds a 'Platinum' AMI by updating existing packages and installs BFD specific dependeicies from a base Gold Image provided by GDIT in the CCS AWS Environment
-##
-- name: Build Platinum AMI
+
+- name: Test ssh_users role
   hosts: localhost
   connection: local
   gather_facts: no
