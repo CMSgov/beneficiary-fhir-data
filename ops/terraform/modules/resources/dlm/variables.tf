@@ -3,7 +3,8 @@ variable "retain" {
   type        = number
 }
 
-variable "interval" {
-  description = "Snapshot interval in hours"
-  type        = number
+variable "time" {
+  description = "Snapshot start time"
+  type        = string
+  default     = "23:45" 
 }
