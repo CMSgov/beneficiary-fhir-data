@@ -53,6 +53,8 @@
         group: root
         mode: 'u=rw,g=,o='
       become: true
+      tags:
+        - pre-ami
       
     - name: Configure CloudWatch Logs Agent
       template:
@@ -64,6 +66,8 @@
       become: true
       notify:
         - Restart awslogs Service
+      tags:
+        - pre-ami
         
   handlers:
     
