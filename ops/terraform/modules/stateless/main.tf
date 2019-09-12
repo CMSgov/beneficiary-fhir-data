@@ -97,6 +97,12 @@ data "aws_security_group" "remote" {
   }
 }
 
+# Find ansible vault pw read only policy by hardcoded ARN, no other options for this data source
+#
+data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
+  arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
+}
+
 #
 # Start to build stuff
 #
@@ -111,12 +117,22 @@ module "fhir_iam" {
   name            = "fhir"
 }
 
+resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
+  role            = module.fhir_iam.role
+  policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
+}
+
 module "etl_iam" {
   source = "../resources/iam"
 
   env_config      = local.env_config
   name            = "etl"
   s3_bucket_arns  = [data.aws_s3_bucket.etl.arn]
+}
+
+resource "aws_iam_role_policy_attachment" "etl_iam_ansible_vault_pw_ro_s3" {
+  role            = module.etl_iam.role
+  policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
 
