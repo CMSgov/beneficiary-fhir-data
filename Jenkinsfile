@@ -184,11 +184,13 @@ stage('Deploy to hhsdevcloud') {
 }
 
 if (params.deploy_env == 'ccs') {
-	stage('Build App AMIs for PROD-SBX') {
-		milestone(label: 'stage_build_app_amis_prod-sbx_start')
+	if (willDeployToProdEnvs) {
+		stage('Build App AMIs for PROD-SBX') {
+			milestone(label: 'stage_build_app_amis_prod-sbx_start')
 
-		node {
-			amiIds = scriptForDeploys.buildAppAmis('prod-stg', amiIds, appBuildResults)
+			node {
+				amiIds = scriptForDeploys.buildAppAmis('prod-stg', amiIds, appBuildResults)
+			}
 		}
 	}
 }
@@ -208,11 +210,13 @@ stage('Deploy to prod-stg') {
 }
 
 if (params.deploy_env == 'ccs') {
-	stage('Build App AMIs for PROD') {
-		milestone(label: 'stage_build_app_amis_prod_start')
+	if (willDeployToProdEnvs) {
+		stage('Build App AMIs for PROD') {
+			milestone(label: 'stage_build_app_amis_prod_start')
 
-		node {
-			amiIds = scriptForDeploys.buildAppAmis('prod', amiIds, appBuildResults)
+			node {
+				amiIds = scriptForDeploys.buildAppAmis('prod', amiIds, appBuildResults)
+			}
 		}
 	}
 }
