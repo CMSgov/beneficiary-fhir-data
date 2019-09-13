@@ -196,6 +196,7 @@ module "fhir_asg" {
 
     profile       = module.fhir_iam.profile
     user_data_tpl = "fhir_server.tpl"       # See templates directory for choices
+    account_id    = data.aws_caller_identity.current.account_id
   }
 
   db_config       = {
