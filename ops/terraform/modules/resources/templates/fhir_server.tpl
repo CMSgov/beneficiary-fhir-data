@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+exec > >(tee -a /var/log/user_data.log 2>&1)
+
 git clone https://github.com/CMSgov/beneficiary-fhir-data.git
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
