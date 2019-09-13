@@ -1,3 +1,4 @@
 *.backup
 *.tfvars
 .terraform
+!.terraform-version

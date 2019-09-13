@@ -38,3 +38,5 @@ os_environment_variables:
     value : "{{ vault_proxy_host }}"
   - key: NEW_RELIC_PROXY_PORT 
     value : "{{ vault_proxy_port }}"
+    
+env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json

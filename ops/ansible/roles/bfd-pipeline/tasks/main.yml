@@ -10,12 +10,16 @@
   become: true
   notify:
     - 'Restart Pipeline Service'
+  tags: 
+    - pre-ami
 
 - name: Create ETL Service User
   user:
     name: "{{ data_pipeline_user }}"
     shell: /bin/false
   become: true
+  tags: 
+    - pre-ami
 
 - name: Create ETL Service Directory
   file:
@@ -25,6 +29,8 @@
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
+  tags: 
+    - pre-ami
 
 # Create the temp directory iff it's missing. (Don't want to accidentally
 # change the permissions on /tmp.)
@@ -34,6 +40,8 @@
   become: true
   register: stat_tmp
   when: data_pipeline_tmp_dir is defined
+  tags: 
+    - pre-ami
 
 - name: Create Custom Temp Directory
   file:
@@ -44,15 +52,25 @@
     mode: u=rwx,g=rx,o=rx
   become: true
   when: data_pipeline_tmp_dir is defined and stat_tmp.stat.exists == false
+  tags: 
+    - pre-ami
 
 - name: Copy Pipeline Application
   copy:
     src: "{{ data_pipeline_jar }}"
     dest: "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}"
   become: true
-  notify:
-    - 'Restart Pipeline Service'
+  tags: 
+    - pre-ami
 
+- name: Restart App Server Service
+  service:
+    name: "{{ data_server_appserver_service }}"
+    state: restarted
+  become: true
+  tags:
+    - post-ami
+    
 - name: Configure Pipeline Application Permissions
   file:
     path: "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}"
@@ -60,6 +78,8 @@
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
+  tags: 
+    - pre-ami
 
 - name: Create Pipeline Service Wrapper Script
   template:
@@ -71,6 +91,8 @@
   become: true
   notify:
     - 'Restart Pipeline Service'
+  tags: 
+    - post-ami
 
 - name: Create Pipeline Service Definition
   template:
@@ -83,3 +105,5 @@
   notify:
     - 'Enable Pipeline Service'
     - 'Restart Pipeline Service'
+  tags: 
+    - post-ami

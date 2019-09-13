@@ -97,6 +97,12 @@ data "aws_security_group" "remote" {
   }
 }
 
+# Find ansible vault pw read only policy by hardcoded ARN, no other options for this data source
+#
+data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
+  arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
+}
+
 #
 # Start to build stuff
 #
@@ -111,12 +117,22 @@ module "fhir_iam" {
   name            = "fhir"
 }
 
+resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
+  role            = module.fhir_iam.role
+  policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
+}
+
 module "etl_iam" {
   source = "../resources/iam"
 
   env_config      = local.env_config
   name            = "etl"
   s3_bucket_arns  = [data.aws_s3_bucket.etl.arn]
+}
+
+resource "aws_iam_role_policy_attachment" "etl_iam_ansible_vault_pw_ro_s3" {
+  role            = module.etl_iam.role
+  policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
 
@@ -172,10 +188,12 @@ module "fhir_asg" {
 
   # TODO: Dummy values to get started
   launch_config   = {
-    instance_type = "m5.large" 
+
+    instance_type = "m5.2xlarge" 
     volume_size   = 100 # GB
-    ami_id        = "ami-0b898040803850657" 
-    key_name      = "bfd-rick-test" 
+    ami_id        = var.fhir_ami 
+    key_name      = var.ssh_key_name 
+
     profile       = module.fhir_iam.profile
     user_data_tpl = "simple_server.tpl"       # See templates directory for choices
   }
@@ -205,10 +223,12 @@ module "etl_instance" {
 
   # TODO: Dummy values to get started
   launch_config   = {
-    instance_type = "m5.large" 
-    volume_size   = 100 # GB
-    ami_id        = "ami-0b898040803850657" 
-    key_name      = "bfd-rick-test" 
+
+    instance_type = "m5.2xlarge"
+    volume_size   = 100 # GB 
+    ami_id        = var.etl_ami 
+
+    key_name      = var.ssh_key_name 
     profile       = module.etl_iam.profile
     user_data_tpl = "default.tpl"
   }
@@ -220,4 +240,3 @@ module "etl_instance" {
     ci_cidrs      = ["10.252.40.0/21"]
   }
 }
-

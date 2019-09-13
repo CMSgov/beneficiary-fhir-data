@@ -94,6 +94,33 @@ module "admin" {
   acl                 = "log-delivery-write"
 }
 
+# IAM policy to allow read access to ansible vault password
+#
+resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
+  name        = "bfd-ansible-vault-pw-ro-s3"
+  description = "ansible vault pw read only S3 policy"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AnsibleVaultPwRO",
+      "Action": [
+        "kms:Decrypt",
+        "s3:GetObject"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "${data.aws_kms_key.master_key.arn}",
+        "${module.admin.arn}/ansible/vault.password"
+      ]
+    }
+  ]
+}
+EOF
+}
+
 # S3 bucket for Build Artifacts
 #
 module "artifacts" {
