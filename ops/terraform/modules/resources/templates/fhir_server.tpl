@@ -13,7 +13,8 @@ aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 cat <<EOF >> extra_vars.json
 {
     "env":"${env}",
-    "data_server_container_name":"wildfly-8.1.0.Final"
+    "data_server_container_name":"wildfly-8.1.0.Final",
+    "data_server_version":"1.0.0-SNAPSHOT"
 }
 EOF
 
