@@ -1,6 +1,6 @@
 ---
 ##
-# Configures the ETL Server and data-pipeline app for CCS env
+# Configures the FHIR Server and data-server app for CCS env
 ##
 
 - name: Launch BFD Data Server
