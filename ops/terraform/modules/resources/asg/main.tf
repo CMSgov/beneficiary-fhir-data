@@ -110,6 +110,7 @@ resource "aws_launch_configuration" "main" {
   user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env   = var.env_config.env
     port  = var.lb_config.port
+    accountId = var.launch_config.account_id
   })
 
   root_block_device {
