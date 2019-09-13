@@ -99,7 +99,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 		dir('ops/ansible/playbooks-ccs'){
 			sh "/usr/bin/packer build -color=false -var vault_password_file=${vaultPasswordFile} \
 			-var source_ami=${goldAmi} \
-			-var subnet_id=subnet-06e6736253a5e5eda \
+			-var subnet_id=subnet-092c2a68bd18b34d1 \
 			../../packer/build_bfd-platinum.json"
 		}
 	  return new AmiIds(
@@ -155,14 +155,14 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 			sh "/usr/bin/packer build -color=false \
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
-				-var 'subnet_id=subnet-06e6736253a5e5eda' \
+				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				../../packer/build_bfd-pipeline.json"
 
 			// build the FHIR server
 			sh "/usr/bin/packer build -color=false \
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
-				-var 'subnet_id=subnet-06e6736253a5e5eda' \
+				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				../../packer/build_bfd-server.json"
 
 			return new AmiIds(
