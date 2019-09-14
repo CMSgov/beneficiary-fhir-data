@@ -44,6 +44,7 @@ public class DataSetTestUtilities {
     username.replaceAll("\\\\", "-");
     int randomId = new Random().nextInt(100000);
 <<<<<<< HEAD
+<<<<<<< HEAD
     String bucketName = String.format("bb-test-%s-%d", username, randomId);
 
     Bucket bucket = s3Client.createBucket(bucketName);
@@ -57,6 +58,9 @@ public class DataSetTestUtilities {
         .run(new WaiterParameters<HeadBucketRequest>(new HeadBucketRequest(bucketName)));
 =======
     String bucketName = String.format("bfd-test-%s-%d", username, randomId);
+=======
+    String bucketName = String.format("bb-test-%s-%d", username, randomId);
+>>>>>>> Fix test S3 bucket names.
 
     Bucket bucket = s3Client.createBucket(bucketName);
     /*
