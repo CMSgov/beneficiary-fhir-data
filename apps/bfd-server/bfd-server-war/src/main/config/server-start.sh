@@ -30,10 +30,7 @@ if [[ "${cygwin}" = true ]]; then
 fi
 
 # Constants.
-serverVersion='8.1.0.Final'
-serverInstall="wildfly-${serverVersion}"
 serverTimeoutSeconds=120
-serverConnectTimeoutMilliseconds=$((30 * 1000))
 dbUsername=""
 dbPassword=""
 
@@ -118,17 +115,15 @@ cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
 workDirectory="${targetDirectory}/server-work"
-serverArtifact="${workDirectory}/wildfly-dist-${serverVersion}.tar.gz"
+serverLauncher="${workDirectory}/$(ls ${workDirectory} | grep '^bfd-server-launcher-.*\.jar$')"
 serverPortsFile="${workDirectory}/server-ports.properties"
+serverLog="${workDirectory}/server-console.log"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bfd-server-war-.*\.war$')"
 keyStore="${scriptDirectory}/../../../../dev/ssl-stores/server-keystore.jks"
 trustStore="${scriptDirectory}/../../../../dev/ssl-stores/server-truststore.jks"
-rolesProps="${scriptDirectory}/../../../../dev/ssl-stores/server-roles.properties"
-serverHome="${workDirectory}/${serverInstall}"
-serverLog="${workDirectory}/server-console.log"
 
 # Check for required files.
-for f in "${serverArtifact}" "${serverPortsFile}" "${warArtifact}" "${keyStore}" "${trustStore}"; do
+for f in "${serverLauncher}" "${serverPortsFile}" "${warArtifact}" "${keyStore}" "${trustStore}"; do
 	if [[ ! -f "${f}" ]]; then
 		>&2 echo "The following file is required but is missing: '${f}'."
 		exit 1
@@ -140,29 +135,10 @@ if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact
 if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
 if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
 
-# If the server install already exists, clean it out to start fresh.
-if [[ -d "${serverHome}" ]]; then
-	echo "Previous server install found. Removing..."
-	rm -rf "${serverHome}"
-	echo "Previous server install removed."
-fi
-
-# Unzip the server.
-if [[ ! -d "${serverHome}" ]]; then
-	tar --extract \
-		--file "${serverArtifact}" \
-		--directory "${workDirectory}"
-	echo "Unpacked server dist: '${serverHome}'"
-fi
-
-# Read the server ports to be used from the ports file.
-serverPortManagement=$(grep "^server.port.management=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )
-serverPortHttp=$(grep "^server.port.http=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )
+# Read the server port to be used from the ports file.
 serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )
-if [[ -z "${serverPortManagement}" ]]; then >&2 echo "Server management port not specified in '${serverPortsFile}'."; exit 1; fi
-if [[ -z "${serverPortHttp}" ]]; then >&2 echo "Server HTTP port not specified in '${serverPortsFile}'."; exit 1; fi
 if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
-echo "Configured server to run on HTTPS port '${serverPortHttps}', HTTP port '${serverPortHttp}', and management port '${serverPortManagement}'."
+echo "Configured server to run on HTTPS port '${serverPortHttps}'."
 
 # Generate a random server ID and write it to a file.
 bfdServerId=$RANDOM
@@ -181,76 +157,19 @@ else
 	visualVmArgs=""
 fi
 
-# Rename the original server conf file.
-if [[ ! -f "${serverHome}/bin/standalone.conf.original" ]]; then
-	mv "${serverHome}/bin/standalone.conf" "${serverHome}/bin/standalone.conf.original"
-fi
-
-# Write a correct server conf file.
-javaHomeLine=''
-if [[ -z "${javaHome}" ]]; then
-	javaHomeLine=''
-else
-	javaHomeLine="JAVA_HOME=${javaHome}"
-fi
-cat <<EOF > "${serverHome}/bin/standalone.conf"
-## -*- shell-script -*- ######################################################
-##                                                                          ##
-##  JBoss Bootstrap Script Configuration                                    ##
-##                                                                          ##
-##############################################################################
-${javaHomeLine}
-JBOSS_MODULES_SYSTEM_PKGS="${jbossModulesSystemPackages}"
-JAVA_OPTS="-Xms64m ${maxHeapArg} -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"
-JAVA_OPTS="\$JAVA_OPTS -Djboss.modules.system.pkgs=\$JBOSS_MODULES_SYSTEM_PKGS -Djava.awt.headless=true"
-JAVA_OPTS="\$JAVA_OPTS ${visualVmArgs}"
-
-# Uncomment this next line to enable debugging Wildfly at launch. It will wait 
-# for a debugger to connect when first launching the server.
-#JAVA_OPTS="\$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y"
-
-# Uncomment this next line to enable SSL debug logging. Watch out: it's super noisy.
-#JAVA_OPTS="\$JAVA_OPTS -Djavax.net.debug=all"
-
-# These ports are only used until the server is configured, but need to be
-# set anyways, as the defaults on first launch conflict with Jenkins and other 
-# such services.
-JAVA_OPTS="\$JAVA_OPTS -Djboss.management.http.port=${serverPortManagement} -Djboss.http.port=${serverPortHttp} -Djboss.https.port=${serverPortHttps}"
-
-# These properties are all referenced within the standalone.xml we'll be using.
-JAVA_OPTS="\$JAVA_OPTS -DbfdServer.db.url=${dbUrl}"
-JAVA_OPTS="\$JAVA_OPTS -DbfdServer.ssl.keystore.path=${keyStore} -DbfdServer.ssl.truststore.path=${trustStore} -DbfdServer.roles=${rolesProps}"
-
-# Used in src/main/resources/logback.xml as the directory to write the app log to. Must have a trailing slash.
-JAVA_OPTS="\$JAVA_OPTS -DbfdServer.logs.dir=${workDirectory}/"
-
-# This just adds a searchable bit of text to the command line, so we can 
-# determine which java processes were started by this script.
-JAVA_OPTS="\$JAVA_OPTS -Dbfd-server-${bfdServerId}"
-EOF
-
-# Swap out the original standalone.xml file for our customized one.
-if [[ ! -f "${serverHome}/standalone/configuration/standalone.xml.original" ]]; then
-	mv "${serverHome}/standalone/configuration/standalone.xml" "${serverHome}/standalone/configuration/standalone.xml.original"
-fi
-cp "${scriptDirectory}/standalone.xml" "${serverHome}/standalone/configuration/standalone.xml"
-
-# Config is all done now.
-echo "Configured server."
-
 # Launch the server in the background.
-#
-# Note: there's no reliable way to get the PID of the actual java process for
-# the server, as it's spawned as a child of standalone.sh. Unfortunately, even
-# the JBOSS_PIDFILE option just seems to give us the PID of the script. Signals
-# sent to the script are (unfortunately) not passed through to the child Java
-# process. I think this is all just buggy in Wildfly 8.1. The only thing that
-# mitigates the mess is that the script process does exit once the java process
-# does.
-# Debugging: Add `--debug 8787` to the command here to enable normal Java 
-# remote debugging of the apps running in Wildfly on port 8787.
-"${serverHome}/bin/standalone.sh" \
-	&> "${serverLog}" \
+PORT="${serverPortHttps}" \
+	KEYSTORE="${keyStore}" \
+	TRUSTSTORE="${trustStore}" \
+	WAR="${warArtifact}" \
+	"${javaHome}/bin/java" \
+	"${maxHeapArg}" \
+	"-Dbfd-server-${bfdServerId}" \
+	"-DbfdServer.db.url=${dbUrl}" \
+	"-DbfdServer.db.username=" \
+	"-DbfdServer.db.password=" \
+	-jar "${serverLauncher}" \
+	>"${serverLog}" 2>&1 \
 	&
 
 # Wait for the server to be ready.
@@ -258,7 +177,7 @@ echo "Server launched, logging to '${serverLog}'. Waiting for it to finish start
 startSeconds=$SECONDS
 endSeconds=$(($startSeconds + $serverTimeoutSeconds))
 while true; do
-	if grep --quiet "JBAS015874" "${serverLog}"; then
+	if grep --quiet "Started Jetty." "${serverLog}"; then
 		echo "Server started in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
@@ -269,22 +188,3 @@ while true; do
 	fi
 	sleep 1
 done
-
-# Write the JBoss CLI script that will deploy the WAR.
-scriptDeploy="${serverHome}/jboss-cli-script-deploy.txt"
-if [[ "${cygwin}" = true ]]; then scriptDeployArg=$(cygpath --windows "${scriptDeploy}"); else scriptDeployArg="${scriptDeploy}"; fi
-cat <<EOF > "${scriptDeploy}"
-deploy "${warArtifact}" --name=ROOT.war
-EOF
-
-# Deploy the application to the now-configured server.
-echo "Deploying application: '${warArtifact}'..."
-"${serverHome}/bin/jboss-cli.sh" \
-	--connect \
-	--controller=localhost:${serverPortManagement} \
-	--timeout=${serverConnectTimeoutMilliseconds} \
-	--file=${scriptDeployArg} \
-	>> "${workDirectory}/server-config.log" 2>&1
-# Note: No need to watch log here, as the command blocks until deployment is
-# completed, and returns a non-zero exit code if it fails.
-echo 'Application deployed.'
