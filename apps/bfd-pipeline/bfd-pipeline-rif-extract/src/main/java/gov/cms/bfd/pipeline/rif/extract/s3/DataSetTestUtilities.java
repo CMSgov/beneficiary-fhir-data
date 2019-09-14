@@ -41,7 +41,7 @@ public class DataSetTestUtilities {
     username.replaceAll("@", "-");
     username.replaceAll("\\\\", "-");
     int randomId = new Random().nextInt(100000);
-    String bucketName = String.format("bfd-test-%s-%d", username, randomId);
+    String bucketName = String.format("bb-test-%s-%d", username, randomId);
 
     Bucket bucket = s3Client.createBucket(bucketName);
     /*
