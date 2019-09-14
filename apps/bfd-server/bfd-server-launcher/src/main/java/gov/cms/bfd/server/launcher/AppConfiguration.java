@@ -79,6 +79,20 @@ public final class AppConfiguration implements Serializable {
     return Paths.get(war);
   }
 
+  /** @see java.lang.Object#toString() */
+  @Override
+  public String toString() {
+    return "AppConfiguration [port="
+        + port
+        + ", keystore="
+        + keystore
+        + ", truststore="
+        + truststore
+        + ", war="
+        + war
+        + "]";
+  }
+
   /**
    * This application accepts its configuration via environment variables. Read those in, and build
    * an {@link AppConfiguration} instance from them.

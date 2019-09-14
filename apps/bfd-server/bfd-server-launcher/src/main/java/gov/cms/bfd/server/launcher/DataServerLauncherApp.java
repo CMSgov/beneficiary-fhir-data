@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.launcher;
 
+import ch.qos.logback.access.jetty.RequestLogImpl;
+import ch.qos.logback.classic.LoggerContext;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
@@ -9,6 +11,9 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -16,7 +21,11 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
+import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
@@ -27,6 +36,7 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
  * A "runner" for the Data Server WAR.
@@ -70,8 +80,15 @@ public final class DataServerLauncherApp {
    */
   public static void main(String[] args) {
     LOGGER.info("Launcher starting up!");
+
+    // Configure Java Util Logging (JUL) to route over SLF4J, instead.
+    SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
+    SLF4JBridgeHandler.install();
+
+    // Ensure that unhandled exceptions are... well, handled. Kinda'.
     configureUnexpectedExceptionHandlers();
 
+    // Parse the app config.
     AppConfiguration appConfig = null;
     try {
       appConfig = AppConfiguration.readConfigFromEnvironmentVariables();
@@ -82,6 +99,7 @@ public final class DataServerLauncherApp {
       System.exit(EXIT_CODE_BAD_CONFIG);
     }
 
+    // Wire up metrics reporting.
     MetricRegistry appMetrics = new MetricRegistry();
     appMetrics.registerAll(new MemoryUsageGaugeSet());
     appMetrics.registerAll(new GarbageCollectorMetricSet());
@@ -89,8 +107,8 @@ public final class DataServerLauncherApp {
         Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
+    // Create the Jetty Server instance that will do most of our work.
     server = new Server(appConfig.getPort());
-    server.setStopAtShutdown(true);
 
     // Modify the default HTTP config.
     HttpConfiguration httpConfig = new HttpConfiguration();
@@ -148,8 +166,46 @@ public final class DataServerLauncherApp {
     // Allow webapps to see but not override SLF4J (prevents LinkageErrors).
     webapp.getSystemClasspathPattern().add("org.slf4j.");
 
+    /*
+     * Disable Logback's builtin shutdown hook, so that OUR shutdown hook can still use the loggers
+     * (and then shut Logback down itself).
+     */
+    webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
+
+    /*
+     * Configure the NCSA-style flat access/request log. This picks up its configuration from this
+     * project's logback-access.xml resource. Please note that the logback-access library it uses is
+     * only half-supported anymore and will miss a number of things, e.g. async requests. See
+     * https://github.com/qos-ch/logback/pull/269 for details.
+     */
+    RequestLogHandler requestLogHandler = new RequestLogHandler();
+    JettyLogbackRequestLogImpl requestLog = new JettyLogbackRequestLogImpl();
+    requestLog.setName("access.log");
+    requestLog.setResource("/logback-access.xml");
+    requestLogHandler.setRequestLog(requestLog);
+
+    /*
+     * Configure authentication for webapps. Note that this is a distinct operation from configuring
+     * mutual TLS above via the SslContextFactory, as that mostly only impacts the connections. In
+     * order to expose the client cert auth info to the webapp, this additional config here is
+     * needed.
+     */
+    ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+    securityHandler.setAuthenticator(new ClientCertAuthenticator());
+    securityHandler.setLoginService(new ClientCertLoginService());
+    Constraint constraint = new Constraint();
+    constraint.setName("auth");
+    constraint.setAuthenticate(true);
+    constraint.setRoles(new String[] {Constraint.ANY_AUTH});
+    ConstraintMapping constraintMapping = new ConstraintMapping();
+    constraintMapping.setPathSpec("/*");
+    constraintMapping.setConstraint(constraint);
+    securityHandler.setConstraintMappings(new ConstraintMapping[] {constraintMapping});
+    webapp.setSecurityHandler(securityHandler);
+
     // Wire up the WebAppContext to Jetty.
-    server.setHandler(webapp);
+    HandlerCollection handlers = new HandlerCollection(webapp, requestLogHandler);
+    server.setHandler(handlers);
 
     // Configure shutdown handlers before starting everything up.
     server.setStopTimeout(Duration.ofSeconds(30).toMillis());
@@ -160,13 +216,18 @@ public final class DataServerLauncherApp {
     try {
       LOGGER.info("Starting Jetty...");
       server.start();
-      LOGGER.info(LOG_MESSAGE_STARTED_JETTY);
+      LOGGER.info(
+          "{} Server available at: '{}'",
+          LOG_MESSAGE_STARTED_JETTY,
+          String.format("https://localhost:%d/", server.getURI().getPort()));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
 
     // This can be useful when debugging, as it prints Jetty's full config out.
     // server.dumpStdErr();
+    // StatusPrinter.print((LoggerContext) LoggerFactory.getILoggerFactory());
+    // StatusPrinter.print(requestLog.getStatusManager());
 
     /*
      * At this point, we're done here with the initial/launch thread. From now on, Jetty's threads
@@ -226,6 +287,14 @@ public final class DataServerLauncherApp {
                     Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build().report();
 
                     LOGGER.info(LOG_MESSAGE_SHUTDOWN_HOOK_COMPLETE);
+
+                    /*
+                     * We have to do this ourselves (rather than use Logback's DelayingShutdownHook)
+                     * to ensure that the logger isn't closed before the above logging.
+                     */
+                    LoggerContext logbackContext =
+                        (LoggerContext) LoggerFactory.getILoggerFactory();
+                    logbackContext.stop();
                   }
                 }));
   }
@@ -258,4 +327,8 @@ public final class DataServerLauncherApp {
           }
         });
   }
+
+  /** Needed to workaround the issue detailed in https://github.com/qos-ch/logback/pull/269. */
+  private static final class JettyLogbackRequestLogImpl extends RequestLogImpl
+      implements LifeCycle {}
 }

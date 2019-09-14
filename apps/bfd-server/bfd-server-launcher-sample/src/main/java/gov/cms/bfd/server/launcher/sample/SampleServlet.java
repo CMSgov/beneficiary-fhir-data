@@ -13,13 +13,17 @@ import org.slf4j.LoggerFactory;
 public final class SampleServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SampleServlet.class);
+  private static final Logger LOGGER_MISC = LoggerFactory.getLogger(SampleServlet.class);
+  private static final Logger LOGGER_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
 
   /** @see javax.servlet.GenericServlet#init() */
   @Override
   public void init() throws ServletException {
     // We'll use this log entry to verify that the servlet is running as expected.
-    LOGGER.info("Johnny 5 is alive on SLF4J!");
+    LOGGER_MISC.info("Johnny 5 is alive on SLF4J!");
+
+    // We'll use this log entry to verify that the JSON access log is working.
+    LOGGER_ACCESS.info("request");
 
     // These are just for debugging.
     System.out.println("Johnny 5 is alive on STDOUT.");
@@ -34,6 +38,6 @@ public final class SampleServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
     PrintWriter out = resp.getWriter();
-    out.println("Johnny 5 is alive on HTTP!");
+    out.print("Johnny 5 is alive on HTTP!");
   }
 }

@@ -46,13 +46,37 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Logback is used as the logging target/backend for SLF4J during runtime: 
+			<!-- An implementation of the JCL API that routes everything through to
+				SLF4J, instead. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<!-- An implementation of the Log4J API that routes everything through
+				to SLF4J, instead. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
+				to SLF4J, instead. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Logback is used as the logging target/backend for SLF4J during runtime:
 				all logging events will be sent to it. -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides 
+			<!-- Provides an HTTP request log for Jetty. -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-access</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
 				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-json-classic</artifactId>
@@ -85,7 +109,20 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+			<!-- Used in tests to verify that requests work as expected. -->
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.3</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<!-- Used in tests to help with managing asynchronous behavior. Reference:
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
