@@ -23,7 +23,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -45,12 +44,11 @@ public final class ManifestEntryDownloadTaskIT {
   @SuppressWarnings("deprecation")
   @Test
   public void testMD5ChkSum() throws Exception {
-    ExtractionOptions options =
-        new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
-      bucket = s3Client.createBucket(options.getS3BucketName());
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName());
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),

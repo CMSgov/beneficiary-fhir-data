@@ -19,6 +19,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Random;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -30,6 +31,29 @@ import javax.xml.bind.Marshaller;
  * without having to delve into classpath dark arts.
  */
 public class DataSetTestUtilities {
+  /**
+   * @param s3Client the {@link AmazonS3} client to use
+   * @return a new, random {@link Bucket} for use in an integration test
+   */
+  public static Bucket createTestBucket(AmazonS3 s3Client) {
+    String username = System.getProperty("user.name");
+    if (username == null || username.isEmpty()) username = "anonymous";
+    username.replaceAll("@", "-");
+    username.replaceAll("\\\\", "-");
+    int randomId = new Random().nextInt(100000);
+    String bucketName = String.format("bfd-test-%s-%d", username, randomId);
+
+    Bucket bucket = s3Client.createBucket(bucketName);
+    /*
+     * Note: S3's API is eventually consistent, so any calls to use this new bucket will
+     * intermittently fail for a brief period of time. The only solution to this is to retry all of
+     * those calls (because it's intermittent, we can't just check once here to see if the bucket is
+     * available).
+     */
+
+    return bucket;
+  }
+
   /**
    * Deletes the specified {@link Bucket} and all objects in it.
    *
