@@ -40,7 +40,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging 
+			<!-- Provides a sane facade for the giant mess of incompatible logging
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -96,7 +96,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
 				at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-jvm</artifactId>
@@ -135,8 +135,8 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<!-- Configure the dependency plugin such that it can be used to grab 
-						the test dependency artifacts, for manual testing or for use in integration 
+					<!-- Configure the dependency plugin such that it can be used to grab
+						the test dependency artifacts, for manual testing or for use in integration
 						tests. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
@@ -156,7 +156,7 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- Used to build executable JARs, with all dependencies included in 
+					<!-- Used to build executable JARs, with all dependencies included in
 						them. -->
 					<groupId>com.github.chrischristo</groupId>
 					<artifactId>capsule-maven-plugin</artifactId>
@@ -164,15 +164,15 @@
 					<configuration>
 						<appClass>gov.cms.bfd.server.launcher.DataServerLauncherApp</appClass>
 
-						<!-- Building the "really executable" .x files is tempting, but ultimately 
-							not very useful, as there's no way to pass JVM args into such launchers, 
+						<!-- Building the "really executable" .x files is tempting, but ultimately
+							not very useful, as there's no way to pass JVM args into such launchers,
 							which prevents customizing the heap size at runtime. -->
 						<chmod>false</chmod>
 
 						<types>fat</types>
 						<manifest>
 							<entry>
-								<!-- This will almost certainly be overridden on the command line; 
+								<!-- This will almost certainly be overridden on the command line;
 									think of this as a bare-minimum default. -->
 								<key>JVM-Args</key>
 								<value>-Xmx1g</value>
@@ -192,7 +192,7 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Use the dependency plugin to copy the test dependency artifacts, 
+						<!-- Use the dependency plugin to copy the test dependency artifacts,
 							for use in ITs. -->
 						<id>server-copy-artifacts</id>
 						<phase>pre-integration-test</phase>
@@ -203,7 +203,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Used to build executable JARs, with all dependencies included in 
+				<!-- Used to build executable JARs, with all dependencies included in
 					them. -->
 				<groupId>com.github.chrischristo</groupId>
 				<artifactId>capsule-maven-plugin</artifactId>
@@ -216,7 +216,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Will run the `*IT.java` integration tests in this project, as part 
+				<!-- Will run the `*IT.java` integration tests in this project, as part
 					of the build. -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
