@@ -43,6 +43,7 @@ public class DataSetTestUtilities {
     username.replaceAll("@", "-");
     username.replaceAll("\\\\", "-");
     int randomId = new Random().nextInt(100000);
+<<<<<<< HEAD
     String bucketName = String.format("bb-test-%s-%d", username, randomId);
 
     Bucket bucket = s3Client.createBucket(bucketName);
@@ -54,6 +55,17 @@ public class DataSetTestUtilities {
         .waiters()
         .bucketExists()
         .run(new WaiterParameters<HeadBucketRequest>(new HeadBucketRequest(bucketName)));
+=======
+    String bucketName = String.format("bfd-test-%s-%d", username, randomId);
+
+    Bucket bucket = s3Client.createBucket(bucketName);
+    /*
+     * Note: S3's API is eventually consistent, so any calls to use this new bucket will
+     * intermittently fail for a brief period of time. The only solution to this is to retry all of
+     * those calls (because it's intermittent, we can't just check once here to see if the bucket is
+     * available).
+     */
+>>>>>>> Resolve non-unique bucket name test errors.
 
     return bucket;
   }
