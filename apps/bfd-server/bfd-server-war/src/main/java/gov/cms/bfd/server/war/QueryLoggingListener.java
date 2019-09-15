@@ -12,8 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /** This {@link QueryExecutionListener} records query performance data in {@link MDC}. */
 public final class QueryLoggingListener implements QueryExecutionListener {
-  private static final Logger LOGGER_DATABASE_QUERY = LoggerFactory.getLogger("DATABASE_QUERY");
-  private static final Logger LOGGER_MISC = LoggerFactory.getLogger(QueryLoggingListener.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(QueryLoggingListener.class);
 
   /**
    * @see
@@ -32,14 +31,12 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     if (queryInfoList.isEmpty()) return;
 
     /*
-     * Most of the time, we just want this to add entries to the MDC, for inclusion
-     * in the normal request-response logging. However, certain things should be
-     * logged separately: see the code below for the conditions that cause this flag
-     * to be set to true.
+     * Most of the time, we don't want to include the full SQL queries as they add a tremendous
+     * amount of bloat to the logs. But, sometimes we do...
      */
-    boolean logSeparateEvent = false;
-    if (LOGGER_DATABASE_QUERY.isTraceEnabled()) {
-      logSeparateEvent = true;
+    boolean logFullQuery = false;
+    if (LOGGER.isTraceEnabled()) {
+      logFullQuery = true;
     }
 
     String mdcKeyPrefix;
@@ -48,23 +45,19 @@ public final class QueryLoggingListener implements QueryExecutionListener {
       mdcKeyPrefix = queryType.getQueryTypeId();
 
       if (queryType == QueryType.UNKNOWN) {
-        logSeparateEvent = true;
+        logFullQuery = true;
       }
       if (execInfo.getElapsedTime() >= 1000) {
-        logSeparateEvent = true;
+        logFullQuery = true;
       }
 
-      /*
-       * Any time we're going to log this as a separate event, include the full query
-       * (in all logs, because we can't pick & choose).
-       */
-      if (logSeparateEvent)
+      if (logFullQuery)
         MDC.put(
             computeMdcKey(String.format("%s.query", mdcKeyPrefix)),
             queryInfoList.get(0).getQuery());
     } else {
       mdcKeyPrefix = "group";
-      logSeparateEvent = true;
+      logFullQuery = true;
 
       StringBuilder queryIds = new StringBuilder();
       if (queryInfoList.size() > 1) queryIds.append('[');
@@ -100,12 +93,6 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     MDC.put(
         computeMdcKey(String.format("%s.datasource_name", mdcKeyPrefix)),
         execInfo.getDataSourceName());
-
-    /*
-     * The message here isn't actually the payload; the MDC context that will get
-     * automatically included with it is!
-     */
-    if (logSeparateEvent) LOGGER_DATABASE_QUERY.info("query complete");
   }
 
   /**
@@ -219,11 +206,11 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
       if (matchingQueryTypes.size() == 1) return matchingQueryTypes.get(0);
       else if (matchingQueryTypes.size() > 1)
-        LOGGER_MISC.warn(
+        LOGGER.warn(
             "Too many matching query types '{}' for query: {}",
             matchingQueryTypes,
             queryInfo.getQuery());
-      else LOGGER_MISC.warn("No matching query type for query: {}", queryInfo.getQuery());
+      else LOGGER.warn("No matching query type for query: {}", queryInfo.getQuery());
 
       return UNKNOWN;
     }
