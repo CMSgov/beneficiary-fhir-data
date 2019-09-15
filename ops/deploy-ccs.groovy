@@ -135,23 +135,16 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
 
 			// both packer builds expect additional variables in a file called `extra_vars.json` in the current directory
-		
 			def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
-			def fhirWar = new File(appBuildResults.dataServerWar)
-			def appServer = new File(appBuildResults.dataServerContainerZip)
 
 			varsFile.write(JsonOutput.toJson([
 				env: normalizeEnvironmentId(environmentId),
-				data_server_war_local_dir: "${workspace}/${fhirWar.getParent()}",
-				data_server_war: "${workspace}/${fhirWar.getParent()}/${fhirWar.getName()}",
-				data_server_appserver_local_dir: "${workspace}/${appServer.getParent()}",
-				data_server_container: "${workspace}/${fhirWar.getParent()}/server-work/${appServer.getName()}",
-				data_server_container_name: appBuildResults.dataServerContainerName,
+				data_server_launcher: "${workspace}/${appBuildResults.dataServerLauncher}",
+				data_server_war: "${workspace}/${appBuildResults.dataServerWar}",
 				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
 			]))
-			 
+
 			// build the ETL pipeline
-			
 			sh "/usr/bin/packer build -color=false \
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
@@ -206,7 +199,6 @@ def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults)
 		-no-color -input=false tfplan"
 	}
 }
-
 
 def extractAmiIdFromPackerManifest(File manifest) {
 	dir('ops/ansible/playbooks-ccs'){

@@ -1,18 +1,18 @@
 ---
 
 ##
-# Restarts the app server service, then waits for the app server to be ready. 
-# The ready check is necessary to avoid race conditions, in case multiple tasks 
-# restart the server asynchronously.
+# Restarts the BFD Server service and waits for it to start accepting connections again afterwards.
 ##
 
-- name: Restart App Server Service
-  service:
-    name: "{{ data_server_appserver_service }}"
-    state: restarted
-  become: true
-
-- name: Wait for App Server to Be Ready
-  script: "files/bluebutton-appserver-wait.sh --serverhome {{ data_server_dir }}/{{ data_server_container_name }} --managementport {{ data_server_appserver_management_port }} --managementusername \"{{ data_server_appserver_management_username }}\" --managementpassword \"{{ data_server_appserver_management_password }}\""
-  become: true
-  become_user: "{{ data_server_user }}"
+- name: Restart and Wait for BFD Server Service
+  block:
+    - name: Restart BFD Server Service
+      service:
+        name: "{{ data_server_appserver_service }}"
+        state: restarted
+      become: true
+    - name: Wait for BFD Server Service Ready
+      wait_for:
+        port: "{{ data_server_appserver_https_port }}"
+        timeout: 30
+  when: launch_enabled

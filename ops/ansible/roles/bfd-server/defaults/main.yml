@@ -9,17 +9,10 @@ data_server_appserver_service: bluebutton-appserver
 # The system user that the Blue Button Data Server will run as.
 data_server_user: bb-data
 
-# The extra Java VM args to start the app server (Wildfly/JBoss) with.
+# The extra Java VM args to start the app server (Jetty) with.
 data_server_appserver_jvmargs: '' 
 
-# The management port used by the app server (Wildfly/JBoss).
-data_server_appserver_management_port: 9990
-
-# The management admin credentials for the app server (Wildfly/JBoss). An empty username indicates that no authentication should be expected or used.
-data_server_appserver_management_username: ''
-data_server_appserver_management_password: ''
-
-# The port that the app server (Wildfly/JBoss) should host HTTPS on.
+# The port that the app server (Jetty) should host HTTPS on.
 data_server_appserver_https_port: 8443
 
 # The client certs/CAs that will be authorized to connect to the server.

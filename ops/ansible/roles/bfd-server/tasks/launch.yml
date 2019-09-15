@@ -1,0 +1,6 @@
+---
+
+- name: Flush BFD Server Handlers
+  meta: flush_handlers
+
+# TODO: This'd be a great place to run some smoke tests.

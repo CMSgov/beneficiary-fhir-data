@@ -1,8 +1,7 @@
 ---
 
-- name: Enable App Server Service
-  include: enable_appserver.yml
+- name: Enable BFD Server Service
+  import_tasks: enable_appserver.yml
 
-- name: Restart App Server Service
-  include: restart_appserver.yml
-
+- name: Restart BFD Server Service
+  import_tasks: restart_appserver.yml

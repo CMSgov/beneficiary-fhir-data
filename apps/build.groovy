@@ -57,8 +57,7 @@ def mvn(args) {
  */
 class AppBuildResults implements Serializable {
 	String dataPipelineUberJar
-	String dataServerContainerZip
-	String dataServerContainerName
+	String dataServerLauncher
 	String dataServerWar
 }
 
@@ -90,8 +89,7 @@ def build(String build_env) {
 
 	return new AppBuildResults(
 		dataPipelineUberJar: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar',
-		dataServerContainerZip: 'apps/bfd-server/bfd-server-war/target/bfd-server/wildfly-dist-8.1.0.Final.tar.gz',
-		dataServerContainerName: 'wildfly-8.1.0.Final',
+		dataServerLauncher: 'apps/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT-capsule-fat.jar',
 		dataServerWar: 'apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war'
 	)
 }

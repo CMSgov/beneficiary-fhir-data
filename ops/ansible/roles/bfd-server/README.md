@@ -23,8 +23,7 @@ This role is highly configurable, though it tries to provide reasonable defaults
 
 Variables that must be defined to use the role:
 
-* `data_server_container`: The path (on the management system) to the app server installation bundle to be deployed.
-* `data_server_container_name`: The name of the directory that will be unzipped by the app server installation bundle, e.g. "`wildfly-8.1.0.Final`".
+* `data_server_launcher`: The path (on the management system) to the app server launcher JAR to be deployed.
 * `data_server_war`: The path (on the management system) to the WAR file to be deployed.
 * `data_server_ssl_server_genkeypair_args`: The arguments to pass to the `keytool` command when generating a server keypair.
 * `data_server_ssl_client_cas`: A list of the SSL client certificate authorities that will be given access to the server.

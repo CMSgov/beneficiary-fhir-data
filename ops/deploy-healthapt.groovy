@@ -82,8 +82,7 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 				"${envLimitName}"
 			],
 			"data_pipeline_jar": "../../../${appBuildResults.dataPipelineUberJar}",
-			"data_server_container": "unused-because-jboss-is-manually-installed",
-			"data_server_container_name": "jboss-eap-7.0",
+			"data_server_launcher": "../../../${appBuildResults.dataServerLauncher}"
 			"data_server_war": "../../../${appBuildResults.dataServerWar}"
 		}
 		""".stripIndent()
