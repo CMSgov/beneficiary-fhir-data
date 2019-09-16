@@ -44,7 +44,7 @@ properties([
 		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'deploy_hhsdevcloud', description: 'Whether to deploy to the hhsdevcloud/"old sandbox" environment.', defaultValue: false),
-		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
+		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: true)
 		//booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false),
 		//booleanParam(name: 'deploy_to_prod', description: 'Whether to run the Ansible plays for PROD systems (without prompting first, which is the default behavior).', defaultValue: false)
 	]),
@@ -52,7 +52,11 @@ properties([
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
+<<<<<<< HEAD
 def deployEnvironment
+=======
+def deploy_env
+>>>>>>> Fixed previous deploy_env default changes.
 def scriptForApps
 def scriptForDeploys
 def scriptForDeploysHhsdevcloud
@@ -67,6 +71,7 @@ stage('Prepare') {
 		checkout scm
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		// Deployment varies a bit by environment: are we running in the CCS?
 		if (env.JENKINS_URL.contains('cmscloud')) {
 			deployEnvironment = 'ccs'
@@ -78,20 +83,37 @@ stage('Prepare') {
 			params.deploy_env = 'ccs'
 			params.build_platinum = true
 >>>>>>> Fix Jenkinsfile default params for CCS.
+=======
+		// Fix deploy_env for CCS environment.
+		if (env.JENKINS_URL.contains('cmscloud')) {
+			deploy_env = 'ccs'
+		} else {
+			deploy_env = 'healthapt'
+>>>>>>> Fixed previous deploy_env default changes.
 		}
 
 		// Load the child Jenkinsfiles.
 		scriptForApps = load('apps/build.groovy')
+<<<<<<< HEAD
 		if (deployEnvironment == 'healthapt') {
 			scriptForDeploys = load('ops/deploy-healthapt.groovy')
 		} else if (deployEnvironment == 'ccs') {
+=======
+		if (deploy_env == 'healthapt') {
+			scriptForDeploys = load('ops/deploy-healthapt.groovy')
+		} else if (deploy_env == 'ccs') {
+>>>>>>> Fixed previous deploy_env default changes.
 			scriptForDeploys = load('ops/deploy-ccs.groovy')
 		}
 		scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
 
 		// Find the most current AMI IDs (if any).
 		amiIds = null
+<<<<<<< HEAD
 		if (deployEnvironment == 'ccs') {
+=======
+		if (deploy_env == 'ccs') {
+>>>>>>> Fixed previous deploy_env default changes.
 			amiIds = scriptForDeploys.findAmis()
 		}
 
@@ -118,7 +140,11 @@ stage('Set Branch Name') {
 	}
 }
 
+<<<<<<< HEAD
 if (deployEnvironment == 'ccs') {
+=======
+if (deploy_env == 'ccs') {
+>>>>>>> Fixed previous deploy_env default changes.
 	stage('Build Platinum AMI') {
 		if (params.build_platinum || amiIds.platinumAmiId == null) {
 			milestone(label: 'stage_build_platinum_ami_start')
@@ -150,13 +176,21 @@ stage('Build Apps') {
 	milestone(label: 'stage_build_apps_start')
 
 	node {
+<<<<<<< HEAD
 		build_env = deployEnvironment
+=======
+		build_env = deploy_env
+>>>>>>> Fixed previous deploy_env default changes.
 		appBuildResults = scriptForApps.build(build_env)
 	}
 }
 
 
+<<<<<<< HEAD
 if (deployEnvironment == 'ccs') {
+=======
+if (deploy_env == 'ccs') {
+>>>>>>> Fixed previous deploy_env default changes.
 	stage('Build App AMIs for TEST') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
@@ -214,7 +248,11 @@ stage('Deploy to hhsdevcloud') {
 	}
 }
 
+<<<<<<< HEAD
 if (deployEnvironment == 'ccs') {
+=======
+if (deploy_env == 'ccs') {
+>>>>>>> Fixed previous deploy_env default changes.
 	if (willDeployToProdEnvs) {
 		stage('Build App AMIs for PROD-SBX') {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
@@ -240,10 +278,16 @@ stage('Deploy to prod-stg') {
 	}
 }
 
+<<<<<<< HEAD
 if (deployEnvironment == 'ccs') {
 	stage('Build App AMIs for PROD') {
 		if (willDeployToProdEnvs && deployEnvironment != 'ccs') {
 			// Note: CCS prod deploys are disabled for the moment, and so this block is unreachable.
+=======
+if (deploy_env == 'ccs') {
+	if (willDeployToProdEnvs) {
+		stage('Build App AMIs for PROD') {
+>>>>>>> Fixed previous deploy_env default changes.
 			milestone(label: 'stage_build_app_amis_prod_start')
 
 			node {
