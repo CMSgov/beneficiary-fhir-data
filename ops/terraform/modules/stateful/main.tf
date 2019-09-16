@@ -225,7 +225,7 @@ module "master" {
   vpc_security_group_ids = local.master_db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : null
+  parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : "default.postgres9.6"
 }
 
 # Replicas Database 
@@ -245,7 +245,7 @@ module "replica1" {
   vpc_security_group_ids = local.db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = null
+  parameter_group_name = "default.postgres9.6"
 }
 
 module "replica2" {
@@ -261,7 +261,7 @@ module "replica2" {
   vpc_security_group_ids = local.db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = null
+  parameter_group_name = "default.postgres9.6"
 }
 
 module "replica3" {
@@ -277,7 +277,7 @@ module "replica3" {
   vpc_security_group_ids = local.db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = null
+  parameter_group_name = "default.postgres9.6"
 }
 
 # Cloud Watch alarms for each RDS instance
