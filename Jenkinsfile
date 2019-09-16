@@ -45,7 +45,7 @@ properties([
 		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'deploy_hhsdevcloud', description: 'Whether to deploy to the hhsdevcloud/"old sandbox" environment.', defaultValue: false),
-		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
+		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: true)
 		//booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false),
 		//booleanParam(name: 'deploy_to_prod', description: 'Whether to run the Ansible plays for PROD systems (without prompting first, which is the default behavior).', defaultValue: false)
 	]),
@@ -53,6 +53,7 @@ properties([
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
+def deploy_env
 def scriptForApps
 def scriptForDeploys
 def scriptForDeploysHhsdevcloud
@@ -66,24 +67,25 @@ stage('Prepare') {
 		// Grab the commit that triggered the build.
 		checkout scm
 
-		// Fix defaults for CCS environment.
+		// Fix deploy_env for CCS environment.
 		if (env.JENKINS_URL.contains('cmscloud')) {
-			params.deploy_env = 'ccs'
-			params.build_platinum = true
+			deploy_env = 'ccs'
+		} else {
+			deploy_env = 'healthapt'
 		}
 
 		// Load the child Jenkinsfiles.
 		scriptForApps = load('apps/build.groovy')
-		if (params.deploy_env == 'healthapt') {
+		if (deploy_env == 'healthapt') {
 			scriptForDeploys = load('ops/deploy-healthapt.groovy')
-		} else if (params.deploy_env == 'ccs') {
+		} else if (deploy_env == 'ccs') {
 			scriptForDeploys = load('ops/deploy-ccs.groovy')
 		}
 		scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
 
 		// Find the most current AMI IDs (if any).
 		amiIds = null
-		if (params.deploy_env == 'ccs') {
+		if (deploy_env == 'ccs') {
 			amiIds = scriptForDeploys.findAmis()
 		}
 
@@ -93,7 +95,7 @@ stage('Prepare') {
 	}
 }
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	stage('Build Platinum AMI') {
 		if (params.build_platinum || platinumAmiId == null) {
 			milestone(label: 'stage_build_platinum_ami_start')
@@ -125,13 +127,13 @@ stage('Build Apps') {
 	milestone(label: 'stage_build_apps_start')
 
 	node {
-		build_env = params.deploy_env
+		build_env = deploy_env
 		appBuildResults = scriptForApps.build(build_env)
 	}
 }
 
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	stage('Build App AMIs for TEST') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
@@ -189,7 +191,7 @@ stage('Deploy to hhsdevcloud') {
 	}
 }
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	if (willDeployToProdEnvs) {
 		stage('Build App AMIs for PROD-SBX') {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
@@ -215,7 +217,7 @@ stage('Deploy to prod-stg') {
 	}
 }
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	if (willDeployToProdEnvs) {
 		stage('Build App AMIs for PROD') {
 			milestone(label: 'stage_build_app_amis_prod_start')
