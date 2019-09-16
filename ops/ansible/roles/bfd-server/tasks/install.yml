@@ -24,6 +24,15 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
+# TODO: This can be removed once we've fully migrated away from JBoss.
+# The first time we dpeloy the new Jetty-based server, we need to ensure that JBoss is stopped first (if it already exists).
+- name: Stop Existing BFD Server Service
+  service:
+    name: "{{ data_server_appserver_service }}"
+    state: stopped
+  become: true
+  ignore_errors: true
+
 - name: Copy BFD Server Launcher
   copy:
     src: "{{ data_server_launcher }}"
