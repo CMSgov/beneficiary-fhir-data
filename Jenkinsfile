@@ -97,7 +97,7 @@ stage('Prepare') {
 
 if (deploy_env == 'ccs') {
 	stage('Build Platinum AMI') {
-		if (params.build_platinum || platinumAmiId == null) {
+		if (params.build_platinum || amiIds.platinumAmiId == null) {
 			milestone(label: 'stage_build_platinum_ami_start')
 
 			node {
