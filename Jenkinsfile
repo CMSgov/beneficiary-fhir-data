@@ -66,6 +66,12 @@ stage('Prepare') {
 		// Grab the commit that triggered the build.
 		checkout scm
 
+		// Fix defaults for CCS environment.
+		if (env.JENKINS_URL.contains('cmscloud')) {
+			params.deploy_env = 'ccs'
+			params.build_platinum = true
+		}
+
 		// Load the child Jenkinsfiles.
 		scriptForApps = load('apps/build.groovy')
 		if (params.deploy_env == 'healthapt') {
