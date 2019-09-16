@@ -60,7 +60,7 @@
     mode: u=rw,g=r,o=r
   become: true
   notify:
-    - 'Enable App Server Service'
+    - 'Enable BFD Server Service'
     - 'Restart BFD Server Service'
 
 - name: Check for BFD Server SSL Keystore
