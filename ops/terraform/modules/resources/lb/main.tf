@@ -50,7 +50,7 @@ resource "aws_lb_listener" "main" {
 # Target group
 #
 resource "aws_lb_target_group" "main" {
-  name_prefix       = "bfd-${var.env_config.env}-${var.role}-"
+  name_prefix       = "bfd-"
   target_type       = "instance"
   protocol          = "TCP"
   port              = var.egress_port
