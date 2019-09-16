@@ -6,7 +6,7 @@
 locals {
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config      = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
-  port            = 7743
+  port            = 7443
   cw_period       = 60    # Seconds
   cw_eval_periods = 3
 }
