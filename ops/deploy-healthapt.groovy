@@ -82,7 +82,7 @@ def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
 				"${envLimitName}"
 			],
 			"data_pipeline_jar": "../../../${appBuildResults.dataPipelineUberJar}",
-			"data_server_launcher": "../../../${appBuildResults.dataServerLauncher}"
+			"data_server_launcher": "../../../${appBuildResults.dataServerLauncher}",
 			"data_server_war": "../../../${appBuildResults.dataServerWar}"
 		}
 		""".stripIndent()
