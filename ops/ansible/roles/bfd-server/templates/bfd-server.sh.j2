@@ -24,4 +24,4 @@ java \
   "-DbfdServer.db.password=${DB_PASSWORD}" \
   "-DbfdServer.db.connections.max=${DB_MAX_CONNECTIONS}" \
   -jar "{{ data_server_dir }}/{{ data_server_launcher | basename }}" \
-  >"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
+  >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
