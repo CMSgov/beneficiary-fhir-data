@@ -22,5 +22,3 @@ data_server_ssl_client_certificates: []
 
 # The max size of the DB connection pool for the Blue Button Data Server.
 data_server_db_max_connections: 100
-
-env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
