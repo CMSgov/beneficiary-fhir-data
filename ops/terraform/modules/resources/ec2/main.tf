@@ -31,6 +31,8 @@ data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
+data "aws_caller_identity" "current" {}
+
 ##
 # Resources
 ##
@@ -96,6 +98,7 @@ resource "aws_instance" "main" {
   }
 
   user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
-    env    = var.env_config.env
+    env    = var.env_config.env,
+    accountId = data.aws_caller_identity.current.account_id
   })
 }

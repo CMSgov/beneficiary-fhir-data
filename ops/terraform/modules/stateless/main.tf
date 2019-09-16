@@ -195,7 +195,8 @@ module "fhir_asg" {
     key_name      = var.ssh_key_name 
 
     profile       = module.fhir_iam.profile
-    user_data_tpl = "simple_server.tpl"       # See templates directory for choices
+    user_data_tpl = "fhir_server.tpl"       # See templates directory for choices
+    account_id    = data.aws_caller_identity.current.account_id
   }
 
   db_config       = {
@@ -230,7 +231,7 @@ module "etl_instance" {
 
     key_name      = var.ssh_key_name 
     profile       = module.etl_iam.profile
-    user_data_tpl = "default.tpl"
+    user_data_tpl = "pipeline_server.tpl"
   }
 
   mgmt_config     = {
