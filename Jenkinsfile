@@ -66,11 +66,18 @@ stage('Prepare') {
 		// Grab the commit that triggered the build.
 		checkout scm
 
+<<<<<<< HEAD
 		// Deployment varies a bit by environment: are we running in the CCS?
 		if (env.JENKINS_URL.contains('cmscloud')) {
 			deployEnvironment = 'ccs'
 		} else {
 			deployEnvironment = 'healthapt'
+=======
+		// Fix defaults for CCS environment.
+		if (env.JENKINS_URL.contains('cmscloud')) {
+			params.deploy_env = 'ccs'
+			params.build_platinum = true
+>>>>>>> Fix Jenkinsfile default params for CCS.
 		}
 
 		// Load the child Jenkinsfiles.
