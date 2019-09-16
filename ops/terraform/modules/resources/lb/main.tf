@@ -81,11 +81,21 @@ resource "aws_elb" "main" {
 
 # Security Group for LB
 #
+<<<<<<< HEAD
 resource "aws_security_group" "lb" {
   name            = "bfd-${var.env_config.env}-${var.role}-lb"
   description     = "Allow access to the ${var.role} load-balancer"
   vpc_id          = var.env_config.vpc_id
   tags            = merge({Name="bfd-${var.env_config.env}-${var.role}-lb"}, local.tags)
+=======
+resource "aws_lb_target_group" "main" {
+  name_prefix       = "bfd-"
+  target_type       = "instance"
+  protocol          = "TCP"
+  port              = var.egress_port
+  vpc_id            = var.env_config.vpc_id
+  tags              = local.tags
+>>>>>>> BLUEBUTTON-1278: Using name_prefix for target group name to avoid resource conflict. (#43)
 
   ingress {
     from_port     = var.ingress.port
