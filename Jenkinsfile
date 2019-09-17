@@ -45,12 +45,9 @@ properties([
 		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'deploy_hhsdevcloud', description: 'Whether to deploy to the hhsdevcloud/"old sandbox" environment.', defaultValue: false),
-		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
+		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
 		//booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false),
 		//booleanParam(name: 'deploy_to_prod', description: 'Whether to run the Ansible plays for PROD systems (without prompting first, which is the default behavior).', defaultValue: false)
-		booleanParam(name: 'deploy_to_test', description: 'Whether to deploy to the test environment', defaultValue: true),
-		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: false),
-		string(name: 'env_num_servers', description: 'Number of JMeter Servers to use in the test.', defaultValue: '1')
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -139,15 +136,12 @@ if (params.deploy_env == 'ccs') {
 }
 
 stage('Deploy to TEST') {
-	if (params.deploy_to_test) {
-		milestone(label: 'stage_deploy_test_start')
+	milestone(label: 'stage_deploy_test_start')
 
-		node {
-			scriptForDeploys.deploy('test', amiIds, appBuildResults)
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to TEST')
+	node {
+		scriptForDeploys.deploy('test', amiIds, appBuildResults)
 	}
+
 }
 
 stage('Manual Approval') {
@@ -238,21 +232,5 @@ stage('Deploy to prod') {
 		}
 	} else {
 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
-	}
-}
-
-stage('Test the Test ENV') {
-	if (params.test_test) {
-		lock(resource: 'env_test', inversePrecendence: true) {
-			milestone(label: 'stage_test_test_start')
-
-			node {
-				insideAnsibleContainer {
-					sh "cd apps/bfd-server-test-perf/ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=test num_servers=${params.env_num_servers}\" --connection=paramiko"
-				}
-			}
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Test the Test ENV')
 	}
 }
