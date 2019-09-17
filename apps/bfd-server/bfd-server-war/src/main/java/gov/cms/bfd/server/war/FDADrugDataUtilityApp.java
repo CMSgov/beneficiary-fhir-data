@@ -102,6 +102,7 @@ public final class FDADrugDataUtilityApp {
     // download FDA NDC file
     Path downloadedNdcZipFile =
         Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
+<<<<<<< HEAD
     URL ndctextZipUrl = new URL("https://www.accessdata.fda.gov/cder/ndctext.zip");
     if (!Files.isReadable(downloadedNdcZipFile)) {
       // connectionTimeout, readTimeout = 10 seconds
@@ -116,6 +117,20 @@ public final class FDADrugDataUtilityApp {
       originalNdcDataFile = workingDir.resolve("Product.txt");
     if (!Files.isReadable(originalNdcDataFile))
       throw new IllegalStateException("Unable to locate product.txt in " + ndctextZipUrl);
+=======
+    if (!Files.isReadable(downloadedNdcZipFile)) {
+      // connectionTimeout, readTimeout = 10 seconds
+      FileUtils.copyURLToFile(
+          new URL("https://www.accessdata.fda.gov/cder/ndctext.zip"),
+          new File(downloadedNdcZipFile.toFile().getAbsolutePath()),
+          10000,
+          10000);
+    }
+
+    // unzip FDA NDC file
+    Path originalNdcDataFile = workingDir.resolve("product.txt");
+    unzip(downloadedNdcZipFile, workingDir);
+>>>>>>> Fix cleanup of fda-data temp files.
 
     // convert file format from cp1252 to utf8
     CharsetDecoder inDec =
