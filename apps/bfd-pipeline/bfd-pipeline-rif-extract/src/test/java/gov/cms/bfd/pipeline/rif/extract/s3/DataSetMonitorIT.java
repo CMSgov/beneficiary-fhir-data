@@ -9,7 +9,6 @@ import gov.cms.bfd.pipeline.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Random;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.junit.Assert;
@@ -51,13 +50,12 @@ public final class DataSetMonitorIT {
    */
   @Test
   public void emptyBucketTest() {
-    ExtractionOptions options =
-        new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = s3Client.createBucket(options.getS3BucketName());
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName());
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
@@ -89,16 +87,15 @@ public final class DataSetMonitorIT {
    */
   @Test
   public void multipleDataSetsTest() throws InterruptedException {
-    ExtractionOptions options =
-        new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
-      bucket = s3Client.createBucket(options.getS3BucketName());
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName());
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
