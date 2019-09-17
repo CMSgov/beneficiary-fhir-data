@@ -229,7 +229,7 @@ if (deployEnvironment == 'ccs') {
 }
 
 stage('Deploy to prod') {
-	if (willDeployToProdEnvs) {
+	if (willDeployToProdEnvs && deployEnvironment != 'ccs') {
 		lock(resource: 'env_prod', inversePrecendence: true) {
 			milestone(label: 'stage_deploy_prod_start')
 
