@@ -171,6 +171,12 @@ resource "aws_db_subnet_group" "db" {
 
 # Parameter Group
 #
+resource "aws_db_parameter_group" "default_mode" {
+  name        = "bfd-${local.env_config.env}-default-mode-parameter-group"
+  family      = "postgres9.6"
+  description = "Sets parameters for standard operation"
+}
+
 resource "aws_db_parameter_group" "import_mode" {
   name        = "bfd-${local.env_config.env}-import-mode-parameter-group"
   family      = "postgres9.6"
@@ -225,7 +231,7 @@ module "master" {
   vpc_security_group_ids = local.master_db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : "default.postgres9.6"
+  parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : aws_db_parameter_group.default_mode.name
 }
 
 # Replicas Database 
@@ -245,7 +251,7 @@ module "replica1" {
   vpc_security_group_ids = local.db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = "default.postgres9.6"
+  parameter_group_name = aws_db_parameter_group.default_mode.name
 }
 
 module "replica2" {
@@ -261,7 +267,7 @@ module "replica2" {
   vpc_security_group_ids = local.db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = "default.postgres9.6"
+  parameter_group_name = aws_db_parameter_group.default_mode.name
 }
 
 module "replica3" {
@@ -277,7 +283,7 @@ module "replica3" {
   vpc_security_group_ids = local.db_sgs
 
   apply_immediately    = var.db_import_mode.enabled
-  parameter_group_name = "default.postgres9.6"
+  parameter_group_name = aws_db_parameter_group.default_mode.name
 }
 
 # Cloud Watch alarms for each RDS instance
