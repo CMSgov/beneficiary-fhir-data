@@ -114,7 +114,7 @@ resource "aws_launch_template" "main" {
   }
   
   block_device_mappings {    
-    device_name = "/dev/xvda"
+    device_name = "/dev/sda1"
     ebs {
       volume_type               = "gp2"
       volume_size               = var.launch_config.volume_size
@@ -125,6 +125,7 @@ resource "aws_launch_template" "main" {
       */
     }
   }
+<<<<<<< HEAD
 
   user_data                     = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env   = var.env_config.env
@@ -195,6 +196,8 @@ resource "aws_launch_template" "main" {
     encrypted                 = true
     # not yet supported
     # kms_key_id                = data.aws_kms_key.master_key.key_id
+=======
+>>>>>>> template fixes
   
   user_data = base64encode(templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env     = var.env_config.env
