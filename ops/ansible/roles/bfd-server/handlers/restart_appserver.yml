@@ -15,4 +15,4 @@
       wait_for:
         port: "{{ data_server_appserver_https_port }}"
         timeout: 30
-  when: launch_enabled
+  when: launch_enabled | default(false)

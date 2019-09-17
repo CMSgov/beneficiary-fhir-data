@@ -7,4 +7,4 @@
 - name: Enable BFD Server Service
   command: /usr/bin/systemctl --system enable "{{ data_server_appserver_service }}"
   become: true
-  when: launch_enabled
+  when: launch_enabled | default(false)
