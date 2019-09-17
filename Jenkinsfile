@@ -48,7 +48,8 @@ properties([
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false),
 		//booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false),
 		//booleanParam(name: 'deploy_to_prod', description: 'Whether to run the Ansible plays for PROD systems (without prompting first, which is the default behavior).', defaultValue: false)
-		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: true),
+		booleanParam(name: 'deploy_to_test', description: 'Whether to deploy to the test environment', defaultValue: true),
+		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: false),
 		string(name: 'env_num_servers', description: 'Number of JMeter Servers to use in the test.', defaultValue: '1')
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
@@ -138,12 +139,15 @@ if (params.deploy_env == 'ccs') {
 }
 
 stage('Deploy to TEST') {
-	milestone(label: 'stage_deploy_test_start')
+	if (params.deploy_to_test) {
+		milestone(label: 'stage_deploy_test_start')
 
-	node {
-		scriptForDeploys.deploy('test', amiIds, appBuildResults)
+		node {
+			scriptForDeploys.deploy('test', amiIds, appBuildResults)
+		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to TEST')
 	}
-
 }
 
 stage('Manual Approval') {
