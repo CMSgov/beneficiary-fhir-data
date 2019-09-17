@@ -2,11 +2,13 @@ package gov.cms.bfd.pipeline.rif.extract.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.waiters.WaiterParameters;
 import gov.cms.bfd.pipeline.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.rif.extract.s3.task.ManifestEntryDownloadTask;
@@ -45,11 +47,13 @@ public class DataSetTestUtilities {
 
     Bucket bucket = s3Client.createBucket(bucketName);
     /*
-     * Note: S3's API is eventually consistent, so any calls to use this new bucket will
-     * intermittently fail for a brief period of time. The only solution to this is to retry all of
-     * those calls (because it's intermittent, we can't just check once here to see if the bucket is
-     * available).
+     * Note: S3's API is eventually consistent, so we want to wait for this new bucket to be
+     * available everywhere.
      */
+    s3Client
+        .waiters()
+        .bucketExists()
+        .run(new WaiterParameters<HeadBucketRequest>(new HeadBucketRequest(bucketName)));
 
     return bucket;
   }
