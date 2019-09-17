@@ -51,6 +51,7 @@ public class DataSetTestUtilities {
     /*
      * Note: S3's API is eventually consistent, so we want to wait for this new bucket to be
      * available everywhere.
+<<<<<<< HEAD
      */
     s3Client
         .waiters()
@@ -70,6 +71,13 @@ public class DataSetTestUtilities {
      * available).
      */
 >>>>>>> Resolve non-unique bucket name test errors.
+=======
+     */
+    s3Client
+        .waiters()
+        .bucketExists()
+        .run(new WaiterParameters<HeadBucketRequest>(new HeadBucketRequest(bucketName)));
+>>>>>>> Wait for S3 consistency after bucket creation.
 
     return bucket;
   }
