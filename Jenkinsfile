@@ -53,6 +53,7 @@ properties([
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
+def deploy_env
 def scriptForApps
 def scriptForDeploys
 def scriptForDeploysHhsdevcloud
@@ -66,18 +67,25 @@ stage('Prepare') {
 		// Grab the commit that triggered the build.
 		checkout scm
 
+		// Fix deploy_env for CCS environment.
+		if (env.JENKINS_URL.contains('cmscloud')) {
+			deploy_env = 'ccs'
+		} else {
+			deploy_env = 'healthapt'
+		}
+
 		// Load the child Jenkinsfiles.
 		scriptForApps = load('apps/build.groovy')
-		if (params.deploy_env == 'healthapt') {
+		if (deploy_env == 'healthapt') {
 			scriptForDeploys = load('ops/deploy-healthapt.groovy')
-		} else if (params.deploy_env == 'ccs') {
+		} else if (deploy_env == 'ccs') {
 			scriptForDeploys = load('ops/deploy-ccs.groovy')
 		}
 		scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
 
 		// Find the most current AMI IDs (if any).
 		amiIds = null
-		if (params.deploy_env == 'ccs') {
+		if (deploy_env == 'ccs') {
 			amiIds = scriptForDeploys.findAmis()
 		}
 
@@ -87,9 +95,9 @@ stage('Prepare') {
 	}
 }
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	stage('Build Platinum AMI') {
-		if (params.build_platinum || platinumAmiId == null) {
+		if (params.build_platinum || amiIds.platinumAmiId == null) {
 			milestone(label: 'stage_build_platinum_ami_start')
 
 			node {
@@ -119,13 +127,13 @@ stage('Build Apps') {
 	milestone(label: 'stage_build_apps_start')
 
 	node {
-		build_env = params.deploy_env
+		build_env = deploy_env
 		appBuildResults = scriptForApps.build(build_env)
 	}
 }
 
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	stage('Build App AMIs for TEST') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
@@ -183,7 +191,7 @@ stage('Deploy to hhsdevcloud') {
 	}
 }
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	if (willDeployToProdEnvs) {
 		stage('Build App AMIs for PROD-SBX') {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
@@ -209,7 +217,7 @@ stage('Deploy to prod-stg') {
 	}
 }
 
-if (params.deploy_env == 'ccs') {
+if (deploy_env == 'ccs') {
 	if (willDeployToProdEnvs) {
 		stage('Build App AMIs for PROD') {
 			milestone(label: 'stage_build_app_amis_prod_start')
