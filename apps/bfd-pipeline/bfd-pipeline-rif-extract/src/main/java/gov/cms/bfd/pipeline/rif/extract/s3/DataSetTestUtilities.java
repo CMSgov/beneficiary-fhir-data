@@ -2,11 +2,13 @@ package gov.cms.bfd.pipeline.rif.extract.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.waiters.WaiterParameters;
 import gov.cms.bfd.pipeline.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.rif.extract.s3.task.ManifestEntryDownloadTask;
@@ -19,6 +21,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Random;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -30,6 +33,31 @@ import javax.xml.bind.Marshaller;
  * without having to delve into classpath dark arts.
  */
 public class DataSetTestUtilities {
+  /**
+   * @param s3Client the {@link AmazonS3} client to use
+   * @return a new, random {@link Bucket} for use in an integration test
+   */
+  public static Bucket createTestBucket(AmazonS3 s3Client) {
+    String username = System.getProperty("user.name");
+    if (username == null || username.isEmpty()) username = "anonymous";
+    username.replaceAll("@", "-");
+    username.replaceAll("\\\\", "-");
+    int randomId = new Random().nextInt(100000);
+    String bucketName = String.format("bb-test-%s-%d", username, randomId);
+
+    Bucket bucket = s3Client.createBucket(bucketName);
+    /*
+     * Note: S3's API is eventually consistent, so we want to wait for this new bucket to be
+     * available everywhere.
+     */
+    s3Client
+        .waiters()
+        .bucketExists()
+        .run(new WaiterParameters<HeadBucketRequest>(new HeadBucketRequest(bucketName)));
+
+    return bucket;
+  }
+
   /**
    * Deletes the specified {@link Bucket} and all objects in it.
    *

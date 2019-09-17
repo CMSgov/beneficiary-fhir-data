@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
@@ -126,7 +125,7 @@ public final class S3ToDatabaseLoadAppIT {
     Process appProcess = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
 
       // Start the app.
       ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
@@ -177,7 +176,7 @@ public final class S3ToDatabaseLoadAppIT {
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = s3Client.createBucket(String.format("bb-test-%d", new Random().nextInt(1000)));
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
       DataSetManifest manifest =
           new DataSetManifest(
               Instant.now(),
