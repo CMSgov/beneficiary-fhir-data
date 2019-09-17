@@ -9,19 +9,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Comparator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
@@ -76,81 +73,70 @@ public final class FDADrugDataUtilityApp {
 
     // Create a temp directory that will be recursively deleted when we're done.
     Path workingDir = Files.createTempDirectory("fda-data");
-    Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread(
-                () -> {
-                  try {
-                    Files.walkFileTree(
-                        workingDir,
-                        new SimpleFileVisitor<Path>() {
-                          @Override
-                          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                              throws IOException {
-                            Files.delete(file);
-                            return FileVisitResult.CONTINUE;
-                          }
-
-                          @Override
-                          public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                              throws IOException {
-                            Files.delete(dir);
-                            return FileVisitResult.CONTINUE;
-                          }
-                        });
-                  } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                  }
-                }));
 
     // If the output file isn't already there, go build it.
     Path convertedNdcDataFile = outputPath.resolve(FDA_PRODUCTS_RESOURCE);
     if (!Files.exists(convertedNdcDataFile)) {
-      // download FDA NDC file
-      Path downloadedNdcZipFile =
-          Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
-      if (!Files.isReadable(downloadedNdcZipFile)) {
-        try {
-          // connectionTimeout, readTimeout = 10 seconds
-          FileUtils.copyURLToFile(
-              new URL("https://www.accessdata.fda.gov/cder/ndctext.zip"),
-              new File(downloadedNdcZipFile.toFile().getAbsolutePath()),
-              10000,
-              10000);
-        } catch (IOException e) {
-          e.printStackTrace();
-          System.exit(4);
-        }
+      try {
+        buildProductsResource(convertedNdcDataFile, workingDir);
+      } finally {
+        // Recursively delete the working dir.
+        Files.walk(workingDir)
+            .sorted(Comparator.reverseOrder())
+            .map(Path::toFile)
+            .peek(System.out::println)
+            .forEach(File::delete);
       }
+    }
+  }
 
-      // unzip FDA NDC file
-      Path originalNdcDataFile = workingDir.resolve("product.txt");
-      unzip(downloadedNdcZipFile, workingDir);
+  /**
+   * Creates the {@link #FDA_PRODUCTS_RESOURCE} file in the specified location.
+   *
+   * @param convertedNdcDataFile the output file/resource to produce
+   * @param workingDir a directory that temporary/working files can be written to
+   * @throws IOException (any errors encountered will be bubbled up)
+   */
+  private static void buildProductsResource(Path convertedNdcDataFile, Path workingDir)
+      throws IOException {
+    // download FDA NDC file
+    Path downloadedNdcZipFile =
+        Paths.get(workingDir.resolve("ndctext.zip").toFile().getAbsolutePath());
+    if (!Files.isReadable(downloadedNdcZipFile)) {
+      // connectionTimeout, readTimeout = 10 seconds
+      FileUtils.copyURLToFile(
+          new URL("https://www.accessdata.fda.gov/cder/ndctext.zip"),
+          new File(downloadedNdcZipFile.toFile().getAbsolutePath()),
+          10000,
+          10000);
+    }
 
-      // convert file format from cp1252 to utf8
-      CharsetDecoder inDec =
-          Charset.forName("windows-1252")
-              .newDecoder()
-              .onMalformedInput(CodingErrorAction.REPORT)
-              .onUnmappableCharacter(CodingErrorAction.REPORT);
+    // unzip FDA NDC file
+    Path originalNdcDataFile = workingDir.resolve("product.txt");
+    unzip(downloadedNdcZipFile, workingDir);
 
-      CharsetEncoder outEnc =
-          StandardCharsets.UTF_8
-              .newEncoder()
-              .onMalformedInput(CodingErrorAction.REPORT)
-              .onUnmappableCharacter(CodingErrorAction.REPORT);
+    // convert file format from cp1252 to utf8
+    CharsetDecoder inDec =
+        Charset.forName("windows-1252")
+            .newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT);
 
-      try (FileInputStream is =
-              new FileInputStream(originalNdcDataFile.toFile().getAbsolutePath());
-          BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
-          FileOutputStream fw =
-              new FileOutputStream(convertedNdcDataFile.toFile().getAbsolutePath());
-          BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
+    CharsetEncoder outEnc =
+        StandardCharsets.UTF_8
+            .newEncoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT);
 
-        for (String in; (in = reader.readLine()) != null; ) {
-          out.write(in);
-          out.newLine();
-        }
+    try (FileInputStream is = new FileInputStream(originalNdcDataFile.toFile().getAbsolutePath());
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is, inDec));
+        FileOutputStream fw =
+            new FileOutputStream(convertedNdcDataFile.toFile().getAbsolutePath());
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fw, outEnc))) {
+
+      for (String in; (in = reader.readLine()) != null; ) {
+        out.write(in);
+        out.newLine();
       }
     }
   }
