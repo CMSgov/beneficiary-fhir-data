@@ -118,7 +118,7 @@ resource "aws_launch_template" "main" {
   }
   
   block_device_mappings {    
-    device_name = "/dev/xvda"
+    device_name = "/dev/sda1"
     ebs {
       volume_type               = "gp2"
       volume_size               = var.launch_config.volume_size
@@ -129,45 +129,6 @@ resource "aws_launch_template" "main" {
       */
     }
   }
-
-  user_data                     = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
-    env   = var.env_config.env
-    port  = var.lb_config.port
-  })
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-
-##
-# Launch configuration
-##
-resource "aws_launch_configuration" "main" {
-  # Generate a new config on every revision
-  name_prefix                 = "bfd-${var.env_config.env}-${var.role}-"
-  security_groups             = concat([aws_security_group.base.id], aws_security_group.app[*].id)
-  key_name                    = var.launch_config.key_name
-  image_id                    = var.launch_config.ami_id
-  instance_type               = var.launch_config.instance_type
-  associate_public_ip_address = false
-  iam_instance_profile        = var.launch_config.profile
-  placement_tenancy           = local.is_prod ? "dedicated" : "default"
-
-  user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
-    env   = var.env_config.env
-    port  = var.lb_config.port
-    accountId = var.launch_config.account_id
-  })
-
-  root_block_device {
-    volume_type               = "gp2"
-    volume_size               = var.launch_config.volume_size
-    delete_on_termination     = true
-    encrypted                 = true
-    # not yet supported
-    # kms_key_id                = data.aws_kms_key.master_key.key_id
   
   user_data = base64encode(templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env     = var.env_config.env
