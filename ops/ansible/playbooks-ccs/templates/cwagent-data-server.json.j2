@@ -1,0 +1,66 @@
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/messages",
+            "log_group_name": "/var/log/messages",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%b %d %H:%M:%S"
+          },
+          {
+            "file_path": "/var/log/secure",
+            "log_group_name": "/var/log/secure",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%b %d %H:%M:%S"
+          },
+          {
+            "file_path": "/{{ data_server_dir }}/{{ data_server_container_name }}/standalone/log/access*.log",
+            "log_group_name": "{{ env }}_jboss_access",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%d/%b/%Y:%H:%M:%S"
+          },
+          {
+            "file_path": "/{{ data_server_dir }}/{{ data_server_container_name }}/standalone/log/server.log*",
+            "log_group_name": "/bfd/{{ env }}/data-server",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S,%f"
+          },
+          {
+            "file_path": "/jboss/bluebutton-server-app-log-access.json",
+            "log_group_name": "/bfd/{{ env }}/data-server/access",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%dT%H:%M:%S.%f%z"
+          },
+          {
+            "file_path": "/jboss/bluebutton-server-app-log-database.json",
+            "log_group_name": "/bfd/{{ env }}/data-server/database",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%dT%H:%M:%S.%f%z"
+          },
+          {
+            "file_path": "/jboss/bluebutton-server-app.log",
+            "log_group_name": "/bfd/{{ env }}/data-server/message.txt",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S,%f",
+            "multi_line_start_pattern": "^[\\d\\d\\d\\d-\\d\\d-\\d\\d ]"
+          },
+          {
+            "file_path": "/jboss/bluebutton-server-app-log.json",
+            "log_group_name": "/bfd/{{ env }}/data-server/message.json",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%dT%H:%M:%S.%f%z"
+          },
+          {
+            "file_path": "/jboss/gc.log",
+            "log_group_name": "/bfd/{{ env }}/data-server/gc.log",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%dT%H:%M:%S.%f%z",
+            "multi_line_start_pattern": "^[\\d\\d\\d\\d-\\d\\d-\\d\\d ]"
+          }
+        ]
+      }
+    }
+  }
+}
