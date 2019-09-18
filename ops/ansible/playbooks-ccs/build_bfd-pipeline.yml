@@ -17,6 +17,10 @@
       include_vars:
         dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
+
+    - name: Apply base Cloudwatch Agent Role
+      import_role:
+        name: cloudwatch-agent-instrumented
       
     - name: Apply Blue Button Data Pipeline Role
       import_role:
@@ -34,21 +38,24 @@
         data_pipeline_db_url: "{{ vault_data_db_primary_url }}"
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_username }}"
-        #data_pipeline_loader_threads: (see group_vars/all/main.yml 
-        
-    - name: Configure CloudWatch Logs Agent
+        #data_pipeline_loader_threads: (see group_vars/all/main.yml
+
+    - name: Build CloudWatch unified agent configuration
       template:
-        src: awslogs.conf.data-pipeline.j2
-        dest: '/var/awslogs/etc/awslogs.conf'
+        src: cwagent-data-pipeline.json.j2
+        dest: '/tmp/cwagent-data-pipeline.json'
         owner: root
         group: root
-        mode: u=rw,g=,o=
+        mode: u=rw,g=r,o=r
       become: true
-      notify:
-        - Restart awslogs Service
       tags:
         - pre-ami
-        
+
+    - name: Reconfigure and relaunch CloudWatch unified agent
+      shell: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a append-config -m ec2 -c file:/tmp/cwagent-data-pipeline.json -s"
+      become: true
+      tags:
+        - pre-ami
         
   handlers:
     - import_tasks: handlers/main.yml
