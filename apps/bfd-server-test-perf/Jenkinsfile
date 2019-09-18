@@ -72,7 +72,8 @@ def mvn(args) {
 stage('Build') {
 	node {
 		milestone(label: 'stage_build_start')
-		appBuildResults = scriptForApps.build('healthapt')
+		build_env = 'healthapt'
+		appBuildResults = scriptForApps.build(build_env)
 	}
 }
 
