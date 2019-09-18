@@ -150,8 +150,11 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'env=${environmentId}' \
+<<<<<<< HEAD
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
+=======
+>>>>>>> Include environment name in manifest path
 				../../packer/build_bfd-pipeline.json"
 
 			// build the FHIR server
@@ -160,8 +163,11 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'env=${environmentId}' \
+<<<<<<< HEAD
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
+=======
+>>>>>>> Include environment name in manifest path
 				../../packer/build_bfd-server.json"
 
 			return new AmiIds(
