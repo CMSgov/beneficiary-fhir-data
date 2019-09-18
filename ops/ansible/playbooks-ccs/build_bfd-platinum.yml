@@ -1,6 +1,7 @@
 ---
 ##
-# Builds a 'Platinum' AMI by updating existing packages and installs BFD specific dependeicies from a base Gold Image provided by GDIT in the CCS AWS Environment
+# Builds a 'Platinum' AMI (updates) and installs program specific dependencies 
+# from a base Gold Image in the CCS AWS Environment
 ##
 - name: Build Platinum AMI
   hosts: all
@@ -8,7 +9,6 @@
   become: true
   gather_facts: no
   vars:
-    # Could not get pipelining enabled. TODO
     ansible_ssh_pipelining: no
 
   tasks:

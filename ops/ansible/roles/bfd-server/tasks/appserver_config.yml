@@ -8,6 +8,8 @@
     group: "{{ data_server_user }}"
     mode: u=rwx,g=rx,o=rx
   become: true
+  tags: 
+    - pre-ami
 
 # The AWS dev/test/prod environments aren't idempotent: the same base image 
 # will be reused and just upgraded over time. accordingly, we have to assume 
@@ -20,13 +22,17 @@
   register: stat_appserver_keystore
   changed_when: false
   become: true
+  tags: 
+    - pre-ami
 
 - name: Create App Server SSL Keystore
-  command: "keytool -genkeypair -alias server {{ data_server_ssl_server_genkeypair_args }} -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit"
+  command: "keytool -genkeypair -alias server {{ data_server_ssl_server_genkeypair_args }} -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit -keypass changeit"
   when: stat_appserver_keystore.stat.isreg is not defined
   become: true
   become_user: "{{ data_server_user }}"
   no_log: true  # Ensure that the key args aren't logged if this command fails.
+  tags: 
+    - pre-ami
 
 # TODO: Export server's public cert and publish to S3 or somesuch (so the frontend and others can pick it up).
 
@@ -37,6 +43,8 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=,o=
   become: true
+  tags: 
+    - pre-ami
 
 - name: Create App Server SSL Truststore Working Directory
   file:
@@ -46,6 +54,8 @@
     group: "{{ data_server_user }}"
     mode: u=rwx,g=rwx,o=rx
   become: true
+  tags: 
+    - pre-ami
 
 - name: Delete Previous App Server SSL Truststore Working Copy
   file:
@@ -53,15 +63,19 @@
     path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
   changed_when: false
   become: true
+  tags: 
+    - pre-ami
 
 - name: Create Empty App Server SSL Truststore Working Copy
   command: "{{ item }}"
   with_items:
     - "keytool -genkeypair -alias fake -dname cn=fake -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
-    - "keytool -delete -alias fake -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
+    - "keytool -delete -alias fake -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit -keypass changeit"
   changed_when: false
   become: true
   become_user: "{{ data_server_user }}"
+  tags: 
+    - pre-ami
 
 - name: Save App Server SSL Truststore Certificates
   copy:
@@ -70,6 +84,8 @@
   with_items: "{{ data_server_ssl_client_certificates }}"
   become: true
   become_user: "{{ data_server_user }}"
+  tags: 
+    - pre-ami
 
 - name: Save App Server SSL Truststore Certificate Authorities
   copy:
@@ -78,6 +94,8 @@
   with_items: "{{ data_server_ssl_client_cas }}"
   become: true
   become_user: "{{ data_server_user }}"
+  tags: 
+    - pre-ami
 
 - name: Import Certificates into App Server SSL Truststore Working Copy
   java_cert:
@@ -89,6 +107,8 @@
   changed_when: false
   become: true
   become_user: "{{ data_server_user }}"
+  tags: 
+    - pre-ami
 
 - name: Import Certificate Authorities into App Server SSL Truststore Working Copy
   command: "keytool -importcert -noprompt -trustcacerts -alias {{ item.alias }} -file {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
@@ -96,6 +116,8 @@
   changed_when: false
   become: true
   become_user: "{{ data_server_user }}"
+  tags: 
+    - pre-ami
 
 - name: Update App Server SSL Truststore
   copy:
@@ -106,6 +128,8 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=rw,o=r
   become: true
+  tags: 
+    - pre-ami
 
 - name: Configure App Server Roles
   template:
@@ -115,6 +139,8 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=rw,o=r
   become: true
+  tags: 
+    - pre-ami
 
 # Note: We always Restart here, because JBoss occassionally needs it. See BLUEBUTTON-1110 for an example.
 - name: Restart App Server Service
@@ -122,11 +148,15 @@
     name: "{{ data_server_appserver_service }}"
     state: restarted
   become: true
+  tags: 
+    - pre-ami
 
 - name: Wait for App Server to Be Ready
   script: "files/bluebutton-appserver-wait.sh --serverhome {{ data_server_dir }}/{{ data_server_container_name }} --managementport {{ data_server_appserver_management_port }} --managementusername \"{{ data_server_appserver_management_username }}\" --managementpassword \"{{ data_server_appserver_management_password }}\""
   become: true
   become_user: "{{ data_server_user }}"
+  tags: 
+    - pre-ami
 
 # Need to ensure service is running (and has been restarted if needed) before config, as it needs the server to be available.
 - meta: flush_handlers
@@ -139,6 +169,8 @@
     group: "{{ data_server_user }}"
     mode: u=rwx,g=rwx,o=rx
   become: true
+  tags: 
+    - pre-ami
 
 - name: Run App Server Config Script
   command: "{{ data_server_dir }}/bluebutton-appserver-config.sh --serverhome {{ data_server_dir }}/{{ data_server_container_name }} --managementport {{ data_server_appserver_management_port }} --managementusername \"{{ data_server_appserver_management_username }}\" --managementpassword \"{{ data_server_appserver_management_password }}\" --httpsport {{ data_server_appserver_https_port }} --keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks --truststore {{ data_server_dir }}/bluebutton-appserver-truststore.jks --dburl {{ data_server_db_url }} --dbusername {{ data_server_db_username }} --dbpassword {{ data_server_db_password }} --dbconnectionsmax {{ data_server_db_max_connections }} --rolesprops {{ data_server_dir }}/bluebutton-appserver-roles.properties"
@@ -146,4 +178,15 @@
   become: true
   become_user: "{{ data_server_user }}"
   no_log: true  # Ensure passwords aren't logged if this fails.
+  tags: 
+    - post-ami
 
+- name: populate /etc/environment
+  become: true
+  lineinfile:
+    dest: "/etc/environment"
+    state: present
+    regexp: "^{{ item.key }}"
+    line: "{{ item.key }}={{ item.value }}"
+  with_items: "{{ os_environment_variables }}"
+  no_log: true  # Ensure passwords aren't logged if this fails.

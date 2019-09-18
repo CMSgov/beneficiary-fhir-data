@@ -137,58 +137,58 @@ log_group_name = /var/log/secure
 
 [Jboss_Access_Log]
 datetime_format = %d/%b/%Y:%H:%M:%S
-file = /u01/jboss/jboss-eap-7.0/standalone/log/access*.log
+file = /{{ data_server_dir }}/{{ data_server_container_name }}/standalone/log/access*.log
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = {{ env_name }}_jboss_access
+log_group_name = {{ env }}_jboss_access
 
 [bfd_jboss_server]
 datetime_format = %Y-%m-%d %H:%M:%S,%f
-file = /u01/jboss/jboss-eap-7.0/standalone/log/server.log*
+file = /{{ data_server_dir }}/{{ data_server_container_name }}/standalone/log/server.log*
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env_name_std }}/data-server/access
+log_group_name = /bfd/{{ env }}/data-server/access
 
 [bfd_data_server_access]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
-file = /u01/jboss/bluebutton-server-app-log-access.json
+file = /jboss/bluebutton-server-app-log-access.json
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env_name_std }}/data-server/access
+log_group_name = /bfd/{{ env }}/data-server/access
 
 [bfd_data_server_database_query]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
-file = /u01/jboss/bluebutton-server-app-log-database.json
+file = /jboss/bluebutton-server-app-log-database.json
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env_name_std }}/data-server/database
+log_group_name = /bfd/{{ env }}/data-server/database
 
 [bfd_data_server_message_txt]
 datetime_format = %Y-%m-%d %H:%M:%S,%f
-file = /u01/jboss/bluebutton-server-app.log
+file = /jboss/bluebutton-server-app.log
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env_name_std }}/data-server/message.txt
+log_group_name = /bfd/{{ env }}/data-server/message.txt
 multi_line_start_pattern = ^[\d\d\d\d-\d\d-\d\d ]
 
 [bfd_data_server_message_ndjson]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
-file = /u01/jboss/bluebutton-server-app-log.json
+file = /jboss/bluebutton-server-app-log.json
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env_name_std }}/data-server/message.json
+log_group_name = /bfd/{{ env }}/data-server/message.json
 
 [bfs_app_gc]
 datetime_format = %Y-%m-%dT%H:%M:%S.%f%z
-file = /u01/jboss/bluebutton-server-app-log.json
+file = /jboss/gc.log
 buffer_duration = 5000
 log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /bfd/{{ env_name_std }}/data-server/message.json
+log_group_name = /bfd/{{ env }}/data-server/gc.log
 multi_line_start_pattern = ^[\d\d\d\d-\d\d-\d\dT]

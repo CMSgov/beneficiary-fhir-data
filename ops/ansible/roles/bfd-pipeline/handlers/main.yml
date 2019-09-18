@@ -9,4 +9,3 @@
     name: bluebutton-data-pipeline
     state: restarted
   become: true
-

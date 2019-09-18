@@ -94,35 +94,56 @@ resource "aws_security_group_rule" "allow_db_access" {
 }
 
 ##
-# Launch configuration
+# Launch template
 ##
-resource "aws_launch_configuration" "main" {
-  # Generate a new config on every revision
-  name_prefix                 = "bfd-${var.env_config.env}-${var.role}-"
-  security_groups             = concat([aws_security_group.base.id], aws_security_group.app[*].id)
-  key_name                    = var.launch_config.key_name
-  image_id                    = var.launch_config.ami_id
-  instance_type               = var.launch_config.instance_type
-  associate_public_ip_address = false
-  iam_instance_profile        = var.launch_config.profile
-  placement_tenancy           = local.is_prod ? "dedicated" : "default"
+resource "aws_launch_template" "main" {
+  name                          = "bfd-${var.env_config.env}-${var.role}"
+  description                   = "Template for the ${var.env_config.env} environment ${var.role} servers"
+  vpc_security_group_ids        = concat([aws_security_group.base.id], aws_security_group.app[*].id)
+  key_name                      = var.launch_config.key_name
+  image_id                      = var.launch_config.ami_id
+  instance_type                 = var.launch_config.instance_type
+  ebs_optimized                 = true
 
-  user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
-    env   = var.env_config.env
-    port  = var.lb_config.port
-  })
-
-  root_block_device {
-    volume_type               = "gp2"
-    volume_size               = var.launch_config.volume_size
-    delete_on_termination     = true
-    encrypted                 = true
-    # not yet supported
-    # kms_key_id                = data.aws_kms_key.master_key.key_id
+  iam_instance_profile {
+    name                        = var.launch_config.profile
   }
 
-  lifecycle {
-    create_before_destroy = true
+  placement {
+    tenancy                     = local.is_prod ? "dedicated" : "default"
+  }
+
+  monitoring {
+    enabled = true
+  }
+  
+  block_device_mappings {    
+    device_name = "/dev/sda1"
+    ebs {
+      volume_type               = "gp2"
+      volume_size               = var.launch_config.volume_size
+      delete_on_termination     = false
+      /* Will be set by AMI's root block snapshot
+      encrypted                 = true
+      kms_key_id                = data.aws_kms_key.master_key.arn
+      */
+    }
+  }
+  
+  user_data = base64encode(templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
+    env       = var.env_config.env
+    port      = var.lb_config.port
+    accountId = var.launch_config.account_id
+  }))
+
+  tag_specifications {
+    resource_type               = "instance"
+    tags                        = merge({Name="bfd-${var.env_config.env}-${var.role}"}, local.tags)
+  }
+
+  tag_specifications {
+    resource_type               = "volume"
+    tags                        = merge({snapshot="true", Name="bfd-${var.env_config.env}-${var.role}"}, local.tags)
   }
 }
 
@@ -130,8 +151,10 @@ resource "aws_launch_configuration" "main" {
 # Autoscaling group
 ##
 resource "aws_autoscaling_group" "main" {
-  # Generate a new group on every revision
-  name                      = aws_launch_configuration.main.name
+  # Generate a new group on every revision of the launch template. 
+  # This does a simple version of a blue/green deployment
+  #
+  name                      = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
   desired_capacity          = var.asg_config.desired
   max_size                  = var.asg_config.max
   min_size                  = var.asg_config.min
@@ -144,8 +167,12 @@ resource "aws_autoscaling_group" "main" {
   health_check_grace_period = 300
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
-  launch_configuration      = aws_launch_configuration.main.name
   target_group_arns         = var.lb_config == null ? [] : [var.lb_config.tg_arn]
+
+  launch_template {
+    name                    = aws_launch_template.main.name
+    version                 = aws_launch_template.main.latest_version
+  }
 
   enabled_metrics = [
     "GroupMinSize",

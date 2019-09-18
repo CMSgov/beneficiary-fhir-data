@@ -17,7 +17,7 @@ module "stateful" {
   }
 
   db_import_mode = {
-    enabled = true
+    enabled = false
     maintenance_work_mem = "1048576"
   }
 
