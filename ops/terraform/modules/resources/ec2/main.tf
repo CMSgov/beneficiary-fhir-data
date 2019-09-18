@@ -82,9 +82,11 @@ resource "aws_instance" "main" {
 
   availability_zone           = var.az
   tags                        = merge({Name="bfd-${var.env_config.env}-${var.role}"}, local.tags)
+  volume_tags                 = merge({Name="bfd-${var.env_config.env}-${var.role}", snapshot="true"}, local.tags)
   monitoring                  = true
   associate_public_ip_address = false
   tenancy                     = local.is_prod ? "dedicated" : "default"
+  ebs_optimized               = true
 
   vpc_security_group_ids      = [aws_security_group.base.id]
   subnet_id                   = data.aws_subnet.main.id
@@ -92,7 +94,7 @@ resource "aws_instance" "main" {
   root_block_device {
     volume_type               = "gp2"
     volume_size               = var.launch_config.volume_size
-    delete_on_termination     = true
+    delete_on_termination     = false
     encrypted                 = true
     kms_key_id                = data.aws_kms_key.master_key.key_id
   }

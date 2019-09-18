@@ -9,7 +9,6 @@ import gov.cms.bfd.pipeline.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -25,13 +24,12 @@ public final class DataSetMonitorWorkerIT {
    */
   @Test
   public void emptyBucketTest() {
-    ExtractionOptions options =
-        new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       // Create the (empty) bucket to run against.
-      bucket = s3Client.createBucket(options.getS3BucketName());
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName());
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
@@ -58,16 +56,15 @@ public final class DataSetMonitorWorkerIT {
    */
   @Test
   public void singleDataSetTest() {
-    ExtractionOptions options =
-        new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)));
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = s3Client.createBucket(options.getS3BucketName());
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName());
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
@@ -130,16 +127,15 @@ public final class DataSetMonitorWorkerIT {
    */
   @Test
   public void multipleDataSetsTest() {
-    ExtractionOptions options =
-        new ExtractionOptions(String.format("bb-test-%d", new Random().nextInt(1000)), null, 1);
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with
        * two data sets.
        */
-      bucket = s3Client.createBucket(options.getS3BucketName());
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName(), null, 1);
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
@@ -221,17 +217,15 @@ public final class DataSetMonitorWorkerIT {
    */
   @Test
   public void skipDataSetTest() {
-    ExtractionOptions options =
-        new ExtractionOptions(
-            String.format("bb-test-%d", new Random().nextInt(1000)), RifFileType.PDE);
-    AmazonS3 s3Client = S3Utilities.createS3Client(options);
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
       /*
        * Create the (empty) bucket to run against, and populate it with a
        * data set.
        */
-      bucket = s3Client.createBucket(options.getS3BucketName());
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName(), RifFileType.PDE);
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
