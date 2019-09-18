@@ -12,16 +12,27 @@ s3_bucket_etl_staging: 'bfd-prod-sbx-etl-577373831711'
 # The abbreviated name for this environment, per https://confluence.cms.gov/display/ODI/AWS+Naming+and+Tagging+Conventions.
 env_name_std: 'prod-sbx'
 
+<<<<<<< HEAD
 # This system is an m5.2xlarge (8 vCPUs, 32 GB RAM).
 data_pipeline_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
 data_pipeline_ec2_instance_type_vcpu: 8
+=======
+# This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
+data_pipeline_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
+data_pipeline_ec2_instance_type_vcpu: 4
+>>>>>>> BLUEBUTTON-1157: Correcting prod and prod-sbx to load the correct client certs. (#53)
 
 # There is no ongoing data refresh here: if we're loading data in the developer preview environment, it should be an initial
 # load.
 data_pipeline_idempotency_required: false
 
+<<<<<<< HEAD
 # These systems are m5.2xlarge (8 vCPUs, 32 GB RAM).
 data_server_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
+=======
+# These systems are m5.xlarge (4 vCPUs, 16 GB RAM).
+data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
+>>>>>>> BLUEBUTTON-1157: Correcting prod and prod-sbx to load the correct client certs. (#53)
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
