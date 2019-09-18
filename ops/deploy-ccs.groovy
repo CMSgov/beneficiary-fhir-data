@@ -156,6 +156,7 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
+				-var 'env=${environmentId}' \
 				../../packer/build_bfd-pipeline.json"
 
 			// build the FHIR server
@@ -163,14 +164,15 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
+				-var 'env=${environmentId}' \
 				../../packer/build_bfd-server.json"
 
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
 				bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-pipeline.json")),
 				bfdServerAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-server.json")),
 			)
 		}
 	}

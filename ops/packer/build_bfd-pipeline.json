@@ -1,7 +1,8 @@
 {
   "variables": {
     "source_ami": "",
-    "subnet_id": ""
+    "subnet_id": "",
+    "env": ""
   },
   "builders": [{
       "type": "amazon-ebs",
@@ -48,7 +49,7 @@
   ],
   "post-processors": [{
     "type": "manifest",
-    "output": "manifest_data-pipeline.json",
+    "output": "manifest_{{user `env`}}_data-pipeline.json",
     "strip_path": true
   }]
 }
