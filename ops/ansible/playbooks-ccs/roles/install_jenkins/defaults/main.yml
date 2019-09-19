@@ -63,6 +63,7 @@ jenkins_plugins_recommended:
   - ldap
   - email-ext
   - mailer
+  - pipeline-aws-plugin
 
 
 # The additional plugins that users of this role would like to be installed
