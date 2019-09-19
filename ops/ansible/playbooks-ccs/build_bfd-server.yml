@@ -18,6 +18,15 @@
       include_vars:
         dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
+
+    # Before the bfd-server role copy the keystore file 
+    - name: Copy the appserver keystore  
+      copy:
+        # Note: this JKS file is encrypted via the Ansible Vault 
+        src: "{{ data_server_appserver_keystore }}"
+        dest: '/jboss/bluebutton-appserver-keystore.jks'
+      tags:
+        - pre-ami
       
     - name: Apply Blue Button Data Server Role
       import_role:
