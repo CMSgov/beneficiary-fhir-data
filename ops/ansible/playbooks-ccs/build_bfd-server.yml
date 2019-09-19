@@ -19,6 +19,7 @@
       include_vars:
         dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
+<<<<<<< HEAD
 
 <<<<<<< HEAD
     - name: Apply base Cloudwatch Agent Role
@@ -34,6 +35,8 @@
       tags:
         - pre-ami
 >>>>>>> Store JKS
+=======
+>>>>>>> Fix the keystore copy in ansible script
       
     - name: Apply Blue Button Data Server Role
       import_role:
@@ -52,17 +55,25 @@
         data_server_db_url: "{{ vault_data_db_secondary_url }}"
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
+<<<<<<< HEAD
         data_server_db_connections_max: 40
         data_server_new_relic_license_key: "{{ vault_data_server_new_relic_license_key }}"
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
         data_server_new_relic_environment: "{{ env_name_std }}"
+=======
+        data_server_db_connections_max: 400
+>>>>>>> Fix the keystore copy in ansible script
 
     # Overwrite bfd-server role copy of the keystore file 
     - name: Copy the appserver keystore  
       copy:
         # Note: this JKS file is encrypted via the Ansible Vault 
         src: "{{ data_server_appserver_keystore }}"
+<<<<<<< HEAD
         dest: "{{ bfd_server_dir }}/bluebutton-appserver-keystore.jks"
+=======
+        dest: '/jboss/bluebutton-appserver-keystore.jks'
+>>>>>>> Fix the keystore copy in ansible script
         force: yes # overwrite the existing keystore
       tags:
         - pre-ami
