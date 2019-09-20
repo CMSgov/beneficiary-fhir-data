@@ -146,7 +146,9 @@ stage('Deploy to TEST') {
 	milestone(label: 'stage_deploy_test_start')
 
 	node {
-		scriptForDeploys.deploy('test', amiIds, appBuildResults)
+		gitBranchName = env.BRANCH_NAME
+		gitCommitId = env.GIT_COMMIT
+		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 
 }

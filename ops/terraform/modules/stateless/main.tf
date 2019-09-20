@@ -189,14 +189,16 @@ module "fhir_asg" {
   # TODO: Dummy values to get started
   launch_config   = {
 
-    instance_type = "m5.2xlarge" 
-    volume_size   = 100 # GB
-    ami_id        = var.fhir_ami 
-    key_name      = var.ssh_key_name 
+    instance_type   = "m5.2xlarge" 
+    volume_size     = 100 # GB
+    ami_id          = var.fhir_ami 
+    key_name        = var.ssh_key_name 
 
-    profile       = module.fhir_iam.profile
-    user_data_tpl = "fhir_server.tpl"       # See templates directory for choices
-    account_id    = data.aws_caller_identity.current.account_id
+    profile         = module.fhir_iam.profile
+    user_data_tpl   = "fhir_server.tpl"       # See templates directory for choices
+    account_id      = data.aws_caller_identity.current.account_id
+    git_branch      = var.git_branch_name
+    git_commit      = var.git_commit_id
   }
 
   db_config       = {
@@ -232,6 +234,8 @@ module "etl_instance" {
     key_name      = var.ssh_key_name 
     profile       = module.etl_iam.profile
     user_data_tpl = "pipeline_server.tpl"
+    git_branch    = var.git_branch_name
+    git_commit    = var.git_commit_id
   }
 
   mgmt_config     = {
