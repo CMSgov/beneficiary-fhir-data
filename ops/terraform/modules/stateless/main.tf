@@ -233,6 +233,10 @@ module "fhir_asg" {
   }
 
   launch_config   = {
+<<<<<<< HEAD
+=======
+
+>>>>>>> Make deployed branch available to user_data (#58)
     instance_type   = "m5.2xlarge" 
     volume_size     = 100 # GB
     ami_id          = var.fhir_ami 

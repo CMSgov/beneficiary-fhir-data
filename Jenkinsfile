@@ -238,6 +238,11 @@ stage('Deploy to TEST') {
 	milestone(label: 'stage_deploy_test_start')
 
 	node {
+<<<<<<< HEAD
+=======
+		gitBranchName = env.BRANCH_NAME
+		gitCommitId = env.GIT_COMMIT
+>>>>>>> Make deployed branch available to user_data (#58)
 		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 
