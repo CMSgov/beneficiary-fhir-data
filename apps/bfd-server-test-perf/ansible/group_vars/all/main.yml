@@ -5,7 +5,7 @@
 ##################################################################################
 
 # location of local uber jar containing jmeter test plan
-test_lib: "../target/fhir-stress-test-0.1.0-SNAPSHOT-uber.jar"
+test_lib: "../target/bfd-server-test-perf-1.0.0-SNAPSHOT-uber.jar"
 # location of local jmeter test script
 test_plan: "../jmeter-project/jmeter-fhir-test.jmx"
 # location of local keystore used in test
