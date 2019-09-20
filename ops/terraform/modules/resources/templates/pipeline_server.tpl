@@ -3,8 +3,11 @@ set -e
 
 exec > >(tee -a /var/log/user_data.log 2>&1)
 
-git clone https://github.com/CMSgov/beneficiary-fhir-data.git
+git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBranchName} --single-branch
+
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
+
+git checkout ${gitCommitId}
 
 aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 

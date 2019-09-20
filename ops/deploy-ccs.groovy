@@ -186,7 +186,7 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
  * @param appBuildResults (not used in the CCS environment; this stuff is all baked into the AMIs there, instead)
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
-def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	def env = normalizeEnvironmentId(environmentId)
 		dir("${workspace}/ops/terraform/env/${env}/stateless") {
 
@@ -201,12 +201,14 @@ def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults)
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
 		-var='ssh_key_name=bfd-${env}' \
+		-var='git_branch_name=${gitBranchName}' \
+		-var='git_commit_id=${gitCommitId}' \
 		-no-color -out=tfplan"
 		
 		// Apply Terraform plan
 		sh "/usr/bin/terraform apply \
 		-no-color -input=false tfplan"
-	}
+		}
 }
 
 
