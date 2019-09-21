@@ -199,6 +199,13 @@
    			 <groupId>commons-io</groupId>
   			  <artifactId>commons-io</artifactId>
   			  <version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.newrelic.agent.java</groupId>
+			<artifactId>newrelic-java</artifactId>
+			<version>5.3.0</version>
+			<scope>provided</scope>
+			<type>zip</type>
 		</dependency>	
 	</dependencies>
 
@@ -244,6 +251,54 @@
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>1.5.0</version>
 				</plugin>
+				<plugin>
+			        <groupId>org.apache.maven.plugins</groupId>
+			        <artifactId>maven-dependency-plugin</artifactId>
+			        <version>3.1.1</version>
+			        <executions>
+			          <execution>
+			            <id>unpack-newrelic</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>unpack-dependencies</goal>
+			            </goals>
+			            <configuration>
+			              <includeGroupIds>com.newrelic.agent.java</includeGroupIds>
+			              <includeArtifactIds>newrelic-java</includeArtifactIds>
+			              <excludes>**/newrelic.yml</excludes>
+			              <overWriteReleases>false</overWriteReleases>
+			              <overWriteSnapshots>false</overWriteSnapshots>
+			              <overWriteIfNewer>false</overWriteIfNewer>
+			              <outputDirectory>${project.build.directory}</outputDirectory>
+			            </configuration>
+			          </execution>
+			        </executions>
+			      </plugin>
+			      <plugin>
+		            <artifactId>maven-resources-plugin</artifactId>
+		            <version>3.1.0</version>
+		            <executions>
+		                <execution>
+		                    <id>copy-newrelic-config</id>
+		                    <phase>package</phase>
+		                    <goals>
+		                        <goal>copy-resources</goal>
+		                    </goals>
+		
+		                    <configuration>
+		                        <outputDirectory>${project.basedir}/target/newrelic</outputDirectory>
+		                        <resources>
+		                            <resource>
+		                                <directory>${project.basedir}/src/main/config</directory>
+		                                <includes>
+		                                    <include>newrelic.yml</include>
+		                                </includes>
+		                            </resource>
+		                        </resources>
+		                    </configuration>
+		                </execution>
+		           </executions>
+		        </plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>

@@ -149,6 +149,7 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
+				-var 'env=${environmentId}' \
 				../../packer/build_bfd-pipeline.json"
 
 			// build the FHIR server
@@ -156,14 +157,15 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
+				-var 'env=${environmentId}' \
 				../../packer/build_bfd-server.json"
 
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
 				bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-pipeline.json")),
 				bfdServerAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-server.json")),
 			)
 		}
 	}
@@ -177,7 +179,7 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
  * @param appBuildResults (not used in the CCS environment; this stuff is all baked into the AMIs there, instead)
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
-def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	def env = normalizeEnvironmentId(environmentId)
 		dir("${workspace}/ops/terraform/env/${env}/stateless") {
 
@@ -192,12 +194,14 @@ def deploy(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults)
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
 		-var='ssh_key_name=bfd-${env}' \
+		-var='git_branch_name=${gitBranchName}' \
+		-var='git_commit_id=${gitCommitId}' \
 		-no-color -out=tfplan"
 		
 		// Apply Terraform plan
 		sh "/usr/bin/terraform apply \
 		-no-color -input=false tfplan"
-	}
+		}
 }
 
 def extractAmiIdFromPackerManifest(File manifest) {

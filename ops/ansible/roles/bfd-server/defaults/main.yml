@@ -22,3 +22,12 @@ data_server_ssl_client_certificates: []
 
 # The max size of the DB connection pool for the Blue Button Data Server.
 data_server_db_max_connections: 100
+
+# Environment variables to set on the app server
+os_environment_variables:
+  - key: NEW_RELIC_LICENSE_KEY 
+    value : "{{ vault_new_relic_license }}"
+  - key: NEW_RELIC_PROXY_HOST 
+    value : "{{ vault_proxy_host }}"
+  - key: NEW_RELIC_PROXY_PORT 
+    value : "{{ vault_proxy_port }}"

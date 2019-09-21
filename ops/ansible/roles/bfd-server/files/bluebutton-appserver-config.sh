@@ -164,6 +164,11 @@ if (outcome == success) of /subsystem=security/security-domain=bluebutton-data-s
 	/subsystem=security/security-domain=bluebutton-data-server:remove
 end-if
 
+# Reset the application's access log.
+if (outcome == success) of /subsystem=undertow/server=default-server/host=default-host/setting=access-log:read-resource
+	/subsystem=undertow/server=default-server/host=default-host/setting=access-log:remove
+end-if
+
 # Reload the server to apply those changes.
 :reload
 EOF
@@ -310,9 +315,6 @@ end-if
 # * https://kb.novaordis.com/index.php/Undertow_WildFly_Subsystem_Configuration_-_access-log
 # * https://stackoverflow.com/questions/34614874/wildfly-9-access-logging
 /subsystem=undertow/server=default-server/https-listener=https:write-attribute(name=record-request-start-time,value=true)
-if (outcome == success) of /subsystem=undertow/server=default-server/host=default-host/setting=access-log:read-resource
-	/subsystem=undertow/server=default-server/host=default-host/setting=access-log:remove
-end-if
 /subsystem=undertow/server=default-server/host=default-host/setting=access-log:add(pattern="%h %l \\"%u\\" %t \\"%r\\" \\"?%q\\" %s %B %D %{i,BlueButton-OriginalQueryId} %{i,BlueButton-OriginalQueryCounter} [%{i,BlueButton-OriginalQueryTimestamp}] %{i,BlueButton-DeveloperId} \\"%{i,BlueButton-Developer}\\" %{i,BlueButton-ApplicationId} \\"%{i,BlueButton-Application}\\" %{i,BlueButton-UserId} \\"%{i,BlueButton-User}\\" %{i,BlueButton-BeneficiaryId}", directory="\${jboss.server.log.dir}", prefix="access", suffix=".log")
 
 # Configure the application's security domain.
