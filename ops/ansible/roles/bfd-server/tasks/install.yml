@@ -173,12 +173,28 @@
   notify:
     - 'Restart BFD Server Service'
 
-- name: populate /etc/environment
+- name: Download New Relic Java Agent Bundle
+  maven_artifact:
+    group_id: com.newrelic.agent.java
+    artifact_id: newrelic-java
+    extension: zip
+    version: 5.6.0
+    dest: /tmp/newrelic-java.zip
+
+- name: Unzip New Relic Java Agent Bundle
+  unarchive:
+    src: /tmp/newrelic-java.zip
+    dest: /tmp
+    creates: /tmp/newrelic
+    remote_src: true
+
+- name: Copy New Relic Java Agent
+  copy:
+    src: /tmp/newrelic/newrelic.jar
+    dest: "{{ data_server_dir }}/newrelic.jar"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=r,o=r
   become: true
-  lineinfile:
-    dest: "/etc/environment"
-    state: present
-    regexp: "^{{ item.key }}"
-    line: "{{ item.key }}={{ item.value }}"
-  with_items: "{{ os_environment_variables }}"
-  no_log: true  # Ensure passwords aren't logged if this fails.
+  notify:
+    - 'Restart BFD Server Service'

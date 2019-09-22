@@ -35,6 +35,11 @@ Variables that must be defined to use the role:
 * `data_server_db_url`: The JDBC URL to connect to.
 * `data_server_db_username`: The DB username to connect as.
 * `data_server_db_password`: The DB user's password to connect with.
+* `data_server_new_relic_license_key`: Optional. The license key for the New Relic agent.
+* `data_server_new_relic_app_name`: Optional. The value to use for the `newrelic.app_name` setting, e.g. "BFD Server (prod)".
+* `data_server_new_relic_environment`: Optional. The value to use for the `newrelic.environment` setting. If provided, should be one of "test", "prod-sbx", or "prod". 
+* `data_server_proxy_host`: Optional. The hostname/IP address of the HTTP/S proxy server to use.
+* `data_server_proxy_port`: Optional. The port of the HTTP/S proxy server to use.
 
 See [defaults/main.yml](./defaults/main.yml) for the list of optional/defaulted variables and their default values.
 
