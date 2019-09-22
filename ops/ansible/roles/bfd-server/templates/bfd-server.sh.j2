@@ -40,6 +40,7 @@ JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 java \
   -javaagent:{{ data_server_dir }}/newrelic.jar \
   ${JVM_ARGS} \
+  "-DbfdServer.logs.dir=${LOGS_DIR}" \
   "-DbfdServer.db.url=${DB_URL}" \
   "-DbfdServer.db.username=${DB_USERNAME}" \
   "-DbfdServer.db.password=${DB_PASSWORD}" \
