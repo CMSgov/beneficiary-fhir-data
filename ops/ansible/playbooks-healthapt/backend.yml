@@ -117,12 +117,12 @@
       become: true
 
     # Overwrite the bfd-server role generation of the keystore file with the one in the ansible vault 
-    - name: Copy the appserver keystore  
-      copy:
-        # Note: this JKS file is encrypted via the Ansible Vault 
-        src: "{{ data_server_appserver_keystore }}"
-        dest: '/u01/jboss/bluebutton-appserver-keystore.jks'
-        force: yes # overwrite the existing keystore
+    #- name: Copy the appserver keystore  
+    #  copy:
+    #    # Note: this JKS file is encrypted via the Ansible Vault 
+    #    src: "{{ data_server_appserver_keystore }}"
+    #    dest: '/u01/jboss/bluebutton-appserver-keystore.jks'
+    #    force: yes # overwrite the existing keystore
 
     - name: Add Data Server Back to Load Balancers
       elb_instance:
