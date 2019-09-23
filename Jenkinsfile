@@ -137,7 +137,9 @@ if (deployEnvironment == 'ccs') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
 		node {
-			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
+			gitBranchName = env.BRANCH_NAME
+			gitCommitId = checkout(scm).GIT_COMMIT
+			amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 		}
 	}
 }
@@ -147,7 +149,7 @@ stage('Deploy to TEST') {
 
 	node {
 		gitBranchName = env.BRANCH_NAME
-		gitCommitId = env.GIT_COMMIT
+		gitCommitId = scmVars.GIT_COMMIT
 		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 
@@ -198,7 +200,9 @@ if (deployEnvironment == 'ccs') {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
 
 			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod-stg', amiIds, appBuildResults)
+				gitBranchName = env.BRANCH_NAME
+				gitCommitId = scmVars.GIT_COMMIT
+				amiIds = scriptForDeploys.buildAppAmis('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	}
@@ -210,7 +214,9 @@ stage('Deploy to prod-stg') {
 			milestone(label: 'stage_deploy_prod_stg_start')
 
 			node {
-				scriptForDeploys.deploy('prod-stg', amiIds, appBuildResults)
+				gitBranchName = env.BRANCH_NAME
+				gitCommitId = scmVars.GIT_COMMIT
+				scriptForDeploys.deploy('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	} else {
@@ -219,12 +225,14 @@ stage('Deploy to prod-stg') {
 }
 
 if (deployEnvironment == 'ccs') {
-	if (willDeployToProdEnvs) {
+	if (willDeployToProdEnvs && deployEnvironment != 'ccs') {
 		stage('Build App AMIs for PROD') {
 			milestone(label: 'stage_build_app_amis_prod_start')
 
 			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod', amiIds, appBuildResults)
+				gitBranchName = env.BRANCH_NAME
+				gitCommitId = scmVars.GIT_COMMIT
+				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	}
@@ -236,7 +244,9 @@ stage('Deploy to prod') {
 			milestone(label: 'stage_deploy_prod_start')
 
 			node {
-				scriptForDeploys.deploy('prod', amiIds, appBuildResults)
+				gitBranchName = env.BRANCH_NAME
+				gitCommitId = scmVars.GIT_COMMIT
+				scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	} else {

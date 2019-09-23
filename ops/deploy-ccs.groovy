@@ -130,10 +130,10 @@ def deployManagement(AmiIds amiIds) {
  * @return a new {@link AmiIds} instance detailing the shiny new AMIs that are now available for use
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
-def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	dir('ops/ansible/playbooks-ccs'){
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
-
+ 
 			// both packer builds expect additional variables in a file called `extra_vars.json` in the current directory
 		
 			def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
@@ -157,6 +157,8 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'env=${environmentId}' \
+				-var 'git_branch=${gitBranchName}' \
+				-var 'git_commit=${gitCommitId}' \
 				../../packer/build_bfd-pipeline.json"
 
 			// build the FHIR server
@@ -165,6 +167,8 @@ def buildAppAmis(String environmentId, AmiIds amiIds, AppBuildResults appBuildRe
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'env=${environmentId}' \
+				-var 'git_branch=${gitBranchName}' \
+				-var 'git_commit=${gitCommitId}' \
 				../../packer/build_bfd-server.json"
 
 			return new AmiIds(
