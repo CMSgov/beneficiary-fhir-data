@@ -44,3 +44,6 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_performance_tester
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
+
+# Feature toggle for startup wrapper script that performs smoke testing on boot
+data_server_startup_wrapper: true

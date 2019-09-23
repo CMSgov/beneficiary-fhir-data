@@ -5,7 +5,11 @@ After=network.target network-online.target
 
 [Service]
 WorkingDirectory={{ data_server_dir }}
+{% if data_server_startup_wrapper %}
+ExecStart={{ data_server_dir }}/bluebutton-appserver-start.sh
+{% else %}
 ExecStart={{ data_server_dir }}/{{ data_server_container_name }}/bin/standalone.sh
+{% endif %}
 User={{ data_server_user }}
 
 [Install]

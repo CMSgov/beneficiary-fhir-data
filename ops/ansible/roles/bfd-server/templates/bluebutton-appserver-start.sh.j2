@@ -1,0 +1,46 @@
+#!/bin/bash
+
+STARTUP_TIMEOUT=30
+REQ_TIMEOUT=15
+REQ_BACKOFF_TIMEOUT=10
+
+check_endpoint() {
+  curl --max-time $REQ_TIMEOUT --silent --insecure --cert-type pem --cert /jboss/bluebutton-backend-test-data-server-client-test-keypair.pem "$1" | grep "$2"
+}
+
+stop_service_if_failing() {
+  echo "$(date): Waiting $STARTUP_TIMEOUT seconds for initial startup"
+  sleep $STARTUP_TIMEOUT
+
+  for I in 1 2 3; do
+    echo "$(date): Checking metadata endpoint"
+    CHECK_METADATA=$(check_endpoint 'https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir' 'status')
+    CHECK_METADATA_EXIT=$?
+
+    echo "$(date): Checking database endpoint"
+    CHECK_DATABASE=$(check_endpoint 'https://localhost:7443/v1/fhir/Coverage?beneficiary=-201&_format=application%2Fjson%2Bfhir' 'id')
+    CHECK_DATABASE_EXIT=$?
+
+    if [[ $CHECK_METADATA_EXIT == 0 ]] && [[ $CHECK_DATABASE_EXIT == 0 ]]; then
+      echo "$(date): Server started properly"
+      return 0
+    elif [[ $I != 3 ]]; then
+      echo "$(date): Server failed to start properly, backing off"
+      sleep $REQ_BACKOFF_TIMEOUT
+    fi
+  done
+
+  echo "$(date): Server failed to start properly, shutting down"
+  JBOSS_PID=$(ps -ef | grep '\-Dbfd-server' | grep -v grep | awk '{print $2}')
+  JBOSS_PID_EXIT=$?
+
+  if [[ $JBOSS_PID_EXIT == 0 ]] && [[ kill -INT $JBOSS_PID ]]; then
+    echo "$(date): Server shut down gracefully"
+  else
+    echo "$(date): Error shutting down server gracefully"
+  fi
+  return 1
+}
+
+(stop_service_if_failing >>/jboss/bluebutton-appserver-start.log 2>&1) &
+/jboss/wildfly-8.1.0.Final/bin/standalone.sh

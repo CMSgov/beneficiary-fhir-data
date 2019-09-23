@@ -20,6 +20,18 @@
   tags: 
     - pre-ami
 
+- name: Create App Server Startup Wrapper Script
+  template:
+    src: bluebutton-appserver-start.sh.j2
+    dest: "{{ data_server_dir }}/bluebutton-appserver-start.sh"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rwx,o=rx
+  become: true
+  when: data_server_startup_wrapper
+  tags:
+    - pre-ami
+
 - name: Create App Server Service Definition
   template:
     src: bluebutton-appserver.service.j2
