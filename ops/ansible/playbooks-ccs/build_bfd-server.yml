@@ -59,8 +59,8 @@
         # automagically decrypt it as part of the copy operation.
         src: "{{ data_server_ssl_client_certificate_test }}"
         dest: '/jboss/bluebutton-backend-test-data-server-client-test-keypair.pem'
-        owner: jboss
-        group: jboss
+        owner: "{{ data_server_user }}"
+        group: "{{ data_server_user }}"
         mode: 'u=rw,g=,o='
       become: true
       tags:
