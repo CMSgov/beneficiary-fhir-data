@@ -1978,8 +1978,11 @@ final class TransformerTestUtils {
   /** @throws IOException */
   static void assertFDADrugCodeDisplayEquals(
       String nationalDrugCode, String nationalDrugCodeDisplayValue) throws IOException {
+    String nationalDrugCodeDisplayValueActual =
+        TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode);
     Assert.assertEquals(
-        TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode),
+        String.format("NDC code '%s' display value mismatch: ", nationalDrugCode),
+        nationalDrugCodeDisplayValueActual,
         nationalDrugCodeDisplayValue);
   }
 

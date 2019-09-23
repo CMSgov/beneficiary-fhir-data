@@ -102,5 +102,7 @@ resource "aws_instance" "main" {
   user_data                   = templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env    = var.env_config.env,
     accountId = data.aws_caller_identity.current.account_id
+    gitBranchName = var.launch_config.git_branch
+    gitCommitId = var.launch_config.git_commit
   })
 }

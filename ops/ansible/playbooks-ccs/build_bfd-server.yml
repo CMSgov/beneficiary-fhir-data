@@ -42,6 +42,16 @@
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
         data_server_db_connections_max: 400
+
+    # Overwrite bfd-server role copy of the keystore file 
+    - name: Copy the appserver keystore  
+      copy:
+        # Note: this JKS file is encrypted via the Ansible Vault 
+        src: "{{ data_server_appserver_keystore }}"
+        dest: '/jboss/bluebutton-appserver-keystore.jks'
+        force: yes # overwrite the existing keystore
+      tags:
+        - pre-ami
         
     - name: Copy Local Test SSL Keypair
       copy:
