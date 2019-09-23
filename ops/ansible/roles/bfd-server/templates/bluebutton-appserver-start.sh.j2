@@ -34,7 +34,7 @@ stop_service_if_failing() {
   JBOSS_PID=$(ps -ef | grep '\-Dbfd-server' | grep -v grep | awk '{print $2}')
   JBOSS_PID_EXIT=$?
 
-  if [[ $JBOSS_PID_EXIT == 0 ]] && [[ kill -INT $JBOSS_PID ]]; then
+  if [[ $JBOSS_PID_EXIT == 0 ]] && kill -INT $JBOSS_PID; then
     echo "$(date): Server shut down gracefully"
   else
     echo "$(date): Error shutting down server gracefully"
