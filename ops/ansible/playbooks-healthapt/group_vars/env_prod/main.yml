@@ -18,10 +18,6 @@ data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
 data_server_ssl_client_certificate_test: 'files/client_data_server_local_test_env_prod_keypair.pem'
 
-# The path (in this project) to the keystore that will be copied to the Data Servers
-# Note: This file is encrypted with Ansible Vault and will be automagically decrypted during the copy.
-data_server_appserver_keystore: 'files/prod-bluebutton-appserver-keystore.jks'
-
 # These are the SSL keypairs authorized to query this environment's Data Servers.
 data_server_ssl_client_certificates:
   - alias: client_local_test_env_prod
