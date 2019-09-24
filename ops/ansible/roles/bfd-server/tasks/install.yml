@@ -266,5 +266,8 @@
 >>>>>>> Fixing merge conflicts (attempt two):ops/ansible/roles/bfd-server/tasks/appserver_config.yml
 =======
   no_log: true  # Ensure passwords aren't logged if this fails.
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
   
 >>>>>>> Lost the newline when fixing conflicts:ops/ansible/roles/bfd-server/tasks/appserver_config.yml
+=======
+>>>>>>> Removing extra whitespace:ops/ansible/roles/bfd-server/tasks/appserver_config.yml
