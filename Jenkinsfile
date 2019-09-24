@@ -137,7 +137,7 @@ if (deployEnvironment == 'ccs') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
 		node {
-			gitBranchName = env.BRANCH_NAME
+			gitBranchName = env.CHANGE_NAME
 			gitCommitId = checkout(scm).GIT_COMMIT
 			amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 		}
@@ -148,7 +148,7 @@ stage('Deploy to TEST') {
 	milestone(label: 'stage_deploy_test_start')
 
 	node {
-		gitBranchName = env.BRANCH_NAME
+		gitBranchName = env.CHANGE_NAME
 		gitCommitId = checkout(scm).GIT_COMMIT
 		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
