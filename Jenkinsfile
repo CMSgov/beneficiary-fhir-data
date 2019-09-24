@@ -91,6 +91,9 @@ stage('Prepare') {
 		// These variables track our decision on whether or not to deploy to prod-like envs.
 		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
 		willDeployToProdEnvs = false
+
+		// Get the current commit id 
+		gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
 	}
 }
 
@@ -147,7 +150,6 @@ if (deployEnvironment == 'ccs') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
 		node {
-			gitCommitId = checkout(scm).GIT_COMMIT
 			amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 		}
 	}
