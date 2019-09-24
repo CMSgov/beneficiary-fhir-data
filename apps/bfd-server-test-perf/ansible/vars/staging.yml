@@ -1,0 +1,24 @@
+ec2_key_name: perf-tests
+profile: default
+num_servers: "{{ num_servers }}"
+
+# URI of FHIR server under test
+fhir_server: "https://10.3.99.235:7443/v1/fhir"
+
+##################################################################################
+# AWS configuration
+##################################################################################
+
+# template-21-encrypted
+# Base hardened AMI
+ami_id_rhel: ami-3a934c40
+
+
+subnet_id: subnet-6aa0240e
+
+security_group_ids:
+  - sg-8c42cbc7
+  - sg-997a8aec
+  - sg-8d7bd5c4
+  - sg-953120e1
+  - sg-0499559a542b4b387

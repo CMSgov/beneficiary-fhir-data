@@ -21,7 +21,8 @@ properties([
 	parameters([
 		booleanParam(name: 'test_test', description: 'Whether to run the test against the test environment', defaultValue: true),
 		booleanParam(name: 'test_dpr', description: 'Whether to run the test against the DPR environment', defaultValue: false),
-		booleanParam(name: 'test_prod', description: 'Whether to run the test against the Prod environment', defaultValue: false),
+		booleanParam(name: 'test_prod', description: 'Whether to run the test against the Prod environment', defaultValue: false),,
+		booleanParam(name: 'test_staging', description: 'Whether to run the test against the Prod Copy (staging) environment', defaultValue: false),
 		string(name: 'env_num_servers', description: 'Number of JMeter Servers to use in the test.', defaultValue: '1')
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
@@ -125,6 +126,19 @@ stage('Test the Prod ENV') {
 	}
 }
 
+stage('Test the Staging ENV') {
+	if (params.test_staging) {
+		milestone(label: 'stage_test_staging_start')
+
+		node {
+			insideAnsibleContainer {
+				sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=staging num_servers=${params.env_num_servers}\" --connection=paramiko"
+			}
+		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Test the Staging ENV')
+	}
+}
 
 /**
  * @return the result returned from running the specified `Closure` inside the

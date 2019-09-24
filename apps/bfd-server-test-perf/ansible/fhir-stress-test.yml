@@ -154,14 +154,6 @@
       async: "{{ 2*duration + (2*poll) }}" 
       poll: "{{ poll }}" 
 
-    - name: Collect Results
-      ignore_errors: yes
-      fetch: 
-        src: "{{ remote_test_dir }}/log.jtl"
-        dest: "{{ hostvars['localhost']['results_path'].stdout }}/"
-        fail_on_missing: yes
-        flat: yes
-    
     - name: Collect Logs
       ignore_errors: yes
       fetch: 
@@ -169,12 +161,12 @@
         dest: "{{ hostvars['localhost']['results_path'].stdout }}/client-log-jmeter.txt"
         fail_on_missing: yes
         flat: yes
-     
-    - name: Collect console Logs
+
+    - name: Collect Results
       ignore_errors: yes
       fetch: 
-        src: "{{ remote_test_dir }}/log-jmeter-console.txt"
-        dest: "{{ hostvars['localhost']['results_path'].stdout }}/client-log-jmeter-console.txt"
+        src: "{{ remote_test_dir }}/log.jtl"
+        dest: "{{ hostvars['localhost']['results_path'].stdout }}/"
         fail_on_missing: yes
         flat: yes
         
