@@ -247,6 +247,7 @@
 =======
   with_items: "{{ os_environment_variables }}"
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
 >>>>>>> Fix merge conflicts:ops/ansible/roles/bfd-server/tasks/appserver_config.yml
 =======
   with_items: "{{ os_environment_variables }}"
@@ -263,3 +264,7 @@
 =======
   no_log: true  # Ensure passwords aren't logged if this fails.
 >>>>>>> Fixing merge conflicts (attempt two):ops/ansible/roles/bfd-server/tasks/appserver_config.yml
+=======
+  no_log: true  # Ensure passwords aren't logged if this fails.
+  
+>>>>>>> Lost the newline when fixing conflicts:ops/ansible/roles/bfd-server/tasks/appserver_config.yml

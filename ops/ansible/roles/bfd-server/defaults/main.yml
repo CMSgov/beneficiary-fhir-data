@@ -67,6 +67,7 @@ env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 >>>>>>> Fix merge conflicts
 =======
     
+<<<<<<< HEAD
 >>>>>>> Fix merge conflicts
 =======
     
@@ -94,3 +95,6 @@ os_environment_variables:
 =======
 env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 >>>>>>> Fixing merge conflicts (attempt two)
+=======
+env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
+>>>>>>> Lost the newline when fixing conflicts
