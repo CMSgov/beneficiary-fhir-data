@@ -208,9 +208,9 @@
   become: true
   become_user: "{{ data_server_user }}"
   no_log: true  # Ensure passwords aren't logged if this fails.
-<<<<<<< HEAD
   tags: 
     - post-ami
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
 =======
@@ -222,6 +222,8 @@
 =======
 >>>>>>> b78c40aeccc26373cb0197b8e6b2ea51706f7eff
 >>>>>>> Revert "Fix merge conflicts":ops/ansible/roles/bfd-server/tasks/appserver_config.yml
+=======
+>>>>>>> Fixing merge conflicts (attempt two):ops/ansible/roles/bfd-server/tasks/appserver_config.yml
 
 - name: populate /etc/environment
   become: true
@@ -233,6 +235,7 @@
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
   with_items: "{{ os_environment_variables }}"
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
   no_log: true  # Ensure passwords aren't logged if this fails.
 
@@ -257,3 +260,6 @@
 =======
 >>>>>>> b78c40aeccc26373cb0197b8e6b2ea51706f7eff
 >>>>>>> Revert "Fix merge conflicts":ops/ansible/roles/bfd-server/tasks/appserver_config.yml
+=======
+  no_log: true  # Ensure passwords aren't logged if this fails.
+>>>>>>> Fixing merge conflicts (attempt two):ops/ansible/roles/bfd-server/tasks/appserver_config.yml
