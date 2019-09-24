@@ -95,15 +95,13 @@ stage('Prepare') {
 }
 
 stage('Set Branch Name') {
-  steps {
-    script {
-      if (env.BRANCH_NAME.startsWith('PR')) {
-        gitBranchName = env.CHANGE_BRANCH
-      } else {
-        gitBranchName = env.BRANCH_NAME
-      }
-    }
-  }
+	script {
+		if (env.BRANCH_NAME.startsWith('PR')) {
+			gitBranchName = env.CHANGE_BRANCH
+		} else {
+			gitBranchName = env.BRANCH_NAME
+		}
+	}
 }
 
 if (deployEnvironment == 'ccs') {
