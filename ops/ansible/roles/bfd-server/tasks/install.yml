@@ -208,10 +208,12 @@
   become: true
   become_user: "{{ data_server_user }}"
   no_log: true  # Ensure passwords aren't logged if this fails.
-<<<<<<< HEAD
   tags: 
     - post-ami
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
 =======
+=======
+>>>>>>> Fix merge conflicts:ops/ansible/roles/bfd-server/tasks/appserver_config.yml
 
 - name: populate /etc/environment
   become: true
@@ -221,7 +223,11 @@
     regexp: "^{{ item.key }}"
     line: "{{ item.key }}={{ item.value }}"
   with_items: "{{ os_environment_variables }}"
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
   no_log: true  # Ensure passwords aren't logged if this fails.
 
 >>>>>>> Add New Relic to BFDS
 >>>>>>> Add New Relic to BFDS:ops/ansible/roles/bfd-server/tasks/appserver_config.yml
+=======
+  no_log: true  # Ensure passwords aren't logged if this fails.
+>>>>>>> Fix merge conflicts:ops/ansible/roles/bfd-server/tasks/appserver_config.yml

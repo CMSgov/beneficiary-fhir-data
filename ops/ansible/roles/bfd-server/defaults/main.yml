@@ -27,8 +27,11 @@ data_server_db_connections_max: 40
 data_server_db_max_connections: 100
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 =======
+=======
+>>>>>>> Fix merge conflicts
 # Environment variables to set on the app server
 os_environment_variables:
   - key: NEW_RELIC_LICENSE_KEY 
@@ -36,6 +39,7 @@ os_environment_variables:
   - key: NEW_RELIC_PROXY_HOST 
     value : "{{ vault_proxy_host }}"
   - key: NEW_RELIC_PROXY_PORT 
+<<<<<<< HEAD
 <<<<<<< HEAD
     value : {{ vault_proxy_port }}
 >>>>>>> Add New Relic to BFDS
@@ -46,3 +50,8 @@ os_environment_variables:
     value : "{{ vault_proxy_port }}"
 >>>>>>> Add quotes
 >>>>>>> Add quotes
+=======
+    value : "{{ vault_proxy_port }}"
+    
+env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
+>>>>>>> Fix merge conflicts
