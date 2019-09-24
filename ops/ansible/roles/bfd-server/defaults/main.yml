@@ -31,6 +31,18 @@ data_server_ssl_client_certificates: []
 data_server_db_max_connections: 100
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+# Environment variables to set on the app server
+os_environment_variables:
+  - key: NEW_RELIC_LICENSE_KEY 
+    value : "{{ vault_new_relic_license }}"
+  - key: NEW_RELIC_PROXY_HOST 
+    value : "{{ vault_proxy_host }}"
+  - key: NEW_RELIC_PROXY_PORT 
+    value : "{{ vault_proxy_port }}"
+    
+>>>>>>> b78c40aeccc26373cb0197b8e6b2ea51706f7eff
 env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 =======
 # Environment variables to set on the app server
