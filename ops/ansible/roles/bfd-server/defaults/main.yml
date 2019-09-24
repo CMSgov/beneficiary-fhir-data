@@ -28,10 +28,14 @@ data_server_db_max_connections: 100
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 =======
 =======
 >>>>>>> Fix merge conflicts
+=======
+=======
+>>>>>>> Revert "Fix merge conflicts"
 # Environment variables to set on the app server
 os_environment_variables:
   - key: NEW_RELIC_LICENSE_KEY 
@@ -62,5 +66,24 @@ env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 >>>>>>> Fix merge conflicts
 =======
     
+<<<<<<< HEAD
 env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
+>>>>>>> Revert "Fix merge conflicts"
+=======
+>>>>>>> b78c40aeccc26373cb0197b8e6b2ea51706f7eff
+env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
+=======
+# Environment variables to set on the app server
+os_environment_variables:
+  - key: NEW_RELIC_LICENSE_KEY 
+    value : "{{ vault_new_relic_license }}"
+  - key: NEW_RELIC_PROXY_HOST 
+    value : "{{ vault_proxy_host }}"
+  - key: NEW_RELIC_PROXY_PORT 
+<<<<<<< HEAD
+    value : {{ vault_proxy_port }}
+>>>>>>> Add New Relic to BFDS
+=======
+    value : "{{ vault_proxy_port }}"
+>>>>>>> Add quotes
 >>>>>>> Revert "Fix merge conflicts"
