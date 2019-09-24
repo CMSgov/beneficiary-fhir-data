@@ -225,8 +225,9 @@ stage('Deploy to prod-stg') {
 }
 
 if (deployEnvironment == 'ccs') {
-	if (willDeployToProdEnvs && deployEnvironment != 'ccs') {
-		stage('Build App AMIs for PROD') {
+	stage('Build App AMIs for PROD') {
+		if (willDeployToProdEnvs && deployEnvironment != 'ccs') {
+			// Note: CCS prod deploys are disabled for the moment, and so this block is unreachable.
 			milestone(label: 'stage_build_app_amis_prod_start')
 
 			node {
