@@ -5,8 +5,7 @@
     name: "{{ item.username }}"
     state: present
   with_items: "{{ ssh_users }}"
-  tags:
-    - post-ami
+  become: true
 
 - name: "Add user public key"
   authorized_key:
@@ -14,8 +13,7 @@
     key: "{{ item.public_key }}"
     state: present
   with_items: "{{ ssh_users }}"
-  tags:
-    - post-ami
+  become: true
 
 - name: "Add user to sudoers file"
   lineinfile:
@@ -25,5 +23,4 @@
     validate: /usr/sbin/visudo -cf %s
   when: item.sudoer
   with_items: "{{ ssh_users }}"
-  tags:
-    - post-ami
+  become: true
