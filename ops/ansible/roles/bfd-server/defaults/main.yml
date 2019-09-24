@@ -53,9 +53,14 @@ os_environment_variables:
 =======
     value : "{{ vault_proxy_port }}"
 <<<<<<< HEAD
+<<<<<<< HEAD
     
 env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
 >>>>>>> Fix merge conflicts
 =======
     
 >>>>>>> Fix merge conflicts
+=======
+    
+env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
+>>>>>>> Revert "Fix merge conflicts"

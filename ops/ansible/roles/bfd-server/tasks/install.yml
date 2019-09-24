@@ -223,6 +223,7 @@
     regexp: "^{{ item.key }}"
     line: "{{ item.key }}={{ item.value }}"
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
+<<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
   with_items: "{{ os_environment_variables }}"
 <<<<<<< HEAD:ops/ansible/roles/bfd-server/tasks/install.yml
   no_log: true  # Ensure passwords aren't logged if this fails.
@@ -235,3 +236,7 @@
 =======
   with_items: "{{ os_environment_variables }}"
 >>>>>>> Fix merge conflicts:ops/ansible/roles/bfd-server/tasks/appserver_config.yml
+=======
+  with_items: "{{ os_environment_variables }}"
+  no_log: true  # Ensure passwords aren't logged if this fails.
+>>>>>>> Revert "Fix merge conflicts":ops/ansible/roles/bfd-server/tasks/appserver_config.yml
