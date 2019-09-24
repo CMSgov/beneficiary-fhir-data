@@ -149,7 +149,7 @@ stage('Deploy to TEST') {
 
 	node {
 		gitBranchName = env.BRANCH_NAME
-		gitCommitId = scmVars.GIT_COMMIT
+		gitCommitId = checkout(scm).GIT_COMMIT
 		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 
@@ -201,7 +201,7 @@ if (deployEnvironment == 'ccs') {
 
 			node {
 				gitBranchName = env.BRANCH_NAME
-				gitCommitId = scmVars.GIT_COMMIT
+				gitCommitId = checkout(scm).GIT_COMMIT
 				amiIds = scriptForDeploys.buildAppAmis('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
@@ -215,7 +215,7 @@ stage('Deploy to prod-stg') {
 
 			node {
 				gitBranchName = env.BRANCH_NAME
-				gitCommitId = scmVars.GIT_COMMIT
+				gitCommitId = checkout(scm).GIT_COMMIT
 				scriptForDeploys.deploy('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
@@ -231,7 +231,7 @@ if (deployEnvironment == 'ccs') {
 
 			node {
 				gitBranchName = env.BRANCH_NAME
-				gitCommitId = scmVars.GIT_COMMIT
+				gitCommitId = checkout(scm).GIT_COMMIT
 				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
@@ -245,7 +245,7 @@ stage('Deploy to prod') {
 
 			node {
 				gitBranchName = env.BRANCH_NAME
-				gitCommitId = scmVars.GIT_COMMIT
+				gitCommitId = checkout(scm).GIT_COMMIT
 				scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
