@@ -1,0 +1,26 @@
+---
+
+- name: "Add user"
+  user:
+    name: "{{ item.username }}"
+    state: present
+  with_items: "{{ ssh_users }}"
+  become: true
+
+- name: "Add user public key"
+  authorized_key:
+    user: "{{ item.username }}"
+    key: "{{ item.public_key }}"
+    state: present
+  with_items: "{{ ssh_users }}"
+  become: true
+
+- name: "Add user to sudoers file"
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: "{{ item.username }} ALL=(ALL) NOPASSWD: ALL"
+    validate: /usr/sbin/visudo -cf %s
+  when: item.sudoer
+  with_items: "{{ ssh_users }}"
+  become: true

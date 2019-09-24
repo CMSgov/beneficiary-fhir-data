@@ -19,14 +19,18 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-fhir-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-fhir-{{user `env`}}-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "tags": {
-        "Name": "bfd-fhir-{{isotime \"20060102030405\"}}",
-        "Application": "bfd-fhir"
+        "Name": "bfd-fhir-{{user `env`}}-{{isotime \"20060102030405\"}}",
+        "Application": "BFD",
+        "Environment": "{{user `env`}}",
+        "Function": "FHIR APP SERVER",
+        "Layer": "APP",
+        "Branch": "{{user `git_branch`}}",
+        "Commit": "{{user `git_commit`}}"
       }
-    }
-  ],
+  }],
   "provisioners": [{
       "type": "ansible",
       "playbook_file": "./build_bfd-server.yml",

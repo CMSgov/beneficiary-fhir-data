@@ -223,8 +223,7 @@ public final class PartDEventTransformerTest {
           eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(),
-          "HASOL Anagen Hair Tonic - DEXPANTHENOL; MENTHOL; SALICYLIC ACID");
+          claim.getNationalDrugCode(), "Childrens Acetaminophen Cherry - ACETAMINOPHEN");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
