@@ -190,3 +190,4 @@
     line: "{{ item.key }}={{ item.value }}"
   with_items: "{{ os_environment_variables }}"
   no_log: true  # Ensure passwords aren't logged if this fails.
+  
