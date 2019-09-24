@@ -18,14 +18,18 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-etl-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-etl-{{user `env`}}-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "tags": {
-        "Name": "bfd-etl-{{isotime \"20060102030405\"}}",
-        "Application": "bfd-etl"
+        "Name": "bb-{{user `env`}}-{{isotime \"20060102030405\"}}",
+        "Application": "BFD",
+        "Environment": "{{user `env`}}",
+        "Function": "ETL APP SERVER",
+        "Layer": "APP",
+        "Branch": "{{user `git_branch`}}",
+        "Commit": "{{user `git_commit`}}"
       }
-    }
-  ],
+  }],
   "provisioners": [{
       "type": "ansible",
       "playbook_file": "./build_bfd-pipeline.yml",
