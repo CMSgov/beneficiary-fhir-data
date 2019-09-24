@@ -52,6 +52,10 @@ os_environment_variables:
 >>>>>>> Add quotes
 =======
     value : "{{ vault_proxy_port }}"
+<<<<<<< HEAD
     
 env_vars_file: ops/ansible/playbooks-ccs/extra_vars.json
+>>>>>>> Fix merge conflicts
+=======
+    
 >>>>>>> Fix merge conflicts
