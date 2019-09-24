@@ -94,6 +94,18 @@ stage('Prepare') {
 	}
 }
 
+stage('Set Branch Name') {
+  steps {
+    script {
+      if (env.BRANCH_NAME.startsWith('PR')) {
+        gitBranchName = env.CHANGE_BRANCH
+      } else {
+        gitBranchName = env.BRANCH_NAME
+      }
+    }
+  }
+}
+
 if (deployEnvironment == 'ccs') {
 	stage('Build Platinum AMI') {
 		if (params.build_platinum || amiIds.platinumAmiId == null) {
@@ -137,7 +149,6 @@ if (deployEnvironment == 'ccs') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
 		node {
-			gitBranchName = env.CHANGE_BRANCH
 			gitCommitId = checkout(scm).GIT_COMMIT
 			amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 		}
