@@ -1,10 +1,18 @@
-# ELBv2 
+# LB
 # 
 # Create an internal application LB with TCP listeners. 
 #
 locals {
   tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
 }
+
+##
+# Find context
+##
+
+# Account 
+#
+data "aws_caller_identity" "current" {}
 
 # Subnets
 # 
@@ -20,51 +28,54 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
+# S3 buckets
+#
+# Bucket for access logs
+#
+data "aws_s3_bucket" "admin" {
+  name  = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+}
+
+##
+# Create resources
+##
+
 # LB 
 #
-# Use NLB to allow the EC2 instance to terminate the TLS connection 
+# A ELB v1 TCP allows the EC2 instance to terminate the TLS connection, matching the HealthApt environment. 
 #
-resource "aws_lb" "main" {
-  name                = "bfd-${var.env_config.env}-${var.role}"
-  tags                = local.tags
-  load_balancer_type  = var.load_balancer_type
-  internal            = true
-  subnets             = data.aws_subnet.app_subnets[*].id
+resource "aws_elb" "main" {
+  name                  = "bfd-${var.env_config.env}-${var.role}"
+  tags                  = local.tags
+  load_balancer_type    = "TCP"
 
-  enable_cross_zone_load_balancing = true
-}
+  internal                          = true
+  subnets                           = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
+  security_groups                   = var.security_groups
 
-# Listener
-#
-resource "aws_lb_listener" "main" {
-  load_balancer_arn = aws_lb.main.arn
-  port              = var.ingress_port
-  protocol          = "TCP"
+  enable_cross_zone_load_balancing  = false   # Match HealthApt
+  idle_timeout                      = 60      # (seconds) Match HealthApt
+  connection_draining               = false   # Match HealthApt
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.main.arn
+  listener {
+    lb_protocol         = "TCP"
+    lb_port             = var.ingress_port
+    instance_protocol   = "TCP"
+    instance_port       = var.egress_port
   }
-}
-
-# Target group
-#
-resource "aws_lb_target_group" "main" {
-  name_prefix       = "bfd-"
-  target_type       = "instance"
-  protocol          = "TCP"
-  port              = var.egress_port
-  vpc_id            = var.env_config.vpc_id
-  tags              = local.tags
 
   health_check {
-    enabled         = true
-    protocol        = "TCP"
-    port            = "traffic-port"
+    healthy_threshold   = 5   # Match HealthApt
+    unhealthy_threshold = 2   # Match HealthApt
+    target              = "TCP:${var.egress_port}"
+    interval            = 10  # (seconds) Match HealthApt
+    timeout             = 5   # (seconds) Match HealthApt
+  } 
 
-    # Comes from GDIT environment
-    interval            = 10 
-    healthy_threshold   = 5
-    unhealthy_threshold = 5
+  access_logs {
+    enabled             = true
+    bucket              = data.aws_s3_bucket.admin.name
+    bucket_prefix       = "elb_access_logs/pd"
+    interval            = 5   # (minutes) Match HealthApt      
   }
 }
