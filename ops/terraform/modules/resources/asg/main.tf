@@ -122,7 +122,7 @@ resource "aws_launch_template" "main" {
     ebs {
       volume_type               = "gp2"
       volume_size               = var.launch_config.volume_size
-      delete_on_termination     = false
+      delete_on_termination     = true
       /* Will be set by AMI's root block snapshot
       encrypted                 = true
       kms_key_id                = data.aws_kms_key.master_key.arn

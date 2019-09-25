@@ -91,6 +91,23 @@ stage('Prepare') {
 		// These variables track our decision on whether or not to deploy to prod-like envs.
 		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
 		willDeployToProdEnvs = false
+
+		// Get the current commit id 
+		gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
+	}
+}
+
+/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
+value if the build is a PR as the BRANCH_NAME var is populated with the build 
+name during PR builds. 
+*/
+stage('Set Branch Name') {
+	script {
+		if (env.BRANCH_NAME.startsWith('PR')) {
+			gitBranchName = env.CHANGE_BRANCH
+		} else {
+			gitBranchName = env.BRANCH_NAME
+		}
 	}
 }
 
@@ -137,7 +154,7 @@ if (deployEnvironment == 'ccs') {
 		milestone(label: 'stage_build_app_amis_test_start')
 
 		node {
-			amiIds = scriptForDeploys.buildAppAmis('test', amiIds, appBuildResults)
+			amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 		}
 	}
 }
@@ -146,8 +163,6 @@ stage('Deploy to TEST') {
 	milestone(label: 'stage_deploy_test_start')
 
 	node {
-		gitBranchName = env.BRANCH_NAME
-		gitCommitId = env.GIT_COMMIT
 		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 
@@ -198,7 +213,7 @@ if (deployEnvironment == 'ccs') {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
 
 			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod-stg', amiIds, appBuildResults)
+				amiIds = scriptForDeploys.buildAppAmis('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	}
@@ -210,7 +225,7 @@ stage('Deploy to prod-stg') {
 			milestone(label: 'stage_deploy_prod_stg_start')
 
 			node {
-				scriptForDeploys.deploy('prod-stg', amiIds, appBuildResults)
+				scriptForDeploys.deploy('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	} else {
@@ -219,12 +234,13 @@ stage('Deploy to prod-stg') {
 }
 
 if (deployEnvironment == 'ccs') {
-	if (willDeployToProdEnvs) {
-		stage('Build App AMIs for PROD') {
+	stage('Build App AMIs for PROD') {
+		if (willDeployToProdEnvs && deployEnvironment != 'ccs') {
+			// Note: CCS prod deploys are disabled for the moment, and so this block is unreachable.
 			milestone(label: 'stage_build_app_amis_prod_start')
 
 			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod', amiIds, appBuildResults)
+				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	}
@@ -236,7 +252,7 @@ stage('Deploy to prod') {
 			milestone(label: 'stage_deploy_prod_start')
 
 			node {
-				scriptForDeploys.deploy('prod', amiIds, appBuildResults)
+				scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	} else {
