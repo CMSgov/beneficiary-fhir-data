@@ -132,7 +132,7 @@ stage('Test the Staging ENV') {
 
 		node {
 			insideAnsibleContainer {
-				sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=staging num_servers=${params.env_num_servers}\" --connection=paramiko"
+				sh "cd apps/bfd-server-test-perf/ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=staging num_servers=${params.env_num_servers}\" --connection=paramiko"
 			}
 		}
 	} else {
