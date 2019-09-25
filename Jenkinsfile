@@ -163,7 +163,6 @@ stage('Deploy to TEST') {
 	milestone(label: 'stage_deploy_test_start')
 
 	node {
-		gitCommitId = checkout(scm).GIT_COMMIT
 		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 
@@ -214,7 +213,6 @@ if (deployEnvironment == 'ccs') {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
 
 			node {
-				gitCommitId = checkout(scm).GIT_COMMIT
 				amiIds = scriptForDeploys.buildAppAmis('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
@@ -227,7 +225,6 @@ stage('Deploy to prod-stg') {
 			milestone(label: 'stage_deploy_prod_stg_start')
 
 			node {
-				gitCommitId = checkout(scm).GIT_COMMIT
 				scriptForDeploys.deploy('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
@@ -243,7 +240,6 @@ if (deployEnvironment == 'ccs') {
 			milestone(label: 'stage_build_app_amis_prod_start')
 
 			node {
-				gitCommitId = checkout(scm).GIT_COMMIT
 				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
@@ -256,8 +252,6 @@ stage('Deploy to prod') {
 			milestone(label: 'stage_deploy_prod_start')
 
 			node {
-				gitBranchName = env.BRANCH_NAME
-				gitCommitId = checkout(scm).GIT_COMMIT
 				scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
