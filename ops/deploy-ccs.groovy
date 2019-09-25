@@ -213,7 +213,7 @@ def extractAmiIdFromPackerManifest(File manifest) {
 		def manifestJson = new JsonSlurper().parseText(manifest.text)
 
 		// artifactId will be of the form $region:$amiId
-		return manifestJson.builds[0].artifact_id.split(":")[1]
+		return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
 	}
 }
 
