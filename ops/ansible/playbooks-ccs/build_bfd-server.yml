@@ -18,10 +18,6 @@
       include_vars:
         dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
-
-    - name: Apply base Cloudwatch Agent Role
-      import_role:
-        name: cloudwatch-agent-instrumented
       
     - name: Apply Blue Button Data Server Role
       import_role:

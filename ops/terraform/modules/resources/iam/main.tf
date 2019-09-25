@@ -48,3 +48,8 @@ resource "aws_iam_role_policy" "s3_policy" {
   }
   EOF
 }
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent_server_managed_policy_attachment" {
+  role       = aws_iam_role.instance.id
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
