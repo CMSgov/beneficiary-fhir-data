@@ -8,7 +8,7 @@ export WAR='{{ data_server_dir }}/{{ data_server_war | basename }}'
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
-LOGS_DIR='{{ data_server_dir }}'
+LOGS_DIR='{{ data_server_dir }}/'
 DB_URL='{{ data_server_db_url }}'
 DB_USERNAME='{{ data_server_db_username }}'
 DB_PASSWORD='{{ data_server_db_password }}'
