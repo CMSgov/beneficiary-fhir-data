@@ -1,5 +1,14 @@
 ---
 
+- name: Trigger Launch Handlers
+  debug:
+    msg: 'Launch handlers triggered.'
+  when: launch_enabled | default(false)
+  changed_when: true
+  notify:
+    - 'Enable BFD Server Service'
+    - 'Restart BFD Server Service'
+
 - name: Flush BFD Server Handlers
   meta: flush_handlers
 
