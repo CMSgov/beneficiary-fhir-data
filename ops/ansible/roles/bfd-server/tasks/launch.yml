@@ -1,5 +1,19 @@
 ---
 
+# This is hacky, but we apply this task twice: in install.yml and here. In the CCS environment, the
+# version of the script created by install.yml in the pre-ami stage will be broken, as it will not
+# yet know which DB URL to use. This fixes that.
+- name: Copy App Server Launcher Script
+  template:
+    src: bfd-server.sh.j2
+    dest: "{{ data_server_dir }}/bfd-server.sh"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rwx,o=rx
+  become: true
+  notify:
+    - 'Restart BFD Server Service'
+
 - name: Trigger Launch Handlers
   debug:
     msg: 'Launch handlers triggered.'
