@@ -37,11 +37,13 @@ def deployManagement(AmiIds amiIds) {
  * Deploys to the specified environment.
  *
  * @param envId the ID of the environment to deploy to
+ * @param gitBranchName the name of the Git branch this build is for
+ * @param gitCommitId the hash/ID of the Git commit that this build is for
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
  * @param appBuildResults the {@link AppBuildResults} containing the paths to the app binaries that were built
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
-def deploy(String envId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def deploy(String envId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 
 	// Ensure the Ansible image is ready to go.
 	insideAnsibleContainer {
