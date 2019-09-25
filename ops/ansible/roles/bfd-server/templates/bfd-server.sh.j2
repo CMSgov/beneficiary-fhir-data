@@ -15,23 +15,23 @@ DB_PASSWORD='{{ data_server_db_password }}'
 DB_MAX_CONNECTIONS='{{ data_server_db_max_connections }}'
 
 # The New Relic agent running in the WAR needs some additional environment variables, so set those.
-{%- if data_server_new_relic_license_key is defined -%}
+{% if data_server_new_relic_license_key is defined %}
 export NEW_RELIC_LICENSE_KEY='{{ data_server_new_relic_license_key }}'
 export NEW_RELIC_LOG_FILE_PATH="${LOGS_DIR}"
 export NEW_RELIC_HIGH_SECURITY='true'
-{%- if data_server_proxy_host is defined -%}
+{% if data_server_proxy_host is defined %}
 export NEW_RELIC_PROXY_HOST='{{ data_server_proxy_host }}'
-{%- endif -%}
-{%- if data_server_proxy_port is defined -%}
+{% endif %}
+{% if data_server_proxy_port is defined %}
 export NEW_RELIC_PROXY_PORT='{{ data_server_proxy_port }}'
-{%- endif -%}
-{%- if data_server_new_relic_app_name is defined -%}
+{% endif %}
+{% if data_server_new_relic_app_name is defined %}
 export NEW_RELIC_APP_NAME='{{ data_server_new_relic_app_name }}'
-{%- endif -%}
-{%- if data_server_new_relic_environment is defined -%}
+{% endif %}
+{% if data_server_new_relic_environment is defined %}
 export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
-{%- endif -%}
-{%- endif -%}
+{% endif %}
+{% endif %}
 
 # Set some additional variables.
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
