@@ -1,5 +1,26 @@
 ---
 
+# Duplicating this task from the `appserver_install.yml` file is a temporary hack to support
+# switching between JBoss and Jetty, while the switch to Jetty is still in development.
+- name: Create App Server Service Definition
+  template:
+    src: bluebutton-appserver.service.j2
+    dest: "/etc/systemd/system/{{ data_server_appserver_service }}.service"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+  notify:
+    - 'Enable App Server Service'
+    - 'Restart App Server Service'
+  tags: 
+    - pre-ami
+- name: Reload Service Daemons
+  command: /usr/bin/systemctl daemon-reload
+  become: true
+  tags: 
+    - pre-ami
+
 - name: Create App Server 'standalone.conf' File
   template:
     src: standalone.conf.j2
