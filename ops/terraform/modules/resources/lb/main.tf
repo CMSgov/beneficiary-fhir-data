@@ -11,7 +11,7 @@ locals {
 # Find context
 ##
 
-# Account 
+# Accounts 
 #
 data "aws_caller_identity" "current" {}
 data "aws_elb_service_account" "main" {}
@@ -85,7 +85,7 @@ resource "aws_security_group" "lb" {
   name            = "bfd-${var.env_config.env}-${var.role}-lb"
   description     = "Allow access to the ${var.role} load-balancer"
   vpc_id          = var.env_config.vpc_id
-  tags            = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
+  tags            = merge({Name="bfd-${var.env_config.env}-${var.role}-lb"}, local.tags)
 
   ingress {
     from_port     = var.ingress.port
