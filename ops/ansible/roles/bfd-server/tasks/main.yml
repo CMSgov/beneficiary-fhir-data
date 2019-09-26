@@ -6,7 +6,7 @@
   set_fact:
     launch_enabled: true
   tags:
-    post-ami
+    - post-ami
 
 - name: Import Install Tasks
   import_tasks: install.yml
