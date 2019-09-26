@@ -28,14 +28,6 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
-# S3 buckets
-#
-# Bucket for access logs
-#
-data "aws_s3_bucket" "admin" {
-  name  = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
-}
-
 ##
 # Create resources
 ##
@@ -47,35 +39,59 @@ data "aws_s3_bucket" "admin" {
 resource "aws_elb" "main" {
   name                  = "bfd-${var.env_config.env}-${var.role}"
   tags                  = local.tags
-  load_balancer_type    = "TCP"
 
-  internal                          = true
-  subnets                           = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
-  security_groups                   = var.security_groups
+  internal              = true
+  subnets               = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
+  security_groups       = [aws_security_group.lb.id]
 
-  enable_cross_zone_load_balancing  = false   # Match HealthApt
-  idle_timeout                      = 60      # (seconds) Match HealthApt
-  connection_draining               = false   # Match HealthApt
+  cross_zone_load_balancing = false   # Match HealthApt
+  idle_timeout              = 60      # (seconds) Match HealthApt
+  connection_draining       = false   # Match HealthApt
 
   listener {
     lb_protocol         = "TCP"
-    lb_port             = var.ingress_port
+    lb_port             = var.ingress.port
     instance_protocol   = "TCP"
-    instance_port       = var.egress_port
+    instance_port       = var.egress.port
   }
 
   health_check {
     healthy_threshold   = 5   # Match HealthApt
     unhealthy_threshold = 2   # Match HealthApt
-    target              = "TCP:${var.egress_port}"
+    target              = "TCP:${var.egress.port}"
     interval            = 10  # (seconds) Match HealthApt
     timeout             = 5   # (seconds) Match HealthApt
   } 
 
   access_logs {
     enabled             = true
-    bucket              = data.aws_s3_bucket.admin.name
+    bucket              = var.log_bucket
     bucket_prefix       = "elb_access_logs/pd"
     interval            = 5   # (minutes) Match HealthApt      
+  }
+}
+
+# Security Group for LB
+#
+resource "aws_security_group" "lb" {
+  name            = "bfd-${var.env_config.env}-${var.role}-lb"
+  description     = "Allow access to the ${var.role} load-balancer"
+  vpc_id          = var.env_config.vpc_id
+  tags            = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
+
+  ingress {
+    from_port     = var.ingress.port
+    to_port       = var.ingress.port
+    protocol      = "tcp"
+    cidr_blocks   = var.ingress.cidr_blocks
+    description   = var.ingress.description
+  }
+
+  egress {
+    from_port     = var.egress.port
+    to_port       = var.egress.port
+    protocol      = "tcp"
+    cidr_blocks   = var.egress.cidr_blocks
+    description   = var.egress.description
   }
 }
