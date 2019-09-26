@@ -88,6 +88,7 @@
       vars:
         data_server_dir: /u01/jboss
         data_server_user: "{{ vault_data_server_user }}"
+        data_server_appserver_service: jboss
         data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:/u01/jboss/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
         # Note: the `data_server_war` variable should have been provided via `--extra-vars` on the command line.
