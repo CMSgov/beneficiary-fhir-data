@@ -13,25 +13,25 @@ public final class AppConfiguration implements Serializable {
    * The name of the environment variable that should be used to provide the {@link #getPort()}
    * value.
    */
-  public static final String ENV_VAR_KEY_PORT = "PORT";
+  public static final String ENV_VAR_KEY_PORT = "BFD_PORT";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #getKeystore()}
    * value.
    */
-  public static final String ENV_VAR_KEY_KEYSTORE = "KEYSTORE";
+  public static final String ENV_VAR_KEY_KEYSTORE = "BFD_KEYSTORE";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getTruststore()} value.
    */
-  public static final String ENV_VAR_KEY_TRUSTSTORE = "TRUSTSTORE";
+  public static final String ENV_VAR_KEY_TRUSTSTORE = "BFD_TRUSTSTORE";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #getWar()}
    * value.
    */
-  public static final String ENV_VAR_KEY_WAR = "WAR";
+  public static final String ENV_VAR_KEY_WAR = "BFD_WAR";
 
   private final int port;
   private final String keystore;

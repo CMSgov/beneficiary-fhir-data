@@ -158,10 +158,10 @@ else
 fi
 
 # Launch the server in the background.
-PORT="${serverPortHttps}" \
-	KEYSTORE="${keyStore}" \
-	TRUSTSTORE="${trustStore}" \
-	WAR="${warArtifact}" \
+BFD_PORT="${serverPortHttps}" \
+	BFD_KEYSTORE="${keyStore}" \
+	BFD_TRUSTSTORE="${trustStore}" \
+	BFD_WAR="${warArtifact}" \
 	"${javaHome}/bin/java" \
 	"${maxHeapArg}" \
 	"-Dbfd-server-${bfdServerId}" \
