@@ -122,9 +122,12 @@
         ec2_elbs: "{{ item }}"
         instance_id: "{{ ansible_ec2_instance_id }}"
         state: present
-        # Give the instance time to be marked as healthy, if needed.
-        wait_timeout: 60
       delegate_to: localhost
+      # Give the instance time to be marked as healthy, if needed.
+      retries: 60
+      delay: 1
+      register: elb_add_bfd_server_back
+      until: elb_add_bfd_server_back is succeeded
       loop: "{{ ec2_elbs }}"
 
     - name: Configure CloudWatch Logs Agent
