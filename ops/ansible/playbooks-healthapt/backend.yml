@@ -122,6 +122,8 @@
         ec2_elbs: "{{ item }}"
         instance_id: "{{ ansible_ec2_instance_id }}"
         state: present
+        # Give the instance time to be marked as healthy, if needed.
+        wait_timeout: 60
       delegate_to: localhost
       loop: "{{ ec2_elbs }}"
 
