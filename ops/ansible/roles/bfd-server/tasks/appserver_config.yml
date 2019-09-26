@@ -15,6 +15,11 @@
     - 'Restart App Server Service'
   tags: 
     - pre-ami
+- name: Reload Service Daemons
+  command: /usr/bin/systemctl daemon-reload
+  become: true
+  tags: 
+    - pre-ami
 
 - name: Create App Server 'standalone.conf' File
   template:
