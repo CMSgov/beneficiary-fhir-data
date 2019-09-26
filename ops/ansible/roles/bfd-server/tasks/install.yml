@@ -173,12 +173,10 @@
   notify:
     - 'Restart BFD Server Service'
 
+# FIXME: Switch to the maven_artifact module after we move to the CCS.
 - name: Download New Relic Java Agent Bundle
-  maven_artifact:
-    group_id: com.newrelic.agent.java
-    artifact_id: newrelic-java
-    extension: zip
-    version: 5.6.0
+  get_url:
+    url: 'https://search.maven.org/remotecontent?filepath=com/newrelic/agent/java/newrelic-java/5.6.0/newrelic-java-5.6.0.zip'
     dest: /tmp/newrelic-java.zip
 
 - name: Unzip New Relic Java Agent Bundle
