@@ -76,6 +76,10 @@ data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
 }
 
+data "aws_s3_bucket" "elb" {
+  bucket = "bfd-${var.env_config.env}-elb-${data.aws_caller_identity.current.account_id}"
+}
+
 # CloudWatch
 #
 data "aws_sns_topic" "cloudwatch_alarms" {
@@ -177,12 +181,12 @@ module "fhir_lb" {
   env_config      = local.env_config
   role            = "fhir"
   layer           = "dmz"
-  log_bucket      = data.aws_s3_bucket.admin.id
+  log_bucket      = data.aws_s3_bucket.elb.id
 
   ingress = {
-    description   = "From VPC peerings and MGMT VPC"
+    description   = "From VPC peerings, the MGMT VPC, and self"
     port          = 443
-    cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block])
+    cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
   }
 
   egress = {
@@ -250,7 +254,7 @@ module "fhir_asg" {
     vpn_sg        = data.aws_security_group.vpn.id
     tool_sg       = data.aws_security_group.tools.id
     remote_sg     = data.aws_security_group.remote.id
-    ci_cidrs      = ["10.252.40.0/21"]
+    ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
   }
 }
 
@@ -280,6 +284,6 @@ module "etl_instance" {
     vpn_sg        = data.aws_security_group.vpn.id
     tool_sg       = data.aws_security_group.tools.id
     remote_sg     = data.aws_security_group.remote.id
-    ci_cidrs      = ["10.252.40.0/21"]
+    ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
   }
 }

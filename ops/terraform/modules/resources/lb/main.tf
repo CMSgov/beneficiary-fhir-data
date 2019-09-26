@@ -4,6 +4,7 @@
 #
 locals {
   tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
+  log_prefix  = "${var.role}_elb_access_logs" 
 }
 
 ##
@@ -13,6 +14,7 @@ locals {
 # Account 
 #
 data "aws_caller_identity" "current" {}
+data "aws_elb_service_account" "main" {}
 
 # Subnets
 # 
@@ -26,6 +28,12 @@ data "aws_subnet" "app_subnets" {
     name    = "tag:Layer"
     values  = [var.layer] 
   }
+}
+
+# S3 admin bucket for logs
+#
+data "aws_s3_bucket" "logs" {
+  bucket = var.log_bucket
 }
 
 ##
@@ -64,9 +72,9 @@ resource "aws_elb" "main" {
   } 
 
   access_logs {
-    enabled             = true
+    enabled             = false
     bucket              = var.log_bucket
-    bucket_prefix       = "elb_access_logs/pd"
+    bucket_prefix       = local.log_prefix
     interval            = 5   # (minutes) Match HealthApt      
   }
 }
@@ -94,4 +102,27 @@ resource "aws_security_group" "lb" {
     cidr_blocks   = var.egress.cidr_blocks
     description   = var.egress.description
   }
+}
+
+# Policy for S3 log access
+# 
+resource "aws_s3_bucket_policy" "logs" {
+  bucket = data.aws_s3_bucket.logs.id
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Id": "LBAccessLogs",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+          "AWS": ["${data.aws_elb_service_account.main.arn}"]
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${var.log_bucket}/*"
+    }
+  ]
+}
+POLICY
 }
