@@ -28,7 +28,7 @@ data_server_ssl_client_cas: []
 data_server_ssl_client_certificates: []
 
 # The max size of the DB connection pool for the Blue Button Data Server.
-data_server_db_max_connections: 100
+data_server_db_max_connections: 40
 
 # Environment variables to set on the app server
 os_environment_variables:
