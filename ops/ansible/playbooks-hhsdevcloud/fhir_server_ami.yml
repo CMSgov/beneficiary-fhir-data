@@ -90,7 +90,7 @@
         data_server_db_url: "jdbc:postgresql://{{ hostvars['localhost']['backend_postgres_endpoint'] }}:{{ hostvars['localhost']['backend_postgres_port'] }}/{{ backend_db_name }}"
         data_server_db_username: "{{ backend_postgres_master_username }}"
         data_server_db_password: "{{ backend_postgres_master_password }}"
-        #data_server_db_max_connections: (see group_vars/all/main.yml)
+        #data_server_db_connections_max: (see group_vars/all/main.yml)
 
 - name: Configure AWS CloudWatch Logs Agent
   hosts: backend_fhir_master
