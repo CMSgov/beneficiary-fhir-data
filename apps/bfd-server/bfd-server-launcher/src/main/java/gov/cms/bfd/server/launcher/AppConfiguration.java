@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 /** Models the configuration options for the launcher. */
 public final class AppConfiguration implements Serializable {
@@ -137,17 +138,21 @@ public final class AppConfiguration implements Serializable {
    */
   private static int readEnvVarAsInt(String envVarKey) {
     String intText = System.getenv(envVarKey);
-    if (intText == null || intText.isEmpty())
-      throw new AppConfigurationException(
-          String.format("Missing value for configuration environment variable '%s'.", envVarKey));
-    int intValue;
-    try {
-      intValue = Integer.parseInt(intText);
-    } catch (NumberFormatException e) {
-      throw new AppConfigurationException(
-          String.format("Invalid value for configuration environment variable '%s'.", envVarKey));
-    }
-    return intValue;
+    return Optional.ofNullable(intText)
+        .map(
+            v -> {
+              try {
+                return Integer.parseInt(v);
+              } catch (Throwable t) {
+                return null;
+              }
+            })
+        .orElseThrow(
+            () ->
+                new AppConfigurationException(
+                    String.format(
+                        "Missing or invalid value for configuration environment variable '%s': '%s'.",
+                        envVarKey, intText)));
   }
 
   /**
@@ -156,10 +161,17 @@ public final class AppConfiguration implements Serializable {
    */
   private static Path readEnvVarAsPath(String envVarKey) {
     String pathText = System.getenv(envVarKey);
-    if (pathText == null || pathText.isEmpty())
-      throw new AppConfigurationException(
-          String.format("Missing value for configuration environment variable '%s'.", envVarKey));
-    Path path = Paths.get(pathText);
-    return path;
+    return Optional.ofNullable(pathText)
+        .filter(v -> !v.isEmpty())
+        .map(
+            v -> {
+              return Paths.get(pathText);
+            })
+        .orElseThrow(
+            () ->
+                new AppConfigurationException(
+                    String.format(
+                        "Missing or invalid value for configuration environment variable '%s': '%s'.",
+                        envVarKey, pathText)));
   }
 }
