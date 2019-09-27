@@ -4,12 +4,18 @@
 # Reloads the system's service definitions.
 ##
 
+# Silly, but prevents Ansible from reporting that the handler is missing when launch_enabled isn't
+# true.
+- name: Report Reload Service Enablement
+  debug:
+    msg: "Enable service?: {{ launch_enabled | default(false) }}"
+
+- name: Reload Service Daemons
+  command: /usr/bin/systemctl daemon-reload
+  become: true
+  when: launch_enabled | default(false)
+
 - name: Enable BFD Server Service
-  block:
-    - name: Reload Service Daemons
-      command: /usr/bin/systemctl daemon-reload
-      become: true
-    - name: Enable BFD Server Service Command
-      command: /usr/bin/systemctl --system enable "{{ data_server_appserver_service }}"
-      become: true
+  command: /usr/bin/systemctl --system enable "{{ data_server_appserver_service }}"
+  become: true
   when: launch_enabled | default(false)
