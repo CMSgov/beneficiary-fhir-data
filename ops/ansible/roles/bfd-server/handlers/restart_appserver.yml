@@ -9,16 +9,19 @@
 - name: Report Restart Service Enablement
   debug:
     msg: "Restart service?: {{ launch_enabled | default(false) }}"
+  listen: Restart BFD Server Service
 
-- name: Restart and Wait for BFD Server Service
-  block:
-    - name: Restart BFD Server Service
-      service:
-        name: "{{ data_server_appserver_service }}"
-        state: restarted
-      become: true
-    - name: Wait for BFD Server Service Ready
-      wait_for:
-        port: "{{ data_server_appserver_https_port }}"
-        timeout: 30
+- name: Restart BFD Server Service Task
+  service:
+    name: "{{ data_server_appserver_service }}"
+    state: restarted
+  become: true
+  listen: Restart BFD Server Service
+  when: launch_enabled | default(false)
+
+- name: Wait for BFD Server Service Ready
+  wait_for:
+    port: "{{ data_server_appserver_https_port }}"
+    timeout: 30
+  listen: Restart BFD Server Service
   when: launch_enabled | default(false)
