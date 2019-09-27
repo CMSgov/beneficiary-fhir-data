@@ -424,7 +424,13 @@ module "etl" {
   log_bucket          = module.admin.id
 }
 
-# IAM policy to allow read-write access to ETL bucket
+# IAM policy, user, and attachment to allow external read-write
+# access to ETL bucket
+#
+# NOTE: We only need this for production, however it is ok to
+# provision these resources for all environments since the mechanism
+# by which we control access is through a manually provisioned
+# access key
 #
 resource "aws_iam_policy" "etl_rw_s3" {
   name        = "bfd-${local.env_config.env}-etl-rw-s3"
@@ -460,8 +466,6 @@ resource "aws_iam_policy" "etl_rw_s3" {
 EOF
 }
 
-# IAM user to allow external access to ETL bucket
-#
 resource "aws_iam_user" "etl" {
   name       = "bfd-${local.env_config.env}-etl"
 }
