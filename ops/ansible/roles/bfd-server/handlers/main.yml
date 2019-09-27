@@ -1,7 +1,7 @@
 ---
 
-- name: Enable BFD Server Service
+- name: 'Enable BFD Server Service'
   import_tasks: enable_appserver.yml
 
-- name: Restart BFD Server Service
+- name: 'Restart BFD Server Service'
   import_tasks: restart_appserver.yml

@@ -15,7 +15,7 @@
   become: true
   when: launch_enabled | default(false)
 
-- name: Enable App Server Service
+- name: Enable BFD Server Service
   command: /usr/bin/systemctl --system enable "{{ data_server_appserver_service }}"
   become: true
   when: launch_enabled | default(false)
