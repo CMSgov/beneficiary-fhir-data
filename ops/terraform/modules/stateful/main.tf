@@ -414,6 +414,15 @@ module "admin" {
   acl                 = "log-delivery-write"
 }
 
+# S3 Admin bucket for logs and other adminstrative 
+#
+module "elb" { 
+  source              = "../resources/s3"
+  role                = "elb"
+  env_config          = local.env_config
+  kms_key_id          = data.aws_kms_key.master_key.arn
+}
+
 # S3 bucket for ETL files
 #
 module "etl" {

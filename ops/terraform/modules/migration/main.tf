@@ -28,7 +28,7 @@ data "aws_vpc" "main" {
 
 # FHIR ELB
 #
-data "aws_lb" "fhir" {
+data "aws_elb" "fhir" {
   name = "bfd-${local.env}-fhir"
 }
 
@@ -49,8 +49,8 @@ module "main" {
 
   # The apex record just goes the FHIR server
   apex_record = {
-    alias         = data.aws_lb.fhir.dns_name 
-    zone_id       = data.aws_lb.fhir.zone_id
+    alias         = data.aws_elb.fhir.dns_name 
+    zone_id       = data.aws_elb.fhir.zone_id
   }
 
   # The health-apt record goes to the health apt service
@@ -69,8 +69,8 @@ module "weighted_pairs" {
   zone_id         = module.main.zone_id
 
   a_set           = "ccs"
-  a_alias         = data.aws_lb.fhir.dns_name 
-  a_zone_id       = data.aws_lb.fhir.zone_id
+  a_alias         = data.aws_elb.fhir.dns_name 
+  a_zone_id       = data.aws_elb.fhir.zone_id
 
   b_set           = "health-apt"
   b_alias         = local.health_apt[local.env].dns

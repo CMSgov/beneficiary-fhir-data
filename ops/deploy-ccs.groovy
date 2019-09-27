@@ -186,6 +186,8 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
  * Deploys to the specified environment.
  *
  * @param envId the ID of the environment to deploy to
+ * @param gitBranchName the name of the Git branch this build is for
+ * @param gitCommitId the hash/ID of the Git commit that this build is for
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
  * @param appBuildResults (not used in the CCS environment; this stuff is all baked into the AMIs there, instead)
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
@@ -221,7 +223,7 @@ def extractAmiIdFromPackerManifest(File manifest) {
 		def manifestJson = new JsonSlurper().parseText(manifest.text)
 
 		// artifactId will be of the form $region:$amiId
-		return manifestJson.builds[0].artifact_id.split(":")[1]
+		return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
 	}
 }
 

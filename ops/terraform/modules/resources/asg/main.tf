@@ -169,7 +169,7 @@ resource "aws_autoscaling_group" "main" {
   health_check_grace_period = 300
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
-  target_group_arns         = var.lb_config == null ? [] : [var.lb_config.tg_arn]
+  load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
 
   launch_template {
     name                    = aws_launch_template.main.name
