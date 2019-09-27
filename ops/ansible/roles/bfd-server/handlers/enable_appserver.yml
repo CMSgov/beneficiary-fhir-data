@@ -4,6 +4,12 @@
 # Reloads the system's service definitions.
 ##
 
+# Silly, but prevents Ansible from reporting that the handler is missing when launch_enabled isn't
+# true.
+- name: Report Reload Service Enablement
+  debug:
+    msg: "Enable service?: {{ launch_enabled | default(false) }}"
+
 - name: Reload Service Daemons
   command: /usr/bin/systemctl daemon-reload
   become: true
