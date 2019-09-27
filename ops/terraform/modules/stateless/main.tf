@@ -4,11 +4,31 @@
 #
 
 locals {
-  azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config      = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
-  port            = 7443
-  cw_period       = 60    # Seconds
-  cw_eval_periods = 3
+  azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  env_config        = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  port              = 7443
+  cw_period         = 60    # Seconds
+  cw_eval_periods   = 3
+
+  # Add new peerings here
+  vpc_peerings_by_env = {
+    test            = [
+      "bfd-test-vpc-to-bluebutton-dev", "bfd-test-vpc-to-bluebutton-test"
+    ],
+    prod            = [
+      "bfd-prod-vpc-to-mct-prod-vpc", "bfd-prod-vpc-to-mct-prod-dr-vpc", 
+      "bfd-prod-vpc-to-dpc-prod-vpc", 
+      "bfd-prod-vpc-to-dpc-prod-vpc", 
+      "bfd-prod-vpc-to-bcda-prod-vpc"
+    ],
+    prod-sbx        = [
+      "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx", "bfd-prod-sbx-to-bcda-opensbx",
+      "bfd-prod-sbx-vpc-to-bluebutton-dev", "bfd-prod-sbx-vpc-to-bluebutton-impl", "bfd-prod-sbx-vpc-to-bluebutton-test",
+      "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc",
+      "bfd-prod-sbx-vpc-to-mct-imp-vpc", "bfd-prod-sbx-vpc-to-mct-test-vpc"
+    ]
+  }
+  vpc_peerings      = local.vpc_peerings_by_env[var.env_config.env]
 }
 
 # Find resources defined outside this script 
@@ -18,16 +38,30 @@ locals {
 #
 data "aws_vpc" "main" {
   filter {
-    name = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpc"]
+    name    = "tag:Name"
+    values  = ["bfd-${var.env_config.env}-vpc"]
   }
+}
+
+data "aws_vpc" "mgmt" {
+  filter {
+    name    = "tag:Name"
+    values  = ["bfd-mgmt-vpc"]
+  }
+}
+
+# VPC peerings
+#
+data "aws_vpc_peering_connection" "peers" {
+  count     = length(local.vpc_peerings)
+  tags      = {Name=local.vpc_peerings[count.index]}
 }
 
 # DNS
 #
 data "aws_route53_zone" "local_zone" {
-  name         = "bfd-${var.env_config.env}.local"
-  private_zone = true
+  name          = "bfd-${var.env_config.env}.local"
+  private_zone  = true
 }
 
 # S3 Buckets
@@ -40,6 +74,10 @@ data "aws_s3_bucket" "etl" {
 
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+}
+
+data "aws_s3_bucket" "elb" {
+  bucket = "bfd-${var.env_config.env}-elb-${data.aws_caller_identity.current.account_id}"
 }
 
 # CloudWatch
@@ -135,19 +173,27 @@ resource "aws_iam_role_policy_attachment" "etl_iam_ansible_vault_pw_ro_s3" {
   policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
-
 # NLB for the FHIR server (SSL terminated by the FHIR server)
 #
 module "fhir_lb" {
   source = "../resources/lb"
-  load_balancer_type = "network"
 
   env_config      = local.env_config
   role            = "fhir"
   layer           = "dmz"
-  log_bucket      = data.aws_s3_bucket.admin.id
-  ingress_port    = 443
-  egress_port     = local.port
+  log_bucket      = data.aws_s3_bucket.elb.id
+
+  ingress = {
+    description   = "From VPC peerings, the MGMT VPC, and self"
+    port          = 443
+    cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+  }
+
+  egress = {
+    description   = "To VPC instances"
+    port          = local.port
+    cidr_blocks   = [data.aws_vpc.main.cidr_block]
+  }    
 }
 
 module "lb_alarms" {
@@ -186,9 +232,7 @@ module "fhir_asg" {
     sns_topic_arn = ""
   }
 
-  # TODO: Dummy values to get started
   launch_config   = {
-
     instance_type   = "m5.2xlarge" 
     volume_size     = 100 # GB
     ami_id          = var.fhir_ami 
@@ -210,7 +254,7 @@ module "fhir_asg" {
     vpn_sg        = data.aws_security_group.vpn.id
     tool_sg       = data.aws_security_group.tools.id
     remote_sg     = data.aws_security_group.remote.id
-    ci_cidrs      = ["10.252.40.0/21"]
+    ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
   }
 }
 
@@ -224,9 +268,7 @@ module "etl_instance" {
   layer           = "data"
   az              = "us-east-1b" # Same as the master db
 
-  # TODO: Dummy values to get started
   launch_config   = {
-
     instance_type = "m5.2xlarge"
     volume_size   = 100 # GB 
     ami_id        = var.etl_ami 
@@ -242,6 +284,6 @@ module "etl_instance" {
     vpn_sg        = data.aws_security_group.vpn.id
     tool_sg       = data.aws_security_group.tools.id
     remote_sg     = data.aws_security_group.remote.id
-    ci_cidrs      = ["10.252.40.0/21"]
+    ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
   }
 }

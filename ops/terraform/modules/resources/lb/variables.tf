@@ -8,11 +8,6 @@ variable "role" {
   type        = string
 }
 
-variable "load_balancer_type" {
-  type        = string
-  default     = "application"
-}
-
 variable "layer" {
   description = "app or data"
   type        = string 
@@ -22,11 +17,12 @@ variable "log_bucket" {
   type        = string
 }
 
-variable "ingress_port" {
-  type        = number
+variable "ingress" {
+  description = "Ingress port and cidr blocks"
+  type        = object({description=string, port=number, cidr_blocks=list(string)})
 }
 
-variable "egress_port" {
-  type        = number
+variable "egress" {
+  description = "Egress port and cidr blocks"
+  type        = object({description=string, port=number, cidr_blocks=list(string)})
 }
-
