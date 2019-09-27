@@ -143,8 +143,8 @@
         -H{{ vault_proxy_host }}
         -P{{ vault_proxy_port }}
         -Gfhir_server={{ fhir_server }} 
-        -Jthread_count={{ thread_count }} 
-        -Jthread_loops={{ thread_loops }} 
+        -Gthread_count={{ thread_count }} 
+        -Gthread_loops={{ thread_loops }} 
         -Gcontinue_forever={{ continue_forever | bool | lower }} 
         -Gscheduler={{ scheduler | bool | lower }} 
         -Gduration={{ duration }}"
