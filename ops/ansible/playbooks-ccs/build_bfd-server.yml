@@ -10,6 +10,7 @@
   gather_facts: no
   vars:
     ansible_ssh_pipelining: no
+    bfd_server_dir: '/usr/local/bfd-server'
     env: "test"
 
   tasks:
@@ -27,11 +28,10 @@
       import_role:
         name: bfd-server
       vars:
-        data_server_dir: /jboss
+        data_server_dir: "{{ bfd_server_dir }}"
         data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
         data_server_container_name: jboss-eap-7.0
-        data_server_appserver_service: jboss
-        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:/jboss/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution"
+        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:{{ bfd_server_dir }}/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
         data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
         data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
@@ -51,7 +51,7 @@
       copy:
         # Note: this JKS file is encrypted via the Ansible Vault 
         src: "{{ data_server_appserver_keystore }}"
-        dest: '/jboss/bluebutton-appserver-keystore.jks'
+        dest: "{{ bfd_server_dir }}/bluebutton-appserver-keystore.jks"
         force: yes # overwrite the existing keystore
       tags:
         - pre-ami
@@ -61,7 +61,7 @@
         # Note: This PEM file is encrypted within the project via Ansible Vault, which will
         # automagically decrypt it as part of the copy operation.
         src: "{{ data_server_ssl_client_certificate_test }}"
-        dest: '/jboss/bluebutton-backend-test-data-server-client-test-keypair.pem'
+        dest: "{{ bfd_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
         owner: root
         group: root
         mode: 'u=rw,g=,o='
