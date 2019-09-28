@@ -182,6 +182,7 @@ public final class DataServerLauncherApp {
     JettyLogbackRequestLogImpl requestLog = new JettyLogbackRequestLogImpl();
     requestLog.setName("access.log");
     requestLog.setResource("/logback-access.xml");
+    requestLog.setQuiet(true);
     requestLogHandler.setRequestLog(requestLog);
 
     /*
