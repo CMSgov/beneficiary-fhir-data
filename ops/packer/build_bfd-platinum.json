@@ -23,7 +23,9 @@
       "tags": {
         "Name": "bfd-platinum-{{isotime \"20060102030405\"}}",
         "Application": "bfd-platinum"
-      }
+      },
+      "encrypt_boot": true,
+      "kms_key_id": "076b1eb1-2fe3-45d3-a8c8-dae8c26d4e8c"
     }
   ],
   "provisioners": [{
