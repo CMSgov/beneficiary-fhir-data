@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# The launcher picks up its config from environment variables, so set those.
+export BFD_PORT='{{ data_server_appserver_https_port }}'
+export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.jks'
+export BFD_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.jks'
+export BFD_WAR='{{ data_server_dir }}/{{ data_server_war | basename }}'
+
+# The WAR picks up its config from Java system properties, so set some variables we can use for
+# those.
+LOGS_DIR='{{ data_server_dir }}/'
+DB_URL='{{ data_server_db_url }}'
+DB_USERNAME='{{ data_server_db_username }}'
+DB_PASSWORD='{{ data_server_db_password }}'
+DB_CONNECTIONS_MAX='{{ data_server_db_connections_max }}'
+
+# The New Relic agent running in the WAR needs some additional environment variables, so set those.
+{% if data_server_new_relic_license_key is defined %}
+export NEW_RELIC_LICENSE_KEY='{{ data_server_new_relic_license_key }}'
+export NEW_RELIC_LOG_FILE_PATH="${LOGS_DIR}"
+export NEW_RELIC_HIGH_SECURITY='true'
+{% if data_server_proxy_host is defined %}
+export NEW_RELIC_PROXY_HOST='{{ data_server_proxy_host }}'
+{% endif %}
+{% if data_server_proxy_port is defined %}
+export NEW_RELIC_PROXY_PORT='{{ data_server_proxy_port }}'
+{% endif %}
+{% if data_server_new_relic_app_name is defined %}
+export NEW_RELIC_APP_NAME='{{ data_server_new_relic_app_name }}'
+{% endif %}
+{% if data_server_new_relic_environment is defined %}
+export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
+{% endif %}
+{% endif %}
+
+# Set some additional variables.
+JVM_ARGS='{{ data_server_appserver_jvmargs }}'
+
+# 3... 2... 1... launch!
+java \
+  -javaagent:{{ data_server_dir }}/newrelic.jar \
+  ${JVM_ARGS} \
+  "-DbfdServer.logs.dir=${LOGS_DIR}" \
+  "-DbfdServer.db.url=${DB_URL}" \
+  "-DbfdServer.db.username=${DB_USERNAME}" \
+  "-DbfdServer.db.password=${DB_PASSWORD}" \
+  "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
+  -jar "{{ data_server_dir }}/{{ data_server_launcher | basename }}" \
+  >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1

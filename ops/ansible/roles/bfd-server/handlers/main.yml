@@ -1,8 +1,10 @@
 ---
 
-- name: Enable App Server Service
-  include: enable_appserver.yml
+##
+# Note: With these imports, Ansible will act as though all the imported tasks were just listed in
+# this file, instead. They still have to have name or listen properties that match the topics being
+# notified.
+##
 
-- name: Restart App Server Service
-  include: restart_appserver.yml
-
+- import_tasks: enable_appserver.yml
+- import_tasks: restart_appserver.yml

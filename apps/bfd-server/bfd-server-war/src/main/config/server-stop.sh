@@ -28,11 +28,6 @@ if [[ "${cygwin}" = true ]]; then
 	source /etc/profile
 fi
 
-# Constants.
-serverVersion='8.1.0.Final'
-serverInstall="wildfly-${serverVersion}"
-serverConnectTimeoutMilliseconds=$((30 * 1000))
-
 # Calculate the directory that this script is in.
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -47,7 +42,6 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 targetDirectory=
-serverPortManagement=
 while true; do
 	case "$1" in
 		-t )
@@ -68,19 +62,9 @@ cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
 workDirectory="${targetDirectory}/server-work"
-serverPortsFile="${workDirectory}/server-ports.properties"
 bfdServerIdFile="${workDirectory}/bfd-server-id.txt"
-serverHome="${workDirectory}/${serverInstall}"
 serverLogRun="${workDirectory}/server-console.log"
 serverLogStop="${workDirectory}/server-stop.log"
-
-# Check for required files.
-for f in "${serverPortsFile}"; do
-	if [[ ! -f "${f}" ]]; then
-		>&2 echo "The following file is required but is missing: '${f}'."
-		exit 1
-	fi
-done
 
 # Read bfdServerId from a file.
 bfdServerId=
@@ -89,35 +73,22 @@ if [[ -f "${bfdServerIdFile}" ]]; then
 fi
 if [[ -z "${bfdServerId}" ]]; then >&2 echo "No server ID found in '${bfdServerIdFile}'."; exit 1; fi
 
-# Also try to read serverPortManagement from a file.
-if [[ -f "${serverPortsFile}" ]]; then
-	serverPortManagement=$(grep "^server.port.management=" "${serverPortsFile}" | cut -d'=' -f2 )
-fi
-if [[ -z "${serverPortManagement}" ]]; then >&2 echo "Server management port not specified in '${serverPortsFile}'."; exit 1; fi
-
 # If the server isn't actually running, just exit.
-serverPids=$(pgrep -f ".*java.*-Dbfd-server-${bfdServerId}.*jboss-modules\.jar.*")
+serverPids=$(pgrep -f ".*java.*-Dbfd-server-${bfdServerId}.*")
 if [[ -z "${serverPids}" ]]; then echo "No '-Dbfd-server-${bfdServerId}' processes found to stop."; exit 0; fi
 
-# Use the Wildfly CLI to stop the server.
-"${serverHome}/bin/jboss-cli.sh" \
-	--connect \
-	--controller=localhost:${serverPortManagement} \
-	--timeout=${serverConnectTimeoutMilliseconds} \
-	--command=shutdown \
-	&> "${serverLogStop}"
+# Stop the server.
+>&2 echo "Sending KILL signal to all '-Dbfd-server-${bfdServerId}' processes."
+pkill -TERM -f ".*java.*-Dbfd-server-${bfdServerId}.*"
+>&2 echo "Server processes sent TERM signal."
 
 # Watch the server log to wait for it to stop.
-echo "Stop request issued. Waiting for server to stop..."
+echo "Waiting for server to stop..."
 serverTimeoutSeconds=120
 startSeconds=$SECONDS
 endSeconds=$(($startSeconds + $serverTimeoutSeconds))
 while true; do
-	if grep --quiet "CliInitializationException: Failed to connect to the controller" "${serverLogStop}"; then
-		>&2 echo "Server was not running."
-		break
-	fi
-	if grep --quiet "JBAS015950" "${serverLogRun}"; then
+	if grep --quiet "Application shutdown housekeeping complete." "${serverLogRun}"; then
 		echo "Server stopped (we think) in $(($SECONDS - $startSeconds)) seconds."
 		break
 	fi
@@ -127,18 +98,3 @@ while true; do
 	fi
 	sleep 1
 done
-
-# The above block might not have been able to actually stop the server, either 
-# because the server's management console wasn't up, or because the server 
-# _said_ it stopped, but really didn't (I've observed this happening). So here,
-# we just double check via the process list, and kill it the mean way if 
-# needed.
-serverPids=$(pgrep -f ".*java.*-Dbfd-server-${bfdServerId}.*jboss-modules\.jar.*")
-if [[ -z "${serverPids}" ]]; then
-	echo "Server did actually stop."
-	exit 0
-else
-	>&2 echo "Server processes still found. Sending KILL signal to all '-Dbfd-server-${bfdServerId}' processes."
-	pkill -KILL -f ".*java.*-Dbfd-server-${bfdServerId}.*jboss-modules\.jar.*"
-	>&2 echo "Server processes sent KILL signal."
-fi

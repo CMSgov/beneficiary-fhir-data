@@ -124,28 +124,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Logging backend for WAR/application. Note: due to an incompatibility 
-				between Hibernate 5 and Wildfly 8, this application can't use Wildfly's logging 
-				and instead has to handle its own logging separately. See `jboss-deployment-structure.xml` 
-				for more details. -->
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-		<dependency>
-			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
-				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
-			<groupId>ch.qos.logback.contrib</groupId>
-			<artifactId>logback-json-classic</artifactId>
-			<version>0.1.5</version>
-		</dependency>
-		<dependency>
-			<!-- Required by logback-json-classic. -->
-			<groupId>ch.qos.logback.contrib</groupId>
-			<artifactId>logback-jackson</artifactId>
-			<version>0.1.5</version>
-		</dependency>
-
-		<dependency>
 			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
 				at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
@@ -193,6 +171,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<!-- Logging backend for tests.  -->
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<!-- The builds for this and other BFD projects use HSQL in tests. -->
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -216,13 +200,6 @@
   			  <artifactId>commons-io</artifactId>
   			  <version>2.5</version>
 		</dependency>
-		<dependency>
-			<groupId>com.newrelic.agent.java</groupId>
-			<artifactId>newrelic-java</artifactId>
-			<version>5.3.0</version>
-			<scope>provided</scope>
-			<type>zip</type>
-		</dependency>	
 	</dependencies>
 
 	<build>
@@ -246,14 +223,13 @@
 					<configuration>
 						<artifactItems>
 							<artifactItem>
-								<!-- Wildfly 8.1 is the upstream release that JBoss EAP 7 is based 
-									on. Though our application will run in JBoss EAP in production, we test it 
-									against Wildfly here because Wildfly is available for unauthenticated download 
-									(and JBoss EAP isn't). -->
-								<groupId>org.wildfly</groupId>
-								<artifactId>wildfly-dist</artifactId>
-								<version>8.1.0.Final</version>
-								<type>tar.gz</type>
+								<!-- Copy the BFD Server Launcher (whitelabeled Jetty) capsule JAR into
+									this project's build directory, for use in ITs. -->
+								<groupId>${project.groupId}</groupId>
+								<artifactId>bfd-server-launcher</artifactId>
+								<version>${project.version}</version>
+								<classifier>capsule-fat</classifier>
+								<type>jar</type>
 								<outputDirectory>${project.build.directory}/server-work</outputDirectory>
 							</artifactItem>
 						</artifactItems>
@@ -268,54 +244,6 @@
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>1.5.0</version>
 				</plugin>
-				<plugin>
-			        <groupId>org.apache.maven.plugins</groupId>
-			        <artifactId>maven-dependency-plugin</artifactId>
-			        <version>3.1.1</version>
-			        <executions>
-			          <execution>
-			            <id>unpack-newrelic</id>
-			            <phase>package</phase>
-			            <goals>
-			              <goal>unpack-dependencies</goal>
-			            </goals>
-			            <configuration>
-			              <includeGroupIds>com.newrelic.agent.java</includeGroupIds>
-			              <includeArtifactIds>newrelic-java</includeArtifactIds>
-			              <excludes>**/newrelic.yml</excludes>
-			              <overWriteReleases>false</overWriteReleases>
-			              <overWriteSnapshots>false</overWriteSnapshots>
-			              <overWriteIfNewer>false</overWriteIfNewer>
-			              <outputDirectory>${project.build.directory}</outputDirectory>
-			            </configuration>
-			          </execution>
-			        </executions>
-			      </plugin>
-			      <plugin>
-		            <artifactId>maven-resources-plugin</artifactId>
-		            <version>3.1.0</version>
-		            <executions>
-		                <execution>
-		                    <id>copy-newrelic-config</id>
-		                    <phase>package</phase>
-		                    <goals>
-		                        <goal>copy-resources</goal>
-		                    </goals>
-		
-		                    <configuration>
-		                        <outputDirectory>${project.basedir}/target/newrelic</outputDirectory>
-		                        <resources>
-		                            <resource>
-		                                <directory>${project.basedir}/src/main/config</directory>
-		                                <includes>
-		                                    <include>newrelic.yml</include>
-		                                </includes>
-		                            </resource>
-		                        </resources>
-		                    </configuration>
-		                </execution>
-		           </executions>
-		        </plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -346,7 +274,7 @@
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Reserve random available ports for Wildfly/JBoss to run on. -->
+						<!-- Reserve random available ports for the server to use. -->
 						<id>reserve-server-ports</id>
 						<goals>
 							<goal>reserve-network-port</goal>
@@ -358,8 +286,6 @@
 							<maxPortNumber>9999</maxPortNumber>
 							<randomPort>true</randomPort>
 							<portNames>
-								<portName>server.port.management</portName>
-								<portName>server.port.http</portName>
 								<portName>server.port.https</portName>
 							</portNames>
 						</configuration>
@@ -367,12 +293,12 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Launch a Java web server hosting the BFD Server prior
-					to running this project's integration tests, and stop it after the integration 
-					tests. The server will serve HTTPS on port 9094 (as configured in the script), 
-					and the FHIR server will be hosted at the root ("/") context. Alternatively, 
-					for manual testing, manually run `mvn package dependency:copy antrun:run 
-					org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start the server. -->
+				<!-- Launch a Java web server hosting the BFD Server prior to running this
+					project's integration tests, and stop it after the integration tests. The
+					server will serve HTTPS on a random port, and the FHIR server will be hosted
+					at the root ("/") context. Alternatively, for manual testing, manually run
+					`mvn package org.codehaus.mojo:exec-maven-plugin:exec@server-start` to start
+					the server. -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
