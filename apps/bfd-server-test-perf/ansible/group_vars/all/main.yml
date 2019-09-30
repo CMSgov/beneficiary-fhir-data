@@ -41,7 +41,7 @@ thread_loops: 1000
 scheduler: true
 # The duration in seconds for a sampler thread to run.
 # The duration is used to set the async timeout duration (even if scheduler is false) 
-duration: 60
+duration: 150
 # Poll interval(in seconds) to check for test completion.  Used because some servers will disconnect the ssh connection prior to test completion causing the ansible script to fail,
 poll: 30
 
