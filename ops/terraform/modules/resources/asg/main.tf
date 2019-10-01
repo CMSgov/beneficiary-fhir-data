@@ -46,12 +46,7 @@ resource "aws_security_group" "base" {
   vpc_id        = var.env_config.vpc_id
   tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
-  }
+  # Note: If we want to allow Jenkins to SSH into boxes, that would go here.
 
   egress {
     from_port   = 0
@@ -74,8 +69,7 @@ resource "aws_security_group" "app" {
     from_port       = var.lb_config.port
     to_port         = var.lb_config.port
     protocol        = "tcp"
-    # TODO: Figure out what the real ingress rule should be
-    cidr_blocks     = ["10.0.0.0/8"]
+    security_groups = [var.lb_config.sg]
   } 
 }
 
@@ -123,10 +117,8 @@ resource "aws_launch_template" "main" {
       volume_type               = "gp2"
       volume_size               = var.launch_config.volume_size
       delete_on_termination     = true
-      /* Will be set by AMI's root block snapshot
       encrypted                 = true
       kms_key_id                = data.aws_kms_key.master_key.arn
-      */
     }
   }
   

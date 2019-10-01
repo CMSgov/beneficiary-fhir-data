@@ -432,3 +432,54 @@ module "etl" {
   kms_key_id          = data.aws_kms_key.master_key.arn
   log_bucket          = module.admin.id
 }
+
+# IAM policy, user, and attachment to allow external read-write
+# access to ETL bucket
+#
+# NOTE: We only need this for production, however it is ok to
+# provision these resources for all environments since the mechanism
+# by which we control access is through a manually provisioned
+# access key
+#
+resource "aws_iam_policy" "etl_rw_s3" {
+  name        = "bfd-${local.env_config.env}-etl-rw-s3"
+  description = "ETL read-write S3 policy"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ETLRWKMS",
+      "Action": ["kms:Decrypt"],
+      "Effect": "Allow",
+      "Resource": ["${data.aws_kms_key.master_key.arn}"]
+    },
+    {
+      "Sid": "ETLRWBucketList",
+      "Action": ["s3:ListBucket"],
+      "Effect": "Allow",
+      "Resource": ["${module.etl.arn}"]
+    },
+    {
+      "Sid": "ETLRWBucketActions",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": ["${module.etl.arn}/*"]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_user" "etl" {
+  name       = "bfd-${local.env_config.env}-etl"
+}
+
+resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
+  user       = aws_iam_user.etl.name
+  policy_arn = aws_iam_policy.etl_rw_s3.arn
+}

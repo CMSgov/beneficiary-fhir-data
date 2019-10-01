@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import ch.qos.logback.classic.helpers.MDCInsertingServletFilter;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -26,9 +25,9 @@ import org.slf4j.MDC;
  * is completely cleared after every request. This {@link Filter} must be declared before all others
  * in the {@code web.xml}.
  *
- * <p>(Note: We don't use or extend {@link MDCInsertingServletFilter}, as it includes more
- * properties than we really need. It also doesn't fully clear the {@link MDC} after each request,
- * only partially.)
+ * <p>(Note: We don't use or extend Logback's builtin <code>MDCInsertingServletFilter</code>, as it
+ * includes more properties than we really need. It also doesn't fully clear the {@link MDC} after
+ * each request, only partially.)
  */
 public final class RequestResponseLoggingFilter implements Filter {
   private static final Logger LOGGER_HTTP_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");

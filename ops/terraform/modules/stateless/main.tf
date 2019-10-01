@@ -117,7 +117,7 @@ data "aws_security_group" "vpn" {
   }
 }
 
-# Find the management group
+# Find the tools group
 #
 data "aws_security_group" "tools" {
   filter {
@@ -126,7 +126,7 @@ data "aws_security_group" "tools" {
   }
 }
 
-# Find the tools group 
+# Find the management group
 #
 data "aws_security_group" "remote" {
   filter {

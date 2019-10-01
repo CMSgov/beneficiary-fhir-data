@@ -49,19 +49,7 @@ resource "aws_security_group" "base" {
   vpc_id        = var.env_config.vpc_id
   tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = var.mgmt_config.ci_cidrs
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    security_groups = [var.mgmt_config.remote_sg,var.mgmt_config.vpn_sg,var.mgmt_config.tool_sg]
-  }
+  # Note: If we want to allow Jenkins to SSH into boxes, that would go here.
 
   egress {
     from_port   = 0
@@ -88,7 +76,7 @@ resource "aws_instance" "main" {
   tenancy                     = local.is_prod ? "dedicated" : "default"
   ebs_optimized               = true
 
-  vpc_security_group_ids      = [aws_security_group.base.id]
+  vpc_security_group_ids      = [aws_security_group.base.id, var.mgmt_config.vpn_sg]
   subnet_id                   = data.aws_subnet.main.id
 
   root_block_device {

@@ -88,13 +88,8 @@
       vars:
         data_server_dir: /u01/jboss
         data_server_user: "{{ vault_data_server_user }}"
-        data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
-        data_server_container_name: jboss-eap-7.0
         data_server_appserver_service: jboss
         data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:/u01/jboss/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution"
-        data_server_appserver_management_port: "{{ vault_data_server_appserver_management_port }}"
-        data_server_appserver_management_username: "{{ vault_data_server_appserver_management_username }}"
-        data_server_appserver_management_password: "{{ vault_data_server_appserver_management_password }}"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
         # Note: the `data_server_war` variable should have been provided via `--extra-vars` on the command line.
         data_server_ssl_server_genkeypair_args: "{{ vault_data_server_ssl_genkeypair_args }}"
@@ -103,7 +98,13 @@
         data_server_db_url: "{{ vault_data_db_secondary_url }}"
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
-        data_server_db_connections_max: 400
+        data_server_db_connections_max: 40
+        # Disable New Relic until its startup is fixed (causes app to hang).
+        #data_server_new_relic_license_key: "{{ vault_data_server_new_relic_license_key }}"
+        # Note: the `data_server_new_relic_app_name` variable is defined for each env/group in `group_vars/*/main.yml`.
+        data_server_new_relic_environment: "{{ env_name_std }}"
+        data_server_proxy_host: "{{ vault_proxy_host }}"
+        data_server_proxy_port: "{{ vault_proxy_port }}"
 
     - name: Copy Local Test SSL Keypair
       copy:
@@ -123,6 +124,11 @@
         instance_id: "{{ ansible_ec2_instance_id }}"
         state: present
       delegate_to: localhost
+      # Give the instance time to be marked as healthy, if needed.
+      retries: 60
+      delay: 1
+      register: elb_add_bfd_server_back
+      until: elb_add_bfd_server_back is succeeded
       loop: "{{ ec2_elbs }}"
 
     - name: Configure CloudWatch Logs Agent

@@ -43,7 +43,7 @@ ec2_backend_fhir_instance_type: 'm4.4xlarge'
 data_pipeline_jvm_args: '-Xmx58g'
 data_pipeline_loader_threads: 100  # The service will use x2 this number of DB connections.
 data_server_appserver_jvmargs: '-Xmx58g -XX:MaxMetaspaceSize=4g'
-data_server_db_max_connections: '100'
+data_server_db_connections_max: '40'
 data_server_asg_max_size: 7  # Watch out that this (plus extra instances for next deploy) doesn't exceed the max allowed DB connections!
 # When `true`, Ansible will configure the FHIR server to run such that Java
 # flame graphs can be collected. This will incur a performance penalty of 1%-
