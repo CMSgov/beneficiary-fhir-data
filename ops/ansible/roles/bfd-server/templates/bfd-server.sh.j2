@@ -66,10 +66,10 @@ stop_service_if_failing() {
   done
 
   echo "$(date): Server failed to start properly, shutting down"
-  BFD_PID=$(ps -ef | grep '\-Dbfd-server' | grep -v grep | awk '{print $2}')
-  BFD_PID_EXIT=$?
+  STARTUP_TESTING_BFD_PID=$(ps -ef | grep 'DataServerLauncherApp' | grep -v grep | awk '{print $2}')
+  STARTUP_TESTING_BFD_PID_EXIT=$?
 
-  if [[ $BFD_PID_EXIT == 0 ]] && kill -INT $BFD_PID; then
+  if [[ $STARTUP_TESTING_BFD_PID_EXIT == 0 ]] && kill -INT $STARTUP_TESTING_BFD_PID; then
     echo "$(date): Server shut down gracefully"
   else
     echo "$(date): Error shutting down server gracefully"
