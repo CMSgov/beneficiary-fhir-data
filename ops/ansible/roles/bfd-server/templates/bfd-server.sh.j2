@@ -33,6 +33,51 @@ export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
 {% endif %}
 {% endif %}
 
+{% if data_server_startup_testing is defined and data_server_startup_testing is sameas true %}
+STARTUP_TESTING_RETRIES='{{ data_server_startup_testing_retries | default(3) }}'
+STARTUP_TESTING_BOOT_TIMEOUT='{{ data_server_startup_testing_boot_timeout | default(30) }}'
+STARTUP_TESTING_REQ_TIMEOUT='{{ data_server_startup_testing_req_timeout | default(15) }}'
+STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='{{ data_server_startup_testing_req_backup_timeout | default(10) }}'
+
+check_endpoint() {
+  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert {{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem "$1" | grep "$2"
+}
+
+stop_service_if_failing() {
+  echo "$(date): Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
+  sleep $STARTUP_TESTING_BOOT_TIMEOUT
+
+  for I in $(seq $STARTUP_TESTING_RETRIES); do
+    echo "$(date): Checking metadata endpoint"
+    STARTUP_TESTING_CHECK_METADATA=$(check_endpoint 'https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir' 'status')
+    STARTUP_TESTING_CHECK_METADATA_EXIT=$?
+
+    echo "$(date): Checking database endpoint"
+    STARTUP_TESTING_CHECK_DATABASE=$(check_endpoint 'https://localhost:7443/v1/fhir/Coverage?beneficiary=-201&_format=application%2Fjson%2Bfhir' 'id')
+    STARTUP_TESTING_CHECK_DATABASE_EXIT=$?
+
+    if [[ $STARTUP_TESTING_CHECK_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_DATABASE_EXIT == 0 ]]; then
+      echo "$(date): Server started properly"
+      return 0
+    elif [[ $I != 3 ]]; then
+      echo "$(date): Server failed to start properly, backing off"
+      sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
+    fi
+  done
+
+  echo "$(date): Server failed to start properly, shutting down"
+  BFD_PID=$(ps -ef | grep '\-Dbfd-server' | grep -v grep | awk '{print $2}')
+  BFD_PID_EXIT=$?
+
+  if [[ $BFD_PID_EXIT == 0 ]] && kill -INT $BFD_PID; then
+    echo "$(date): Server shut down gracefully"
+  else
+    echo "$(date): Error shutting down server gracefully"
+  fi
+  return 1
+}
+{% endif %}
+
 # Set some additional variables.
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 
