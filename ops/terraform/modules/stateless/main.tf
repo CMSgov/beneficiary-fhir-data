@@ -97,9 +97,16 @@ data "aws_db_instance" "replica" {
   db_instance_identifier  = "bfd-${var.env_config.env}-replica${count.index+1}"
 }
 
-# RDS Security Group
+# RDS Security Groups
 #
-data "aws_security_group" "db" {
+data "aws_security_group" "db_primary" {
+  filter {
+    name        = "tag:Name"
+    values      = ["bfd-${var.env_config.env}-master-rds"]
+  }
+}
+
+data "aws_security_group" "db_replicas" {
   filter {
     name        = "tag:Name"
     values      = ["bfd-${var.env_config.env}-rds"]
@@ -246,7 +253,7 @@ module "fhir_asg" {
   }
 
   db_config       = {
-    db_sg         = data.aws_security_group.db.id
+    db_sg         = data.aws_security_group.db_replicas.id
     role          = "replica"
   }
 
@@ -260,24 +267,22 @@ module "fhir_asg" {
 
 # ETL server
 #
-module "etl_instance" {
-  source = "../resources/ec2"
+module "bfd_pipeline" {
+  source = "../resources/bfd_pipeline"
 
   env_config      = local.env_config
-  role            = "etl"
-  layer           = "data"
   az              = "us-east-1b" # Same as the master db
 
   launch_config   = {
-    instance_type = "m5.2xlarge"
-    volume_size   = 100 # GB 
-    ami_id        = var.etl_ami 
-
-    key_name      = var.ssh_key_name 
+    ami_id        = var.etl_ami
+    ssh_key_name  = var.ssh_key_name
     profile       = module.etl_iam.profile
-    user_data_tpl = "pipeline_server.tpl"
     git_branch    = var.git_branch_name
     git_commit    = var.git_commit_id
+  }
+
+  db_config       = {
+    db_sg         = data.aws_security_group.db_primary.id
   }
 
   mgmt_config     = {
