@@ -83,8 +83,8 @@ resource "aws_security_group_rule" "allow_db_access" {
   protocol                  = "tcp"
   description               = "Allows access to the ${var.db_config.role} db"
 
-  security_group_id         = var.db_config.db_sg         # The SG associated with each replica
-  source_security_group_id  = aws_security_group.base.id  # Every instance in the ASG
+  security_group_id         = var.db_config.db_sg           # The SG associated with each replica
+  source_security_group_id  = aws_security_group.app[0].id  # Every instance in the ASG
 }
 
 ##
