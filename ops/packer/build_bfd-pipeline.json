@@ -21,7 +21,7 @@
       "ami_name": "bfd-etl-{{user `env`}}-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "tags": {
-        "Name": "bb-{{user `env`}}-{{isotime \"20060102030405\"}}",
+        "Name": "bfd-etl-{{user `env`}}-{{isotime \"20060102030405\"}}",
         "Application": "BFD",
         "Environment": "{{user `env`}}",
         "Function": "ETL APP SERVER",
