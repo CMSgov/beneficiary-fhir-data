@@ -34,13 +34,14 @@ export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
 {% endif %}
 
 {% if data_server_startup_testing is defined and data_server_startup_testing is sameas true %}
+# Begin smoke testing startup routine
 STARTUP_TESTING_RETRIES='{{ data_server_startup_testing_retries | default(3) }}'
 STARTUP_TESTING_BOOT_TIMEOUT='{{ data_server_startup_testing_boot_timeout | default(30) }}'
 STARTUP_TESTING_REQ_TIMEOUT='{{ data_server_startup_testing_req_timeout | default(15) }}'
 STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='{{ data_server_startup_testing_req_backup_timeout | default(10) }}'
 
 check_endpoint() {
-  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert {{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem "$1" | grep "$2"
+  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
 }
 
 stop_service_if_failing() {
@@ -76,6 +77,9 @@ stop_service_if_failing() {
   fi
   return 1
 }
+
+(stop_service_if_failing >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1)
+# End smoke testing startup routine
 {% endif %}
 
 # Set some additional variables.
