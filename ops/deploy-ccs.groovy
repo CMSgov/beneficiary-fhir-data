@@ -187,15 +187,16 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
  */
 def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	def env = normalizeEnvironmentId(environmentId)
-		dir("${workspace}/ops/terraform/env/${env}/stateless") {
+	dir("${workspace}/ops/terraform/env/${env}/stateless") {
 
 		// Debug output terraform version 
 		sh "/usr/bin/terraform --version"
 		
 		// Initilize terraform 
-		sh "/usr/bin/terraform init"
+		sh "/usr/bin/terraform init -no-color"
 		
-		// Gathering terraform plan 
+		// Gathering terraform plan
+		echo "Timestamp: ${Instant.now().toString()}"
 		sh "/usr/bin/terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
@@ -205,9 +206,11 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		-no-color -out=tfplan"
 		
 		// Apply Terraform plan
+		echo "Timestamp: ${Instant.now().toString()}"
 		sh "/usr/bin/terraform apply \
 		-no-color -input=false tfplan"
-		}
+		echo "Timestamp: ${Instant.now().toString()}"
+	}
 }
 
 def extractAmiIdFromPackerManifest(File manifest) {
