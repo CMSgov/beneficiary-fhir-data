@@ -25,4 +25,6 @@ module "stateful" {
     env               = "prod-sbx"
     tags              = {application="bfd", business="oeda", stack="prod-sbx", Environment="prod-sbx"}
   }  
+
+  enable_victor_ops   = true
 }

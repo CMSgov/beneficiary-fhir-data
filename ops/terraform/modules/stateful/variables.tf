@@ -15,6 +15,6 @@ variable "env_config" {
 
 variable "enable_victor_ops" {
   description       = "Enable cloudwatch alarms to be forwarded to VictorOps"
-  type              = boolean
+  type              = bool
   default           = false
 }

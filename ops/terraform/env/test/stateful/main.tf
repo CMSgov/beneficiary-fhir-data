@@ -25,4 +25,6 @@ module "stateful" {
     env               = "test"
     tags              = {application="bfd", business="oeda", stack="test", Environment="test"}
   }  
+
+  enable_victor_ops   = false # do not generate alerts in test
 }

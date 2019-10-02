@@ -117,6 +117,7 @@ resource "aws_sns_topic_subscription" "alarm" {
   protocol  = "https"
   topic_arn = aws_sns_topic.cloudwatch_alarms.arn
   endpoint  = local.victor_ops
+  endpoint_auto_confirms = true
 }
 
 resource "aws_sns_topic" "cloudwatch_ok" {
@@ -130,6 +131,7 @@ resource "aws_sns_topic_subscription" "ok" {
   topic_arn = aws_sns_topic.cloudwatch_ok.arn
   protocol  = "https"
   endpoint  = local.victor_ops
+  endpoint_auto_confirms = true
 }
 
 # DB Security group
