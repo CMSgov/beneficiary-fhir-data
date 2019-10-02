@@ -196,7 +196,7 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		sh "/usr/bin/terraform init -no-color"
 		
 		// Gathering terraform plan
-		echo "Timestamp: ${java.time.Instant.now().toString()}"
+		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 		sh "/usr/bin/terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
@@ -206,10 +206,10 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		-no-color -out=tfplan"
 		
 		// Apply Terraform plan
-		echo "Timestamp: ${java.time.Instant.now().toString()}"
+		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 		sh "/usr/bin/terraform apply \
 		-no-color -input=false tfplan"
-		echo "Timestamp: ${java.time.Instant.now().toString()}"
+		echo "Timestamp: ${java.time.LocalDateTime.now().toString()}"
 	}
 }
 
