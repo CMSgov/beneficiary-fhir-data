@@ -1,9 +1,9 @@
 # RFC Proposal
 [RFC Proposal]: #rfc-proposal
 
-* RFC Proposal ID: `0004-since-parameter-support` 
+* RFC Proposal ID: `0000-since-parameter-support` 
 * Start Date: October 1, 2019
-* RFC PR: TBD
+* RFC PR: <https://github.com/CMSgov/beneficiary-fhir-data/pull/85>
 * JIRA Ticket(s): 
     - [BlueButton 1181](https://jira.cms.gov/browse/BLUEBUTTON-1181)
 
@@ -136,3 +136,6 @@ The following references are required to fully understand and implement this pro
 
 <a id="ref6"></a>
 [6] FHIR Subscriptions: <https://www.hl7.org/fhir/subscription.html>
+
+<a id="ref7"></a>
+[7] Original Confluence page with an implementation outline: <https://confluence.cms.gov/pages/viewpage.action?pageId=189269516>
