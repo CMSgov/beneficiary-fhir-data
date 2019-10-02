@@ -78,7 +78,7 @@ stop_service_if_failing() {
   return 1
 }
 
-(stop_service_if_failing >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1)
+(stop_service_if_failing >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
 # End smoke testing startup routine
 {% endif %}
 
