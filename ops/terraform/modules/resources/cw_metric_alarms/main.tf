@@ -8,7 +8,7 @@ resource "aws_cloudwatch_metric_alarm" "http-500" {
   count = var.create_cw_alarms ? 1 : 0
 
   alarm_name                = "${var.app}-${var.env}-http-500"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
+  comparison_operator       = "GreaterThanThreshold"
   evaluation_periods        = "1"
   period                    = "300"
   statistic                 = "Maximum"
