@@ -76,7 +76,7 @@ resource "aws_instance" "main" {
   tenancy                     = local.is_prod ? "dedicated" : "default"
   ebs_optimized               = true
 
-  vpc_security_group_ids      = [aws_security_group.base.id, var.mgmt_config.vpn_sg]
+  vpc_security_group_ids      = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], var.sg_ids)
   subnet_id                   = data.aws_subnet.main.id
 
   root_block_device {
