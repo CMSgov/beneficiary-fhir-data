@@ -109,13 +109,11 @@ feed because it was not general enough or universally useful.
 
 ## Future Possibilities
 
-Scale out
+This proposal should scale as BFD, and it's partners serve more beneficiaries and clients. It should continue to work as BFD adds more partners and data sources. 
 
-PUB-SUB to customers
+In future releases, BFD may receive claim data faster than the current delay. If the ETL process runs daily instead of weekly as it does today, the algorithms in this proposal should continue to work. If one day, the BFD receives claim data continuously, we should revisit the algorithms of this proposal. 
 
-More frequent updates 
-
-Richer feeds 
+In discussions with DPC customers, they have asked for notification when the DPC has new beneficiary data. Instead of polling for updates, they would like to have the ability for a push update.  Similarly, FHIR is developing a subscription model that supports webhooks \[[6](#ref6)\]. If a BFD partner wants to develop these features, they can use the ETL feed as a source of information for this feature. 
 
 ## References
 
@@ -131,9 +129,10 @@ The following references are required to fully understand and implement this pro
 [3] Working copy of the Bulk Export specification: <https://build.fhir.org/ig/HL7/bulk-data/export/index.html>
 
 <a id="ref4"></a>
-[4] Meta.lastUpdated defintion: <https://www.hl7.org/fhir/resource-definitions.html#meta.lastupdated> 
+[4] FHIR Meta.lastUpdated definition: <https://www.hl7.org/fhir/resource-definitions.html#meta.lastupdated> 
 
 <a id="ref5"></a>
-[5] Search operation: <https://www.hl7.org/fhir/search.html>   
+[5] FHIR Search operation: <https://www.hl7.org/fhir/search.html>   
 
-
+<a id="ref6"></a>
+[6] FHIR Subscriptions: <https://www.hl7.org/fhir/subscription.html>
