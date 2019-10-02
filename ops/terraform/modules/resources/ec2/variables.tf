@@ -25,4 +25,8 @@ variable "launch_config" {
   type        = object({instance_type=string, volume_size=number, ami_id=string, key_name=string, profile=string, user_data_tpl=string, git_branch=string, git_commit=string})
 }
 
-
+variable "sg_ids" {
+  type        = list(string)
+  default     = []
+  description = "The IDs of the additional security groups that this EC2 instance should be added to."
+}
