@@ -30,3 +30,9 @@ variable "sg_ids" {
   default     = []
   description = "The IDs of the additional security groups that this EC2 instance should be added to."
 }
+
+variable "dependencies" {
+  type        = list(string)
+  default     = []
+  description = "The IDs of the AWS resources that this module's EC2 instance should depend on, e.g. SGs or other resources that it relies on to function properly."
+}

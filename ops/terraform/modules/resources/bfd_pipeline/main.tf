@@ -59,4 +59,7 @@ module "ec2_instance" {
   }
 
   sg_ids          = [aws_security_group.app.id]
+
+  # Ensure that the DB is accessible before the BFD Pipeline is launched.
+  dependencies    = ["${aws_security_group_rule.allow_db_primary_access.id}"]
 }

@@ -93,4 +93,18 @@ resource "aws_instance" "main" {
     gitBranchName = var.launch_config.git_branch
     gitCommitId = var.launch_config.git_commit
   })
+
+  depends_on                  = [null_resource.dependency_getter]
+}
+
+##
+# Module Dependency Workaround
+#
+# Note: This is a workaround for Terraform's lack of support for `depends_on` in modules.
+# See here for the inspiration: https://github.com/hashicorp/terraform/issues/1178#issuecomment-449158607
+##
+resource "null_resource" "dependency_getter" {
+  provisioner "local-exec" {
+    command = "echo ${length(var.dependencies)}"
+  }
 }
