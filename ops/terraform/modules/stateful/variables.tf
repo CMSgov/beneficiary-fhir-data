@@ -12,3 +12,9 @@ variable "env_config" {
   description       = "All high-level info for the whole vpc"
   type              = object({env=string, tags=map(string)})
 }
+
+variable "enable_victor_ops" {
+  description       = "Enable cloudwatch alarms to be forwarded to VictorOps"
+  type              = boolean
+  default           = false
+}
