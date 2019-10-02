@@ -57,7 +57,7 @@ The second change is to support the `_lastUpdated` query parameter for resource 
 
 ### BFD Feed Details
 
-The ETL server will write to a S3 bucket a feed of NDJSON records. Each record contains fields for the ETL job's id, status, start and end timestamps. The record also contains a pointer to a list of beneficiaries which were udpated in the ETL job. The list is a ASCII encoded comma seperated list of MBIs. The MBI list will be written in a sorted in order. 
+The ETL server will write to a S3 bucket a feed of NDJSON records. Each record contains fields for the ETL job's id, status, start and end timestamps. The job id is an integer. The timestamps follows the FHIR specification for instant formating. The record also contains a pointer to a list of beneficiaries which were udpated in the ETL job. The list is a UTF-8 encoded comma seperated list of MBIs. The MBI list will be written in a sorted in order. 
 
 ```
 {
