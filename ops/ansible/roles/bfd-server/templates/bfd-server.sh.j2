@@ -60,7 +60,7 @@ stop_service_if_failing() {
     if [[ $STARTUP_TESTING_CHECK_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_DATABASE_EXIT == 0 ]]; then
       echo "$(date): Server started properly"
       return 0
-    elif [[ $I != 3 ]]; then
+    elif [[ $I != $STARTUP_TESTING_RETRIES ]]; then
       echo "$(date): Server failed to start properly, backing off"
       sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
     fi
