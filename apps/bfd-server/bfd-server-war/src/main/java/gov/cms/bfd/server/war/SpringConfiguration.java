@@ -1,5 +1,19 @@
 package gov.cms.bfd.server.war;
 
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheckRegistry;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
+import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
+import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -10,13 +24,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
-
+import net.ttddyy.dsproxy.support.ProxyDataSource;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -30,24 +44,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
-
-import com.codahale.metrics.JmxReporter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.health.HealthCheckRegistry;
-import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
-import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
-import com.zaxxer.hikari.HikariDataSource;
-
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import net.ttddyy.dsproxy.support.ProxyDataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
@@ -262,12 +258,12 @@ public class SpringConfiguration {
 
     poolingDataSource.setRegisterMbeans(true);
     poolingDataSource.setMetricRegistry(metricRegistry);
-
-		/*
-		 * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
-		 * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
-		 */
-		poolingDataSource.setLeakDetectionThreshold(60 * 1000);
+    
+    /*
+     * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
+     * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
+     */
+    poolingDataSource.setLeakDetectionThreshold(60 * 1000);
   }
 
   /**
