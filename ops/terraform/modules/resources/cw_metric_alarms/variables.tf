@@ -1,9 +1,3 @@
-variable "create_cw_alarms" {
-  description = "Whether to create the Cloudwatch log metric filter"
-  type        = bool
-  default     = true
-}
-
 variable "alarm_notification_arn" {
   description = "The CloudWatch Alarm notification ARN."
   type        = "string"
@@ -22,4 +16,24 @@ variable "app" {
 
 variable "env" {
   type = string
+}
+
+variable "http_500" {
+  type    = object({period: number, eval_periods: number, threshold: number})
+  default = null
+}
+
+variable "http_latency_4s" {
+  type    = object({period: number, eval_periods: number, threshold: number, ext_stat: string})
+  default = null
+}
+
+variable "http_latency_6s" {
+  type    = object({period: number, eval_periods: number, threshold: number, ext_stat: string})
+  default = null
+}
+
+variable "mct_query_time" {
+  type    = object({period: number, eval_periods: number, threshold: number, ext_stat: string})
+  default = null
 }

@@ -5,15 +5,16 @@ locals {
 
 # HTTP 500 Errors
 resource "aws_cloudwatch_metric_alarm" "http-500" {
-  count = var.create_cw_alarms ? 1 : 0
+  count                     = var.http_500 == null ? 0 : 1
 
   alarm_name                = "${var.app}-${var.env}-http-500"
   comparison_operator       = "GreaterThanThreshold"
-  evaluation_periods        = "1"
-  period                    = "300"
+  evaluation_periods        = var.http_500.eval_periods
+  period                    = var.http_500.period
   statistic                 = "Maximum"
-  threshold                 = "0.0"
-  alarm_description         = "HTTP 500 Errors detected in APP-ENV: ${var.app}-${var.env} over a 5m period."
+  threshold                 = var.http_500.threshold
+  alarm_description         = "HTTP 500 Errors Detected within ${var.http_500.threshold} seconds in APP-ENV: ${var.app}-${var.env} over ${var.http_500.period} seconds"
+
 
   metric_name               = "http-requests/count/http-500"
   namespace                 = "bfd-${var.env}/bfd-server"
@@ -27,15 +28,15 @@ resource "aws_cloudwatch_metric_alarm" "http-500" {
 
 # EOB Slow Response > 4s p90
 resource "aws_cloudwatch_metric_alarm" "http-requests-latency-fhir-eob-4s" {
-  count = var.create_cw_alarms ? 1 : 0
+  count                     = var.http_latency_4s == null ? 0 : 1
 
   alarm_name                = "${var.app}-${var.env}-http-requests-latency-fhir-eob"
   comparison_operator       = "GreaterThanThreshold"
-  evaluation_periods        = "1"
-  period                    = "900"
-  extended_statistic        = "p90"
-  threshold                 = "4000.0"
-  alarm_description         = "HTTP EOB Request Latency exceeds 4s (p90) in APP-ENV: ${var.app}-${var.env} over a 15m period."
+  evaluation_periods        = var.http_latency_4s.eval_periods
+  period                    = var.http_latency_4s.period
+  extended_statistic        = var.http_latency_4s.ext_stat
+  threshold                 = var.http_latency_4s.threshold
+  alarm_description         = "HTTP EOB Request Latency ${var.http_latency_4s.ext_stat} exceeds ${var.http_latency_4s.threshold} seconds in APP-ENV: ${var.app}-${var.env} over ${var.http_latency_4s.period} seconds"
 
   metric_name               = "http-requests/latency/fhir/eob"
   namespace                 = "bfd-${var.env}/bfd-server"
@@ -49,15 +50,15 @@ resource "aws_cloudwatch_metric_alarm" "http-requests-latency-fhir-eob-4s" {
 
 # EOB Slow Response > 6s p99 over 1h
 resource "aws_cloudwatch_metric_alarm" "http-requests-latency-fhir-eob-6s" {
-  count = var.create_cw_alarms ? 1 : 0
+  count                     = var.http_latency_6s == null ? 0 : 1
 
   alarm_name                = "${var.app}-${var.env}-http-requests-latency-fhir-eob"
   comparison_operator       = "GreaterThanThreshold"
-  evaluation_periods        = "1"
-  period                    = "3600"
-  extended_statistic        = "p99"
-  threshold                 = "6000.0"
-  alarm_description         = "HTTP EOB Request Latency exceeds 6s (p99) in APP-ENV: ${var.app}-${var.env} over a 1h period."
+  evaluation_periods        = var.http_latency_6s.eval_periods
+  period                    = var.http_latency_6s.period
+  extended_statistic        = var.http_latency_6s.ext_stat
+  threshold                 = var.http_latency_6s.threshold
+  alarm_description         = "HTTP EOB Request Latency ${var.http_latency_6s.ext_stat} exceeds ${var.http_latency_6s.threshold} seconds in APP-ENV: ${var.app}-${var.env} over ${var.http_latency_6s.period} seconds"
 
   metric_name               = "http-requests/latency/fhir/eob"
   namespace                 = "bfd-${var.env}/bfd-server"
@@ -71,15 +72,15 @@ resource "aws_cloudwatch_metric_alarm" "http-requests-latency-fhir-eob-6s" {
 
 # MCT Specific - EOB Slow Response > 6s p99 over 15m
 resource "aws_cloudwatch_metric_alarm" "mct-query-duration" {
-  count = var.create_cw_alarms ? 1 : 0
+  count                     = var.mct_query_time == null ? 0 : 1
 
   alarm_name                = "${var.app}-${var.env}-mct-query-duration"
   comparison_operator       = "GreaterThanThreshold"
-  evaluation_periods        = "1"
-  period                    = "3600"
-  extended_statistic        = "p99"
-  threshold                 = "6000.0"
-  alarm_description         = "HTTP EOB Request Latency exceeds 6s (p99) in APP-ENV: ${var.app}-${var.env} over a 1h period."
+  evaluation_periods        = var.mct_query_time.eval_periods
+  period                    = var.mct_query_time.period
+  extended_statistic        = var.mct_query_time.ext_stat
+  threshold                 = var.mct_query_time.threshold
+  alarm_description         = "HTTP EOB Request Latency ${var.mct_query_time.ext_stat} exceeds ${var.mct_query_time.threshold} seconds for MCT in APP-ENV: ${var.app}-${var.env} over ${var.mct_query_time.period} seconds"
 
   metric_name               = "mct-query-duration"
   namespace                 = "bfd-${var.env}/bfd-server"
