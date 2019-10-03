@@ -24,7 +24,5 @@ module "stateful" {
   env_config = {
     env               = "prod"
     tags              = {application="bfd", business="oeda", stack="prod", Environment="prod"}
-  }  
-
-  enable_victor_ops   = true
+  }
 }

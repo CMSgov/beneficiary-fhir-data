@@ -5,9 +5,11 @@
 #
 
 locals {
-  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=module.local_zone.zone_id }
-  victor_ops = "https://alert.victorops.com/integrations/cloudwatch/20131130/alert/55e5f15e-cd33-4790-919e-1ce13a2d8299/CCS"
+  azs                   = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  env_config            = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=module.local_zone.zone_id }
+  is_prod               = substr(var.env_config.env, 0, 4) == "prod" 
+  victor_ops_url        = "https://alert.victorops.com/integrations/cloudwatch/20131130/alert/55e5f15e-cd33-4790-919e-1ce13a2d8299/CCS"
+  enable_victor_ops     = local.is_prod # only wake people up for prod alarms
 
   db_sgs = [
     aws_security_group.db.id,
@@ -113,10 +115,10 @@ resource "aws_sns_topic" "cloudwatch_alarms" {
 }
 
 resource "aws_sns_topic_subscription" "alarm" {
-  count     = var.enable_victor_ops ? 1 : 0
+  count     = local.enable_victor_ops ? 1 : 0
   protocol  = "https"
   topic_arn = aws_sns_topic.cloudwatch_alarms.arn
-  endpoint  = local.victor_ops
+  endpoint  = local.victor_ops_url
   endpoint_auto_confirms = true
 }
 
@@ -127,10 +129,10 @@ resource "aws_sns_topic" "cloudwatch_ok" {
 }
 
 resource "aws_sns_topic_subscription" "ok" {
-  count     = var.enable_victor_ops ? 1 : 0
+  count     = local.enable_victor_ops ? 1 : 0
   topic_arn = aws_sns_topic.cloudwatch_ok.arn
   protocol  = "https"
-  endpoint  = local.victor_ops
+  endpoint  = local.victor_ops_url
   endpoint_auto_confirms = true
 }
 
