@@ -37,7 +37,7 @@
         # Primary (i.e. write) DB defined in `environments/<env>/group_vars/all/vault.yml`:
         data_pipeline_db_url: "{{ vault_data_db_primary_url }}"
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
-        data_pipeline_db_password: "{{ vault_data_pipeline_db_username }}"
+        data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
         #data_pipeline_loader_threads: (see group_vars/all/main.yml
 
     - name: Build CloudWatch unified agent configuration
