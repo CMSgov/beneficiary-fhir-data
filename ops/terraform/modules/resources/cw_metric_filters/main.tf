@@ -3,22 +3,6 @@
 # Creates the BFD Data Server cloudwatch log metric filters and log group. 
 #
 
-resource "aws_cloudwatch_log_group" "access" {
-  name = "/bfd/${var.env}/bfd-server/access.txt"
-}
-
-resource "aws_cloudwatch_log_group" "gc" {
-  name = "/bfd/${var.env}/bfd-server/gc.log"
-}
-
-resource "aws_cloudwatch_log_group" "messages" {
-  name = "/bfd/${var.env}/bfd-server/messages.json"
-}
-
-resource "aws_cloudwatch_log_group" "newrelic_agent" {
-  name = "/bfd/${var.env}/bfd-server/newrelic_agent.log"
-}
-
 resource "aws_cloudwatch_log_metric_filter" "mct_query_time" {
   count          = var.env == null ? 0 : 1
   name           = "bfd-${var.env}/bfd-server/mct-query-time"
