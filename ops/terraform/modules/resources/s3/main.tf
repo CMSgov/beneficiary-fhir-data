@@ -19,15 +19,26 @@ resource "aws_s3_bucket" "main" {
   acl                     = var.acl
   tags                    = local.tags
 
+  # Always apply encryption, Customer CMK or AWS AES256
   server_side_encryption_configuration {
     rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = var.kms_key_id
-        sse_algorithm     = "aws:kms"
+      dynamic "apply_server_side_encryption_by_default" {
+        for_each = var.kms_key_id == null ? ["doit"] : []
+        content {
+          sse_algorithm     = "AES256"
+        }
+      }
+      dynamic "apply_server_side_encryption_by_default" {
+        for_each = var.kms_key_id != null ? ["doit"] : []
+        content {
+          sse_algorithm     = "aws:kms"
+          kms_master_key_id = var.kms_key_id
+        }
       }
     }
   }
 
+  # Add logging if specified
   dynamic "logging" {
     for_each        = var.log_bucket == "" ? [] : [var.log_bucket]
     content {
@@ -37,4 +48,13 @@ resource "aws_s3_bucket" "main" {
   }
 
   # TODO add retention policy
+}
+
+# For safety, block public access to the bucket
+#
+resource "aws_s3_bucket_public_access_block" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  block_public_acls   = true
+  block_public_policy = true
 }

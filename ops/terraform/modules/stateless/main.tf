@@ -76,8 +76,8 @@ data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
 }
 
-data "aws_s3_bucket" "elb" {
-  bucket = "bfd-${var.env_config.env}-elb-${data.aws_caller_identity.current.account_id}"
+data "aws_s3_bucket" "logs" {
+  bucket = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
 # CloudWatch
@@ -188,7 +188,7 @@ module "fhir_lb" {
   env_config      = local.env_config
   role            = "fhir"
   layer           = "dmz"
-  log_bucket      = data.aws_s3_bucket.elb.id
+  log_bucket      = data.aws_s3_bucket.logs.id
 
   ingress = {
     description   = "From VPC peerings, the MGMT VPC, and self"
