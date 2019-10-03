@@ -45,35 +45,35 @@ check_endpoint() {
 }
 
 stop_service_if_failing() {
-  echo "$(date): Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
+  echo "$(date +%F\ %T): Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
   sleep $STARTUP_TESTING_BOOT_TIMEOUT
 
   for I in $(seq $STARTUP_TESTING_RETRIES); do
-    echo "$(date): Checking metadata endpoint"
+    echo "$(date +%F\ %T): Checking metadata endpoint"
     STARTUP_TESTING_CHECK_METADATA=$(check_endpoint 'https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir' 'status')
     STARTUP_TESTING_CHECK_METADATA_EXIT=$?
 
-    echo "$(date): Checking database endpoint"
+    echo "$(date +%F\ %T): Checking database endpoint"
     STARTUP_TESTING_CHECK_DATABASE=$(check_endpoint 'https://localhost:7443/v1/fhir/Coverage?beneficiary=-201&_format=application%2Fjson%2Bfhir' 'id')
     STARTUP_TESTING_CHECK_DATABASE_EXIT=$?
 
     if [[ $STARTUP_TESTING_CHECK_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_DATABASE_EXIT == 0 ]]; then
-      echo "$(date): Server started properly"
+      echo "$(date +%F\ %T): Server started properly"
       return 0
     elif [[ $I != $STARTUP_TESTING_RETRIES ]]; then
-      echo "$(date): Server failed to start properly, backing off"
+      echo "$(date +%F\ %T): Server failed to start properly, backing off"
       sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
     fi
   done
 
-  echo "$(date): Server failed to start properly, shutting down"
+  echo "$(date +%F\ %T): Server failed to start properly, shutting down"
   STARTUP_TESTING_BFD_PID=$(ps -ef | grep 'DataServerLauncherApp' | grep -v grep | awk '{print $2}')
   STARTUP_TESTING_BFD_PID_EXIT=$?
 
   if [[ $STARTUP_TESTING_BFD_PID_EXIT == 0 ]] && kill -INT $STARTUP_TESTING_BFD_PID; then
-    echo "$(date): Server shut down gracefully"
+    echo "$(date +%F\ %T): Server shut down gracefully"
   else
-    echo "$(date): Error shutting down server gracefully"
+    echo "$(date +%F\ %T): Error shutting down server gracefully"
   fi
   return 1
 }

@@ -45,6 +45,12 @@
             "log_group_name": "/bfd/{{ env }}/bfd-server/newrelic_agent.log",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%b %d, %Y %H:%M:%S %z"
+          },
+          {
+            "file_path": "{{ bfd_server_dir }}/bfd-server-startup.log",
+            "log_group_name": "/bfd/{{ env }}/bfd-server/bfd-server-startup.log",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S"
           }
         ]
       }
