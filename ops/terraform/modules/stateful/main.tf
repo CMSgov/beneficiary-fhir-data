@@ -440,7 +440,8 @@ module "logs" {
   source              = "../resources/s3"
   role                = "logs"
   env_config          = local.env_config
-  acl                 = "log-delivery-write" 
+  acl                 = "log-delivery-write"  # For AWS bucket logs
+  kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
 # S3 bucket for ETL files
