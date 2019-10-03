@@ -22,18 +22,9 @@ resource "aws_s3_bucket" "main" {
   # Always apply encryption, Customer CMK or AWS AES256
   server_side_encryption_configuration {
     rule {
-      dynamic "apply_server_side_encryption_by_default" {
-        for_each = var.kms_key_id == null ? ["doit"] : []
-        content {
-          sse_algorithm     = "AES256"
-        }
-      }
-      dynamic "apply_server_side_encryption_by_default" {
-        for_each = var.kms_key_id != null ? ["doit"] : []
-        content {
-          sse_algorithm     = "aws:kms"
-          kms_master_key_id = var.kms_key_id
-        }
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = var.kms_key_id != null ? "aws:kms" : "AES256"
+        kms_master_key_id = var.kms_key_id 
       }
     }
   }
