@@ -94,17 +94,7 @@ resource "aws_instance" "main" {
     gitCommitId = var.launch_config.git_commit
   })
 
-  depends_on                  = [null_resource.dependency_getter]
-}
-
-##
-# Module Dependency Workaround
-#
-# Note: This is a workaround for Terraform's lack of support for `depends_on` in modules.
-# See here for the inspiration: https://github.com/hashicorp/terraform/issues/1178#issuecomment-449158607
-##
-resource "null_resource" "dependency_getter" {
-  provisioner "local-exec" {
-    command = "echo ${length(var.dependencies)}"
-  }
+  # Note: This is a workaround for Terraform's lack of support for `depends_on` in modules.
+  # The value here must be a static list, so only a single dependency can be passed in per-variable.
+  depends_on                  = [var.ec2_depends_on_1]
 }
