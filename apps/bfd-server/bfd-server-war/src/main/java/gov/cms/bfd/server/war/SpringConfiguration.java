@@ -258,7 +258,7 @@ public class SpringConfiguration {
 
     poolingDataSource.setRegisterMbeans(true);
     poolingDataSource.setMetricRegistry(metricRegistry);
-    
+
     /*
      * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
      * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)

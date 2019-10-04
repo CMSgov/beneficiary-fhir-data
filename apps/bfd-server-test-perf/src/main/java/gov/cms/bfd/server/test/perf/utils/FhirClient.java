@@ -28,13 +28,13 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 
 /**
  * A class that simplifies connecting to FHIR backend server(s) that require a secure
@@ -113,8 +113,8 @@ public final class FhirClient {
 
       // initialize the ssl context
       sslContext.init(kmf.getKeyManagers(), new TrustManager[] {tm}, new SecureRandom());
-      SSLConnectionSocketFactory ssl = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-
+      SSLConnectionSocketFactory ssl =
+          new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
 
       // create a http client connection manager
       PoolingHttpClientConnectionManager connectionManager =
