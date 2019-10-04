@@ -309,32 +309,6 @@ module "cw_metric_alarms" {
   alarm_notification_arn        = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn           = data.aws_sns_topic.cloudwatch_ok.arn
 
-  http_500 = {
-    period            = "300"
-    eval_periods      = "1"
-    threshold         = "0.0"
-  }
-
-  http_latency_4s = {
-    period            = "900"
-    eval_periods      = "1"
-    threshold         = "4000.0"
-    ext_stat          = "p90"
-  }
-
-  http_latency_6s = {
-    period            = "3600"
-    eval_periods      = "1"
-    threshold         = "6000.0"
-    ext_stat          = "p99"
-  }
-
-  mct_query_time = {
-    period            = "900"
-    eval_periods      = "1"
-    threshold         = "6000.0"
-    ext_stat          = "p99"
-  }
 }
 
 
