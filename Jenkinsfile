@@ -160,12 +160,13 @@ if (deployEnvironment == 'ccs') {
 }
 
 stage('Deploy to TEST') {
-	milestone(label: 'stage_deploy_test_start')
+	lock(resource: 'env_test', inversePrecendence: true) {
+		milestone(label: 'stage_deploy_test_start')
 
-	node {
-		scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+		node {
+			scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+		}
 	}
-
 }
 
 stage('Manual Approval') {

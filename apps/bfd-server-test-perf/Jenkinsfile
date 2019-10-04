@@ -32,6 +32,8 @@ stage('Prepare') {
 		// Grab the commit that triggered the build.
 		checkout scm
 
+		scriptForApps = load('apps/build.groovy')
+
 		// Ensure the Ansible image is ready to go.
 		insideAnsibleContainer {
 			// Just some general "what does the container look like" debug
@@ -42,7 +44,7 @@ stage('Prepare') {
 			sh 'cd ansible && ansible --version'
 
 			// Verify the play's syntax before we run it.
-			sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=test num_servers=${params.env_num_servers}\" --syntax-check"
+			sh "cd apps/bfd-server-test-perf/ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=test num_servers=${params.env_num_servers}\" --syntax-check"
 		}
 	}
 }
@@ -63,25 +65,15 @@ def mvn(args) {
 				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
 			]
 	) {
-		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
+		sh "cd apps/bfd-server-test-perf && ${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
 	}
 }
 
 stage('Build') {
 	node {
 		milestone(label: 'stage_build_start')
-
-		withCredentials([
-				string(credentialsId: 'proxy-host', variable: 'proxyHost'),
-				string(credentialsId: 'proxy-port', variable: 'proxyPort')
-		]) {
-			// Run our Maven build with the correct proxy server settings, as part of
-			// build needs to use the proxy to download some things.
-			// (Note: Exposing the proxy server details on the Maven command line isn't
-			// a risk, as anyone with shell access will already be able to find it from
-			// the build system's environment variables.)
-			mvn "--update-snapshots -Dmaven.test.failure.ignore clean install -Dhttp.proxyHost=${proxyHost} -Dhttp.proxyPort=${proxyPort} -Dhttps.proxyHost=${proxyHost} -Dhttps.proxyPort=${proxyPort} -Dhttp.nonProxyHosts=localhost"
-		}
+		build_env = 'healthapt'
+		appBuildResults = scriptForApps.build(build_env)
 	}
 }
 
@@ -92,7 +84,7 @@ stage('Test the Test ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=test num_servers=${params.env_num_servers}\" --connection=paramiko"
+					sh "cd apps/bfd-server-test-perf/ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=test num_servers=${params.env_num_servers}\" --connection=paramiko"
 				}
 			}
 		}
@@ -108,7 +100,7 @@ stage('Test the DPR ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=dpr num_servers=${params.env_num_servers}\" --connection=paramiko"
+					sh "cd apps/bfd-server-test-perf/ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=dpr num_servers=${params.env_num_servers}\" --connection=paramiko"
 				}
 			}
 		}
@@ -124,7 +116,7 @@ stage('Test the Prod ENV') {
 
 			node {
 				insideAnsibleContainer {
-					sh "cd ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=prod num_servers=${params.env_num_servers}\" --connection=paramiko"
+					sh "cd apps/bfd-server-test-perf/ansible && ansible-playbook fhir-stress-test-temp-testers.yml -e \"target_env=prod num_servers=${params.env_num_servers}\" --connection=paramiko"
 				}
 			}
 		}
