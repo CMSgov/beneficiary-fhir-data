@@ -220,7 +220,7 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-over-600" {
   log_group_name = "/bfd/${var.env}/bfd-server/access"
 
   metric_transformation {
-    name          = "http-requests/latency/over-600"
+    name          = "http-requests/latency/over-6000"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "1"
     default_value = "0"
