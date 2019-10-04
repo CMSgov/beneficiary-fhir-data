@@ -1,6 +1,6 @@
 # Cloudwatch Metric Filters
 # 
-# Creates the BFD Data Server cloudwatch log metric filters and log group. 
+# Creates the BFD Server CloudWatch log metric filters and log group. 
 #
 
 resource "aws_cloudwatch_log_metric_filter" "mct_query_time" {
