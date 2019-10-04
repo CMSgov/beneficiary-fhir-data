@@ -30,3 +30,9 @@ variable "sg_ids" {
   default     = []
   description = "The IDs of the additional security groups that this EC2 instance should be added to."
 }
+
+variable "ec2_depends_on_1" {
+  type        = string
+  default     = null
+  description = "The Terraform resource name/ID of a resource that this module's EC2 instance should depend on, if any."
+}

@@ -424,23 +424,24 @@ module "replica3_alarms" {
   ok_notification_arn = aws_sns_topic.cloudwatch_ok.arn
 }
 
-# S3 Admin bucket for logs and other adminstrative 
+# S3 Admin bucket for adminstrative stuff
 #
 module "admin" { 
   source              = "../resources/s3"
   role                = "admin"
   env_config          = local.env_config
   kms_key_id          = data.aws_kms_key.master_key.arn
-  acl                 = "log-delivery-write"
+  log_bucket          = module.logs.id
 }
 
-# S3 Admin bucket for logs and other adminstrative 
+# S3 bucket for logs 
 #
-module "elb" { 
+module "logs" { 
   source              = "../resources/s3"
-  role                = "elb"
+  role                = "logs"
   env_config          = local.env_config
-  kms_key_id          = data.aws_kms_key.master_key.arn
+  acl                 = "log-delivery-write"  # For AWS bucket logs
+  kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
 # S3 bucket for ETL files
@@ -450,7 +451,7 @@ module "etl" {
   role                = "etl"
   env_config          = local.env_config
   kms_key_id          = data.aws_kms_key.master_key.arn
-  log_bucket          = module.admin.id
+  log_bucket          = module.logs.id
 }
 
 # IAM policy, user, and attachment to allow external read-write

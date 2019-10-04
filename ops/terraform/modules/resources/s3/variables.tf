@@ -9,6 +9,7 @@ variable "role" {
 
 variable "kms_key_id" {
   type        = string
+  default     = null
 }
 
 variable "log_bucket" {

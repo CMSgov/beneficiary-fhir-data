@@ -30,7 +30,7 @@ data "aws_subnet" "app_subnets" {
   }
 }
 
-# S3 admin bucket for logs
+# S3 bucket for logs
 #
 data "aws_s3_bucket" "logs" {
   bucket = var.log_bucket

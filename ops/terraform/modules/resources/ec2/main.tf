@@ -93,4 +93,8 @@ resource "aws_instance" "main" {
     gitBranchName = var.launch_config.git_branch
     gitCommitId = var.launch_config.git_commit
   })
+
+  # Note: This is a workaround for Terraform's lack of support for `depends_on` in modules.
+  # The value here must be a static list, so only a single dependency can be passed in per-variable.
+  depends_on                  = [var.ec2_depends_on_1]
 }
