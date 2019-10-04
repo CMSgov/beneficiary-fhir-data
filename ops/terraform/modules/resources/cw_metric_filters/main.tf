@@ -6,7 +6,7 @@
 resource "aws_cloudwatch_log_metric_filter" "mct_query_time" {
   count          = var.env == null ? 0 : 1
   name           = "bfd-${var.env}/bfd-server/mct-query-time"
-  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user=*mct-prod-client, timestamp, request, query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user=*mct*, timestamp, request, query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
   log_group_name = "/bfd/${var.env}/bfd-server/access.txt"
 
   metric_transformation {
