@@ -57,6 +57,7 @@
 		</encoder>
 	</appender>
 	
+	<!-- TODO: Disable once BLUEBUTTON-1233 is resolved -->
 	<!-- Enabling DEBUG level logging for hikari -->
 	<logger name="com.zaxxer.hikari" level="debug" additivity="false">
 		<appender-ref ref="STDOUT"/>
