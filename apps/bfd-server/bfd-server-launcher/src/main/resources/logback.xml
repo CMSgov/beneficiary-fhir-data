@@ -56,6 +56,12 @@
 			</layout>
 		</encoder>
 	</appender>
+	
+	<!-- TODO: Disable once BLUEBUTTON-1233 is resolved -->
+	<!-- Enabling DEBUG level logging for hikari -->
+	<logger name="com.zaxxer.hikari" level="debug" additivity="false">
+		<appender-ref ref="STDOUT"/>
+	</logger>
 
 	<!-- At 'debug', Hibernate will log SQL statements. -->
 	<!-- However, please note that this doesn't work in JBoss, as Hibernate 
