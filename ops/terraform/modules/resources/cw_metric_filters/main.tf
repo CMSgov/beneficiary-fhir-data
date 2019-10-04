@@ -15,7 +15,7 @@ resource "aws_cloudwatch_log_metric_filter" "mct_query_time" {
   log_group_name = local.log_groups.access
 
   metric_transformation {
-    name          = "mct-query-duration"
+    name          = "http-requests/latency/mct"
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "$duration_milliseconds"
     default_value = null
@@ -74,8 +74,8 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-500" {
   }
 }
 
-resource "aws_cloudwatch_log_metric_filter" "http-requests-count-metadata" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/count/meta-data"
+resource "aws_cloudwatch_log_metric_filter" "http-requests-count-metadata" { 
+  name            = "bfd-${var.env}/bfd-server/http-requests/count/metadata"
   pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request = \"*/metadata*\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
   log_group_name = local.log_groups.access
 
@@ -191,8 +191,10 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-fhir-patient"
   }
 }
 
-resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-over-600" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/over-600"
+resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-over-6000" {
+  count          = var.env == null ? 0 : 1
+
+  name           = "bfd-${var.env}/bfd-server/http-requests/latency/over-6000"
   pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request, query_string, status_code, bytes, duration_milliseconds > 6000, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
   log_group_name = local.log_groups.access
 
