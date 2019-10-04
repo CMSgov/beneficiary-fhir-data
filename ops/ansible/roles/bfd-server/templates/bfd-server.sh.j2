@@ -59,6 +59,7 @@ log() {
 # * $2: the value to confirm is present in the curl output; if not found, then the query should be regarded as unsuccessful
 ##
 check_endpoint() {
+  set -o pipefail
   curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
 }
 
