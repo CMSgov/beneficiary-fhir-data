@@ -292,3 +292,23 @@ module "bfd_pipeline" {
     ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
   }
 }
+
+# Cloudwatch Log Metric Filters
+
+module "cw_metric_filters" {
+  source          = "../resources/cw_metric_filters"
+  env             = var.env_config.env
+}
+
+# Cloudwatch Log Metric Filter Alarms
+
+module "cw_metric_alarms" {
+  source          = "../resources/cw_metric_alarms"
+  env                           = var.env_config.env
+  app                           = "bfd"
+  alarm_notification_arn        = data.aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn           = data.aws_sns_topic.cloudwatch_ok.arn
+
+}
+
+
