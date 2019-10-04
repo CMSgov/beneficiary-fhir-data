@@ -46,7 +46,3 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
 
 data_server_startup_testing: true
-data_server_startup_testing_retries: 3
-data_server_startup_testing_boot_timeout: 30
-data_server_startup_testing_req_timeout: 15
-data_server_startup_testing_req_backoff_timeout: 10

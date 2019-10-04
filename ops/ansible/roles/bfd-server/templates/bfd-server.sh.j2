@@ -35,45 +35,66 @@ export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
 
 {% if data_server_startup_testing is defined and data_server_startup_testing is sameas true %}
 # Begin smoke testing startup routine
-STARTUP_TESTING_RETRIES='{{ data_server_startup_testing_retries | default(3) }}'
-STARTUP_TESTING_BOOT_TIMEOUT='{{ data_server_startup_testing_boot_timeout | default(30) }}'
-STARTUP_TESTING_REQ_TIMEOUT='{{ data_server_startup_testing_req_timeout | default(15) }}'
-STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='{{ data_server_startup_testing_req_backup_timeout | default(10) }}'
+STARTUP_TESTING_RETRIES='3'
+STARTUP_TESTING_BOOT_TIMEOUT='30'
+STARTUP_TESTING_REQ_TIMEOUT='15'
+STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='10'
+STARTUP_TESTING_BENE_ID='-201'
 
+##
+# Prints out the specified message.
+#
+# Params:
+# * $1: the message to log
+##
+log() {
+  echo "$(date +%F\ %T): $1"
+}
+
+##
+# Verifies that the specified endpoint/query can be queried via curl without error and produced the expected output.
+#
+# Params:
+# * $1: the full URL to query via curl
+# * $2: the value to confirm is present in the curl output; if not found, then the query should be regarded as unsuccessful
+##
 check_endpoint() {
   curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
 }
 
+##
+# Runs test queries to verify that the server is working as expected. If not, issues a 'kill -INT' on the server's process to shut it down.
+##
 stop_service_if_failing() {
-  echo "$(date +%F\ %T): Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
+  log "Waiting $STARTUP_TESTING_BOOT_TIMEOUT seconds for initial startup"
   sleep $STARTUP_TESTING_BOOT_TIMEOUT
 
   for I in $(seq $STARTUP_TESTING_RETRIES); do
-    echo "$(date +%F\ %T): Checking metadata endpoint"
-    STARTUP_TESTING_CHECK_METADATA=$(check_endpoint 'https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir' 'status')
+    log "Checking metadata endpoint"
+    STARTUP_TESTING_CHECK_METADATA=$(check_endpoint "https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
     STARTUP_TESTING_CHECK_METADATA_EXIT=$?
 
-    echo "$(date +%F\ %T): Checking database endpoint"
-    STARTUP_TESTING_CHECK_DATABASE=$(check_endpoint 'https://localhost:7443/v1/fhir/Coverage?beneficiary=-201&_format=application%2Fjson%2Bfhir' 'id')
+    log "Checking database endpoint"
+    STARTUP_TESTING_CHECK_DATABASE=$(check_endpoint "https://localhost:7443/v1/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
     STARTUP_TESTING_CHECK_DATABASE_EXIT=$?
 
     if [[ $STARTUP_TESTING_CHECK_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_DATABASE_EXIT == 0 ]]; then
-      echo "$(date +%F\ %T): Server started properly"
+      log "Server started properly"
       return 0
-    elif [[ $I != $STARTUP_TESTING_RETRIES ]]; then
-      echo "$(date +%F\ %T): Server failed to start properly, backing off"
+    elif [[ $I -lt $STARTUP_TESTING_RETRIES ]]; then
+      log "Server failed to start properly, backing off"
       sleep $STARTUP_TESTING_REQ_BACKOFF_TIMEOUT
     fi
   done
 
-  echo "$(date +%F\ %T): Server failed to start properly, shutting down"
+  log "Server failed to start properly, shutting down"
   STARTUP_TESTING_BFD_PID=$(ps -ef | grep 'DataServerLauncherApp' | grep -v grep | awk '{print $2}')
   STARTUP_TESTING_BFD_PID_EXIT=$?
 
   if [[ $STARTUP_TESTING_BFD_PID_EXIT == 0 ]] && kill -INT $STARTUP_TESTING_BFD_PID; then
-    echo "$(date +%F\ %T): Server shut down gracefully"
+    log "Server shut down gracefully"
   else
-    echo "$(date +%F\ %T): Error shutting down server gracefully"
+    log "Error shutting down server gracefully"
   fi
   return 1
 }
