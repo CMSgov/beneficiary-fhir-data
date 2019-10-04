@@ -82,7 +82,7 @@ resource "aws_cloudwatch_metric_alarm" "mct-query-duration" {
   threshold                 = var.mct_query_time.threshold
   alarm_description         = "HTTP EOB Request Latency ${var.mct_query_time.ext_stat} exceeds ${var.mct_query_time.threshold} seconds for MCT in APP-ENV: ${var.app}-${var.env} over ${var.mct_query_time.period} seconds"
 
-  metric_name               = "mct-query-duration"
+  metric_name               = "http-requests/latency/mct"
   namespace                 = "bfd-${var.env}/bfd-server"
 
   alarm_actions      = local.alarm_actions
