@@ -504,3 +504,53 @@ resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
   user       = aws_iam_user.etl.name
   policy_arn = aws_iam_policy.etl_rw_s3.arn
 }
+
+# CloudWatch Log Groups
+#
+resource "aws_cloudwatch_log_group" "var_log_messages" {
+  name       = "/bfd/${var.env_config.env}/var/log/messages"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = local.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "var_log_secure" {
+  name       = "/bfd/${var.env_config.env}/var/log/secure"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = local.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "var_log_messages" {
+  name       = "/bfd/${var.env_config.env}/bfd-pipeline/messages.txt"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_access_txt" {
+  name       = "/bfd/${var.env}/bfd-server/access.txt"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_access_json" {
+  name       = "/bfd/${var.env}/bfd-server/access.json"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_messages_json" {
+  name       = "/bfd/${var.env}/bfd-server/messages.json"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_newrelic_agent" {
+  name       = "/bfd/${var.env}/bfd-server/newrelic_agent.log"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_gc" {
+  name       = "/bfd/${var.env}/bfd-server/gc.log"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
