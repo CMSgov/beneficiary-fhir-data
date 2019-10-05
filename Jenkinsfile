@@ -209,8 +209,8 @@ stage('Deploy to hhsdevcloud') {
 }
 
 if (deployEnvironment == 'ccs') {
-	if (willDeployToProdEnvs) {
-		stage('Build App AMIs for PROD-SBX') {
+	stage('Build App AMIs for PROD-SBX') {
+		if (willDeployToProdEnvs) {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
 
 			node {
