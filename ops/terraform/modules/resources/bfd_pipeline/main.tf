@@ -92,7 +92,7 @@ resource "aws_iam_role_policy_attachment" "bfd_pipeline_rif" {
 # Give the BFD Pipeline app read access to the Ansible Vault PW.
 #
 data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
-  arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
+  arn           = "arn:aws:iam::${var.launch_config.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
 resource "aws_iam_role_policy_attachment" "bfd_pipeline_iam_ansible_vault_pw_ro_s3" {
