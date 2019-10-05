@@ -66,8 +66,11 @@ resource "aws_iam_policy" "bfd_pipeline_rif" {
     {
       "Sid": "BFD Pipeline RW S3 RIF: Read Write Objects",
       "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
         "s3:GetObject",
-        "s3:PutObject"
+        "s3:PutObject",
+        "s3:DeleteObject"
       ],
       "Effect": "Allow",
       "Resource": ["${data.aws_s3_bucket.rif.arn}/*"]
