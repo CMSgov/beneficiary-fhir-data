@@ -68,10 +68,6 @@ data "aws_route53_zone" "local_zone" {
 #
 data "aws_caller_identity" "current" {}
 
-data "aws_s3_bucket" "etl" {
-  bucket = "bfd-${var.env_config.env}-etl-${data.aws_caller_identity.current.account_id}"
-}
-
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
 }
@@ -164,19 +160,6 @@ module "fhir_iam" {
 
 resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
   role            = module.fhir_iam.role
-  policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
-}
-
-module "etl_iam" {
-  source = "../resources/iam"
-
-  env_config      = local.env_config
-  name            = "etl"
-  s3_bucket_arns  = [data.aws_s3_bucket.etl.arn]
-}
-
-resource "aws_iam_role_policy_attachment" "etl_iam_ansible_vault_pw_ro_s3" {
-  role            = module.etl_iam.role
   policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
@@ -275,8 +258,8 @@ module "bfd_pipeline" {
 
   launch_config   = {
     ami_id        = var.etl_ami
+    account_id    = data.aws_caller_identity.current.account_id
     ssh_key_name  = var.ssh_key_name
-    profile       = module.etl_iam.profile
     git_branch    = var.git_branch_name
     git_commit    = var.git_commit_id
   }
