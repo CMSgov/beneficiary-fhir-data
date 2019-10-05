@@ -66,7 +66,7 @@ def deploy(String envId, String gitBranchName, String gitCommitId, AmiIds amiIds
 	if (envId == "test" ) {
 		envGroupName = 'env_test'
 		envLimitName = 'ts'
-	} else if (envId == "prod-stg") {
+	} else if (envId == "prod-sbx") {
 		envGroupName = 'env_dpr'
 		envLimitName = 'dp'
 	} else if (envId == "prod") {

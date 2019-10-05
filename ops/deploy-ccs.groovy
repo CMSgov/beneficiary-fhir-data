@@ -138,7 +138,7 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 			def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
 
 			varsFile.write(JsonOutput.toJson([
-				env: normalizeEnvironmentId(environmentId),
+				env: environmentId,
 				data_server_launcher: "${workspace}/${appBuildResults.dataServerLauncher}",
 				data_server_war: "${workspace}/${appBuildResults.dataServerWar}",
 				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
@@ -178,7 +178,7 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 /**
  * Deploys to the specified environment.
  *
- * @param envId the ID of the environment to deploy to
+ * @param environmentId the ID of the environment to deploy to
  * @param gitBranchName the name of the Git branch this build is for
  * @param gitCommitId the hash/ID of the Git commit that this build is for
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
@@ -186,8 +186,7 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
  * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
  */
 def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
-	def env = normalizeEnvironmentId(environmentId)
-	dir("${workspace}/ops/terraform/env/${env}/stateless") {
+	dir("${workspace}/ops/terraform/env/${environmentId}/stateless") {
 
 		// Debug output terraform version 
 		sh "/usr/bin/terraform --version"
@@ -200,7 +199,7 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 		sh "/usr/bin/terraform plan \
 		-var='fhir_ami=${amiIds.bfdServerAmiId}' \
 		-var='etl_ami=${amiIds.bfdPipelineAmiId}' \
-		-var='ssh_key_name=bfd-${env}' \
+		-var='ssh_key_name=bfd-${environmentId}' \
 		-var='git_branch_name=${gitBranchName}' \
 		-var='git_commit_id=${gitCommitId}' \
 		-no-color -out=tfplan"
@@ -220,19 +219,6 @@ def extractAmiIdFromPackerManifest(File manifest) {
 		// artifactId will be of the form $region:$amiId
 		return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
 	}
-}
-
-def normalizeEnvironmentId(String environmentId) {
-	switch (environmentId) {
-		case 'test':
-		case 'prod':
-		case 'prod-sbx':
-			return environmentId
-		case 'prod-stg':
-			return 'prod-sbx'
-		default:
-			throw new UnsupportedOperationException("Deploy to the CCS ${environmentId} environment is not yet implemented.")
-  }
 }
 
 return this

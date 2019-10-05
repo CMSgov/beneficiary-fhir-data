@@ -209,33 +209,35 @@ stage('Deploy to hhsdevcloud') {
 }
 
 if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for PROD-SBX') {
+	stage('Build App AMIs for prod-sbx') {
 		if (willDeployToProdEnvs) {
 			milestone(label: 'stage_build_app_amis_prod-sbx_start')
 
 			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			}
-		}
-	}
-}
-
-stage('Deploy to prod-stg') {
-	if (willDeployToProdEnvs) {
-		lock(resource: 'env_prod_stg', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_prod_stg_start')
-
-			node {
-				scriptForDeploys.deploy('prod-stg', gitBranchName, gitCommitId, amiIds, appBuildResults)
+				amiIds = scriptForDeploys.buildAppAmis('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
 	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-stg')
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod-sbx')
+	}
+}
+
+stage('Deploy to prod-sbx') {
+	if (willDeployToProdEnvs) {
+		lock(resource: 'env_prod_sbx', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_prod_sbx_start')
+
+			node {
+				scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			}
+		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 	}
 }
 
 if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for PROD') {
+	stage('Build App AMIs for prod') {
 		if (willDeployToProdEnvs) {
 			milestone(label: 'stage_build_app_amis_prod_start')
 
@@ -243,6 +245,8 @@ if (deployEnvironment == 'ccs') {
 				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod')
 	}
 }
 
