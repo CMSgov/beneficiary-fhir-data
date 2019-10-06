@@ -28,6 +28,27 @@ resource "aws_iam_role" "instance" {
   EOF
 }
 
+resource "aws_iam_role_policy" "logs_policy" {
+  name = "bfd-${var.env_config.env}-${var.name}-logs-policy"
+  role = aws_iam_role.instance.id
+
+  policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:PutLogEvents",
+          "logs:CreateLogStream"
+        ],
+        "Resource": ["*"]
+      }
+    ]
+  }
+  EOF
+}
+
 resource "aws_iam_role_policy" "s3_policy" {
   count = length(var.s3_bucket_arns) > 0 ? 1 : 0
   name = "bfd-${var.env_config.env}-${var.name}-s3-policy"
