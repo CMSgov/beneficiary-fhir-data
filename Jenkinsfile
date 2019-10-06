@@ -216,9 +216,9 @@ if (deployEnvironment == 'ccs') {
 			node {
 				amiIds = scriptForDeploys.buildAppAmis('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod-sbx')
 		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod-sbx')
 	}
 }
 
@@ -244,9 +244,9 @@ if (deployEnvironment == 'ccs') {
 			node {
 				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod')
 		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod')
 	}
 }
 
