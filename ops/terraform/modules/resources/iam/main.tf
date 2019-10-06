@@ -39,6 +39,7 @@ resource "aws_iam_role_policy" "logs_policy" {
       {
         "Effect": "Allow",
         "Action": [
+          "ec2:DescribeTags",
           "logs:PutLogEvents",
           "logs:CreateLogStream"
         ],
