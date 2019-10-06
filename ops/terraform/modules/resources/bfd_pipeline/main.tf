@@ -52,19 +52,19 @@ resource "aws_iam_policy" "bfd_pipeline_rif" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "BFD Pipeline RW S3 RIF: KMS",
+      "Sid": "BFDPipelineRWS3RIFKMS",
       "Action": ["kms:Decrypt"],
       "Effect": "Allow",
       "Resource": ["${data.aws_kms_key.master_key.arn}"]
     },
     {
-      "Sid": "BFD Pipeline RW S3 RIF: List Bucket",
+      "Sid": "BFDPipelineRWS3RIFListBucket",
       "Action": ["s3:ListBucket"],
       "Effect": "Allow",
       "Resource": ["${data.aws_s3_bucket.rif.arn}"]
     },
     {
-      "Sid": "BFD Pipeline RW S3 RIF: Read Write Objects",
+      "Sid": "BFDPipelineRWS3RIFReadWriteObjects",
       "Action": [
         "s3:ListBucket",
         "s3:GetBucketLocation",
