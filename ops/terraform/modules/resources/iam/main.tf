@@ -1,3 +1,7 @@
+data "aws_iam_policy" "cloudwatch_agent_policy" {
+  arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
 resource "aws_iam_instance_profile" "instance" {
   name = "bfd-${var.env_config.env}-${var.name}-profile"
   role = aws_iam_role.instance.name
@@ -28,25 +32,11 @@ resource "aws_iam_role" "instance" {
   EOF
 }
 
-resource "aws_iam_role_policy" "logs_policy" {
-  name = "bfd-${var.env_config.env}-${var.name}-logs-policy"
-  role = aws_iam_role.instance.id
-
-  policy = <<-EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Action": [
-          "logs:PutLogEvents",
-          "logs:CreateLogStream"
-        ],
-        "Resource": ["*"]
-      }
-    ]
-  }
-  EOF
+# Attach AWS managed CloudWatchAgentServerPolicy to all EC2 instances
+#
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
+  role       = aws_iam_role.instance.id
+  policy_arn = data.aws_iam_policy.cloudwatch_agent_policy.arn
 }
 
 resource "aws_iam_role_policy" "s3_policy" {
