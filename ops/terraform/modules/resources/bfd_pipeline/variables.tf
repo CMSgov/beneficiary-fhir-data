@@ -18,5 +18,5 @@ variable "mgmt_config" {
 }
 
 variable "launch_config" {
-  type        = object({ami_id=string, ssh_key_name=string, profile=string, git_branch=string, git_commit=string})
+  type        = object({ami_id=string, account_id=string, ssh_key_name=string, git_branch=string, git_commit=string})
 }
