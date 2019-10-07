@@ -16,6 +16,13 @@ module "stateful" {
     allocated_storage = 16000
   }
 
+  db_params = [
+    {name="max_worker_processes", value="16", apply_on_reboot=true},
+    {name="random_page_cost", value="1", apply_on_reboot=false},
+    {name="temp_buffers", value="8192", apply_on_reboot=false},
+    {name="work_mem", value="32768", apply_on_reboot=false}
+  ]
+
   db_import_mode = {
     enabled = false
     maintenance_work_mem = "4194304"
