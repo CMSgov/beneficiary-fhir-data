@@ -223,7 +223,7 @@ module "fhir_asg" {
   }
 
   launch_config   = {
-    instance_type   = "m5.2xlarge" 
+    instance_type   = "m5.xlarge"             # Use reserve instances
     volume_size     = 100 # GB
     ami_id          = var.fhir_ami 
     key_name        = var.ssh_key_name 

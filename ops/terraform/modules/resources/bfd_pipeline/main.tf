@@ -1,3 +1,7 @@
+locals {
+  is_prod               = var.env_config.env == "prod" 
+}
+
 # Locate the S3 bucket that stores the RIF data to be processed by the BFD Pipeline application.
 #
 data "aws_s3_bucket" "rif" {
@@ -114,8 +118,8 @@ module "ec2_instance" {
   az              = "us-east-1b" # Same as the master db
 
   launch_config   = {
-    instance_type = "m5.2xlarge"
-    volume_size   = 100 # GB
+    instance_type = local.is_prod ? "m5.4xlarge" : "m5.xlarge"  # Use reserve instances (4x and 1x). Prod only has big workloads  
+    volume_size   = 200 # GB                                    # Have enough space to download RIF files
     ami_id        = var.launch_config.ami_id
 
     key_name      = var.launch_config.ssh_key_name
