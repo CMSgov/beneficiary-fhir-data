@@ -1,7 +1,7 @@
 /*
  * Creates the beneficiary ID history table required by the application. This
  * schema is derived from the JPA metadata, via the 
- * gov.cms.bfd.pipeline.rif.schema.HibernateSchemaPrinter
+ * gov.hhs.cms.bluebutton.data.pipeline.rif.schema.HibernateSchemaPrinter 
  * utility.
  */
 

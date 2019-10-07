@@ -41,6 +41,3 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_mct_prod_certificate.pem') }}"
   - alias: client_performance_tester
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
-
-# Adjust the default New Relic `app_name` setting to include AWS env name.
-data_server_new_relic_app_name: "BFD Server ({{ env_name_std }}, HealtAPT)"

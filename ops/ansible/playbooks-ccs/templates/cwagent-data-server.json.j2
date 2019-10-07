@@ -5,18 +5,18 @@
         "collect_list": [
           {
             "file_path": "/var/log/messages",
-            "log_group_name": "/var/log/messages",
+            "log_group_name": "/bfd/{{ env }}/var/log/messages",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%b %d %H:%M:%S"
           },
           {
             "file_path": "/var/log/secure",
-            "log_group_name": "/var/log/secure",
+            "log_group_name": "/bfd/{{ env }}/var/log/secure",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%b %d %H:%M:%S"
           },
           {
-            "file_path": "{{ bfd_server_dir }}/bluebutton-server-app-log-access.json",
+            "file_path": "{{ bfd_server_dir }}/access.json",
             "log_group_name": "/bfd/{{ env }}/bfd-server/access.json",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%dT%H:%M:%S%z"

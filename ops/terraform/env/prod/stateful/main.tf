@@ -12,7 +12,7 @@ module "stateful" {
 
   db_config = { 
     instance_class    = "db.r5.24xlarge"
-    iops              = 16000
+    iops              = 80000
     allocated_storage = 16000
   }
 
