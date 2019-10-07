@@ -118,8 +118,8 @@ module "ec2_instance" {
   az              = "us-east-1b" # Same as the master db
 
   launch_config   = {
-    instance_type = local.is_prod ? "m5.4xlarge" : "m5.xlarge"  # Use reserve instances (4x and 1x). Prod only has big workloads  
-    volume_size   = 200 # GB                                    # Have enough space to download RIF files
+    instance_type = local.is_prod ? "m5.4xlarge" : "m5.xlarge"  # Use reserve instances. Use 4x only in prod. 
+    volume_size   = 200 # GB                                    # Make sure we have nough space to download RIF files
     ami_id        = var.launch_config.ami_id
 
     key_name      = var.launch_config.ssh_key_name
