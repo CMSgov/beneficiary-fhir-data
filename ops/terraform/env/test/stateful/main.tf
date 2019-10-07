@@ -16,6 +16,8 @@ module "stateful" {
     allocated_storage = 12000
   }
 
+  db_params = []
+
   db_import_mode = {
     enabled = false
     maintenance_work_mem = "4194304"
