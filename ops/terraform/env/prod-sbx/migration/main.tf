@@ -15,7 +15,7 @@ module "migration" {
     tags              = {application="bfd", business="oeda", stack="prod-sbx", Environment="prod-sbx"}
   }  
 
-  bb      = 100
+  bb      = 50
   bcda    = 100
   dpc     = 100
   mct     = 100
