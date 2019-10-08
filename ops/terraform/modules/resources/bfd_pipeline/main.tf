@@ -118,6 +118,7 @@ module "ec2_instance" {
   az              = "us-east-1b" # Same as the master db
 
   launch_config   = {
+    # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
     instance_type = local.is_prod ? "m5.4xlarge" : "m5.xlarge"  # Use reserve instances. Use 4x only in prod. 
     volume_size   = 1000 # GB                                   # Make sure we have nough space to download RIF files
     ami_id        = var.launch_config.ami_id
