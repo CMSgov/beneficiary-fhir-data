@@ -16,7 +16,15 @@ module "stateful" {
     allocated_storage = 12000
   }
 
-  db_params = []
+  db_params = [
+    {name="effective_io_concurrency", value="300", apply_on_reboot=false},
+    {name="default_statistics_target", value="1000", apply_on_reboot=false},
+    {name="max_worker_processes", value="96", apply_on_reboot=true},
+    {name="max_parallel_workers_per_gather", value="48", apply_on_reboot=false},
+    {name="random_page_cost", value="1", apply_on_reboot=false},
+    {name="temp_buffers", value="8192", apply_on_reboot=false},
+    {name="work_mem", value="32768", apply_on_reboot=false}
+  ]
 
   db_import_mode = {
     enabled = false
