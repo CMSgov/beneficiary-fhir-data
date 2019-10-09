@@ -195,6 +195,15 @@ resource "aws_db_parameter_group" "default_mode" {
   name        = "bfd-${local.env_config.env}-default-mode-parameter-group"
   family      = "postgres9.6"
   description = "Sets parameters for standard operation"
+
+  dynamic "parameter" {
+    for_each = var.db_params
+    content {
+      name         = parameter.value.name
+      value        = parameter.value.value
+      apply_method = parameter.value.apply_on_reboot ? "pending-reboot" : null
+    }
+  }
 }
 
 resource "aws_db_parameter_group" "import_mode" {
