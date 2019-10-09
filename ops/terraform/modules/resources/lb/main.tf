@@ -52,9 +52,10 @@ resource "aws_elb" "main" {
   subnets               = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
   security_groups       = [aws_security_group.lb.id]
 
-  cross_zone_load_balancing = false   # Match HealthApt
-  idle_timeout              = 60      # (seconds) Match HealthApt
-  connection_draining       = false   # Match HealthApt
+  cross_zone_load_balancing   = false   # Match HealthApt
+  idle_timeout                = 60      # (seconds) Match HealthApt
+  connection_draining         = true
+  connection_draining_timeout = 60
 
   listener {
     lb_protocol         = "TCP"
