@@ -18,7 +18,7 @@ locals {
     prod            = [
       "bfd-prod-vpc-to-mct-prod-vpc", "bfd-prod-vpc-to-mct-prod-dr-vpc", 
       "bfd-prod-vpc-to-dpc-prod-vpc", 
-      "bfd-prod-vpc-to-dpc-prod-vpc", 
+      "bfd-prod-vpc-to-bluebutton-prod", 
       "bfd-prod-vpc-to-bcda-prod-vpc"
     ],
     prod-sbx        = [
