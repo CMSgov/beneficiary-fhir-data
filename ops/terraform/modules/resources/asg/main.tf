@@ -156,7 +156,7 @@ resource "aws_autoscaling_group" "main" {
   # If an lb is defined, wait for the ELB 
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
   wait_for_elb_capacity     = var.lb_config == null ? null : var.asg_config.min
-  wait_for_capacity_timeout = var.lb_config == null ? null : "10m"
+  wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
   health_check_grace_period = 300
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
