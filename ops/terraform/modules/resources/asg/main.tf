@@ -42,11 +42,17 @@ data "aws_kms_key" "master_key" {
 #
 resource "aws_security_group" "base" {
   name          = "bfd-${var.env_config.env}-${var.role}-base"
-  description   = "Allow CI access to app servers"
+  description   = "Allow CI and SSH access to servers"
   vpc_id        = var.env_config.vpc_id
   tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
 
   # Note: If we want to allow Jenkins to SSH into boxes, that would go here.
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.mgmt_config.ci_cidrs
+  }
 
   egress {
     from_port   = 0
