@@ -217,7 +217,7 @@ module "fhir_asg" {
   # Initial size is one server per AZ
   asg_config      = {
     min           = length(local.azs)
-    max           = 2*length(local.azs)
+    max           = 8*length(local.azs)
     desired       = length(local.azs)
     sns_topic_arn = ""
   }
