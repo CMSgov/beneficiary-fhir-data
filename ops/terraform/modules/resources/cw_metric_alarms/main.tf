@@ -53,7 +53,7 @@ resource "aws_cloudwatch_metric_alarm" "http-500" {
 
 # EOB Slow Response > 4s p90
 resource "aws_cloudwatch_metric_alarm" "http-requests-latency-fhir-eob-4s" {
-  alarm_name                = "${var.app}-${var.env}-http-requests-latency-fhir-eob"
+  alarm_name                = "${var.app}-${var.env}-http-requests-latency-fhir-eob-4s"
   comparison_operator       = "GreaterThanThreshold"
   evaluation_periods        = local.http_latency_4s.eval_periods
   period                    = local.http_latency_4s.period
@@ -73,7 +73,7 @@ resource "aws_cloudwatch_metric_alarm" "http-requests-latency-fhir-eob-4s" {
 
 # EOB Slow Response > 6s p99 over 1h
 resource "aws_cloudwatch_metric_alarm" "http-requests-latency-fhir-eob-6s" {
-  alarm_name                = "${var.app}-${var.env}-http-requests-latency-fhir-eob"
+  alarm_name                = "${var.app}-${var.env}-http-requests-latency-fhir-eob-6s"
   comparison_operator       = "GreaterThanThreshold"
   evaluation_periods        = local.http_latency_6s.eval_periods
   period                    = local.http_latency_6s.period
