@@ -38,7 +38,7 @@ data "aws_kms_key" "master_key" {
 # Security groups
 #
 
-# Base security includes management SSH access
+# Base security group with egress 
 #
 resource "aws_security_group" "base" {
   name          = "bfd-${var.env_config.env}-${var.role}-base"
@@ -46,8 +46,8 @@ resource "aws_security_group" "base" {
   vpc_id        = var.env_config.vpc_id
   tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
 
-  # Note: If we want to allow Jenkins to SSH into boxes, that would go here.
-
+  ingress       = []  # Make the ingress empty for this SG. 
+  
   egress {
     from_port   = 0
     protocol    = "-1"
