@@ -15,7 +15,7 @@ module "migration" {
     tags              = {application="bfd", business="oeda", stack="prod", Environment="prod"}
   }  
 
-  bb      = 0
+  bb      = 50
   bcda    = 0
   dpc     = 0
   mct     = 0
