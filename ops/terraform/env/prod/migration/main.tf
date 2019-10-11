@@ -16,7 +16,7 @@ module "migration" {
   }  
 
   bb      = 50
-  bcda    = 0
+  bcda    = 50
   dpc     = 0
   mct     = 0
 }
