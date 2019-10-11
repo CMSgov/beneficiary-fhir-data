@@ -336,11 +336,8 @@ module "master_alarms" {
     threshold         = local.cw_latency
   }
 
-  disk_queue_depth = {
-    period            = local.cw_period
-    eval_periods      = local.cw_eval_periods
-    threshold         = local.cw_disk_queue_depth
-  }
+  # Do not alarm on disk_queue_depth. This metric didn't
+  # have much correlation to a healthy database
 
   alarm_notification_arn = aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn = aws_sns_topic.cloudwatch_ok.arn
