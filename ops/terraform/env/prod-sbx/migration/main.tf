@@ -15,6 +15,12 @@ module "migration" {
     tags              = {application="bfd", business="oeda", stack="prod-sbx", Environment="prod-sbx"}
   }  
 
+  # These values control the CCS and HealthApt DNS record weight for each partner
+  # A value of:
+  #   100 - 100% CCS, 0% HealthApt
+  #    50 - 50% CCS, 50% HealthApt
+  #     0 - 0 CCS, 100% HealthApt
+  #
   bb      = 50
   bcda    = 100
   dpc     = 100
