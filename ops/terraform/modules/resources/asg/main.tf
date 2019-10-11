@@ -157,7 +157,7 @@ resource "aws_autoscaling_group" "main" {
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
-  health_check_grace_period = 300
+  health_check_grace_period = 600
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
