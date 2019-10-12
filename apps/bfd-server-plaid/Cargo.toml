@@ -1,0 +1,31 @@
+[package]
+name = "bfd-server-plaid"
+version = "0.1.0"
+authors = ["Karl M. Davis <karl.davis@cms.hhs.gov>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+# Provide application logging facilities.
+log = "0.4"
+slog = { version = "2.5.2", features = ["max_level_trace", "release_max_level_warn"] }
+slog-async = { version = "2.3.0" }
+slog-stdlog = { version = "4.0.0" }
+slog-scope = { version = "4.1.2" }
+slog-json = { version = "2.3.0" }
+slog-term = { version = "2.4.1" }
+
+# Read environment variables from a file, if present.
+dotenv = "0.14.1"
+
+# Actix is the web framework used by this application.
+actix-web = { version = "1.0", features = ["rust-tls"] }
+rustls = { version = "0.15.2", features = ["logging"] }
+
+# Allows for auto-reload of the server in development, per https://actix.rs/docs/autoreload/.
+listenfd = "0.3"
+
+# Date & time.
+chrono = "0.4.9"
