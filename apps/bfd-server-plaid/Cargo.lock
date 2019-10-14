@@ -361,6 +361,7 @@ dependencies = [
  "slog-scope 4.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "slog-stdlog 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "slog-term 2.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "webpki 0.19.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

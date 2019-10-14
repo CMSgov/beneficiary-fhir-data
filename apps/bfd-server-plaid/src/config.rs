@@ -1,3 +1,4 @@
+use crate::error;
 use std::env;
 
 /// Stores application state. Re-created for each processing thread, but threads are reused across
@@ -12,7 +13,7 @@ pub struct AppConfig {
 }
 
 impl AppConfig {
-    pub fn new() -> Result<AppConfig, std::env::VarError> {
+    pub fn new() -> error::Result<AppConfig> {
         // If present, load environment variables from a `.env` file in the working directory.
         dotenv::dotenv().ok();
 

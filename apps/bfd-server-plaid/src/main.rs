@@ -1,4 +1,5 @@
 mod config;
+mod error;
 mod fhir;
 mod tls;
 
@@ -22,14 +23,14 @@ fn config_logging() -> slog::Logger {
     logger
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> error::Result<()> {
     // First, initialize logging.
     let logger = config_logging();
 
     // Route all log crate usage (from our dependencies) to slog, instead.
     // Note: This has to stay in scope in order to keep working.
     let _scope_guard = slog_scope::set_global_logger(logger.clone());
-    let _log_guard = slog_stdlog::init_with_level(log::Level::Warn).unwrap();
+    let _log_guard = slog_stdlog::init_with_level(log::Level::Warn)?;
 
     // Next, parse the app confif from the env.
     let app_config = AppConfig::new()?;
@@ -49,16 +50,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     info!(logger, "Ludicrous speed... go!");
-    server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
+    server = if let Some(l) = listenfd.take_tcp_listener(0)? {
         // Used in local development to auto-reload changes.
-        server.listen(l).unwrap()
+        server.listen(l)?
     } else {
         // Offer HTTP to localhost and HTTPS to remote clients.
         server
-            .bind("127.0.0.1:3000")
-            .unwrap()
-            .bind_rustls("0.0.0.0:3001", tls::create_rustls_config(&app_config))
-            .unwrap()
+            .bind("127.0.0.1:3000")?
+            .bind_rustls("0.0.0.0:3001", tls::create_rustls_config(&app_config)?)?
     };
 
     /*
@@ -66,7 +65,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
      * that honors the `shutdown_timeout`, while SIGINT and SIGQUIT will close all open connections
      * immediately.
      */
-    server.run().unwrap();
+    server.run()?;
 
     Ok(())
 }

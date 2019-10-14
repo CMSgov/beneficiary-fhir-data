@@ -23,6 +23,7 @@ dotenv = "0.14.1"
 # Actix is the web framework used by this application.
 actix-web = { version = "1.0", features = ["rust-tls"] }
 rustls = { version = "0.15.2", features = ["logging"] }
+webpki = "0.19" # Only included as it's part of rustls's public API. Has to match version used by rustls.
 
 # Allows for auto-reload of the server in development, per https://actix.rs/docs/autoreload/.
 listenfd = "0.3"

@@ -1,41 +1,59 @@
 use super::config::AppConfig;
+use crate::error;
 use std::fs;
 use std::io::BufReader;
+// We only need this because some rustls methods return unexported types from it.
+use webpki;
+
+/// Enumerates some additional error conditions that `rustls` doesn't define.
+#[derive(Debug)]
+pub enum TLSConfigError {
+    MiscError(String),
+    IoError(std::io::Error, String),
+    WebPKIError(webpki::Error),
+}
 
 /// Parses the SSL certificate(s) in the specified PEM file into `Certificate` instances.
-fn load_certs(certs_filename: &str) -> Vec<rustls::Certificate> {
-    let certs_file = fs::File::open(certs_filename).expect("Can't open certificates file.");
+fn load_certs(certs_filename: &str) -> error::Result<Vec<rustls::Certificate>> {
+    let certs_file = fs::File::open(certs_filename)
+        .map_err(|err| TLSConfigError::IoError(err, "Can't open certificates file.".to_string()))?;
     let mut certs_reader = BufReader::new(certs_file);
-    rustls::internal::pemfile::certs(&mut certs_reader).unwrap()
+    rustls::internal::pemfile::certs(&mut certs_reader)
+        .map_err(|_| TLSConfigError::MiscError("Unable to parse certificates.".to_string()))
+        .map_err(|err| error::AppError::TLSConfigError(err))
 }
 
 /// Parses the SSL private key in the specified PEM file into a `PrivateKey` instance.
-fn load_private_key(key_filename: &str) -> rustls::PrivateKey {
-    let key_file = fs::File::open(key_filename).expect("Can't open private key file.");
+fn load_private_key(key_filename: &str) -> error::Result<rustls::PrivateKey> {
+    let key_file = fs::File::open(key_filename)
+        .map_err(|err| TLSConfigError::IoError(err, "Can't open private key file.".to_string()))?;
     let mut key_reader = BufReader::new(key_file);
-    let keys = rustls::internal::pemfile::pkcs8_private_keys(&mut key_reader).expect(
-        "Unable to parse PKCS8 private key(s) from key file (encrypted keys not supported).",
-    );
+    let keys = rustls::internal::pemfile::pkcs8_private_keys(&mut key_reader).map_err(|_| {
+        TLSConfigError::MiscError(
+            "Unable to parse PKCS8 private key(s) from key file (encrypted keys not supported)."
+                .to_string(),
+        )
+    })?;
     // TODO: fail if unexpected number of keys
-    keys[0].clone()
+    Ok(keys[0].clone())
 }
 
 /// Creates the `rustls::ServerConfig` for the server to use.
-pub fn create_rustls_config(app_config: &AppConfig) -> rustls::ServerConfig {
-    let client_auth_certs = load_certs(&app_config.client_certs_filename);
+pub fn create_rustls_config(app_config: &AppConfig) -> error::Result<rustls::ServerConfig> {
+    let client_auth_certs = load_certs(&app_config.client_certs_filename)?;
     let mut client_auth_roots = rustls::RootCertStore::empty();
     for client_auth_cert in client_auth_certs {
-        client_auth_roots.add(&client_auth_cert).unwrap();
+        client_auth_roots
+            .add(&client_auth_cert)
+            .map_err(|err| TLSConfigError::WebPKIError(err))?;
     }
     let client_auth_verifier = rustls::AllowAnyAuthenticatedClient::new(client_auth_roots);
 
     let mut config = rustls::ServerConfig::new(client_auth_verifier);
 
-    let server_certs = load_certs(&app_config.server_certs_filename);
-    let server_private_key = load_private_key(&app_config.server_private_key_filename);
-    config
-        .set_single_cert(server_certs, server_private_key)
-        .expect("Unable to parse server certificates and/or key.");
+    let server_certs = load_certs(&app_config.server_certs_filename)?;
+    let server_private_key = load_private_key(&app_config.server_private_key_filename)?;
+    config.set_single_cert(server_certs, server_private_key)?;
 
     // TODO: remove TLS v1.2 once we can move all of our clients off it.
     let versions = vec![
@@ -56,5 +74,5 @@ pub fn create_rustls_config(app_config: &AppConfig) -> rustls::ServerConfig {
      * See https://github.com/ctz/rustls/blob/master/rustls-mio/examples/tlsserver.rs#L565
      */
 
-    config
+    Ok(config)
 }
