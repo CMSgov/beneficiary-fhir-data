@@ -17,6 +17,8 @@ module "stateful" {
   }
 
   db_params = [
+    {name="autovacuum_vacuum_scale_factor", value="0.005", apply_on_reboot=false},
+    {name="autovacuum_analyze_scale_factor", value="0.0025", apply_on_reboot=false},
     {name="effective_io_concurrency", value="300", apply_on_reboot=false},
     {name="default_statistics_target", value="1000", apply_on_reboot=false},
     {name="max_worker_processes", value="96", apply_on_reboot=true},
