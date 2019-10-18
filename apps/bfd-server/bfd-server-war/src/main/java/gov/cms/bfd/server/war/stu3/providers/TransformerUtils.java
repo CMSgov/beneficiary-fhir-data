@@ -1,39 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.codahale.metrics.MetricRegistry;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.codebook.model.Value;
-import gov.cms.bfd.model.codebook.model.Variable;
-import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.CarrierClaim;
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
-import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.model.rif.DMEClaim;
-import gov.cms.bfd.model.rif.DMEClaimColumn;
-import gov.cms.bfd.model.rif.DMEClaimLine;
-import gov.cms.bfd.model.rif.HHAClaim;
-import gov.cms.bfd.model.rif.HHAClaimColumn;
-import gov.cms.bfd.model.rif.HHAClaimLine;
-import gov.cms.bfd.model.rif.HospiceClaim;
-import gov.cms.bfd.model.rif.HospiceClaimLine;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.InpatientClaimColumn;
-import gov.cms.bfd.model.rif.InpatientClaimLine;
-import gov.cms.bfd.model.rif.OutpatientClaim;
-import gov.cms.bfd.model.rif.OutpatientClaimColumn;
-import gov.cms.bfd.model.rif.OutpatientClaimLine;
-import gov.cms.bfd.model.rif.SNFClaim;
-import gov.cms.bfd.model.rif.SNFClaimColumn;
-import gov.cms.bfd.model.rif.SNFClaimLine;
-import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
-import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
-import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
-import gov.cms.bfd.server.war.stu3.providers.Diagnosis.DiagnosisLabel;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +26,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -105,6 +72,42 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import com.codahale.metrics.MetricRegistry;
+import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.codebook.model.Value;
+import gov.cms.bfd.model.codebook.model.Variable;
+import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.CarrierClaimColumn;
+import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.rif.DMEClaimColumn;
+import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HHAClaimColumn;
+import gov.cms.bfd.model.rif.HHAClaimLine;
+import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.HospiceClaimLine;
+import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.InpatientClaimColumn;
+import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaimColumn;
+import gov.cms.bfd.model.rif.OutpatientClaimLine;
+import gov.cms.bfd.model.rif.SNFClaim;
+import gov.cms.bfd.model.rif.SNFClaimColumn;
+import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
+import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
+import gov.cms.bfd.server.war.stu3.providers.Diagnosis.DiagnosisLabel;
 
 /**
  * Contains shared methods used to transform CCW JPA entities (e.g. {@link Beneficiary}) into FHIR
@@ -2947,8 +2950,14 @@ public final class TransformerUtils {
        */
       int endIndex =
           Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList =
-          resources.subList(pagingArgs.getStartIndex(), endIndex);
+      List<IBaseResource> resourcesSubList;
+      try {
+    	  resourcesSubList = resources.subList(pagingArgs.getStartIndex(), endIndex);
+      } catch (IllegalArgumentException e) {
+    	  throw new InvalidRequestException(
+						"Invalid argument in request URL: Index out of bounds - startIndex cannot be greater than the total number of results.");
+      }
+      
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       TransformerUtils.addPagingLinks(
           pagingArgs, bundle, resourceType, identifier, value, resources.size());

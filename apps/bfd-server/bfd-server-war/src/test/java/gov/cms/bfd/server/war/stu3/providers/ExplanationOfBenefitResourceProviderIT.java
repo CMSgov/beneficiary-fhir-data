@@ -1,5 +1,27 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
+import org.hibernate.internal.SessionFactoryRegistry;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -22,25 +44,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import org.hibernate.internal.SessionFactoryRegistry;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Integration tests for {@link
@@ -1160,6 +1163,49 @@ public final class ExplanationOfBenefitResourceProviderIT {
     fhirClient
         .loadPage()
         .byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=-1")
+        .andReturnBundle(Bundle.class)
+        .execute();
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
+   * works as expected for a {@link Patient} that does exist in the DB, with paging, using a
+   * startIndex that is greater than the total number of results being returned. This test expects
+   * to receive a BadRequestException, as out of bounds startIndexes should result in an HTTP 400.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+	// @Test(expected = InvalidRequestException.class)
+  public void searchForEobsWithPagingWithStartIndexOutOfBounds() throws FHIRException {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+
+    /*
+     * Access a created link of this bundle, providing a startIndex greater than the
+     * total number of results being returned
+     */
+    fhirClient
+        .loadPage()
+        .byUrl(searchResults.getLink(Bundle.LINK_SELF).getUrl() + "&startIndex=100")
         .andReturnBundle(Bundle.class)
         .execute();
   }
