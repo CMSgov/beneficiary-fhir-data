@@ -1176,7 +1176,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
    *
    * @throws FHIRException (indicates test failure)
    */
-	// @Test(expected = InvalidRequestException.class)
+  @Test(expected = InvalidRequestException.class)
   public void searchForEobsWithPagingWithStartIndexOutOfBounds() throws FHIRException {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
