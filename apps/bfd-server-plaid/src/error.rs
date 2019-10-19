@@ -7,6 +7,8 @@ pub enum AppError {
     SetLoggerError(log::SetLoggerError),
     RustlsError(rustls::TLSError),
     TLSConfigError(crate::tls::TLSConfigError),
+    DieselConnectionError(diesel::ConnectionError),
+    DieselResultError(diesel::result::Error),
 }
 
 impl From<std::env::VarError> for AppError {
@@ -36,5 +38,17 @@ impl From<rustls::TLSError> for AppError {
 impl From<crate::tls::TLSConfigError> for AppError {
     fn from(err: crate::tls::TLSConfigError) -> AppError {
         AppError::TLSConfigError(err)
+    }
+}
+
+impl From<diesel::result::Error> for AppError {
+    fn from(err: diesel::result::Error) -> AppError {
+        AppError::DieselResultError(err)
+    }
+}
+
+impl From<diesel::ConnectionError> for AppError {
+    fn from(err: diesel::ConnectionError) -> AppError {
+        AppError::DieselConnectionError(err)
     }
 }

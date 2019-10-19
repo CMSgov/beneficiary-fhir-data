@@ -1,0 +1,8 @@
+# For documentation on how to configure this file,
+# see diesel.rs/guides/configuring-diesel-cli
+
+[print_schema]
+file = "src/schema.rs"
+
+# Filter out the original tables so that we can use our view wrappers around them, instead.
+filter = { only_tables = [] }

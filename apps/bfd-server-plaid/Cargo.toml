@@ -25,6 +25,10 @@ actix-web = { version = "1.0", features = ["rust-tls"] }
 rustls = { version = "0.15.2", features = ["logging"] }
 webpki = "0.19" # Only included as it's part of rustls's public API. Has to match version used by rustls.
 
+# The ORM used to access the application's database.
+diesel = { version = "1.0.0", features = ["postgres", "64-column-tables", "numeric", "chrono"] }
+bigdecimal = "0.1.0"
+
 # Allows for auto-reload of the server in development, per https://actix.rs/docs/autoreload/.
 listenfd = "0.3"
 

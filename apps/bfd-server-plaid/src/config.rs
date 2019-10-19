@@ -10,6 +10,7 @@ pub struct AppConfig {
     pub server_certs_filename: String,
     pub server_private_key_filename: String,
     pub client_certs_filename: String,
+    pub database_url: String,
 }
 
 impl AppConfig {
@@ -21,11 +22,13 @@ impl AppConfig {
         let server_certs_filename = env::var("BFD_TLS_SERVER_CERT");
         let server_private_key_filename = env::var("BFD_TLS_SERVER_KEY");
         let client_certs_filename = env::var("BFD_TLS_CLIENT_CERTS");
+        let database_url = env::var("DATABASE_URL");
 
         Ok(AppConfig {
             server_certs_filename: server_certs_filename?,
             server_private_key_filename: server_private_key_filename?,
             client_certs_filename: client_certs_filename?,
+            database_url: database_url?,
         })
     }
 }

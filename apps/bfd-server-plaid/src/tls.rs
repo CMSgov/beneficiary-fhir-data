@@ -1,4 +1,4 @@
-use super::config::AppConfig;
+use crate::config::AppConfig;
 use crate::error;
 use std::fs;
 use std::io::BufReader;

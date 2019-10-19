@@ -1,7 +1,16 @@
+// Necessary for `schema_views.rs` to compile.
+#![recursion_limit = "2048"]
+
 mod config;
+mod db;
 mod error;
 mod fhir;
+mod models;
+mod schema_views;
 mod tls;
+
+#[macro_use]
+extern crate diesel;
 
 use actix_web::{web, App, HttpResponse, HttpServer};
 use config::AppConfig;
@@ -32,8 +41,12 @@ fn main() -> error::Result<()> {
     let _scope_guard = slog_scope::set_global_logger(logger.clone());
     let _log_guard = slog_stdlog::init_with_level(log::Level::Warn)?;
 
-    // Next, parse the app confif from the env.
+    // Parse the app confif from the env.
     let app_config = AppConfig::new()?;
+
+    // Verify that the DB connection is copacetic.
+    let db_connection = db::establish_connection(&app_config)?;
+    let claims_partd_sample = db::claims_by_bene_id_partd(&db_connection, "foo");
 
     info!(logger, "Prepare ship for ludicrous speed.");
     let mut listenfd = ListenFd::from_env();
