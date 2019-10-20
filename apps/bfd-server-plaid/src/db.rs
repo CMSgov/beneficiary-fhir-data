@@ -3,12 +3,21 @@ use crate::error;
 use crate::models::PartDEvent;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
+use diesel::r2d2::{ConnectionManager, Pool, PoolError, PooledConnection};
 
-pub fn establish_connection(app_config: &AppConfig) -> ConnectionResult<PgConnection> {
-    PgConnection::establish(app_config.database_url.as_ref())
+pub type PgPool = Pool<ConnectionManager<PgConnection>>;
+
+pub type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
+
+pub fn create_db_connection_pool(app_config: &AppConfig) -> error::Result<PgPool> {
+    let database_url: &str = app_config.database_url.as_ref();
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+    Pool::builder()
+        .build(manager)
+        .map_err(|err| error::AppError::DieselPoolError(err))
 }
 
-pub fn claims_by_bene_id_partd(
+pub fn claims_partd_by_bene_id(
     db_connection: &PgConnection,
     search_bene_id: &str,
 ) -> error::Result<Vec<PartDEvent>> {

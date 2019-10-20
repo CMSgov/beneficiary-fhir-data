@@ -7,8 +7,9 @@ pub enum AppError {
     SetLoggerError(log::SetLoggerError),
     RustlsError(rustls::TLSError),
     TLSConfigError(crate::tls::TLSConfigError),
-    DieselConnectionError(diesel::ConnectionError),
+    DieselPoolError(diesel::r2d2::PoolError),
     DieselResultError(diesel::result::Error),
+    BadRequestError(String),
 }
 
 impl From<std::env::VarError> for AppError {
@@ -41,14 +42,36 @@ impl From<crate::tls::TLSConfigError> for AppError {
     }
 }
 
+impl From<diesel::r2d2::PoolError> for AppError {
+    fn from(err: diesel::r2d2::PoolError) -> AppError {
+        AppError::DieselPoolError(err)
+    }
+}
+
 impl From<diesel::result::Error> for AppError {
     fn from(err: diesel::result::Error) -> AppError {
         AppError::DieselResultError(err)
     }
 }
 
-impl From<diesel::ConnectionError> for AppError {
-    fn from(err: diesel::ConnectionError) -> AppError {
-        AppError::DieselConnectionError(err)
+impl std::fmt::Display for AppError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            _ => write!(f, "Application error: {:?}", self),
+        }
+    }
+}
+
+impl actix_web::error::ResponseError for AppError {
+    fn error_response(&self) -> actix_web::HttpResponse {
+        match *self {
+            AppError::DieselResultError(_) => {
+                actix_web::HttpResponse::new(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR)
+            }
+            AppError::BadRequestError(ref message) => actix_web::HttpResponse::BadRequest()
+                .content_type("text/html")
+                .body(message),
+            _ => actix_web::HttpResponse::new(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR),
+        }
     }
 }

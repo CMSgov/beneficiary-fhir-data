@@ -14,7 +14,10 @@ extern crate diesel;
 
 use actix_web::{web, App, HttpResponse, HttpServer};
 use config::AppConfig;
+use lazy_static;
 use listenfd::ListenFd;
+use regex;
+use serde;
 use slog::{info, o, Drain};
 use slog_async;
 use slog_json;
@@ -45,14 +48,16 @@ fn main() -> error::Result<()> {
     let app_config = AppConfig::new()?;
 
     // Verify that the DB connection is copacetic.
-    let db_connection = db::establish_connection(&app_config)?;
-    let claims_partd_sample = db::claims_by_bene_id_partd(&db_connection, "foo");
+    let db_connection_pool = db::create_db_connection_pool(&app_config)?;
+    //let claims_partd_sample = db::claims_by_bene_id_partd(&db_connection, "foo");
 
     info!(logger, "Prepare ship for ludicrous speed.");
     let mut listenfd = ListenFd::from_env();
     let app_config_data = web::Data::new(app_config.clone());
+    let db_connection_pool_data = web::Data::new(db_connection_pool.clone());
     let mut server = HttpServer::new(move || {
         App::new()
+            .register_data(db_connection_pool_data.clone())
             .register_data(app_config_data.clone())
             .service(web::scope("/v1/fhir").route(
                 "/ExplanationOfBenefit",
