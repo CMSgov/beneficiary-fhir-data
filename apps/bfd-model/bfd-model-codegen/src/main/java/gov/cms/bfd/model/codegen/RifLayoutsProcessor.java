@@ -9,6 +9,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -28,6 +29,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -69,6 +71,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * This <code>javac</code> annotation {@link Processor} reads in an Excel file that details a RIF
@@ -317,6 +320,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private void generateCode(MappingSpec mappingSpec) throws IOException {
+    logNote("Generated code for %s", mappingSpec.getRifLayout().getName());
+
     /*
      * First, create the Java enum for the RIF columns.
      */
@@ -746,6 +751,40 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 .build();
         headerEntityClass.addMethod(childGetter);
       }
+    }
+
+    // Add a lastUpdated field. Use the Hibernate UpdateTimestamp feature to set this field.
+    if (mappingSpec.getHasLastUpdated()) {
+      // lastUpdated field
+      final FieldSpec lastUpdatedField =
+          FieldSpec.builder(Date.class, "lastUpdated", Modifier.PRIVATE)
+              .addAnnotation(
+                  AnnotationSpec.builder(Column.class)
+                      .addMember("name", "$S", "lastUpdated")
+                      .addMember("nullable", "$L", "true")
+                      .build())
+              .addAnnotation(UpdateTimestamp.class)
+              .build();
+      headerEntityClass.addField(lastUpdatedField);
+
+      // Getter method
+      final MethodSpec lastUpdatedGetter =
+          MethodSpec.methodBuilder("getLastUpdated")
+              .addModifiers(Modifier.PUBLIC)
+              .addStatement("return Optional.ofNullable(lastUpdated)")
+              .returns(ParameterizedTypeName.get(Optional.class, Date.class))
+              .build();
+      headerEntityClass.addMethod(lastUpdatedGetter);
+
+      // Setter method which is useful for testing, but not needed in the main modules
+      final MethodSpec lastUpdatedSetter =
+          MethodSpec.methodBuilder("setLastUpdated")
+              .addModifiers(Modifier.PUBLIC)
+              .addParameter(ParameterSpec.builder(Date.class, "lastUpdated").build())
+              .addStatement("this.lastUpdated = lastUpdated")
+              .returns(TypeName.VOID)
+              .build();
+      headerEntityClass.addMethod(lastUpdatedSetter);
     }
 
     TypeSpec headerEntityFinal = headerEntityClass.build();

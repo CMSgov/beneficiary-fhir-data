@@ -89,6 +89,18 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.index-create-concurrently", "");
         placeholders.put("logic.sequence-start", "start with");
         placeholders.put("logic.sequence-increment", "increment by");
+        placeholders.put("logic.clob", "clob");
+        placeholders.put("logic.using-hash", "");
+      } else if (connection.getMetaData().getDatabaseProductName().equals("PostgreSQL")) {
+        placeholders.put("type.int4", "int4");
+        placeholders.put("logic.tablespaces-escape", "--");
+        placeholders.put("logic.drop-tablespaces-escape", "");
+        placeholders.put("logic.alter-column-type", "type");
+        placeholders.put("logic.index-create-concurrently", "concurrently");
+        placeholders.put("logic.sequence-start", "start");
+        placeholders.put("logic.sequence-increment", "increment");
+        placeholders.put("logic.clob", "text");
+        placeholders.put("logic.using-hash", "using hash");
       } else {
         placeholders.put("type.int4", "int4");
         placeholders.put("logic.tablespaces-escape", "--");
@@ -97,6 +109,8 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.index-create-concurrently", "concurrently");
         placeholders.put("logic.sequence-start", "start");
         placeholders.put("logic.sequence-increment", "increment");
+        placeholders.put("logic.clob", "clob");
+        placeholders.put("logic.using-hash", "");
       }
     } catch (SQLException e) {
       throw new UncheckedSqlException(e);

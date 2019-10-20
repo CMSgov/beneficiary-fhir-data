@@ -229,6 +229,8 @@ public final class DatabaseTestHelper {
     /**
      * Constructs a {@link DataSourceComponents} instance for the specified test {@link DataSource}
      * (does not support more complicated {@link DataSource}s, as discussed in the class' JavaDoc)
+     *
+     * @param dataSource to find components
      */
     public DataSourceComponents(DataSource dataSource) {
       if (dataSource instanceof JDBCDataSource) {

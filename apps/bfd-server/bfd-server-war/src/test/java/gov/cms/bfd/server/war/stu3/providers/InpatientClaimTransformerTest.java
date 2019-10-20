@@ -39,6 +39,7 @@ public final class InpatientClaimTransformerTest {
             .map(r -> (InpatientClaim) r)
             .findFirst()
             .get();
+    claim.setLastUpdated(new Date());
 
     ExplanationOfBenefit eob = InpatientClaimTransformer.transform(new MetricRegistry(), claim);
     assertMatches(claim, eob);
@@ -231,5 +232,8 @@ public final class InpatientClaimTransformerTest {
         Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL),
         Optional.of(claim.getNearLineRecordIdCode()),
         Optional.of(claim.getClaimTypeCode()));
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }

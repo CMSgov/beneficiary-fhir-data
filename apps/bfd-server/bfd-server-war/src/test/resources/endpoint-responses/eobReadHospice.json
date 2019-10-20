@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "hospice-9992223422",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {

@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "outpatient-1234567890",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt",
     "valueMoney" : {

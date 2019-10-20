@@ -2,11 +2,14 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -300,6 +303,52 @@ public final class CoverageResourceProviderIT {
 
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(0, searchResults.getTotal());
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#searchByBeneficiary} works as
+   * expected for a search with a lastUpdated value.
+   */
+  @Test
+  public void searchWithLastUpdated() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    Date nowDate = new Date();
+    Date secondsAgoDate = Date.from(Instant.now().minusSeconds(100));
+    DateRangeParam inBoundsRange = new DateRangeParam(secondsAgoDate, nowDate);
+    Bundle searchInBoundsResults =
+        fhirClient
+            .search()
+            .forResource(Coverage.class)
+            .where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary)))
+            .lastUpdated(inBoundsRange)
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchInBoundsResults);
+    Assert.assertEquals(MedicareSegment.values().length, searchInBoundsResults.getTotal());
+
+    Date hourAgoDate = Date.from(Instant.now().minusSeconds(3600));
+    DateRangeParam outOfBoundsRange = new DateRangeParam(hourAgoDate, secondsAgoDate);
+    Bundle searchOutOfBoundsResult =
+        fhirClient
+            .search()
+            .forResource(Coverage.class)
+            .where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary)))
+            .lastUpdated(outOfBoundsRange)
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertNotNull(searchOutOfBoundsResult);
+    Assert.assertEquals(0, searchOutOfBoundsResult.getTotal());
   }
 
   /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */

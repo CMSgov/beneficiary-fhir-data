@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -12,7 +13,9 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -975,6 +978,7 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
+
    * works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
@@ -1768,6 +1772,57 @@ public final class PatientResourceProviderIT {
 
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(0, searchResults.getTotal());
+  }
+
+    @Test
+    public void searchWithLastUpdated() {
+        List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+        // Build up a list of lastUpdatedURLs that return > all values values
+        String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
+        String earlyDateTime = "2019-10-01T00:00:00-04:00";
+        List<String> allUrls =
+            Arrays.asList(
+                "_lastUpdated=gt" + earlyDateTime,
+                "_lastUpdated=ge" + earlyDateTime,
+                "_lastUpdated=le" + nowDateTime,
+                "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
+                "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
+        testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 1);
+
+        // Empty searches
+        List<String> emptyUrls =
+            Arrays.asList(
+                "_lastUpdated=lt" + earlyDateTime,
+                "_lastUpdated=le" + earlyDateTime,
+                "_lastUpdated=eq" + earlyDateTime);
+        testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
+    }
+
+  /**
+   * Test the set of lastUpdated values
+   *
+   * @param fhirClient to use
+   * @param id the beneficiary id to use
+   * @param urls is a list of lastUpdate values to test to find
+   * @param expectedValue number of matches
+   */
+  private void testLastUpdatedUrls(
+      IGenericClient fhirClient, String id, List<String> urls, int expectedValue) {
+    String baseResourceUrl = "Patient?_id=" + id + "&_format=application%2Fjson%2Bfhir";
+
+    // Search for each lastUpdated value
+    for (String lastUpdatedValue : urls) {
+      String theSearchUrl = baseResourceUrl + "&" + lastUpdatedValue;
+      Bundle searchResults =
+          fhirClient.search().byUrl(theSearchUrl).returnBundle(Bundle.class).execute();
+      Assert.assertEquals(
+          String.format(
+              "Expected %s to filter resources using lastUpdated correctly", lastUpdatedValue),
+          expectedValue,
+          searchResults.getTotal());
+    }
   }
 
   /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */

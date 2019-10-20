@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "dme-2188888888",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "contained" : [ {
     "resourceType" : "ReferralRequest",
     "id" : "1",

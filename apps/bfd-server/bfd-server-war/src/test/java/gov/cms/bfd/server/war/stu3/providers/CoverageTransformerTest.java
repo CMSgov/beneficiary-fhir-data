@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -35,6 +36,7 @@ public final class CoverageTransformerTest {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
+    beneficiary.setLastUpdated(new Date());
 
     Coverage partACoverage =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
@@ -51,6 +53,12 @@ public final class CoverageTransformerTest {
     Coverage partDCoverage =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
     assertPartDMatches(beneficiary, partDCoverage);
+
+    // Test with null lastUpdated
+    beneficiary.setLastUpdated(null);
+    Coverage partACoverageNullLastUpdated =
+        CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
+    assertPartAMatches(beneficiary, partACoverageNullLastUpdated);
   }
 
   /**
@@ -73,6 +81,7 @@ public final class CoverageTransformerTest {
     Assert.assertEquals(
         TransformerConstants.COVERAGE_PLAN_PART_A, coverage.getGrouping().getSubPlan());
     Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getMedicareCoverageStartDate().isPresent())
       TransformerTestUtils.assertPeriodEquals(
@@ -116,6 +125,7 @@ public final class CoverageTransformerTest {
     Assert.assertEquals(
         TransformerConstants.COVERAGE_PLAN_PART_B, coverage.getGrouping().getSubPlan());
     Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getMedicareCoverageStartDate().isPresent())
       TransformerTestUtils.assertPeriodEquals(
@@ -151,6 +161,7 @@ public final class CoverageTransformerTest {
     Assert.assertEquals(
         TransformerConstants.COVERAGE_PLAN_PART_C, coverage.getGrouping().getSubPlan());
     Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getPartCContractNumberAugId().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
@@ -191,6 +202,7 @@ public final class CoverageTransformerTest {
       TransformerTestUtils.assertExtensionCodingEquals(
           CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(), coverage);
     Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getPartDContractNumberAugId().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(

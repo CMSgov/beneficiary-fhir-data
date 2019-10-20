@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "pde-89",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/pde_id",
     "value" : "89"
