@@ -34,6 +34,7 @@ public final class MappingSpec {
   private String headerEntityGeneratedIdField;
   private boolean hasLines = false;
   private String lineTable;
+  private boolean hasLastUpdated = true;
   private List<String> headerEntityTransientFields;
   private List<RifField> headerEntityAdditionalDatabaseFields;
   private List<InnerJoinRelationship> innerJoinRelationship;
@@ -155,6 +156,20 @@ public final class MappingSpec {
   /** @param hasLines the new value for {@link #getHasLines()} */
   public MappingSpec setHasLines(boolean hasLines) {
     this.hasLines = hasLines;
+    return this;
+  }
+
+  /**
+   * @return <code>true</code> if the entity should contain a lastUpdated field, <code>false</code>
+   *     if not
+   */
+  public boolean getHasLastUpdated() {
+    return hasLastUpdated;
+  }
+
+  /** @param hasLastUpdated the new value for {@link #getHasLastUpdated()} */
+  public MappingSpec setHasLastUpdated(boolean hasLastUpdated) {
+    this.hasLastUpdated = hasLastUpdated;
     return this;
   }
 

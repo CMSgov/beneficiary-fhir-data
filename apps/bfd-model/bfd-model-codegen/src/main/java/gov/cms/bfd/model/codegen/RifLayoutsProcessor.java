@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * This <code>javac</code> annotation {@link Processor} reads in an Excel file that details a RIF
@@ -316,6 +318,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private void generateCode(MappingSpec mappingSpec) throws IOException {
+    logNote("Generated code for %s", mappingSpec.getRifLayout().getName());
+
     /*
      * First, create the Java enum for the RIF columns.
      */
@@ -745,6 +749,30 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 .build();
         headerEntityClass.addMethod(childGetter);
       }
+    }
+
+    // Add a lastUpdated field. Use the Hibernate UpdateTimestamp feature to set field.
+    if (mappingSpec.getHasLastUpdated()) {
+      // lastUpdated field
+      FieldSpec lastUpdatedField =
+          FieldSpec.builder(Timestamp.class, "lastUpdated", Modifier.PRIVATE)
+              .addAnnotation(
+                  AnnotationSpec.builder(Column.class)
+                      .addMember("name", "$S", "lastUpdated")
+                      .addMember("nullable", "$L", "true")
+                      .build())
+              .addAnnotation(UpdateTimestamp.class)
+              .build();
+      headerEntityClass.addField(lastUpdatedField);
+
+      // Getter method
+      MethodSpec lastUpdatedGetter =
+          MethodSpec.methodBuilder("getLastUpdated")
+              .addModifiers(Modifier.PUBLIC)
+              .addStatement("return lastUpdated")
+              .returns(Timestamp.class)
+              .build();
+      headerEntityClass.addMethod(lastUpdatedGetter);
     }
 
     TypeSpec headerEntityFinal = headerEntityClass.build();
