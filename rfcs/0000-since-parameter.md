@@ -5,7 +5,7 @@
 * Start Date: October 1, 2019
 * RFC PR: <https://github.com/CMSgov/beneficiary-fhir-data/pull/85>
 * JIRA Ticket(s): 
-    - [BlueButton 1181](https://jira.cms.gov/browse/BLUEBUTTON-1181)
+    - [BlueButton-1506: Bulk Export Since Support](https://jira.cms.gov/browse/BLUEBUTTON-1506)
 
 
 This RFC proposal adds features to BFD's API to allow BFD's partners to implement the Bulk Export `_since` parameter. Specifically, it provides for a `lastUpdated` query parameter to FHIR resource search operation and a feed of metadata about BFD's data loads. The proposal discusses these new features as well as the logic that BFD's partners need to implement the `_since` parameter correctly. 
@@ -21,6 +21,7 @@ This RFC proposal adds features to BFD's API to allow BFD's partners to implemen
     * [Since Implementors Details](#since-implementors-details)
     * [ETL Corner Case](#etl-corner-case)
     * [Roster Change Corner Case](#roster-change-corner-case)
+    * [Internal Database Corner Case](#internal-database-corner-cases)
     * [Replication Lag Corner Case](#replication-lag-corner-case)
     * [Alternatives Considered](#alternatives-considered)
 * [Future Possibilities](#future-possibilities)
@@ -95,6 +96,13 @@ To avoid this delay, a bulk-export implementor may take an optimistic approach b
 The resources returned by a group export operation is the current roster of the group at the time of an export call. A group's roster may change between successive export calls. At this time, the importer does not have any data for the added beneficiaries. So, how should an export call with a `_since` parameter handle new beneficiaries? The FHIR specification states that export should only include data updated after the passed in `_since` parameter. However, the specification does not contemplate this use-case, nor does it offer any hint on how to correctly implement this use-case. 
 
 Since the BFD service does not track groups, the BFD partners have to work out solutions for this problem. Please see the authors for a discussion on solutions. 
+
+### Internal Database Corner Cases
+
+Resources may have their `lastUpdated` field change when other fields have not changed. This may happen  because the BFD has its own internal representation of records and only keeps one `lastUpdated` value for these internal records. 
+
+Records created before the since feature was implmented, do not have a defined `lastUpdated` value. In this case, the BFD will return the timestamp of the since feature's database migration, making the time that 
+the since feature was deployed the earliest `lastUpdated` value. 
 
 ### Replication Lag Corner Case
 
