@@ -10,24 +10,24 @@
 -- Based on this information, alters have the implicit default null
 
 
-alter table "Beneficiaries" add column lastUpdated timestamp;
+alter table "Beneficiaries" add column lastUpdated timestamp with time zone;
 
-alter table "BeneficiariesHistory" add column lastUpdated timestamp;
+alter table "BeneficiariesHistory" add column lastUpdated timestamp with time zone;
 
-alter table "MedicareBeneficiaryIdHistory" add column lastUpdated timestamp;
+alter table "MedicareBeneficiaryIdHistory" add column lastUpdated timestamp with time zone;
 
-alter table "PartDEvents" add column lastUpdated timestamp;
+alter table "PartDEvents" add column lastUpdated timestamp with time zone;
 
-alter table "CarrierClaims" add column lastUpdated timestamp;
+alter table "CarrierClaims" add column lastUpdated timestamp with time zone;
 
-alter table "InpatientClaims" add column lastUpdated timestamp;
+alter table "InpatientClaims" add column lastUpdated timestamp with time zone;
 
-alter table "OutpatientClaims" add column lastUpdated timestamp;
+alter table "OutpatientClaims" add column lastUpdated timestamp with time zone;
 
-alter table "HHAClaims" add column lastUpdated timestamp;
+alter table "HHAClaims" add column lastUpdated timestamp with time zone;
 
-alter table "DMEClaims" add column lastUpdated timestamp;
+alter table "DMEClaims" add column lastUpdated timestamp with time zone;
 
-alter table "HospiceClaims" add column lastUpdated timestamp;
+alter table "HospiceClaims" add column lastUpdated timestamp with time zone;
 
-alter table "SNFClaims" add column lastUpdated timestamp;
+alter table "SNFClaims" add column lastUpdated timestamp with time zone;

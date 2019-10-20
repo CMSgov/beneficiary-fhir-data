@@ -16,6 +16,7 @@ import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
@@ -77,13 +78,13 @@ public final class RifLoaderIT {
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
         Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
+        // A recent lastUpdated timestamp
         Assert.assertNotNull("Expected a lastUpdated field", beneHistory.getLastUpdated());
         Assert.assertTrue(
             "Expected a recent lastUpdated timestamp",
             beneHistory
                 .getLastUpdated()
-                .toInstant()
-                .isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)));
+                .isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
       }
       Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
@@ -99,8 +100,7 @@ public final class RifLoaderIT {
           "Expected a recent lastUpdated timestamp",
           beneficiaryFromDb
               .getLastUpdated()
-              .toInstant()
-              .isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)));
+              .isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
 
       CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
       Assert.assertEquals('N', carrierRecordFromDb.getFinalAction());
@@ -114,8 +114,7 @@ public final class RifLoaderIT {
           "Expected a recent lastUpdated timestamp",
           carrierRecordFromDb
               .getLastUpdated()
-              .toInstant()
-              .isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)));
+              .isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
 
       CarrierClaimLine carrierLineRecordFromDb = carrierRecordFromDb.getLines().get(0);
       // CliaLabNumber inserted with value BB889999AA

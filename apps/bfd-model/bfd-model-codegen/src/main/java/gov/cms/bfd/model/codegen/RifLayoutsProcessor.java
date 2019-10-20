@@ -24,9 +24,9 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -751,11 +751,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       }
     }
 
-    // Add a lastUpdated field. Use the Hibernate UpdateTimestamp feature to set field.
+    // Add a lastUpdated field. Use the Hibernate UpdateTimestamp feature to set this field.
     if (mappingSpec.getHasLastUpdated()) {
       // lastUpdated field
       FieldSpec lastUpdatedField =
-          FieldSpec.builder(Timestamp.class, "lastUpdated", Modifier.PRIVATE)
+          FieldSpec.builder(OffsetDateTime.class, "lastUpdated", Modifier.PRIVATE)
               .addAnnotation(
                   AnnotationSpec.builder(Column.class)
                       .addMember("name", "$S", "lastUpdated")
@@ -770,7 +770,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           MethodSpec.methodBuilder("getLastUpdated")
               .addModifiers(Modifier.PUBLIC)
               .addStatement("return lastUpdated")
-              .returns(Timestamp.class)
+              .returns(OffsetDateTime.class)
               .build();
       headerEntityClass.addMethod(lastUpdatedGetter);
     }
