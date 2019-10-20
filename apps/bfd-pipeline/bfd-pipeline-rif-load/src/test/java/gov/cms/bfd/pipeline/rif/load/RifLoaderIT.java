@@ -79,12 +79,15 @@ public final class RifLoaderIT {
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
         Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
-        Assert.assertNotNull("Expected a lastUpdated field", beneHistory.getLastUpdated());
-        Assert.assertTrue(
-            "Expected a recent lastUpdated timestamp",
-            beneHistory
-                .getLastUpdated()
-                .isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
+        Assert.assertTrue("Expected a lastUpdated field", beneHistory.getLastUpdated().isPresent());
+        beneHistory
+            .getLastUpdated()
+            .ifPresent(
+                lastUpdated -> {
+                  Assert.assertTrue(
+                      "Expected a recent lastUpdated timestamp",
+                      lastUpdated.isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
+                });
       }
       Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
@@ -95,12 +98,16 @@ public final class RifLoaderIT {
       Assert.assertEquals("John", beneficiaryFromDb.getNameGiven());
       Assert.assertEquals(new Character('A'), beneficiaryFromDb.getNameMiddleInitial().get());
       // A recent lastUpdated timestamp
-      Assert.assertNotNull("Expected a lastUpdated field", beneficiaryFromDb.getLastUpdated());
       Assert.assertTrue(
-          "Expected a recent lastUpdated timestamp",
-          beneficiaryFromDb
-              .getLastUpdated()
-              .isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
+          "Expected a lastUpdated field", beneficiaryFromDb.getLastUpdated().isPresent());
+      beneficiaryFromDb
+          .getLastUpdated()
+          .ifPresent(
+              lastUpdated -> {
+                Assert.assertTrue(
+                    "Expected a recent lastUpdated timestamp",
+                    lastUpdated.isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
+              });
 
       CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
       Assert.assertEquals('N', carrierRecordFromDb.getFinalAction());
@@ -109,12 +116,16 @@ public final class RifLoaderIT {
           LocalDate.of(2000, Month.OCTOBER, 27), carrierRecordFromDb.getDateThrough());
       Assert.assertEquals(1, carrierRecordFromDb.getLines().size());
       // A recent lastUpdated timestamp
-      Assert.assertNotNull("Expected a lastUpdated field", carrierRecordFromDb.getLastUpdated());
       Assert.assertTrue(
-          "Expected a recent lastUpdated timestamp",
-          carrierRecordFromDb
-              .getLastUpdated()
-              .isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
+          "Expected a lastUpdated field", carrierRecordFromDb.getLastUpdated().isPresent());
+      carrierRecordFromDb
+          .getLastUpdated()
+          .ifPresent(
+              lastUpdated -> {
+                Assert.assertTrue(
+                    "Expected a recent lastUpdated timestamp",
+                    lastUpdated.isAfter(OffsetDateTime.now().minus(1, ChronoUnit.MINUTES)));
+              });
 
       CarrierClaimLine carrierLineRecordFromDb = carrierRecordFromDb.getLines().get(0);
       // CliaLabNumber inserted with value BB889999AA
