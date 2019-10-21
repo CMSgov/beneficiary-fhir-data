@@ -21,7 +21,7 @@ module "migration" {
   #    50 - 50% CCS, 50% HealthApt
   #     0 - 0 CCS, 100% HealthApt
   #
-  bb      = 50
+  bb      = 100
   bcda    = 50
   dpc     = 50  
   mct     = 50
