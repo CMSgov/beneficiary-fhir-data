@@ -17,6 +17,7 @@ module "stateful" {
   }
 
   db_params = [
+    {name="auto_explain.log_min_duration", value="6000", apply_on_reboot=false},
     {name="effective_io_concurrency", value="300", apply_on_reboot=false},
     {name="default_statistics_target", value="1000", apply_on_reboot=false},
     {name="max_worker_processes", value="96", apply_on_reboot=true},
