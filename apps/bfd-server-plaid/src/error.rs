@@ -9,6 +9,7 @@ pub enum AppError {
     TLSConfigError(crate::tls::TLSConfigError),
     DieselPoolError(diesel::r2d2::PoolError),
     DieselResultError(diesel::result::Error),
+    NumTryFromIntError(std::num::TryFromIntError),
     BadRequestError(String),
 }
 
@@ -51,6 +52,12 @@ impl From<diesel::r2d2::PoolError> for AppError {
 impl From<diesel::result::Error> for AppError {
     fn from(err: diesel::result::Error) -> AppError {
         AppError::DieselResultError(err)
+    }
+}
+
+impl From<std::num::TryFromIntError> for AppError {
+    fn from(err: std::num::TryFromIntError) -> AppError {
+        AppError::NumTryFromIntError(err)
     }
 }
 
