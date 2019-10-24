@@ -18,17 +18,7 @@ Run the following commands to perform a release:
 
 ## Parameter Store
 
-Parameters:
-
-FILE_ID: The Jenkins ID for the config file managed by Jenkins.
-Steps:
-
-Fill in the job parameters with appropriate values.
-Click "build" and wait for the job to finish.
-
-<h2>Preparing the config for the running the Pipeline</h2>
-
-<h3>Parameter naming</h3>
+Parameter naming
 
 The parameter names are made from the following:
 * Project Name
@@ -37,20 +27,87 @@ The parameter names are made from the following:
 * Parameter key
 Example: /weapon-x/dev/20190130/subject
 
-<h3>Updating the exisiting config.json</h3>
+Log into Jenkins and upload your AWS SSM Parameter Store json file to the Managed Files section of Manage Jenkins.
 
-Go to "JsonConfig" in "Manage Jenkins" > "Managed files"
-* Click the edit button next to the JsonConfig, it looks like a piece of paper and pencil
-* Edit your parameters/secrets, if updating an existing parameter you will need to specify true for Overwrite
-* Click Submit
+The format should look something like this:
+```
+{
+    "fus": [
+    {
+        "Name": "/weapon-x/dev/20190130/fus",
+        "Description": "",
+        "Value": "fus",
+        "Type": "SecureString",
+        "Overwrite": true,
+        "AllowedPattern": "",
+        "Tier": "Standard"
+    }],
 
-<h2>Running the Pipeline</h2>
+    "ro": [
+    {
+        "Name": "/weapon-x/dev/20190130/ro",
+        "Description": "",
+        "Value": "ro",
+        "Type": "SecureString",
+        "Overwrite": true,
+        "AllowedPattern": "",
+        "Tier": "Standard"
+    }],
 
-Click the Jenkins Pipeline named "parameters"
-* Click "Build Now"
-* Once the build is complete, click the most recent build number in the "Build History"
-* Click "Console Output" to make sure the build ran successfully
+    "dah": [
+    {
+        "Name": "/weapon-x/dev/20190130/dah",
+        "Description": "",
+        "Value": "dah",
+        "Type": "SecureString",
+        "Overwrite": true,
+        "AllowedPattern": "",
+        "Tier": "Standard"
+    }]
+}
+```
 
+Note the File ID as it will be required to push the parameters to the Parameter Store.
+
+Find the job to push parameters to the AWS parameters store, paste the File ID into the job, and then run it.
+
+Pulling Parameters requires either a BASH or Ansible script.
+BASH Example:
+```
+/usr/local/bin/aws ssm get-parameters-by-path --with-decryption  --path "$1"
+```
+Where $1 is the path where the parameters live. Further parsing of the output of the above command will likely be necessary. Something like this may work:
+```
+eval $(/usr/local/bin/aws ssm get-parameters-by-path --with-decryption  --path "$1" | jq -r '.Parameters| .[] | "export " + .Name + "=\"" + .Value + "\""  ' | sed "s|/$1||g")
+```
+
+Ansible Example:
+```
+- name: Pull Parameters from AWS SSM Parameter Store
+  hosts: all
+  remote_user: ec2-user
+  gather_facts: no
+  vars:
+    ansible_ssh_pipelining: no
+    env: "test"
+### Best if put in var file
+#    project: bbrooks
+#    stage: dev
+#    date: 20190905
+#    path: "/{{ project }}/{{ stage }}/{{ date }}/"
+  vars_files:
+    - "{{ variable_file }}"
+
+  roles:
+    - bfd.get-parameters
+```
+```
+  - name: Set Facts
+    set_fact:
+      "{{ item.key|upper }}={{ item.value }}"
+    loop: "{{ lookup('aws_ssm', '{{ path }}', region='us-east-2', shortnames=true, bypath=true, recursive=true, decrypt=True)|dict2items }}"
+```
+This will lookup the AWS Parameter Store path and put those values into the environment for the duration of the Ansible task.
 
 ## License
 
