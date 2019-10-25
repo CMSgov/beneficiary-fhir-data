@@ -453,6 +453,7 @@ final class OutpatientClaimTransformer {
               TransformerUtils.createExtensionCoding(
                   eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
     }
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }

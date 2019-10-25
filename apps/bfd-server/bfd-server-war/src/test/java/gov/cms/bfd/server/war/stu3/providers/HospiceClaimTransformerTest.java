@@ -168,5 +168,8 @@ public final class HospiceClaimTransformerTest {
         Optional.of(org.hl7.fhir.dstu3.model.codesystems.ClaimType.INSTITUTIONAL),
         Optional.of(claim.getNearLineRecordIdCode()),
         Optional.of(claim.getClaimTypeCode()));
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }
