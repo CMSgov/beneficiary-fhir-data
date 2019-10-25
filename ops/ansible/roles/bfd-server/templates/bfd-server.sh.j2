@@ -33,7 +33,6 @@ export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
 {% endif %}
 {% endif %}
 
-{% if data_server_startup_testing is defined and data_server_startup_testing is sameas true %}
 # Begin smoke testing startup routine
 STARTUP_TESTING_RETRIES='3'
 STARTUP_TESTING_BOOT_TIMEOUT='30'
@@ -102,7 +101,6 @@ stop_service_if_failing() {
 
 (stop_service_if_failing >>"{{ data_server_dir }}/bfd-server-startup.log" 2>&1) &
 # End smoke testing startup routine
-{% endif %}
 
 # Set some additional variables.
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
