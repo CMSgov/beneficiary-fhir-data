@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
@@ -60,6 +61,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
@@ -1994,5 +1996,22 @@ final class TransformerTestUtils {
   static void assertNPICodeDisplayEquals(String npiCode, String npiCodeDisplayValue)
       throws IOException {
     Assert.assertEquals(TransformerUtils.retrieveNpiCodeDisplay(npiCode), npiCodeDisplayValue);
+  }
+
+  /**
+   * Test that the NPI
+   *
+   * @param expectedDateTime
+   * @param actualResource
+   */
+  static void assertLastUpdatedEquals(
+      Optional<OffsetDateTime> expectedDateTime, IAnyResource actualResource) {
+    expectedDateTime.ifPresent(
+        lastUpdated -> {
+          Assert.assertEquals(
+              "Expect lastUpdated to be equal",
+              actualResource.getMeta().getLastUpdated().toInstant(),
+              lastUpdated.toInstant());
+        });
   }
 }
