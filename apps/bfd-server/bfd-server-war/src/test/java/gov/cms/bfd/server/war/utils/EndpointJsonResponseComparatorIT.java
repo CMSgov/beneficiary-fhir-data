@@ -907,7 +907,10 @@ public final class EndpointJsonResponseComparatorIT {
     pattern.append("|\"/link/[0-9]/url\"");
     pattern.append("|\"/implementation/url\"");
     pattern.append("|\"/entry/[0-9]/fullUrl\"");
+    pattern.append("|\"/meta\"");
     pattern.append("|\"/meta/lastUpdated\"");
+    pattern.append("|\"/entry/[0-9]/resource/meta/lastUpdated\"");
+    pattern.append("|\"/entry/[0-9]/resource/meta\"");
     pattern.append("|\"/procedure/[0-9]/date\"");
     pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
     pattern.append("|\"/software/version\"");

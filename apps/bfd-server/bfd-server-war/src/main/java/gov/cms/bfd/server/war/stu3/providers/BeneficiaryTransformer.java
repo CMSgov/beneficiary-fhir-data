@@ -7,10 +7,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -237,6 +234,9 @@ final class BeneficiaryTransformer {
               CcwCodebookVariable.DUAL_12,
               beneficiary.getMedicaidDualEligibilityDecCode()));
     }
+
+    // Add lastUpdated
+    TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
 
     return patient;
   }

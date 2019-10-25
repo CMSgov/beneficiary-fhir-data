@@ -160,5 +160,12 @@ public final class BeneficiaryTransformerTest {
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
       TransformerTestUtils.assertExtensionDateYearEquals(
           CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), patient);
+    beneficiary
+        .getLastUpdated()
+        .ifPresent(
+            lastUpdated -> {
+              Assert.assertEquals(
+                  patient.getMeta().getLastUpdated().toInstant(), lastUpdated.toInstant());
+            });
   }
 }
