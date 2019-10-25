@@ -74,7 +74,7 @@ stop_service_if_failing() {
     STARTUP_TESTING_CHECK_METADATA=$(check_endpoint "https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
     STARTUP_TESTING_CHECK_METADATA_EXIT=$?
 
-    log "Checking database endpoint"
+    log "Checking coverage resource endpoint for bene $STARTUP_TESTING_BENE_ID"
     STARTUP_TESTING_CHECK_DATABASE=$(check_endpoint "https://localhost:7443/v1/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
     STARTUP_TESTING_CHECK_DATABASE_EXIT=$?
 
