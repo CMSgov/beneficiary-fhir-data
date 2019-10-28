@@ -4,6 +4,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetMonitor;
@@ -23,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
@@ -342,6 +345,9 @@ public final class S3ToDatabaseLoadAppIT {
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
+
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
     appRunBuilder
         .environment()
@@ -355,15 +361,13 @@ public final class S3ToDatabaseLoadAppIT {
             Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
     appRunBuilder
         .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, RifLoaderTestUtils.DB_URL);
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
     appRunBuilder
         .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, RifLoaderTestUtils.DB_USERNAME);
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
     appRunBuilder
         .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD,
-            String.valueOf(RifLoaderTestUtils.DB_PASSWORD));
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
     appRunBuilder
         .environment()
         .put(

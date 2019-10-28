@@ -11,13 +11,14 @@ import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,8 +35,6 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
-import org.hsqldb.persist.HsqlProperties;
-import org.hsqldb.server.ServerAcl.AclFormatException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
@@ -53,13 +52,8 @@ public class SpringConfiguration {
   public static final String PROP_DB_USERNAME = "bfdServer.db.username";
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
+  public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
   public static final int TRANSACTION_TIMEOUT = 30;
-
-  /**
-   * This fake JDBC URL prefix indicates to {@link SpringConfiguration} and <code>ServerTestUtils
-   * </code> that a database should be created for the integration tests being run.
-   */
-  private static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bfd-test:";
 
   /**
    * The {@link Bean#name()} for the {@link List} of STU3 {@link IResourceProvider} beans for the
@@ -79,6 +73,7 @@ public class SpringConfiguration {
    * @param username the database username to use
    * @param password the database password to use
    * @param connectionsMaxText the maximum number of database connections to use
+   * @param schemaApplyText whether or not to create/update the DB schema
    * @param metricRegistry the {@link MetricRegistry} for the application
    * @return the {@link DataSource} that provides the application's database connection
    */
@@ -88,15 +83,16 @@ public class SpringConfiguration {
       @Value("${" + PROP_DB_USERNAME + "}") String username,
       @Value("${" + PROP_DB_PASSWORD + "}") String password,
       @Value("${" + PROP_DB_CONNECTIONS_MAX + ":-1}") String connectionsMaxText,
+      @Value("${" + PROP_DB_SCHEMA_APPLY + ":false}") String schemaApplyText,
       MetricRegistry metricRegistry) {
     HikariDataSource poolingDataSource;
-    if (url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
+    if (url.startsWith(DatabaseTestHelper.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
       poolingDataSource = createTestDatabaseIfNeeded(url, connectionsMaxText, metricRegistry);
     } else {
       poolingDataSource = new HikariDataSource();
       poolingDataSource.setJdbcUrl(url);
-      poolingDataSource.setUsername(username);
-      poolingDataSource.setPassword(password);
+      if (username != null && !username.isEmpty()) poolingDataSource.setUsername(username);
+      if (password != null && !password.isEmpty()) poolingDataSource.setPassword(password);
       configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
     }
 
@@ -108,17 +104,18 @@ public class SpringConfiguration {
             .proxyResultSet()
             .build();
 
+    // Create/upgrade the DB schema, if specified.
+    boolean schemaApply = Boolean.parseBoolean(schemaApplyText);
+    if (schemaApply) {
+      DatabaseSchemaManager.createOrUpdateSchema(proxyDataSource);
+    }
+
     return proxyDataSource;
   }
 
   /**
-   * When running this application for integration testing, this application should provision its
-   * own database. In addition, it must ensure that the database is accessible to other processes on
-   * this system, which allows the test code to connect directly to the database and load/remove
-   * data.
-   *
-   * <p>To determine whether or not this is the case, the integration tests use special fake JDBC
-   * URLs that are special-cased here and in the <code>ServerTestUtils</code> class.
+   * Some of the DBs we support using in local development and testing require special handling.
+   * This method takes care of that.
    *
    * @param url the JDBC URL that the application was configured to use
    * @param connectionsMaxText the maximum number of database connections to use
@@ -126,62 +123,45 @@ public class SpringConfiguration {
    */
   private static HikariDataSource createTestDatabaseIfNeeded(
       String url, String connectionsMaxText, MetricRegistry metricRegistry) {
-    if (!url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
-      throw new IllegalArgumentException();
-    }
-
     /*
      * Note: Eventually, we may add support for other test DB types, but
      * right now only in-memory HSQL DBs are supported.
      */
-    if (!url.endsWith(":hsqldb:mem")) {
+    if (url.endsWith(":hsqldb:mem")) {
+      return createTestDatabaseIfNeededForHsql(url, connectionsMaxText, metricRegistry);
+    } else {
       throw new BadCodeMonkeyException("Unsupported test URL: " + url);
     }
+  }
 
-    /*
-     * Select a random local port to run the HSQL DB server on, so that one
-     * test run doesn't conflict with another.
-     */
-    int hsqldbPort = findFreePort();
-
-    HsqlProperties p = new HsqlProperties();
-    p.setProperty("server.database.0", "mem:test-embedded;user=test;password=test");
-    p.setProperty("server.dbname.0", "test-embedded");
-    p.setProperty("server.port", "" + hsqldbPort);
-    p.setProperty("hsqldb.tx", "mvcc");
-    org.hsqldb.server.Server server = new org.hsqldb.server.Server();
-
-    try {
-      server.setProperties(p);
-    } catch (IOException | AclFormatException e) {
-      throw new BadCodeMonkeyException(e);
-    }
-
-    server.setLogWriter(null);
-    server.setErrWriter(null);
-    server.start();
+  /**
+   * Handles {@link #createTestDatabaseIfNeeded(String, String, MetricRegistry)} for HSQL. We need
+   * to special-case the HSQL DBs that are supported by our tests, so that they get handled
+   * correctly. Specifically, we need to ensure that the HSQL Server is started up, so that our test
+   * code can access the DB directly. In addition, we need to ensure that connection details to that
+   * HSQL server get written out somewhere that the test code can find it.
+   *
+   * @param url the JDBC URL that the application was configured to use
+   * @param connectionsMaxText the maximum number of database connections to use
+   * @param metricRegistry the {@link MetricRegistry} for the application
+   */
+  private static HikariDataSource createTestDatabaseIfNeededForHsql(
+      String url, String connectionsMaxText, MetricRegistry metricRegistry) {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     // Create the DataSource to connect to that shiny new DB.
-    HikariDataSource poolingDataSource = new HikariDataSource();
-    poolingDataSource.setJdbcUrl(
-        String.format("jdbc:hsqldb:hsql://localhost:%d/test-embedded", hsqldbPort));
-    poolingDataSource.setUsername("test");
-    poolingDataSource.setPassword("test");
-    configureDataSource(poolingDataSource, connectionsMaxText, metricRegistry);
-
-    /*
-     * Ensure the DataSource DB's schema is ready to use, because once
-     * Spring starts, anything can try to use it.
-     */
-    DatabaseSchemaManager.createOrUpdateSchema(poolingDataSource);
+    HikariDataSource dataSourcePool = new HikariDataSource();
+    dataSourcePool.setDataSource(dataSource);
+    configureDataSource(dataSourcePool, connectionsMaxText, metricRegistry);
 
     /*
      * Write out the DB properties for <code>ServerTestUtils</code> to use.
      */
     Properties testDbProps = new Properties();
-    testDbProps.setProperty(PROP_DB_URL, poolingDataSource.getJdbcUrl());
-    testDbProps.setProperty(PROP_DB_USERNAME, poolingDataSource.getUsername());
-    testDbProps.setProperty(PROP_DB_PASSWORD, poolingDataSource.getPassword());
+    testDbProps.setProperty(PROP_DB_URL, dataSourceComponents.getUrl());
+    testDbProps.setProperty(PROP_DB_USERNAME, dataSourceComponents.getUsername());
+    testDbProps.setProperty(PROP_DB_PASSWORD, dataSourceComponents.getPassword());
     Path testDbPropsPath = findTestDatabaseProperties();
     try {
       testDbProps.store(new FileWriter(testDbPropsPath.toFile()), null);
@@ -189,7 +169,7 @@ public class SpringConfiguration {
       throw new UncheckedIOException(e);
     }
 
-    return poolingDataSource;
+    return dataSourcePool;
   }
 
   /**
@@ -207,22 +187,6 @@ public class SpringConfiguration {
 
     Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");
     return testDbPropertiesPath;
-  }
-
-  /**
-   * Note: It's possible for this to result in race conditions, if the random port selected enters
-   * use after this method returns and before whatever called this method gets a chance to grab it.
-   * It's pretty unlikely, though, and there's not much we can do about it, either. So.
-   *
-   * @return a free local port number
-   */
-  private static int findFreePort() {
-    try (ServerSocket socket = new ServerSocket(0)) {
-      socket.setReuseAddress(true);
-      return socket.getLocalPort();
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
   }
 
   /**
@@ -253,8 +217,10 @@ public class SpringConfiguration {
      * strongly worded letter instructing it to avoid sequential scans whenever
      * possible.
      */
-    if (poolingDataSource.getJdbcUrl().contains("postgre"))
-      poolingDataSource.setConnectionInitSql("set enable_seqscan = false;");
+    if (poolingDataSource.getJdbcUrl() != null
+        && poolingDataSource.getJdbcUrl().contains("postgre"))
+      poolingDataSource.setConnectionInitSql(
+          "set application_name = 'bfd-server'; set enable_seqscan = false;");
 
     poolingDataSource.setRegisterMbeans(true);
     poolingDataSource.setMetricRegistry(metricRegistry);

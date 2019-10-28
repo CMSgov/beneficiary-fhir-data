@@ -12,6 +12,7 @@ import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -26,7 +27,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.junit.After;
+import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Ignore;
@@ -44,7 +45,8 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadSampleA() {
-    loadSample(StaticRifResourceGroup.SAMPLE_A);
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
   }
 
   /**
@@ -53,13 +55,14 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadSampleU() {
-    loadSample(StaticRifResourceGroup.SAMPLE_A);
-    loadSample(StaticRifResourceGroup.SAMPLE_U);
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_U);
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
      */
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
         RifLoaderTestUtils.createEntityManagerFactory(options);
     EntityManager entityManager = null;
@@ -108,7 +111,8 @@ public final class RifLoaderIT {
   @Ignore
   @Test
   public void loadSampleB() {
-    loadSample(StaticRifResourceGroup.SAMPLE_B);
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_B);
   }
 
   /**
@@ -123,7 +127,8 @@ public final class RifLoaderIT {
             "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
             Runtime.getRuntime().maxMemory()),
         Runtime.getRuntime().maxMemory() >= 4500000000L);
-    loadSample(StaticRifResourceGroup.SYNTHETIC_DATA);
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);
   }
 
   /**
@@ -132,19 +137,21 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadSampleMctData() {
-    loadSample(StaticRifResourceGroup.SAMPLE_MCT);
-    loadSample(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
-    loadSample(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
-    loadSample(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT);
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
   }
 
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the specified {@link
    * StaticRifResourceGroup}.
    *
+   * @param dataSource a {@link DataSource} for the test DB to use
    * @param sampleGroup the {@link StaticRifResourceGroup} to load
    */
-  private void loadSample(StaticRifResourceGroup sampleGroup) {
+  private void loadSample(DataSource dataSource, StaticRifResourceGroup sampleGroup) {
     // Generate the sample RIF data to feed through the pipeline.
     List<StaticRifResource> sampleResources =
         Arrays.stream(sampleGroup.getResources()).collect(Collectors.toList());
@@ -157,7 +164,7 @@ public final class RifLoaderIT {
     // Create the processors that will handle each stage of the pipeline.
     MetricRegistry appMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     RifLoader loader = new RifLoader(appMetrics, options);
 
     // Link up the pipeline and run it.
@@ -212,15 +219,6 @@ public final class RifLoaderIT {
           options, entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
     }
     LOGGER.info("All records found in DB.");
-  }
-
-  /**
-   * Ensures that {@link gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils#cleanDatabaseServer()} is
-   * called after each test case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    RifLoaderTestUtils.cleanDatabaseServer(RifLoaderTestUtils.getLoadOptions());
   }
 
   /**

@@ -168,6 +168,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
+	"-DbfdServer.db.schema.apply=true" \
 	-jar "${serverLauncher}" \
 	>"${serverLog}" 2>&1 \
 	&

@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.app;
 
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
 import gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Assert;
@@ -38,6 +41,9 @@ public final class AppConfigurationTestIT {
   public void normalUsage()
       throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException,
           DecoderException {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabase();
+    DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
+
     ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
     testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, "foo");
     testAppBuilder
@@ -55,15 +61,13 @@ public final class AppConfigurationTestIT {
             Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
     testAppBuilder
         .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, RifLoaderTestUtils.DB_URL);
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
     testAppBuilder
         .environment()
-        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, RifLoaderTestUtils.DB_USERNAME);
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME, dataSourceComponents.getUsername());
     testAppBuilder
         .environment()
-        .put(
-            AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD,
-            String.valueOf(RifLoaderTestUtils.DB_PASSWORD));
+        .put(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD, dataSourceComponents.getPassword());
     testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS, "42");
     testAppBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED, "true");
     Process testApp = testAppBuilder.start();
