@@ -11,13 +11,11 @@ import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.rif.extract.s3.TaskExecutor;
 import gov.cms.bfd.pipeline.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +28,8 @@ public final class S3TaskManager {
   private final ExtractionOptions options;
   private final AmazonS3 s3Client;
   private final TransferManager s3TransferManager;
-  private final ExecutorService downloadTasksService;
-  private final ExecutorService moveTasksService;
+  private final TaskExecutor downloadTasksExecutor;
+  private final TaskExecutor moveTasksExecutor;
 
   /**
    * Tracks the asynchronous downloads of {@link DataSetManifestEntry}s, which will produce {@link
@@ -52,18 +50,8 @@ public final class S3TaskManager {
     this.s3Client = S3Utilities.createS3Client(options);
     this.s3TransferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-    ThreadPoolExecutor downloadTasksService =
-        new ThreadPoolExecutor(
-            1, 1, 100L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-    downloadTasksService.allowCoreThreadTimeOut(true);
-    this.downloadTasksService = downloadTasksService;
-
-    ThreadPoolExecutor moveTasksService =
-        new ThreadPoolExecutor(
-            2, 2, 100L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-    moveTasksService.allowCoreThreadTimeOut(true);
-    this.moveTasksService = moveTasksService;
-
+    this.downloadTasksExecutor = new TaskExecutor(1);
+    this.moveTasksExecutor = new TaskExecutor(2);
     this.downloadTasks = new HashMap<>();
   }
 
@@ -100,7 +88,7 @@ public final class S3TaskManager {
     ManifestEntryDownloadTask downloadTask =
         new ManifestEntryDownloadTask(this, appMetrics, options, manifestEntry);
     Future<ManifestEntryDownloadResult> downloadFuture =
-        this.downloadTasksService.submit(downloadTask);
+        this.downloadTasksExecutor.submit(downloadTask);
     this.downloadTasks.put(manifestEntry, downloadFuture);
 
     return downloadFuture;
@@ -133,24 +121,24 @@ public final class S3TaskManager {
      * necessary to ensure that data sets present in the database aren't
      * left marked as pending in S3.
      */
-    this.moveTasksService.shutdown();
+    this.moveTasksExecutor.shutdown();
 
     /*
      * Prevent any new download tasks from being submitted and cancel those
      * that are queued.
      */
-    this.downloadTasksService.shutdownNow();
+    this.downloadTasksExecutor.shutdownNow();
 
     try {
-      if (!this.moveTasksService.isTerminated()) {
+      if (!this.moveTasksExecutor.isTerminated()) {
         LOGGER.info("Waiting for all S3 rename/move operations to complete...");
-        this.moveTasksService.awaitTermination(30, TimeUnit.MINUTES);
+        this.moveTasksExecutor.awaitTermination(30, TimeUnit.MINUTES);
         LOGGER.info("All S3 rename/move operations are complete.");
       }
 
-      if (!this.downloadTasksService.isTerminated()) {
+      if (!this.downloadTasksExecutor.isTerminated()) {
         LOGGER.info("Waiting for in-progress downloads to complete...");
-        this.downloadTasksService.awaitTermination(30, TimeUnit.MINUTES);
+        this.downloadTasksExecutor.awaitTermination(30, TimeUnit.MINUTES);
         LOGGER.info("All in-progress downloads are complete.");
       }
     } catch (InterruptedException e) {
@@ -161,6 +149,6 @@ public final class S3TaskManager {
 
   /** @param task the {@link DataSetMoveTask} to be asynchronously run */
   public void submit(DataSetMoveTask task) {
-    moveTasksService.submit(task);
+    moveTasksExecutor.submit(task);
   }
 }

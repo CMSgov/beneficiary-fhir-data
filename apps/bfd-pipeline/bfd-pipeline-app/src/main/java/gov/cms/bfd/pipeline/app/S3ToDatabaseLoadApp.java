@@ -142,22 +142,7 @@ public final class S3ToDatabaseLoadApp {
            */
           @Override
           public void errorOccurred(Throwable error) {
-            /*
-             * If an error is caught, log it and then shut everything down.
-             */
-
-            LOGGER.error("Data set failed with an unhandled error. Application will exit.", error);
-
-            /*
-             * This will trigger the shutdown monitors, block until they
-             * complete, and then terminate this thread (and all others).
-             * Accordingly, we can be doubly sure that the data set
-             * processing will be halted: 1) this thread is the
-             * DataSetMonitorWorker's and that thread will block then die,
-             * and 2) the shutdown monitor will call DataSetMonitor.stop().
-             * Pack it up: we're going home, folks.
-             */
-            System.exit(EXIT_CODE_MONITOR_ERROR);
+            handleUncaughtException(error);
           }
         };
 
@@ -249,7 +234,7 @@ public final class S3ToDatabaseLoadApp {
             new UncaughtExceptionHandler() {
               @Override
               public void uncaughtException(Thread t, Throwable e) {
-                LOGGER.error("Uncaught exception on main thread. Main thread stopping.", e);
+                handleUncaughtException(e);
               }
             });
     Thread.setDefaultUncaughtExceptionHandler(
@@ -257,14 +242,36 @@ public final class S3ToDatabaseLoadApp {
           @Override
           public void uncaughtException(Thread t, Throwable e) {
             /*
-             * Just a note on something that I found a bit surprising: this
-             * won't be triggered for errors that occur in the
-             * DataSetMonitorWorker, as the ScheduledExecutorService
+             * FIXME Just a note on something that I found a bit surprising: this won't be triggered
+             * for errors that occur in the DataSetMonitorWorker, as the ScheduledExecutorService
              * swallows those exceptions.
              */
 
-            LOGGER.error("Uncaught exception on non-main thread.", e);
+            handleUncaughtException(e);
           }
         });
+  }
+
+  /**
+   * Call this method to deal with any uncaught exceptions. It'll log the error and then shut things
+   * down gracefully.
+   *
+   * @param throwable the error that occurred
+   */
+  private static void handleUncaughtException(Throwable throwable) {
+    /*
+     * If an error is caught, log it and then shut everything down.
+     */
+
+    LOGGER.error("Data set failed with an unhandled error. Application will exit.", throwable);
+
+    /*
+     * This will trigger the shutdown monitors, block until they complete, and then terminate this
+     * thread (and all others). Accordingly, we can be doubly sure that the data set processing will
+     * be halted: 1) this thread is the DataSetMonitorWorker's and that thread will block then die,
+     * and 2) the shutdown monitor will call DataSetMonitor.stop(). Pack it up: we're going home,
+     * folks.
+     */
+    System.exit(EXIT_CODE_MONITOR_ERROR);
   }
 }
