@@ -57,7 +57,13 @@ resource "aws_iam_policy" "bfd_pipeline_rif" {
   "Statement": [
     {
       "Sid": "BFDPipelineRWS3RIFKMS",
-      "Action": ["kms:Decrypt"],
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ],
       "Effect": "Allow",
       "Resource": ["${data.aws_kms_key.master_key.arn}"]
     },
