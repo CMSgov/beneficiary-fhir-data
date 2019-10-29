@@ -62,8 +62,8 @@
         # automagically decrypt it as part of the copy operation.
         src: "{{ data_server_ssl_client_certificate_test }}"
         dest: "{{ bfd_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
-        owner: root
-        group: root
+        owner: "{{ data_server_user }}"
+        group: "{{ data_server_user }}"
         mode: 'u=rw,g=,o='
       become: true
       tags:
