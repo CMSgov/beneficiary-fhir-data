@@ -241,12 +241,6 @@ public final class S3ToDatabaseLoadApp {
         new UncaughtExceptionHandler() {
           @Override
           public void uncaughtException(Thread t, Throwable e) {
-            /*
-             * FIXME Just a note on something that I found a bit surprising: this won't be triggered
-             * for errors that occur in the DataSetMonitorWorker, as the ScheduledExecutorService
-             * swallows those exceptions.
-             */
-
             handleUncaughtException(e);
           }
         });
