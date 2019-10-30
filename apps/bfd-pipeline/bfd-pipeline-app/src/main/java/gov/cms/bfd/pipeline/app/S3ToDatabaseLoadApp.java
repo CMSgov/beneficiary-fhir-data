@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.app;
 
+import ch.qos.logback.classic.LoggerContext;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.Timer;
@@ -219,6 +220,14 @@ public final class S3ToDatabaseLoadApp {
                     Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build().report();
 
                     LOGGER.info("Application has finished shutting down.");
+
+                    /*
+                     * We have to do this ourselves (rather than use Logback's DelayingShutdownHook)
+                     * to ensure that the logger isn't closed before the above logging.
+                     */
+                    LoggerContext logbackContext =
+                        (LoggerContext) LoggerFactory.getILoggerFactory();
+                    logbackContext.stop();
                   }
                 }));
   }
