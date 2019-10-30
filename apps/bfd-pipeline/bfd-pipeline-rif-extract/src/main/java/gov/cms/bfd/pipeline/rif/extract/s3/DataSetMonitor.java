@@ -108,7 +108,7 @@ public final class DataSetMonitor {
     if (this.dataSetWatcherExecutor != null || this.dataSetWatcherFuture != null)
       throw new IllegalStateException();
 
-    this.dataSetWatcherExecutor = new TaskExecutor(1);
+    this.dataSetWatcherExecutor = new TaskExecutor("Data Set Watcher Executor", 1);
     this.s3TaskManager = new S3TaskManager(appMetrics, options);
     this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
     Runnable errorNotifyingDataSetWatcher =

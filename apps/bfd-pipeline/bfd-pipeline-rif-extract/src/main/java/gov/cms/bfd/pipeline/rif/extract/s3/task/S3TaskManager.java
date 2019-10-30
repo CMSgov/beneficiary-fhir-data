@@ -50,8 +50,8 @@ public final class S3TaskManager {
     this.s3Client = S3Utilities.createS3Client(options);
     this.s3TransferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
-    this.downloadTasksExecutor = new TaskExecutor(1);
-    this.moveTasksExecutor = new TaskExecutor(2);
+    this.downloadTasksExecutor = new TaskExecutor("Download RIF Executor", 1);
+    this.moveTasksExecutor = new TaskExecutor("Move Completed RIF Executor", 2);
     this.downloadTasks = new HashMap<>();
   }
 
@@ -89,6 +89,7 @@ public final class S3TaskManager {
         new ManifestEntryDownloadTask(this, appMetrics, options, manifestEntry);
     Future<ManifestEntryDownloadResult> downloadFuture =
         this.downloadTasksExecutor.submit(downloadTask);
+    LOGGER.debug("Submitted future: {}", TaskExecutor.getTaskId(downloadFuture));
     this.downloadTasks.put(manifestEntry, downloadFuture);
 
     return downloadFuture;
@@ -115,6 +116,8 @@ public final class S3TaskManager {
    * already-submitted tasks to complete.
    */
   public void shutdownSafely() {
+    LOGGER.debug("Shutting down...");
+
     /*
      * Prevent any new move tasks from being submitted, while allowing those
      * that are queued and/or actively running to complete. This is
@@ -144,6 +147,8 @@ public final class S3TaskManager {
       // We're not expecting interrupts here, so go boom.
       throw new BadCodeMonkeyException(e);
     }
+
+    LOGGER.debug("Shut down.");
   }
 
   /** @param task the {@link DataSetMoveTask} to be asynchronously run */
