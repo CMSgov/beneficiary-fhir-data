@@ -124,10 +124,9 @@ public final class S3TaskManager {
     this.moveTasksExecutor.shutdown();
 
     /*
-     * Prevent any new download tasks from being submitted and cancel those
-     * that are queued.
+     * Prevent any new download tasks from being submitted.
      */
-    this.downloadTasksExecutor.shutdownNow();
+    this.downloadTasksExecutor.shutdown();
 
     try {
       if (!this.moveTasksExecutor.isTerminated()) {
