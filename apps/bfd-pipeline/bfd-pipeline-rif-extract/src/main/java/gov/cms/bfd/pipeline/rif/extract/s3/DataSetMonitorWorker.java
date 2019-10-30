@@ -86,14 +86,18 @@ public final class DataSetMonitorWorker implements Runnable {
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param options the {@link ExtractionOptions} to use
+   * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
    */
   public DataSetMonitorWorker(
-      MetricRegistry appMetrics, ExtractionOptions options, DataSetMonitorListener listener) {
+      MetricRegistry appMetrics,
+      ExtractionOptions options,
+      S3TaskManager s3TaskManager,
+      DataSetMonitorListener listener) {
     this.appMetrics = appMetrics;
     this.options = options;
     this.listener = listener;
-    this.s3TaskManager = new S3TaskManager(appMetrics, options);
+    this.s3TaskManager = s3TaskManager;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
@@ -265,17 +269,5 @@ public final class DataSetMonitorWorker implements Runnable {
     }
 
     return true;
-  }
-
-  /**
-   * Cleans up all resources in use by this {@link DataSetMonitorWorker}, in preparation for
-   * application shutdown.
-   */
-  public void cleanup() {
-    /*
-     * Stop accepting new S3 tasks, cancel those tasks that can be canceled
-     * safely, and wait for the rest to complete.
-     */
-    s3TaskManager.shutdownSafely();
   }
 }

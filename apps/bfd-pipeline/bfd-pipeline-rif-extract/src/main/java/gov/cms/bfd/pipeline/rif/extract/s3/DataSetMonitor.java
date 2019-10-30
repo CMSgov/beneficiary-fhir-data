@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rif.extract.s3;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.pipeline.rif.extract.ExtractionOptions;
+import gov.cms.bfd.pipeline.rif.extract.s3.task.S3TaskManager;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
@@ -68,6 +69,7 @@ public final class DataSetMonitor {
   private final DataSetMonitorListener listener;
 
   private TaskExecutor dataSetWatcherExecutor;
+  private S3TaskManager s3TaskManager;
   private ScheduledFuture<?> dataSetWatcherFuture;
   private DataSetMonitorWorker dataSetWatcher;
 
@@ -107,7 +109,8 @@ public final class DataSetMonitor {
       throw new IllegalStateException();
 
     this.dataSetWatcherExecutor = new TaskExecutor(1);
-    this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, listener);
+    this.s3TaskManager = new S3TaskManager(appMetrics, options);
+    this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
     Runnable errorNotifyingDataSetWatcher =
         new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
@@ -156,8 +159,8 @@ public final class DataSetMonitor {
     waitForStop();
 
     // Clean house.
-    dataSetWatcher.cleanup();
     dataSetWatcherExecutor.shutdown();
+    s3TaskManager.shutdownSafely();
 
     LOGGER.debug("Stopped.");
   }
