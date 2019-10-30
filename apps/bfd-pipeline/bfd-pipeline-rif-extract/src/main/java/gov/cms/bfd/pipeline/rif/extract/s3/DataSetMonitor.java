@@ -155,11 +155,12 @@ public final class DataSetMonitor {
      * Signal the scheduler to stop after the current DataSetMonitorWorker
      * execution (if any), then wait for that to happen.
      */
+    dataSetWatcherExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+    dataSetWatcherExecutor.shutdown();
     dataSetWatcherFuture.cancel(false);
     waitForStop();
 
     // Clean house.
-    dataSetWatcherExecutor.shutdown();
     s3TaskManager.shutdownSafely();
 
     LOGGER.debug("Stopped.");
