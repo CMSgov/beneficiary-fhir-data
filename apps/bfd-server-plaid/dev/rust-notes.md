@@ -25,6 +25,56 @@ Go one query type at a time.
   Don't bother with intermediate steps like interprocess communication or Java interop;
     build a webapp that can support an entire query type end-to-end.
 
+## Development and Test
+
+### Problem: Test Data
+
+In development, how am I going to feed this thing a DB that I can actually test against?
+
+### Problem: Correctness Verification
+
+How am I going to verify that this works as expected?
+I don't think I want to reimplement our Integration Tests in Rust yet --
+  it'd take too much time right now, and should be deferred until I've proven the concept.
+
+What if I rig up the BFD Server app to passthrough queries to the Plaid app?
+It'd definitely incur a performance penalty,
+  but that doesn't matter for local development and testing purposes.
+The penalty _might_ even be small enough that I could eventually use this mechanism
+  as part of a release and testing strategy in `prod`.
+
+The main challenge with the passthrough approach is that both apps
+  would need to talk to the same DB, which doesn't work with HSQL DB.
+Instead, I'll have to update the tests to use, or at least support, PostgreSQL.
+
+#### How Will I Update the Existing Build to Use PostgreSQL?
+
+Not as simple as it first appears: if I rig it up to launch PostgreSQL via Docker,
+  there's no good way to clean up the container & DB afterwards.
+
+If I start PostgreSQL out-of-band and pass the DB URL in, there are a number of problems:
+
+1. We don't currently support passing in the DB username & password.
+    * Solution: These can be passed in the JDBC URL, e.g.
+      `jdbc:postgresql://localhost/test?user=fred&password=secret`.
+2. We don't create the DB schema.
+
+It'd also, in general, be good to add PostgreSQL support to the other projects.
+
+### Problem: Performance Verification
+
+How am I going to measure what performance impact all of this has?
+Improving performance is the primary goal of this whole effort.
+Short answer: I can't, right away. First, I'll have to either:
+
+* Implement query passthrough, and hope that it still shows a major improvement.
+* Update the performance tests (only) to directly hit the Plaid app.
+
+Regardless, both of those options will require me to implement
+  all of the deployment changes necessary to standup the Plaid app
+  alongside the existing BFD Server.
+That's a decent chunk of work, but I don't see how it can be avoided.
+
 ## Tooling Notes
 
 ### Installs

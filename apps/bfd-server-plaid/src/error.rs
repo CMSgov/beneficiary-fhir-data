@@ -3,6 +3,7 @@ pub type Result<T> = ::std::result::Result<T, AppError>;
 #[derive(Debug)]
 pub enum AppError {
     VarError(std::env::VarError),
+    ParseIntError(std::num::ParseIntError),
     IoError(std::io::Error),
     SetLoggerError(log::SetLoggerError),
     RustlsError(rustls::TLSError),
@@ -16,6 +17,12 @@ pub enum AppError {
 impl From<std::env::VarError> for AppError {
     fn from(err: std::env::VarError) -> AppError {
         AppError::VarError(err)
+    }
+}
+
+impl From<std::num::ParseIntError> for AppError {
+    fn from(err: std::num::ParseIntError) -> AppError {
+        AppError::ParseIntError(err)
     }
 }
 

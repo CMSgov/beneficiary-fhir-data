@@ -72,10 +72,17 @@ fn main() -> error::Result<()> {
         // Used in local development to auto-reload changes.
         server.listen(l)?
     } else {
-        // Offer HTTP to localhost and HTTPS to remote clients.
-        server
-            .bind("127.0.0.1:3000")?
-            .bind_rustls("0.0.0.0:3001", tls::create_rustls_config(&app_config)?)?
+        if app_config.server_certs_filename.is_some()
+            && app_config.server_private_key_filename.is_some()
+            && app_config.client_certs_filename.is_some()
+        {
+            // Offer HTTP to localhost and HTTPS to remote clients.
+            server
+                .bind(format!("127.0.0.1:{}", &app_config.server_http_port))?
+                .bind_rustls("0.0.0.0:3001", tls::create_rustls_config(&app_config)?)?
+        } else {
+            server.bind(format!("127.0.0.1:{}", &app_config.server_http_port))?
+        }
     };
 
     /*

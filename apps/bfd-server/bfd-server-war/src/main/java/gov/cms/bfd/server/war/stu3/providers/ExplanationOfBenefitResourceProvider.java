@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -65,6 +67,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   private MetricRegistry metricRegistry;
   private SamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
+  private IGenericClient plaidClient;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -88,6 +91,14 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
+  }
+
+  /**
+   * @param fhirClient the {@link IGenericClient} to use for querying the local Plaid application
+   */
+  @Inject
+  public void setFhirClient(IGenericClient fhirClient) {
+    this.plaidClient = fhirClient;
   }
 
   /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
@@ -256,10 +267,18 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
           transformToEobs(
               ClaimType.OUTPATIENT,
               findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated)));
-    if (claimTypes.contains(ClaimType.PDE))
-      eobs.addAll(
-          transformToEobs(
-              ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
+    if (claimTypes.contains(ClaimType.PDE)) {
+      // eobs.addAll(
+      //     transformToEobs(
+      //         ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
+      // FIXME: the lastUpdated parameter is not yet supported by Plaid
+      Bundle plaidBundle =
+          findByPatientViaPlaid(
+              patient, new TokenAndListParam().addAnd(new TokenOrListParam(null, "pde")), "true");
+      List plaidResource =
+          plaidBundle.getEntry().stream().map(e -> e.getResource()).collect(Collectors.toList());
+      eobs.addAll(plaidResource);
+    }
     if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(
           transformToEobs(
@@ -270,6 +289,52 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
+  }
+
+  /**
+   * Adds support for the FHIR "search" operation for {@link ExplanationOfBenefit}s, allowing users
+   * to search by {@link ExplanationOfBenefit#getPatient()}.
+   *
+   * <p>The {@link Search} annotation indicates that this method supports the search operation.
+   * There may be many different methods annotated with this {@link Search} annotation, to support
+   * many different search criteria.
+   *
+   * @param patient a {@link ReferenceParam} for the {@link ExplanationOfBenefit#getPatient()} to
+   *     try and find matches for {@link ExplanationOfBenefit}s
+   * @param type a {@link TokenAndListParam} detailing the claim types that should be included in
+   *     the result
+   * @param plaid set to <code>true</code>, to request that the Plaid implementation be used to
+   *     return these results, instead
+   * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
+   *     matching resources, or may also be empty.
+   */
+  @Search
+  public Bundle findByPatientViaPlaid(
+      @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient,
+      @RequiredParam(name = "type") TokenAndListParam type,
+      @RequiredParam(name = "plaid") String plaid) {
+    String beneficiaryId = patient.getIdPart();
+    Set<ClaimType> types = parseTypeParam(type);
+    boolean usePlaid = Boolean.parseBoolean(plaid);
+
+    // I'm lazy and don't feel like doing the work to redirect the request; if you don't want
+    // results from Plaid, don't use this endpoint.
+    if (!usePlaid)
+      throw new IllegalArgumentException("This method only supports use of the Plaid app.");
+    if (types.size() != 1 || !types.contains(ClaimType.PDE))
+      throw new IllegalArgumentException("This method only supports PDE claims at this time.");
+
+    // Query the local Plaid app for the results and return them.
+    Bundle plaidResults =
+        plaidClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiaryId)))
+            .where(new TokenClientParam("type").exactly().code(ClaimType.PDE.name()))
+            .returnBundle(Bundle.class)
+            .execute();
+    return plaidResults;
   }
 
   /*

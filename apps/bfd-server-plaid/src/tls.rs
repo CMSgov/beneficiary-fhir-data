@@ -40,7 +40,13 @@ fn load_private_key(key_filename: &str) -> error::Result<rustls::PrivateKey> {
 
 /// Creates the `rustls::ServerConfig` for the server to use.
 pub fn create_rustls_config(app_config: &AppConfig) -> error::Result<rustls::ServerConfig> {
-    let client_auth_certs = load_certs(&app_config.client_certs_filename)?;
+    let client_certs_filename = match &app_config.client_certs_filename {
+        Some(f) => Ok(f),
+        None => Err(TLSConfigError::MiscError(
+            "Missing config value.".to_string(),
+        )),
+    };
+    let client_auth_certs = load_certs(client_certs_filename?)?;
     let mut client_auth_roots = rustls::RootCertStore::empty();
     for client_auth_cert in client_auth_certs {
         client_auth_roots
@@ -51,8 +57,20 @@ pub fn create_rustls_config(app_config: &AppConfig) -> error::Result<rustls::Ser
 
     let mut config = rustls::ServerConfig::new(client_auth_verifier);
 
-    let server_certs = load_certs(&app_config.server_certs_filename)?;
-    let server_private_key = load_private_key(&app_config.server_private_key_filename)?;
+    let server_certs_filename = match &app_config.server_certs_filename {
+        Some(f) => Ok(f),
+        None => Err(TLSConfigError::MiscError(
+            "Missing config value.".to_string(),
+        )),
+    };
+    let server_certs = load_certs(server_certs_filename?)?;
+    let server_private_key_filename = match &app_config.server_private_key_filename {
+        Some(f) => Ok(f),
+        None => Err(TLSConfigError::MiscError(
+            "Missing config value.".to_string(),
+        )),
+    };
+    let server_private_key = load_private_key(server_private_key_filename?)?;
     config.set_single_cert(server_certs, server_private_key)?;
 
     // TODO: remove TLS v1.2 once we can move all of our clients off it.
