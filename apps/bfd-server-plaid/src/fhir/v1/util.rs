@@ -1,7 +1,7 @@
 use crate::fhir::constants::*;
 use crate::fhir::util::ClaimType;
 use crate::fhir::v1::code_systems::*;
-use crate::fhir::v1::structure::*;
+use crate::fhir::v1::structures::*;
 
 /// Returns a `Reference` for the FHIR Patient resource with the specified `Patient.id` value.
 pub fn create_eob_id(claim_type: ClaimType, claim_id: &str) -> String {

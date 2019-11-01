@@ -1,7 +1,7 @@
 use crate::db::PgPool;
 use crate::error;
 use crate::fhir::util;
-use crate::fhir::v1::structure::*;
+use crate::fhir::v1::structures::*;
 use crate::fhir::v1::util::*;
 use crate::models::PartDEvent;
 use actix_web::{web, HttpResponse};
