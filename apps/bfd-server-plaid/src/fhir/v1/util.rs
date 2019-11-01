@@ -18,7 +18,7 @@ pub fn reference_patient_by_id(patient_id: &str) -> Reference {
     }
 }
 
-/// Returns a `CodeableConcept` for the
+/// Returns a `CodeableConcept` for the `ExplanationOfBenefit.type` field.
 pub fn create_eob_type_concept(claim_type: ClaimType) -> CodeableConcept {
     // Every EOB will have a type_bfd.
     let type_bfd = Coding {
