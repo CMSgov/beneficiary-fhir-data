@@ -1,10 +1,10 @@
-use crate::db::{PgPool, PgPooledConnection};
+use crate::db::PgPool;
 use crate::error;
 use crate::fhir::util;
 use crate::fhir::v1::structure::*;
 use crate::fhir::v1::util::*;
 use crate::models::PartDEvent;
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use serde::Deserialize;
 use std::convert::TryFrom;

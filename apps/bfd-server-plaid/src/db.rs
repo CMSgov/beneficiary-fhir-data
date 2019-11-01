@@ -3,10 +3,12 @@ use crate::error;
 use crate::models::PartDEvent;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use diesel::r2d2::{ConnectionManager, Pool, PoolError, PooledConnection};
+use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 
 pub type PgPool = Pool<ConnectionManager<PgConnection>>;
 
+/// Note: think I'm going to need this eventually, so leaving it for now
+#[allow(dead_code)]
 pub type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
 pub fn create_db_connection_pool(app_config: &AppConfig) -> error::Result<PgPool> {

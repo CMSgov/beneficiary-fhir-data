@@ -14,10 +14,7 @@ extern crate diesel;
 
 use actix_web::{web, App, HttpResponse, HttpServer};
 use config::AppConfig;
-use lazy_static;
 use listenfd::ListenFd;
-use regex;
-use serde;
 use slog::{info, o, Drain};
 use slog_async;
 use slog_json;
