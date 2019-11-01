@@ -1,6 +1,6 @@
 use crate::config::AppConfig;
 use crate::error;
-use crate::models::PartDEvent;
+use crate::models::structs::PartDEvent;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};

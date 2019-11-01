@@ -6,18 +6,18 @@
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(untagged)]
 pub enum Resource {
     ExplanationOfBenefit(ExplanationOfBenefit),
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct ResourceMeta {
     pub lastUpdated: DateTime<Utc>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(tag = "resourceType")]
 pub struct Bundle {
     pub id: String,
@@ -29,28 +29,28 @@ pub struct Bundle {
     pub entry: Vec<BundleEntry>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct BundleLink {
     pub relation: String,
     pub url: String,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct BundleEntry {
     pub resource: Resource,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Default, Serialize)]
 pub struct Reference {
     pub reference: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Default, Serialize)]
 pub struct CodeableConcept {
     pub coding: Vec<Coding>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Default, Serialize)]
 pub struct Coding {
     pub system: Option<String>,
     pub code: Option<String>,
@@ -58,7 +58,7 @@ pub struct Coding {
     pub display: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Default, Serialize)]
 pub struct ExplanationOfBenefit {
     pub resourceType: String,
     pub id: String,

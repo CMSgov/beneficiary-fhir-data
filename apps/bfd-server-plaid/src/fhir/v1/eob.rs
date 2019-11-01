@@ -3,7 +3,7 @@ use crate::error;
 use crate::fhir::util;
 use crate::fhir::v1::structures::*;
 use crate::fhir::v1::util::*;
-use crate::models::PartDEvent;
+use crate::models::structs::PartDEvent;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use serde::Deserialize;
@@ -54,11 +54,9 @@ pub fn eob_for_bene_id(
 
 /// Returns an `ExplanationOfBenefit` that represents the specified `PartDEvent`.
 fn transform_claim_partd(claim: &PartDEvent) -> ExplanationOfBenefit {
-    ExplanationOfBenefit {
-        resourceType: String::from("ExplanationOfBenefit"),
-        id: create_eob_id(util::ClaimType::PartDEvent, &claim.PDE_ID),
-        patient: Some(reference_patient_by_id(&claim.BENE_ID)),
-        r#type: Some(create_eob_type_concept(util::ClaimType::PartDEvent)),
-        // TODO flesh out the rest of this
-    }
+    let eob = ExplanationOfBenefit::default();
+    let eob = map_claim_header_common(claim, eob);
+    // TODO flesh out the rest of this
+
+    eob
 }

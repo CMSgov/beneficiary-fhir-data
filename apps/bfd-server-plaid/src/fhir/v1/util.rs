@@ -2,9 +2,24 @@ use crate::fhir::constants::*;
 use crate::fhir::util::ClaimType;
 use crate::fhir::v1::code_systems::*;
 use crate::fhir::v1::structures::*;
+use crate::models::traits::*;
+
+/// Maps the common claim header CCW fields into the specified `ExplanationOfBenefit`.
+pub fn map_claim_header_common<T: PartABDClaim>(
+    claim: &T,
+    mut eob: ExplanationOfBenefit,
+) -> ExplanationOfBenefit {
+    eob.resourceType = String::from("ExplanationOfBenefit");
+    eob.id = create_eob_id(ClaimType::PartDEvent, &claim.claim_id());
+    eob.patient = Some(reference_patient_by_id(&claim.beneficiary_id()));
+    eob.r#type = Some(create_eob_type_concept(ClaimType::PartDEvent));
+    // TODO flesh out the rest of this
+
+    eob
+}
 
 /// Returns a `Reference` for the FHIR Patient resource with the specified `Patient.id` value.
-pub fn create_eob_id(claim_type: ClaimType, claim_id: &str) -> String {
+fn create_eob_id(claim_type: ClaimType, claim_id: &str) -> String {
     let prefix = match claim_type {
         crate::fhir::util::ClaimType::PartDEvent => "pde",
     };
@@ -12,14 +27,14 @@ pub fn create_eob_id(claim_type: ClaimType, claim_id: &str) -> String {
 }
 
 /// Returns a `Reference` for the FHIR Patient resource with the specified `Patient.id` value.
-pub fn reference_patient_by_id(patient_id: &str) -> Reference {
+fn reference_patient_by_id(patient_id: &str) -> Reference {
     Reference {
         reference: Some(patient_id.to_string()),
     }
 }
 
 /// Returns a `CodeableConcept` for the `ExplanationOfBenefit.type` field.
-pub fn create_eob_type_concept(claim_type: ClaimType) -> CodeableConcept {
+fn create_eob_type_concept(claim_type: ClaimType) -> CodeableConcept {
     // Every EOB will have a type_bfd.
     let type_bfd = Coding {
         system: Some(format!(

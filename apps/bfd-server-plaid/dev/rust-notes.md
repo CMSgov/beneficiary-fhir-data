@@ -152,3 +152,28 @@ We could still do some DB schema refactorings if we really wanted to, e.g.:
     which would also allow us to support multiple reference years for each beneficiary.
 * Fixing our table and column names, which will be the worst migration ever
     but would pay long-term dividends.
+
+## Transformer Design
+
+### Mapping Methods: Lots of Parameters or Traits?
+
+Design Question: Should this take in a traited-up DB model,
+  or should it take in the individual fields?
+
+* The individual fields thing we're doing in the Java _looks_ messy,
+    but has been reasonably easy to trace and debug.
+* The traits wouldn't be that much harder to debug,
+    and would certainly look a bit neater.
+* The traits might also be a bit simpler to _think_ about:
+    "these N claim header/line types are common in ways that
+    allow them to implement the same trait X."
+* We might eventually try to normalize our schema a bit.
+    * I don't think the traits vs. individual fields approaches
+        would be easier or harder to refactor; that's about equivalent.
+    * The traits approach might make it a bit easier to decide how the normalization should go.
+* Worth noting: the traits approach requires more typing (to define and impl the traits).
+* Worth noting: also, the traits approach requires _less_ typing,
+    as calling the mapping methods doesn't require passing in a giant list of parameters.
+    * I stress about those parameter lists a decent amount:
+        what if things get mixed up and no one notices?
+      The traits approach is definitely safer.
