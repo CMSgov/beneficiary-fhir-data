@@ -2,6 +2,7 @@ use crate::db::{PgPool, PgPooledConnection};
 use crate::error;
 use crate::fhir::util;
 use crate::fhir::v1::structure::*;
+use crate::fhir::v1::util::*;
 use crate::models::PartDEvent;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::Utc;
@@ -51,9 +52,13 @@ pub fn eob_for_bene_id(
         .json(bundle))
 }
 
+/// Returns an `ExplanationOfBenefit` that represents the specified `PartDEvent`.
 fn transform_claim_partd(claim: &PartDEvent) -> ExplanationOfBenefit {
     ExplanationOfBenefit {
-        id: claim.PDE_ID.clone(),
+        resourceType: String::from("ExplanationOfBenefit"),
+        id: create_eob_id(util::ClaimType::PartDEvent, &claim.PDE_ID),
+        patient: Some(reference_patient_by_id(&claim.BENE_ID)),
+        r#type: Some(create_eob_type_concept(util::ClaimType::PartDEvent)),
         // TODO flesh out the rest of this
     }
 }

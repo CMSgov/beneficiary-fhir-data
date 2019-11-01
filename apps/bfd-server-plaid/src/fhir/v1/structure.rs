@@ -1,9 +1,13 @@
 //! Contains the FHIR structures used in v1 of this API, which uses FHIR R3.
+//!
+//! Note: We want to match FHIR naming conventions here, so we aren't using snake case.
+#![allow(non_snake_case)]
 
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 #[derive(Serialize)]
+#[serde(untagged)]
 pub enum Resource {
     ExplanationOfBenefit(ExplanationOfBenefit),
 }
@@ -37,7 +41,28 @@ pub struct BundleEntry {
 }
 
 #[derive(Serialize)]
+pub struct Reference {
+    pub reference: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct CodeableConcept {
+    pub coding: Vec<Coding>,
+}
+
+#[derive(Serialize)]
+pub struct Coding {
+    pub system: Option<String>,
+    pub code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display: Option<String>,
+}
+
+#[derive(Serialize)]
 pub struct ExplanationOfBenefit {
+    pub resourceType: String,
     pub id: String,
+    pub patient: Option<Reference>,
+    pub r#type: Option<CodeableConcept>,
     // TODO flesh out the rest of this
 }

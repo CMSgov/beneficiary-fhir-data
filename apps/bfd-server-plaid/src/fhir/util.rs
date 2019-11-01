@@ -2,6 +2,11 @@
 use lazy_static::lazy_static;
 use regex::Regex;
 
+/// Enumerates the Medicare claim (and event) types supported by the application.
+pub enum ClaimType {
+    PartDEvent,
+}
+
 /// Parses the specified FHIR relative resource `Reference` value into its components. For example,
 /// `Patient/123` will be parsed into `("Patient", "123")`. Invalid relative resource `Reference`s
 /// will return `None`.
