@@ -145,11 +145,12 @@ public final class S3RifFile implements RifFile {
    */
   public void cleanupTempFile() {
     LOGGER.debug("Cleaning up '{}'...", this);
-    if (!manifestEntryDownload.isDone()) {
-      manifestEntryDownload.cancel(false);
-      return;
-    }
 
+    /*
+     * We need to either cancel the download or wait for it to complete and then clean up the file.
+     * However, canceling isn't a thread-safe operation (which is bonkers, but true), so we'll just
+     * wait for completion.
+     */
     try {
       ManifestEntryDownloadResult fileDownloadResult = waitForDownload();
       Files.deleteIfExists(fileDownloadResult.getLocalDownload());

@@ -3,10 +3,9 @@ package gov.cms.bfd.pipeline.rif.extract.s3;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.pipeline.rif.extract.ExtractionOptions;
+import gov.cms.bfd.pipeline.rif.extract.s3.task.S3TaskManager;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -69,7 +68,8 @@ public final class DataSetMonitor {
   private final int scanRepeatDelay;
   private final DataSetMonitorListener listener;
 
-  private ScheduledExecutorService dataSetWatcherService;
+  private TaskExecutor dataSetWatcherExecutor;
+  private S3TaskManager s3TaskManager;
   private ScheduledFuture<?> dataSetWatcherFuture;
   private DataSetMonitorWorker dataSetWatcher;
 
@@ -93,7 +93,7 @@ public final class DataSetMonitor {
     this.scanRepeatDelay = scanRepeatDelay;
     this.listener = listener;
 
-    this.dataSetWatcherService = null;
+    this.dataSetWatcherExecutor = null;
     this.dataSetWatcherFuture = null;
     this.dataSetWatcher = null;
   }
@@ -105,11 +105,12 @@ public final class DataSetMonitor {
    */
   public void start() {
     // Instances of this class are single-use-only.
-    if (this.dataSetWatcherService != null || this.dataSetWatcherFuture != null)
+    if (this.dataSetWatcherExecutor != null || this.dataSetWatcherFuture != null)
       throw new IllegalStateException();
 
-    this.dataSetWatcherService = Executors.newSingleThreadScheduledExecutor();
-    this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, listener);
+    this.dataSetWatcherExecutor = new TaskExecutor("Data Set Watcher Executor", 1);
+    this.s3TaskManager = new S3TaskManager(appMetrics, options);
+    this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
     Runnable errorNotifyingDataSetWatcher =
         new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
 
@@ -125,7 +126,7 @@ public final class DataSetMonitor {
      */
     LOGGER.info(LOG_MESSAGE_STARTING_WORKER);
     this.dataSetWatcherFuture =
-        dataSetWatcherService.scheduleWithFixedDelay(
+        dataSetWatcherExecutor.scheduleWithFixedDelay(
             errorNotifyingDataSetWatcher, 0, scanRepeatDelay, TimeUnit.MILLISECONDS);
   }
 
@@ -146,7 +147,7 @@ public final class DataSetMonitor {
     }
 
     // If something has already shut us down, we're done.
-    if (dataSetWatcherService.isShutdown()) {
+    if (dataSetWatcherExecutor.isShutdown()) {
       return;
     }
 
@@ -154,12 +155,13 @@ public final class DataSetMonitor {
      * Signal the scheduler to stop after the current DataSetMonitorWorker
      * execution (if any), then wait for that to happen.
      */
+    dataSetWatcherExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+    dataSetWatcherExecutor.shutdown();
     dataSetWatcherFuture.cancel(false);
     waitForStop();
 
     // Clean house.
-    dataSetWatcher.cleanup();
-    dataSetWatcherService.shutdown();
+    s3TaskManager.shutdownSafely();
 
     LOGGER.debug("Stopped.");
   }
@@ -221,7 +223,7 @@ public final class DataSetMonitor {
    *     is not
    */
   public boolean isStopped() {
-    return dataSetWatcherService != null && dataSetWatcherService.isShutdown();
+    return dataSetWatcherExecutor != null && dataSetWatcherExecutor.isShutdown();
   }
 
   /**

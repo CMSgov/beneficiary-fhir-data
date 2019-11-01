@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rif.extract.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
@@ -72,6 +73,16 @@ public class DataSetTestUtilities {
       s3ObjectListing = s3Client.listObjectsV2(s3BucketListRequest);
       for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
         s3Client.deleteObject(bucket.getName(), objectSummary.getKey());
+        /*
+         * Note: S3's API is eventually consistent, so we want to wait for the deletes to be
+         * consistent globally.
+         */
+        s3Client
+            .waiters()
+            .objectNotExists()
+            .run(
+                new WaiterParameters<GetObjectMetadataRequest>(
+                    new GetObjectMetadataRequest(bucket.getName(), objectSummary.getKey())));
       }
 
       s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
