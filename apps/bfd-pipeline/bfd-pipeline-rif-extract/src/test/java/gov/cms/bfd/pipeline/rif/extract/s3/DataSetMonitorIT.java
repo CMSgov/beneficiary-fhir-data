@@ -7,8 +7,12 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.junit.Assert;
@@ -134,6 +138,128 @@ public final class DataSetMonitorIT {
               manifestC,
               manifestC.getEntries().get(0),
               StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+
+      // Start the monitor up.
+      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
+      DataSetMonitor monitor = new DataSetMonitor(new MetricRegistry(), options, 1, listener);
+      monitor.start();
+
+      // Wait for the monitor to generate events for the three data sets.
+      Awaitility.await()
+          .atMost(Duration.ONE_MINUTE)
+          .until(() -> listener.getDataEvents().size() >= 3);
+      monitor.stop();
+
+      // Verify what was handed off to the DataSetMonitorListener.
+      Assert.assertEquals(3, listener.getDataEvents().size());
+      Assert.assertEquals(0, listener.getErrorEvents().size());
+      Assert.assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
+      Assert.assertEquals(manifestB.getTimestamp(), listener.getDataEvents().get(1).getTimestamp());
+      Assert.assertEquals(manifestC.getTimestamp(), listener.getDataEvents().get(2).getTimestamp());
+
+      // Verify that the data sets were both renamed.
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client,
+          bucket,
+          DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+          0,
+          java.time.Duration.ofSeconds(10));
+      DataSetTestUtilities.waitForBucketObjectCount(
+          s3Client,
+          bucket,
+          DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS,
+          1
+              + manifestA.getEntries().size()
+              + 1
+              + manifestB.getEntries().size()
+              + 1
+              + manifestC.getEntries().size(),
+          java.time.Duration.ofSeconds(10));
+    } catch (Exception e) {
+      LOGGER.warn("Test case failed.", e);
+      throw new RuntimeException(e);
+    } finally {
+      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+    }
+  }
+
+  /**
+   * Tests {@link gov.cms.bfd.pipeline.rif.extract.s3.DataSetMonitor} when run against a bucket with
+   * two data sets in it that do not appear at once.
+   *
+   * @throws InterruptedException (shouldn't happen)
+   */
+  @Test
+  public void delayedMultipleDataSetsTest() throws InterruptedException {
+    ScheduledExecutorService manifestUploaderService = Executors.newScheduledThreadPool(3);
+
+    class ManifestUploader implements Runnable {
+      AmazonS3 s3Client;
+      Bucket bucket;
+      DataSetManifest manifest;
+      URL manifestResourceURL;
+
+      public ManifestUploader(
+          AmazonS3 s3Client, Bucket bucket, DataSetManifest manifest, URL manifestResourceURL) {
+        this.s3Client = s3Client;
+        this.bucket = bucket;
+        this.manifest = manifest;
+        this.manifestResourceURL = manifestResourceURL;
+      }
+
+      public void run() {
+        s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
+        s3Client.putObject(
+            DataSetTestUtilities.createPutRequest(
+                bucket, manifest, manifest.getEntries().get(0), manifestResourceURL));
+      }
+    }
+
+    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
+    Bucket bucket = null;
+
+    try {
+      /*
+       * Create the (empty) bucket to run against, and populate it with
+       * two data sets.
+       */
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      ExtractionOptions options = new ExtractionOptions(bucket.getName());
+      LOGGER.info(
+          "Bucket created: '{}:{}'",
+          s3Client.getS3AccountOwner().getDisplayName(),
+          bucket.getName());
+
+      DataSetManifest manifestA =
+          new DataSetManifest(
+              Instant.now().minus(1L, ChronoUnit.HOURS),
+              0,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
+      manifestUploaderService.schedule(
+          new ManifestUploader(
+              s3Client, bucket, manifestA, StaticRifResource.SAMPLE_A_BENES.getResourceUrl()),
+          2,
+          TimeUnit.SECONDS);
+
+      DataSetManifest manifestB =
+          new DataSetManifest(
+              manifestA.getTimestampText(),
+              1,
+              new DataSetManifestEntry("pde.rif", RifFileType.PDE));
+      manifestUploaderService.schedule(
+          new ManifestUploader(
+              s3Client, bucket, manifestB, StaticRifResource.SAMPLE_A_PDE.getResourceUrl()),
+          4,
+          TimeUnit.SECONDS);
+
+      DataSetManifest manifestC =
+          new DataSetManifest(
+              Instant.now(), 0, new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      manifestUploaderService.schedule(
+          new ManifestUploader(
+              s3Client, bucket, manifestC, StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()),
+          1,
+          TimeUnit.SECONDS);
 
       // Start the monitor up.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
