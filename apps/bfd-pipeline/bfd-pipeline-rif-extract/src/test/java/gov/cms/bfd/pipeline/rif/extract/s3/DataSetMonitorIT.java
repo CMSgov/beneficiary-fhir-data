@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -238,7 +239,7 @@ public final class DataSetMonitorIT {
       manifestUploaderService.schedule(
           new ManifestUploader(
               s3Client, bucket, manifestA, StaticRifResource.SAMPLE_A_BENES.getResourceUrl()),
-          2,
+          new Random().nextInt(10),
           TimeUnit.SECONDS);
 
       DataSetManifest manifestB =
@@ -249,7 +250,7 @@ public final class DataSetMonitorIT {
       manifestUploaderService.schedule(
           new ManifestUploader(
               s3Client, bucket, manifestB, StaticRifResource.SAMPLE_A_PDE.getResourceUrl()),
-          4,
+          new Random().nextInt(10),
           TimeUnit.SECONDS);
 
       DataSetManifest manifestC =
@@ -258,7 +259,7 @@ public final class DataSetMonitorIT {
       manifestUploaderService.schedule(
           new ManifestUploader(
               s3Client, bucket, manifestC, StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()),
-          1,
+          new Random().nextInt(10),
           TimeUnit.SECONDS);
 
       // Start the monitor up.
