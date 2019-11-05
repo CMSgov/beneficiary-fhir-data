@@ -1,6 +1,7 @@
 // Necessary for `schema_views.rs` to compile.
 #![recursion_limit = "2048"]
 
+mod ccw_codebook;
 mod config;
 mod db;
 mod error;

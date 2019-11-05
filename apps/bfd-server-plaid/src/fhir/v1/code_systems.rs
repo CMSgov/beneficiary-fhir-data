@@ -10,11 +10,30 @@ pub struct ValueSetCode {
 pub mod claim_type {
     static SYSTEM: &'static str = "http://hl7.org/fhir/ex-claimtype";
 
-    /// Entry for <https://hl7.org/fhir/STU3/valueset-claim-type.html>.
     pub static PHARMACY: super::ValueSetCode = super::ValueSetCode {
         system: SYSTEM,
         code: "pharmacy",
         display: "Pharmacy",
         definition: "Pharmacy claims for goods and services.",
     };
+}
+
+pub mod explanation_of_benefit {
+    pub mod status {
+        static SYSTEM: &'static str = "http://hl7.org/fhir/ValueSet/explanationofbenefit-status";
+
+        pub static ACTIVE: super::super::ValueSetCode = super::super::ValueSetCode {
+            system: SYSTEM,
+            code: "active",
+            display: "Active",
+            definition: "The resource instance is currently in-force.",
+        };
+
+        pub static CANCELLED: super::super::ValueSetCode = super::super::ValueSetCode {
+            system: SYSTEM,
+            code: "cancelled",
+            display: "Cancelled",
+            definition: "The resource instance is withdrawn, rescinded or reversed.",
+        };
+    }
 }

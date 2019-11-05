@@ -59,10 +59,25 @@ pub struct Coding {
 }
 
 #[derive(Debug, Default, Serialize)]
+pub struct Identifier {
+    pub system: Option<String>,
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Default, Serialize)]
+pub struct ExplanationOfBenefitInsurance {
+    pub coverage: Option<Reference>,
+}
+
+#[derive(Debug, Default, Serialize)]
 pub struct ExplanationOfBenefit {
     pub resourceType: String,
     pub id: String,
+    pub status: Option<String>,
     pub patient: Option<Reference>,
     pub r#type: Option<CodeableConcept>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub identifier: Vec<Identifier>,
+    pub insurance: Option<ExplanationOfBenefitInsurance>,
     // TODO flesh out the rest of this
 }

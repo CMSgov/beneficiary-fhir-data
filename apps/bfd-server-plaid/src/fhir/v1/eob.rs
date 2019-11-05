@@ -27,6 +27,9 @@ pub fn eob_for_bene_id(
         .get()
         .map_err(|err| error::AppError::DieselPoolError(err))?;
     let claims_partd = crate::db::claims_partd_by_bene_id(&db_connection, &bene_id)?;
+    let eobs: error::Result<Vec<ExplanationOfBenefit>> =
+        claims_partd.iter().map(transform_claim_partd).collect();
+    let eobs: Vec<ExplanationOfBenefit> = eobs?;
     let bundle = Bundle {
         id: String::from("TODO"),
         meta: ResourceMeta {
@@ -39,9 +42,8 @@ pub fn eob_for_bene_id(
             relation: String::from("self"),
             url: String::from("TODO"),
         }],
-        entry: claims_partd
-            .iter()
-            .map(transform_claim_partd)
+        entry: eobs
+            .into_iter()
             .map(|eob| BundleEntry {
                 resource: Resource::ExplanationOfBenefit(eob),
             })
@@ -53,7 +55,7 @@ pub fn eob_for_bene_id(
 }
 
 /// Returns an `ExplanationOfBenefit` that represents the specified `PartDEvent`.
-fn transform_claim_partd(claim: &PartDEvent) -> ExplanationOfBenefit {
+fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenefit> {
     let eob = ExplanationOfBenefit::default();
     let eob = map_claim_header_common(claim, eob);
     // TODO flesh out the rest of this
