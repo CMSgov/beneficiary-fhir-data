@@ -3,7 +3,8 @@ use crate::ccw_codebook::CcwCodebookVariable;
 use crate::error;
 use crate::fhir::constants::*;
 use crate::fhir::util::ClaimType;
-use crate::fhir::v1::code_systems::*;
+use crate::fhir::v1::code_systems;
+use crate::fhir::v1::structures::explanation_of_benefit::*;
 use crate::fhir::v1::structures::*;
 use crate::models::traits::*;
 
@@ -15,8 +16,12 @@ pub fn map_claim_header_common<T: PartABDClaim>(
     eob.resourceType = String::from("ExplanationOfBenefit");
     eob.id = create_eob_id(ClaimType::PartDEvent, &claim.claim_id());
     eob.status = Some(match &claim.final_action_code() as &str {
-        "F" => explanation_of_benefit::status::ACTIVE.code.to_string(),
-        "N" => explanation_of_benefit::status::CANCELLED.code.to_string(),
+        "F" => code_systems::explanation_of_benefit::status::ACTIVE
+            .code
+            .to_string(),
+        "N" => code_systems::explanation_of_benefit::status::CANCELLED
+            .code
+            .to_string(),
         _ => "".to_string(), // FIXME return error
     });
     eob.patient = Some(reference_patient_by_id(&claim.beneficiary_id()));
@@ -36,7 +41,7 @@ pub fn map_claim_header_common<T: PartABDClaim>(
     };
     eob_identifiers.push(claim_group_identifier);
     eob.identifier = eob_identifiers;
-    eob.insurance = Some(ExplanationOfBenefitInsurance {
+    eob.insurance = Some(Insurance {
         coverage: Some(reference_coverage(
             &claim.beneficiary_id(),
             &MEDICARE_SEGMENT_PART_D,
@@ -82,7 +87,7 @@ fn create_eob_type_concept(claim_type: ClaimType) -> CodeableConcept {
         display: None,
     };
     let code_fhir = match claim_type {
-        crate::fhir::util::ClaimType::PartDEvent => Some(&claim_type::PHARMACY),
+        crate::fhir::util::ClaimType::PartDEvent => Some(&code_systems::claim_type::PHARMACY),
     };
 
     // Most EOBs will have a type_fhir.
