@@ -1,5 +1,18 @@
 locals {
-  is_prod               = var.env_config.env == "prod" 
+  is_prod        = var.env_config.env == "prod"
+
+  log_groups = {
+    messages     = "/bfd/${var.env_config.env}/bfd-pipeline/messages.txt"
+  }
+
+  pipeline_messages_error = {
+    period       = "300"
+    eval_periods = "1"
+    threshold    = "0"
+  }
+
+  alarm_actions  = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
+  ok_actions     = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
 }
 
 # Locate the S3 bucket that stores the RIF data to be processed by the BFD Pipeline application.
@@ -12,6 +25,42 @@ data "aws_s3_bucket" "rif" {
 #
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
+}
+
+# CloudWatch metric filters
+#
+resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
+  name            = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/error"
+  pattern         = "[date, time, java_thread, level = \"ERROR\", java_class, message]"
+  log_group_name  = local.log_groups.messages
+
+  metric_transformation {
+    name          = "messages/count/error"
+    namespace     = "bfd-${var.env_config.env}/bfd-pipeline"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+# CloudWatch metric alarms
+#
+resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
+  alarm_name          = "bfd-${var.env_config.env}-pipeline-messages-error"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = local.pipeline_messages_error.eval_periods
+  period              = local.pipeline_messages_error.period
+  statistic           = "Maximum"
+  threshold           = local.pipeline_messages_error.threshold
+  alarm_description   = "Pipeline errors detected within ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${var.env_config.env}"
+
+  metric_name         = "messages/count/error"
+  namespace           = "bfd-${var.env_config.env}/bfd-pipeline"
+
+  alarm_actions       = local.is_prod ? local.alarm_actions : []
+  ok_actions          = local.is_prod ? local.ok_actions : []
+
+  datapoints_to_alarm = "1"
+  treat_missing_data  = "notBreaching"
 }
 
 # Security group for application-specific (i.e. non-management) traffic.
