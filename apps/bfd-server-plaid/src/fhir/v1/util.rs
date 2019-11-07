@@ -110,7 +110,7 @@ fn create_eob_type_concept(claim_type: ClaimType) -> CodeableConcept {
 }
 
 /// Create an `Identifier` with the specified value, for the specified `CcwCodebookVariable`.
-fn create_identifier(codebook_var: &CcwCodebookVariable, value: &str) -> Identifier {
+pub fn create_identifier(codebook_var: &CcwCodebookVariable, value: &str) -> Identifier {
     Identifier {
         system: Some(create_codebook_system(codebook_var)),
         value: Some(value.to_string()),

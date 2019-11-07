@@ -61,6 +61,10 @@ pub fn eob_for_bene_id(
 fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenefit> {
     let eob = ExplanationOfBenefit::default();
     let mut eob = map_claim_header_common(claim, eob)?;
+    eob.identifier.push(create_identifier(
+        &ccw_codebook::RX_SRVC_RFRNC_NUM,
+        &claim.RX_SRVC_RFRNC_NUM.to_string(),
+    ));
     eob.insurance = Some(Insurance {
         extension: vec![
             create_identifier_extension(
@@ -71,6 +75,12 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
         ],
         coverage: eob.insurance.clone().unwrap().coverage,
     });
+    match claim.PD_DT {
+        Some(date) => {
+            eob.payment = Some(Payment { date: Some(date) });
+        }
+        _ => {}
+    };
     // TODO flesh out the rest of this
 
     Ok(eob)

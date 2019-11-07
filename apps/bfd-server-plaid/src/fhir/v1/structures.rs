@@ -137,6 +137,7 @@ pub mod bundle {
 
 /// Contains structs specific to the FHIR Bundle resource.
 pub mod explanation_of_benefit {
+    use chrono::NaiveDate;
     use serde::Serialize;
 
     #[derive(Debug, Default, Serialize)]
@@ -149,6 +150,8 @@ pub mod explanation_of_benefit {
         #[serde(skip_serializing_if = "Vec::is_empty")]
         pub identifier: Vec<super::Identifier>,
         pub insurance: Option<Insurance>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub payment: Option<Payment>,
         // TODO flesh out the rest of this
     }
 
@@ -157,5 +160,11 @@ pub mod explanation_of_benefit {
         #[serde(skip_serializing_if = "Vec::is_empty")]
         pub extension: Vec<super::Extension>,
         pub coverage: Option<super::Reference>,
+    }
+
+    #[derive(Clone, Debug, Default, Serialize)]
+    pub struct Payment {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub date: Option<NaiveDate>,
     }
 }

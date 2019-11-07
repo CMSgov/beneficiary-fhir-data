@@ -9,6 +9,10 @@ pub struct CcwCodebookVariable {
 
 pub static PDE_ID: CcwCodebookVariable = CcwCodebookVariable { id: "PDE_ID" };
 
+pub static RX_SRVC_RFRNC_NUM: CcwCodebookVariable = CcwCodebookVariable {
+    id: "RX_SRVC_RFRNC_NUM",
+};
+
 pub static PLAN_CNTRCT_REC_ID: CcwCodebookVariable = CcwCodebookVariable {
     id: "PLAN_CNTRCT_REC_ID",
 };
