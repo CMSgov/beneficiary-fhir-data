@@ -5,13 +5,33 @@
 
 use serde::Serialize;
 
+/// Just about every FHIR resource and element can contain an `Extension`.
+///
+/// Note: Rust doesn't allow for struct inheritance; composition is used, instead.
+#[derive(Clone, Debug, Serialize)]
+pub struct Extension {
+    pub url: String,
+    #[serde(flatten)]
+    pub value: ExtensionValue,
+}
+
+/// Enumerates the types of extension values.
+///
+/// Note: extensions can contain other extensions, though Rust doesn't allow that directly. If we
+/// ever need to do support that, we'll need to wrap it in a `Box` or somesuch.
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ExtensionValue {
+    ValueIdentifier(Identifier),
+}
+
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
 pub enum Resource {
     ExplanationOfBenefit(explanation_of_benefit::ExplanationOfBenefit),
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct Reference {
     pub reference: Option<String>,
 }
@@ -29,10 +49,56 @@ pub struct Coding {
     pub display: Option<String>,
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct Identifier {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub system: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<String>,
+}
+
+/// Unit tests for the base/shared FHIR stuctures.
+#[cfg(test)]
+mod tests {
+    use serde::Serialize;
+    use serde_json::json;
+
+    /// Verifies that FHIR `Extension`s serialize as expected.
+    #[test]
+    fn serialize_extension() {
+        let expected = json!({
+            "extension": [{
+                "url": "http://example.com/foo",
+                "valueIdentifier": {
+                    "value": "bar"
+                }
+                }],
+            "other_stuff": "fizz",
+        });
+        let expected = serde_json::to_string(&expected).unwrap();
+
+        let actual = ExtensionTester {
+            extension: vec![super::Extension {
+                url: "http://example.com/foo".to_string(),
+                value: super::ExtensionValue::ValueIdentifier(super::Identifier {
+                    system: None,
+                    value: Some("bar".to_string()),
+                }),
+            }],
+            other_stuff: "fizz".to_string(),
+        };
+        let actual = serde_json::to_string(&actual).unwrap();
+
+        assert_eq!(expected, actual);
+    }
+
+    /// Fake FHIR structure for testing serialization of `Extension`s.
+    #[derive(Debug, Serialize)]
+    struct ExtensionTester {
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        extension: Vec<super::Extension>,
+        other_stuff: String,
+    }
 }
 
 /// Contains structs specific to the FHIR Bundle resource.
@@ -86,8 +152,10 @@ pub mod explanation_of_benefit {
         // TODO flesh out the rest of this
     }
 
-    #[derive(Debug, Default, Serialize)]
+    #[derive(Clone, Debug, Default, Serialize)]
     pub struct Insurance {
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        pub extension: Vec<super::Extension>,
         pub coverage: Option<super::Reference>,
     }
 }

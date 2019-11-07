@@ -8,3 +8,11 @@ pub struct CcwCodebookVariable {
 }
 
 pub static PDE_ID: CcwCodebookVariable = CcwCodebookVariable { id: "PDE_ID" };
+
+pub static PLAN_CNTRCT_REC_ID: CcwCodebookVariable = CcwCodebookVariable {
+    id: "PLAN_CNTRCT_REC_ID",
+};
+
+pub static PLAN_PBP_REC_NUM: CcwCodebookVariable = CcwCodebookVariable {
+    id: "PLAN_PBP_REC_NUM",
+};

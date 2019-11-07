@@ -42,6 +42,7 @@ pub fn map_claim_header_common<T: PartABDClaim>(
     eob_identifiers.push(claim_group_identifier);
     eob.identifier = eob_identifiers;
     eob.insurance = Some(Insurance {
+        extension: vec![],
         coverage: Some(reference_coverage(
             &claim.beneficiary_id(),
             &MEDICARE_SEGMENT_PART_D,
@@ -113,6 +114,17 @@ fn create_identifier(codebook_var: &CcwCodebookVariable, value: &str) -> Identif
     Identifier {
         system: Some(create_codebook_system(codebook_var)),
         value: Some(value.to_string()),
+    }
+}
+
+/// Create an `Extension` with an `Identifier` with the specified value, for the specified `CcwCodebookVariable`.
+pub fn create_identifier_extension(codebook_var: &CcwCodebookVariable, value: &str) -> Extension {
+    Extension {
+        url: create_codebook_system(codebook_var),
+        value: ExtensionValue::ValueIdentifier(Identifier {
+            system: Some(create_codebook_system(codebook_var)),
+            value: Some(value.to_string()),
+        }),
     }
 }
 
