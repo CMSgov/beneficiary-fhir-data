@@ -33,6 +33,7 @@ json = "*"
 
 # The ORM used to access the application's database.
 diesel = { version = "1.0.0", features = ["r2d2", "postgres", "64-column-tables", "numeric", "chrono"] }
+num-bigint = { version = "0.2", features = ["serde"] }
 bigdecimal = "0.1.0"
 
 # Allows for auto-reload of the server in development, per https://actix.rs/docs/autoreload/.

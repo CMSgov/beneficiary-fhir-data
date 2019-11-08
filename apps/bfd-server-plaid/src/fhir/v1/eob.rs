@@ -2,6 +2,7 @@ use crate::ccw_codebook;
 use crate::db::PgPool;
 use crate::error;
 use crate::fhir::util;
+use crate::fhir::v1::code_systems;
 use crate::fhir::v1::structures::bundle::*;
 use crate::fhir::v1::structures::explanation_of_benefit::*;
 use crate::fhir::v1::structures::*;
@@ -82,6 +83,32 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
     if let Some(pd_dt) = claim.PD_DT {
         eob.payment = Some(Payment { date: Some(pd_dt) });
     }
+
+    // Create the EOB's single Item and its single Detail.
+    let mut item = explanation_of_benefit::Item::default();
+    let mut detail = explanation_of_benefit::Detail::default();
+
+    // Map the EOB.item.detail.type field from CMPND_CD.
+    let compound_code = match claim.CMPND_CD {
+        0 => Ok(None),
+        1 => Ok(Some(
+            &code_systems::explanation_of_benefit::act_invoice_group::RXDINV,
+        )),
+        2 => Ok(Some(
+            &code_systems::explanation_of_benefit::act_invoice_group::RXCINV,
+        )),
+        _ => Err(error::AppError::InvalidSourceDataError(format!(
+            "Unsupported 'CMPND_CD' value."
+        ))),
+    }?;
+    if let Some(compound_code) = compound_code {
+        detail.r#type = Some(create_concept_from_value_set_code(compound_code));
+    };
+
+    // Attach the EOB's single Item and Detail.
+    item.detail = vec![detail];
+    eob.item = vec![item];
+
     // TODO flesh out the rest of this
 
     Ok(eob)

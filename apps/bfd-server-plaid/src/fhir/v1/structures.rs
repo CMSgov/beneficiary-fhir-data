@@ -38,12 +38,12 @@ pub struct Reference {
     pub reference: Option<String>,
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct CodeableConcept {
     pub coding: Vec<Coding>,
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct Coding {
     pub system: Option<String>,
     pub code: Option<String>,
@@ -154,6 +154,8 @@ pub mod explanation_of_benefit {
         pub insurance: Option<Insurance>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub payment: Option<Payment>,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        pub item: Vec<Item>,
         // TODO flesh out the rest of this
     }
 
@@ -166,5 +168,17 @@ pub mod explanation_of_benefit {
     pub struct Payment {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub date: Option<NaiveDate>,
+    }
+
+    #[derive(Clone, Debug, Default, Serialize)]
+    pub struct Item {
+        pub sequence: num_bigint::BigUint,
+        pub detail: Vec<Detail>,
+    }
+
+    #[derive(Clone, Debug, Default, Serialize)]
+    pub struct Detail {
+        pub sequence: num_bigint::BigUint,
+        pub r#type: Option<super::CodeableConcept>,
     }
 }

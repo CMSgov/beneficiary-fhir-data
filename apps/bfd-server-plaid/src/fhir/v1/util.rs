@@ -139,3 +139,16 @@ fn create_codebook_system(codebook_var: &CcwCodebookVariable) -> String {
         codebook_var.id.to_lowercase()
     )
 }
+
+/// Creates a `CodeableConcept` containing just the specified `ValueSetCode`.
+pub fn create_concept_from_value_set_code(
+    value_set_code: &code_systems::ValueSetCode,
+) -> CodeableConcept {
+    CodeableConcept {
+        coding: vec![Coding {
+            system: Some(value_set_code.system.to_string()),
+            code: Some(value_set_code.code.to_string()),
+            display: Some(value_set_code.display.to_string()),
+        }],
+    }
+}

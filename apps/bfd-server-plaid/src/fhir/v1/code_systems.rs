@@ -36,4 +36,21 @@ pub mod explanation_of_benefit {
             definition: "The resource instance is withdrawn, rescinded or reversed.",
         };
     }
+    pub mod act_invoice_group {
+        static SYSTEM: &'static str = "http://hl7.org/fhir/v3/ActCode";
+
+        pub static RXCINV: super::super::ValueSetCode = super::super::ValueSetCode {
+            system: SYSTEM,
+            code: "RXCINV",
+            display: "Rx compound invoice",
+            definition: "Pharmacy dispense invoice for a compound.",
+        };
+
+        pub static RXDINV: super::super::ValueSetCode = super::super::ValueSetCode {
+            system: SYSTEM,
+            code: "RXDINV",
+            display: "Rx dispense invoice",
+            definition: "Pharmacy dispense invoice not involving a compound",
+        };
+    }
 }

@@ -12,6 +12,9 @@ pub enum AppError {
     DieselResultError(diesel::result::Error),
     NumTryFromIntError(std::num::TryFromIntError),
     BadRequestError(String),
+
+    /// Should be used when the CCW/RIF/source data contains unexpected or unsupported values.
+    InvalidSourceDataError(String),
 }
 
 impl From<std::env::VarError> for AppError {
