@@ -79,12 +79,9 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
             ];
         }
     }
-    match claim.PD_DT {
-        Some(date) => {
-            eob.payment = Some(Payment { date: Some(date) });
-        }
-        _ => {}
-    };
+    if let Some(pd_dt) = claim.PD_DT {
+        eob.payment = Some(Payment { date: Some(pd_dt) });
+    }
     // TODO flesh out the rest of this
 
     Ok(eob)
