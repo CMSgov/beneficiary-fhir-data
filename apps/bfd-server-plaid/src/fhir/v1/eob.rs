@@ -65,16 +65,20 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
         &ccw_codebook::RX_SRVC_RFRNC_NUM,
         &claim.RX_SRVC_RFRNC_NUM.to_string(),
     ));
-    eob.insurance = Some(Insurance {
-        extension: vec![
-            create_identifier_extension(
-                &ccw_codebook::PLAN_CNTRCT_REC_ID,
-                &claim.PLAN_CNTRCT_REC_ID,
-            ),
-            create_identifier_extension(&ccw_codebook::PLAN_PBP_REC_NUM, &claim.PLAN_PBP_REC_NUM),
-        ],
-        coverage: eob.insurance.clone().unwrap().coverage,
-    });
+    if let Some(ref mut insurance) = eob.insurance {
+        if let Some(ref mut coverage) = insurance.coverage {
+            coverage.extension = vec![
+                create_identifier_extension(
+                    &ccw_codebook::PLAN_CNTRCT_REC_ID,
+                    &claim.PLAN_CNTRCT_REC_ID,
+                ),
+                create_identifier_extension(
+                    &ccw_codebook::PLAN_PBP_REC_NUM,
+                    &claim.PLAN_PBP_REC_NUM,
+                ),
+            ];
+        }
+    }
     match claim.PD_DT {
         Some(date) => {
             eob.payment = Some(Payment { date: Some(date) });

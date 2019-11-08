@@ -42,7 +42,6 @@ pub fn map_claim_header_common<T: PartABDClaim>(
     eob_identifiers.push(claim_group_identifier);
     eob.identifier = eob_identifiers;
     eob.insurance = Some(Insurance {
-        extension: vec![],
         coverage: Some(reference_coverage(
             &claim.beneficiary_id(),
             &MEDICARE_SEGMENT_PART_D,
@@ -65,6 +64,7 @@ fn create_eob_id(claim_type: ClaimType, claim_id: &str) -> String {
 /// Returns a `Reference` for the FHIR Patient resource with the specified `Patient.id` value.
 fn reference_patient_by_id(patient_id: &str) -> Reference {
     Reference {
+        extension: vec![],
         reference: Some(format!("Patient/{}", patient_id.to_string())),
     }
 }
@@ -72,6 +72,7 @@ fn reference_patient_by_id(patient_id: &str) -> Reference {
 /// Returns a `Reference` for the FHIR Coverage resource for the specified CCW `BENE_ID`.
 fn reference_coverage(patient_id: &str, medicare_segment: &MedicareSegment) -> Reference {
     Reference {
+        extension: vec![],
         reference: Some(format!(
             "Coverage/{}-{}",
             medicare_segment.coverage_url_prefix, patient_id

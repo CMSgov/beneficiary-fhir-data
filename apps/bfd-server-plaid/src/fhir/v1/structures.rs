@@ -33,6 +33,8 @@ pub enum Resource {
 
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct Reference {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub extension: Vec<Extension>,
     pub reference: Option<String>,
 }
 
@@ -157,8 +159,6 @@ pub mod explanation_of_benefit {
 
     #[derive(Clone, Debug, Default, Serialize)]
     pub struct Insurance {
-        #[serde(skip_serializing_if = "Vec::is_empty")]
-        pub extension: Vec<super::Extension>,
         pub coverage: Option<super::Reference>,
     }
 
