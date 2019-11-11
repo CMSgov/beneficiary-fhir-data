@@ -84,8 +84,10 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
         eob.payment = Some(Payment { date: Some(pd_dt) });
     }
 
-    // Create the EOB's single Item and its single Detail.
+    // Create the EOB's single Item, its Adjudications, and its single Detail.
     let mut item = explanation_of_benefit::Item::default();
+    item.sequence = 1;
+    let mut adjudications = vec![];
     let mut detail = explanation_of_benefit::Detail::default();
 
     // Map the EOB.item.detail.type field from CMPND_CD.
@@ -105,7 +107,36 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
         detail.r#type = Some(create_concept_from_value_set_code(compound_code));
     };
 
-    // Attach the EOB's single Item and Detail.
+    // Map the prescription fill date.
+    item.serviced = Some(Serviced::ServicedDate(claim.SRVC_DT));
+
+    /*
+     * Create an adjudication for either CVRD_D_PLAN_PD_AMT or NCVRD_PLAN_PD_AMT, depending on the
+     * value of DRUG_CVRG_STUS_CD. Stick DRUG_CVRG_STUS_CD into the adjudication.reason field.
+     */
+    // FIXME should always map both CVRD_D_PLAN_PD_AMT and NCVRD_PLAN_PD_AMT
+    let (category, amount) = match claim.DRUG_CVRG_STUS_CD.as_str() {
+        "C" => (
+            create_adjudication_category_concept(&ccw_codebook::CVRD_D_PLAN_PD_AMT),
+            create_money_from_big_decimal(&claim.CVRD_D_PLAN_PD_AMT),
+        ),
+        _ => (
+            create_adjudication_category_concept(&ccw_codebook::NCVRD_PLAN_PD_AMT),
+            create_money_from_big_decimal(&claim.NCVRD_PLAN_PD_AMT),
+        ),
+    };
+    let adjudication_drug_payment = Adjudication {
+        category: Some(category),
+        reason: Some(create_concept_for_codebook_value(
+            &ccw_codebook::DRUG_CVRG_STUS_CD,
+            &claim.DRUG_CVRG_STUS_CD,
+        )),
+        amount: Some(amount),
+    };
+    adjudications.push(adjudication_drug_payment);
+
+    // Attach the EOB's single Item, Adjudications, and Detail.
+    item.adjudication = adjudications;
     item.detail = vec![detail];
     eob.item = vec![item];
 

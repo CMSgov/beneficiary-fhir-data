@@ -30,3 +30,13 @@ pub struct MedicareSegment {
 pub static MEDICARE_SEGMENT_PART_D: MedicareSegment = MedicareSegment {
     coverage_url_prefix: "part-d",
 };
+
+/// The CMS-custom `Coding.system` for Medicare `Adjudication`s.
+pub static SYSTEM_BFD_ADJUDICATION_CATEGORY: &'static str = "/codesystem/adjudication";
+
+/// The standard `Money.system` for currency. (It looks odd that it has "iso" in there twice, but
+/// some web searches seem to confirm that that's correct.)
+pub static SYSTEM_MONEY: &'static str = "urn:iso:std:iso:4217";
+
+/// The standard `Money.code` for US currency.
+pub static CODE_MONEY_USD: &'static str = "USD";

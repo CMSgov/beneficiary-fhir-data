@@ -59,6 +59,16 @@ pub struct Identifier {
     pub value: Option<String>,
 }
 
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct Money {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<serde_json::Number>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub system: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+}
+
 /// Unit tests for the base/shared FHIR stuctures.
 #[cfg(test)]
 mod tests {
@@ -172,13 +182,98 @@ pub mod explanation_of_benefit {
 
     #[derive(Clone, Debug, Default, Serialize)]
     pub struct Item {
-        pub sequence: num_bigint::BigUint,
+        pub sequence: u64,
+        #[serde(flatten)]
+        pub serviced: Option<Serviced>,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        pub adjudication: Vec<Adjudication>,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
         pub detail: Vec<Detail>,
+    }
+
+    /// Enumerates the possible EOB.serviced[x] field types.
+    #[derive(Clone, Debug, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub enum Serviced {
+        ServicedDate(NaiveDate),
+    }
+
+    #[derive(Clone, Debug, Default, Serialize)]
+    pub struct Adjudication {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub category: Option<super::CodeableConcept>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub reason: Option<super::CodeableConcept>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub amount: Option<super::Money>,
     }
 
     #[derive(Clone, Debug, Default, Serialize)]
     pub struct Detail {
-        pub sequence: num_bigint::BigUint,
+        pub sequence: u64,
         pub r#type: Option<super::CodeableConcept>,
+    }
+
+    /// Unit tests for the explanation_of_benefit FHIR stuctures.
+    #[cfg(test)]
+    mod tests {
+        use serde_json::json;
+
+        /// Verifies that FHIR `Extension`s serialize as expected.
+        #[test]
+        fn serialize_serviced() {
+            let expected = json!({
+                "sequence": 1,
+                "servicedDate": "2019-11-08",
+            });
+            let expected = serde_json::to_string(&expected).unwrap();
+
+            let actual = super::Item {
+                sequence: 1,
+                serviced: Some(super::Serviced::ServicedDate(chrono::NaiveDate::from_ymd(
+                    2019, 11, 08,
+                ))),
+                adjudication: vec![],
+                detail: vec![],
+            };
+            let actual = serde_json::to_string(&actual).unwrap();
+
+            assert_eq!(expected, actual);
+        }
+    }
+}
+
+/// Configures Serde to serialize the specified field via its `Display` trait and deserialize it
+/// via its `FromStr` trait.
+///
+/// Can be used on a field via `#[serde(with = "serde_string")]`.
+///
+/// Derived from: <https://github.com/serde-rs/serde/issues/1316>.
+#[allow(dead_code)]
+mod serde_string {
+    use std::fmt::Display;
+    use std::str::FromStr;
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    /// Serializes values via their `Display` trait.
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Display,
+        S: Serializer,
+    {
+        serializer.collect_str(value)
+    }
+
+    /// Deserializes values via their type's `FromStr` trait.
+    pub fn deserialize<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: FromStr,
+        T::Err: Display,
+        D: Deserializer<'de>,
+    {
+        String::deserialize(deserializer)?
+            .parse()
+            .map_err(de::Error::custom)
     }
 }

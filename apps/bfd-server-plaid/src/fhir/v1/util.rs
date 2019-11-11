@@ -152,3 +152,41 @@ pub fn create_concept_from_value_set_code(
         }],
     }
 }
+
+/// Creates a `CodeableConcept` for use as an `Adjudication.category`.
+pub fn create_concept_for_codebook_value(
+    codebook_var: &CcwCodebookVariable,
+    code: &str,
+) -> CodeableConcept {
+    CodeableConcept {
+        coding: vec![Coding {
+            system: Some(create_codebook_system(codebook_var)),
+            code: Some(code.to_string()),
+            display: codebook_var.lookup_description(code),
+        }],
+    }
+}
+
+/// Creates a `CodeableConcept` for use as an `Adjudication.category`.
+pub fn create_adjudication_category_concept(codebook_var: &CcwCodebookVariable) -> CodeableConcept {
+    CodeableConcept {
+        coding: vec![Coding {
+            system: Some(format!(
+                "{}{}",
+                SYSTEM_BFD_BASE, SYSTEM_BFD_ADJUDICATION_CATEGORY
+            )),
+            code: Some(create_codebook_system(codebook_var)),
+            display: Some(codebook_var.label.to_string()),
+        }],
+    }
+}
+
+/// Creates a `CodeableConcept` for use as an `Adjudication.category`.
+pub fn create_money_from_big_decimal(value: &bigdecimal::BigDecimal) -> Money {
+    Money {
+        // FIXME Is there a cleaner way to do this, instead of this non-public API?
+        value: Some(serde_json::Number::from_string_unchecked(value.to_string())),
+        system: Some(SYSTEM_MONEY.to_string()),
+        code: Some(CODE_MONEY_USD.to_string()),
+    }
+}
