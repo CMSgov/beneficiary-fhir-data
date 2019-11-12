@@ -16,6 +16,6 @@ ssh_users:
   - username: richard.hawes
     sudoer: true
     public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDF+hlmi85ErLP0rFUBqhckuPZebklgz4WKWCwgrNG/vUDI3gl4BNAW4qyh54kr4qE9VSavWh65P52lmkVBf7AwZX8r+Jsa51vXQmkkYmcnpT7wVhyfTDERqY5l+6qHOnOPj7Mtaxx3sMbCMOyKgRZvEoZR/eaMrRBAxyDD73Ts1ZSvv5GnQdxHQFZ5+85g2CV+/UjQ30jIsU6ak/ozCydtD/k6IlqM/EFfSFyn20+j3R68zU5x+tgdit3TVEJVxZFxrk+SQ7MRSUakVGtxVhoJGPhJuSm9hULnGL3XGrfTa+zBMugODwqeQ4iNQBO+jyUpFL5eT3Tm+4YaLMf/t6sJ rickhawes@RicksMacBook"
-  - username: scan_man
+  - username: scanman
     sudoer: true
     password: "{{ vault_scan_man_crypted_password | default(omit) }}"
