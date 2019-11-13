@@ -275,6 +275,9 @@ module "bfd_pipeline" {
     remote_sg     = data.aws_security_group.remote.id
     ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
   }
+
+  alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
 }
 
 # Cloudwatch Log Metric Filters
@@ -292,7 +295,6 @@ module "cw_metric_alarms" {
   app                           = "bfd"
   alarm_notification_arn        = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn           = data.aws_sns_topic.cloudwatch_ok.arn
-
 }
 
 
