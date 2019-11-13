@@ -3,6 +3,7 @@
 - name: "Add user"
   user:
     name: "{{ item.username }}"
+    password: "{{ item.password | default(omit) }}"
     state: present
   with_items: "{{ ssh_users }}"
   become: true
@@ -12,6 +13,7 @@
     user: "{{ item.username }}"
     key: "{{ item.public_key }}"
     state: present
+  when: item.public_key is defined
   with_items: "{{ ssh_users }}"
   become: true
 
