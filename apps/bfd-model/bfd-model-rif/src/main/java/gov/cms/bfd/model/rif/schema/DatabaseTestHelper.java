@@ -235,6 +235,11 @@ public final class DatabaseTestHelper {
         JDBCDataSource hsqlDataSource = (JDBCDataSource) dataSource;
         this.url = hsqlDataSource.getUrl();
         this.username = hsqlDataSource.getUser();
+        /*
+         * HSQL's implementation doesn't expose the DataSource's password, which is dumb. Because
+         * I'm lazy, I just hardcode it here. If you need this to NOT be hardcoded, simplest fix
+         * would be to write a helper method that pulls the field's value via reflection.
+         */
         this.password = HSQL_SERVER_PASSWORD; // no getter available; hardcoded
       } else if (dataSource instanceof PGSimpleDataSource) {
         PGSimpleDataSource pgDataSource = (PGSimpleDataSource) dataSource;
