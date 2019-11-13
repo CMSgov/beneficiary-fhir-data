@@ -28,7 +28,7 @@ public final class DatabaseTestHelper {
   private static final String HSQL_SERVER_PASSWORD = "test";
 
   /** @return the JDBC URL for the test DB to use */
-  private static String getTestDatabaseJdbcUrl() {
+  private static String getTestDatabaseUrl() {
     // Build a default DB URL that uses HSQL, just as it's configured in the parent POM.
     String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
 
@@ -59,7 +59,7 @@ public final class DatabaseTestHelper {
    *     schema-fied first
    */
   public static DataSource getTestDatabase() {
-    String url = getTestDatabaseJdbcUrl();
+    String url = getTestDatabaseUrl();
     String username = getTestDatabaseUsername();
     String password = getTestDatabasePassword();
     return getTestDatabase(url, username, password);
@@ -92,7 +92,7 @@ public final class DatabaseTestHelper {
     DataSource dataSource = getTestDatabase();
 
     // Try to prevent career-limiting moves.
-    String url = getTestDatabaseJdbcUrl();
+    String url = getTestDatabaseUrl();
     if (!url.contains("localhost") && !url.contains("127.0.0.1") && !url.contains("hsqldb:mem")) {
       throw new BadCodeMonkeyException("Our builds can only be run against local test DBs.");
     }
