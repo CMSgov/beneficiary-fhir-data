@@ -135,6 +135,52 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
     };
     adjudications.push(adjudication_drug_payment);
 
+    // Map the miscellaneous adjudication amounts.
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::GDC_BLW_OOPT_AMT,
+        &claim.GDC_BLW_OOPT_AMT,
+    ));
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::GDC_ABV_OOPT_AMT,
+        &claim.GDC_ABV_OOPT_AMT,
+    ));
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::PTNT_PAY_AMT,
+        &claim.PTNT_PAY_AMT,
+    ));
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::OTHR_TROOP_AMT,
+        &claim.OTHR_TROOP_AMT,
+    ));
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::LICS_AMT,
+        &claim.LICS_AMT,
+    ));
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::PLRO_AMT,
+        &claim.PLRO_AMT,
+    ));
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::TOT_RX_CST_AMT,
+        &claim.TOT_RX_CST_AMT,
+    ));
+    adjudications.push(create_adjudication_amount(
+        &ccw_codebook::RPTD_GAP_DSCNT_NUM,
+        &claim.RPTD_GAP_DSCNT_NUM,
+    ));
+
+    // Map PRSCRBR_ID_QLFYR_CD.
+    match claim.PRSCRBR_ID_QLFYR_CD.as_ref() {
+        "" | "01" => {
+            return Err(error::AppError::InvalidSourceDataError(
+                "Invalid PRSCRBR_ID_QLFYR_CD value.".to_string(),
+            ));
+        }
+        _ => {
+            // FIXME why don't we map this?
+        }
+    }
+
     // Attach the EOB's single Item, Adjudications, and Detail.
     item.adjudication = adjudications;
     item.detail = vec![detail];

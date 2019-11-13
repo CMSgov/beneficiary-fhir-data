@@ -190,3 +190,15 @@ pub fn create_money_from_big_decimal(value: &bigdecimal::BigDecimal) -> Money {
         code: Some(CODE_MONEY_USD.to_string()),
     }
 }
+
+/// Creates a `CodeableConcept` for use as an `Adjudication.category`.
+pub fn create_adjudication_amount(
+    codebook_var: &CcwCodebookVariable,
+    value: &bigdecimal::BigDecimal,
+) -> Adjudication {
+    Adjudication {
+        category: Some(create_adjudication_category_concept(codebook_var)),
+        reason: None,
+        amount: Some(create_money_from_big_decimal(value)),
+    }
+}

@@ -159,4 +159,31 @@ lazy_static! {
             .value("O", "Over-the-counter drugs")
             .group_end()
             .build();
+    pub static ref GDC_BLW_OOPT_AMT: CcwCodebookVariable =
+        CcwCodebookVariable::new("GDC_BLW_OOPT_AMT")
+            .label("Gross Drug Cost Below Part D Out-of-Pocket Threshold (GDCB)")
+            .build();
+    pub static ref GDC_ABV_OOPT_AMT: CcwCodebookVariable =
+        CcwCodebookVariable::new("GDC_ABV_OOPT_AMT")
+            .label("Gross Drug Cost Above Part D Out-of-Pocket Threshold (GDCA)")
+            .build();
+    pub static ref PTNT_PAY_AMT: CcwCodebookVariable = CcwCodebookVariable::new("PTNT_PAY_AMT")
+        .label("Amount Paid by Patient")
+        .build();
+    pub static ref OTHR_TROOP_AMT: CcwCodebookVariable = CcwCodebookVariable::new("OTHR_TROOP_AMT")
+        .label("Other True Out-of-Pocket (TrOOP) Amount")
+        .build();
+    pub static ref LICS_AMT: CcwCodebookVariable = CcwCodebookVariable::new("LICS_AMT")
+        .label("Amount paid for the PDE by Part D low income subsidy")
+        .build();
+    pub static ref PLRO_AMT: CcwCodebookVariable = CcwCodebookVariable::new("PLRO_AMT")
+        .label("Reduction in patient liability due to payments by other payers (PLRO)")
+        .build();
+    pub static ref TOT_RX_CST_AMT: CcwCodebookVariable = CcwCodebookVariable::new("TOT_RX_CST_AMT")
+        .label("Total drug cost (Part D)")
+        .build();
+    pub static ref RPTD_GAP_DSCNT_NUM: CcwCodebookVariable =
+        CcwCodebookVariable::new("RPTD_GAP_DSCNT_NUM")
+            .label("Gap Discount Amount")
+            .build();
 }
