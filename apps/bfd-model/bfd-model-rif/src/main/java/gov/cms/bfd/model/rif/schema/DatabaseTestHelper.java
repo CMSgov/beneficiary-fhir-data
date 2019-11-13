@@ -125,10 +125,7 @@ public final class DatabaseTestHelper {
    * @return a HSQL {@link DataSource} for the test DB
    */
   private static DataSource createDataSourceForHsqlEmbeddedWithServer(String url) {
-    if (!url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
-      throw new IllegalArgumentException();
-    }
-    if (!url.endsWith(":hsqldb:mem")) {
+    if (!url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "hsqldb:mem")) {
       throw new IllegalArgumentException();
     }
 
