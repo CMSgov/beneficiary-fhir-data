@@ -289,6 +289,13 @@ public final class ServerTestUtils {
         query.from(entityClass);
         entityManager.createQuery(query).executeUpdate();
       }
+
+      /*
+       * To be complete, we should also be resetting our sequences here. However, there isn't a
+       * simple way to do that without hardcoding the sequence names, so I'm going to lean into my
+       * laziness and not implement it: it's unlikely to cause issues with our tests.
+       */
+
       transaction.commit();
       LOGGER.info("Deleted all resources.");
     } finally {
