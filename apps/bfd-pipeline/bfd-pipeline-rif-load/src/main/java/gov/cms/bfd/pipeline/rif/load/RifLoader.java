@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * Pushes CCW beneficiary and claims data from {@link RifRecordEvent}s into the Blue Button API's
  * database.
  */
-public final class RifLoader {
+public final class RifLoader implements AutoCloseable {
   /**
    * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
    * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
@@ -85,6 +85,7 @@ public final class RifLoader {
 
   private final MetricRegistry appMetrics;
   private final LoadAppOptions options;
+  private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final SecretKeyFactory secretKeyFactory;
 
@@ -99,9 +100,9 @@ public final class RifLoader {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    DataSource jdbcDataSource = createDataSource(options, appMetrics);
-    DatabaseSchemaManager.createOrUpdateSchema(jdbcDataSource);
-    this.entityManagerFactory = createEntityManagerFactory(jdbcDataSource);
+    this.dataSource = createDataSource(options, appMetrics);
+    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
+    this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
     this.secretKeyFactory = createSecretKeyFactory();
   }
@@ -109,9 +110,9 @@ public final class RifLoader {
   /**
    * @param options the {@link LoadAppOptions} to use
    * @param metrics the {@link MetricRegistry} to use
-   * @return a JDBC {@link DataSource} for the Blue Button API backend database
+   * @return a {@link HikariDataSource} for the BFD database
    */
-  static DataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
+  static HikariDataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
     HikariDataSource dataSource = new HikariDataSource();
 
     /*
@@ -121,9 +122,14 @@ public final class RifLoader {
      */
     dataSource.setMaximumPoolSize(options.getLoaderThreads());
 
-    dataSource.setJdbcUrl(options.getDatabaseUrl());
-    dataSource.setUsername(options.getDatabaseUsername());
-    dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
+    if (options.getDatabaseDataSource() != null) {
+      dataSource.setDataSource(options.getDatabaseDataSource());
+    } else {
+      dataSource.setJdbcUrl(options.getDatabaseUrl());
+      dataSource.setUsername(options.getDatabaseUsername());
+      dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
+    }
+
     dataSource.setRegisterMbeans(true);
     dataSource.setMetricRegistry(metrics);
 
@@ -132,10 +138,9 @@ public final class RifLoader {
 
   /**
    * @param jdbcDataSource the JDBC {@link DataSource} for the Blue Button API backend database
-   * @param metrics the {@link MetricRegistry} to use
    * @return a JPA {@link EntityManagerFactory} for the Blue Button API backend database
    */
-  static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
+  public static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
     /*
      * The number of JDBC statements that will be queued/batched within a
      * single transaction. Most recommendations suggest this should be 5-30.
@@ -698,6 +703,14 @@ public final class RifLoader {
     } catch (InvalidKeySpecException e) {
       throw new BadCodeMonkeyException(e);
     }
+  }
+
+  /** @see java.lang.AutoCloseable#close() */
+  @Override
+  public void close() {
+    if (this.entityManagerFactory != null && this.entityManagerFactory.isOpen())
+      this.entityManagerFactory.close();
+    if (this.dataSource != null && !this.dataSource.isClosed()) this.dataSource.close();
   }
 
   /**

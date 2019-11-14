@@ -84,6 +84,13 @@
 
 		<metrics.version>3.1.2</metrics.version>
 		<hibernate.version>5.2.10.Final</hibernate.version>
+		
+		<!-- The default DB that will be used in integration tests. -->
+		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
+			on the default 'jdbc:bfd-test:' URL here. -->
+		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
+		<its.db.username></its.db.username>
+		<its.db.password></its.db.password>
 	</properties>
 
 	<dependencyManagement>
@@ -368,6 +375,11 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+						<systemPropertyVariables>
+							<its.db.url>${its.db.url}</its.db.url>
+							<its.db.username>${its.db.username}</its.db.username>
+							<its.db.password>${its.db.password}</its.db.password>
+						</systemPropertyVariables>
 					</configuration>
 				</plugin>
 				<plugin>

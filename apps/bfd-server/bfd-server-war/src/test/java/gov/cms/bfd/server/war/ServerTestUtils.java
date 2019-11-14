@@ -9,7 +9,7 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rif.load.RifLoader;
@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -39,6 +40,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.sql.DataSource;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
@@ -194,12 +201,6 @@ public final class ServerTestUtils {
     return trustStorePath;
   }
 
-  /** Ensures that the database used in tests has the correct database schema. */
-  public static void createDatabaseSchema() {
-    LoadAppOptions options = createRifLoaderOptions();
-    DatabaseSchemaManager.createOrUpdateSchema(RifLoaderTestUtils.createDataSouce(options));
-  }
-
   /**
    * @param sampleResources the sample RIF resources to parse
    * @return the {@link List} of RIF records that were parsed (e.g. {@link Beneficiary}s, etc.)
@@ -233,44 +234,119 @@ public final class ServerTestUtils {
     // Create the processors that will handle each stage of the pipeline.
     MetricRegistry loadAppMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
-    RifLoader loader = new RifLoader(loadAppMetrics, loadOptions);
 
-    // Link up the pipeline and run it.
-    LOGGER.info("Loading RIF records...");
-    List<Object> recordsLoaded = new ArrayList<>();
-    for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
-      RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-      loader.process(
-          rifFileRecords,
-          error -> {
-            LOGGER.warn("Record(s) failed to load.", error);
-          },
-          result -> {
-            recordsLoaded.add(result.getRifRecordEvent().getRecord());
-          });
+    try (RifLoader loader = new RifLoader(loadAppMetrics, loadOptions); ) {
+      // Link up the pipeline and run it.
+      LOGGER.info("Loading RIF records...");
+      List<Object> recordsLoaded = new ArrayList<>();
+      for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+        RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
+        loader.process(
+            rifFileRecords,
+            error -> {
+              LOGGER.warn("Record(s) failed to load.", error);
+            },
+            result -> {
+              recordsLoaded.add(result.getRifRecordEvent().getRecord());
+            });
+      }
+      LOGGER.info("Loaded RIF records: '{}'.");
+      return recordsLoaded;
     }
-    LOGGER.info("Loaded RIF records: '{}'.");
-    return recordsLoaded;
   }
 
-  /** Calls {@link RifLoaderTestUtils#cleanDatabaseServer(LoadAppOptions)}. */
+  /** Cleans the test DB by running a bunch of <cod. */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public static void cleanDatabaseServer() {
-    RifLoaderTestUtils.cleanDatabaseServerViaDeletes(createRifLoaderOptions());
+    EntityManagerFactory entityManagerFactory = null;
+    EntityManager entityManager = null;
+    EntityTransaction transaction = null;
+    try {
+      entityManagerFactory = createEntityManagerFactory();
+      entityManager = entityManagerFactory.createEntityManager();
+
+      // Determine the entity types to delete, and the order to do so in.
+      Comparator<Class<?>> entityDeletionSorter =
+          (t1, t2) -> {
+            if (t1.equals(Beneficiary.class)) return 1;
+            if (t2.equals(Beneficiary.class)) return -1;
+            if (t1.getSimpleName().endsWith("Line")) return -1;
+            if (t2.getSimpleName().endsWith("Line")) return 1;
+            return 0;
+          };
+      List<Class<?>> entityTypesInDeletionOrder =
+          entityManagerFactory.getMetamodel().getEntities().stream()
+              .map(t -> t.getJavaType())
+              .sorted(entityDeletionSorter)
+              .collect(Collectors.toList());
+
+      LOGGER.info("Deleting all resources...");
+      transaction = entityManager.getTransaction();
+      transaction.begin();
+      for (Class<?> entityClass : entityTypesInDeletionOrder) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaDelete query = builder.createCriteriaDelete(entityClass);
+        query.from(entityClass);
+        entityManager.createQuery(query).executeUpdate();
+      }
+
+      /*
+       * To be complete, we should also be resetting our sequences here. However, there isn't a
+       * simple way to do that without hardcoding the sequence names, so I'm going to lean into my
+       * laziness and not implement it: it's unlikely to cause issues with our tests.
+       */
+
+      transaction.commit();
+      LOGGER.info("Deleted all resources.");
+    } finally {
+      if (transaction != null && transaction.isActive()) transaction.rollback();
+      if (entityManager != null) entityManager.close();
+      if (entityManagerFactory != null) entityManagerFactory.close();
+    }
+  }
+
+  /** @return a {@link DataSource} for the test DB */
+  private static final DataSource createDataSource() {
+    String jdbcUrl, jdbcUsername, jdbcPassword;
+
+    /*
+     * In our tests, we either get the DB connection details from the system properties (for a
+     * "normal" DB that was created outside of the tests), or from the test Properties file that was
+     * created by the WAR when it launched (for HSQL DBs).
+     */
+
+    Properties testDbProps = readTestDatabaseProperties();
+    if (testDbProps != null) {
+      jdbcUrl = testDbProps.getProperty(SpringConfiguration.PROP_DB_URL);
+      jdbcUsername = testDbProps.getProperty(SpringConfiguration.PROP_DB_USERNAME, null);
+      jdbcPassword = testDbProps.getProperty(SpringConfiguration.PROP_DB_PASSWORD, null);
+    } else {
+      jdbcUrl = System.getProperty("its.db.url", null);
+      jdbcUsername = System.getProperty("its.db.username", null);
+      jdbcPassword = System.getProperty("its.db.password", null);
+    }
+
+    if (jdbcUsername != null && jdbcUsername.isEmpty()) jdbcUsername = null;
+    if (jdbcPassword != null && jdbcPassword.isEmpty()) jdbcPassword = null;
+
+    DataSource dataSource = DatabaseTestHelper.getTestDatabase(jdbcUrl, jdbcUsername, jdbcPassword);
+
+    return dataSource;
+  }
+
+  /** @return an {@link EntityManagerFactory} for the test DB */
+  private static EntityManagerFactory createEntityManagerFactory() {
+    DataSource dataSource = createDataSource();
+    return RifLoader.createEntityManagerFactory(dataSource);
   }
 
   /** @return the {@link LoadAppOptions} to use with {@link RifLoader} in integration tests */
   public static LoadAppOptions createRifLoaderOptions() {
-    Properties testDbProps = readTestDatabaseProperties();
-    String jdbcUrl = testDbProps.getProperty(SpringConfiguration.PROP_DB_URL);
-    String jdbcUsername = testDbProps.getProperty(SpringConfiguration.PROP_DB_USERNAME);
-    String jdbcPassword = testDbProps.getProperty(SpringConfiguration.PROP_DB_PASSWORD);
-
+    DataSource dataSource = createDataSource();
     return new LoadAppOptions(
         RifLoaderTestUtils.HICN_HASH_ITERATIONS,
         RifLoaderTestUtils.HICN_HASH_PEPPER,
-        jdbcUrl,
-        jdbcUsername,
-        jdbcPassword.toCharArray(),
+        dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
   }
@@ -301,19 +377,21 @@ public final class ServerTestUtils {
   }
 
   /**
-   * @return the {@link Properties} from the {@link
-   *     gov.cms.bfd.server.war.SpringConfiguration#findTestDatabaseProperties()} file that should
-   *     have been written out by {@link gov.cms.bfd.server.war.SpringConfiguration} when it created
-   *     the test database
+   * @return the {@link Properties} file created by {@link
+   *     gov.cms.bfd.server.war.SpringConfiguration#findTestDatabaseProperties()}, or <code>null
+   *     </code> if it's not present (indicating that just a regular DB connection is being used)
    */
   private static Properties readTestDatabaseProperties() {
-    Properties testDbProps = new Properties();
+    Path testDatabasePropertiesPath = SpringConfiguration.findTestDatabaseProperties();
+    if (!Files.isRegularFile(testDatabasePropertiesPath)) return null;
+
     try {
-      testDbProps.load(new FileReader(SpringConfiguration.findTestDatabaseProperties().toFile()));
+      Properties testDbProps = new Properties();
+      testDbProps.load(new FileReader(testDatabasePropertiesPath.toFile()));
+      return testDbProps;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    return testDbProps;
   }
 
   /**

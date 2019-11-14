@@ -1,7 +1,7 @@
 Development Environment Setup
 =============================
 
-Thinking of contributing to this project or some of the other Java-based Blue Button projects? Great! This document provides some help on getting a development environment setup for that work.
+Thinking of contributing to this project? Great! This document provides some help on getting a development environment setup for that work.
 
 ## Getting Started
 
@@ -10,7 +10,6 @@ Thinking of contributing to this project or some of the other Java-based Blue Bu
 Cygwin provides a Unix environment for Windows systems. It should be installed as follows:
 
 1. Create a directory to install Cygwin to. `C:\cygwin64` is traditional.
-    * GDIT staff on Windows systems will likely need to go with `C:\bit9prog\dev\cygwin64`, instead.
 1. Download the Cygwin installer from <https://cygwin.com/setup-x86_64.exe> and save it to that directory, e.g. `C:\cygwin64\setup-x86_64.exe`.
 1. Open a non-administrator Windows/DOS command prompt from the Start menu.
 1. Run the following command to download and install Cygwin and a couple of basic extra packages (adjust the `cygwin64` directory entries to match the one you chose earlier):
@@ -32,7 +31,7 @@ Launch a Cygwin terminal and install `apt-cyg` by running  the following:
     $ lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg
     $ install apt-cyg /bin
 
-Once installed, `apt-cyg can be used to install packages by running '`apt-cyg install <package>..`'. For example, to install the silly `fortune` utility:
+Once installed, `apt-cyg` can be used to install packages by running '`apt-cyg install <package>..`'. For example, to install the silly `fortune` utility:
 
     $ apt-cyg install fortune-mod
     $ fortune
@@ -113,7 +112,7 @@ First off, if you're on one of the following platforms, we provide the [devenv-i
 
 It can be run as follows from a Bash prompt:
 
-    $ wget https://github.com/CMSgov/bluebutton-parent-pom/raw/master/dev/devenv-install.py
+    $ wget https://github.com/CMSgov/beneficiary-fhir-data/raw/master/dev/devenv-install.py
     $ chmod a+x ./devenv-install.py
     $ ./devenv-install.py
 
@@ -149,15 +148,54 @@ You will need to configure an SSH credential in order to clone the Blue Button r
   * [Adding a new SSH key to your GitHub account](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/)
   * [Testing your SSH connection](https://help.github.com/articles/testing-your-ssh-connection/)
 
-## Maven Configuration
+## Cloning the Repository
+
+Clone the repository:
+
+    $ mkdir -p ~/workspaces/bfd/
+    $ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/beneficiary-fhir-data.git
+
+## Building the Applications via Maven
+
+The application code is in the `apps/` directory.
+
+Running the Maven build up through the `install` phase will compile the code,
+  run the unit tests, run the integration tests,
+  and cache the build artifacts locally in `~/.m2/repository/`.
+Run it, as follows:
+
+    $ cd ~/workspaces/bfd/beneficiary-fhir-data.git/
+    $ cd apps/
+    $ mvn clean install
+
+The first build will take longer as it fetches dependencies,
+  but subsequent builds should take about 5 minutes to complete.
 
 ### Skipping Tests
 
-The default `install` goal for most Blue Button Maven projects will run integration tests.  If you do not want to run them (as some do use AWS resources), add the `-DskipITs` flag to the build. For example:
+If you do not want to run the integration tests (which add several minutes to the build and do use AWS resources), add the `-DskipITs` flag to the build:
 
 ```
 $ mvn clean install -DskipITs
 ```
+
+### Testing Against PostgreSQL
+
+By default, the integration tests will all run against an in-memory DB called HSQL,
+  which gets created on the fly and cleaned up as soon as the build completes.
+This is done mostly to save time, as HSQL is hilariously fast.
+It's also _close enough_ to PostgreSQL that anything that works with HSQL
+  should also work with PostgreSQL.
+
+Nevertheless, we use PostgreSQL in production and some changes **do** need
+  to be tested against it -- particularly those involving DB schema and/or JPA changes.
+To stand up a temporary PostgreSQL DB and run the ITs against it, do the following:
+
+    $ docker-compose --file dev/docker-compose.yml up --detach
+    $ mvn clean verify "-Dits.db.url=jdbc:postgresql://$(docker-compose --file dev/docker-compose.yml port postgresql 5432)/bfd?user=bfd&password=InsecureLocalDev"
+    $ docker-compose --file dev/docker-compose.yml down
+
+Builds against PostgreSQL are slower, and generally take about 10 minutes to complete (as opposed to 5).
 
 ## Eclipse Configuration
 
@@ -197,11 +235,11 @@ If you're using Eclipse for development, you'll want to configure its preference
 
 ### Importing Maven Projects into Eclipse
 
-If you have already cloned Blue Button repositories to your system they can easily be added to your Eclipse workspace using the **Import** feature.
+The repository can easily be added to your Eclipse workspace using the **Import** feature.
 
 1. Open **File > Import...**.
 1. Select **Existing Maven Projects**.
-1. Specify a **Root Directory** using the **Browse...** button or by typing in a path.
-1. Select the pom files you want to import from the **Projects** table.
+1. Specify the **Root Directory** using the **Browse...** button or by typing in a path: `~/workspaces/bfd/beneficiary-fhir-data.git`.
+1. Verify that it found the projects in the **Projects** table.
 1. Click **Finish**.
 1. The projects and packages you selected will now appear in the **Project Explorer** window.
