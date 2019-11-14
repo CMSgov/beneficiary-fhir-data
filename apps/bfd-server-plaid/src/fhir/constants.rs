@@ -40,3 +40,7 @@ pub static SYSTEM_MONEY: &'static str = "urn:iso:std:iso:4217";
 
 /// The standard `Money.code` for US currency.
 pub static CODE_MONEY_USD: &'static str = "USD";
+
+/// The `Identifier.system` for United States National Provider Identifiers, as available at
+/// [NPI/NPPES File](http://download.cms.gov/nppes/NPI_Files.html).
+pub static SYSTEM_NPI_US: &'static str = "http://hl7.org/fhir/sid/us-npi";

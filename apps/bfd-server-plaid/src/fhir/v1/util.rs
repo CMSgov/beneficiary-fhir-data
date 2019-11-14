@@ -66,6 +66,7 @@ fn reference_patient_by_id(patient_id: &str) -> Reference {
     Reference {
         extension: vec![],
         reference: Some(format!("Patient/{}", patient_id.to_string())),
+        identifier: None,
     }
 }
 
@@ -77,6 +78,7 @@ fn reference_coverage(patient_id: &str, medicare_segment: &MedicareSegment) -> R
             "Coverage/{}-{}",
             medicare_segment.coverage_url_prefix, patient_id
         )),
+        identifier: None,
     }
 }
 
@@ -201,4 +203,44 @@ pub fn create_adjudication_amount(
         reason: None,
         amount: Some(create_money_from_big_decimal(value)),
     }
+}
+
+/// Adds the specified NPI to the `EOB.careTeam`, if it's not already present.
+///
+/// # Arguments
+/// * `eob` - The `ExplanationOfBenefit` to modify.
+/// * `item` - The `Item` whose `careTeamLinkId` should reference the `CareTeam`, or `None` if no such reference is needed.
+/// * `npi` - The NPI identifier that a `CareTeam` should be created for.
+/// * `care_team_role` - The code to use in `CareTeam.role`.
+pub fn map_care_team_npi(
+    mut eob: ExplanationOfBenefit,
+    item: Option<&mut Item>,
+    npi: &str,
+    care_team_role: &code_systems::ValueSetCode,
+) -> error::Result<ExplanationOfBenefit> {
+    // Is a matching CareTeam already present?
+    // FIXME also verify that `CareTeam.role` matches.
+    let reference = Reference {
+        extension: vec![],
+        reference: None,
+        identifier: Some(Identifier {
+            system: Some(SYSTEM_NPI_US.to_string()),
+            value: Some(npi.to_string()),
+        }),
+    };
+    if !eob.careTeam.iter().any(|c| c.provider == reference) {
+        let care_team = CareTeam {
+            sequence: eob.careTeam.iter().map(|c| c.sequence).max().unwrap_or(0) + 1,
+            provider: reference,
+            role: Some(create_concept_from_value_set_code(care_team_role)),
+        };
+        eob.careTeam.push(care_team);
+        match item {
+            Some(item) => {
+                item.careTeamLinkId = Some(eob.careTeam.last().unwrap().sequence);
+            }
+            None => {}
+        }
+    }
+    Ok(eob)
 }

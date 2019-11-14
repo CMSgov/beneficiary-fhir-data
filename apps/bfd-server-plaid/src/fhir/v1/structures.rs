@@ -8,7 +8,7 @@ use serde::Serialize;
 /// Just about every FHIR resource and element can contain an `Extension`.
 ///
 /// Note: Rust doesn't allow for struct inheritance; composition is used, instead.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct Extension {
     pub url: String,
     #[serde(flatten)]
@@ -19,7 +19,7 @@ pub struct Extension {
 ///
 /// Note: extensions can contain other extensions, though Rust doesn't allow that directly. If we
 /// ever need to do support that, we'll need to wrap it in a `Box` or somesuch.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ExtensionValue {
     ValueIdentifier(Identifier),
@@ -31,11 +31,12 @@ pub enum Resource {
     ExplanationOfBenefit(explanation_of_benefit::ExplanationOfBenefit),
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Reference {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub extension: Vec<Extension>,
     pub reference: Option<String>,
+    pub identifier: Option<Identifier>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
@@ -51,7 +52,7 @@ pub struct Coding {
     pub display: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 pub struct Identifier {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub system: Option<String>,
@@ -166,7 +167,17 @@ pub mod explanation_of_benefit {
         pub payment: Option<Payment>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         pub item: Vec<Item>,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        pub careTeam: Vec<CareTeam>,
         // TODO flesh out the rest of this
+    }
+
+    #[derive(Clone, Debug, Default, Serialize)]
+    pub struct CareTeam {
+        pub sequence: u64,
+        pub provider: super::Reference,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub role: Option<super::CodeableConcept>,
     }
 
     #[derive(Clone, Debug, Default, Serialize)]
@@ -183,6 +194,8 @@ pub mod explanation_of_benefit {
     #[derive(Clone, Debug, Default, Serialize)]
     pub struct Item {
         pub sequence: u64,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub careTeamLinkId: Option<u64>,
         #[serde(flatten)]
         pub serviced: Option<Serviced>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -230,6 +243,7 @@ pub mod explanation_of_benefit {
 
             let actual = super::Item {
                 sequence: 1,
+                careTeamLinkId: None,
                 serviced: Some(super::Serviced::ServicedDate(chrono::NaiveDate::from_ymd(
                     2019, 11, 08,
                 ))),

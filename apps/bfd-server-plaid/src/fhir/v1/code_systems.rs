@@ -20,6 +20,7 @@ pub mod claim_type {
 
 pub mod explanation_of_benefit {
     pub mod status {
+        // FIXME this system is wrong, per the spec, I think: note how it has a different base path than the others
         static SYSTEM: &'static str = "http://hl7.org/fhir/ValueSet/explanationofbenefit-status";
 
         pub static ACTIVE: super::super::ValueSetCode = super::super::ValueSetCode {
@@ -51,6 +52,16 @@ pub mod explanation_of_benefit {
             code: "RXDINV",
             display: "Rx dispense invoice",
             definition: "Pharmacy dispense invoice not involving a compound",
+        };
+    }
+    pub mod care_team_role {
+        static SYSTEM: &'static str = "http://hl7.org/fhir/claimcareteamrole";
+
+        pub static PRIMARY: super::super::ValueSetCode = super::super::ValueSetCode {
+            system: SYSTEM,
+            code: "primary",
+            display: "Primary provider",
+            definition: "The primary care provider.",
         };
     }
 }

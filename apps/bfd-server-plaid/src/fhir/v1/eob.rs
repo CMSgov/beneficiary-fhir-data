@@ -181,6 +181,19 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
         }
     }
 
+    // Map PRSCRBR_ID.
+    match claim.PRSCRBR_ID.as_ref() {
+        "" => {}
+        _ => {
+            eob = map_care_team_npi(
+                eob,
+                Some(&mut item),
+                &claim.PRSCRBR_ID,
+                &code_systems::explanation_of_benefit::care_team_role::PRIMARY,
+            )?;
+        }
+    }
+
     // Attach the EOB's single Item, Adjudications, and Detail.
     item.adjudication = adjudications;
     item.detail = vec![detail];
