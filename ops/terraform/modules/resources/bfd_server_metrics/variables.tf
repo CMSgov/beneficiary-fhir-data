@@ -2,10 +2,9 @@ variable "env" {
   type = string
 }
 
-variable "partner_name" {
-  type = string
-}
-
-variable "partner_regex" {
-  type = string
+variable "metric_config" {
+  type = object({
+    partner_name = string,
+    partner_regex = string
+  })
 }
