@@ -249,6 +249,130 @@ module "fhir_asg" {
   }
 }
 
+# FHIR server metrics, per partner
+#
+module "bfd_server_metrics_all" {
+  source = "../resources/bfd_server_metrics"
+
+  env    = var.env_config.env
+
+  metric_config = {
+    partner_name  = "all"
+    partner_regex = "*"
+  }
+}
+
+module "bfd_server_metrics_bb" {
+  source = "../resources/bfd_server_metrics"
+
+  env    = var.env_config.env
+
+  metric_config = {
+    partner_name  = "bb"
+    partner_regex = "*BlueButton*"
+  }
+}
+
+module "bfd_server_metrics_bcda" {
+  source = "../resources/bfd_server_metrics"
+
+  env    = var.env_config.env
+
+  metric_config = {
+    partner_name  = "bcda"
+    partner_regex = "*bcda*"
+  }
+}
+
+module "bfd_server_metrics_mct" {
+  source = "../resources/bfd_server_metrics"
+
+  env    = var.env_config.env
+
+  metric_config = {
+    partner_name  = "mct"
+    partner_regex = "*mct*"
+  }
+}
+
+# FHIR server alarms, partner specific
+#
+module "bfd_server_alarm_all_500s" {
+  source = "../resources/bfd_server_alarm"
+
+  env    = var.env_config.env
+
+  alarm_config = {
+    alarm_name       = "all-500s"
+    partner_name     = "all"
+    metric_prefix    = "http-requests/count-500"
+    eval_periods     = "1"
+    period           = "300"
+    statistic        = "Maximum"
+    ext_statistic    = null
+    threshold        = "0.0"
+    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
+    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+  }
+}
+
+module "bfd_server_alarm_all_eob_4s" {
+  source = "../resources/bfd_server_alarm"
+
+  env    = var.env_config.env
+
+  alarm_config = {
+    alarm_name       = "all-eob-4s"
+    partner_name     = "all"
+    metric_prefix    = "http-requests/latency/eobAll"
+    eval_periods     = "1"
+    period           = "900"
+    statistic        = null
+    ext_statistic    = "p90"
+    threshold        = "4000.0"
+    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
+    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+  }
+}
+
+module "bfd_server_alarm_all_eob_6s" {
+  source = "../resources/bfd_server_alarm"
+
+  env    = var.env_config.env
+
+  alarm_config = {
+    alarm_name       = "all-eob-6s"
+    partner_name     = "all"
+    metric_prefix    = "http-requests/latency/eobAll"
+    eval_periods     = "1"
+    period           = "3600"
+    statistic        = null
+    ext_statistic    = "p99"
+    threshold        = "6000.0"
+    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
+    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+  }
+}
+
+module "bfd_server_alarm_mct_eob_6s" {
+  source = "../resources/bfd_server_alarm"
+
+  env    = var.env_config.env
+
+  alarm_config = {
+    alarm_name       = "mct-eob-6s"
+    partner_name     = "mct"
+    metric_prefix    = "http-requests/latency/eobAll"
+    eval_periods     = "1"
+    period           = "900"
+    statistic        = null
+    ext_statistic    = "p99"
+    threshold        = "6000.0"
+    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
+    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+  }
+}
+
 # ETL server
 #
 module "bfd_pipeline" {
@@ -278,23 +402,6 @@ module "bfd_pipeline" {
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-}
-
-# Cloudwatch Log Metric Filters
-
-module "cw_metric_filters" {
-  source          = "../resources/cw_metric_filters"
-  env             = var.env_config.env
-}
-
-# Cloudwatch Log Metric Filter Alarms
-
-module "cw_metric_alarms" {
-  source          = "../resources/cw_metric_alarms"
-  env                           = var.env_config.env
-  app                           = "bfd"
-  alarm_notification_arn        = data.aws_sns_topic.cloudwatch_alarms.arn
-  ok_notification_arn           = data.aws_sns_topic.cloudwatch_ok.arn
 }
 
 
