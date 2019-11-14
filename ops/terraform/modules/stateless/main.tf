@@ -312,7 +312,7 @@ module "bfd_server_alarm_all_500s" {
     ext_statistic    = null
     threshold        = "0.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
@@ -331,7 +331,7 @@ module "bfd_server_alarm_all_eob_4s" {
     ext_statistic    = "p90"
     threshold        = "4000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
@@ -350,7 +350,7 @@ module "bfd_server_alarm_all_eob_6s" {
     ext_statistic    = "p99"
     threshold        = "6000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
@@ -369,7 +369,7 @@ module "bfd_server_alarm_mct_eob_6s" {
     ext_statistic    = "p99"
     threshold        = "6000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    alarm_ok_arn     = data.aws_sns_topic.cloudwatch_ok.arn
+    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
