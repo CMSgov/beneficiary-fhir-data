@@ -8,14 +8,14 @@ resource "aws_cloudwatch_metric_alarm" "bfd-server-alarm" {
   namespace           = "bfd-${var.env}/bfd-server"
 
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = var.metric_config.eval_periods
-  period              = var.metric_config.period
-  statistic           = var.metric_config.statistic
-  extended_statistic  = var.metric_config.ext_statistic
-  threshold           = var.metric_config.threshold
+  evaluation_periods  = var.alarm_config.eval_periods
+  period              = var.alarm_config.period
+  statistic           = var.alarm_config.statistic
+  extended_statistic  = var.alarm_config.ext_statistic
+  threshold           = var.alarm_config.threshold
   datapoints_to_alarm = "1"
   treat_missing_data  = "notBreaching"
 
-  alarm_actions       = var.metric_config.alarm_notify_arn == null ? [] : [var.metric_config.alarm_notify_arn]
-  ok_actions          = var.metric_config.alarm_ok_arn == null ? [] : [var.metric_config.alarm_ok_arn]
+  alarm_actions       = var.alarm_config.alarm_notify_arn == null ? [] : [var.alarm_config.alarm_notify_arn]
+  ok_actions          = var.alarm_config.ok_notify_arn == null ? [] : [var.alarm_config.ok_notify_arn]
 }
