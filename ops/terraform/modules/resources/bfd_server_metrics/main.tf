@@ -26,7 +26,7 @@ locals {
     "eobByPatientIdAll": "*/ExplanationOfBenefit*patient=*",
     "eobByPatientIdPaged": "*/ExplanationOfBenefit*patient=*_count=*",
     "eobByPatientIdAndTypeAll":  "*/ExplanationOfBenefit*patient=*type=*",
-    "eobByPatientIdAndTypePaged", "*/ExplanationOfBenefit*patient=*type=*_count=*"
+    "eobByPatientIdAndTypePaged": "*/ExplanationOfBenefit*patient=*type=*_count=*"
   }
 }
 
