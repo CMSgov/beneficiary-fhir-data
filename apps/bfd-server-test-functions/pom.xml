@@ -54,7 +54,7 @@
 	</repositories>
 
 	<properties>
-		<hapi-fhir.version>1.4-SNAPSHOT</hapi-fhir.version>
+		<hapi-fhir.version>4.1.0</hapi-fhir.version>
 	</properties>
 
 	<dependencies>
