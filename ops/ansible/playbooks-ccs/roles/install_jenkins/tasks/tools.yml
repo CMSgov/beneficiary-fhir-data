@@ -30,3 +30,29 @@
     src: https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip
     dest: /usr/bin
     remote_src: yes
+
+- name: Install - AWS CLI
+  pip:
+    name: "awscli"
+
+- name: Create .aws directory in the home directory
+  file:
+    path: "/home/{{ansible_user}}/.aws/"
+    state: directory
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+    mode: 0755
+
+- name: Copy the aws config file to the box
+  sudo: yes
+  template:
+    src: ../templates/aws_config.j2
+    dest: "/home/{{ansible_user}}/.aws/config"
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+    mode: 0600
+
+- name: Install - jq
+  yum:
+    name: 
+      - jq
