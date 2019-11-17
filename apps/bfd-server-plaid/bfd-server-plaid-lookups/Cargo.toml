@@ -1,0 +1,19 @@
+[package]
+name = "bfd-server-plaid-lookups"
+version = "0.1.0"
+authors = ["Karl M. Davis <karl.davis@cms.hhs.gov>"]
+edition = "2018"
+build = "build.rs"
+
+[build-dependencies]
+
+# Provides most of the code used in `build.rs`.
+#
+# Why split this out to a separate project? Mostly, because the IDE support for `build.rs` scripts
+# is poor, so it's easier to develop and debug the code if it's in a separate library crate.
+bfd-server-plaid-lookups-codegen = { path = "../bfd-server-plaid-lookups-codegen" }
+
+[dependencies]
+
+# Use the "perfect hash" tables produced by `build.rs`.
+phf = "0.8"

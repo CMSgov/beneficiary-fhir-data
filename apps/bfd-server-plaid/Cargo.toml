@@ -1,5 +1,16 @@
 [workspace]
 
+##
+# This project is split across several workspace packages.
+##
+
 members = [
+  # Turns our lookups data into Rust structs and constants that can be used by the app.
+  "bfd-server-plaid-lookups-codegen",
+
+  # Provides the app with access to the lookups data.
+  "bfd-server-plaid-lookups",
+
+  # The primary app: the Beneficiary FHIR Data Server.
   "bfd-server-plaid-app",
 ]

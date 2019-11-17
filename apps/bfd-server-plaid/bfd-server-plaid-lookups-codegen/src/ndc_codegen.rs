@@ -8,14 +8,8 @@ use std::fs::File;
 use std::io::{self, BufWriter, Write};
 use std::path::{Path, PathBuf};
 
-/// Entry point for this `build.rs` script, which Cargo will call before compiling the rest of the
-/// code (in `src/`).
-fn main() -> io::Result<()> {
-    generate_ndc_descriptions()
-}
-
 /// Generate the `ndc_descriptions.rs` file.
-fn generate_ndc_descriptions() -> io::Result<()> {
+pub fn generate_ndc_descriptions() -> io::Result<()> {
     // Parse the NDC data file.
     let ndc_data = parse_ndc_data()?;
 
