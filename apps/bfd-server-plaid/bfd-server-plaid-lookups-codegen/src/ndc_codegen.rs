@@ -1,15 +1,16 @@
 use phf_codegen;
 
+use crate::error;
 use csv;
 use serde;
 use serde::Deserialize;
 use std::env;
 use std::fs::File;
-use std::io::{self, BufWriter, Write};
+use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 
 /// Generate the `ndc_descriptions.rs` file.
-pub fn generate_ndc_descriptions() -> io::Result<()> {
+pub fn generate_ndc_descriptions() -> error::Result<()> {
     // Parse the NDC data file.
     let ndc_data = parse_ndc_data()?;
 
@@ -36,11 +37,13 @@ pub fn generate_ndc_descriptions() -> io::Result<()> {
     // Create the output Rust source code file with the generated map.
     let path = Path::new(&env::var("OUT_DIR").unwrap()).join("ndc_descriptions.rs");
     let mut file = BufWriter::new(File::create(&path).unwrap());
-    writeln!(
+    let result = writeln!(
         &mut file,
         "static NDC_DESCRIPTIONS: phf::Map<&'static str, &'static str> = \n{};",
         builder.build()
-    )
+    )?;
+
+    Ok(result)
 }
 
 /// Represents the data we care about for records in the NDC data file.
@@ -55,7 +58,7 @@ struct NdcRecord {
 }
 
 /// Parse the NDC CSV file into `NdcRecord`s.
-fn parse_ndc_data() -> io::Result<Vec<NdcRecord>> {
+fn parse_ndc_data() -> error::Result<Vec<NdcRecord>> {
     let mut ndc_data = vec![];
     let ndc_path = download_ndc_data();
     let mut ndc_reader = csv::ReaderBuilder::new()
@@ -89,7 +92,9 @@ fn parse_ndc_data() -> io::Result<Vec<NdcRecord>> {
                 cap.name("drug_id").unwrap().as_str(),
             ))
         });
-        let (manufacturer_id, drug_id) = ndc_parsed.unwrap(); // FIXME handle error
+        let (manufacturer_id, drug_id) = ndc_parsed.ok_or(
+            error::Error::InvalidLookupsDataError("Unexpected NDC format.".to_string()),
+        )?;
         let ndc = format!("{:0>5}-{:0>4}", manufacturer_id, drug_id);
         ndc_record.ndc = ndc;
 
