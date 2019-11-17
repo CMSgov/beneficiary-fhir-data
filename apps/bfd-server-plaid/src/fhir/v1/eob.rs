@@ -104,7 +104,7 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
         ))),
     }?;
     if let Some(compound_code) = compound_code {
-        detail.r#type = Some(create_concept_from_value_set_code(compound_code));
+        detail.r#type = Some(create_concept_for_value_set_code(compound_code));
     };
 
     // Map the prescription fill date.

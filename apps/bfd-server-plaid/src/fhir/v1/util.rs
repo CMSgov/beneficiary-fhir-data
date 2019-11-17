@@ -144,7 +144,7 @@ fn create_codebook_system(codebook_var: &CcwCodebookVariable) -> String {
 }
 
 /// Creates a `CodeableConcept` containing just the specified `ValueSetCode`.
-pub fn create_concept_from_value_set_code(
+pub fn create_concept_for_value_set_code(
     value_set_code: &code_systems::ValueSetCode,
 ) -> CodeableConcept {
     CodeableConcept {
@@ -245,7 +245,7 @@ pub fn map_care_team_npi(
         let care_team = CareTeam {
             sequence: eob.careTeam.iter().map(|c| c.sequence).max().unwrap_or(0) + 1,
             provider: reference,
-            role: Some(create_concept_from_value_set_code(care_team_role)),
+            role: Some(create_concept_for_value_set_code(care_team_role)),
         };
         eob.careTeam.push(care_team);
         match item {
