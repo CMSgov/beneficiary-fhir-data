@@ -194,6 +194,9 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
         }
     }
 
+    // Map PROD_SRVC_ID.
+    item.service = Some(create_concept_for_ndc(&claim.PROD_SRVC_ID));
+
     // Attach the EOB's single Item, Adjudications, and Detail.
     item.adjudication = adjudications;
     item.detail = vec![detail];

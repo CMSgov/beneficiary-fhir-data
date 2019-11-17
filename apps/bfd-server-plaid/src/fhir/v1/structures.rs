@@ -196,6 +196,8 @@ pub mod explanation_of_benefit {
         pub sequence: u64,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub careTeamLinkId: Option<u64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub service: Option<super::CodeableConcept>,
         #[serde(flatten)]
         pub serviced: Option<Serviced>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -244,6 +246,7 @@ pub mod explanation_of_benefit {
             let actual = super::Item {
                 sequence: 1,
                 careTeamLinkId: None,
+                service: None,
                 serviced: Some(super::Serviced::ServicedDate(chrono::NaiveDate::from_ymd(
                     2019, 11, 08,
                 ))),

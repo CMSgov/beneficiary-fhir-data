@@ -44,3 +44,8 @@ pub static CODE_MONEY_USD: &'static str = "USD";
 /// The `Identifier.system` for United States National Provider Identifiers, as available at
 /// [NPI/NPPES File](http://download.cms.gov/nppes/NPI_Files.html).
 pub static SYSTEM_NPI_US: &'static str = "http://hl7.org/fhir/sid/us-npi";
+
+/// Used to identify the drugs that were purchased as part of Part D, Carrier, and DME claims. See
+/// here for more information on using NDC codes with FHIR:
+/// [Using NDC and NHRIC Codes with FHIR](http://hl7.org/fhir/ndc.html).
+pub static SYSTEM_NDC: &'static str = "http://hl7.org/fhir/sid/ndc";

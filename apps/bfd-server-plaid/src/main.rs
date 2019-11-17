@@ -6,6 +6,7 @@ mod config;
 mod db;
 mod error;
 mod fhir;
+mod lookups;
 mod models;
 mod schema_views;
 mod tls;

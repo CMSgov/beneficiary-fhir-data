@@ -6,6 +6,7 @@ use crate::fhir::util::ClaimType;
 use crate::fhir::v1::code_systems;
 use crate::fhir::v1::structures::explanation_of_benefit::*;
 use crate::fhir::v1::structures::*;
+use crate::lookups;
 use crate::models::traits::*;
 
 /// Maps the common claim header CCW fields into the specified `ExplanationOfBenefit`.
@@ -165,6 +166,18 @@ pub fn create_concept_for_codebook_value(
             system: Some(create_codebook_system(codebook_var)),
             code: Some(code.to_string()),
             display: codebook_var.lookup_description(code),
+        }],
+    }
+}
+
+/// Creates a `CodeableConcept` to represent a National Drug Code (NDC).
+pub fn create_concept_for_ndc(ndc: &str) -> CodeableConcept {
+    let ndc_display = lookups::ndc::lookup_ndc_description(ndc);
+    CodeableConcept {
+        coding: vec![Coding {
+            system: Some(SYSTEM_NDC.to_string()),
+            code: Some(ndc.to_string()),
+            display: ndc_display.map(String::from),
         }],
     }
 }
