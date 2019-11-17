@@ -114,5 +114,5 @@ fn download_ndc_data() -> PathBuf {
      * dependency between that project and this one.
      */
     Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap())
-        .join("../bfd-server/bfd-server-war/target/classes/fda_products_cp1252.tsv")
+        .join("../../bfd-server/bfd-server-war/target/classes/fda_products_cp1252.tsv")
 }
