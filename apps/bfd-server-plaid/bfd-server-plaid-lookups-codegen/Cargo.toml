@@ -6,6 +6,12 @@ edition = "2018"
 
 [dependencies]
 
+# Download source lookups data files.
+reqwest = "0.9"
+tempfile = "3.1"
+zip = "0.5" # FIXME: recently went unmaintained; find a replacement
+encoding = "0.2"
+
 # Generate "perfect hash" tables of the app's lookup data.
 phf_codegen = "0.8"
 

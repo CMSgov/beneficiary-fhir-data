@@ -7,7 +7,7 @@ use serde::Deserialize;
 use std::env;
 use std::fs::File;
 use std::io::{BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Generate the `ndc_descriptions.rs` file.
 pub fn generate_ndc_descriptions() -> error::Result<()> {
@@ -59,11 +59,12 @@ struct NdcRecord {
 
 /// Parse the NDC CSV file into `NdcRecord`s.
 fn parse_ndc_data() -> error::Result<Vec<NdcRecord>> {
-    let mut ndc_data = vec![];
-    let ndc_path = download_ndc_data();
+    let ndc_data = download_ndc_data()?;
+    let ndc_data: &[u8] = &ndc_data;
     let mut ndc_reader = csv::ReaderBuilder::new()
         .delimiter(b'\t')
-        .from_path(ndc_path)?;
+        .from_reader(ndc_data);
+    let mut ndc_records = vec![];
     for ndc_record in ndc_reader.deserialize() {
         let mut ndc_record: NdcRecord = ndc_record?;
 
@@ -98,20 +99,41 @@ fn parse_ndc_data() -> error::Result<Vec<NdcRecord>> {
         let ndc = format!("{:0>5}-{:0>4}", manufacturer_id, drug_id);
         ndc_record.ndc = ndc;
 
-        ndc_data.push(ndc_record);
+        ndc_records.push(ndc_record);
     }
 
-    Ok(ndc_data)
+    Ok(ndc_records)
 }
 
-/// Retrieves the FDA's "products" data file from their site and returns a `PathBuf` to its
-/// location on disk.
-fn download_ndc_data() -> PathBuf {
-    /*
-     * FIXME The file at https://www.accessdata.fda.gov/cder/ndctext.zip was downloaded and
-     * unpacked by the Java app. We'll need to copy that same logic here, to avoid a circular
-     * dependency between that project and this one.
-     */
-    Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap())
-        .join("../../bfd-server/bfd-server-war/target/classes/fda_products_cp1252.tsv")
+/// Retrieves the FDA's "products" data file from their site and returns the data as UTF-8 bytes.
+fn download_ndc_data() -> error::Result<Vec<u8>> {
+    use encoding::types::Encoding;
+    use std::io::Read;
+
+    // Download the ZIP file from the FDA.
+    let zip_url = "https://www.accessdata.fda.gov/cder/ndctext.zip";
+    let mut zip_response = reqwest::get(zip_url)?;
+    let mut zip_dest = tempfile::tempfile()?;
+    std::io::copy(&mut zip_response, &mut zip_dest)?;
+
+    // Extract the products file from the ZIP.
+    // (Note: the exact name of the file seems to change from time to time. Yay.)
+    let mut zip_archive = zip::ZipArchive::new(zip_dest)?;
+    let mut products_file = zip_archive.by_name("product.txt")?;
+
+    // Convert the products character set from CP-1252 to UTF-8.
+    let mut products_cp1252_buffer = Vec::new();
+    let mut products_utf8_chars = String::new();
+    products_file.read_to_end(&mut products_cp1252_buffer)?;
+    encoding::all::WINDOWS_1252
+        .decode_to(
+            &products_cp1252_buffer,
+            encoding::DecoderTrap::Strict,
+            &mut products_utf8_chars,
+        )
+        .map_err(|_| {
+            error::Error::InvalidLookupsDataError("Unable to decode NDC data.".to_string())
+        })?;
+
+    Ok(products_utf8_chars.as_bytes().to_owned())
 }
