@@ -23,10 +23,9 @@ locals {
     "eobReadOutpatient": "*/ExplanationOfBenefit/outpatient*",
     "eobReadPde": "*/ExplanationOfBenefit/pde*",
     "eobReadSnf": "*/ExplanationOfBenefit/snf*",
-    "eobByPatientIdAll": "*/ExplanationOfBenefit*patient=*",
-    "eobByPatientIdPaged": "*/ExplanationOfBenefit*patient=*_count=*",
-    "eobByPatientIdAndTypeAll":  "*/ExplanationOfBenefit*patient=*type=*",
-    "eobByPatientIdAndTypePaged": "*/ExplanationOfBenefit*patient=*type=*_count=*"
+    "eobByPatientId": "*/ExplanationOfBenefit*patient=*",
+    "eobByPaged": "*/ExplanationOfBenefit*_count=*",
+    "eobByType":  "*/ExplanationOfBenefit*type=*",
   }
 }
 
