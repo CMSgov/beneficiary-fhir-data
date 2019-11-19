@@ -7,22 +7,11 @@ locals {
     "all": "*",
     "metadata": "*/metadata*",
     "coverageAll": "*/Coverage*",
-    "coverageRead": "*/Coverage/*",
     "coverageByPatientId": "*/Coverage*beneficiary=*",
     "patientAll": "*/Patient*",
-    "patientRead": "*/Patient/*",
     "patientById": "*/Patient*_id=*",
     "patientByIdentifier": "*/Patient*identifier=*hicnHash*",
     "eobAll": "*/ExplanationOfBenefit*",
-    "eobRead": "*/ExplanationOfBenefit/*",
-    "eobReadCarrier": "*/ExplanationOfBenefit/carrier*",
-    "eobReadDme": "*/ExplanationOfBenefit/dme*",
-    "eobReadHha": "*/ExplanationOfBenefit/hha*",
-    "eobReadHospice": "*/ExplanationOfBenefit/hospice*",
-    "eobReadInpatient": "*/ExplanationOfBenefit/inpatient*",
-    "eobReadOutpatient": "*/ExplanationOfBenefit/outpatient*",
-    "eobReadPde": "*/ExplanationOfBenefit/pde*",
-    "eobReadSnf": "*/ExplanationOfBenefit/snf*",
     "eobByPatientId": "*/ExplanationOfBenefit*patient=*",
     "eobByPaged": "*/ExplanationOfBenefit*_count=*",
     "eobByType":  "*/ExplanationOfBenefit*type=*",
@@ -88,20 +77,5 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-latency" {
     namespace     = "bfd-${var.env}/bfd-server"
     value         = "$duration_milliseconds"
     default_value = null
-  }
-}
-
-# Count latency over 6s per partner
-#
-resource "aws_cloudwatch_log_metric_filter" "http-requests-latency-over-6000" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency-over-6000/${var.metric_config.partner_name}"
-  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user = \"${var.metric_config.partner_regex}\", timestamp, request, query_string, status_code, bytes, duration_milliseconds > 6000, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
-  log_group_name = local.log_groups.access
-
-  metric_transformation {
-    name          = "http-requests/latency-over-6000/${var.metric_config.partner_name}"
-    namespace     = "bfd-${var.env}/bfd-server"
-    value         = "1"
-    default_value = "0"
   }
 }
