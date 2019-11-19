@@ -30,48 +30,105 @@ import org.slf4j.LoggerFactory;
  * beneficiary columns from the BSF file.
  */
 public final class SyntheticDataFixer4 {
-  private class MBIPool {
-	  private int i = 0;
+  private static class MBIPool {
+    private int i = 0;
 
-	  private String template = "%dS%s%d%s%s%d%s%s%d%d";
+    private String template = "%dS%s%d%s%s%d%s%s%d%d";
+    private String[] alpha = {
+      "A", "C", "D", "E", "F", "G", "H", "J", "K", "M", "N", "P", "Q", "R", "S", "U", "V", "W", "X",
+      "Y"
+    };
+    private String[] alphanumeric = {
+      "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "C", "D", "E", "F", "G", "H", "J", "K",
+      "M", "N", "P", "Q", "R", "S", "U", "V", "W", "X", "Y"
+    };
 
-	  public String next() {
-		  // how do I cycle through the possibilities for these strings?
-		  position1 = (this.i % 9) + 1;
-	          position3 = Math.floor(this.i/9) % alphanumeric.length
-		  position4 = Math.floor(this.i/(9*alphanumeric.length))%10
-	          position5 = Math.floor(this.i/(9*alphanumeric.length*10)) % alpha.length
-		  position6 = Math.floor(this.i/(9*alphanumeric.length*10*alpha.length)) % alphanumeric.length
-		  position7 = Math.floor(this.i/(9*alphanumeric.length*10*alpha.length*alphanumeric.length)) % 10
-		  position8 = Math.floor(this.i/(9*alphanumeric.length*10*alpha.length*alphanumeric.length*10)) % alphanumeric.length
-		  position9 = Math.floor(this.i/(9*alphanumeric.length*10*alpha.length*alphanumeric.length*10*alphanumeric.length)) % alphanumeric.length
-		  position10 = Math.floor(this.i/(9*alphanumeric.length*10*alpha.length*alphanumeric.length*10*alphanumeric.length*alphanumeric.length)) % 10
-		  position11 = Math.floor(this.i/(9*alphanumeric.length*10*alpha.length*alphanumeric.length*10*alphanumeric.length*alphanumeric.length*10)) % 10
+    public String next() {
+      // how do I cycle through the possibilities for these strings?
+      int position1 = (this.i % 9) + 1;
+      int position3 = (int) Math.floor(this.i / 9) % alphanumeric.length;
+      int position4 = (int) Math.floor(this.i / (9 * alphanumeric.length)) % 10;
+      int position5 = (int) Math.floor(this.i / (9 * alphanumeric.length * 10)) % alpha.length;
+      int position6 =
+          (int) Math.floor(this.i / (9 * alphanumeric.length * 10 * alpha.length))
+              % alphanumeric.length;
+      int position7 =
+          (int)
+                  Math.floor(
+                      this.i / (9 * alphanumeric.length * 10 * alpha.length * alphanumeric.length))
+              % 10;
+      int position8 =
+          (int)
+                  Math.floor(
+                      this.i
+                          / (9
+                              * alphanumeric.length
+                              * 10
+                              * alpha.length
+                              * alphanumeric.length
+                              * 10))
+              % alphanumeric.length;
+      int position9 =
+          (int)
+                  Math.floor(
+                      this.i
+                          / (9
+                              * alphanumeric.length
+                              * 10
+                              * alpha.length
+                              * alphanumeric.length
+                              * 10
+                              * alphanumeric.length))
+              % alphanumeric.length;
+      int position10 =
+          (int)
+                  Math.floor(
+                      this.i
+                          / (9
+                              * alphanumeric.length
+                              * 10
+                              * alpha.length
+                              * alphanumeric.length
+                              * 10
+                              * alphanumeric.length
+                              * alphanumeric.length))
+              % 10;
+      int position11 =
+          (int)
+                  Math.floor(
+                      this.i
+                          / (9
+                              * alphanumeric.length
+                              * 10
+                              * alpha.length
+                              * alphanumeric.length
+                              * 10
+                              * alphanumeric.length
+                              * alphanumeric.length
+                              * 10))
+              % 10;
 
-		  this.i++
+      this.i++;
 
-		  return String.format(
-                  	template,
-			position1,
-			position3,
-			position4,
-			position5,
-			position6,
-			position7,
-			position8,
-			position9,
-			position10,
-			position11);
-	  }
+      return String.format(
+          template,
+          position1,
+          alphanumeric[position3],
+          position4,
+          alpha[position5],
+          alphanumeric[position6],
+          position7,
+          alphanumeric[position8],
+          alphanumeric[position9],
+          position10,
+          position11);
+    }
   }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheticDataFixer2.class);
 
-  private static final Path PATH_ORIGINAL_DATA =
-      Paths.get(
-          "/Users/d6lu/workspaces/cms/bluebutton-data-synthetic/2017-11-27T00:00:00.000Z-fixed-with-negative-ids");
-  private static final Path PATH_FIXED_DATA =
-      Paths.get(
-          "/Users/d6lu/workspaces/cms/bluebutton-data-synthetic/2017-11-27T00:00:00.000Z-fixed-with-negative-ids-and-enrollment-columns");
+  private static final Path PATH_ORIGINAL_DATA = Paths.get("/vagrant/synthetic-data");
+  private static final Path PATH_FIXED_DATA = Paths.get("/vagrant/synthetic-data/fixed");
 
   /**
    * The application entry point/driver. Will read in the synthetic data files and then write out
@@ -124,6 +181,7 @@ public final class SyntheticDataFixer4 {
     LocalRifFile rifFile = syntheticDataFile.getRifFile();
     CSVParser parser = RifParsingUtils.createCsvParser(rifFile);
     LOGGER.info("Fixing RIF file: '{}'...", rifFile.getDisplayName());
+    MBIPool mbiPool = new MBIPool();
 
     /*
      * We tell the CSVPrinter not to include a header here, because we will manually
