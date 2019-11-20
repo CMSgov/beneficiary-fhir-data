@@ -129,6 +129,7 @@ public final class SyntheticDataFixer4 {
 
   private static final Path PATH_ORIGINAL_DATA = Paths.get("/vagrant/synthetic-data");
   private static final Path PATH_FIXED_DATA = Paths.get("/vagrant/synthetic-data/fixed");
+  private static final MBIPool mbiPool = new MBIPool();
 
   /**
    * The application entry point/driver. Will read in the synthetic data files and then write out
@@ -181,7 +182,6 @@ public final class SyntheticDataFixer4 {
     LocalRifFile rifFile = syntheticDataFile.getRifFile();
     CSVParser parser = RifParsingUtils.createCsvParser(rifFile);
     LOGGER.info("Fixing RIF file: '{}'...", rifFile.getDisplayName());
-    MBIPool mbiPool = new MBIPool();
 
     /*
      * We tell the CSVPrinter not to include a header here, because we will manually
