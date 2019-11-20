@@ -10,7 +10,7 @@ use std::io::{BufWriter, Write};
 use std::path::Path;
 
 /// Generate the `ndc_descriptions.rs` file.
-pub fn generate_ndc_descriptions() -> error::Result<()> {
+pub(crate) fn generate_ndc_descriptions() -> error::Result<()> {
     // Parse the NDC data file.
     let ndc_data = parse_ndc_data()?;
 

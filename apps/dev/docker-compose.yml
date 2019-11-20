@@ -5,7 +5,9 @@ services:
   postgresql:
     image: postgres:9.6
     ports:
-      - "127.0.0.1::5432"
+      # Default to a random host binding port for PostgreSQL (via the blank default after the `-`),
+      # but allow overriding on command line.
+      - "127.0.0.1:${POSTGRES_PORT-}:5432"
     restart: always
     environment:
       POSTGRES_DB: bfd

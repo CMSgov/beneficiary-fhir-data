@@ -1,3 +1,97 @@
+//! This crate produces the main Beneficiary FHIR Data (BFD) Server application, which is an HTTP/S
+//! FHIR-compliant web server that supports other CMS applications needing access to Medicare
+//! beneficiaries' demographic, enrollment, and claims data.
+//!
+//! # Launching the Application
+//!
+//! The application's configuration is all provided via environment variables. For full details on
+//! that configuration, see the following files in the application source repository:
+//!
+//! * `bfd-server-plaid-app/src/config.rs`: Handles the configuration parsing for the application.
+//! * `.env`: Specifies the environment variable values that will be used during local development.
+//!
+//! In local development, the application can be launched as follows:
+//!
+//! ```sh
+//! # Change to the BFD Server's directory, then to the Rust app's.
+//! $ cd beneficiary-fhir-data.git/
+//! $ cd apps/bfd-server-plaid/
+//!
+//! # Stand up the PostgreSQL database server.
+//! $ POSTGRES_PORT=5432 docker-compose --file ../dev/docker-compose.yml up --detach
+//!
+//! # Provision the database schema via Diesel. Note that the schema migration files for Diesel
+//! # are separate from the Java app's and may diverge if not kept up to date by developers. See
+//! # the `bfd-server-plaid-app/migrations/` directory for details.
+//! $ cd bfd-server-plaid-app/
+//! $ diesel migration run
+//! $ cd ..
+//!
+//! # Build the Rust crates.
+//! $ cargo build
+//!
+//! # Run the tests in the Rust crates (will build first if necessary).
+//! $ cargo test
+//!
+//! # Launch the BFD Server application (will build first if necessary). This will wait/block while
+//! # the server is running. Press `ctrl+c` to stop it when you're done.
+//! $ cargo run
+//!
+//! # Stand down the PostgreSQL database server.
+//! $ docker-compose --file ../dev/docker-compose.yml down
+//! ```
+//!
+//! Alternatively, during the transition from the Java app to the Rust app, launching the Java app
+//! will also automagically launch the Rust app:
+//!
+//! ```sh
+//! # Change to the BFD Server's directory, then to the main app directory.
+//! $ cd beneficiary-fhir-data.git/
+//! $ cd apps/
+//!
+//! # Stand up the PostgreSQL database server.
+//! $ POSTGRES_PORT=5432 docker-compose --file dev/docker-compose.yml up --detach
+//!
+//! # Build the Java apps.
+//! $ mvn clean install
+//!
+//! # Change to the directory for the Java BFD Server application.
+//! $ cd bfd-server/bfd-server-war/
+//!
+//! # Run the Java BFD Server, which will also launch an instance of the Rust server. This will
+//! # launch the servers and then return, leaving them running in separate processes.
+//! $ mvn \
+//!     '-Dits.db.url=jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev' \
+//!     dependency:copy \
+//!     org.codehaus.mojo:build-helper-maven-plugin:reserve-network-port@reserve-server-ports \
+//!     org.codehaus.mojo:exec-maven-plugin:exec@server-start
+//!
+//! # Stop the Java (and Rust) BFD Server processes when you're done.
+//! $ mvn org.codehaus.mojo:exec-maven-plugin:exec@server-stop
+//!
+//! # Change back to the main apps directory.
+//! $ cd ../..
+//!
+//! # Stand down the PostgreSQL database server.
+//! $ docker-compose --file dev/docker-compose.yml down
+//! ```
+//!
+//! # Querying the Application
+//!
+//! The server listens for both HTTP and HTTPS requests, though HTTP requests are only accessible
+//! from `localhost`.
+//!
+//! By default, the server selects port `3000` for HTTP and port `3001` for HTTPS. The server can
+//! be queried for a specific beneficiaries' claims, as follows:
+//!
+//! ```sh
+//! $ curl 'http://localhost:3000/v1/fhir/ExplanationOfBenefit?patient=Patient/1234'
+//! ```
+//!
+//! Note: Your database will likely be empty, and so that search will likely not return any
+//! results. For now, it's generally simplest to test the Rust app via the Java app's integration
+//! tests, which automatically handle loading test data.
+
 // Necessary for `schema_views.rs` to compile.
 #![recursion_limit = "2048"]
 
