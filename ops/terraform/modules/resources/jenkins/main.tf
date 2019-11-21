@@ -139,6 +139,11 @@ resource "aws_iam_policy" "jenkins_boundary" {
 EOT
 }
 
+resource "aws_iam_role_policy_attachment" "jenkins_boundary" {
+  role       = "${aws_iam_role.jenkins.name}"
+  policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
+}
+
 ### Add Jenkins user to group and attach policy to group
 
 data "aws_iam_group" "managed_service" {
