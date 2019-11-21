@@ -133,6 +133,21 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
+   * StaticRifResourceGroup#LOCAL_SYNTHETIC} data.
+   */
+  @Test
+  public void loadLocalSyntheticData() {
+    /*Assume.assumeTrue(
+    String.format(
+        "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
+        Runtime.getRuntime().maxMemory()),
+    Runtime.getRuntime().maxMemory() >= 4500000000L); */
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, StaticRifResourceGroup.LOCAL_SYNTHETIC);
+  }
+
+  /**
+   * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
    * StaticRifResourceGroup#SAMPLE_MCT} data.
    */
   @Test
