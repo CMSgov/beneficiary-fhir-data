@@ -295,6 +295,17 @@ module "bfd_server_metrics_mct" {
   }
 }
 
+module "bfd_server_metrics_dpc" {
+  source = "../resources/bfd_server_metrics"
+
+  env    = var.env_config.env
+
+  metric_config = {
+    partner_name  = "dpc"
+    partner_regex = "*dpc*"
+  }
+}
+
 # FHIR server alarms, partner specific
 #
 module "bfd_server_alarm_all_500s" {
