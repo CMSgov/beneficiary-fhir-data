@@ -8,7 +8,7 @@ locals {
   azs                   = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config            = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=module.local_zone.zone_id }
   is_prod               = substr(var.env_config.env, 0, 4) == "prod" 
-  victor_ops_url        = "https://alert.victorops.com/integrations/cloudwatch/20131130/alert/55e5f15e-cd33-4790-919e-1ce13a2d8299/CCS"
+  victor_ops_url        = var.victor_ops_url
   enable_victor_ops     = local.is_prod # only wake people up for prod alarms
 
   db_sgs = [

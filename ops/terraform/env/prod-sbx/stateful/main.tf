@@ -26,5 +26,7 @@ module "stateful" {
   env_config = {
     env               = "prod-sbx"
     tags              = {application="bfd", business="oeda", stack="prod-sbx", Environment="prod-sbx"}
-  }  
+  }
+
+  victor_ops_url      = var.victor_ops_url
 }

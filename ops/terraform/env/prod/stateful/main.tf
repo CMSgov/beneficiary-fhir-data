@@ -36,4 +36,6 @@ module "stateful" {
     env               = "prod"
     tags              = {application="bfd", business="oeda", stack="prod", Environment="prod"}
   }
+
+  victor_ops_url      = var.victor_ops_url
 }
