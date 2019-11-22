@@ -22,6 +22,8 @@
     - import_role: 
         name: attach_ebs
     - import_role:
+        name: ssh_users
+    - import_role:
         name: build_install_apache
     - import_role:
         name: install_jenkins

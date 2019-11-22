@@ -83,41 +83,6 @@ module "jenkins_lb" {
   ingress_port    = 443
   egress_port     = 443
 }
-// # Jenkins Module (ELB, ASG, EC2, IAM)
-// 
-// # Autoscale group for the FHIR server
-// #
-// module "jenkins_asg" {
-//   source = "../resources/asg"
-// 
-//   env_config      = local.env_config
-//   role            = "jenkins"
-//   layer           = "app"
-//   lb_config       = module.jenkins_lb.lb_config
-// 
-//   # Initial size is one server per AZ
-//   asg_config      = {
-//     min           = 3/length(local.azs)
-//     max           = 3/length(local.azs)
-//     desired       = 3/length(local.azs)
-//     sns_topic_arn = ""
-//   }
-// 
-//   # TODO: Dummy values to get started
-//   launch_config   = {
-//     instance_type = var.instance_size 
-//     ami_id        = var.jenkins_ami 
-//     key_name      = var.jenkins_key_name 
-//     profile       = module.jenkins_iam.profile
-//   }
-// 
-//   mgmt_config     = {
-//     vpn_sg        = data.aws_security_group.vpn.id
-//     tool_sg       = data.aws_security_group.tools.id
-//     remote_sg     = data.aws_security_group.remote.id
-//     ci_cidrs      = ["10.252.40.0/21"]
-//   }
-// }
 
 module "jenkins" {
   source = "../resources/jenkins"
