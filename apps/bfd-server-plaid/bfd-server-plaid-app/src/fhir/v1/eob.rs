@@ -69,13 +69,13 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
     if let Some(ref mut insurance) = eob.insurance {
         if let Some(ref mut coverage) = insurance.coverage {
             coverage.extension = vec![
-                create_identifier_extension(
+                create_extension_identifier(
                     &ccw_codebook::PLAN_CNTRCT_REC_ID,
-                    &claim.PLAN_CNTRCT_REC_ID,
+                    create_identifier(&ccw_codebook::PLAN_CNTRCT_REC_ID, &claim.PLAN_CNTRCT_REC_ID),
                 ),
-                create_identifier_extension(
+                create_extension_identifier(
                     &ccw_codebook::PLAN_PBP_REC_NUM,
-                    &claim.PLAN_PBP_REC_NUM,
+                    create_identifier(&ccw_codebook::PLAN_PBP_REC_NUM, &claim.PLAN_PBP_REC_NUM),
                 ),
             ];
         }
@@ -83,6 +83,26 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
     if let Some(pd_dt) = claim.PD_DT {
         eob.payment = Some(Payment { date: Some(pd_dt) });
     }
+
+    // Map SRVC_PRVDR_ID and PHRMCY_SRVC_TYPE_CD.
+    // FIXME Map SRVC_PRVDR_ID_QLFYR_CD.
+    eob.organization = Some(create_reference_to_npi(&claim.SRVC_PRVDR_ID));
+    let mut facility = create_reference_to_npi(&claim.SRVC_PRVDR_ID);
+    facility.extension = vec![create_extension_concept(
+        &ccw_codebook::PHRMCY_SRVC_TYPE_CD,
+        create_concept_for_codebook_value(
+            &ccw_codebook::PHRMCY_SRVC_TYPE_CD,
+            &claim.PHRMCY_SRVC_TYPE_CD,
+        ),
+    )];
+    eob.facility = Some(facility);
+
+    // Map DAW_PROD_SLCTN_CD.
+    add_information_with_code(
+        eob,
+        &ccw_codebook::DAW_PROD_SLCTN_CD,
+        &claim.DAW_PROD_SLCTN_CD,
+    );
 
     // Create the EOB's single Item, its Adjudications, and its single Detail.
     let mut item = explanation_of_benefit::Item::default();
@@ -196,6 +216,20 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
 
     // Map PROD_SRVC_ID.
     item.service = Some(create_concept_for_ndc(&claim.PROD_SRVC_ID));
+
+    // Map QTY_DSPNSD_NUM, FILL_NUM, and DAYS_SUPLY_NUM.
+    item.quantity = Some(create_quantity_from_big_decimal(&claim.QTY_DSPNSD_NUM));
+    let fill_num = create_extension_quantity(
+        &ccw_codebook::FILL_NUM,
+        create_quantity_from_big_decimal(&claim.FILL_NUM),
+    );
+    let days_supply_num = create_extension_quantity(
+        &ccw_codebook::DAYS_SUPLY_NUM,
+        create_quantity_from_big_decimal(&claim.DAYS_SUPLY_NUM),
+    );
+    if let Some(ref mut quantity) = item.quantity {
+        quantity.extension = vec![fill_num, days_supply_num];
+    };
 
     // Attach the EOB's single Item, Adjudications, and Detail.
     item.adjudication = adjudications;

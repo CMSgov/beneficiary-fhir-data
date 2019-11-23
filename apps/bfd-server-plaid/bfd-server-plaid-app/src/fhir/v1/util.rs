@@ -68,6 +68,7 @@ fn reference_patient_by_id(patient_id: &str) -> Reference {
         extension: vec![],
         reference: Some(format!("Patient/{}", patient_id.to_string())),
         identifier: None,
+        display: None,
     }
 }
 
@@ -80,6 +81,21 @@ fn reference_coverage(patient_id: &str, medicare_segment: &MedicareSegment) -> R
             medicare_segment.coverage_url_prefix, patient_id
         )),
         identifier: None,
+        display: None,
+    }
+}
+
+/// Returns a `Reference` where `Reference.identifier` points to the specified NPI.
+pub fn create_reference_to_npi(npi: &str) -> Reference {
+    let npi_display = bfd_server_plaid_lookups::npi::lookup_npi_description(npi);
+    Reference {
+        extension: vec![],
+        reference: None,
+        identifier: Some(Identifier {
+            system: Some(SYSTEM_NPI_US.to_string()),
+            value: Some(npi.to_string()),
+        }),
+        display: npi_display.map(String::from),
     }
 }
 
@@ -118,17 +134,6 @@ pub fn create_identifier(codebook_var: &CcwCodebookVariable, value: &str) -> Ide
     Identifier {
         system: Some(create_codebook_system(codebook_var)),
         value: Some(value.to_string()),
-    }
-}
-
-/// Create an `Extension` with an `Identifier` with the specified value, for the specified `CcwCodebookVariable`.
-pub fn create_identifier_extension(codebook_var: &CcwCodebookVariable, value: &str) -> Extension {
-    Extension {
-        url: create_codebook_system(codebook_var),
-        value: ExtensionValue::ValueIdentifier(Identifier {
-            system: Some(create_codebook_system(codebook_var)),
-            value: Some(value.to_string()),
-        }),
     }
 }
 
@@ -196,14 +201,38 @@ pub fn create_adjudication_category_concept(codebook_var: &CcwCodebookVariable) 
     }
 }
 
+/// Creates a `CodeableConcept` for use as an `Information.category`.
+pub fn create_information_category_concept(codebook_var: &CcwCodebookVariable) -> CodeableConcept {
+    CodeableConcept {
+        coding: vec![Coding {
+            system: Some(format!(
+                "{}{}",
+                SYSTEM_BFD_BASE, SYSTEM_BFD_INFORMATION_CATEGORY
+            )),
+            code: Some(create_codebook_system(codebook_var)),
+            display: Some(codebook_var.label.to_string()),
+        }],
+    }
+}
+
 /// Creates a `CodeableConcept` for use as an `Adjudication.category`.
-pub fn create_money_from_big_decimal(value: &bigdecimal::BigDecimal) -> Money {
-    Money {
+pub fn create_quantity_from_big_decimal(value: &bigdecimal::BigDecimal) -> Quantity {
+    Quantity {
+        extension: vec![],
         // FIXME Is there a cleaner way to do this, instead of this non-public API?
         value: Some(serde_json::Number::from_string_unchecked(value.to_string())),
-        system: Some(SYSTEM_MONEY.to_string()),
-        code: Some(CODE_MONEY_USD.to_string()),
+        system: None,
+        code: None,
     }
+}
+
+/// Creates a `CodeableConcept` for use as an `Adjudication.category`.
+pub fn create_money_from_big_decimal(value: &bigdecimal::BigDecimal) -> Quantity {
+    let mut quantity = create_quantity_from_big_decimal(value);
+    quantity.system = Some(SYSTEM_MONEY.to_string());
+    quantity.code = Some(CODE_MONEY_USD.to_string());
+
+    quantity
 }
 
 /// Creates a `CodeableConcept` for use as an `Adjudication.category`.
@@ -233,14 +262,7 @@ pub fn map_care_team_npi(
 ) -> error::Result<ExplanationOfBenefit> {
     // Is a matching CareTeam already present?
     // FIXME also verify that `CareTeam.role` matches.
-    let reference = Reference {
-        extension: vec![],
-        reference: None,
-        identifier: Some(Identifier {
-            system: Some(SYSTEM_NPI_US.to_string()),
-            value: Some(npi.to_string()),
-        }),
-    };
+    let reference = create_reference_to_npi(npi);
     if !eob.careTeam.iter().any(|c| c.provider == reference) {
         let care_team = CareTeam {
             sequence: eob.careTeam.iter().map(|c| c.sequence).max().unwrap_or(0) + 1,
@@ -256,4 +278,72 @@ pub fn map_care_team_npi(
         }
     }
     Ok(eob)
+}
+
+/// Adds a new `Information` entry to `EOB.information`, and returns it.
+///
+/// # Arguments
+/// * `eob` - The `ExplanationOfBenefit` to modify.
+/// * `codebook_var` - The `CcwCodebookVariable` to use for the `Information.category`.
+fn add_information(
+    mut eob: ExplanationOfBenefit,
+    codebook_var: &CcwCodebookVariable,
+) -> Information {
+    Information {
+        sequence: eob
+            .information
+            .iter()
+            .map(|i| i.sequence)
+            .max()
+            .unwrap_or(0)
+            + 1,
+        category: create_information_category_concept(codebook_var),
+        code: None,
+    }
+}
+
+/// Adds a new `Information` entry to `EOB.information`, and returns it.
+///
+/// # Arguments
+/// * `eob` - The `ExplanationOfBenefit` to modify.
+/// * `codebook_var` - The `CcwCodebookVariable` to use for the `Information.category`.
+/// * `code` - The code value to use in `Information.code`.
+pub fn add_information_with_code(
+    mut eob: ExplanationOfBenefit,
+    codebook_var: &CcwCodebookVariable,
+    code: &str,
+) -> Information {
+    let mut information = add_information(eob, codebook_var);
+    information.code = Some(create_concept_for_codebook_value(codebook_var, code));
+    information
+}
+
+/// Converts a `Quantity` to a `Extension` with an `ExtensionValue::ValueIdentifier`.
+pub fn create_extension_identifier(
+    codebook_var: &CcwCodebookVariable,
+    value: Identifier,
+) -> Extension {
+    Extension {
+        url: create_codebook_system(codebook_var),
+        value: ExtensionValue::ValueIdentifier(value),
+    }
+}
+
+/// Converts a `Quantity` to a `Extension` with an `ExtensionValue::ValueQuanitity`.
+pub fn create_extension_quantity(codebook_var: &CcwCodebookVariable, value: Quantity) -> Extension {
+    Extension {
+        url: create_codebook_system(codebook_var),
+        value: ExtensionValue::ValueQuantity(value),
+    }
+}
+
+/// Converts a `CodeableConcept` to a `Extension` with an `ExtensionValue::ValueCodeableConcept`.
+pub fn create_extension_concept(
+    codebook_var: &CcwCodebookVariable,
+    value: CodeableConcept,
+) -> Extension {
+    Extension {
+        url: create_codebook_system(codebook_var),
+        value: ExtensionValue::ValueCodeableConcept(value),
+    }
 }

@@ -186,4 +186,57 @@ lazy_static! {
         CcwCodebookVariable::new("RPTD_GAP_DSCNT_NUM")
             .label("Gap Discount Amount")
             .build();
+    pub static ref FILL_NUM: CcwCodebookVariable = CcwCodebookVariable::new("FILL_NUM")
+        .label("Number of drug fills")
+        .build();
+    pub static ref DAYS_SUPLY_NUM: CcwCodebookVariable = CcwCodebookVariable::new("DAYS_SUPLY_NUM")
+        .label("Days Supply")
+        .build();
+    pub static ref PHRMCY_SRVC_TYPE_CD: CcwCodebookVariable =
+        CcwCodebookVariable::new("PHRMCY_SRVC_TYPE_CD")
+            .label("Pharmacy service type code")
+            .group_start()
+            .value("01", " Community/retail pharmacy")
+            .value("02", "Compounding pharmacy")
+            .value("03", "Home infusion therapy provider")
+            .value("04", "Institutional pharmacy")
+            .value("05", "Long-term care pharmacy")
+            .value("06", "Mail order pharmacy")
+            .value("07", "Managed care organization (MCO) pharmacy")
+            .value("08", "Specialty care pharmacy")
+            .value("99", "Other")
+            .value("Null", "Pharmacy is not in any other category above")
+            .group_end()
+            .build();
+    pub static ref DAW_PROD_SLCTN_CD: CcwCodebookVariable =
+        CcwCodebookVariable::new("DAW_PROD_SLCTN_CD")
+            .label("Dispense as Written (DAW) Product Selection Code")
+            .group_start()
+            .value(
+                "0",
+                "No Product Selection Indicated (may also have missing values)"
+            )
+            .value("1", "Substitution Not Allowed by Prescriber")
+            .value(
+                "2",
+                "Substitution Allowed - Patient Requested That Brand Product Be Dispensed"
+            )
+            .value(
+                "3",
+                "Substitution Allowed - Pharmacist Selected Product Dispensed"
+            )
+            .value("4", "Substitution Allowed - Generic Drug Not in Stock")
+            .value(
+                "5",
+                "Substitution Allowed - Brand Drug Dispensed as Generic"
+            )
+            .value("6", "Override")
+            .value("7", "Substitution Not Allowed - Brand Drug Mandated by Law")
+            .value(
+                "8",
+                "Substitution Allowed - Generic Drug Not Available in Marketplace"
+            )
+            .value("9", "Other")
+            .group_end()
+            .build();
 }

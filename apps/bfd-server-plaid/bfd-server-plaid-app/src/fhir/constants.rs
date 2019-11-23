@@ -34,6 +34,9 @@ pub static MEDICARE_SEGMENT_PART_D: MedicareSegment = MedicareSegment {
 /// The CMS-custom `Coding.system` for Medicare `Adjudication`s.
 pub static SYSTEM_BFD_ADJUDICATION_CATEGORY: &'static str = "/codesystem/adjudication";
 
+/// The CMS-custom `Coding.system` value for Medicare `Information.category`s.
+pub static SYSTEM_BFD_INFORMATION_CATEGORY: &'static str = "/codesystem/information";
+
 /// The standard `Money.system` for currency. (It looks odd that it has "iso" in there twice, but
 /// some web searches seem to confirm that that's correct.)
 pub static SYSTEM_MONEY: &'static str = "urn:iso:std:iso:4217";

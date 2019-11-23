@@ -8,7 +8,7 @@ use serde::Serialize;
 /// Just about every FHIR resource and element can contain an `Extension`.
 ///
 /// Note: Rust doesn't allow for struct inheritance; composition is used, instead.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Extension {
     pub url: String,
     #[serde(flatten)]
@@ -19,10 +19,12 @@ pub struct Extension {
 ///
 /// Note: extensions can contain other extensions, though Rust doesn't allow that directly. If we
 /// ever need to do support that, we'll need to wrap it in a `Box` or somesuch.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ExtensionValue {
     ValueIdentifier(Identifier),
+    ValueQuantity(Quantity),
+    ValueCodeableConcept(CodeableConcept),
 }
 
 #[derive(Debug, Serialize)]
@@ -31,20 +33,22 @@ pub enum Resource {
     ExplanationOfBenefit(explanation_of_benefit::ExplanationOfBenefit),
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct Reference {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub extension: Vec<Extension>,
     pub reference: Option<String>,
     pub identifier: Option<Identifier>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct CodeableConcept {
     pub coding: Vec<Coding>,
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct Coding {
     pub system: Option<String>,
     pub code: Option<String>,
@@ -60,8 +64,10 @@ pub struct Identifier {
     pub value: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct Money {
+#[derive(Clone, Debug, Default, PartialEq, Serialize)]
+pub struct Quantity {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub extension: Vec<Extension>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<serde_json::Number>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -162,11 +168,17 @@ pub mod explanation_of_benefit {
         pub r#type: Option<super::CodeableConcept>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         pub identifier: Vec<super::Identifier>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub organization: Option<super::Reference>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub facility: Option<super::Reference>,
         pub insurance: Option<Insurance>,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub payment: Option<Payment>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         pub item: Vec<Item>,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        pub information: Vec<Information>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         pub careTeam: Vec<CareTeam>,
         // TODO flesh out the rest of this
@@ -200,6 +212,8 @@ pub mod explanation_of_benefit {
         pub service: Option<super::CodeableConcept>,
         #[serde(flatten)]
         pub serviced: Option<Serviced>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub quantity: Option<super::Quantity>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         pub adjudication: Vec<Adjudication>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -220,13 +234,20 @@ pub mod explanation_of_benefit {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub reason: Option<super::CodeableConcept>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        pub amount: Option<super::Money>,
+        pub amount: Option<super::Quantity>,
     }
 
     #[derive(Clone, Debug, Default, Serialize)]
     pub struct Detail {
         pub sequence: u64,
         pub r#type: Option<super::CodeableConcept>,
+    }
+
+    #[derive(Clone, Debug, Default, Serialize)]
+    pub struct Information {
+        pub sequence: u64,
+        pub category: super::CodeableConcept,
+        pub code: Option<super::CodeableConcept>,
     }
 
     /// Unit tests for the explanation_of_benefit FHIR stuctures.
@@ -250,6 +271,7 @@ pub mod explanation_of_benefit {
                 serviced: Some(super::Serviced::ServicedDate(chrono::NaiveDate::from_ymd(
                     2019, 11, 08,
                 ))),
+                quantity: None,
                 adjudication: vec![],
                 detail: vec![],
             };

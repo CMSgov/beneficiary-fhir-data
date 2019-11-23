@@ -26,12 +26,15 @@
 
 pub mod error;
 mod ndc_codegen;
+mod npi_codegen;
 
 /// Generate all of the lookups data:
 ///
 /// * `${OUT_DIR}/ndc_descriptions.rs`: A PHF map the the NDC codes and their descriptions.
+/// * `${OUT_DIR}/npi_descriptions.rs`: A PHF map the the NPI numbers and their descriptions.
 pub fn generate_lookups() -> error::Result<()> {
     ndc_codegen::generate_ndc_descriptions()?;
+    npi_codegen::generate_npi_descriptions()?;
 
     Ok(())
 }
