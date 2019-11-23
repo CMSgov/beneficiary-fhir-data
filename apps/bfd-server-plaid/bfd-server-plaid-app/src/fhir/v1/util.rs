@@ -286,7 +286,7 @@ pub fn map_care_team_npi(
 /// * `eob` - The `ExplanationOfBenefit` to modify.
 /// * `codebook_var` - The `CcwCodebookVariable` to use for the `Information.category`.
 fn add_information(
-    mut eob: ExplanationOfBenefit,
+    eob: &mut ExplanationOfBenefit,
     codebook_var: &CcwCodebookVariable,
 ) -> Information {
     Information {
@@ -309,7 +309,7 @@ fn add_information(
 /// * `codebook_var` - The `CcwCodebookVariable` to use for the `Information.category`.
 /// * `code` - The code value to use in `Information.code`.
 pub fn add_information_with_code(
-    mut eob: ExplanationOfBenefit,
+    eob: &mut ExplanationOfBenefit,
     codebook_var: &CcwCodebookVariable,
     code: &str,
 ) -> Information {

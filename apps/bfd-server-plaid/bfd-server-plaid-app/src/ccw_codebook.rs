@@ -239,4 +239,142 @@ lazy_static! {
             .value("9", "Other")
             .group_end()
             .build();
+    pub static ref DSPNSNG_STUS_CD: CcwCodebookVariable =
+        CcwCodebookVariable::new("DSPNSNG_STUS_CD")
+            .label("Dispensing Status Code")
+            .group_start()
+            .value(
+                "Blank",
+                "Not specified or presumably full quantity of prescription"
+            )
+            .value("P", "Partial fill")
+            .value("C", "Completion of partial fill")
+            .group_end()
+            .build();
+    pub static ref ADJSTMT_DLTN_CD: CcwCodebookVariable =
+        CcwCodebookVariable::new("ADJSTMT_DLTN_CD")
+            .label("Adjustment Deletion Code")
+            .group_start()
+            .value("Blank", "Original PDE")
+            .value("A", "Adjustment")
+            .value("D", "Deletion")
+            .value("R", "Resubmitted")
+            .group_end()
+            .build();
+    pub static ref NSTD_FRMT_CD: CcwCodebookVariable = CcwCodebookVariable::new("NSTD_FRMT_CD")
+        .label("Non-Standard Format Code")
+        .group_start()
+        .value("X", "X12 837")
+        .value("B", "Beneficiary submitted claim")
+        .value("C", "Coordination of Benefits")
+        .value("P", "Paper claim from provider")
+        .value("Blank", "NCPDP electronic format")
+        .group_end()
+        .build();
+    pub static ref PRCNG_EXCPTN_CD: CcwCodebookVariable =
+        CcwCodebookVariable::new("PRCNG_EXCPTN_CD")
+            .label("Pricing Exception Code")
+            .group_start()
+            .value("M", "Medicare is a secondary payer (MSP)")
+            .value("O", "Out of network pharmacy")
+            .value("Blank", "In-network pharmacy")
+            .group_end()
+            .build();
+    pub static ref CTSTRPHC_CVRG_CD: CcwCodebookVariable =
+        CcwCodebookVariable::new("CTSTRPHC_CVRG_CD")
+            .label("Catastrophic Coverage Code")
+            .group_start()
+            .value("A", "Attachment point met on this event")
+            .value("C", "Above attachment point")
+            .value("Blank", "Attachment point not met")
+            .group_end()
+            .build();
+    pub static ref RX_ORGN_CD: CcwCodebookVariable = CcwCodebookVariable::new("RX_ORGN_CD")
+        .label("Prescription Origination Code")
+        .group_start()
+        .value("Null", "Unknown")
+        .value("0", "Not specified")
+        .value("1", "Written")
+        .value("2", "Telephone")
+        .value("3", "Electronic")
+        .value("4", "Facsimile")
+        .value("5", "Pharmacy")
+        .group_end()
+        .build();
+    pub static ref BRND_GNRC_CD: CcwCodebookVariable = CcwCodebookVariable::new("BRND_GNRC_CD")
+        .label("Brand-Generic Code Reported by Submitting Plan")
+        .group_start()
+        .value("B", "Brang")
+        .value("G", "Generic")
+        .value("Null/Missing", "")
+        .group_end()
+        .build();
+    pub static ref PTNT_RSDNC_CD: CcwCodebookVariable = CcwCodebookVariable::new("PTNT_RSDNC_CD")
+        .label("Patient Residence Code")
+        .group_start()
+        .value(
+            "00",
+            "Not specified, other patient residence not identified below"
+        )
+        .value("01", "Home")
+        .value("02", "Skilled Nursing Facility")
+        .value("03", "Nursing facility (long-term care facility)")
+        .value("04", "Assisted living facility")
+        .value(
+            "05",
+            "Custodial Care Facility (residential but not medical care)"
+        )
+        .value(
+            "06",
+            "Group home (e.g., congregate residential foster care)"
+        )
+        .value("07", "Inpatient Psychiatric Facility")
+        .value("08", "Psychiatric Facility – Partial Hospitalization")
+        .value(
+            "09",
+            "Intermediate care facility for the mentally retarded (ICF/MR)"
+        )
+        .value("10", "Residential Substance Abuse Treatment Facility")
+        .value("11", "Hospice")
+        .value("12", "Psychiatric Residential Treatment Facility")
+        .value("13", "Comprehensive Inpatient Rehabilitation Facility")
+        .value("14", "Homeless Shelter")
+        .value("15", "Correctional Institution")
+        .group_end()
+        .build();
+    pub static ref SUBMSN_CLR_CD: CcwCodebookVariable = CcwCodebookVariable::new("SUBMSN_CLR_CD")
+        .label("Submission clarification code")
+        .group_start()
+        .value("00", "(Unknown value – rarely populated)")
+        .value("05", "Therapy change. Physician determined that a change in therapy was required – either the medication was used faster than expected, or a different dosage form is needed.")
+        .value("07", "Emergency supply of non-formulary drugs (or formulary drugs which typically require step therapy or prior authorization). Medication has been determined by the physician to be medically necessary.")
+        .value("08", "Process compound for approved ingredients")
+        .value("14", "LTC leave of absence – short fill required for take-home use")
+        .value("16", "LTC emergency box (e box) /automated dispensing machine")
+        .value("17", "LTC emergency supply remainder (remainder of drug from the emergency supply)")
+        .value("18", "LTC patient admit/readmission indicator. This status required new dispensing of medication.")
+        .value("19", "Split billing. The quantity dispensed is the remainder billed to a subsequent payer after Medicare Part A benefits expired (partial payment under Part A).")
+        .value("21", "LTC dispensing rule for &lt;=14 day supply is not applicable due to CMS exclusion or the fact that the manufacturer’s packaging does not allow for special dispensing")
+        .value("22", "LTC dispensing, 7-day supply")
+        .value("23", "LTC dispensing, 4-day supply")
+        .value("24", "LTC dispensing, 3-day supply")
+        .value("25", "LTC dispensing, 2-day supply")
+        .value("26", "LTC dispensing, 1-day supply")
+        .value("27", "LTC dispensing, 4-day supply, then 3-day supply")
+        .value("28", "LTC dispensing, 2-day supply, then 2-day supply, then 3-day supply")
+        .value("29", "LTC dispensing, daily during the week then multiple days (3) for weekend")
+        .value("30", "LTC dispensing, per shift (multiple medication passes)")
+        .value("31", "LTC dispensing, per medication pass")
+        .value("32", "LTC dispensing, PRN on demand")
+        .value("33", "LTC dispensing, other &lt;=7 day cycle")
+        .value("34", "LTC dispensing, 14-day supply")
+        .value("35", "LTC dispensing, other 8-14 day dispensing not listed above")
+        .value("36", "LTC dispensing, outside short cycle, determined to be Part D after originally submitted to another payer")
+        .value("42", "The prescriber ID submitted has been validated and is active (rarely populated)")
+        .value("43", "For the prescriber ID submitted, the associated DEA number has been renewed or the renewal is in progress (rarely populated)")
+        .value("44", "(Unknown value – rarely populated)")
+        .value("45", "For the prescriber ID submitted, the associated DEA number is a valid hospital DEA number with suffix (rarely populated)")
+        .value("Null", "Not applicable, beneficiary not in an LTC setting (or in the first two months of 2013, the presumption is there was greater than a 14-day supply)")
+        .group_end()
+        .build();
 }

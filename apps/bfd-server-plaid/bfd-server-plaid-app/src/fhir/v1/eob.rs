@@ -97,12 +97,49 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
     )];
     eob.facility = Some(facility);
 
-    // Map DAW_PROD_SLCTN_CD.
+    // Map the `ExplanationOfBenefit.information` entries.
+    // FIXME Need to map these even when they're null, as the codebook has descriptions for that.
     add_information_with_code(
-        eob,
+        &mut eob,
         &ccw_codebook::DAW_PROD_SLCTN_CD,
         &claim.DAW_PROD_SLCTN_CD,
     );
+    if let Some(dspnsng_stus_cd) = &claim.DSPNSNG_STUS_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::DSPNSNG_STUS_CD, dspnsng_stus_cd);
+    }
+    add_information_with_code(
+        &mut eob,
+        &ccw_codebook::DRUG_CVRG_STUS_CD,
+        &claim.DRUG_CVRG_STUS_CD,
+    );
+    if let Some(adjstmt_dltn_cd) = &claim.ADJSTMT_DLTN_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::ADJSTMT_DLTN_CD, adjstmt_dltn_cd);
+    }
+    if let Some(nstd_frmt_cd) = &claim.NSTD_FRMT_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::NSTD_FRMT_CD, nstd_frmt_cd);
+    }
+    if let Some(prcng_excptn_cd) = &claim.PRCNG_EXCPTN_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::PRCNG_EXCPTN_CD, prcng_excptn_cd);
+    }
+    if let Some(ctstrphc_cvrg_cd) = &claim.CTSTRPHC_CVRG_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::CTSTRPHC_CVRG_CD, ctstrphc_cvrg_cd);
+    }
+    if let Some(rx_orgn_cd) = &claim.RX_ORGN_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::RX_ORGN_CD, rx_orgn_cd);
+    }
+    if let Some(brnd_gnrc_cd) = &claim.BRND_GNRC_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::BRND_GNRC_CD, brnd_gnrc_cd);
+    }
+    // FIXME Why is PHRMCY_SRVC_TYPE_CD mapped twice?
+    add_information_with_code(
+        &mut eob,
+        &ccw_codebook::PHRMCY_SRVC_TYPE_CD,
+        &claim.PHRMCY_SRVC_TYPE_CD,
+    );
+    add_information_with_code(&mut eob, &ccw_codebook::PTNT_RSDNC_CD, &claim.PTNT_RSDNC_CD);
+    if let Some(submsn_clr_cd) = &claim.SUBMSN_CLR_CD {
+        add_information_with_code(&mut eob, &ccw_codebook::SUBMSN_CLR_CD, submsn_clr_cd);
+    }
 
     // Create the EOB's single Item, its Adjudications, and its single Detail.
     let mut item = explanation_of_benefit::Item::default();
