@@ -169,7 +169,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
-	"-DbfdServer.plaid.path=${targetDirectory}/../../../bfd-server-plaid/target/debug/bfd-server-plaid" \
+	"-DbfdServer.plaid.path=${targetDirectory}/../../../bfd-server-plaid/target/debug/bfd-server-plaid-app" \
 	"-DbfdServer.plaid.log=${workDirectory}/plaid-console.log" \
 	-jar "${serverLauncher}" \
 	>"${serverLog}" 2>&1 \

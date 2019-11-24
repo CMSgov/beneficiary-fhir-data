@@ -196,7 +196,7 @@ lazy_static! {
         CcwCodebookVariable::new("PHRMCY_SRVC_TYPE_CD")
             .label("Pharmacy service type code")
             .group_start()
-            .value("01", " Community/retail pharmacy")
+            .value("01", "Community/retail pharmacy")
             .value("02", "Compounding pharmacy")
             .value("03", "Home infusion therapy provider")
             .value("04", "Institutional pharmacy")
@@ -304,9 +304,8 @@ lazy_static! {
     pub static ref BRND_GNRC_CD: CcwCodebookVariable = CcwCodebookVariable::new("BRND_GNRC_CD")
         .label("Brand-Generic Code Reported by Submitting Plan")
         .group_start()
-        .value("B", "Brang")
-        .value("G", "Generic")
-        .value("Null/Missing", "")
+        .value("B", "Brand")
+        .value("G", "Generic Null/missing") // FIXME this is super wrong
         .group_end()
         .build();
     pub static ref PTNT_RSDNC_CD: CcwCodebookVariable = CcwCodebookVariable::new("PTNT_RSDNC_CD")

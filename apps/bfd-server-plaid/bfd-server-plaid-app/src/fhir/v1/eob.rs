@@ -88,9 +88,9 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
     // FIXME Map SRVC_PRVDR_ID_QLFYR_CD.
     eob.organization = Some(create_reference_to_npi(&claim.SRVC_PRVDR_ID));
     let mut facility = create_reference_to_npi(&claim.SRVC_PRVDR_ID);
-    facility.extension = vec![create_extension_concept(
+    facility.extension = vec![create_extension_coding(
         &ccw_codebook::PHRMCY_SRVC_TYPE_CD,
-        create_concept_for_codebook_value(
+        create_coding_for_codebook_value(
             &ccw_codebook::PHRMCY_SRVC_TYPE_CD,
             &claim.PHRMCY_SRVC_TYPE_CD,
         ),
@@ -99,46 +99,46 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
 
     // Map the `ExplanationOfBenefit.information` entries.
     // FIXME Need to map these even when they're null, as the codebook has descriptions for that.
-    add_information_with_code(
-        &mut eob,
+    eob.information.push(create_information_with_code(
+        &eob,
         &ccw_codebook::DAW_PROD_SLCTN_CD,
         &claim.DAW_PROD_SLCTN_CD,
-    );
+    ));
     if let Some(dspnsng_stus_cd) = &claim.DSPNSNG_STUS_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::DSPNSNG_STUS_CD, dspnsng_stus_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::DSPNSNG_STUS_CD, dspnsng_stus_cd));
     }
-    add_information_with_code(
-        &mut eob,
+    eob.information.push(create_information_with_code(
+        &eob,
         &ccw_codebook::DRUG_CVRG_STUS_CD,
         &claim.DRUG_CVRG_STUS_CD,
-    );
+    ));
     if let Some(adjstmt_dltn_cd) = &claim.ADJSTMT_DLTN_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::ADJSTMT_DLTN_CD, adjstmt_dltn_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::ADJSTMT_DLTN_CD, adjstmt_dltn_cd));
     }
     if let Some(nstd_frmt_cd) = &claim.NSTD_FRMT_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::NSTD_FRMT_CD, nstd_frmt_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::NSTD_FRMT_CD, nstd_frmt_cd));
     }
     if let Some(prcng_excptn_cd) = &claim.PRCNG_EXCPTN_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::PRCNG_EXCPTN_CD, prcng_excptn_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::PRCNG_EXCPTN_CD, prcng_excptn_cd));
     }
     if let Some(ctstrphc_cvrg_cd) = &claim.CTSTRPHC_CVRG_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::CTSTRPHC_CVRG_CD, ctstrphc_cvrg_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::CTSTRPHC_CVRG_CD, ctstrphc_cvrg_cd));
     }
     if let Some(rx_orgn_cd) = &claim.RX_ORGN_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::RX_ORGN_CD, rx_orgn_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::RX_ORGN_CD, rx_orgn_cd));
     }
     if let Some(brnd_gnrc_cd) = &claim.BRND_GNRC_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::BRND_GNRC_CD, brnd_gnrc_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::BRND_GNRC_CD, brnd_gnrc_cd));
     }
     // FIXME Why is PHRMCY_SRVC_TYPE_CD mapped twice?
-    add_information_with_code(
-        &mut eob,
+    eob.information.push(create_information_with_code(
+        &eob,
         &ccw_codebook::PHRMCY_SRVC_TYPE_CD,
         &claim.PHRMCY_SRVC_TYPE_CD,
-    );
-    add_information_with_code(&mut eob, &ccw_codebook::PTNT_RSDNC_CD, &claim.PTNT_RSDNC_CD);
+    ));
+    eob.information.push(create_information_with_code(&eob, &ccw_codebook::PTNT_RSDNC_CD, &claim.PTNT_RSDNC_CD));
     if let Some(submsn_clr_cd) = &claim.SUBMSN_CLR_CD {
-        add_information_with_code(&mut eob, &ccw_codebook::SUBMSN_CLR_CD, submsn_clr_cd);
+        eob.information.push(create_information_with_code(&eob, &ccw_codebook::SUBMSN_CLR_CD, submsn_clr_cd));
     }
 
     // Create the EOB's single Item, its Adjudications, and its single Detail.
@@ -228,13 +228,13 @@ fn transform_claim_partd(claim: &PartDEvent) -> error::Result<ExplanationOfBenef
 
     // Map PRSCRBR_ID_QLFYR_CD.
     match claim.PRSCRBR_ID_QLFYR_CD.as_ref() {
-        "" | "01" => {
+        "01" => {
+            // FIXME why don't we map this?
+        }
+        _ => {
             return Err(error::AppError::InvalidSourceDataError(
                 "Invalid PRSCRBR_ID_QLFYR_CD value.".to_string(),
             ));
-        }
-        _ => {
-            // FIXME why don't we map this?
         }
     }
 

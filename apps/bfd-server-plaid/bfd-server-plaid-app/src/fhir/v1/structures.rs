@@ -24,7 +24,7 @@ pub struct Extension {
 pub enum ExtensionValue {
     ValueIdentifier(Identifier),
     ValueQuantity(Quantity),
-    ValueCodeableConcept(CodeableConcept),
+    ValueCoding(Coding),
 }
 
 #[derive(Debug, Serialize)]
@@ -239,7 +239,8 @@ pub mod explanation_of_benefit {
 
     #[derive(Clone, Debug, Default, Serialize)]
     pub struct Detail {
-        pub sequence: u64,
+        // FIXME The sequence field should be required.
+        // pub sequence: u64,
         pub r#type: Option<super::CodeableConcept>,
     }
 

@@ -17,3 +17,7 @@ bfd-server-plaid-lookups-codegen = { path = "../bfd-server-plaid-lookups-codegen
 
 # Use the "perfect hash" tables produced by `build.rs`.
 phf = "0.8"
+
+# Parse NDCs for lookup.
+lazy_static = "1.4.0"
+regex = "1.3.1"

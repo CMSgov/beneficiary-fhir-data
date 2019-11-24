@@ -161,17 +161,25 @@ pub fn create_concept_for_value_set_code(
     }
 }
 
-/// Creates a `CodeableConcept` for use as an `Adjudication.category`.
+/// Creates a `Coding` for the specified `CcwCodebookVariable` and value.
+pub fn create_coding_for_codebook_value(
+    codebook_var: &CcwCodebookVariable,
+    code: &str,
+) -> Coding {
+    Coding {
+        system: Some(create_codebook_system(codebook_var)),
+        code: Some(code.to_string()),
+        display: codebook_var.lookup_description(code),
+    }
+}
+
+/// Creates a `CodeableConcept` for the specified `CcwCodebookVariable` and value.
 pub fn create_concept_for_codebook_value(
     codebook_var: &CcwCodebookVariable,
     code: &str,
 ) -> CodeableConcept {
     CodeableConcept {
-        coding: vec![Coding {
-            system: Some(create_codebook_system(codebook_var)),
-            code: Some(code.to_string()),
-            display: codebook_var.lookup_description(code),
-        }],
+        coding: vec![create_coding_for_codebook_value(codebook_var, code)],
     }
 }
 
@@ -265,7 +273,8 @@ pub fn map_care_team_npi(
     let reference = create_reference_to_npi(npi);
     if !eob.careTeam.iter().any(|c| c.provider == reference) {
         let care_team = CareTeam {
-            sequence: eob.careTeam.iter().map(|c| c.sequence).max().unwrap_or(0) + 1,
+            // FIXME Sequence should start at 1, not 2.
+            sequence: eob.careTeam.iter().map(|c| c.sequence).max().unwrap_or(1) + 1,
             provider: reference,
             role: Some(create_concept_for_value_set_code(care_team_role)),
         };
@@ -280,13 +289,13 @@ pub fn map_care_team_npi(
     Ok(eob)
 }
 
-/// Adds a new `Information` entry to `EOB.information`, and returns it.
+/// Creates an `Information` for the specified `ExplanationOfBenefit`.
 ///
 /// # Arguments
-/// * `eob` - The `ExplanationOfBenefit` to modify.
+/// * `eob` - The `ExplanationOfBenefit` that the `Information` will be for.
 /// * `codebook_var` - The `CcwCodebookVariable` to use for the `Information.category`.
-fn add_information(
-    eob: &mut ExplanationOfBenefit,
+fn create_information(
+    eob: &ExplanationOfBenefit,
     codebook_var: &CcwCodebookVariable,
 ) -> Information {
     Information {
@@ -302,18 +311,18 @@ fn add_information(
     }
 }
 
-/// Adds a new `Information` entry to `EOB.information`, and returns it.
+/// Creates an `Information` for the specified `ExplanationOfBenefit`.
 ///
 /// # Arguments
-/// * `eob` - The `ExplanationOfBenefit` to modify.
+/// * `eob` - The `ExplanationOfBenefit` that the `Information` will be for.
 /// * `codebook_var` - The `CcwCodebookVariable` to use for the `Information.category`.
 /// * `code` - The code value to use in `Information.code`.
-pub fn add_information_with_code(
-    eob: &mut ExplanationOfBenefit,
+pub fn create_information_with_code(
+    eob: &ExplanationOfBenefit,
     codebook_var: &CcwCodebookVariable,
     code: &str,
 ) -> Information {
-    let mut information = add_information(eob, codebook_var);
+    let mut information = create_information(eob, codebook_var);
     information.code = Some(create_concept_for_codebook_value(codebook_var, code));
     information
 }
@@ -337,13 +346,13 @@ pub fn create_extension_quantity(codebook_var: &CcwCodebookVariable, value: Quan
     }
 }
 
-/// Converts a `CodeableConcept` to a `Extension` with an `ExtensionValue::ValueCodeableConcept`.
-pub fn create_extension_concept(
+/// Converts a `Coding` to a `Extension` with an `ExtensionValue::ValueCoding`.
+pub fn create_extension_coding(
     codebook_var: &CcwCodebookVariable,
-    value: CodeableConcept,
+    value: Coding,
 ) -> Extension {
     Extension {
         url: create_codebook_system(codebook_var),
-        value: ExtensionValue::ValueCodeableConcept(value),
+        value: ExtensionValue::ValueCoding(value),
     }
 }

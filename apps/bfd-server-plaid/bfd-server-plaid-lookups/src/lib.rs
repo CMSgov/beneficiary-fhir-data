@@ -8,7 +8,7 @@
 //! Use it, as follows:
 //!
 //! ```rust
-//! let ndc_code = "00777-3107";
+//! let ndc_code = "007773107";
 //! let ndc_description = bfd_server_plaid_lookups::ndc::lookup_ndc_description(ndc_code);
 //!
 //! assert_eq!(Some("Prozac - FLUOXETINE HYDROCHLORIDE"), ndc_description);
