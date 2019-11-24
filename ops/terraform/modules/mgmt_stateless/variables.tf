@@ -21,7 +21,7 @@ variable "jenkins_key_name" {
 variable "instance_size" {
   type              = string
   description       = "The EC2 instance size to use"
-  default           = "m5.xlarge"
+  default           = "c5.xlarge"
 }
 
 variable "mgmt_network_ci_cidrs" {
