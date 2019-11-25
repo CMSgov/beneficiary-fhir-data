@@ -175,7 +175,7 @@ module "fhir_lb" {
 
   ingress = {
     description   = "From VPC peerings, the MGMT VPC, and self"
-    port          = 7443
+    port          = 443
     cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
   }
 
