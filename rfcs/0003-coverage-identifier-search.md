@@ -39,27 +39,48 @@ their Part D entrollment status.
 
 ### Patient centric interface
 
-`/Patient/?ptdcntrct<month_code>=<contract id>`
+`v1.1/fhir/Patient/?ptdcntrct<month_code>=<contract id>`
 
-returns a set of patient resources
+returns a [bundle](https://www.hl7.org/fhir/bundle.html) of [patient resources](https://www.hl7.org/fhir/patient.html)
 that have that `contract_id` for that `month_code`.
 
-`/Patient/?Coverage.identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month_code>|<contract_id>`
 
-Same return value.
-
-### Coverage centric interface
-
-`/Coverage/?identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month_code>|<contract_id>`
-
-returns a set of Coverage resources
-for that `contract_id` and `month_code`.
-Each resource would contain a
-`beneficiary` entry
-with a `Patient/<fhir_id>` entry.
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
+
+#### Implementation Goals
+
+- a pattern for data filters
+- low risk of change to current external contract
+	- do partners currently expect a `Patient` call without a `patient_id` parameter to error?
+
+#### valid parameters
+
+- [ptdcntrct01](https://bluebutton.cms.gov/resources/variables/ptdcntrct01/)
+- [ptdcntrct02](https://bluebutton.cms.gov/resources/variables/ptdcntrct02/)
+- [ptdcntrct03](https://bluebutton.cms.gov/resources/variables/ptdcntrct03/)
+- [ptdcntrct04](https://bluebutton.cms.gov/resources/variables/ptdcntrct04/)
+- [ptdcntrct05](https://bluebutton.cms.gov/resources/variables/ptdcntrct05/)
+- [ptdcntrct06](https://bluebutton.cms.gov/resources/variables/ptdcntrct06/)
+- [ptdcntrct07](https://bluebutton.cms.gov/resources/variables/ptdcntrct07/)
+- [ptdcntrct08](https://bluebutton.cms.gov/resources/variables/ptdcntrct08/)
+- [ptdcntrct09](https://bluebutton.cms.gov/resources/variables/ptdcntrct09/)
+- [ptdcntrct10](https://bluebutton.cms.gov/resources/variables/ptdcntrct10/)
+- [ptdcntrct11](https://bluebutton.cms.gov/resources/variables/ptdcntrct11/)
+- [ptdcntrct12](https://bluebutton.cms.gov/resources/variables/ptdcntrct12/)
+
+### Proposed Solution: Unresolved Questions
+[Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
+
+### Proposed Solution: Drawbacks
+[Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
+
+TODO
+
+
+### Proposed Solution: Notable Alternatives
+[Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
 
 #### Notes:
 
@@ -78,20 +99,6 @@ https://bluebutton.cms.gov/resources/variables/ptdcntrct01 is a valid coding
 
 [example coverage response with codes](https://github.com/CMSgov/beneficiary-fhir-data/blob/b541b973bf21c925f80df9c154263eb0b6ae4483/apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/coverageSearchByPatientId.json#L588-L660)
 
-### Proposed Solution: Unresolved Questions
-[Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
-
-### Proposed Solution: Drawbacks
-[Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
-
-TODO
-
-
-### Proposed Solution: Notable Alternatives
-[Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
-
-TODO
-
 ## Prior Art
 [Prior Art]: #prior-art
 
@@ -100,7 +107,19 @@ TODO
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
 
-TODO
+`/Patient/?Coverage.identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month_code>|<contract_id>`
+
+Same return value.
+
+### Coverage centric interface
+
+`/Coverage/?identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month_code>|<contract_id>`
+
+returns a set of Coverage resources
+for that `contract_id` and `month_code`.
+Each resource would contain a
+`beneficiary` entry
+with a `Patient/<fhir_id>` entry.
 
 ## Addendums
 [Addendums]: #addendums
