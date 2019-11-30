@@ -68,23 +68,28 @@ class AppBuildResults implements Serializable {
  * @throws Exception An exception will be bubbled up if the installation fails.
  */
 def installRustToolchain() {
-	// FIXME This is a hacky way of doing this; the toolchain should be added to the Jenkins setup.
-	// Check to see if it's already installed.
+	// FIXME This all is a hacky way of doing this; the toolchain should be added to the Jenkins setup.
+
+	// Check to see if Cargo is already installed.
 	isCargoInstalled = sh(script: 'which cargo', returnStatus: true) == 0
 	if (isCargoInstalled) {
 		echo 'Cargo is already installed.'
 		sh 'cargo --version'
 		sh 'rustc --version'
-		return
+	} else {
+		// It's not installed, so let's fix that.
+		// Reference: <https://www.rust-lang.org/learn/get-started>
+		sh "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+		echo 'Installed Rust toolchain.'
+		sh 'cargo --version'
+		sh 'rustc --version'
 	}
 
-	// It's not installed, so let's fix that.
-	// Reference: <https://www.rust-lang.org/learn/get-started>
-	echo 'Installing Rust toolchain...'
-	sh "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
-	echo 'Installed Rust toolchain.'
-	sh 'cargo --version'
-	sh 'rustc --version'
+	sh 'rpm --quiet --query gcc || sudo yum install -y gcc'
+	sh 'rpm --quiet --query gcc || sudo yum install -y openssl-devel'
+	sh 'rpm --quiet --query gcc || sudo yum install -y sqlite-devel'
+	sh 'rpm --quiet --query gcc || sudo yum install -y postgresql-libs'
+	sh 'rpm --quiet --query gcc || sudo yum install -y postgresql-static'
 }
 
 /**
