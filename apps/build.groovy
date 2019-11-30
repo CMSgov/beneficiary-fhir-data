@@ -104,7 +104,7 @@ def build(String build_env) {
 			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify -Dhttp.nonProxyHosts=localhost"
 		} else if (build_env == 'ccs') {
 			// Build the Plaid app.
-			installRustToolchain
+			installRustToolchain()
 			dir ('bfd-server-plaid') {
 				sh 'cargo build --release'
 			}
