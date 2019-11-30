@@ -65,12 +65,14 @@ resource "aws_security_group" "app" {
   vpc_id        = var.env_config.vpc_id
   tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
 
-  ingress {
-    from_port       = var.lb_config.port
-    to_port         = var.lb_config.port
-    protocol        = "tcp"
-    security_groups = [var.lb_config.sg]
-  } 
+  ingress = [
+    for port in var.lb_config.ports: {
+      from_port       = port
+      to_port         = port
+      protocol        = "tcp"
+      security_groups = [var.lb_config.sg]
+    }
+  ]
 }
 
 # App access to the database
@@ -124,7 +126,6 @@ resource "aws_launch_template" "main" {
   
   user_data = base64encode(templatefile("${path.module}/../templates/${var.launch_config.user_data_tpl}", {
     env           = var.env_config.env
-    port          = var.lb_config.port
     accountId     = var.launch_config.account_id
     gitBranchName = var.launch_config.git_branch
     gitCommitId   = var.launch_config.git_branch

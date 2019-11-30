@@ -59,6 +59,32 @@ class AppBuildResults implements Serializable {
 	String dataPipelineUberJar
 	String dataServerLauncher
 	String dataServerWar
+	String dataServerPlaidApp
+}
+
+/**
+ * Installs the Rust build toolchain if it's not already present.
+ *
+ * @throws Exception An exception will be bubbled up if the installation fails.
+ */
+def installRustToolchain() {
+	// FIXME This is a hacky way of doing this; the toolchain should be added to the Jenkins setup.
+	// Check to see if it's already installed.
+	isCargoInstalled = sh(script: 'which cargo', returnStatus: true) == 0
+	if (isCargoInstalled) {
+		echo 'Cargo is already installed.'
+		sh 'cargo --version'
+		sh 'rustc --version'
+		return
+	}
+
+	// It's not installed, so let's fix that.
+	// Reference: <https://www.rust-lang.org/learn/get-started>
+	echo 'Installing Rust toolchain...'
+	sh "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+	echo 'Installed Rust toolchain.'
+	sh 'cargo --version'
+	sh 'rustc --version'
 }
 
 /**
@@ -67,15 +93,21 @@ class AppBuildResults implements Serializable {
  * @return An {@link AppBuildResults} instance containing the paths to the artifacts that were built.
  * @throws Exception An exception will be bubbled up if the Maven build fails.
  */
- 
 def build(String build_env) {
 	dir ('apps') {
 		if (build_env == 'healthapt') {
 			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify -Dhttp.nonProxyHosts=localhost"
 		} else if (build_env == 'ccs') {
+			// Build the Plaid app.
+			installRustToolchain
+			dir ('bfd-server-plaid') {
+				sh 'cargo build --release'
+			}
+
 			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify"
-		} else 
-		UnsupportedOperationException("No Build Apps job available for ${params.dev_env} environment")
+		} else {
+			UnsupportedOperationException("No Build Apps job available for ${params.dev_env} environment")
+		}
 	
 		/*
 		 * Fingerprint the output artifacts and archive the test results.
@@ -90,7 +122,8 @@ def build(String build_env) {
 	return new AppBuildResults(
 		dataPipelineUberJar: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar',
 		dataServerLauncher: 'apps/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT-capsule-fat.jar',
-		dataServerWar: 'apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war'
+		dataServerWar: 'apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war',
+		dataServerPlaidApp: 'apps/bfd-server-plaid/target/release/bfd-server-plaid-app'
 	)
 }
 

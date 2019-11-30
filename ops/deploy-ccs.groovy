@@ -139,6 +139,7 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 
 			varsFile.write(JsonOutput.toJson([
 				env: environmentId,
+				data_server_plaid_app: "${workspace}/${appBuildResults.dataServerPlaidApp}",
 				data_server_launcher: "${workspace}/${appBuildResults.dataServerLauncher}",
 				data_server_war: "${workspace}/${appBuildResults.dataServerWar}",
 				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",

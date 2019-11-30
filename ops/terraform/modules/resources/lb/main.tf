@@ -57,17 +57,19 @@ resource "aws_elb" "main" {
   connection_draining         = true
   connection_draining_timeout = 60
 
-  listener {
-    lb_protocol         = "TCP"
-    lb_port             = var.ingress.port
-    instance_protocol   = "TCP"
-    instance_port       = var.egress.port
-  }
+  listener = [
+    for port in var.ingress.ports: {
+      lb_protocol         = "TCP"
+      lb_port             = port
+      instance_protocol   = "TCP"
+      instance_port       = port
+    }
+  ]
 
   health_check {
     healthy_threshold   = 5   # Match HealthApt
     unhealthy_threshold = 2   # Match HealthApt
-    target              = "TCP:${var.egress.port}"
+    target              = "TCP:${var.egress.health_check_port}"
     interval            = 10  # (seconds) Match HealthApt
     timeout             = 5   # (seconds) Match HealthApt
   } 
@@ -88,21 +90,25 @@ resource "aws_security_group" "lb" {
   vpc_id          = var.env_config.vpc_id
   tags            = merge({Name="bfd-${var.env_config.env}-${var.role}-lb"}, local.tags)
 
-  ingress {
-    from_port     = var.ingress.port
-    to_port       = var.ingress.port
-    protocol      = "tcp"
-    cidr_blocks   = var.ingress.cidr_blocks
-    description   = var.ingress.description
-  }
+  ingress = [
+    for port in var.ingress.ports: {
+      from_port     = port
+      to_port       = port
+      protocol      = "tcp"
+      cidr_blocks   = var.ingress.cidr_blocks
+      description   = var.ingress.description
+    }
+  ]
 
-  egress {
-    from_port     = var.egress.port
-    to_port       = var.egress.port
-    protocol      = "tcp"
-    cidr_blocks   = var.egress.cidr_blocks
-    description   = var.egress.description
-  }
+  egress = [
+    for port in var.egress.ports: {
+      from_port     = port
+      to_port       = port
+      protocol      = "tcp"
+      cidr_blocks   = var.egress.cidr_blocks
+      description   = var.egress.description
+    }
+  ]
 }
 
 # Policy for S3 log access

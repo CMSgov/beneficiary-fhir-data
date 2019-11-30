@@ -33,6 +33,14 @@
   become: true
   ignore_errors: true
 
+- name: Copy BFD Server Plaid App
+  copy:
+    src: "{{ data_server_plaid_app }}"
+    dest: "{{ data_server_dir }}/{{ data_server_plaid_app | basename }}"
+  become: true
+  notify:
+    - 'Restart BFD Server Service'
+
 - name: Copy BFD Server Launcher
   copy:
     src: "{{ data_server_launcher }}"
@@ -134,10 +142,24 @@
   become: true
   become_user: "{{ data_server_user }}"
 
+- name: Save App Server SSL Truststore Certificates for the Plaid App
+  shell: "cat {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt >> {{ data_server_dir }}/bluebutton-appserver-truststore-work/clients-trusted.crt"
+  with_items: "{{ data_server_ssl_client_certificates }}"
+  changed_when: false
+  become: true
+  become_user: "{{ data_server_user }}"
+
 - name: Save App Server SSL Truststore Certificate Authorities
   copy:
     content: "{{ item.certificate }}"
     dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
+  with_items: "{{ data_server_ssl_client_cas }}"
+  changed_when: false
+  become: true
+  become_user: "{{ data_server_user }}"
+
+- name: Save App Server SSL Truststore Certificate Authorities for the Plaid App
+  shell: "cat {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt >> {{ data_server_dir }}/bluebutton-appserver-truststore-work/clients-trusted.crt"
   with_items: "{{ data_server_ssl_client_cas }}"
   changed_when: false
   become: true
@@ -166,6 +188,18 @@
     remote_src: true
     src: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
     dest: "{{ data_server_dir }}/bluebutton-appserver-truststore.jks"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=rw,o=r
+  become: true
+  notify:
+    - 'Restart BFD Server Service'
+
+- name: Update App Server SSL Truststore for Plaid App
+  copy:
+    remote_src: true
+    src: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/clients-trusted.crt"
+    dest: "{{ data_server_dir }}/clients-trusted.crt"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=rw,o=r

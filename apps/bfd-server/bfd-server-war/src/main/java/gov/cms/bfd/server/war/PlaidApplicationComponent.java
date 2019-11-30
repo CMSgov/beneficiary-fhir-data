@@ -29,6 +29,9 @@ public class PlaidApplicationComponent implements DisposableBean {
    *
    * @param plaidPathText the path to the Plaid application's binary
    * @param plaidLogPath the path to log the Plaid application's output to
+   * @param plaidTlsServerCert the path to the Plaid application's TLS server certficate file
+   * @param plaidTlsServerKey the path to the Plaid application's TLS server key file
+   * @param plaidTlsClientCerts the path to the Plaid application's TLS client certificates file
    * @param databaseUrlFromProperties the PostgreSQL JDBC database URL provided as a system property
    * @param databaseUsernameFromProperties the PostgreSQL database username provided as a system
    *     property, if any
@@ -39,6 +42,9 @@ public class PlaidApplicationComponent implements DisposableBean {
   public PlaidApplicationComponent(
       @Value("${bfdServer.plaid.path}") String plaidPathText,
       @Value("${bfdServer.plaid.log}") String plaidLogPath,
+      @Value("${bfdServer.plaid.tls.server.cert}") String plaidTlsServerCert,
+      @Value("${bfdServer.plaid.tls.server.key}") String plaidTlsServerKey,
+      @Value("${bfdServer.plaid.tls.client.certs}") String plaidTlsClientCerts,
       @Value("${" + SpringConfiguration.PROP_DB_URL + "}") String databaseUrlFromProperties,
       @Value("${" + SpringConfiguration.PROP_DB_USERNAME + "}")
           String databaseUsernameFromProperties,
@@ -64,6 +70,9 @@ public class PlaidApplicationComponent implements DisposableBean {
     ProcessBuilder plaidProcessBuilder = new ProcessBuilder(plaidPath.toString());
     plaidProcessBuilder.environment().put("BFD_PLAID_HTTP_PORT", "" + plaidHttpPort);
     plaidProcessBuilder.environment().put("DATABASE_URL", databaseUrl);
+    plaidProcessBuilder.environment().put("BFD_TLS_SERVER_CERT", plaidTlsServerCert);
+    plaidProcessBuilder.environment().put("BFD_TLS_SERVER_KEY", plaidTlsServerKey);
+    plaidProcessBuilder.environment().put("BFD_TLS_CLIENT_CERTS", plaidTlsClientCerts);
     plaidProcessBuilder.redirectErrorStream(true);
     plaidProcessBuilder.redirectOutput(new File(plaidLogPath));
 

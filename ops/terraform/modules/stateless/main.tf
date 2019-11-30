@@ -4,11 +4,12 @@
 #
 
 locals {
-  azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config        = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
-  port              = 7443
-  cw_period         = 60    # Seconds
-  cw_eval_periods   = 3
+  azs                     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  env_config              = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  bfd_server_port         = 7443
+  bfd_server_plaid_port   = 3001
+  cw_period               = 60    # Seconds
+  cw_eval_periods         = 3
 
   # Add new peerings here
   vpc_peerings_by_env = {
@@ -180,14 +181,15 @@ module "fhir_lb" {
     cidr_blocks   = ["0.0.0.0/0"]
   } : {
     description   = "From VPC peerings, the MGMT VPC, and self"
-    port          = 443
+    ports         = [443, local.bfd_server_plaid_port]
     cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
   }
 
   egress = {
-    description   = "To VPC instances"
-    port          = local.port
-    cidr_blocks   = [data.aws_vpc.main.cidr_block]
+    description         = "To VPC instances"
+    ports               = [local.bfd_server_port, local.bfd_server_plaid_port]
+    health_check_port   = local.bfd_server_port
+    cidr_blocks         = [data.aws_vpc.main.cidr_block]
   }    
 }
 

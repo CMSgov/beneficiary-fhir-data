@@ -171,6 +171,9 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.schema.apply=true" \
 	"-DbfdServer.plaid.path=${targetDirectory}/../../../bfd-server-plaid/target/debug/bfd-server-plaid-app" \
 	"-DbfdServer.plaid.log=${workDirectory}/plaid-console.log" \
+	"-DbfdServer.plaid.tls.server.cert=${targetDirectory}/../../dev/ssl-stores/server.cer" \
+	"-DbfdServer.plaid.tls.server.key=${targetDirectory}/../../dev/ssl-stores/server.key" \
+	"-DbfdServer.plaid.tls.client.certs=${targetDirectory}/../../dev/ssl-stores/client-trusted.cer" \
 	-jar "${serverLauncher}" \
 	>"${serverLog}" 2>&1 \
 	&

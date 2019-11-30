@@ -25,7 +25,7 @@ variable "db_config" {
 
 variable "lb_config" {
   description = "Load balancer information"
-  type        = object({name=string, port=number, sg=string})
+  type        = object({name=string, ports=list(number), sg=string})
   default     = null
 }
 

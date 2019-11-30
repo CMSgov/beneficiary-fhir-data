@@ -56,6 +56,11 @@
       tags:
         - pre-ami
         
+    - name: Convert the Keystore to Certificate and Key for the Plaid App
+      shell: "keytool -export -keystore {{ bfd_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit -alias server -file {{ bfd_server_dir }}/bluebutton-appserver-certificate.der && keytool -importkeystore -srckeystore {{ bfd_server_dir }}/bluebutton-appserver-keystore.jks -srcstorepass changeit -srcalias server -srckeypass changeit -destkeystore {{ bfd_server_dir }}/bluebutton-appserver-keystore.p12 -deststoretype PKCS12 -deststorepass changeit -destalias server -destkeypass changeit && openssl pkcs12 -in {{ bfd_server_dir }}/bluebutton-appserver-keystore.p12 -passin pass:changeit -nodes -nocerts -out {{ bfd_server_dir }}/bluebutton-appserver-certificate.key"
+      tags:
+        - pre-ami
+
     - name: Copy Local Test SSL Keypair
       copy:
         # Note: This PEM file is encrypted within the project via Ansible Vault, which will
