@@ -106,7 +106,7 @@ def build(String build_env) {
 			// Build the Plaid app.
 			installRustToolchain()
 			dir ('bfd-server-plaid') {
-				sh 'cargo build --release'
+				sh 'source $HOME/.cargo/bin && cargo build --release'
 			}
 
 			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify"
