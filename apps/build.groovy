@@ -81,8 +81,8 @@ def installRustToolchain() {
 		// Reference: <https://www.rust-lang.org/learn/get-started>
 		sh "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 		echo 'Installed Rust toolchain.'
-		sh 'source $HOME/.cargo/bin && cargo --version'
-		sh 'source $HOME/.cargo/bin && rustc --version'
+		sh 'source $HOME/.cargo/env && cargo --version'
+		sh 'source $HOME/.cargo/env && rustc --version'
 	}
 
 	sh 'rpm --quiet --query gcc || sudo yum install -y gcc'
@@ -106,7 +106,7 @@ def build(String build_env) {
 			// Build the Plaid app.
 			installRustToolchain()
 			dir ('bfd-server-plaid') {
-				sh 'source $HOME/.cargo/bin && cargo build --release'
+				sh 'source $HOME/.cargo/env && cargo build --release'
 			}
 
 			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify"
