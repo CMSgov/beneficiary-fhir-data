@@ -81,8 +81,8 @@ def installRustToolchain() {
 		// Reference: <https://www.rust-lang.org/learn/get-started>
 		sh "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 		echo 'Installed Rust toolchain.'
-		sh 'cargo --version'
-		sh 'rustc --version'
+		sh 'source $HOME/.cargo/bin && cargo --version'
+		sh 'source $HOME/.cargo/bin && rustc --version'
 	}
 
 	sh 'rpm --quiet --query gcc || sudo yum install -y gcc'
