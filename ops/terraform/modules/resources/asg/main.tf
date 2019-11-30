@@ -65,14 +65,16 @@ resource "aws_security_group" "app" {
   vpc_id        = var.env_config.vpc_id
   tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
 
-  ingress = [
-    for port in var.lb_config.ports: {
-      from_port       = port
-      to_port         = port
+  dynamic "ingress" {
+    for_each = var.lb_config.ports
+
+    content {
+      from_port       = ingress.value
+      to_port         = ingress.value
       protocol        = "tcp"
       security_groups = [var.lb_config.sg]
     }
-  ]
+  }
 }
 
 # App access to the database
