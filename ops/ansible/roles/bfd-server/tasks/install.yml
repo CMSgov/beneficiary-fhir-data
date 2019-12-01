@@ -7,6 +7,8 @@
   with_items:
     # Needed to supply `keytool` and also to run the app server.
     - java-1.8.0-openjdk-devel
+    # Required by the Plaid app, so it can connect to PostgreSQL DBs.
+    - postgresql-devel
   become: true
 
 - name: Create Server User
@@ -146,7 +148,7 @@
   become_user: "{{ data_server_user }}"
 
 - name: Save App Server SSL Truststore Certificates for the Plaid App
-  shell: "cat {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt >> {{ data_server_dir }}/bluebutton-appserver-truststore-work/clients-trusted.crt"
+  shell: "(cat {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt; echo) >> {{ data_server_dir }}/bluebutton-appserver-truststore-work/clients-trusted.crt"
   with_items: "{{ data_server_ssl_client_certificates }}"
   changed_when: false
   become: true
@@ -162,7 +164,7 @@
   become_user: "{{ data_server_user }}"
 
 - name: Save App Server SSL Truststore Certificate Authorities for the Plaid App
-  shell: "cat {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt >> {{ data_server_dir }}/bluebutton-appserver-truststore-work/clients-trusted.crt"
+  shell: "(cat {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt; echo) >> {{ data_server_dir }}/bluebutton-appserver-truststore-work/clients-trusted.crt"
   with_items: "{{ data_server_ssl_client_cas }}"
   changed_when: false
   become: true
