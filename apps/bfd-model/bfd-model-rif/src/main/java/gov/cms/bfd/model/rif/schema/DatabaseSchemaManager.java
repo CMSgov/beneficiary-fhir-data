@@ -41,6 +41,9 @@ public final class DatabaseSchemaManager {
     // Trying to prevent career-limiting mistakes.
     flyway.setCleanDisabled(true);
 
+    // FIXME Should this only be used in non-prod envs?
+    flyway.setIgnoreMissingMigrations(true);
+
     flyway.setDataSource(dataSource);
     flyway.setPlaceholders(createScriptPlaceholdersMap(dataSource));
     flyway.migrate();
