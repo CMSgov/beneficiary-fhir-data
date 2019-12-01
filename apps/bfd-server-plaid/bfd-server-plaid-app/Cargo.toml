@@ -11,7 +11,7 @@ bfd-server-plaid-lookups = { path = "../bfd-server-plaid-lookups" }
 
 # Provide application logging facilities.
 log = "0.4"
-slog = { version = "2.5.2", features = ["max_level_trace", "release_max_level_warn"] }
+slog = { version = "2.5.2", features = ["max_level_trace", "release_max_level_trace"] }
 slog-async = { version = "2.3.0" }
 slog-stdlog = { version = "4.0.0" }
 slog-scope = { version = "4.1.2" }

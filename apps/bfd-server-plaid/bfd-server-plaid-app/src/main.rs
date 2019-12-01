@@ -110,7 +110,7 @@ extern crate diesel;
 use actix_web::{web, App, HttpResponse, HttpServer};
 use config::AppConfig;
 use listenfd::ListenFd;
-use slog::{info, o, Drain};
+use slog::{info, o, Drain, trace};
 use slog_async;
 use slog_json;
 
@@ -137,11 +137,14 @@ fn main() -> error::Result<()> {
     let _log_guard = slog_stdlog::init_with_level(log::Level::Warn)?;
 
     // Parse the app confif from the env.
+    trace!(logger, "Application configuration: parsing...");
     let app_config = AppConfig::new()?;
+    trace!(logger, "Application configuration: parsed.");
 
     // Verify that the DB connection is copacetic.
+    trace!(logger, "DB connection pool: creating...");
     let db_connection_pool = db::create_db_connection_pool(&app_config)?;
-    //let claims_partd_sample = db::claims_by_bene_id_partd(&db_connection, "foo");
+    trace!(logger, "DB connection pool: created.");
 
     info!(logger, "Prepare ship for ludicrous speed.");
     let mut listenfd = ListenFd::from_env();
