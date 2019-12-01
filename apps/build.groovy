@@ -110,7 +110,8 @@ def build(String build_env) {
 				sh 'source $HOME/.cargo/env && cargo build --release'
 			}
 
-			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify"
+			// FIXME Disabling ITs here due to lack of Docker on Jenkins: can't test against PostgreSQL.
+			mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify -DskipITs=true"
 		} else {
 			UnsupportedOperationException("No Build Apps job available for ${params.dev_env} environment")
 		}
