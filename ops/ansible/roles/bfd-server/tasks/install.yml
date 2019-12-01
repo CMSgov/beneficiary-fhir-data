@@ -37,6 +37,9 @@
   copy:
     src: "{{ data_server_plaid_app }}"
     dest: "{{ data_server_dir }}/{{ data_server_plaid_app | basename }}"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rwx,o=rx
   become: true
   notify:
     - 'Restart BFD Server Service'
