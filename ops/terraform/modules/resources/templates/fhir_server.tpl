@@ -22,7 +22,8 @@ aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 cat <<EOF >> extra_vars.json
 {
     "env":"${env}",
-    "data_server_version":"1.0.0-SNAPSHOT"
+    "data_server_version":"1.0.0-SNAPSHOT",
+    "data_server_plaid_app":"bfd-server-plaid-app"
 }
 EOF
 
