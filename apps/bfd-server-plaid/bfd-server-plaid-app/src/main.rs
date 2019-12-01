@@ -134,7 +134,7 @@ fn main() -> error::Result<()> {
     // Route all log crate usage (from our dependencies) to slog, instead.
     // Note: This has to stay in scope in order to keep working.
     let _scope_guard = slog_scope::set_global_logger(logger.clone());
-    let _log_guard = slog_stdlog::init_with_level(log::Level::Warn)?;
+    let _log_guard = slog_stdlog::init_with_level(log::Level::Trace)?;
 
     // Parse the app confif from the env.
     trace!(logger, "Application configuration: parsing...");
