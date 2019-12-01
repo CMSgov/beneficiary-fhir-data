@@ -85,11 +85,12 @@ def installRustToolchain() {
 		sh 'source $HOME/.cargo/env && rustc --version'
 	}
 
-	sh 'rpm --quiet --query gcc || sudo yum install -y gcc'
-	sh 'rpm --quiet --query gcc || sudo yum install -y openssl-devel'
-	sh 'rpm --quiet --query gcc || sudo yum install -y sqlite-devel'
-	sh 'rpm --quiet --query gcc || sudo yum install -y postgresql-libs'
-	sh 'rpm --quiet --query gcc || sudo yum install -y postgresql-static'
+	// Disabled this, as Jenkins doesn't have sudo access.
+	//sh 'rpm --quiet --query gcc || sudo yum install -y gcc'
+	//sh 'rpm --quiet --query openssl-devel || sudo yum install -y openssl-devel'
+	//sh 'rpm --quiet --query sqlite-devel || sudo yum install -y sqlite-devel'
+	//sh 'rpm --quiet --query postgresql-libs || sudo yum install -y postgresql-libs'
+	//sh 'rpm --quiet --query postgresql-static || sudo yum install -y postgresql-static'
 }
 
 /**
