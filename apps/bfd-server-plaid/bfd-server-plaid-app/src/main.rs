@@ -174,7 +174,9 @@ fn main() -> error::Result<()> {
             // Offer HTTP to localhost and HTTPS to remote clients.
             server
                 .bind(format!("127.0.0.1:{}", &app_config.server_http_port))?
-                .bind_rustls("0.0.0.0:3001", tls::create_rustls_config(&app_config)?)?
+                // FIXME Figure out why RusTLS isn't working.
+                //.bind_rustls("0.0.0.0:3001", tls::create_rustls_config(&app_config)?)?
+                .bind_ssl("0.0.0.0:3001", tls::create_openssl_config(&app_config)?)?
         } else {
             server.bind(format!("127.0.0.1:{}", &app_config.server_http_port))?
         }
