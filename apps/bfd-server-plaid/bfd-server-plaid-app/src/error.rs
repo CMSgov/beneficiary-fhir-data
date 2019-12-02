@@ -13,6 +13,7 @@ pub enum AppError {
     DieselResultError(diesel::result::Error),
     NumTryFromIntError(std::num::TryFromIntError),
     BadRequestError(String),
+    ActixCanceledBlockingError(),
 
     /// Should be used when the CCW/RIF/source data contains unexpected or unsupported values.
     InvalidSourceDataError(String),
@@ -75,6 +76,15 @@ impl From<diesel::result::Error> for AppError {
 impl From<std::num::TryFromIntError> for AppError {
     fn from(err: std::num::TryFromIntError) -> AppError {
         AppError::NumTryFromIntError(err)
+    }
+}
+
+impl From<actix_web::error::BlockingError<AppError>> for AppError {
+    fn from(err: actix_web::error::BlockingError<AppError>) -> AppError {
+        match err {
+            actix_web::error::BlockingError::Error(err) => err,
+            actix_web::error::BlockingError::Canceled => AppError::ActixCanceledBlockingError {},
+        }
     }
 }
 

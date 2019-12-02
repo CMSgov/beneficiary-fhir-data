@@ -156,7 +156,7 @@ fn main() -> error::Result<()> {
             .register_data(app_config_data.clone())
             .service(web::scope("/v1/fhir").route(
                 "/ExplanationOfBenefit",
-                web::get().to(fhir::v1::eob::eob_for_bene_id),
+                web::get().to_async(fhir::v1::eob::eob_for_bene_id),
             ))
             .service(web::scope("/v2").route("/", web::to(|| HttpResponse::Ok())))
             .route("/", web::to(|| HttpResponse::Ok()))

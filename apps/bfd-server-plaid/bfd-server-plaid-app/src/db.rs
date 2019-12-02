@@ -1,6 +1,7 @@
 use crate::config::AppConfig;
 use crate::error;
 use crate::models::structs::PartDEvent;
+use actix_web::web;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
@@ -20,13 +21,16 @@ pub fn create_db_connection_pool(app_config: &AppConfig) -> error::Result<PgPool
 }
 
 pub fn claims_partd_by_bene_id(
-    db_connection: &PgConnection,
+    db_pool: web::Data<PgPool>,
     search_bene_id: &str,
 ) -> error::Result<Vec<PartDEvent>> {
     use crate::schema_views::claims_partd::dsl::*;
+    let db_connection = db_pool
+        .get()
+        .map_err(|err| error::AppError::DieselPoolError(err))?;
     let results = claims_partd
         .filter(bene_id.eq(search_bene_id))
-        .load::<PartDEvent>(db_connection)
+        .load::<PartDEvent>(&db_connection)
         .map_err(|err| error::AppError::DieselResultError(err));
     results
 }

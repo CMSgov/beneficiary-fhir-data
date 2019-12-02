@@ -10,6 +10,7 @@ use crate::fhir::v1::util::*;
 use crate::models::structs::PartDEvent;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
+use futures::future::{self, Future};
 use serde::Deserialize;
 use std::convert::TryFrom;
 
@@ -21,18 +22,41 @@ pub struct EobQueryParams {
 pub fn eob_for_bene_id(
     db_pool: web::Data<PgPool>,
     query_params: web::Query<EobQueryParams>,
-) -> error::Result<HttpResponse> {
+) -> impl Future<Item = HttpResponse, Error = error::AppError> {
+    // Run Diesel's synchronous query via an Actix Future, then transform the results, returning a
+    // chained Future with the final result.
+    query_claims_partd_by_bene_id(db_pool, query_params)
+        .and_then(|claims| transform_claims_partd(claims))
+        .and_then(|bundle| {
+            Ok(HttpResponse::Ok()
+                .content_type("application/fhir+json")
+                .json(bundle))
+        })
+}
+
+/// Parses the specified HTTP query parameters and returns the raw results of the specified DB query as a `Future`.
+pub fn query_claims_partd_by_bene_id(
+    db_pool: web::Data<PgPool>,
+    query_params: web::Query<EobQueryParams>,
+) -> impl Future<Item = Vec<PartDEvent>, Error = error::AppError> {
     let bene_id = util::parse_relative_reference_expected(&query_params.patient, "Patient").ok_or(
         error::AppError::BadRequestError(String::from(
             "Unable to parse the specified 'patient' parameter.",
         )),
-    )?;
-    let db_connection = db_pool
-        .get()
-        .map_err(|err| error::AppError::DieselPoolError(err))?;
-    let claims_partd = crate::db::claims_partd_by_bene_id(&db_connection, &bene_id)?;
+    );
+
+    future::result(bene_id)
+        .and_then(|bene_id| {
+            web::block(move || crate::db::claims_partd_by_bene_id(db_pool, &bene_id))
+                .map_err(|err| err.into())
+        })
+        .from_err()
+}
+
+/// Returns a `Bundle` of `ExplanationOfBenefit`s that represents the specified `PartDEvent`s.
+fn transform_claims_partd(claims: Vec<PartDEvent>) -> error::Result<Bundle> {
     let eobs: error::Result<Vec<ExplanationOfBenefit>> =
-        claims_partd.iter().map(transform_claim_partd).collect();
+        claims.iter().map(transform_claim_partd).collect();
     let eobs: Vec<ExplanationOfBenefit> = eobs?;
     let bundle = Bundle {
         id: String::from("TODO"),
@@ -41,7 +65,7 @@ pub fn eob_for_bene_id(
         },
         r#type: String::from("searchset"),
         // FYI: FHIR has a max of 2,147,483,647, while Rust's u32 has a max of 4,294,967,295.
-        total: u32::try_from(claims_partd.len())?,
+        total: u32::try_from(claims.len())?,
         link: vec![BundleLink {
             relation: String::from("self"),
             url: String::from("TODO"),
@@ -53,9 +77,8 @@ pub fn eob_for_bene_id(
             })
             .collect(),
     };
-    Ok(HttpResponse::Ok()
-        .content_type("application/fhir+json")
-        .json(bundle))
+
+    Ok(bundle)
 }
 
 /// Returns an `ExplanationOfBenefit` that represents the specified `PartDEvent`.
