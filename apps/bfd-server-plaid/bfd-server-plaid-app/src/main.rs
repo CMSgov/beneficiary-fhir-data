@@ -110,7 +110,7 @@ extern crate diesel;
 use actix_web::{web, App, HttpResponse, HttpServer};
 use config::AppConfig;
 use listenfd::ListenFd;
-use slog::{info, o, Drain, trace};
+use slog::{info, o, trace, Drain};
 use slog_async;
 use slog_json;
 
@@ -134,7 +134,7 @@ fn main() -> error::Result<()> {
     // Route all log crate usage (from our dependencies) to slog, instead.
     // Note: This has to stay in scope in order to keep working.
     let _scope_guard = slog_scope::set_global_logger(logger.clone());
-    let _log_guard = slog_stdlog::init_with_level(log::Level::Trace)?;
+    let _log_guard = slog_stdlog::init_with_level(log::Level::Warn)?;
 
     // Parse the app confif from the env.
     trace!(logger, "Application configuration: parsing...");
