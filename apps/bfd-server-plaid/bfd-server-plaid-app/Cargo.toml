@@ -1,8 +1,17 @@
 [package]
+
 name = "bfd-server-plaid-app"
 version = "0.1.0"
 authors = ["Karl M. Davis <karl.davis@cms.hhs.gov>"]
 edition = "2018"
+
+
+[profile.release]
+
+# Ensure that debug symbols are left in compiled release binaries, as they can aid with
+# investigating bugs and performance issues in production.
+debug = true
+
 
 [dependencies]
 
