@@ -136,10 +136,18 @@ fn main() -> error::Result<()> {
     let _scope_guard = slog_scope::set_global_logger(logger.clone());
     let _log_guard = slog_stdlog::init_with_level(log::Level::Warn)?;
 
-    // Parse the app confif from the env.
-    trace!(logger, "Application configuration: parsing...");
+    // Load the app config.
+    //
+    // Note: The ACTIX_THREADPOOL environment variable isn't documented anywhere, but if you look
+    // at that crate's `lib.rs`, it's used to configure the number of `actix_web::web::block`
+    // workers available.
+    trace!(logger, "Application configuration: loading...");
     let app_config = AppConfig::new()?;
-    trace!(logger, "Application configuration: parsed.");
+    std::env::set_var(
+        "ACTIX_THREADPOOL",
+        format!("{}", app_config.actix_threadpool_size),
+    );
+    trace!(logger, "Application configuration: loaded.");
 
     // Verify that the DB connection is copacetic.
     trace!(logger, "DB connection pool: creating...");

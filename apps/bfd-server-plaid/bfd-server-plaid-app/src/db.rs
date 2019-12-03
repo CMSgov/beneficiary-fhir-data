@@ -16,6 +16,7 @@ pub fn create_db_connection_pool(app_config: &AppConfig) -> error::Result<PgPool
     let database_url: &str = app_config.database_url.as_ref();
     let manager = ConnectionManager::<PgConnection>::new(database_url);
     Pool::builder()
+        .max_size(app_config.database_pool_size)
         .build(manager)
         .map_err(|err| error::AppError::DieselPoolError(err))
 }
