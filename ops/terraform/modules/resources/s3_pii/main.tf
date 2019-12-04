@@ -8,21 +8,6 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
-# data "aws_iam_user" "pii_bucket_admin_users" {
-#   count     = length(var.pii_bucket_config.admin_users)
-#   user_name = var.pii_bucket_config.admin_users[count.index]
-# }
-
-# data "aws_iam_role" "pii_bucket_read_roles" {
-#   count = length(var.pii_bucket_config.read_roles)
-#   name  = var.pii_bucket_config.read_roles[count.index]
-# }
-
-# data "aws_iam_role" "pii_bucket_write_roles" {
-#   count = length(var.pii_bucket_config.write_roles)
-#   name  = var.pii_bucket_config.write_roles[count.index]
-# }
-
 resource "aws_kms_key" "pii_bucket_key" {
   description             = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-cmk"
   deletion_window_in_days = 10
