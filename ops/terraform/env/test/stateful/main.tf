@@ -40,8 +40,8 @@ module "stateful" {
   victor_ops_url      = var.victor_ops_url
 
   medicare_opt_out_config = {
-    read_roles        = ["arn:aws:iam::AccountA:role/AccountAReader", "arn:aws:iam::AccountB:role/AccountBReader"]
-    write_roles       = ["arn:aws:iam::AccountA:role/AccountAWriter", "arn:aws:iam::AccountB:role/AccountBWriter"]
+    read_roles        = ["arn:aws:iam::577373831711:role/bfd-test-fhir-role", "arn:aws:iam::577373831711:role/bfd-test-data-migration-role"]
+    write_roles       = ["arn:aws:iam::577373831711:role/bfd-test-bfd_pipeline-role"]
     admin_users       = ["arn:aws:iam::577373831711:user/DS7H"]
   }
 }
