@@ -32,7 +32,7 @@
       "Action": [
         "s3:GetObject"
       ],
-      "Resource": "arn:aws:s3:::${bucket_id}/*",
+      "Resource": "arn:aws:s3:::${bucket_id}/*"
     },
     {
       "Sid": "BFDPIIS3WriteBucket",
@@ -89,9 +89,9 @@
       "Action": "s3:PutObject",
       "Resource": "arn:aws:s3:::${bucket_id}/*",
       "Condition": {
-          "StringNotEquals": {
-              "s3:x-amz-server-side-encryption": "aws:kms"
-          }
+        "StringNotEquals": {
+            "s3:x-amz-server-side-encryption": "aws:kms"
+        }
       }
     }
   ]
