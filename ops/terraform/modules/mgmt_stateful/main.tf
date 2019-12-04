@@ -121,16 +121,6 @@ resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
 EOF
 }
 
-# S3 bucket for Build Artifacts
-#
-module "artifacts" {
-  source              = "../resources/s3"
-  role                = "artifacts"
-  env_config          = local.env_config
-  kms_key_id          = data.aws_kms_key.master_key.arn
-  log_bucket          = module.admin.id
-}
-
 # EBS Volume for Jenkins Data
 
 resource "aws_ebs_volume" "jenkins_data" {
