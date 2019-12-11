@@ -157,7 +157,7 @@ resource "aws_autoscaling_group" "main" {
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
-  health_check_grace_period = 400
+  health_check_grace_period = var.asg_config.instance_warmup
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
@@ -202,11 +202,29 @@ resource "aws_autoscaling_group" "main" {
 # Autoscaling policies and Cloudwatch alarms
 ##
 resource "aws_autoscaling_policy" "high-cpu" {
-  name                   = "bfd-${var.env_config.env}-${var.role}-high-cpu-scaleup"
-  scaling_adjustment     = 2
-  adjustment_type        = "ChangeInCapacity"
-  cooldown               = 300
-  autoscaling_group_name = aws_autoscaling_group.main.name
+  name                      = "bfd-${var.env_config.env}-${var.role}-high-cpu-policy"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  adjustment_type           = "ChangeInCapacity"
+  policy_type               = "StepScaling"
+  estimated_instance_warmup = var.asg_config.instance_warmup
+  metric_aggregation_type   = "Average"
+
+  step_adjustment {
+    scaling_adjustment          = 1
+    metric_interval_lower_bound = 0.0
+    metric_interval_upper_bound = 10.0
+  }
+
+  step_adjustment {
+    scaling_adjustment          = 2
+    metric_interval_lower_bound = 10.0
+    metric_interval_upper_bound = 20.0
+  }
+
+  step_adjustment {
+    scaling_adjustment          = 3
+    metric_interval_lower_bound = 20.0
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "high-cpu" {
@@ -217,7 +235,7 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu" {
   namespace           = "AWS/EC2"
   period              = 60
   statistic           = "Average"
-  threshold           = 50
+  threshold           = 40
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.main.name
@@ -228,11 +246,23 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu" {
 }
 
 resource "aws_autoscaling_policy" "low-cpu" {
-  name                   = "bfd-${var.env_config.env}-${var.role}-low-cpu-scaledown"
-  scaling_adjustment     = -1
-  adjustment_type        = "ChangeInCapacity"
-  cooldown               = 300
-  autoscaling_group_name = aws_autoscaling_group.main.name
+  name                      = "bfd-${var.env_config.env}-${var.role}-low-cpu-policy"
+  autoscaling_group_name    = aws_autoscaling_group.main.name
+  adjustment_type           = "ChangeInCapacity"
+  policy_type               = "StepScaling"
+  estimated_instance_warmup = var.asg_config.instance_warmup
+  metric_aggregation_type   = "Average"
+
+  step_adjustment {
+    scaling_adjustment          = -1
+    metric_interval_lower_bound = -10.0
+    metric_interval_upper_bound = 0.0
+  }
+
+  step_adjustment {
+    scaling_adjustment          = -2
+    metric_interval_upper_bound = -10.0
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "low-cpu" {
@@ -241,7 +271,7 @@ resource "aws_cloudwatch_metric_alarm" "low-cpu" {
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = 120
+  period              = 60
   statistic           = "Average"
   threshold           = 20
 
