@@ -1,0 +1,129 @@
+#ansible-playbook rotate_bfd_postgres_user.yml --extra-vars "rds_database= new_user= new_user_pw= old_user= master_pw="
+- hosts: localhost
+  vars:
+    rds_database: 
+    new_user: 
+    new_user_pw: 
+    old_user: 
+    old_user_pw: 
+    master_pw: 
+#    rds_endpoint:
+  tasks:
+    - name: RDS Gather Facts/Info
+#      rds_instance_info: #requires Ansible 2.9+
+      rds_instance_facts:
+        db_instance_identifier: "{{ rds_database }}"
+
+      register: database_info
+
+    - name: Show Register
+      debug: var=database_info
+
+    - name: Show RDS Endpoint
+      debug:
+        msg: "{{ database_info.instances[0].endpoint.address }}"
+
+    - name: Show Master Username
+      debug:
+        msg: " {{ database_info.instances[0].master_username }}"
+
+    - name: Show DB Name
+      debug:
+        msg: "{{ database_info.instances[0].db_instance_identifier }}"
+
+    - name: Create PostgreSQL user
+      postgresql_user:
+        login_host: "{{ database_info.instances[0].endpoint.address }}"
+        login_user: "{{ database_info.instances[0].master_username }}"
+        login_password: "{{ master_pw }}"
+        db: postgres
+        name: "{{ new_user }}"
+        password: "{{ new_user_pw }}"
+        role_attr_flags: LOGIN,CREATEROLE,CREATEDB,INHERIT
+        state: present
+
+    - name: Add PostgreSQL user to Group/Role
+      postgresql_privs:
+        login_host: "{{ database_info.instances[0].endpoint.address }}"
+        login_user: "{{ database_info.instances[0].master_username }}"
+        login_password: "{{ master_pw }}"
+        db: postgres
+        type: group
+        objs: rds_superuser
+        roles: "{{ new_user }}"
+        admin_option: no
+        state: present
+
+    - name: Make sure the PostgreSQL database is present
+      postgresql_db:
+        name: postgres
+        login_host: "{{ database_info.instances[0].endpoint.address }}"
+        login_user: "{{ new_user }}"
+        login_password: "{{ new_user_pw }}"
+
+    - name: Make sure the new PostgreSQL User is present
+      postgresql_query:
+        db: postgres
+        login_host: "{{ database_info.instances[0].endpoint.address }}"
+        login_user: "{{ new_user }}"
+        login_password: "{{ new_user_pw }}"
+#        path_to_script: userlookup.sql
+        path_to_script: testlookup.sql
+      register: users_query
+
+#    - name: Make sure the new PostgreSQL Role is present
+#      postgresql_query:
+#        db: postgres
+#        login_host: "{{ database_info.instances[0].endpoint.address }}"
+#        login_user: "{{ new_user }}"
+ #       login_password: "{{ new_user_pw }}"
+ #       path_to_script: rolelookup.sql
+ #     register: roles_query
+
+    - name: Show Register
+      debug: var=users_query
+
+#    - name: Show Register
+#      debug: var=roles_query
+
+#    - name: Show User Attributes
+#      debug:
+#        msg: "{{ users_query.query_result }}"
+
+#    - name: Show User Groups
+#      debug:
+#        msg: "{{ roles_query.query_result }}"
+##        msg: "{{ database_info.instances[0].db_instance_identifier }}"
+
+    - name: Show User Attributes
+      debug:
+#        msg: "{{ users_query.query_result[0].Attributes }}"
+        msg: "{{ item.rolname }}: {{ item.memberof }}, {{ item.rolcreatedb }}, {{ item.rolcreaterole }}, {{ item.rolinherit }}"
+      with_items: 
+        - "{{ users_query.query_result }}"
+#        - "{{ roles_query.query_result }}"
+      when: item.rolname == "{{ old_user }}"
+
+#    - name: Show User Groups
+#      debug:
+#        msg: "{{ roles_query.query_result[0].role }}"
+
+    - name: Remove Old PostgreSQL User
+      postgresql_user:
+        login_host: "{{ database_info.instances[0].endpoint.address }}"
+        login_user: "{{ database_info.instances[0].master_username }}"
+        login_password: "{{ master_pw }}"
+        db: postgres
+        name: "{{ old_user }}"
+#        password: "{{ old_user_pw }}"
+#        role_attr_flags: LOGIN,CREATEROLE,CREATEDB,INHERIT
+        state: absent
+      with_items: "{{ users_query.query_result }}"
+      when: item.rolname == "{{ old_user }}" and item.memberof == "rds_superuser" and item.rolcreatedb == "True" and item.rolcreaterole == "True" and item.rolinherit == "True"
+
+#    - name: Connect to test database, remove test user from cluster
+#     postgresql_user:
+#        db: "{{ bbrooks_info.instances[0].db_instance_identifier }}"
+#        name: newhotness_admin
+#        priv: ALL
+#        state: present
