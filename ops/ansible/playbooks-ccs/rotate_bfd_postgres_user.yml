@@ -119,8 +119,7 @@
 #        role_attr_flags: LOGIN,CREATEROLE,CREATEDB,INHERIT
         state: absent
       with_items: "{{ users_query.query_result }}"
-      when: item.rolname == "{{ old_user }}" and item.memberof == "rds_superuser" and item.rolcreatedb == "True" and item.rolcreaterole == "True" and item.rolinherit == "True"
-
+      when: item.rolname == old_user and item.memberof == ['rds_superuser'] and item.rolcreatedb == True and item.rolcreaterole == True and item.rolinherit == True
 #    - name: Connect to test database, remove test user from cluster
 #     postgresql_user:
 #        db: "{{ bbrooks_info.instances[0].db_instance_identifier }}"
