@@ -34,8 +34,17 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+
     assertMatches(beneficiary, patient);
-    Assert.assertEquals(2, patient.getIdentifier().size());
+
+    // Verify patient has only one identifier.
+    Assert.assertEquals(1, patient.getIdentifier().size());
+
+    // Verify the only identifier is BENE_ID and value.
+    Assert.assertEquals(
+        patient.getIdentifier().get(0).getSystem(),
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID));
+    Assert.assertEquals(patient.getIdentifier().get(0).getValue(), "567834");
   }
 
   /**
@@ -51,8 +60,42 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+
     assertMatches(beneficiary, patient);
-    Assert.assertEquals(7, patient.getIdentifier().size());
+
+    // Verify patient has 6 identifiers.
+    Assert.assertEquals(6, patient.getIdentifier().size());
+
+    // Verify patient identifiers and values match.
+    Assert.assertEquals(
+        patient.getIdentifier().get(0).getSystem(),
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID));
+    Assert.assertEquals(patient.getIdentifier().get(0).getValue(), "567834");
+
+    Assert.assertEquals(
+        patient.getIdentifier().get(1).getSystem(),
+        TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED);
+    Assert.assertEquals(patient.getIdentifier().get(1).getValue(), "543217066U");
+
+    Assert.assertEquals(
+        patient.getIdentifier().get(2).getSystem(),
+        TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED);
+    Assert.assertEquals(patient.getIdentifier().get(2).getValue(), "3456789");
+
+    Assert.assertEquals(
+        patient.getIdentifier().get(3).getSystem(),
+        TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED);
+    Assert.assertEquals(patient.getIdentifier().get(3).getValue(), "543217066T");
+
+    Assert.assertEquals(
+        patient.getIdentifier().get(4).getSystem(),
+        TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED);
+    Assert.assertEquals(patient.getIdentifier().get(4).getValue(), "543217066Z");
+
+    Assert.assertEquals(
+        patient.getIdentifier().get(5).getSystem(),
+        TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED);
+    Assert.assertEquals(patient.getIdentifier().get(5).getValue(), "9AB2WW3GR44");
   }
 
   /**
