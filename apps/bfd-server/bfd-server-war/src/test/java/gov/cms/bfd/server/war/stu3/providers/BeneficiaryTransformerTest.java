@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,6 +56,7 @@ public final class BeneficiaryTransformerTest {
    */
   @Test
   public void transformSampleARecordWithIdentifiers() {
+
     Beneficiary beneficiary = loadSampleABeneficiary();
 
     Patient patient =
@@ -67,35 +69,45 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals(6, patient.getIdentifier().size());
 
     // Verify patient identifiers and values match.
-    Assert.assertEquals(
-        patient.getIdentifier().get(0).getSystem(),
-        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID));
-    Assert.assertEquals(patient.getIdentifier().get(0).getValue(), "567834");
+    assertValuesInPatientIdentifiers(
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
 
-    Assert.assertEquals(
-        patient.getIdentifier().get(1).getSystem(),
-        TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED);
-    Assert.assertEquals(patient.getIdentifier().get(1).getValue(), "543217066U");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
 
-    Assert.assertEquals(
-        patient.getIdentifier().get(2).getSystem(),
-        TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED);
-    Assert.assertEquals(patient.getIdentifier().get(2).getValue(), "3456789");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "3456789");
 
-    Assert.assertEquals(
-        patient.getIdentifier().get(3).getSystem(),
-        TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED);
-    Assert.assertEquals(patient.getIdentifier().get(3).getValue(), "543217066T");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
 
-    Assert.assertEquals(
-        patient.getIdentifier().get(4).getSystem(),
-        TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED);
-    Assert.assertEquals(patient.getIdentifier().get(4).getValue(), "543217066Z");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
 
-    Assert.assertEquals(
-        patient.getIdentifier().get(5).getSystem(),
-        TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED);
-    Assert.assertEquals(patient.getIdentifier().get(5).getValue(), "9AB2WW3GR44");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
+  }
+
+  /**
+   * Verifies that the {@link Patient} identifiers contain expected values.
+   *
+   * @param Patient {@link Patient} containing identifiers
+   * @param identifierSystem value to be matched
+   * @param identifierValue value to be matched
+   */
+  private static void assertValuesInPatientIdentifiers(
+      Patient patient, String identifierSystem, String identifierValue) {
+    boolean identifierFound = false;
+
+    for (Identifier temp : patient.getIdentifier()) {
+      if (identifierSystem.equals(temp.getSystem()) && identifierValue.equals(temp.getValue())) {
+        identifierFound = true;
+        break;
+      }
+    }
+    Assert.assertEquals(identifierFound, true);
   }
 
   /**
