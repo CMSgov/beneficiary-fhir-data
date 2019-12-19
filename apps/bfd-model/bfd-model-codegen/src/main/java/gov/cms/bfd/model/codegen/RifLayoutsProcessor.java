@@ -184,7 +184,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("Beneficiaries")
               .setHeaderEntityIdField("beneficiaryId")
               .setHeaderEntityAdditionalDatabaseFields(
-                  createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
+                  createDetailsForAdditionalDatabaseFields(
+                      Arrays.asList("hicnUnhashed", "mbiHash")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -224,7 +225,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   "nameMiddleInitial")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
+                      Arrays.asList("hicnUnhashed", "medicareBeneficiaryId", "mbiHash")))
               .setHasLines(false));
 
       mappingSpecs.add(
@@ -1303,6 +1304,20 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 "MBI_NUM",
                 "medicareBeneficiaryId");
         addlDatabaseFields.add(medicareBeneficiaryId);
+        continue;
+      }
+      if (additionalDatabaseField.contentEquals("mbiHash")) {
+        RifField mbiHash =
+            new RifField(
+                "MBI_NUM",
+                RifColumnType.CHAR,
+                Optional.of(64),
+                Optional.of(0),
+                Boolean.TRUE,
+                new URL(DATA_DICTIONARY_LINK + "mbiHash"),
+                "MBI_NUM",
+                "mbiHash");
+        addlDatabaseFields.add(mbiHash);
         continue;
       }
     }
