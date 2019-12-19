@@ -408,8 +408,10 @@ public final class RifLoader implements AutoCloseable {
         hashBeneficiaryMbi(fileEventMetrics, rifRecordEvent);
       }
     } else if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         hashBeneficiaryHistoryHicn(fileEventMetrics, rifRecordEvent);
+        hashBeneficiaryHistoryMbi(fileEventMetrics, rifRecordEvent);
+      }
     }
 
     // Only one of each failure/success Timer.Contexts will be applied.
@@ -642,14 +644,13 @@ public final class RifLoader implements AutoCloseable {
         metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "mbisHashed")).time();
 
     Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
+
     // set the hashed MBI
     beneficiary
         .getMedicareBeneficiaryId()
         .ifPresent(
             mbi -> {
-              String mbiHash =
-                  computeMbiHash(
-                      options, secretKeyFactory, beneficiary.getMedicareBeneficiaryId().get());
+              String mbiHash = computeMbiHash(options, secretKeyFactory, mbi);
               beneficiary.setMbiHash(Optional.of(mbiHash));
             });
 
@@ -684,6 +685,39 @@ public final class RifLoader implements AutoCloseable {
     // set the hashed Hicn
     beneficiaryHistory.setHicn(
         computeHicnHash(options, secretKeyFactory, beneficiaryHistory.getHicn()));
+
+    timerHashing.stop();
+  }
+
+  /**
+   * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
+   * BeneficiaryHistory}, switches the {@link BeneficiaryHistory#getHicn()} property to a
+   * cryptographic hash of its current value. This is done for security purposes, and the Blue
+   * Button API frontend applications know how to compute the exact same hash, which allows the two
+   * halves of the system to interoperate.
+   *
+   * <p>All other {@link RifRecordEvent}s are left unmodified.
+   *
+   * @param metrics the {@link MetricRegistry} to use
+   * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
+   */
+  private void hashBeneficiaryHistoryMbi(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
+      return;
+
+    Timer.Context timerHashing =
+        metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "mbisHashed")).time();
+
+    BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
+
+    // set the hashed MBI
+    beneficiaryHistory
+        .getMedicareBeneficiaryId()
+        .ifPresent(
+            mbi -> {
+              String mbiHash = computeMbiHash(options, secretKeyFactory, mbi);
+              beneficiaryHistory.setMbiHash(Optional.of(mbiHash));
+            });
 
     timerHashing.stop();
   }
