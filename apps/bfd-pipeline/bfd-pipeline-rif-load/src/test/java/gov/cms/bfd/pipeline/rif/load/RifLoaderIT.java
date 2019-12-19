@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -243,6 +244,14 @@ public final class RifLoaderIT {
           beneficiaryHistoryToFind.setHicn(
               RifLoader.computeHicnHash(
                   options, RifLoader.createSecretKeyFactory(), beneficiaryHistoryToFind.getHicn()));
+          beneficiaryHistoryToFind.setMbiHash(
+              beneficiaryHistoryToFind.getMedicareBeneficiaryId().isPresent()
+                  ? Optional.of(
+                      RifLoader.computeMbiHash(
+                          options,
+                          RifLoader.createSecretKeyFactory(),
+                          beneficiaryHistoryToFind.getMedicareBeneficiaryId().get()))
+                  : Optional.empty());
 
           CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
           CriteriaQuery<BeneficiaryHistory> query =
@@ -260,7 +269,11 @@ public final class RifLoaderIT {
                   criteriaBuilder.equal(
                       from.get(BeneficiaryHistory_.sex), beneficiaryHistoryToFind.getSex()),
                   criteriaBuilder.equal(
-                      from.get(BeneficiaryHistory_.hicn), beneficiaryHistoryToFind.getHicn()));
+                      from.get(BeneficiaryHistory_.hicn), beneficiaryHistoryToFind.getHicn()),
+                  criteriaBuilder.equal(
+                      from.get(BeneficiaryHistory_.mbiHash),
+                      beneficiaryHistoryToFind.getMbiHash().orElse(null)));
+
           List<BeneficiaryHistory> beneficiaryHistoryFound =
               entityManager.createQuery(query).getResultList();
           Assert.assertNotNull(beneficiaryHistoryFound);

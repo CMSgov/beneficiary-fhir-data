@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -121,6 +122,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(LocalDate.of(1979, Month.MARCH, 17), beneficiaryHistory0.getBirthDate());
     Assert.assertEquals(('2'), beneficiaryHistory0.getSex());
     Assert.assertEquals("543217066Z", beneficiaryHistory0.getHicn());
+    Assert.assertEquals(Optional.of("3456689"), beneficiaryHistory0.getMedicareBeneficiaryId());
 
     /*
      * We should expect and be able to cope with BENEFICIARY_HISTORY records that
@@ -139,6 +141,7 @@ public final class RifFilesProcessorTest {
       Assert.assertEquals(LocalDate.of(1980, Month.MARCH, 17), beneficiaryHistory.getBirthDate());
       Assert.assertEquals(('1'), beneficiaryHistory.getSex());
       Assert.assertEquals("543217066T", beneficiaryHistory.getHicn());
+      Assert.assertEquals(Optional.of("3456789"), beneficiaryHistory.getMedicareBeneficiaryId());
     }
   }
 

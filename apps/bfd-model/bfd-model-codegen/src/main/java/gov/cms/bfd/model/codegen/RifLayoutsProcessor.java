@@ -225,7 +225,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   "nameMiddleInitial")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("hicnUnhashed", "medicareBeneficiaryId", "mbiHash")))
+                      Arrays.asList("hicnUnhashed", "mbiHash")))
               .setHasLines(false));
 
       mappingSpecs.add(
@@ -1290,20 +1290,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 "BENE_CRNT_HIC_NUM",
                 "hicnUnhashed");
         addlDatabaseFields.add(hicnUnhashed);
-        continue;
-      }
-      if (additionalDatabaseField.contentEquals("medicareBeneficiaryId")) {
-        RifField medicareBeneficiaryId =
-            new RifField(
-                "MBI_NUM",
-                RifColumnType.CHAR,
-                Optional.of(11),
-                Optional.of(0),
-                Boolean.TRUE,
-                new URL(DATA_DICTIONARY_LINK + "mbinum"),
-                "MBI_NUM",
-                "medicareBeneficiaryId");
-        addlDatabaseFields.add(medicareBeneficiaryId);
         continue;
       }
       if (additionalDatabaseField.contentEquals("mbiHash")) {
