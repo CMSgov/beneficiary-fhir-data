@@ -403,8 +403,10 @@ public final class RifLoader implements AutoCloseable {
 
     // If these are Beneficiary records, first hash their HICNs.
     if (rifFileType == RifFileType.BENEFICIARY) {
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         hashBeneficiaryHicn(fileEventMetrics, rifRecordEvent);
+        hashBeneficiaryMbi(fileEventMetrics, rifRecordEvent);
+      }
     } else if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
         hashBeneficiaryHistoryHicn(fileEventMetrics, rifRecordEvent);
@@ -623,6 +625,39 @@ public final class RifLoader implements AutoCloseable {
 
   /**
    * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
+   * Beneficiary}, computes the {@link Beneficiary#getMedicareBeneficiaryId()} ()} property to a
+   * cryptographic hash of its current value. This is done for security purposes, and the Blue
+   * Button API frontend applications know how to compute the exact same hash, which allows the two
+   * halves of the system to interoperate.
+   *
+   * <p>All other {@link RifRecordEvent}s are left unmodified.
+   *
+   * @param metrics the {@link MetricRegistry} to use
+   * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
+   */
+  private void hashBeneficiaryMbi(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
+
+    Timer.Context timerHashing =
+        metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "mbisHashed")).time();
+
+    Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
+    // set the hashed MBI
+    beneficiary
+        .getMedicareBeneficiaryId()
+        .ifPresent(
+            mbi -> {
+              String mbiHash =
+                  computeMbiHash(
+                      options, secretKeyFactory, beneficiary.getMedicareBeneficiaryId().get());
+              beneficiary.setMbiHash(Optional.of(mbiHash));
+            });
+
+    timerHashing.stop();
+  }
+
+  /**
+   * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
    * BeneficiaryHistory}, switches the {@link BeneficiaryHistory#getHicn()} property to a
    * cryptographic hash of its current value. This is done for security purposes, and the Blue
    * Button API frontend applications know how to compute the exact same hash, which allows the two
@@ -698,6 +733,50 @@ public final class RifLoader implements AutoCloseable {
               hicn.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
       SecretKey hicnSecret = secretKeyFactory.generateSecret(hicnKeySpec);
       String hexEncodedHash = Hex.encodeHexString(hicnSecret.getEncoded());
+
+      return hexEncodedHash;
+    } catch (InvalidKeySpecException e) {
+      throw new BadCodeMonkeyException(e);
+    }
+  }
+
+  /**
+   * Computes a one-way cryptographic hash of the specified MBI value.
+   *
+   * @param options the {@link LoadAppOptions} to use
+   * @param secretKeyFactory the {@link SecretKeyFactory} to use
+   * @param mbi the Medicare beneficiary id to be hashed
+   * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
+   */
+  static String computeMbiHash(
+      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String mbi) {
+    try {
+      /*
+       * Our approach here is NOT using a salt, as salts must be randomly
+       * generated for each value to be hashed and then included in
+       * plaintext with the hash results. Random salts would prevent the
+       * Blue Button API frontend systems from being able to produce equal
+       * hashes for the same MBIs. Instead, we use a secret "pepper" that
+       * is shared out-of-band with the frontend. This value MUST be kept
+       * secret.
+       *
+       * We are re-using the same pepper between HICNs and MBIs
+       */
+      byte[] salt = options.getHicnHashPepper();
+
+      /*
+       * Bigger is better here as it reduces chances of collisions, but
+       * the equivalent Python Django hashing functions used by the
+       * frontend default to this value, so we'll go with it.
+       */
+      int derivedKeyLength = 256;
+
+      /* We're reusing the same hicn hash iterations, so the algorithm is exactly the same */
+      PBEKeySpec mbiKeySpec =
+          new PBEKeySpec(
+              mbi.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
+      SecretKey mbiSecret = secretKeyFactory.generateSecret(mbiKeySpec);
+      String hexEncodedHash = Hex.encodeHexString(mbiSecret.getEncoded());
 
       return hexEncodedHash;
     } catch (InvalidKeySpecException e) {
