@@ -944,8 +944,6 @@ public final class PatientResourceProviderIT {
     Assert.assertEquals(0, searchResults.getTotal());
   }
 
-  /* -- */
-
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
@@ -1206,7 +1204,7 @@ public final class PatientResourceProviderIT {
               .filter(r -> mbi.equals(r.getMedicareBeneficiaryId().get()))
               .findFirst()
               .get();
-      mbiHash = beneficiaryMbiToMatchTo.getHicn();
+      mbiHash = beneficiaryMbiToMatchTo.getMbiHash().get();
     } else {
       BeneficiaryHistory beneficiaryHistoryMbiToMatchTo =
           beneficiariesHistoryList.stream()
