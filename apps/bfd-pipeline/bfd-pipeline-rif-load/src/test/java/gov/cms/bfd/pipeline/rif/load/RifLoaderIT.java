@@ -89,6 +89,12 @@ public final class RifLoaderIT {
       // Following fields were NOT changed in update record
       Assert.assertEquals("John", beneficiaryFromDb.getNameGiven());
       Assert.assertEquals(new Character('A'), beneficiaryFromDb.getNameMiddleInitial().get());
+      Assert.assertEquals(
+          "Beneficiary has MBI", Optional.of("SSSS"), beneficiaryFromDb.getMedicareBeneficiaryId());
+      Assert.assertEquals(
+          "Beneficiary has mbiHash",
+          Optional.of("401441595efcc68bc5b26f4e88bd9fa550004e068d69ff75761ab946ec553a02"),
+          beneficiaryFromDb.getMbiHash());
 
       CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
       Assert.assertEquals('N', carrierRecordFromDb.getFinalAction());
