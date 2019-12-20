@@ -49,8 +49,9 @@ public final class PatientResourceProvider implements IResourceProvider {
    * The {@link Identifier#getSystem()} values that are supported by {@link
    * #searchByIdentifier(TokenParam)}.
    */
-  private static final List<String> SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS =
+  private static final List<String> SUPPORTED_HASH_IDENTIFIER_SYSTEMS =
       Arrays.asList(
+          TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
 
@@ -192,7 +193,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    *
    * <ul>
    *   <li>Matching a {@link Beneficiary#getHicn()} hash value: when {@link TokenParam#getSystem()}
-   *       matches one of the {@link #SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS} entries.
+   *       matches one of the {@link #SUPPORTED_HASH_IDENTIFIER_SYSTEMS} entries.
    * </ul>
    *
    * <p>Searches that don't match one of the above forms are not supported.
@@ -219,12 +220,24 @@ public final class PatientResourceProvider implements IResourceProvider {
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
 
-    if (!SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
+    if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
     List<IBaseResource> patients;
     try {
-      patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue(), requestDetails));
+      switch (identifier.getSystem()) {
+        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
+        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
+          patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue(), requestDetails));
+          break;
+        case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
+          patients = Arrays.asList(queryDatabaseByMbiHash(identifier.getValue(), requestDetails));
+          break;
+        default:
+          throw new InvalidRequestException(
+              "Unsupported identifier system: " + identifier.getSystem());
+      }
+
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
@@ -246,6 +259,18 @@ public final class PatientResourceProvider implements IResourceProvider {
   private Patient queryDatabaseByHicnHash(String hicnHash, RequestDetails requestDetails) {
     return queryDatabaseByHash(
         hicnHash, "hicn", requestDetails, Beneficiary_.hicn, BeneficiaryHistory_.hicn);
+  }
+
+  /**
+   * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
+   * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
+   *     {@link Beneficiary#getMbiHash()} ()} hash value
+   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
+   *     Beneficiary} can be found
+   */
+  private Patient queryDatabaseByMbiHash(String mbiHash, RequestDetails requestDetails) {
+    return queryDatabaseByHash(
+        mbiHash, "mbi", requestDetails, Beneficiary_.mbiHash, BeneficiaryHistory_.mbiHash);
   }
 
   /**
