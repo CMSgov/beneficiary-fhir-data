@@ -987,6 +987,17 @@ public final class PatientResourceProviderIT {
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+
+    String mbiHashIdentifier =
+        patientFromSearchResult.getIdentifier().stream()
+            .filter(
+                identifier ->
+                    identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH))
+            .findFirst()
+            .get()
+            .getValue();
+    Assert.assertEquals(
+        "mbiHash identifier exists", beneficiary.getMbiHash().get(), mbiHashIdentifier);
   }
 
   /**
