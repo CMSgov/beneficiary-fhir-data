@@ -60,7 +60,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
    * application.
    */
-  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(\\p{Alnum}+)");
+  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
