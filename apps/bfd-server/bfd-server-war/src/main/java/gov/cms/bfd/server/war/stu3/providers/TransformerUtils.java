@@ -2688,24 +2688,22 @@ public final class TransformerUtils {
   private static Map<String, String> readNpiCodeFile() {
 
     Map<String, String> npiCodeMap = new HashMap<String, String>();
-    InputStream npiCodeDisplayStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream("NPI_Coded_Display_Values_Tab.txt");
-
-    BufferedReader npiCodesIn = null;
-    npiCodesIn = new BufferedReader(new InputStreamReader(npiCodeDisplayStream));
-    /*
-     * We want to extract the NPI codes and display values and put in a map for easy
-     * retrieval to get the display value-- npiColumns[0] is the NPI Code,
-     * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
-     * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
-     * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
-     * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
-     * provider credential.
-     */
-    String line = "";
-    try {
+    try (final InputStream npiCodeDisplayStream =
+            Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("NPI_Coded_Display_Values_Tab.txt");
+        final BufferedReader npiCodesIn =
+            new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
+      /*
+       * We want to extract the NPI codes and display values and put in a map for easy
+       * retrieval to get the display value-- npiColumns[0] is the NPI Code,
+       * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
+       * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
+       * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
+       * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
+       * provider credential.
+       */
+      String line = "";
       npiCodesIn.readLine();
       while ((line = npiCodesIn.readLine()) != null) {
         String npiColumns[] = line.split("\t");
@@ -2727,11 +2725,9 @@ public final class TransformerUtils {
           npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
         }
       }
-      npiCodesIn.close();
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI code data.", e);
     }
-
     return npiCodeMap;
   }
 
