@@ -87,6 +87,11 @@ public final class DataServerLauncherAppIT {
       }
 
       // Verify that the access log is working, as expected.
+      try {
+        TimeUnit.MILLISECONDS.sleep(
+            100); // Needed in some configurations to resolve a race condition
+      } catch (InterruptedException e) {
+      }
       Path accessLog =
           ServerTestUtils.getLauncherProjectDirectory()
               .resolve("target")
