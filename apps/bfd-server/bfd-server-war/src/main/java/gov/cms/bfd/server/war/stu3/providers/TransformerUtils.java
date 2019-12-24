@@ -2617,20 +2617,18 @@ public final class TransformerUtils {
    * in the src/main/resources directory
    */
   private static Map<String, String> readIcdCodeFile() {
-
     Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
-    InputStream icdCodeDisplayStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream("DGNS_CD.txt");
 
-    BufferedReader icdCodesIn = null;
-    icdCodesIn = new BufferedReader(new InputStreamReader(icdCodeDisplayStream));
-    /*
-     * We want to extract the ICD Diagnosis codes and display values and put in a
-     * map for easy retrieval to get the display value icdColumns[1] is
-     * DGNS_DESC(i.e. 7840 code is HEADACHE description)
-     */
-    String line = "";
-    try {
+    try (final InputStream icdCodeDisplayStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream("DGNS_CD.txt");
+        final BufferedReader icdCodesIn =
+            new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
+      /*
+       * We want to extract the ICD Diagnosis codes and display values and put in a
+       * map for easy retrieval to get the display value icdColumns[1] is
+       * DGNS_DESC(i.e. 7840 code is HEADACHE description)
+       */
+      String line = "";
       icdCodesIn.readLine();
       while ((line = icdCodesIn.readLine()) != null) {
         String icdColumns[] = line.split("\t");
@@ -2776,19 +2774,16 @@ public final class TransformerUtils {
   private static Map<String, String> readProcedureCodeFile() {
 
     Map<String, String> procedureCodeMap = new HashMap<String, String>();
-    InputStream procedureCodeDisplayStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream("PRCDR_CD.txt");
-
-    BufferedReader procedureCodesIn = null;
-    procedureCodesIn = new BufferedReader(new InputStreamReader(procedureCodeDisplayStream));
-
-    /*
-     * We want to extract the procedure codes and display values and put in a map
-     * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
-     * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
-     */
-    String line = "";
-    try {
+    try (final InputStream procedureCodeDisplayStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream("PRCDR_CD.txt");
+        final BufferedReader procedureCodesIn =
+            new BufferedReader(new InputStreamReader(procedureCodeDisplayStream))) {
+      /*
+       * We want to extract the procedure codes and display values and put in a map
+       * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
+       * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
+       */
+      String line = "";
       procedureCodesIn.readLine();
       while ((line = procedureCodesIn.readLine()) != null) {
         String icdColumns[] = line.split("\t");
@@ -2856,22 +2851,19 @@ public final class TransformerUtils {
    */
   public static Map<String, String> readFDADrugCodeFile() {
     Map<String, String> ndcProductHashMap = new HashMap<String, String>();
-    InputStream ndcProductStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(FDADrugDataUtilityApp.FDA_PRODUCTS_RESOURCE);
-
-    BufferedReader ndcProductsIn = null;
-    ndcProductsIn = new BufferedReader(new InputStreamReader(ndcProductStream));
-
-    /*
-     * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
-     * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
-     * put in a Map for easy retrieval to get the display value which is a
-     * combination of PROPRIETARYNAME & SUBSTANCENAME
-     */
-    String line = "";
-    try {
+    try (final InputStream ndcProductStream =
+            Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(FDADrugDataUtilityApp.FDA_PRODUCTS_RESOURCE);
+        final BufferedReader ndcProductsIn =
+            new BufferedReader(new InputStreamReader(ndcProductStream))) {
+      /*
+       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
+       * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
+       * put in a Map for easy retrieval to get the display value which is a
+       * combination of PROPRIETARYNAME & SUBSTANCENAME
+       */
+      String line = "";
       ndcProductsIn.readLine();
       while ((line = ndcProductsIn.readLine()) != null) {
         String ndcProductColumns[] = line.split("\t");
@@ -2894,7 +2886,6 @@ public final class TransformerUtils {
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
     }
-
     return ndcProductHashMap;
   }
 
