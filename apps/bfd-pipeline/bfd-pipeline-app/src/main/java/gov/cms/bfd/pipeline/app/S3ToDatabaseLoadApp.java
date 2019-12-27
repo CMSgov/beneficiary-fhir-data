@@ -145,6 +145,13 @@ public final class S3ToDatabaseLoadApp {
           public void errorOccurred(Throwable error) {
             handleUncaughtException(error);
           }
+
+          /** Called when no RIF files are available to process. */
+          @Override
+          public void noDataAvailable() {
+            rifLoader.doIdleTask();
+            DataSetMonitorListener.super.noDataAvailable();
+          }
         };
 
     /*

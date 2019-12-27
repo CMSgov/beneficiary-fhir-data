@@ -125,6 +125,8 @@ public final class RifLoaderIT {
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
    * StaticRifResourceGroup#SYNTHETIC_DATA} data.
+   *
+   * <p>This test only works with a PostgreSQL database instance. It 10s or minutes to run.
    */
   @Ignore
   @Test
@@ -151,6 +153,54 @@ public final class RifLoaderIT {
     loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
   }
 
+  @Test
+  public void runIdleTasks() {
+    final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    final RifLoader loader = loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+
+    // The sample are loaded with mbiHash set, clear them for this test
+    final String selectNullMbiHash = "select b from Beneficiary b where b.mbiHash is null";
+    loader
+        .getIdleTasks()
+        .doTransaction(
+            em -> {
+              for (Beneficiary b :
+                  em.createQuery("select b from Beneficiary b", Beneficiary.class)
+                      .getResultList()) {
+                b.setMbiHash(Optional.empty());
+              }
+              return true;
+            });
+    EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
+    Assert.assertFalse(
+        "Should not be empty now",
+        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
+
+    // Run the initial task;
+    Assert.assertEquals(
+        "Should be running the initial task",
+        RifLoaderIdleTasks.Task.INITIAL,
+        loader.getIdleTasks().getCurrentTask());
+    loader.doIdleTask();
+    Assert.assertEquals(
+        "Should be running the initial task",
+        RifLoaderIdleTasks.Task.POST_STARTUP,
+        loader.getIdleTasks().getCurrentTask());
+
+    // Run the post startup task
+    loader.doIdleTask();
+
+    // Should mbiHash should be set now
+    Assert.assertEquals(
+        "Should be running the initial task",
+        RifLoaderIdleTasks.Task.NORMAL,
+        loader.getIdleTasks().getCurrentTask());
+    Assert.assertTrue(
+        "Expect all mbiHash have been filled",
+        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
+    loader.close();
+  }
+
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the specified {@link
    * StaticRifResourceGroup}.
@@ -158,7 +208,7 @@ public final class RifLoaderIT {
    * @param dataSource a {@link DataSource} for the test DB to use
    * @param sampleGroup the {@link StaticRifResourceGroup} to load
    */
-  private void loadSample(DataSource dataSource, StaticRifResourceGroup sampleGroup) {
+  private RifLoader loadSample(DataSource dataSource, StaticRifResourceGroup sampleGroup) {
     // Generate the sample RIF data to feed through the pipeline.
     List<StaticRifResource> sampleResources =
         Arrays.stream(sampleGroup.getResources()).collect(Collectors.toList());
@@ -226,6 +276,7 @@ public final class RifLoaderIT {
           options, entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
     }
     LOGGER.info("All records found in DB.");
+    return loader;
   }
 
   /**

@@ -88,6 +88,7 @@ public final class RifLoader implements AutoCloseable {
   private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final SecretKeyFactory secretKeyFactory;
+  private final RifLoaderIdleTasks idleTasks;
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -105,6 +106,17 @@ public final class RifLoader implements AutoCloseable {
     this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
     this.secretKeyFactory = createSecretKeyFactory();
+    this.idleTasks =
+        new RifLoaderIdleTasks(options, appMetrics, entityManagerFactory, secretKeyFactory);
+  }
+
+  /**
+   * Get the IdleTask manager associated with this loader. Useful for testing.
+   *
+   * @return the RifLoaderIdleTasks associated with this
+   */
+  public RifLoaderIdleTasks getIdleTasks() {
+    return idleTasks;
   }
 
   /**
@@ -238,6 +250,11 @@ public final class RifLoader implements AutoCloseable {
     }
 
     return result.get();
+  }
+
+  /** Do the idle tasks on the database. */
+  public void doIdleTask() {
+    idleTasks.doIdleTask();
   }
 
   /**
