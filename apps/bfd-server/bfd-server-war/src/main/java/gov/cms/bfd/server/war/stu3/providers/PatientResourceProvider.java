@@ -103,7 +103,9 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+
+    if ((IncludeIdentifiersMode.hasHICN(includeIdentifiersMode))
+        || (IncludeIdentifiersMode.hasMBI(includeIdentifiersMode))) {
       // For efficiency, grab these relations in the same query.
       // For security, only grab them when needed.
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -130,10 +132,13 @@ public final class PatientResourceProvider implements IResourceProvider {
           beneficiary == null ? 0 : 1);
     }
 
-    // Null out the unhashed HICNs and MBIs if we're not supposed to be returning
-    // those.
-    if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+    // Null out the unhashed HICNs if we're not supposed to be returning them
+    if (!IncludeIdentifiersMode.hasHICN(includeIdentifiersMode)) {
       beneficiary.setHicnUnhashed(Optional.empty());
+    }
+
+    // Null out the unhashed MBIs if we're not supposed to be returning
+    if (!IncludeIdentifiersMode.hasMBI(includeIdentifiersMode)) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
@@ -370,7 +375,9 @@ public final class PatientResourceProvider implements IResourceProvider {
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
     IncludeIdentifiersMode includeIdentifiersMode =
         IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+
+    if ((IncludeIdentifiersMode.hasHICN(includeIdentifiersMode))
+        || (IncludeIdentifiersMode.hasMBI(includeIdentifiersMode))) {
       // For efficiency, grab these relations in the same query.
       // For security, only grab them when needed.
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -419,9 +426,13 @@ public final class PatientResourceProvider implements IResourceProvider {
       beneficiary = matchingBenes.get(0);
     }
 
-    // Then, null out the HICN and MBI if we're not supposed to be returning those.
-    if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+    // Null out the unhashed HICNs if we're not supposed to be returning them
+    if (!IncludeIdentifiersMode.hasHICN(includeIdentifiersMode)) {
       beneficiary.setHicnUnhashed(Optional.empty());
+    }
+
+    // Null out the unhashed MBIs if we're not supposed to be returning
+    if (!IncludeIdentifiersMode.hasMBI(includeIdentifiersMode)) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
@@ -461,8 +472,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /** Enumerates the supported "should we include unique beneficiary identifiers" options. */
   public static enum IncludeIdentifiersMode {
+    INCLUDE_MBIS,
+    INCLUDE_HICNS,
     INCLUDE_HICNS_AND_MBIS,
-
     OMIT_HICNS_AND_MBIS;
 
     /**
@@ -473,11 +485,38 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     static IncludeIdentifiersMode determineIncludeIdentifiersMode(RequestDetails requestDetails) {
       String includeIdentifiersValue = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
-      if (Boolean.parseBoolean(includeIdentifiersValue) == true) {
+
+      if (includeIdentifiersValue == null) {
+        // If the header was not included in the request or blank
+        return OMIT_HICNS_AND_MBIS;
+      } else if (Boolean.parseBoolean(includeIdentifiersValue) == true) {
+        return INCLUDE_MBIS;
+      } else if (includeIdentifiersValue.equals("HICN")) {
+        return INCLUDE_HICNS;
+      } else if (includeIdentifiersValue.equals("MBI")) {
+        return INCLUDE_MBIS;
+      } else if (includeIdentifiersValue.equals("HICN_AND_MBI")) {
         return INCLUDE_HICNS_AND_MBIS;
       } else {
+        // Default
         return OMIT_HICNS_AND_MBIS;
       }
+    }
+
+    /** @return Returns true if the @param includeIdentifiersMode includes unhashed hicn */
+    public static boolean hasHICN(IncludeIdentifiersMode includeIdentifiersMode) {
+      if ((includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS)
+          || (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS)) {
+        return true;
+      } else return false;
+    }
+
+    /** @return Returns true if the @param includeIdentifiersMode includes unhashed mbi */
+    public static boolean hasMBI(IncludeIdentifiersMode includeIdentifiersMode) {
+      if ((includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS)
+          || (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_MBIS)) {
+        return true;
+      } else return false;
     }
   }
 }
