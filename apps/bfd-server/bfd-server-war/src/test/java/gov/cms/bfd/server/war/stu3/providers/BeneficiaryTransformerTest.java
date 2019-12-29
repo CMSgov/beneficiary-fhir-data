@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +36,17 @@ public final class BeneficiaryTransformerTest {
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
     assertMatches(beneficiary, patient);
+
+    // Verify patient has only two identifiers.
     Assert.assertEquals(2, patient.getIdentifier().size());
+
+    // Verify identifiers and values match.
+    assertValuesInPatientIdentifiers(
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
   }
 
   /**
@@ -52,7 +63,111 @@ public final class BeneficiaryTransformerTest {
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
     assertMatches(beneficiary, patient);
+
+    // Verify patient has only 7 identifiers.
     Assert.assertEquals(7, patient.getIdentifier().size());
+
+    // Verify patient identifiers and values match.
+    assertValuesInPatientIdentifiers(
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "3456789");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, in
+   * the {@link IncludeIdentifiersMode#INCLUDE_HICNS} mode.
+   */
+  @Test
+  public void transformSampleARecordWithIdentifiersHicn() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+
+    Patient patient =
+        BeneficiaryTransformer.transform(
+            new MetricRegistry(), beneficiary, IncludeIdentifiersMode.INCLUDE_HICNS);
+    assertMatches(beneficiary, patient);
+
+    // Verify patient has only 5 identifiers.
+    Assert.assertEquals(5, patient.getIdentifier().size());
+
+    // Verify patient identifiers and values match.
+    assertValuesInPatientIdentifiers(
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}, in
+   * the {@link IncludeIdentifiersMode#INCLUDE_MBIS} mode.
+   */
+  @Test
+  public void transformSampleARecordWithIdentifiersMbi() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+
+    Patient patient =
+        BeneficiaryTransformer.transform(
+            new MetricRegistry(), beneficiary, IncludeIdentifiersMode.INCLUDE_MBIS);
+    assertMatches(beneficiary, patient);
+
+    // Verify patient has only 4 identifiers.
+    Assert.assertEquals(4, patient.getIdentifier().size());
+
+    // Verify patient identifiers and values match.
+    assertValuesInPatientIdentifiers(
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "3456789");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
+  }
+
+  /**
+   * Verifies that the {@link Patient} identifiers contain expected values.
+   *
+   * @param Patient {@link Patient} containing identifiers
+   * @param identifierSystem value to be matched
+   * @param identifierValue value to be matched
+   */
+  private static void assertValuesInPatientIdentifiers(
+      Patient patient, String identifierSystem, String identifierValue) {
+    boolean identifierFound = false;
+
+    for (Identifier temp : patient.getIdentifier()) {
+      if (identifierSystem.equals(temp.getSystem()) && identifierValue.equals(temp.getValue())) {
+        identifierFound = true;
+        break;
+      }
+    }
+    Assert.assertEquals(identifierFound, true);
   }
 
   /**
