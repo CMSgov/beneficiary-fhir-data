@@ -67,12 +67,15 @@ final class BeneficiaryTransformer {
           .setValue(beneficiary.getMbiHash().get());
     }
 
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+    if ((IncludeIdentifiersMode.hasHICN(includeIdentifiersMode))
+        || (IncludeIdentifiersMode.hasMBI(includeIdentifiersMode))) {
+
       Extension currentIdentifier =
           TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
 
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
-      if (hicnUnhashedCurrent.isPresent())
+      if ((hicnUnhashedCurrent.isPresent())
+          && (IncludeIdentifiersMode.hasHICN(includeIdentifiersMode)))
         addUnhashedIdentifier(
             patient,
             hicnUnhashedCurrent.get(),
@@ -80,7 +83,8 @@ final class BeneficiaryTransformer {
             currentIdentifier);
 
       Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
-      if (mbiUnhashedCurrent.isPresent())
+      if ((mbiUnhashedCurrent.isPresent())
+          && (IncludeIdentifiersMode.hasMBI(includeIdentifiersMode)))
         addUnhashedIdentifier(
             patient,
             mbiUnhashedCurrent.get(),
@@ -90,35 +94,41 @@ final class BeneficiaryTransformer {
       Extension historicalIdentifier =
           TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
 
-      List<String> unhashedHicns = new ArrayList<String>();
-      for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
-        Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
-        if (hicnUnhashedHistoric.isPresent()) unhashedHicns.add(hicnUnhashedHistoric.get());
-      }
-      List<String> unhashedHicnsNoDupes =
-          unhashedHicns.stream().distinct().collect(Collectors.toList());
-      for (String hicn : unhashedHicnsNoDupes) {
-        addUnhashedIdentifier(
-            patient,
-            hicn,
-            TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
-            historicalIdentifier);
+      if (IncludeIdentifiersMode.hasHICN(includeIdentifiersMode)) {
+        List<String> unhashedHicns = new ArrayList<String>();
+        for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
+          Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
+          if (hicnUnhashedHistoric.isPresent()) unhashedHicns.add(hicnUnhashedHistoric.get());
+        }
+
+        List<String> unhashedHicnsNoDupes =
+            unhashedHicns.stream().distinct().collect(Collectors.toList());
+        for (String hicn : unhashedHicnsNoDupes) {
+          addUnhashedIdentifier(
+              patient,
+              hicn,
+              TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+              historicalIdentifier);
+        }
       }
 
-      List<String> unhashedMbis = new ArrayList<String>();
-      for (MedicareBeneficiaryIdHistory mbiHistory :
-          beneficiary.getMedicareBeneficiaryIdHistories()) {
-        Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
-        if (mbiUnhashedHistoric.isPresent()) unhashedMbis.add(mbiUnhashedHistoric.get());
-      }
-      List<String> unhashedMbisNoDupes =
-          unhashedMbis.stream().distinct().collect(Collectors.toList());
-      for (String mbi : unhashedMbisNoDupes) {
-        addUnhashedIdentifier(
-            patient,
-            mbi,
-            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
-            historicalIdentifier);
+      if (IncludeIdentifiersMode.hasMBI(includeIdentifiersMode)) {
+        List<String> unhashedMbis = new ArrayList<String>();
+        for (MedicareBeneficiaryIdHistory mbiHistory :
+            beneficiary.getMedicareBeneficiaryIdHistories()) {
+          Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
+          if (mbiUnhashedHistoric.isPresent()) unhashedMbis.add(mbiUnhashedHistoric.get());
+        }
+
+        List<String> unhashedMbisNoDupes =
+            unhashedMbis.stream().distinct().collect(Collectors.toList());
+        for (String mbi : unhashedMbisNoDupes) {
+          addUnhashedIdentifier(
+              patient,
+              mbi,
+              TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+              historicalIdentifier);
+        }
       }
     }
 
