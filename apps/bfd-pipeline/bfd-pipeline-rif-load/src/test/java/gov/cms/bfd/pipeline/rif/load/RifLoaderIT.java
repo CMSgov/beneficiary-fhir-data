@@ -30,7 +30,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -131,11 +130,6 @@ public final class RifLoaderIT {
   @Ignore
   @Test
   public void loadSyntheticData() {
-    Assume.assumeTrue(
-        String.format(
-            "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
-            Runtime.getRuntime().maxMemory()),
-        Runtime.getRuntime().maxMemory() >= 4500000000L);
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
     loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);
   }
@@ -159,40 +153,69 @@ public final class RifLoaderIT {
     final RifLoader loader = loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
 
     // The sample are loaded with mbiHash set, clear them for this test
+    clearMbiHash(loader);
     final String selectNullMbiHash = "select b from Beneficiary b where b.mbiHash is null";
-    loader
-        .getIdleTasks()
-        .doTransaction(
-            em -> {
-              for (Beneficiary b :
-                  em.createQuery("select b from Beneficiary b", Beneficiary.class)
-                      .getResultList()) {
-                b.setMbiHash(Optional.empty());
-              }
-              return true;
-            });
     EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
     Assert.assertFalse(
         "Should not be empty now",
         em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
 
-    // Run the initial task;
+    // Run the initial task
     Assert.assertEquals(
         "Should be running the initial task",
         RifLoaderIdleTasks.Task.INITIAL,
         loader.getIdleTasks().getCurrentTask());
     loader.doIdleTask();
-    Assert.assertEquals(
-        "Should be running the initial task",
-        RifLoaderIdleTasks.Task.POST_STARTUP,
-        loader.getIdleTasks().getCurrentTask());
 
     // Run the post startup task
+    Assert.assertEquals(
+        "Should be running the post-startup task",
+        RifLoaderIdleTasks.Task.POST_STARTUP,
+        loader.getIdleTasks().getCurrentTask());
     loader.doIdleTask();
 
     // Should mbiHash should be set now
     Assert.assertEquals(
+        "Should be running the normal task",
+        RifLoaderIdleTasks.Task.NORMAL,
+        loader.getIdleTasks().getCurrentTask());
+    Assert.assertTrue(
+        "Expect all mbiHash have been filled",
+        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
+    loader.close();
+  }
+
+  @Ignore
+  @Test
+  public void runLongIdleTasks() {
+    final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    final RifLoader loader = loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);
+
+    // The sample are loaded with mbiHash set, clear them for this test
+    clearMbiHash(loader);
+    final String selectNullMbiHash = "select b from Beneficiary b where b.mbiHash is null";
+    EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
+    Assert.assertFalse(
+        "Should not be empty now",
+        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
+
+    // Run the initial task
+    Assert.assertEquals(
         "Should be running the initial task",
+        RifLoaderIdleTasks.Task.INITIAL,
+        loader.getIdleTasks().getCurrentTask());
+    loader.doIdleTask();
+
+    // Run the post startup task
+    Assert.assertEquals(
+        "Should be running the post-startup task",
+        RifLoaderIdleTasks.Task.POST_STARTUP,
+        loader.getIdleTasks().getCurrentTask());
+    loader.doIdleTask();
+
+    // Should mbiHash should be set now
+    Assert.assertEquals(
+        "Should be running the normal task",
         RifLoaderIdleTasks.Task.NORMAL,
         loader.getIdleTasks().getCurrentTask());
     Assert.assertTrue(
@@ -344,5 +367,24 @@ public final class RifLoaderIT {
     } finally {
       if (entityManager != null) entityManager.close();
     }
+  }
+
+  private static void clearMbiHash(final RifLoader loader) {
+    loader
+        .getIdleTasks()
+        .doTransaction(
+            em -> {
+              for (final Beneficiary b :
+                  em.createQuery("select b from Beneficiary b", Beneficiary.class)
+                      .getResultList()) {
+                b.setMbiHash(Optional.empty());
+              }
+              for (final BeneficiaryHistory b :
+                  em.createQuery("select b from BeneficiaryHistory b", BeneficiaryHistory.class)
+                      .getResultList()) {
+                b.setMbiHash(Optional.empty());
+              }
+              return true;
+            });
   }
 }
