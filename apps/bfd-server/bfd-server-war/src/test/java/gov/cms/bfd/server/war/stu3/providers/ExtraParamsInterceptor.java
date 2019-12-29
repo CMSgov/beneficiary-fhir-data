@@ -20,9 +20,21 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
 
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS)
-      theRequest.addHeader(
-          IncludeIdentifiersMode.HEADER_NAME_INCLUDE_IDENTIFIERS, Boolean.TRUE.toString());
+    String headerValue;
+    switch (includeIdentifiersMode) {
+      case INCLUDE_HICNS_AND_MBIS:
+        headerValue = "HICN_AND_MBI";
+        break;
+      case INCLUDE_HICNS:
+        headerValue = "HICN";
+        break;
+      case INCLUDE_MBIS:
+        headerValue = "MBI";
+        break;
+      default:
+        headerValue = Boolean.FALSE.toString();
+    }
+    theRequest.addHeader(IncludeIdentifiersMode.HEADER_NAME_INCLUDE_IDENTIFIERS, headerValue);
   }
 
   @Override
