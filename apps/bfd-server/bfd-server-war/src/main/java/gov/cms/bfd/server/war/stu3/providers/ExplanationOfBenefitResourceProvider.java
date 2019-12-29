@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
 import java.util.ArrayList;
@@ -95,6 +96,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
+  @Trace
   public ExplanationOfBenefit read(@IdParam IdType eobId) {
     if (eobId == null) throw new IllegalArgumentException();
     if (eobId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
@@ -162,6 +164,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    *     matching resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) ReferenceParam patient,
       @OptionalParam(name = "type") TokenAndListParam type,
@@ -266,6 +269,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * @return the matching claim/event entities
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
+  @Trace
   private <T> List<T> findClaimTypeByPatient(ClaimType claimType, String patientId) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = criteriaBuilder.createQuery((Class) claimType.getEntityClass());
@@ -305,6 +309,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified
    *     claim/event
    */
+  @Trace
   private List<ExplanationOfBenefit> transformToEobs(ClaimType claimType, List<?> claims) {
     return claims.stream()
         .map(c -> claimType.getTransformer().apply(metricRegistry, c))

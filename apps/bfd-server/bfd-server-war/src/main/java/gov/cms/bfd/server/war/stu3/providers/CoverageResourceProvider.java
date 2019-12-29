@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
@@ -77,6 +78,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
    *     exists.
    */
   @Read(version = false)
+  @Trace
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) throw new IllegalArgumentException();
     if (coverageId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
@@ -128,6 +130,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
    *     resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY) ReferenceParam beneficiary,
       @OptionalParam(name = "startIndex") String startIndex,
@@ -159,6 +162,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found in the database.
    */
+  @Trace
   private Beneficiary findBeneficiaryById(String beneficiaryId) throws NoResultException {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);

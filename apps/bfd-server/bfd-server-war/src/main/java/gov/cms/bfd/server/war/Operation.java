@@ -116,7 +116,7 @@ public final class Operation {
      * @return the canonical name for the HTTP endpoint/handler represented by this {@link Endpoint}
      */
     public String getCanonicalName() {
-      return null;
+      return requestHttpUri;
     }
 
     /**

@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
@@ -88,6 +89,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     exists.
    */
   @Read(version = false)
+  @Trace
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null) throw new IllegalArgumentException();
     if (patientId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
@@ -163,6 +165,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID) TokenParam logicalId,
       @OptionalParam(name = "startIndex") String startIndex,
@@ -216,6 +219,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER) TokenParam identifier,
       @OptionalParam(name = "startIndex") String startIndex,
@@ -258,6 +262,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
+  @Trace
   private Patient queryDatabaseByHicnHash(
       String hicnHash, IncludeIdentifiersMode includeIdentifiersMode) {
     if (hicnHash == null || hicnHash.trim().isEmpty()) throw new IllegalArgumentException();
@@ -402,6 +407,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return a FHIR {@link Beneficiary} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    */
+  @Trace
   private Beneficiary selectBeneWithLatestReferenceYear(List<Beneficiary> duplicateBenes) {
     BigDecimal maxReferenceYear = new BigDecimal(-0001);
     String maxReferenceYearMatchingBeneficiaryId = null;
