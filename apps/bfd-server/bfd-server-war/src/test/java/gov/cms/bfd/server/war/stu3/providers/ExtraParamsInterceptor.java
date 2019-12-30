@@ -23,13 +23,13 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
     String headerValue;
     switch (includeIdentifiersMode) {
       case INCLUDE_HICNS_AND_MBIS:
-        headerValue = "HICN_AND_MBI";
+        headerValue = "hicn,mbi";
         break;
       case INCLUDE_HICNS:
-        headerValue = "HICN";
+        headerValue = "hicn";
         break;
       case INCLUDE_MBIS:
-        headerValue = "MBI";
+        headerValue = "mbi";
         break;
       default:
         headerValue = Boolean.FALSE.toString();

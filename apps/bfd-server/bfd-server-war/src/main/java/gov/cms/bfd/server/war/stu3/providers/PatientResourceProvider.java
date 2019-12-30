@@ -494,11 +494,11 @@ public final class PatientResourceProvider implements IResourceProvider {
         // Still match boolean true by ignoring case
       } else if (headerValues.stream().anyMatch(x -> x.equalsIgnoreCase("true"))) {
         return INCLUDE_MBIS;
-      } else if (headerValues.contains("HICN") && headerValues.contains("MBI")) {
+      } else if (headerValues.contains("hicn") && headerValues.contains("mbi")) {
         return INCLUDE_HICNS_AND_MBIS;
-      } else if (headerValues.contains("HICN")) {
+      } else if (headerValues.contains("hicn")) {
         return INCLUDE_HICNS;
-      } else if (headerValues.contains("MBI")) {
+      } else if (headerValues.contains("mbi")) {
         return INCLUDE_MBIS;
       } else {
         // Default
