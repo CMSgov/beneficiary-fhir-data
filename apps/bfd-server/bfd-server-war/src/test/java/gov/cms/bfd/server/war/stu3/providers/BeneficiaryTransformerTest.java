@@ -37,8 +37,7 @@ public final class BeneficiaryTransformerTest {
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
     assertMatches(beneficiary, patient);
 
-    // Verify patient has only two identifiers.
-    Assert.assertEquals(2, patient.getIdentifier().size());
+    Assert.assertEquals("Number of identifiers should be 2", 2, patient.getIdentifier().size());
 
     // Verify identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -64,8 +63,7 @@ public final class BeneficiaryTransformerTest {
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
     assertMatches(beneficiary, patient);
 
-    // Verify patient has only 7 identifiers.
-    Assert.assertEquals(7, patient.getIdentifier().size());
+    Assert.assertEquals("Number of identifiers should be 7", 7, patient.getIdentifier().size());
 
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -101,8 +99,7 @@ public final class BeneficiaryTransformerTest {
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.INCLUDE_HICNS);
     assertMatches(beneficiary, patient);
 
-    // Verify patient has only 5 identifiers.
-    Assert.assertEquals(5, patient.getIdentifier().size());
+    Assert.assertEquals("Number of identifiers should be 5", 5, patient.getIdentifier().size());
 
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -134,8 +131,7 @@ public final class BeneficiaryTransformerTest {
             new MetricRegistry(), beneficiary, IncludeIdentifiersMode.INCLUDE_MBIS);
     assertMatches(beneficiary, patient);
 
-    // Verify patient has only 4 identifiers.
-    Assert.assertEquals(4, patient.getIdentifier().size());
+    Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
 
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -167,7 +163,14 @@ public final class BeneficiaryTransformerTest {
         break;
       }
     }
-    Assert.assertEquals(identifierFound, true);
+    Assert.assertEquals(
+        "Identifier "
+            + identifierSystem
+            + " value = "
+            + identifierValue
+            + " does not match an expected value.",
+        identifierFound,
+        true);
   }
 
   /**
