@@ -486,17 +486,20 @@ public final class PatientResourceProvider implements IResourceProvider {
     static IncludeIdentifiersMode determineIncludeIdentifiersMode(RequestDetails requestDetails) {
       String includeIdentifiersValue = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
+      List<String> headerValues = Arrays.asList(includeIdentifiersValue.split("\\s*,\\s*"));
+
       if (includeIdentifiersValue == null) {
         // If the header was not included in the request or blank
         return OMIT_HICNS_AND_MBIS;
-      } else if (Boolean.parseBoolean(includeIdentifiersValue) == true) {
+        // Still match boolean true by ignoring case
+      } else if (headerValues.stream().anyMatch(x -> x.equalsIgnoreCase("true"))) {
         return INCLUDE_MBIS;
-      } else if (includeIdentifiersValue.equals("HICN")) {
-        return INCLUDE_HICNS;
-      } else if (includeIdentifiersValue.equals("MBI")) {
-        return INCLUDE_MBIS;
-      } else if (includeIdentifiersValue.equals("HICN_AND_MBI")) {
+      } else if (headerValues.contains("HICN") && headerValues.contains("MBI")) {
         return INCLUDE_HICNS_AND_MBIS;
+      } else if (headerValues.contains("HICN")) {
+        return INCLUDE_HICNS;
+      } else if (headerValues.contains("MBI")) {
+        return INCLUDE_MBIS;
       } else {
         // Default
         return OMIT_HICNS_AND_MBIS;
