@@ -1,5 +1,14 @@
 # API Changelog
 
+## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
+
+The Patient resource supports searching by a hashed MBI identifier:
+
+```
+https://bluebutton.cms.gov/resources/identifier/mbi-hash
+```
+
+
 ## BLUEBUTTON-1679: Hashed HICN needs to be removed from Patient Resource
 
 The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule by January 1st. This is to leave no traces of the HICN-hash in any external facing data requests to BFD. 
