@@ -3,11 +3,6 @@ variable "env_config" {
   type        = object({env=string, tags=map(string), vpc_id=string, zone_id=string, azs=list(string)})
 }
 
-// variable "app_subnets" {
-//   type        = list(string)
-//   description = "App Subnets to use for the jenkins application"
-// }
-
 variable "vpn_security_group_id" {
   type        = string
   description = "Security group that provides access via VPN"

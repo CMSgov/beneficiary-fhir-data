@@ -1,0 +1,31 @@
+---
+##
+# Mounts Jenkins Data EBS Volume
+##
+- name: Ensure NFS is installed.
+  package: "name={{ nfs_package }} state=installed"
+
+- name: Ensure mount directory exists.
+  file:
+    path: "{{ efs_mount_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Get current AZ from AWS.
+  uri:
+    url: http://169.254.169.254/latest/meta-data/placement/availability-zone
+    return_content: yes
+  register: aws_current_az
+
+- name: Ensure EFS volume is mounted.
+  mount:
+    name: "{{ efs_mount_dir }}"
+    src: "{{ aws_current_az.content }}.{{ efs_file_system_id }}.efs.{{ aws_region }}.amazonaws.com:/"
+    fstype: nfs4
+    opts: nfsvers=4.1
+    state: mounted
+
+# Print the contents of the mount to the log.
+- command: "ls -lah {{ efs_mount_dir }}"
+  register: efs_contents
+- debug: var=efs_contents
