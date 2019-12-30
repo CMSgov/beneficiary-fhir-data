@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,12 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class manages the work that is done during the idle time of RifLoader. This is a helper
- * class for the RifLoader.
+ * This class manages the work that is done during the idle time of a RifLoader. This is a helper
+ * class for the RifLoader. It is expected to have a 1-to-1 relationship to a RifLoader.
  */
 public class RifLoaderIdleTasks {
-  /** Statics */
-
   /** Parameters for the post startup tasks. Tuned for throughput. */
 
   /** Time slice that a task can take before returning/yielding to the main pipeline */
@@ -39,7 +38,7 @@ public class RifLoaderIdleTasks {
   private static final int BATCH_COUNT = 1000;
 
   /** The number threads of batches to execute conncurrently */
-  private static final int THREAD_COUNT = 10;
+  private static final int THREAD_COUNT = 5;
 
   /** JPQL queries */
   private static final String SELECT_UNHASHED_BENFICIARIES =
@@ -109,9 +108,9 @@ public class RifLoaderIdleTasks {
     this.secretKeyFactory = secretKeyFactory;
 
     this.beneficaryMeter = appMetrics.meter("fixups.beneficiary.rate");
-    this.historyMeter = appMetrics.meter("fixups.beneficiaryHistory.rate");
+    this.historyMeter = appMetrics.meter("fixups.beneficiary_history.rate");
     this.beneficiaryCounter = appMetrics.counter("fixups.beneficiary.remaining");
-    this.historyCounter = appMetrics.counter("fixups.beneficiaryHistory.remaining");
+    this.historyCounter = appMetrics.counter("fixups.beneficiary_history.remaining");
 
     this.executorService = Executors.newFixedThreadPool(THREAD_COUNT);
   }
@@ -148,7 +147,7 @@ public class RifLoaderIdleTasks {
         }
         break;
       default:
-        throw new RuntimeException("Unexcpected idle task");
+        throw new RuntimeException("Unexpected idle task");
     }
   }
 
@@ -199,10 +198,7 @@ public class RifLoaderIdleTasks {
     }
     waitUntilDone();
 
-    /*
-     * Do mbiHash fixups This is a long running startup tasks. The TASK_TIME_LIMIT
-     * comes into play.
-     */
+    // return done if the counters are at zero
     final boolean isDone = beneficiaryCounter.getCount() <= 0 && historyCounter.getCount() <= 0;
     if (isDone) {
       LOGGER.info("Finished idle startup tasks");
@@ -223,6 +219,7 @@ public class RifLoaderIdleTasks {
   /** Wait until all executors are done. */
   public void waitUntilDone() {
     try {
+      // Use a 2x longer value than the expected termination.
       executorService.awaitTermination(2 * TASK_TIME_LIMIT_MILLIS, TimeUnit.MILLISECONDS);
     } catch (InterruptedException ex) {
     }
@@ -235,6 +232,7 @@ public class RifLoaderIdleTasks {
    * @return true if done with all fixups
    */
   public Boolean fixupBeneficiaryBatch(final EntityManager em) {
+    Objects.requireNonNull(em);
     final List<Beneficiary> beneficiaries =
         em.createQuery(SELECT_UNHASHED_BENFICIARIES, Beneficiary.class)
             .setMaxResults(BATCH_COUNT)
@@ -263,6 +261,7 @@ public class RifLoaderIdleTasks {
    * @return true if done with all fixups
    */
   public Boolean fixupHistoryBatch(final EntityManager em) {
+    Objects.requireNonNull(em);
     final List<BeneficiaryHistory> histories =
         em.createQuery(SELECT_UNHASHED_HISTORIES, BeneficiaryHistory.class)
             .setMaxResults(BATCH_COUNT)
@@ -302,6 +301,7 @@ public class RifLoaderIdleTasks {
    * @return the return value from the executor
    */
   public boolean doTransaction(final Function<EntityManager, Boolean> executor) {
+    Objects.requireNonNull(executor);
     try {
       final EntityManager em = entityManagerFactory.createEntityManager();
       EntityTransaction txn = null;

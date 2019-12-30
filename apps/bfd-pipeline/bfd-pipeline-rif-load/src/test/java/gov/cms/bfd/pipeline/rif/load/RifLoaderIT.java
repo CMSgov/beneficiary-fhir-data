@@ -371,6 +371,11 @@ public final class RifLoaderIT {
     }
   }
 
+  /**
+   * Clear the MBI hash fields in the db
+   *
+   * @param loader the loader and the db connection within
+   */
   private static void clearMbiHash(final RifLoader loader) {
     loader
         .getIdleTasks()
