@@ -39,7 +39,7 @@ public class RifLoaderIdleTasks {
   private static final int BATCH_COUNT = 1000;
 
   /** The number threads of batches to execute conncurrently */
-  private static final int THREAD_COUNT = 1;
+  private static final int THREAD_COUNT = 10;
 
   /** JPQL queries */
   private static final String SELECT_UNHASHED_BENFICIARIES =
@@ -108,10 +108,10 @@ public class RifLoaderIdleTasks {
     this.entityManagerFactory = entityManagerFactory;
     this.secretKeyFactory = secretKeyFactory;
 
-    this.beneficaryMeter = appMetrics.meter("Beneficiary_fixup_rate");
-    this.historyMeter = appMetrics.meter("BeneficiaryHistory_fixup_rate");
-    this.beneficiaryCounter = appMetrics.counter("Beneficiary_fixups_remaining");
-    this.historyCounter = appMetrics.counter("BeneficiaryHistory_fixups_remaining");
+    this.beneficaryMeter = appMetrics.meter("fixups.beneficiary.rate");
+    this.historyMeter = appMetrics.meter("fixups.beneficiaryHistory.rate");
+    this.beneficiaryCounter = appMetrics.counter("fixups.beneficiary.remaining");
+    this.historyCounter = appMetrics.counter("fixups.beneficiaryHistory.remaining");
 
     this.executorService = Executors.newFixedThreadPool(THREAD_COUNT);
   }

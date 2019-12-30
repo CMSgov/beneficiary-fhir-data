@@ -14,6 +14,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -154,11 +155,15 @@ public final class RifLoaderIT {
 
     // The sample are loaded with mbiHash set, clear them for this test
     clearMbiHash(loader);
-    final String selectNullMbiHash = "select b from Beneficiary b where b.mbiHash is null";
+    final String selectBeneficiary = "select b from Beneficiary b where b.mbiHash is null";
     EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
     Assert.assertFalse(
         "Should not be empty now",
-        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
+        em.createQuery(selectBeneficiary, Beneficiary.class).getResultList().isEmpty());
+    final String selectHistory = "select b from BeneficiaryHistory b where b.mbiHash is null";
+    Assert.assertFalse(
+        "Should not be empty now",
+        em.createQuery(selectHistory, BeneficiaryHistory.class).getResultList().isEmpty());
 
     // Run the initial task
     Assert.assertEquals(
@@ -181,7 +186,11 @@ public final class RifLoaderIT {
         loader.getIdleTasks().getCurrentTask());
     Assert.assertTrue(
         "Expect all mbiHash have been filled",
-        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
+        em.createQuery(selectBeneficiary, Beneficiary.class).getResultList().isEmpty());
+    Assert.assertTrue(
+        "Should all mbiHash should have been filled",
+        em.createQuery(selectHistory, BeneficiaryHistory.class).getResultList().isEmpty());
+
     loader.close();
   }
 
@@ -193,11 +202,6 @@ public final class RifLoaderIT {
 
     // The sample are loaded with mbiHash set, clear them for this test
     clearMbiHash(loader);
-    final String selectNullMbiHash = "select b from Beneficiary b where b.mbiHash is null";
-    EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
-    Assert.assertFalse(
-        "Should not be empty now",
-        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
 
     // Run the initial task
     Assert.assertEquals(
@@ -207,20 +211,18 @@ public final class RifLoaderIT {
     loader.doIdleTask();
 
     // Run the post startup task
-    Assert.assertEquals(
-        "Should be running the post-startup task",
-        RifLoaderIdleTasks.Task.POST_STARTUP,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
+    Instant startTime = Instant.now();
+    while (loader.getIdleTasks().getCurrentTask() == RifLoaderIdleTasks.Task.POST_STARTUP) {
+      loader.doIdleTask();
+    }
+    Duration time = Duration.between(startTime, Instant.now());
+    LOGGER.info("Post migration took: {} seconds", time.getSeconds());
 
     // Should mbiHash should be set now
     Assert.assertEquals(
         "Should be running the normal task",
         RifLoaderIdleTasks.Task.NORMAL,
         loader.getIdleTasks().getCurrentTask());
-    Assert.assertTrue(
-        "Expect all mbiHash have been filled",
-        em.createQuery(selectNullMbiHash, Beneficiary.class).getResultList().isEmpty());
     loader.close();
   }
 
