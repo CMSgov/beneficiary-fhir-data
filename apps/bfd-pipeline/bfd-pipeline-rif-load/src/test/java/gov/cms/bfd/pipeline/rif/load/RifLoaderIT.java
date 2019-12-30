@@ -194,6 +194,45 @@ public final class RifLoaderIT {
     loader.close();
   }
 
+  @Test
+  public void runIdleTasksWithNoFixups() {
+    final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    final RifLoader loader = loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+
+    // Should need no work
+    final String selectBeneficiary = "select b from Beneficiary b where b.mbiHash is null";
+    EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
+    Assert.assertTrue(
+        "Beneficiaries should be fixed up",
+        em.createQuery(selectBeneficiary, Beneficiary.class).getResultList().isEmpty());
+    final String selectHistory = "select b from BeneficiaryHistory b where b.mbiHash is null";
+    Assert.assertTrue(
+        "Histories should be fixed up",
+        em.createQuery(selectHistory, BeneficiaryHistory.class).getResultList().isEmpty());
+
+    // Run the initial task
+    Assert.assertEquals(
+        "Should be running the initial task",
+        RifLoaderIdleTasks.Task.INITIAL,
+        loader.getIdleTasks().getCurrentTask());
+    loader.doIdleTask();
+
+    // Run the post startup task
+    Assert.assertEquals(
+        "Should be running the post-startup task",
+        RifLoaderIdleTasks.Task.POST_STARTUP,
+        loader.getIdleTasks().getCurrentTask());
+    loader.doIdleTask();
+
+    // Should be normal now
+    Assert.assertEquals(
+        "Should be running the normal task",
+        RifLoaderIdleTasks.Task.NORMAL,
+        loader.getIdleTasks().getCurrentTask());
+
+    loader.close();
+  }
+
   @Ignore
   @Test
   public void runLongIdleTasks() {
