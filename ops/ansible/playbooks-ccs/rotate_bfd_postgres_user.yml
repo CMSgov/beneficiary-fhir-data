@@ -16,7 +16,7 @@
 
       register: database_info
 
-    - name: Create RDS PostgreSQL Database
+    - name: Change Pre-existing Users Password
       postgresql_user:
         login_host: "{{ database_info.instances[0].endpoint.address }}"
         login_user: "{{ database_info.instances[0].master_username }}"
