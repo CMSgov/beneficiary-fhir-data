@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class SyntheticDataFixer4 {
   private static class MBIPool {
+    // Format based on https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI-with-Format.pdf
+   
     private int i = 0;
 
     private String template = "%dS%s%d%s%s%d%s%s%d%d";
@@ -67,7 +69,7 @@ public final class SyntheticDataFixer4 {
                               * alpha.length
                               * alphanumeric.length
                               * 10))
-              % alphanumeric.length;
+              % alpha.length;
       int position9 =
           (int)
                   Math.floor(
@@ -78,8 +80,8 @@ public final class SyntheticDataFixer4 {
                               * alpha.length
                               * alphanumeric.length
                               * 10
-                              * alphanumeric.length))
-              % alphanumeric.length;
+                              * alpha.length))
+              % alpha.length;
       int position10 =
           (int)
                   Math.floor(
@@ -90,8 +92,8 @@ public final class SyntheticDataFixer4 {
                               * alpha.length
                               * alphanumeric.length
                               * 10
-                              * alphanumeric.length
-                              * alphanumeric.length))
+                              * alpha.length
+                              * alpha.length))
               % 10;
       int position11 =
           (int)
@@ -103,8 +105,8 @@ public final class SyntheticDataFixer4 {
                               * alpha.length
                               * alphanumeric.length
                               * 10
-                              * alphanumeric.length
-                              * alphanumeric.length
+                              * alpha.length
+                              * alpha.length
                               * 10))
               % 10;
 
@@ -118,8 +120,8 @@ public final class SyntheticDataFixer4 {
           alpha[position5],
           alphanumeric[position6],
           position7,
-          alphanumeric[position8],
-          alphanumeric[position9],
+          alpha[position8],
+          alpha[position9],
           position10,
           position11);
     }
