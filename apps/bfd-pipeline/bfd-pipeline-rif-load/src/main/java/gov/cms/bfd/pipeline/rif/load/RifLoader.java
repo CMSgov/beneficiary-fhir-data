@@ -743,35 +743,7 @@ public final class RifLoader implements AutoCloseable {
    */
   static String computeHicnHash(
       LoadAppOptions options, SecretKeyFactory secretKeyFactory, String hicn) {
-    try {
-      /*
-       * Our approach here is NOT using a salt, as salts must be randomly
-       * generated for each value to be hashed and then included in
-       * plaintext with the hash results. Random salts would prevent the
-       * Blue Button API frontend systems from being able to produce equal
-       * hashes for the same HICNs. Instead, we use a secret "pepper" that
-       * is shared out-of-band with the frontend. This value MUST be kept
-       * secret.
-       */
-      byte[] salt = options.getHicnHashPepper();
-
-      /*
-       * Bigger is better here as it reduces chances of collisions, but
-       * the equivalent Python Django hashing functions used by the
-       * frontend default to this value, so we'll go with it.
-       */
-      int derivedKeyLength = 256;
-
-      PBEKeySpec hicnKeySpec =
-          new PBEKeySpec(
-              hicn.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
-      SecretKey hicnSecret = secretKeyFactory.generateSecret(hicnKeySpec);
-      String hexEncodedHash = Hex.encodeHexString(hicnSecret.getEncoded());
-
-      return hexEncodedHash;
-    } catch (InvalidKeySpecException e) {
-      throw new BadCodeMonkeyException(e);
-    }
+    return computeIdentifierHash(options, secretKeyFactory, hicn);
   }
 
   /**
@@ -784,13 +756,18 @@ public final class RifLoader implements AutoCloseable {
    */
   static String computeMbiHash(
       LoadAppOptions options, SecretKeyFactory secretKeyFactory, String mbi) {
+    return computeIdentifierHash(options, secretKeyFactory, mbi);
+  }
+
+  private static String computeIdentifierHash(
+      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String identifier) {
     try {
       /*
        * Our approach here is NOT using a salt, as salts must be randomly
        * generated for each value to be hashed and then included in
        * plaintext with the hash results. Random salts would prevent the
        * Blue Button API frontend systems from being able to produce equal
-       * hashes for the same MBIs. Instead, we use a secret "pepper" that
+       * hashes for the same identifiers. Instead, we use a secret "pepper" that
        * is shared out-of-band with the frontend. This value MUST be kept
        * secret.
        *
@@ -806,11 +783,11 @@ public final class RifLoader implements AutoCloseable {
       int derivedKeyLength = 256;
 
       /* We're reusing the same hicn hash iterations, so the algorithm is exactly the same */
-      PBEKeySpec mbiKeySpec =
+      PBEKeySpec keySpec =
           new PBEKeySpec(
-              mbi.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
-      SecretKey mbiSecret = secretKeyFactory.generateSecret(mbiKeySpec);
-      String hexEncodedHash = Hex.encodeHexString(mbiSecret.getEncoded());
+              identifier.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
+      SecretKey secret = secretKeyFactory.generateSecret(keySpec);
+      String hexEncodedHash = Hex.encodeHexString(secret.getEncoded());
 
       return hexEncodedHash;
     } catch (InvalidKeySpecException e) {
