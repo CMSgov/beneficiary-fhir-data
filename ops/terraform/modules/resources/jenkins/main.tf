@@ -349,3 +349,13 @@ resource "aws_autoscaling_group" "main" {
     propagate_at_launch   = true
   }
 }
+
+# EFS Resource, Mount and Security Group for Jenkins 
+
+module "efs" {
+  source = "../efs"
+
+  env_config      = var.env_config
+  role            = var.role
+  layer           = var.layer
+}
