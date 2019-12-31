@@ -1,24 +1,30 @@
 /** */
 package gov.cms.bfd.pipeline.rif.load;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 import javax.crypto.SecretKeyFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +41,10 @@ public class RifLoaderIdleTasks {
   private static final Duration TASK_TIME_LIMIT = Duration.ofMillis(TASK_TIME_LIMIT_MILLIS);
 
   /** The record count of a db update batch */
-  private static final int BATCH_COUNT = 1000;
+  private static final int BATCH_COUNT = 100;
 
-  /** The number threads of batches to execute conncurrently */
-  private static final int THREAD_COUNT = 5;
+  /** One thread for each query type */
+  private static final int THREAD_COUNT = 2;
 
   /** JPQL queries */
   private static final String SELECT_UNHASHED_BENFICIARIES =
@@ -46,14 +52,19 @@ public class RifLoaderIdleTasks {
           + "where b.mbiHash is null and b.medicareBeneficiaryId is not null and "
           + "b.medicareBeneficiaryId is not empty";
 
+  /** JPQL query for a count */
   private static final String COUNT_UNHASHED_BENFICIARIES =
       "select count(b) from Beneficiary b "
           + "where b.mbiHash is null and b.medicareBeneficiaryId is not null and "
           + "b.medicareBeneficiaryId is not empty";
+
+  /** JPQL query for a list */
   private static final String SELECT_UNHASHED_HISTORIES =
       "select b from BeneficiaryHistory b "
           + "where b.mbiHash is null and b.medicareBeneficiaryId is not null and "
           + "b.medicareBeneficiaryId is not empty";
+
+  /** JPQL query for a count */
   private static final String COUNT_UNHASHED_HISTORIES =
       "select count(b) from BeneficiaryHistory b "
           + "where b.mbiHash is null and b.medicareBeneficiaryId is not null and "
@@ -81,13 +92,11 @@ public class RifLoaderIdleTasks {
   /* Metrics */
   private final Meter beneficaryMeter;
   private final Meter historyMeter;
-  private final Counter beneficiaryCounter;
-  private final Counter historyCounter;
 
   /* Thread pool for post startup tasks */
   private final ExecutorService executorService;
 
-  /* The tasks that is going to execute next */
+  /* The task that is going to execute next */
   private Task currentTask = Task.INITIAL;
 
   /**
@@ -109,8 +118,6 @@ public class RifLoaderIdleTasks {
 
     this.beneficaryMeter = appMetrics.meter("fixups.beneficiary.rate");
     this.historyMeter = appMetrics.meter("fixups.beneficiary_history.rate");
-    this.beneficiaryCounter = appMetrics.counter("fixups.beneficiary.remaining");
-    this.historyCounter = appMetrics.counter("fixups.beneficiary_history.remaining");
 
     this.executorService = Executors.newFixedThreadPool(THREAD_COUNT);
   }
@@ -157,15 +164,12 @@ public class RifLoaderIdleTasks {
    * @return true if done with this task.
    */
   public boolean doInitialTask() {
-    // Setup the counters
+    // For the log count the work that we have to do.
     final EntityManager em = entityManagerFactory.createEntityManager();
     final Long beneficiaryCount =
         em.createQuery(COUNT_UNHASHED_BENFICIARIES, Long.class).getSingleResult();
     final Long historyCount =
         em.createQuery(COUNT_UNHASHED_HISTORIES, Long.class).getSingleResult();
-
-    beneficiaryCounter.inc(beneficiaryCount);
-    historyCounter.inc(historyCount);
 
     LOGGER.info(
         "Starting idle task processing with null mbiHash for: {} Beneficaries and {} Benficiary Histories",
@@ -182,24 +186,15 @@ public class RifLoaderIdleTasks {
    */
   public boolean doPostStartupTask() {
     final Instant startTime = Instant.now();
+    LOGGER.debug("Started a PostStartup time slice");
 
     // Execute batches in parallel
-    for (int i = 0; i < THREAD_COUNT; i++) {
-      executorService.submit(
-          () -> {
-            while (inPeriod(startTime, TASK_TIME_LIMIT)
-                && !doTransaction(this::fixupBeneficiaryBatch)) {}
-          });
-      executorService.submit(
-          () -> {
-            while (inPeriod(startTime, TASK_TIME_LIMIT)
-                && !doTransaction(this::fixupHistoryBatch)) {}
-          });
-    }
-    waitUntilDone();
+    List<Future<Boolean>> tasks = new ArrayList<Future<Boolean>>();
+    tasks.add(executorService.submit(() -> doTransaction(startTime, this::fixupBeneficiaryBatch)));
+    tasks.add(executorService.submit(() -> doTransaction(startTime, this::fixupHistoryBatch)));
 
-    // return done if the counters are at zero
-    final boolean isDone = beneficiaryCounter.getCount() <= 0 && historyCounter.getCount() <= 0;
+    final boolean isDone = waitUntilDone(tasks);
+    LOGGER.debug("Finished a PostStartup time slice");
     if (isDone) {
       LOGGER.info("Finished idle startup tasks");
     }
@@ -216,13 +211,23 @@ public class RifLoaderIdleTasks {
     return true;
   }
 
-  /** Wait until all executors are done. */
-  public void waitUntilDone() {
+  /**
+   * Wait until all tasks are done or time out
+   *
+   * @param tasks to wait on
+   */
+  private boolean waitUntilDone(List<Future<Boolean>> tasks) {
+    boolean isDone = true;
     try {
       // Use a 2x longer value than the expected termination.
-      executorService.awaitTermination(2 * TASK_TIME_LIMIT_MILLIS, TimeUnit.MILLISECONDS);
+      for (Future<Boolean> task : tasks) {
+        isDone = task.get(2 * TASK_TIME_LIMIT_MILLIS, TimeUnit.MILLISECONDS) && isDone;
+      }
+    } catch (TimeoutException ex) {
+    } catch (ExecutionException ex) {
     } catch (InterruptedException ex) {
     }
+    return isDone;
   }
 
   /**
@@ -231,27 +236,38 @@ public class RifLoaderIdleTasks {
    * @param em a {@link EntityManager} setup for a transaction
    * @return true if done with all fixups
    */
-  public Boolean fixupBeneficiaryBatch(final EntityManager em) {
-    Objects.requireNonNull(em);
-    final List<Beneficiary> beneficiaries =
-        em.createQuery(SELECT_UNHASHED_BENFICIARIES, Beneficiary.class)
-            .setMaxResults(BATCH_COUNT)
-            .getResultList();
-
-    for (final Beneficiary beneficiary : beneficiaries) {
-      beneficiary
-          .getMedicareBeneficiaryId()
-          .ifPresent(
-              mbi -> {
-                if (mbi.isEmpty()) return;
-                final String mbiHash = RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
-                beneficiary.setMbiHash(Optional.of(mbiHash));
-              });
+  public Boolean fixupBeneficiaryBatch(final EntityManager em, final Instant startTime) {
+    LOGGER.debug("Start fixing up a Beneficiary batch");
+    boolean isDone = true;
+    // Use a cursor, measures slightly faster than
+    try (ScrollableResults itemCursor =
+        em.unwrap(Session.class)
+            .createQuery(SELECT_UNHASHED_BENFICIARIES)
+            .setFetchSize(BATCH_COUNT)
+            .scroll(ScrollMode.SCROLL_INSENSITIVE)) {
+      int count = 0;
+      while (inPeriod(startTime, TASK_TIME_LIMIT) && itemCursor.next()) {
+        final Beneficiary beneficiary = (Beneficiary) itemCursor.get(0);
+        beneficiary
+            .getMedicareBeneficiaryId()
+            .ifPresent(
+                mbi -> {
+                  if (mbi.isEmpty()) return;
+                  final String mbiHash =
+                      "xxx"; // RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
+                  beneficiary.setMbiHash(Optional.of(mbiHash));
+                });
+        isDone = itemCursor.isLast();
+        // Write to the DB in batches
+        if (++count % BATCH_COUNT == 0) {
+          em.flush();
+          em.clear();
+        }
+      }
+      beneficaryMeter.mark(count);
+      LOGGER.debug("Finished fixing up a Beneficiary batch: {}", count);
     }
-
-    beneficaryMeter.mark(beneficiaries.size());
-    beneficiaryCounter.dec(beneficiaries.size());
-    return beneficiaries.size() < BATCH_COUNT;
+    return isDone;
   }
 
   /**
@@ -260,27 +276,37 @@ public class RifLoaderIdleTasks {
    * @param em a {@link EntityManager} setup for a transaction
    * @return true if done with all fixups
    */
-  public Boolean fixupHistoryBatch(final EntityManager em) {
-    Objects.requireNonNull(em);
-    final List<BeneficiaryHistory> histories =
-        em.createQuery(SELECT_UNHASHED_HISTORIES, BeneficiaryHistory.class)
-            .setMaxResults(BATCH_COUNT)
-            .getResultList();
-
-    for (final BeneficiaryHistory history : histories) {
-      history
-          .getMedicareBeneficiaryId()
-          .ifPresent(
-              mbi -> {
-                if (mbi.isEmpty()) return;
-                final String mbiHash = RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
-                history.setMbiHash(Optional.of(mbiHash));
-              });
+  public Boolean fixupHistoryBatch(final EntityManager em, final Instant startTime) {
+    LOGGER.debug("Start fixing up a History batch");
+    boolean isDone = true;
+    try (ScrollableResults itemCursor =
+        em.unwrap(Session.class)
+            .createQuery(SELECT_UNHASHED_HISTORIES)
+            .setFetchSize(BATCH_COUNT)
+            .scroll(ScrollMode.FORWARD_ONLY)) {
+      int count = 0;
+      while (inPeriod(startTime, TASK_TIME_LIMIT) && itemCursor.next()) {
+        final BeneficiaryHistory beneficiary = (BeneficiaryHistory) itemCursor.get(0);
+        beneficiary
+            .getMedicareBeneficiaryId()
+            .ifPresent(
+                mbi -> {
+                  if (mbi.isEmpty()) return;
+                  final String mbiHash =
+                      "xxx"; // RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
+                  beneficiary.setMbiHash(Optional.of(mbiHash));
+                });
+        isDone = itemCursor.isLast();
+        // Write to the DB in batches
+        if (++count % BATCH_COUNT == 0) {
+          em.flush();
+          em.clear();
+        }
+      }
+      historyMeter.mark(count);
+      LOGGER.debug("Finished fixing up a History batch: {}", count);
     }
-
-    historyMeter.mark(histories.size());
-    historyCounter.dec(histories.size());
-    return histories.size() < BATCH_COUNT;
+    return isDone;
   }
 
   /**
@@ -297,10 +323,12 @@ public class RifLoaderIdleTasks {
   /**
    * Setup a DB transaction and call the executor to do the work.
    *
+   * @param startTime context of the work
    * @param executor does the work. Return the value from the executor
    * @return the return value from the executor
    */
-  public boolean doTransaction(final Function<EntityManager, Boolean> executor) {
+  public Boolean doTransaction(
+      final Instant startTime, final BiFunction<EntityManager, Instant, Boolean> executor) {
     Objects.requireNonNull(executor);
     try {
       final EntityManager em = entityManagerFactory.createEntityManager();
@@ -308,7 +336,7 @@ public class RifLoaderIdleTasks {
       try {
         txn = em.getTransaction();
         txn.begin();
-        final Boolean result = executor.apply(em);
+        final Boolean result = executor.apply(em, startTime);
         txn.commit();
         return result;
       } finally {

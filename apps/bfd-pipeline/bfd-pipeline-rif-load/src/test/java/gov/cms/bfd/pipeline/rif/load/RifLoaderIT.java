@@ -148,6 +148,7 @@ public final class RifLoaderIT {
     loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
   }
 
+  /** Tests the RifLoaderIdleTasks class */
   @Test
   public void runIdleTasks() {
     final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
@@ -194,6 +195,7 @@ public final class RifLoaderIT {
     loader.close();
   }
 
+  /** Tests the RifLoaderIdleTasks with no fixups needed. */
   @Test
   public void runIdleTasksWithNoFixups() {
     final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
@@ -233,11 +235,17 @@ public final class RifLoaderIT {
     loader.close();
   }
 
+  /**
+   * Tests the RifLoaderIdleTasks class with existing data in the database. Useful for profiling
+   * against the beneficiary data set
+   */
   @Ignore
   @Test
-  public void runLongIdleTasks() {
-    final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    final RifLoader loader = loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);
+  public void runExistingIdleTasks() {
+    final DataSource dataSource = DatabaseTestHelper.getTestDatabase();
+    MetricRegistry appMetrics = new MetricRegistry();
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    RifLoader loader = new RifLoader(appMetrics, options);
 
     // The sample are loaded with mbiHash set, clear them for this test
     clearMbiHash(loader);
@@ -419,7 +427,8 @@ public final class RifLoaderIT {
     loader
         .getIdleTasks()
         .doTransaction(
-            em -> {
+            null,
+            (em, start) -> {
               for (final Beneficiary b :
                   em.createQuery("select b from Beneficiary b", Beneficiary.class)
                       .getResultList()) {
