@@ -1,4 +1,4 @@
-#ansible-playbook rotate_bfd_postgres_user.yml --extra-vars "rds_database= master_user= master_pw= old_user= db_user= db_user_pw= rds_region="
+#ansible-playbook rotate_bfd_postgres_user.yml --extra-vars "rds_database= master_user= master_pw= db_user= db_user_pw= rds_region="
 - hosts: localhost
   vars:
     rds_database: 
@@ -23,4 +23,5 @@
         login_password: "{{ master_pw }}"
         db: postgres
         name: "{{ db_user }}"
+        password: "{{ db_user_pw }}"
         state: present
