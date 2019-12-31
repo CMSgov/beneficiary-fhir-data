@@ -186,34 +186,11 @@
     creates: /tmp/newrelic
     remote_src: true
 
-- name: Create New Relic Directories
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
-    mode: u=rwx,g=rx,o=rx
-  become: true
-  loop:
-    - "{{ data_server_dir }}/newrelic"
-    - "{{ data_server_dir }}/newrelic/extensions"
-
 - name: Copy New Relic Java Agent
   copy:
     src: /tmp/newrelic/newrelic.jar
-    dest: "{{ data_server_dir }}/newrelic/newrelic.jar"
+    dest: "{{ data_server_dir }}/newrelic.jar"
     remote_src: true
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
-    mode: u=rw,g=r,o=r
-  become: true
-  notify:
-    - 'Restart BFD Server Service'
-
-- name: Configure New Relic Extensions
-  template:
-    src: 'newrelic_tracing.xml.j2'
-    dest: "{{ data_server_dir }}/newrelic/extensions/tracing.xml"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
