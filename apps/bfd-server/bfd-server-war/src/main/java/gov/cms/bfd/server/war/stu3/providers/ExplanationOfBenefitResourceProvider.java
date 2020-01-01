@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.server.war.Operation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -108,6 +109,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
     String eobIdClaimIdText = eobIdMatcher.group(2);
 
+    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    operation.setOption("by", "id");
+    operation.publishOperationName();
+
     Class<?> entityClass = eobIdType.get().getEntityClass();
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery(entityClass);
@@ -172,6 +177,14 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     String beneficiaryId = patient.getIdPart();
     Set<ClaimType> types = parseTypeParam(type);
+    PagingArguments pagingArgs = new PagingArguments(requestDetails);
+
+    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    operation.setOption("by", "patient");
+    operation.setOption("types", types.toString());
+    operation.setOption(
+        "pageSize", pagingArgs.isPagingRequested() ? "" + pagingArgs.getPageSize() : "*");
+    operation.publishOperationName();
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
     /*
@@ -212,7 +225,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
-    PagingArguments pagingArgs = new PagingArguments(requestDetails);
     Bundle bundle =
         TransformerUtils.createBundle(
             pagingArgs,

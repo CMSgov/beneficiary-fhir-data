@@ -14,6 +14,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
+import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 import java.util.LinkedList;
 import java.util.List;
@@ -84,6 +85,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
     if (coverageIdText == null || coverageIdText.trim().isEmpty())
       throw new IllegalArgumentException();
 
+    Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
+    operation.setOption("by", "id");
+    operation.publishOperationName();
+
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
     if (!coverageIdMatcher.matches()) throw new ResourceNotFoundException(coverageId);
     String coverageIdSegmentText = coverageIdMatcher.group(1);
@@ -134,6 +139,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
+
+    Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
+    operation.setOption("by", "beneficiary");
+    operation.publishOperationName();
 
     PagingArguments pagingArgs = new PagingArguments(requestDetails);
     Bundle bundle =

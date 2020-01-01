@@ -17,6 +17,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
+import gov.cms.bfd.server.war.Operation;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -96,6 +97,11 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     IncludeIdentifiersMode includeIdentifiersMode =
         IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
+
+    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    operation.setOption("by", "id");
+    operation.setOption("IncludeIdentifiers", includeIdentifiersMode.name());
+    operation.publishOperationName();
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
@@ -221,9 +227,18 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (!SUPPORTED_HICN_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
+    IncludeIdentifiersMode includeIdentifiersMode =
+        IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
+
+    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    operation.setOption("by", "identifier");
+    operation.setOption("IncludeIdentifiers", includeIdentifiersMode.name());
+    operation.publishOperationName();
+
     List<IBaseResource> patients;
     try {
-      patients = Arrays.asList(queryDatabaseByHicnHash(identifier.getValue(), requestDetails));
+      patients =
+          Arrays.asList(queryDatabaseByHicnHash(identifier.getValue(), includeIdentifiersMode));
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
@@ -237,12 +252,14 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /**
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
+   * @param includeIdentifiersMode the {@link IncludeIdentifiersMode} to use
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
-  private Patient queryDatabaseByHicnHash(String hicnHash, RequestDetails requestDetails) {
+  private Patient queryDatabaseByHicnHash(
+      String hicnHash, IncludeIdentifiersMode includeIdentifiersMode) {
     if (hicnHash == null || hicnHash.trim().isEmpty()) throw new IllegalArgumentException();
 
     /*
@@ -320,8 +337,6 @@ public final class PatientResourceProvider implements IResourceProvider {
     // Then, find all Beneficiary records that match the HICN or those BENE_IDs.
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-    IncludeIdentifiersMode includeIdentifiersMode =
-        IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
     if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
       // For efficiency, grab these relations in the same query.
       // For security, only grab them when needed.
