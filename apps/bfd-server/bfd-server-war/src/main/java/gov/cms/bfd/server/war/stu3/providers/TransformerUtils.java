@@ -2882,7 +2882,6 @@ public final class TransformerUtils {
             String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
             ndcProductColumns[3] + " - " + ndcProductColumns[13]);
       }
-      ndcProductsIn.close();
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
     }

@@ -223,7 +223,7 @@ public final class PartDEventTransformerTest {
           eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "Childrens Acetaminophen Cherry - ACETAMINOPHEN");
+          claim.getNationalDrugCode(), "Childrens Acetaminophen - ACETAMINOPHEN");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
