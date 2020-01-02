@@ -231,7 +231,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("01", pdeRow.getPrescriberIdQualifierCode());
     Assert.assertEquals("1750384806", pdeRow.getPrescriberId());
     Assert.assertEquals(new BigDecimal(799999), pdeRow.getPrescriptionReferenceNumber());
-    Assert.assertEquals("46122005000", pdeRow.getNationalDrugCode());
+    Assert.assertEquals("49035044700", pdeRow.getNationalDrugCode());
     Assert.assertEquals("H9999", pdeRow.getPlanContractId());
     Assert.assertEquals("020", pdeRow.getPlanBenefitPackageId());
     Assert.assertEquals(1, pdeRow.getCompoundCode());
