@@ -177,7 +177,6 @@ public class RifLoaderIdleTasks {
    * @return true if done with this task.
    */
   public boolean doInitialTask() {
-    // For the log count the work that we have to do.
     final EntityManager em = entityManagerFactory.createEntityManager();
     final Long beneficiaryCount =
         em.createQuery(COUNT_UNHASHED_BENFICIARIES, Long.class).getSingleResult();
@@ -238,9 +237,9 @@ public class RifLoaderIdleTasks {
       for (Future<Boolean> task : tasks) {
         isDone = task.get(2 * TASK_TIME_LIMIT_MILLIS, TimeUnit.MILLISECONDS) && isDone;
       }
-    } catch (TimeoutException ex) {
-    } catch (ExecutionException ex) {
-    } catch (InterruptedException ex) {
+    } catch (TimeoutException | ExecutionException | InterruptedException ex) {
+      LOGGER.error("Exception executing an idle  task", ex);
+      return false;
     }
     return isDone;
   }
@@ -254,7 +253,7 @@ public class RifLoaderIdleTasks {
   public Boolean fixupBeneficiaryBatch(final EntityManager em, final Instant startTime) {
     LOGGER.debug("Start fixing up a Beneficiary batch");
     boolean isDone = true;
-    // Use a cursor, measures slightly faster than
+    // Use a cursor, measures slightly faster than queries with a LIMIT
     try (ScrollableResults itemCursor =
         em.unwrap(Session.class)
             .createQuery(SELECT_UNHASHED_BENFICIARIES)
@@ -342,26 +341,21 @@ public class RifLoaderIdleTasks {
   public Boolean doTransaction(
       final Instant startTime, final BiFunction<EntityManager, Instant, Boolean> executor) {
     Objects.requireNonNull(executor);
+    final EntityManager em = entityManagerFactory.createEntityManager();
+    EntityTransaction txn = null;
     try {
-      final EntityManager em = entityManagerFactory.createEntityManager();
-      EntityTransaction txn = null;
-      try {
-        txn = em.getTransaction();
-        txn.begin();
-        final Boolean result = executor.apply(em, startTime);
-        txn.commit();
-        return result;
-      } finally {
-        if (em != null && em.isOpen()) {
-          if (txn != null && txn.isActive()) {
-            txn.rollback();
-          }
-          em.close();
+      txn = em.getTransaction();
+      txn.begin();
+      final Boolean result = executor.apply(em, startTime);
+      txn.commit();
+      return result;
+    } finally {
+      if (em != null && em.isOpen()) {
+        if (txn != null && txn.isActive()) {
+          txn.rollback();
         }
+        em.close();
       }
-    } catch (final Exception ex) {
-      LOGGER.error("Error while doing a idle task", ex);
-      return true;
     }
   }
 }
