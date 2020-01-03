@@ -137,24 +137,37 @@ public class RifLoaderIdleTasks {
    * not interfer with RIF file processing.
    */
   public void doIdleTask() {
+    boolean isTaskDone;
     switch (currentTask) {
       case INITIAL:
-        if (doInitialTask()) {
-          currentTask = Task.POST_STARTUP;
-        }
+        isTaskDone = doInitialTask();
         break;
       case POST_STARTUP:
-        if (doPostStartupTask()) {
-          currentTask = Task.NORMAL;
-        }
+        isTaskDone = doPostStartupTask();
         break;
       case NORMAL:
-        if (doNormalTask()) {
-          currentTask = Task.NORMAL;
-        }
+        isTaskDone = doNormalTask();
         break;
       default:
         throw new RuntimeException("Unexpected idle task");
+    }
+    if (isTaskDone) {
+      setNextTask();
+    }
+  }
+
+  /** Set the currentTask to the next task after current task. */
+  private void setNextTask() {
+    switch (currentTask) {
+      case INITIAL:
+        currentTask = Task.POST_STARTUP;
+        break;
+
+      case POST_STARTUP:
+      case NORMAL:
+      default:
+        currentTask = Task.NORMAL;
+        break;
     }
   }
 
@@ -189,11 +202,13 @@ public class RifLoaderIdleTasks {
     LOGGER.debug("Started a PostStartup time slice");
 
     // Execute batches in parallel
-    List<Future<Boolean>> tasks = new ArrayList<Future<Boolean>>();
-    tasks.add(executorService.submit(() -> doTransaction(startTime, this::fixupBeneficiaryBatch)));
-    tasks.add(executorService.submit(() -> doTransaction(startTime, this::fixupHistoryBatch)));
+    List<Future<Boolean>> batchFutures = new ArrayList<Future<Boolean>>();
+    batchFutures.add(
+        executorService.submit(() -> doTransaction(startTime, this::fixupBeneficiaryBatch)));
+    batchFutures.add(
+        executorService.submit(() -> doTransaction(startTime, this::fixupHistoryBatch)));
 
-    final boolean isDone = waitUntilDone(tasks);
+    final boolean isDone = waitUntilDone(batchFutures);
     LOGGER.debug("Finished a PostStartup time slice");
     if (isDone) {
       LOGGER.info("Finished idle startup tasks");
@@ -208,7 +223,7 @@ public class RifLoaderIdleTasks {
    */
   public boolean doNormalTask() {
     // Nothing to do normally
-    return true;
+    return false;
   }
 
   /**
@@ -252,9 +267,7 @@ public class RifLoaderIdleTasks {
             .getMedicareBeneficiaryId()
             .ifPresent(
                 mbi -> {
-                  if (mbi.isEmpty()) return;
-                  final String mbiHash =
-                      "xxx"; // RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
+                  final String mbiHash = RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
                   beneficiary.setMbiHash(Optional.of(mbiHash));
                 });
         isDone = itemCursor.isLast();
@@ -283,7 +296,7 @@ public class RifLoaderIdleTasks {
         em.unwrap(Session.class)
             .createQuery(SELECT_UNHASHED_HISTORIES)
             .setFetchSize(BATCH_COUNT)
-            .scroll(ScrollMode.FORWARD_ONLY)) {
+            .scroll(ScrollMode.SCROLL_INSENSITIVE)) {
       int count = 0;
       while (inPeriod(startTime, TASK_TIME_LIMIT) && itemCursor.next()) {
         final BeneficiaryHistory beneficiary = (BeneficiaryHistory) itemCursor.get(0);
@@ -291,9 +304,7 @@ public class RifLoaderIdleTasks {
             .getMedicareBeneficiaryId()
             .ifPresent(
                 mbi -> {
-                  if (mbi.isEmpty()) return;
-                  final String mbiHash =
-                      "xxx"; // RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
+                  final String mbiHash = RifLoader.computeMbiHash(options, secretKeyFactory, mbi);
                   beneficiary.setMbiHash(Optional.of(mbiHash));
                 });
         isDone = itemCursor.isLast();
@@ -317,7 +328,8 @@ public class RifLoaderIdleTasks {
    * @return true iff current period is less than the passed in period duration;
    */
   public static boolean inPeriod(final Instant start, final Duration period) {
-    return Duration.between(start, Instant.now()).compareTo(period) <= 0;
+    Instant nowInstant = Instant.now();
+    return start.isBefore(nowInstant) && start.plus(period).isAfter(nowInstant);
   }
 
   /**
