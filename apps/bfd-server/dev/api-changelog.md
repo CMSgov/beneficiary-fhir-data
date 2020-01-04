@@ -1,5 +1,13 @@
 # API Changelog
 
+## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
+
+The Patient resource supports searching by a hashed MBI identifier:
+
+```
+https://bluebutton.cms.gov/resources/identifier/mbi-hash
+```
+
 ## BLUEBUTTON-1191: Allow Filtering of EOB Searches by type
 
 A new optional query parameter has been added to `ExplanationOfBenefit` searches that will filter the returned results by `type`.

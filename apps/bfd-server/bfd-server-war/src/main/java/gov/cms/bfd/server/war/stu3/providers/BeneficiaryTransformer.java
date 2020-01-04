@@ -60,6 +60,13 @@ final class BeneficiaryTransformer {
         .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
         .setValue(beneficiary.getHicn());
 
+    if (beneficiary.getMbiHash().isPresent()) {
+      patient
+          .addIdentifier()
+          .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+          .setValue(beneficiary.getMbiHash().get());
+    }
+
     if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
       Extension currentIdentifier =
           TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
