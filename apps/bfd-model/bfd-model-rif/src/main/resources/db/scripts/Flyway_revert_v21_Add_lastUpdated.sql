@@ -1,6 +1,8 @@
 /*
+ * APPLY ONLY TO THE TEST DATABASE
+ *
  * Reverts the original version of the V21 migration, which was done in a developer
- * experimental branch, but didn't get into the master branch.
+ * experimental branch, but didn't get into the master branch. 
  *
  * Note: In general, this is a bad idea, but another V21 migration made it into
  * production, so removing this migration was thought as the best fix. See the v19 goof
