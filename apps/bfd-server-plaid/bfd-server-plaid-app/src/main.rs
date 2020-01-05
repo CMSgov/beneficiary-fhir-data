@@ -107,6 +107,7 @@ mod tls;
 #[macro_use]
 extern crate diesel;
 
+use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpResponse, HttpServer};
 use config::AppConfig;
 use listenfd::ListenFd;
@@ -134,7 +135,7 @@ fn main() -> error::Result<()> {
     // Route all log crate usage (from our dependencies) to slog, instead.
     // Note: This has to stay in scope in order to keep working.
     let _scope_guard = slog_scope::set_global_logger(logger.clone());
-    let _log_guard = slog_stdlog::init_with_level(log::Level::Warn)?;
+    let _log_guard = slog_stdlog::init_with_level(log::Level::Info)?;
 
     // Load the app config.
     //
@@ -168,6 +169,7 @@ fn main() -> error::Result<()> {
             ))
             .service(web::scope("/v2").route("/", web::to(|| HttpResponse::Ok())))
             .route("/", web::to(|| HttpResponse::Ok()))
+            .wrap(Logger::new("%a [%r] [%U] %s %b %D"))
     });
 
     info!(logger, "Ludicrous speed... go!");
