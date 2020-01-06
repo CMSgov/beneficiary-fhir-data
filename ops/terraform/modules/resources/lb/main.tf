@@ -58,20 +58,20 @@ resource "aws_elb" "main" {
   connection_draining_timeout = 60
 
   dynamic "listener" {
-    for_each = var.ingress.ports
+    for_each = var.listeners
 
     content {
       lb_protocol         = "TCP"
-      lb_port             = listener.value
+      lb_port             = listener.value.ingress_port
       instance_protocol   = "TCP"
-      instance_port       = listener.value
+      instance_port       = listener.value.egress_port
     }
   }
 
   health_check {
     healthy_threshold   = 5   # Match HealthApt
     unhealthy_threshold = 2   # Match HealthApt
-    target              = "TCP:${var.egress.health_check_port}"
+    target              = "TCP:${var.health_check_port}"
     interval            = 10  # (seconds) Match HealthApt
     timeout             = 5   # (seconds) Match HealthApt
   } 
@@ -93,26 +93,26 @@ resource "aws_security_group" "lb" {
   tags            = merge({Name="bfd-${var.env_config.env}-${var.role}-lb"}, local.tags)
 
   dynamic "ingress" {
-    for_each = var.ingress.ports
+    for_each = var.listeners
 
     content {
-      from_port     = ingress.value
-      to_port       = ingress.value
-      protocol      = "tcp"
-      cidr_blocks   = var.ingress.cidr_blocks
-      description   = var.ingress.description
+      from_port     = ingress.value.ingress_port
+      to_port       = ingress.value.ingress_port
+      protocol      = "TCP"
+      cidr_blocks   = ingress.value.ingress_cidr_blocks
+      description   = ingress.value.ingress_description
     }
   }
 
   dynamic "egress" {
-    for_each = var.egress.ports
+    for_each = var.listeners
 
     content {
-      from_port     = egress.value
-      to_port       = egress.value
-      protocol      = "tcp"
-      cidr_blocks   = var.egress.cidr_blocks
-      description   = var.egress.description
+      from_port     = egress.value.egress_port
+      to_port       = egress.value.egress_port
+      protocol      = "TCP"
+      cidr_blocks   = egress.value.egress_cidr_blocks
+      description   = egress.value.egress_description
     }
   }
 }

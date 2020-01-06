@@ -25,7 +25,20 @@ variable "db_config" {
 
 variable "lb_config" {
   description = "Load balancer information"
-  type        = object({name=string, ports=list(number), sg=string})
+  type        = object({
+                  name = string,
+                  listeners = list(
+                    object({
+                      ingress_description = string,
+                      ingress_port        = number,
+                      ingress_cidr_blocks = list(string),
+                      egress_description  = string,
+                      egress_port         = number,
+                      egress_cidr_blocks  = list(string),
+                    })
+                  ),
+                  sg = string
+                })
   default     = null
 }
 

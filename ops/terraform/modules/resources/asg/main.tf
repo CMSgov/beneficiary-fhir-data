@@ -66,12 +66,12 @@ resource "aws_security_group" "app" {
   tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
 
   dynamic "ingress" {
-    for_each = var.lb_config.ports
+    for_each = var.lb_config.listeners
 
     content {
-      from_port       = ingress.value
-      to_port         = ingress.value
-      protocol        = "tcp"
+      from_port       = ingress.value.egress_port
+      to_port         = ingress.value.egress_port
+      protocol        = "TCP"
       security_groups = [var.lb_config.sg]
     }
   }

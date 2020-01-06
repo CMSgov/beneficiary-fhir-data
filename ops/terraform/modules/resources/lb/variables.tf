@@ -23,12 +23,21 @@ variable "is_public" {
   default     = false
 }
 
-variable "ingress" {
-  description = "Ingress port and cidr blocks"
-  type        = object({description=string, ports=list(number), cidr_blocks=list(string)})
+variable "listeners" {
+  description = "The listeners that the load balancer should have."
+  type        = list(
+                  object({
+                    ingress_description = string,
+                    ingress_port        = number,
+                    ingress_cidr_blocks = list(string),
+                    egress_description  = string,
+                    egress_port         = number,
+                    egress_cidr_blocks  = list(string),
+                  })
+                )
 }
 
-variable "egress" {
-  description = "Egress port and cidr blocks"
-  type        = object({description=string, ports=list(number), health_check_port=number, cidr_blocks=list(string)})
+variable "health_check_port" {
+  description = "Configures the load balancer's health check."
+  type        = number
 }

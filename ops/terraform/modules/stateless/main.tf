@@ -175,22 +175,33 @@ module "fhir_lb" {
   log_bucket      = data.aws_s3_bucket.logs.id
   is_public       = var.is_public
 
-  ingress = var.is_public ? {
-    description   = "Public Internet access"
-    port          = 443
-    cidr_blocks   = ["0.0.0.0/0"]
-  } : {
-    description   = "From VPC peerings, the MGMT VPC, and self"
-    ports         = [443, local.bfd_server_plaid_port]
-    cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
-  }
+  listeners = [
+    var.is_public ? {
+      ingress_description   = "Public Internet access"
+      ingress_port          = 443
+      ingress_cidr_blocks   = ["0.0.0.0/0"]
+      egress_description    = "To VPC instances"
+      egress_port           = local.bfd_server_port
+      egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
+    } : {
+      ingress_description   = "From VPC peerings, the MGMT VPC, and self"
+      ingress_port          = 443
+      ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+      egress_description    = "To VPC instances"
+      egress_port           = local.bfd_server_port
+      egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
+    },
+    {
+      ingress_description   = "From VPC peerings, the MGMT VPC, and self"
+      ingress_port          = local.bfd_server_plaid_port
+      ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+      egress_description    = "To VPC instances"
+      egress_port           = local.bfd_server_plaid_port
+      egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
+    }
+  ]
 
-  egress = {
-    description         = "To VPC instances"
-    ports               = [local.bfd_server_port, local.bfd_server_plaid_port]
-    health_check_port   = local.bfd_server_port
-    cidr_blocks         = [data.aws_vpc.main.cidr_block]
-  }    
+  health_check_port   = local.bfd_server_port
 }
 
 module "lb_alarms" {
