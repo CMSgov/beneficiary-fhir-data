@@ -561,6 +561,12 @@ resource "aws_cloudwatch_log_group" "bfd_server_messages_json" {
   tags       = var.env_config.tags
 }
 
+resource "aws_cloudwatch_log_group" "bfd_server_messages_plaid_json" {
+  name       = "/bfd/${var.env_config.env}/bfd-server/messages-plaid.json"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
 resource "aws_cloudwatch_log_group" "bfd_server_newrelic_agent" {
   name       = "/bfd/${var.env_config.env}/bfd-server/newrelic_agent.log"
   kms_key_id = data.aws_kms_key.master_key.arn
