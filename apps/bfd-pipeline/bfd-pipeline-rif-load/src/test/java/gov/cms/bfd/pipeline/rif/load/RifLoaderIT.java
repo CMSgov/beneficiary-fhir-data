@@ -430,12 +430,16 @@ public final class RifLoaderIT {
             null,
             (em, start) -> {
               for (final Beneficiary b :
-                  em.createQuery("select b from Beneficiary b", Beneficiary.class)
+                  em.createQuery(
+                          "select b from Beneficiary b where b.mbiHash is not null",
+                          Beneficiary.class)
                       .getResultList()) {
                 b.setMbiHash(Optional.empty());
               }
               for (final BeneficiaryHistory b :
-                  em.createQuery("select b from BeneficiaryHistory b", BeneficiaryHistory.class)
+                  em.createQuery(
+                          "select b from BeneficiaryHistory b where b.mbiHash is not null",
+                          BeneficiaryHistory.class)
                       .getResultList()) {
                 b.setMbiHash(Optional.empty());
               }

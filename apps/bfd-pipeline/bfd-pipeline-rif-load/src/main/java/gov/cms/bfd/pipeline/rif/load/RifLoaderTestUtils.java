@@ -20,6 +20,9 @@ public final class RifLoaderTestUtils {
   /** The value to use for {@link LoadAppOptions#isIdempotencyRequired()}. */
   public static final boolean IDEMPOTENCY_REQUIRED = true;
 
+  /** The value to use for {@link LoadAppOptions#isFixupsEnabled()} */
+  public static final boolean FIXUPS_ENABLED = true;
+
   /**
    * @param dataSource a {@link DataSource} for the test DB to connect to
    * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
@@ -31,7 +34,8 @@ public final class RifLoaderTestUtils {
         HICN_HASH_PEPPER,
         dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        IDEMPOTENCY_REQUIRED);
+        IDEMPOTENCY_REQUIRED,
+        FIXUPS_ENABLED);
   }
 
   /**
