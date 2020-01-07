@@ -348,7 +348,8 @@ public final class ServerTestUtils {
         RifLoaderTestUtils.HICN_HASH_PEPPER,
         dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
+        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED,
+        RifLoaderTestUtils.FIXUPS_ENABLED);
   }
 
   /**

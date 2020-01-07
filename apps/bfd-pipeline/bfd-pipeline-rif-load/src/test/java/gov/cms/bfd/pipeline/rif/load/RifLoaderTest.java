@@ -30,7 +30,8 @@ public final class RifLoaderTest {
             options.getDatabaseUsername(),
             options.getDatabasePassword(),
             options.getLoaderThreads(),
-            options.isIdempotencyRequired());
+            options.isIdempotencyRequired(),
+            options.isFixupsEnabled());
     LOGGER.info(
         "salt/pepper: {}", Arrays.toString("nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     LOGGER.info("hash iterations: {}", 1000);
@@ -65,7 +66,8 @@ public final class RifLoaderTest {
             options.getDatabaseUsername(),
             options.getDatabasePassword(),
             options.getLoaderThreads(),
-            options.isIdempotencyRequired());
+            options.isIdempotencyRequired(),
+            options.isFixupsEnabled());
     LOGGER.info(
         "salt/pepper: {}", Arrays.toString("nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     LOGGER.info("hash iterations: {}", 1000);

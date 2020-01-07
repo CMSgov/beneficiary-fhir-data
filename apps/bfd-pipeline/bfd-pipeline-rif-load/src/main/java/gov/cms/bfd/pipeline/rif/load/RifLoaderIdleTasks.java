@@ -184,7 +184,7 @@ public class RifLoaderIdleTasks {
         em.createQuery(COUNT_UNHASHED_HISTORIES, Long.class).getSingleResult();
 
     LOGGER.info(
-        "Starting idle task processing with null mbiHash for: {} Beneficaries and {} Benficiary Histories",
+        "Starting idle task processing with missing mbiHash for: {} Beneficaries and {} Benficiary Histories",
         beneficiaryCount,
         historyCount);
 
@@ -197,10 +197,15 @@ public class RifLoaderIdleTasks {
    * @return true if done with the current task.
    */
   public boolean doPostStartupTask() {
+    // Just return done if fixups are not enabled;
+    if (!options.isFixupsEnabled()) {
+      LOGGER.info("PostStartup fixups are not enabled.");
+      return true;
+    }
     final Instant startTime = Instant.now();
     LOGGER.debug("Started a PostStartup time slice");
 
-    // Execute batches in parallel
+    // Execute beneficiaries and histories in parallel
     List<Future<Boolean>> batchFutures = new ArrayList<Future<Boolean>>();
     batchFutures.add(
         executorService.submit(() -> doTransaction(startTime, this::fixupBeneficiaryBatch)));
@@ -248,6 +253,7 @@ public class RifLoaderIdleTasks {
    * Fixup a batch of Beneficiaries. Update the beneficary metrics.
    *
    * @param em a {@link EntityManager} setup for a transaction
+   * @param startTime the start of the time slice
    * @return true if done with all fixups
    */
   public Boolean fixupBeneficiaryBatch(final EntityManager em, final Instant startTime) {
@@ -286,6 +292,7 @@ public class RifLoaderIdleTasks {
    * Fixup a batch of BeneficiaryHistory. Update the history metrics.
    *
    * @param em a {@link EntityManager} setup for a transaction
+   * @param startTime the start of the time slice
    * @return true if done with all fixups
    */
   public Boolean fixupHistoryBatch(final EntityManager em, final Instant startTime) {

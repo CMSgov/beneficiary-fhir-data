@@ -82,6 +82,12 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "IDEMPOTENCY_REQUIRED";
 
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
+   */
+  public static final String ENV_VAR_KEY_FIXUPS_ENABLED = "FIXUPS_ENABLED";
+
   private final ExtractionOptions extractionOptions;
   private final LoadAppOptions loadOptions;
 
@@ -243,6 +249,12 @@ public final class AppConfiguration implements Serializable {
               "Invalid value for configuration environment variable '%s'.",
               ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
 
+    String fixupsEnabledText = System.getenv(ENV_VAR_KEY_FIXUPS_ENABLED);
+    boolean fixupsEnabled = false;
+    if (fixupsEnabledText != null && !fixupsEnabledText.isEmpty()) {
+      fixupsEnabled = Boolean.parseBoolean(fixupsEnabledText);
+    }
+
     /*
      * Just for convenience: make sure DefaultAWSCredentialsProviderChain
      * has whatever it needs.
@@ -272,7 +284,8 @@ public final class AppConfiguration implements Serializable {
             databaseUsername,
             databasePassword.toCharArray(),
             loaderThreads,
-            idempotencyRequired.get()));
+            idempotencyRequired.get().booleanValue(),
+            fixupsEnabled));
   }
 
   /**
