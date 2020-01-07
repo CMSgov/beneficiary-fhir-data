@@ -199,6 +199,14 @@ module "fhir_lb" {
       egress_port           = local.bfd_server_plaid_port
       egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
     }
+    {
+      ingress_description   = "From VPC peerings, the MGMT VPC, and self"
+      ingress_port          = 3000
+      ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+      egress_description    = "To VPC instances"
+      egress_port           = 3000
+      egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
+    }
   ]
 
   health_check_port   = local.bfd_server_port

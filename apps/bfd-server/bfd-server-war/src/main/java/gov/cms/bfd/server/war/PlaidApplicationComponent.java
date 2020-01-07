@@ -57,7 +57,9 @@ public class PlaidApplicationComponent implements DisposableBean {
     }
 
     // Select the port to have Plaid use for HTTP.
-    this.plaidHttpPort = findFreePort();
+    // FIXME Select random HTTP port once we're done comparing HTTP/HTTPS performance.
+    // this.plaidHttpPort = findFreePort();
+    this.plaidHttpPort = 3000;
 
     // Calculate the Diesel database URL.
     String databaseUrl =
