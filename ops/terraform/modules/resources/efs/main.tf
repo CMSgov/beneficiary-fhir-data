@@ -27,7 +27,7 @@ resource "aws_efs_file_system" "efs" {
   }
 }
 
-resource "aws_efs_mount_target" "efs-mt" {
+resource "aws_efs_mount_target" "efs-mnt" {
   file_system_id  = "${aws_efs_file_system.efs.id}"
   subnet_id = data.aws_subnet.main.id
   security_groups = ["${aws_security_group.ingress-efs.id}"]
