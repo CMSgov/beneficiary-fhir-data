@@ -5,7 +5,6 @@
 #
 
 locals {
-  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id }
 }
 
@@ -124,7 +123,7 @@ EOF
 # EBS Volume for Jenkins Data
 
 resource "aws_ebs_volume" "jenkins_data" {
-  availability_zone = data.aws_subnet.selected[0].availability_zone
+  availability_zone = var.az
   size              = 1000
   type              = "gp2"
 

@@ -4,8 +4,7 @@
 #
 
 locals {
-  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=var.az}
 }
 
 # Find resources defined outside this script 

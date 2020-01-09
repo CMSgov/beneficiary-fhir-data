@@ -29,3 +29,8 @@ variable "mgmt_network_ci_cidrs" {
   description       = "The CIDR of the MGMT Network"
   default           = "10.252.40.0/21"
 }
+
+variable "az" {
+  description       = "Availability Zone"
+  type              = string
+}
