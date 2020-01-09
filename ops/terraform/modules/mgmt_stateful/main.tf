@@ -143,7 +143,7 @@ resource "aws_efs_file_system" "foo" {
 }
 
 resource "aws_ebs_volume" "jenkins_data" {
-  availability_zone = var.env_config.azs
+  availability_zone = var.az
   size              = 1000
   type              = "gp2"
   encrypted         = true
