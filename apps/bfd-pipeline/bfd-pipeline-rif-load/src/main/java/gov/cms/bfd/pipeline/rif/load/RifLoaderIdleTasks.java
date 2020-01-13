@@ -56,21 +56,24 @@ public class RifLoaderIdleTasks {
    */
 
   /** Time slice that a task can take before returning/yielding to the main pipeline */
-  private static final int TIME_SLICE_LIMIT_MILLIS = 10000;
+  private static final int TIME_SLICE_LIMIT_MILLIS = 20000;
 
+  /** Time slice that a task can take before returning/yielding to the main pipeline */
   private static final Duration TIME_SLICE_LIMIT = Duration.ofMillis(TIME_SLICE_LIMIT_MILLIS);
 
-  /** The record count of a db update batch */
-  private static final int BATCH_COUNT = 1000;
+  /** Max amount of time before a timeout occurs. */
+  private static final int MAX_EXECUTOR_TIME_SECONDS = 300; // Allow for large table scans
 
-  /** How much to partition the table. */
-  private static final int PARTITION_COUNT = 10;
+  /** The record count of a db update batch */
+  private static final int BATCH_COUNT = 100;
 
   /** An executor list that does no work and always completes */
-  private static final List<Callable<Boolean>> NULL_EXECUTORS =
-      Collections.singletonList(() -> true);
+  private static final List<Callable<Boolean>> NULL_EXECUTORS = Collections.emptyList();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderIdleTasks.class);
+
+  /** The number of partitions to run by default. It is an option. */
+  public static final int DEFAULT_PARTITION_COUNT = 20;
 
   /** Enum to tell what the current task is being executed. */
   public enum Task {
@@ -125,7 +128,7 @@ public class RifLoaderIdleTasks {
     this.beneficaryMeter = appMetrics.meter("fixups.beneficiary.rate");
     this.historyMeter = appMetrics.meter("fixups.beneficiary_history.rate");
 
-    this.executorService = Executors.newFixedThreadPool(PARTITION_COUNT);
+    this.executorService = Executors.newFixedThreadPool(options.getFixupThreads());
   }
 
   /**
@@ -179,7 +182,7 @@ public class RifLoaderIdleTasks {
    * @return the list of executors
    */
   private List<Callable<Boolean>> makeExecutorsForPartitions(Function<Integer, Boolean> executor) {
-    return IntStream.range(0, PARTITION_COUNT)
+    return IntStream.range(0, options.getFixupThreads())
         .mapToObj((partition) -> (Callable<Boolean>) () -> executor.apply(partition))
         .collect(Collectors.toList());
   }
@@ -190,6 +193,7 @@ public class RifLoaderIdleTasks {
    * @param executors Callables to that do the work
    */
   private boolean doExecutors(List<Callable<Boolean>> executors) {
+    if (executors.size() == 0) return true;
     final Instant startTime = Instant.now();
     LOGGER.debug("Started a time slice: {}", currentTask);
 
@@ -201,7 +205,7 @@ public class RifLoaderIdleTasks {
             .map(
                 future -> {
                   try {
-                    return future.get(2 * TIME_SLICE_LIMIT_MILLIS, TimeUnit.MILLISECONDS);
+                    return future.get(MAX_EXECUTOR_TIME_SECONDS, TimeUnit.SECONDS);
                   } catch (TimeoutException | ExecutionException | InterruptedException ex) {
                     LOGGER.error("Error executing in sub-task {}", getCurrentTask());
                     LOGGER.error("Exception executing a task", ex);
@@ -264,7 +268,7 @@ public class RifLoaderIdleTasks {
             .getSingleResult();
 
     LOGGER.info(
-        "Starting idle task processing with missing mbiHash for: {} Beneficaries and {} Benficiary Histories",
+        "Missing mbiHash for: {} Beneficaries and {} Benficiary Histories",
         beneficiaryCount,
         historyCount);
 
@@ -388,8 +392,6 @@ public class RifLoaderIdleTasks {
       final String idName,
       final boolean hasTextId,
       final int partition) {
-    final String p = Integer.toString(partition);
-
     final String select =
         "SELECT b.\""
             + idName
@@ -399,8 +401,13 @@ public class RifLoaderIdleTasks {
             + "\" b "
             + "WHERE b.\"mbiHash\" IS NULL AND b.\"medicareBeneficiaryId\" IS NOT NULL AND "
             + (hasTextId
-                ? "RIGHT(b.\"" + idName + "\", 1) = '" + p + "'"
-                : "MOD(b.\"" + idName + "\", 10) = " + p);
+                ? "MOD(CAST(b.\""
+                    + idName
+                    + "\" AS numeric), "
+                    + options.getFixupThreads()
+                    + ") = "
+                    + partition
+                : "MOD(b.\"" + idName + "\", " + options.getFixupThreads() + ") = " + partition);
 
     return session.createNativeQuery(select).setMaxResults(BATCH_COUNT).getResultList();
   }

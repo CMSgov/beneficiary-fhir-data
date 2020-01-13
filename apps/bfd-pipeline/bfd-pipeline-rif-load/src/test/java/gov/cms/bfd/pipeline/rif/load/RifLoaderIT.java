@@ -450,7 +450,8 @@ public final class RifLoaderIT {
             defaultOptions.getDatabaseDataSource(),
             defaultOptions.getLoaderThreads(),
             defaultOptions.isIdempotencyRequired(),
-            fixupsEnabled));
+            fixupsEnabled,
+            defaultOptions.getFixupThreads()));
   }
 
   /**

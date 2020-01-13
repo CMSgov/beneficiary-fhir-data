@@ -35,7 +35,8 @@ public final class RifLoaderTestUtils {
         dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED,
-        FIXUPS_ENABLED);
+        FIXUPS_ENABLED,
+        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
   }
 
   /**
