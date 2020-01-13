@@ -21,7 +21,7 @@ public final class RifLoaderTestUtils {
   public static final boolean IDEMPOTENCY_REQUIRED = true;
 
   /** The value to use for {@link LoadAppOptions#isFixupsEnabled()} */
-  public static final boolean FIXUPS_ENABLED = true;
+  public static final boolean FIXUPS_ENABLED = false;
 
   /**
    * @param dataSource a {@link DataSource} for the test DB to connect to
