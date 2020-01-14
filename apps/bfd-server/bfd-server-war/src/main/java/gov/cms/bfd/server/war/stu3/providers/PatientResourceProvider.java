@@ -25,6 +25,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -413,7 +414,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
-      beneficiary = selectBeneWithLatestReferenceYear(matchingBenes);
+      throw new NonUniqueResultException();
     } else if (distinctBeneIds == 1) {
       beneficiary = matchingBenes.get(0);
     }
