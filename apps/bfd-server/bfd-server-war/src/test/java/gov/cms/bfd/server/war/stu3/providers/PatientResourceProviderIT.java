@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
@@ -513,6 +514,7 @@ public final class PatientResourceProviderIT {
    * Verifies that the correct bene id is returned when a hicn points to more than one bene id in
    * either the Beneficiaries and/or BeneficiariesHistory table.
    */
+  @Ignore
   @Test
   public void searchForExistingPatientByHicnHashWithBeneDups() {
     List<Object> loadedRecords =
