@@ -1063,6 +1063,7 @@ public final class PatientResourceProviderIT {
    * Verifies that the correct bene id is returned when an MBI points to more than one bene id in
    * either the Beneficiaries and/or BeneficiariesHistory table.
    */
+  @Ignore
   @Test
   public void searchForExistingPatientByMbiHashWithBeneDups() {
     List<Object> loadedRecords =
