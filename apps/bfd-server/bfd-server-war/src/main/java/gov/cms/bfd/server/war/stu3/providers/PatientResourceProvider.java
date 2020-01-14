@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -97,15 +98,13 @@ public final class PatientResourceProvider implements IResourceProvider {
     String beneIdText = patientId.getIdPart();
     if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
-    IncludeIdentifiersMode includeIdentifiersMode =
-        IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
+    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
-    if ((IncludeIdentifiersMode.hasHICN(includeIdentifiersMode))
-        || (IncludeIdentifiersMode.hasMBI(includeIdentifiersMode))) {
+    if (hasHICN(includeIdentifiersValues) || hasMBI(includeIdentifiersValues)) {
       // For efficiency, grab these relations in the same query.
       // For security, only grab them when needed.
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -126,24 +125,32 @@ public final class PatientResourceProvider implements IResourceProvider {
       throw new ResourceNotFoundException(patientId);
     } finally {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
+
       TransformerUtils.recordQueryInMdc(
-          String.format("bene_by_id.%s", includeIdentifiersMode.name().toLowerCase()),
+          String.format(
+              "bene_by_id.include_%s",
+              includeIdentifiersValues
+                  .toString()
+                  .replace("[", "")
+                  .replace("]", "")
+                  .replace(",", "")
+                  .replace(" ", "_")),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!IncludeIdentifiersMode.hasHICN(includeIdentifiersMode)) {
+    if (!hasHICN(includeIdentifiersValues)) {
       beneficiary.setHicnUnhashed(Optional.empty());
     }
 
     // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!IncludeIdentifiersMode.hasMBI(includeIdentifiersMode)) {
+    if (!hasMBI(includeIdentifiersValues)) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
     Patient patient =
-        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersMode);
+        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
     return patient;
   }
 
@@ -373,11 +380,10 @@ public final class PatientResourceProvider implements IResourceProvider {
     // Then, find all Beneficiary records that match the hash or those BENE_IDs.
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-    IncludeIdentifiersMode includeIdentifiersMode =
-        IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
 
-    if ((IncludeIdentifiersMode.hasHICN(includeIdentifiersMode))
-        || (IncludeIdentifiersMode.hasMBI(includeIdentifiersMode))) {
+    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+
+    if (hasHICN(includeIdentifiersValues) || hasMBI(includeIdentifiersValues)) {
       // For efficiency, grab these relations in the same query.
       // For security, only grab them when needed.
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -407,10 +413,16 @@ public final class PatientResourceProvider implements IResourceProvider {
       matchingBenes = entityManager.createQuery(beneMatches).getResultList();
     } finally {
       benesByHashOrIdQueryNanoSeconds = timerHicnQuery.stop();
+
       TransformerUtils.recordQueryInMdc(
           String.format(
-              "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.%s",
-              includeIdentifiersMode.name().toLowerCase()),
+              "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
+              includeIdentifiersValues
+                  .toString()
+                  .replace("[", "")
+                  .replace("]", "")
+                  .replace(",", "")
+                  .replace(" ", "_")),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
     }
@@ -427,17 +439,17 @@ public final class PatientResourceProvider implements IResourceProvider {
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!IncludeIdentifiersMode.hasHICN(includeIdentifiersMode)) {
+    if (!hasHICN(includeIdentifiersValues)) {
       beneficiary.setHicnUnhashed(Optional.empty());
     }
 
     // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!IncludeIdentifiersMode.hasMBI(includeIdentifiersMode)) {
+    if (!hasMBI(includeIdentifiersValues)) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
     Patient patient =
-        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersMode);
+        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
     return patient;
   }
 
@@ -470,56 +482,40 @@ public final class PatientResourceProvider implements IResourceProvider {
     return entityManager.find(Beneficiary.class, maxReferenceYearMatchingBeneficiaryId);
   }
 
-  /** Enumerates the supported "should we include unique beneficiary identifiers" options. */
-  public static enum IncludeIdentifiersMode {
-    INCLUDE_MBIS,
-    INCLUDE_HICNS,
-    INCLUDE_HICNS_AND_MBIS,
-    OMIT_HICNS_AND_MBIS;
+  /**
+   * The header key used to determine which {@link IncludeIdentifiersValues} header should be used.
+   * See {@link #determineIncludeIdentifiersValues(RequestDetails)} for details.
+   */
+  public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
 
-    /**
-     * The header key used to determine which {@link IncludeIdentifiersMode} mode should be used.
-     * See {@link #determineIncludeIdentifiersMode(RequestDetails)} for details.
-     */
-    public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
+  /**
+   * The List of valid values for the {@link IncludeIdentifiersValues} header. See {@link
+   * #determineIncludeIdentifiersValues(RequestDetails)} for details.
+   */
+  public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
+      Arrays.asList("true", "hicn", "mbi");
 
-    static IncludeIdentifiersMode determineIncludeIdentifiersMode(RequestDetails requestDetails) {
-      String includeIdentifiersValue = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
+  /** Return a valid List of values for the IncludeIdenfifiers header */
+  public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
+    String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
-      List<String> headerValues = Arrays.asList(includeIdentifiersValue.split("\\s*,\\s*"));
+    if (headerValues == null) return Arrays.asList("");
+    else
+      // Return values split on a comma with any whitespace, valid, distict, and sort
+      return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
+          .filter(c -> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
+          .distinct()
+          .sorted()
+          .collect(Collectors.toList());
+  }
 
-      if (includeIdentifiersValue == null) {
-        // If the header was not included in the request or blank
-        return OMIT_HICNS_AND_MBIS;
-        // Still match boolean true by ignoring case
-      } else if (headerValues.stream().anyMatch(x -> x.equalsIgnoreCase("true"))) {
-        return INCLUDE_MBIS;
-      } else if (headerValues.contains("hicn") && headerValues.contains("mbi")) {
-        return INCLUDE_HICNS_AND_MBIS;
-      } else if (headerValues.contains("hicn")) {
-        return INCLUDE_HICNS;
-      } else if (headerValues.contains("mbi")) {
-        return INCLUDE_MBIS;
-      } else {
-        // Default
-        return OMIT_HICNS_AND_MBIS;
-      }
-    }
+  /** @return Returns true if the @param includeIdentifiersValues includes unhashed hicn */
+  public static boolean hasHICN(List<String> includeIdentifiersValues) {
+    return includeIdentifiersValues.contains("hicn");
+  }
 
-    /** @return Returns true if the @param includeIdentifiersMode includes unhashed hicn */
-    public static boolean hasHICN(IncludeIdentifiersMode includeIdentifiersMode) {
-      if ((includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS)
-          || (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS)) {
-        return true;
-      } else return false;
-    }
-
-    /** @return Returns true if the @param includeIdentifiersMode includes unhashed mbi */
-    public static boolean hasMBI(IncludeIdentifiersMode includeIdentifiersMode) {
-      if ((includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS)
-          || (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_MBIS)) {
-        return true;
-      } else return false;
-    }
+  /** @return Returns true if the @param includeIdentifiersValues includes unhashed mbi */
+  public static boolean hasMBI(List<String> includeIdentifiersValues) {
+    return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
   }
 }

@@ -9,7 +9,6 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +59,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -107,7 +106,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -153,7 +152,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("false");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -254,7 +253,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -307,7 +306,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("false");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -466,7 +465,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -716,7 +715,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("false");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -892,7 +891,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     loadedRecords.stream()
@@ -1014,7 +1013,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -1264,7 +1263,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("false");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -1444,7 +1443,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     loadedRecords.stream()

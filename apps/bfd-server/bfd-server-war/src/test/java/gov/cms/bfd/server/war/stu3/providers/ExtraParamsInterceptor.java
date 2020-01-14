@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 import java.io.IOException;
 
 /**
@@ -15,26 +14,12 @@ import java.io.IOException;
  */
 public class ExtraParamsInterceptor implements IClientInterceptor {
 
-  private IncludeIdentifiersMode includeIdentifiersMode =
-      IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS;
+  private String includeIdentifiersValues = "false";
 
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
-    String headerValue;
-    switch (includeIdentifiersMode) {
-      case INCLUDE_HICNS_AND_MBIS:
-        headerValue = "hicn,mbi";
-        break;
-      case INCLUDE_HICNS:
-        headerValue = "hicn";
-        break;
-      case INCLUDE_MBIS:
-        headerValue = "mbi";
-        break;
-      default:
-        headerValue = Boolean.FALSE.toString();
-    }
-    theRequest.addHeader(IncludeIdentifiersMode.HEADER_NAME_INCLUDE_IDENTIFIERS, headerValue);
+    String headerValue = includeIdentifiersValues;
+    theRequest.addHeader(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, headerValue);
   }
 
   @Override
@@ -43,7 +28,7 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
 
   }
 
-  public void setIncludeIdentifiers(IncludeIdentifiersMode includeIdentifiersMode) {
-    this.includeIdentifiersMode = includeIdentifiersMode;
+  public void setIncludeIdentifiers(String includeIdentifiersValues) {
+    this.includeIdentifiersValues = includeIdentifiersValues;
   }
 }
