@@ -13,6 +13,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils;
 import java.io.FileReader;
 import java.io.IOException;
@@ -349,7 +350,8 @@ public final class ServerTestUtils {
         dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         RifLoaderTestUtils.IDEMPOTENCY_REQUIRED,
-        RifLoaderTestUtils.FIXUPS_ENABLED);
+        RifLoaderTestUtils.FIXUPS_ENABLED,
+        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
   }
 
   /**
