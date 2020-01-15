@@ -148,11 +148,13 @@ public final class RifLoaderIT {
     loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
   }
 
-  /** Tests the RifLoaderIdleTasks class */
+  /** Tests the RifLoaderIdleTasks class with a Sample. Note: only works with Postgres. */
+  @Ignore
   @Test
   public void runIdleTasks() {
     final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    final RifLoader loader = loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    RifLoader loader = createLoader(dataSource, true);
 
     // The sample are loaded with mbiHash set, clear them for this test
     clearMbiHash(loader);
@@ -180,6 +182,20 @@ public final class RifLoaderIT {
         loader.getIdleTasks().getCurrentTask());
     loader.doIdleTask();
 
+    // Run the post startup beneficiary task
+    Assert.assertEquals(
+        "Should be running the post-startup task",
+        RifLoaderIdleTasks.Task.POST_STARTUP_FIXUP_BENEFICIARIES,
+        loader.getIdleTasks().getCurrentTask());
+    loader.doIdleTask();
+
+    // Run the post startup beneficiary history task
+    Assert.assertEquals(
+        "Should be running the post-startup task",
+        RifLoaderIdleTasks.Task.POST_STARTUP_FIXUP_BENEFICIARY_HISTORY,
+        loader.getIdleTasks().getCurrentTask());
+    loader.doIdleTask();
+
     // Should mbiHash should be set now
     Assert.assertEquals(
         "Should be running the normal task",
@@ -199,7 +215,8 @@ public final class RifLoaderIT {
   @Test
   public void runIdleTasksWithNoFixups() {
     final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    final RifLoader loader = loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    final RifLoader loader = createLoader(dataSource, false);
 
     // Should need no work
     final String selectBeneficiary = "select b from Beneficiary b where b.mbiHash is null";
@@ -237,15 +254,13 @@ public final class RifLoaderIT {
 
   /**
    * Tests the RifLoaderIdleTasks class with existing data in the database. Useful for profiling
-   * against the beneficiary data set
+   * against the beneficiary data set.
    */
   @Ignore
   @Test
   public void runExistingIdleTasks() {
     final DataSource dataSource = DatabaseTestHelper.getTestDatabase();
-    MetricRegistry appMetrics = new MetricRegistry();
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
-    RifLoader loader = new RifLoader(appMetrics, options);
+    final RifLoader loader = createLoader(dataSource, true);
 
     // The sample are loaded with mbiHash set, clear them for this test
     clearMbiHash(loader);
@@ -259,7 +274,7 @@ public final class RifLoaderIT {
 
     // Run the post startup task
     Instant startTime = Instant.now();
-    while (loader.getIdleTasks().getCurrentTask() == RifLoaderIdleTasks.Task.POST_STARTUP) {
+    while (loader.getIdleTasks().getCurrentTask() != RifLoaderIdleTasks.Task.NORMAL) {
       loader.doIdleTask();
     }
     Duration time = Duration.between(startTime, Instant.now());
@@ -280,7 +295,7 @@ public final class RifLoaderIT {
    * @param dataSource a {@link DataSource} for the test DB to use
    * @param sampleGroup the {@link StaticRifResourceGroup} to load
    */
-  private RifLoader loadSample(DataSource dataSource, StaticRifResourceGroup sampleGroup) {
+  private void loadSample(DataSource dataSource, StaticRifResourceGroup sampleGroup) {
     // Generate the sample RIF data to feed through the pipeline.
     List<StaticRifResource> sampleResources =
         Arrays.stream(sampleGroup.getResources()).collect(Collectors.toList());
@@ -348,7 +363,7 @@ public final class RifLoaderIT {
           options, entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
     }
     LOGGER.info("All records found in DB.");
-    return loader;
+    loader.close();
   }
 
   /**
@@ -419,6 +434,27 @@ public final class RifLoaderIT {
   }
 
   /**
+   * Create a RIF loader
+   *
+   * @param dataSource to use
+   * @param fixupsEnabled option
+   */
+  private static RifLoader createLoader(DataSource dataSource, boolean fixupsEnabled) {
+    MetricRegistry appMetrics = new MetricRegistry();
+    LoadAppOptions defaultOptions = RifLoaderTestUtils.getLoadOptions(dataSource);
+    return new RifLoader(
+        appMetrics,
+        new LoadAppOptions(
+            defaultOptions.getHicnHashIterations(),
+            defaultOptions.getHicnHashPepper(),
+            defaultOptions.getDatabaseDataSource(),
+            defaultOptions.getLoaderThreads(),
+            defaultOptions.isIdempotencyRequired(),
+            fixupsEnabled,
+            defaultOptions.getFixupThreads()));
+  }
+
+  /**
    * Clear the MBI hash fields in the db
    *
    * @param loader the loader and the db connection within
@@ -426,23 +462,10 @@ public final class RifLoaderIT {
   private static void clearMbiHash(final RifLoader loader) {
     loader
         .getIdleTasks()
-        .doTransaction(
-            null,
-            (em, start) -> {
-              for (final Beneficiary b :
-                  em.createQuery(
-                          "select b from Beneficiary b where b.mbiHash is not null",
-                          Beneficiary.class)
-                      .getResultList()) {
-                b.setMbiHash(Optional.empty());
-              }
-              for (final BeneficiaryHistory b :
-                  em.createQuery(
-                          "select b from BeneficiaryHistory b where b.mbiHash is not null",
-                          BeneficiaryHistory.class)
-                      .getResultList()) {
-                b.setMbiHash(Optional.empty());
-              }
+        .doBatches(
+            (session) -> {
+              session.createQuery("update Beneficiary set mbiHash = null").executeUpdate();
+              session.createQuery("update BeneficiaryHistory set mbiHash = null").executeUpdate();
               return true;
             });
   }
