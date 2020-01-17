@@ -319,9 +319,9 @@ module "bfd_server_alarm_all_500s" {
     metric_prefix    = "http-requests/count-500"
     eval_periods     = "1"
     period           = "300"
-    statistic        = "Maximum"
+    statistic        = "Sum"
     ext_statistic    = null
-    threshold        = "0.0"
+    threshold        = "20.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
