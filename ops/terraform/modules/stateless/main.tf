@@ -321,7 +321,7 @@ module "bfd_server_alarm_all_500s" {
     period           = "300"
     statistic        = "Sum"
     ext_statistic    = null
-    threshold        = "10.0"
+    threshold        = "20.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
