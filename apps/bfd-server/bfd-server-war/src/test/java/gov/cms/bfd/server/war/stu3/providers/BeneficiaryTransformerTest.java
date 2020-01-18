@@ -86,6 +86,41 @@ public final class BeneficiaryTransformerTest {
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
+   * with {@link IncludeIdentifiersValues} = ["true"].
+   */
+  @Test
+  public void transformSampleARecordWithIdentifiersTrue() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+
+    Patient patient =
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("true"));
+    assertMatches(beneficiary, patient);
+
+    Assert.assertEquals("Number of identifiers should be 7", 7, patient.getIdentifier().size());
+
+    // Verify patient identifiers and values match.
+    assertValuesInPatientIdentifiers(
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "3456789");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
    * with {@link IncludeIdentifiersValues} = ["hicn"].
    */
   @Test
