@@ -511,7 +511,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /** @return Returns true if the @param includeIdentifiersValues includes unhashed hicn */
   public static boolean hasHICN(List<String> includeIdentifiersValues) {
-    return includeIdentifiersValues.contains("hicn");
+    return includeIdentifiersValues.contains("hicn") || includeIdentifiersValues.contains("true");
   }
 
   /** @return Returns true if the @param includeIdentifiersValues includes unhashed mbi */
