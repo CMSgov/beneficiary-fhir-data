@@ -87,6 +87,8 @@ public final class PatientResourceProvider implements IResourceProvider {
    *
    * @param patientId The read operation takes one parameter, which must be of type {@link IdType}
    *     and must be annotated with the {@link IdParam} annotation.
+   * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
+   *     to parse out pagination values
    * @return Returns a resource matching the specified {@link IdDt}, or <code>null</code> if none
    *     exists.
    */
@@ -483,19 +485,26 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   /**
-   * The header key used to determine which {@link IncludeIdentifiersValues} header should be used.
-   * See {@link #determineIncludeIdentifiersValues(RequestDetails)} for details.
+   * The header key used to determine which header should be used. See {@link
+   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
 
   /**
-   * The List of valid values for the {@link IncludeIdentifiersValues} header. See {@link
-   * #determineIncludeIdentifiersValues(RequestDetails)} for details.
+   * The List of valid values for the {@link HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
+   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
       Arrays.asList("true", "hicn", "mbi");
 
-  /** Return a valid List of values for the IncludeIdenfifiers header */
+  /**
+   * Return a valid List of values for the IncludeIdenfifiers header
+   *
+   * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
+   *     to parse out include identifiers values
+   * @return List of validated header values against the {@link
+   *     VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS} list.
+   */
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
@@ -509,12 +518,22 @@ public final class PatientResourceProvider implements IResourceProvider {
           .collect(Collectors.toList());
   }
 
-  /** @return Returns true if the @param includeIdentifiersValues includes unhashed hicn */
+  /**
+   * Check if HICN is in {@link HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
+   *
+   * @param includeIdentifiersValues a list of header values.
+   * @return Returns true if includes unhashed hicn
+   */
   public static boolean hasHICN(List<String> includeIdentifiersValues) {
     return includeIdentifiersValues.contains("hicn") || includeIdentifiersValues.contains("true");
   }
 
-  /** @return Returns true if the @param includeIdentifiersValues includes unhashed mbi */
+  /**
+   * Check if MBI is in {@link HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
+   *
+   * @param includeIdentifiersValues a list of header values.
+   * @return Returns true if includes unhashed mbi
+   */
   public static boolean hasMBI(List<String> includeIdentifiersValues) {
     return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
   }
