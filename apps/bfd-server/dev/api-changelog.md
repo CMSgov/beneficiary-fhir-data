@@ -1,5 +1,27 @@
 # API Changelog
 
+## BLUEBUTTON-1536: Extend `IncludeIdentifiers` header options for the Patient Resource
+
+The `IncludeIdentifiers` header has been extended to handle values of [ "true", "hicn", "mbi' ]. 
+
+To enable this, set an "`IncludeIdentifiers: <value>`" HTTP header in the `/Patient` request.
+
+Multiple values can be seperated by a comma (","). For example, "`IncludeIdentifiers: hicn,mbi`" .
+
+The following table describes the response behaviors:
+
+
+HEADER: IncludeIdentifier | Response Behavior
+--- | ---
+\<blank\> | omit HICN and MBI
+false | omit HICN and MBI
+true | include HICN and MBI
+hicn | include HICN
+mbi | include MBI
+hicn,mbi or mbi,hicn | include HICN and MBI
+\<any\> | omit HICN and MBI
+
+
 ## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
 
 The Patient resource supports searching by a hashed MBI identifier:
