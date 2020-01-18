@@ -51,15 +51,110 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} that does exist in the DB.
+   * works as expected for a {@link Patient} when include identifiers value = ["true"].
    */
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
+    String includeIdentifiersValue = "true";
+    boolean expectingHicn = true;
+    boolean expectingMbi = true;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link Patient} when include identifiers value = ["hicn,mbi"].
+   */
+  @Test
+  public void readExistingPatientIncludeIdentifiersHicnMbi() {
+    String includeIdentifiersValue = "hicn,mbi";
+    boolean expectingHicn = true;
+    boolean expectingMbi = true;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link Patient} when include identifiers value = ["hicn"].
+   */
+  @Test
+  public void readExistingPatientIncludeIdentifiersHicn() {
+    String includeIdentifiersValue = "hicn";
+    boolean expectingHicn = true;
+    boolean expectingMbi = false;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link Patient} when include identifiers value = ["mbi"].
+   */
+  @Test
+  public void readExistingPatientIncludeIdentifiersMbi() {
+    String includeIdentifiersValue = "mbi";
+    boolean expectingHicn = false;
+    boolean expectingMbi = true;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link Patient} when include identifiers value = ["false"].
+   */
+  @Test
+  public void readExistingPatientIncludeIdentifiersFalse() {
+    String includeIdentifiersValue = "false";
+    boolean expectingHicn = false;
+    boolean expectingMbi = false;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link Patient} when include identifiers value = [""].
+   */
+  @Test
+  public void readExistingPatientIncludeIdentifiersBlank() {
+    String includeIdentifiersValue = "";
+    boolean expectingHicn = false;
+    boolean expectingMbi = false;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Asserts that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * contains expected/present identifiers for a {@link Patient}.
+   *
+   * @param includeIdentifiersValue header value
+   * @param expectingHicn true if expecting a HICN
+   * @param expectingMbi true if expecting a MBI
+   */
+  public void assertExistingPatientIncludeIdentifiersExpected(
+      String includeIdentifiersValue, boolean expectingHicn, boolean expectingMbi) {
+
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setIncludeIdentifiers(includeIdentifiersValue);
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -90,15 +185,19 @@ public final class PatientResourceProviderIT {
         mbiUnhashedPresent = true;
     }
 
-    Assert.assertTrue(hicnUnhashedPresent);
-    Assert.assertTrue(mbiUnhashedPresent);
+    if (expectingHicn) Assert.assertTrue(hicnUnhashedPresent);
+    else Assert.assertFalse(hicnUnhashedPresent);
+
+    if (expectingMbi) Assert.assertTrue(mbiUnhashedPresent);
+    else Assert.assertFalse(mbiUnhashedPresent);
   }
 
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
    * works as expected for a {@link Patient} that does exist in the DB but has no {@link
-   * BeneficiaryHistory} or {@link MedicareBeneficiaryIdHistory} records.
+   * BeneficiaryHistory} or {@link MedicareBeneficiaryIdHistory} records when include identifiers
+   * value = ["true"].
    */
   @Test
   public void readExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
@@ -106,7 +205,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setIncludeIdentifiers("true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -139,52 +238,6 @@ public final class PatientResourceProviderIT {
 
     Assert.assertTrue(hicnUnhashedPresent);
     Assert.assertTrue(mbiUnhashedPresent);
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} that does exist in the DB.
-   */
-  @Test
-  public void readExistingPatientIncludeIdentifiersFalse() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
-
-    Beneficiary beneficiary =
-        loadedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-    Patient patient =
-        fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
-
-    Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
-
-    /*
-     * Ensure the unhashed values for HICN and MBI are *not* present.
-     */
-    Boolean hicnUnhashedPresent = false;
-    Boolean mbiUnhashedPresent = false;
-    Iterator<Identifier> identifiers = patient.getIdentifier().iterator();
-    while (identifiers.hasNext()) {
-      Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
-        hicnUnhashedPresent = true;
-      if (identifier
-          .getSystem()
-          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
-        mbiUnhashedPresent = true;
-    }
-
-    Assert.assertFalse(hicnUnhashedPresent);
-    Assert.assertFalse(mbiUnhashedPresent);
   }
 
   /**
@@ -253,7 +306,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setIncludeIdentifiers("true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -465,7 +518,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setIncludeIdentifiers("true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -891,7 +944,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setIncludeIdentifiers("true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     loadedRecords.stream()
@@ -1013,7 +1066,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setIncludeIdentifiers("true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -1443,7 +1496,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setIncludeIdentifiers("true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     loadedRecords.stream()
