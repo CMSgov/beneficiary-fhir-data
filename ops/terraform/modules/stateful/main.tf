@@ -27,7 +27,8 @@ locals {
   cw_period             = 60    # Seconds
   cw_eval_periods       = 3
   cw_disk_queue_depth   = 5
-  cw_replica_lag        = 600   # Seconds
+  cw_replica_lag_period = 3600
+  cw_replica_lag        = 1800   # Seconds
   cw_latency            = 0.2   # Seconds
 
 }
@@ -357,7 +358,7 @@ module "replica1_alarms" {
   }
 
   replica_lag = {
-    period            = local.cw_period
+    period            = local.cw_replica_lag_period
     eval_periods      = local.cw_eval_periods
     threshold         = local.cw_replica_lag
   }
@@ -383,7 +384,7 @@ module "replica2_alarms" {
   }
 
   replica_lag = {
-    period            = local.cw_period
+    period            = local.cw_replica_lag_period
     eval_periods      = local.cw_eval_periods
     threshold         = local.cw_replica_lag
   }
@@ -409,7 +410,7 @@ module "replica3_alarms" {
   }
 
   replica_lag = {
-    period            = local.cw_period
+    period            = local.cw_replica_lag_period
     eval_periods      = local.cw_eval_periods
     threshold         = local.cw_replica_lag
   }
