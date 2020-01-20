@@ -39,19 +39,21 @@ their Part D entrollment status.
 
 ### Patient centric interface
 
-`v1.1/fhir/Patient/?ptdcntrct<month_code>=<contract id>`
+Following the fhir pattern of [reverse chaining](https://www.hl7.org/fhir/search.html#has) the interface will request a list of patients that `have` `Coverage` identified by the `prdcntrct<month code>` identifier.
 
-returns a [bundle](https://www.hl7.org/fhir/bundle.html) of [patient resources](https://www.hl7.org/fhir/patient.html)
-that have that `contract_id` for that `month_code`.
+Calls to
 
+`v1/fhir/Patient/?_has:Coverage.identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month code>|<contract id>`
 
+will return a [bundle](https://www.hl7.org/fhir/bundle.html) of [patient resources](https://www.hl7.org/fhir/patient.html)
+that have the specified `contract_id` for the specified `month_code`.
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
 #### Implementation Goals
 
-- a pattern for data filters
+- a pattern for patient centric data filters
 - low risk of change to current external contract
 	- do partners currently expect a `Patient` call without a `patient_id` parameter to error?
 
@@ -76,11 +78,35 @@ that have that `contract_id` for that `month_code`.
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
-TODO
-
+While technically all Patient search responses
+_could_ contain more than one entry
+per the specification,
+there is a convention within the BFD
+that they only ever contain one entry.
+This proposal
+breaks that convention
+by necessity of the requested behavior.
 
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
+
+#### [_tag](https://www.hl7.org/fhir/STU3/search.html#tag)
+Fetch patient resources
+via a precomputed tag
+based on their coverage
+contract enrollment.
+
+`<base_url>/Patient/?_tag=partdcontract-01-1234`
+
+#### [_list](https://www.hl7.org/fhir/STU3/search.html#list)
+
+Fetch
+lists of patients
+precomputed
+based on their coverage
+contract enrollment.
+
+`<base_url>/Patient?_list=42`
 
 #### Notes:
 
@@ -106,10 +132,6 @@ TODO
 
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
-
-`/Patient/?Coverage.identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month_code>|<contract_id>`
-
-Same return value.
 
 ### Coverage centric interface
 
