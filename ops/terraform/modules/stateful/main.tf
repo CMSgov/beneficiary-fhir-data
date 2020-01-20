@@ -502,8 +502,18 @@ resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
   policy_arn = aws_iam_policy.etl_rw_s3.arn
 }
 
-# S3 bucket, policy, and KMS key for medicare opt out data
+# Admin group, S3 bucket, policy, and KMS key for medicare opt out data
 #
+resource "aws_iam_group" "medicare_opt_out_admins" {
+  name = "bfd-${var.env_config.env}-medicare-opt-out-admins-group"
+}
+
+resource "aws_iam_group_membership" "medicare_opt_out_admins" {
+  name  = "bfd-${var.env_config.env}-medicare-opt-out-admins-membership"
+  group = aws_iam_group.medicare_opt_out_admins.name
+  users = var.medicare_opt_out_config.admin_users
+}
+
 module "medicare_opt_out" {
   source            = "../resources/s3_pii"
   env_config        = local.env_config
@@ -511,9 +521,9 @@ module "medicare_opt_out" {
   pii_bucket_config = {
     name            = "medicare-opt-out"
     log_bucket      = module.logs.id
-    read_roles      = var.medicare_opt_out_config.read_roles
-    write_roles     = var.medicare_opt_out_config.write_roles
-    admin_users     = var.medicare_opt_out_config.admin_users
+    read_arns       = var.medicare_opt_out_config.read_roles
+    write_arns      = var.medicare_opt_out_config.write_roles
+    admin_arns      = [aws_iam_group.medicare_opt_out_admins.arn]
   }
 }
 
