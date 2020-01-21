@@ -52,7 +52,7 @@ The returned patient resource includes the HICN and MBI identifiers if the reque
 | hicn,mbi | HICN and MBI      | New value supported        |
 
 ### Hash Algorithm
-For convenience, MBI hashing uses the existing HICN hashing algorithm and pepper.
+Requests use a hashed version of the MBI instead of the actual MBI of the resource being requested. Hashing prevents the actual MBI from appearing in logs. For convenience, MBI hashing uses the existing HICN hashing algorithm, pepper and iterations. 
 
 ### Synthetic Beneficiaries
 The BFD has a set of 30,000 synthetic beneficiary records for use for development and testing. These records now contain random MBIs. To distinguish these identifiers from real MBIs, they have `S` as the second letter. `1S00A00AA00` is an example of a synthetic MBI. 
