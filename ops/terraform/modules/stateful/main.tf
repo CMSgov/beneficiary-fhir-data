@@ -242,6 +242,11 @@ resource "aws_db_parameter_group" "import_mode" {
   parameter {
     name  = "autovacuum"
     value = "0"
+
+  parameter {
+    name = "log_connections"
+    value = "on"
+  }
   }
 
 }
