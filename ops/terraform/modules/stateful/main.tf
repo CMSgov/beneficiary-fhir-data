@@ -245,7 +245,7 @@ resource "aws_db_parameter_group" "import_mode" {
 
   parameter {
     name = "log_connections"
-    value = "on"
+    value = "1"
   }
   }
 
