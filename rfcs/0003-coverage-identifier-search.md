@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0003-coverage-identifier-search`
 * Start Date: 2019-11-15
-* RFC PR: []()
+* RFC PR: [#156](https://github.com/CMSgov/beneficiary-fhir-data/pull/156)
 * JIRA Ticket(s):
     * [BLUEBUTTON-1517](https://jira.cms.gov/browse/BLUEBUTTON-1517)
 
@@ -21,7 +21,7 @@ Search by Coverage.identity, initially only supporting the part D coverage ident
     * [Proposed Solution: Drawbacks](#proposed-solution-drawbacks)
     * [Proposed Solution: Notable Alternatives](#proposed-solution-notable-alternatives)
 * [Prior Art](#prior-art)
-* [Future Possibilities](#future-possibilities)
+* [Future Work](#future-work)
 * [Addendums](#addendums)
 
 ## Motivation
@@ -125,13 +125,34 @@ https://bluebutton.cms.gov/resources/variables/ptdcntrct01 is a valid coding
 
 [example coverage response with codes](https://github.com/CMSgov/beneficiary-fhir-data/blob/b541b973bf21c925f80df9c154263eb0b6ae4483/apps/bfd-server/bfd-server-war/src/test/resources/endpoint-responses/coverageSearchByPatientId.json#L588-L660)
 
-## Prior Art
-[Prior Art]: #prior-art
+## Future Work
+[Future Work]: #future-work
 
-TODO
+### Store coverage in a more robust way
 
-## Future Possibilities
-[Future Possibilities]: #future-possibilities
+In the current system Coverage information
+is stored accross columns of the beneficiary table.
+This results in a few weaknesses.
+
+Coverage information is recorded by month,
+one column for each month.
+This loses any year or day information
+for that coverage relationship.
+
+The Coverage relationship is stored as a string within those columns.
+This means that missmatches,
+typos,
+etc.,
+are possible.
+
+The coverage information living
+within the beneficiary table
+also increases the table size.
+Spreading the data out,
+and potentially normalizing it,
+would decrease the table size
+and potentially response times
+while simplifying the system.
 
 ### Coverage centric interface
 
@@ -142,8 +163,3 @@ for that `contract_id` and `month_code`.
 Each resource would contain a
 `beneficiary` entry
 with a `Patient/<fhir_id>` entry.
-
-## Addendums
-[Addendums]: #addendums
-
-TODO
