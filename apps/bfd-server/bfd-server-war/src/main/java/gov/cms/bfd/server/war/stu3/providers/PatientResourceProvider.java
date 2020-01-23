@@ -131,12 +131,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       TransformerUtils.recordQueryInMdc(
           String.format(
               "bene_by_id.include_%s",
-              includeIdentifiersValues
-                  .toString()
-                  .replace("[", "")
-                  .replace("]", "")
-                  .replace(",", "")
-                  .replace(" ", "_")),
+              String.join("_", includeIdentifiersValues),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
@@ -419,12 +414,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       TransformerUtils.recordQueryInMdc(
           String.format(
               "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
-              includeIdentifiersValues
-                  .toString()
-                  .replace("[", "")
-                  .replace("]", "")
-                  .replace(",", "")
-                  .replace(" ", "_")),
+              String.join("_", includeIdentifiersValues),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
     }
