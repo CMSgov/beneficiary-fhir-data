@@ -129,9 +129,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
       TransformerUtils.recordQueryInMdc(
-          String.format(
-              "bene_by_id.include_%s",
-              String.join("_", includeIdentifiersValues),
+          String.format("bene_by_id.include_%s", String.join("_", includeIdentifiersValues)),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
@@ -414,7 +412,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       TransformerUtils.recordQueryInMdc(
           String.format(
               "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
-              String.join("_", includeIdentifiersValues),
+              String.join("_", includeIdentifiersValues)),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes == null ? 0 : matchingBenes.size());
     }
@@ -485,7 +483,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
-      Arrays.asList("true", "hicn", "mbi");
+      Arrays.asList("true", "false", "hicn", "mbi");
 
   /**
    * Return a valid List of values for the IncludeIdenfifiers header
@@ -502,7 +500,12 @@ public final class PatientResourceProvider implements IResourceProvider {
     else
       // Return values split on a comma with any whitespace, valid, distict, and sort
       return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
-          .filter(c -> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
+          .peek(
+              c -> {
+                if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
+                  throw new InvalidRequestException(
+                      "Unsupported " + HEADER_NAME_INCLUDE_IDENTIFIERS + " header value: " + c);
+              })
           .distinct()
           .sorted()
           .collect(Collectors.toList());
