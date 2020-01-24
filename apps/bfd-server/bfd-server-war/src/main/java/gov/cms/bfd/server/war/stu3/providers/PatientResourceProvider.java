@@ -479,7 +479,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
 
   /**
-   * The List of valid values for the {@link HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
+   * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
    * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
@@ -512,7 +512,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   /**
-   * Check if HICN is in {@link HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
+   * Check if HICN is in {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
    *
    * @param includeIdentifiersValues a list of header values.
    * @return Returns true if includes unhashed hicn
@@ -522,7 +522,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   /**
-   * Check if MBI is in {@link HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
+   * Check if MBI is in {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
    *
    * @param includeIdentifiersValues a list of header values.
    * @return Returns true if includes unhashed mbi
