@@ -1,9 +1,6 @@
 package gov.cms.bfd.pipeline.rif.extract.synthetic;
 
 import gov.cms.bfd.model.rif.BeneficiaryColumn;
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
-import gov.cms.bfd.model.rif.InpatientClaimColumn;
-import gov.cms.bfd.model.rif.PartDEventColumn;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.rif.extract.LocalRifFile;
@@ -31,8 +28,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class SyntheticDataFixer4 {
   private static class MBIPool {
-    // Format based on https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI-with-Format.pdf
-   
+    // Format based on
+    // https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI-with-Format.pdf
+
     private int i = 0;
 
     private String template = "%dS%s%d%s%s%d%s%s%d%d";
@@ -129,8 +127,9 @@ public final class SyntheticDataFixer4 {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SyntheticDataFixer2.class);
 
-  private static final Path PATH_ORIGINAL_DATA = Paths.get("/vagrant/synthetic-data");
-  private static final Path PATH_FIXED_DATA = Paths.get("/vagrant/synthetic-data/fixed");
+  private static final Path PATH_ORIGINAL_DATA = Paths.get(System.getenv("LOCAL_SYNTHETIC_DATA"));
+  private static final Path PATH_FIXED_DATA =
+      Paths.get(System.getenv("LOCAL_SYNTHETIC_DATA") + "/fixed");
   private static final MBIPool mbiPool = new MBIPool();
 
   /**
@@ -156,21 +155,6 @@ public final class SyntheticDataFixer4 {
     Arrays.stream(SyntheticDataFile.values())
         .filter(r -> RifFileType.BENEFICIARY == r.getRifFile().getFileType())
         .forEach(r -> fixBeneficiaryFile(r));
-
-    // Fix the Carrier files.
-    Arrays.stream(SyntheticDataFile.values())
-        .filter(r -> RifFileType.CARRIER == r.getRifFile().getFileType())
-        .forEach(r -> fixCarrierFile(r));
-
-    // Fix the Inpatient files.
-    Arrays.stream(SyntheticDataFile.values())
-        .filter(r -> RifFileType.INPATIENT == r.getRifFile().getFileType())
-        .forEach(r -> fixInpatientFile(r));
-
-    // Fix the Part D files.
-    Arrays.stream(SyntheticDataFile.values())
-        .filter(r -> RifFileType.PDE == r.getRifFile().getFileType())
-        .forEach(r -> fixPartDEventsFile(r));
   }
 
   /**
@@ -238,209 +222,6 @@ public final class SyntheticDataFixer4 {
       throw new IllegalStateException(e);
     }
 
-    LOGGER.info("Fixed RIF file: '{}'...", syntheticDataFile.getFixedFilePath());
-  }
-
-  /**
-   * Process the original RIF file for the specified {@link SyntheticDataFile}, then write out a
-   * fixed version of the file.
-   *
-   * @param syntheticDataFile the beneficiary {@link SyntheticDataFile} to be fixed
-   * @throws IOException (Any {@link IOException}s encountered will be bubbled up.
-   */
-  private static void fixCarrierFile(SyntheticDataFile syntheticDataFile) {
-    LocalRifFile rifFile = syntheticDataFile.getRifFile();
-    CSVParser parser = RifParsingUtils.createCsvParser(rifFile);
-    LOGGER.info("Fixing RIF file: '{}'...", rifFile.getDisplayName());
-
-    /*
-     * We tell the CSVPrinter not to include a header here, because we will manually
-     * add it later, based on what we find in the input file.
-     */
-    CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader((String[]) null);
-    try (FileWriter writer = new FileWriter(syntheticDataFile.getFixedFilePath().toFile());
-        CSVPrinter rifFilePrinter = new CSVPrinter(writer, csvFormat); ) {
-
-      /*
-       * When we created the CSVPrinter, we told it to skip the header. That ensures
-       * that we don't write out a header until we've started reading the file and
-       * know what it is. Before proceeding, we verify that the header is what we
-       * expect it to be, to avoid propagating errors in our code.
-       */
-      Object[] columnNamesFromFile =
-          parser.getHeaderMap().entrySet().stream()
-              .sorted(Map.Entry.comparingByValue())
-              .map(e -> e.getKey())
-              .toArray();
-      Object[] columnNamesFromFileWithoutMetadata =
-          parser.getHeaderMap().entrySet().stream()
-              .sorted(Map.Entry.comparingByValue())
-              .map(e -> e.getKey())
-              .filter(c -> !c.equals("DML_IND"))
-              .toArray();
-      Object[] columnNamesFromEnum =
-          Arrays.stream(CarrierClaimColumn.values()).map(c -> c.name()).toArray();
-      if (!Arrays.equals(columnNamesFromFileWithoutMetadata, columnNamesFromEnum))
-        throw new IllegalStateException(
-            String.format(
-                "Column names mismatch:\nColumns from enum: %s\nColumns from file: %s",
-                Arrays.toString(columnNamesFromEnum),
-                Arrays.toString(columnNamesFromFileWithoutMetadata)));
-      rifFilePrinter.printRecord(columnNamesFromFile);
-
-      parser.forEach(
-          r -> {
-            // Read the record into a List.
-            List<String> recordValues = new LinkedList<>();
-            for (String value : r) recordValues.add(value);
-
-            // Nothing to do here; no fixes needed.
-
-            try {
-              rifFilePrinter.printRecord(recordValues);
-            } catch (Exception e) {
-              throw new IllegalStateException(e);
-            }
-          });
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
-
-    LOGGER.info("Fixed RIF file: '{}'...", syntheticDataFile.getFixedFilePath());
-  }
-
-  /**
-   * Process the original RIF file for the specified {@link SyntheticDataFile}, then write out a
-   * fixed version of the file.
-   *
-   * @param syntheticDataFile the beneficiary {@link SyntheticDataFile} to be fixed
-   * @throws IOException (Any {@link IOException}s encountered will be bubbled up.
-   */
-  private static void fixInpatientFile(SyntheticDataFile syntheticDataFile) {
-    LocalRifFile rifFile = syntheticDataFile.getRifFile();
-    CSVParser parser = RifParsingUtils.createCsvParser(rifFile);
-    LOGGER.info("Fixing RIF file: '{}'...", rifFile.getDisplayName());
-
-    /*
-     * We tell the CSVPrinter not to include a header here, because we will manually
-     * add it later, based on what we find in the input file.
-     */
-    CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader((String[]) null);
-    try (FileWriter writer = new FileWriter(syntheticDataFile.getFixedFilePath().toFile());
-        CSVPrinter rifFilePrinter = new CSVPrinter(writer, csvFormat); ) {
-
-      /*
-       * When we created the CSVPrinter, we told it to skip the header. That ensures
-       * that we don't write out a header until we've started reading the file and
-       * know what it is. Before proceeding, we verify that the header is what we
-       * expect it to be, to avoid propagating errors in our code.
-       */
-      Object[] columnNamesFromFile =
-          parser.getHeaderMap().entrySet().stream()
-              .sorted(Map.Entry.comparingByValue())
-              .map(e -> e.getKey())
-              .toArray();
-      Object[] columnNamesFromFileWithoutMetadata =
-          parser.getHeaderMap().entrySet().stream()
-              .sorted(Map.Entry.comparingByValue())
-              .map(e -> e.getKey())
-              .filter(c -> !c.equals("DML_IND"))
-              .toArray();
-      Object[] columnNamesFromEnum =
-          Arrays.stream(InpatientClaimColumn.values()).map(c -> c.name()).toArray();
-      if (!Arrays.equals(columnNamesFromFileWithoutMetadata, columnNamesFromEnum))
-        throw new IllegalStateException(
-            String.format(
-                "Column names mismatch:\nColumns from enum: %s\nColumns from file: %s",
-                Arrays.toString(columnNamesFromEnum),
-                Arrays.toString(columnNamesFromFileWithoutMetadata)));
-      rifFilePrinter.printRecord(columnNamesFromFile);
-
-      parser.forEach(
-          r -> {
-            // Read the record into a List.
-            List<String> recordValues = new LinkedList<>();
-            for (String value : r) recordValues.add(value);
-
-            // Nothing to do here; no fixes needed.
-
-            try {
-              rifFilePrinter.printRecord(recordValues);
-            } catch (Exception e) {
-              throw new IllegalStateException(e);
-            }
-          });
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
-
-    LOGGER.info("Fixed RIF file: '{}'...", syntheticDataFile.getFixedFilePath());
-  }
-
-  /**
-   * Process the original RIF file for the specified {@link SyntheticDataFile}, then write out a
-   * fixed version of the file.
-   *
-   * @param syntheticDataFile the beneficiary {@link SyntheticDataFile} to be fixed
-   * @throws IOException (Any {@link IOException}s encountered will be bubbled up.
-   */
-  private static void fixPartDEventsFile(SyntheticDataFile syntheticDataFile) {
-    LocalRifFile rifFile = syntheticDataFile.getRifFile();
-    CSVParser parser = RifParsingUtils.createCsvParser(rifFile);
-    LOGGER.info("Fixing RIF file: '{}'...", rifFile.getDisplayName());
-
-    /*
-     * We tell the CSVPrinter not to include a header here, because we will manually
-     * add it later, based on what we find in the input file.
-     */
-    CSVFormat csvFormat = RifParsingUtils.CSV_FORMAT.withHeader((String[]) null);
-    try (FileWriter writer = new FileWriter(syntheticDataFile.getFixedFilePath().toFile());
-        CSVPrinter rifFilePrinter = new CSVPrinter(writer, csvFormat); ) {
-
-      /*
-       * When we created the CSVPrinter, we told it to skip the header. That ensures
-       * that we don't write out a header until we've started reading the file and
-       * know what it is. Before proceeding, we verify that the header is what we
-       * expect it to be, to avoid propagating errors in our code.
-       */
-      Object[] columnNamesFromFile =
-          parser.getHeaderMap().entrySet().stream()
-              .sorted(Map.Entry.comparingByValue())
-              .map(e -> e.getKey())
-              .toArray();
-      Object[] columnNamesFromFileWithoutMetadata =
-          parser.getHeaderMap().entrySet().stream()
-              .sorted(Map.Entry.comparingByValue())
-              .map(e -> e.getKey())
-              .filter(c -> !c.equals("DML_IND"))
-              .toArray();
-      Object[] columnNamesFromEnum =
-          Arrays.stream(PartDEventColumn.values()).map(c -> c.name()).toArray();
-      if (!Arrays.equals(columnNamesFromFileWithoutMetadata, columnNamesFromEnum))
-        throw new IllegalStateException(
-            String.format(
-                "Column names mismatch:\nColumns from enum: %s\nColumns from file: %s",
-                Arrays.toString(columnNamesFromEnum),
-                Arrays.toString(columnNamesFromFileWithoutMetadata)));
-      rifFilePrinter.printRecord(columnNamesFromFile);
-
-      parser.forEach(
-          r -> {
-            // Read the record into a List.
-            List<String> recordValues = new LinkedList<>();
-            for (String value : r) recordValues.add(value);
-
-            // Nothing to do here; no fixes needed.
-
-            try {
-              rifFilePrinter.printRecord(recordValues);
-            } catch (Exception e) {
-              throw new IllegalStateException(e);
-            }
-          });
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
     LOGGER.info("Fixed RIF file: '{}'...", syntheticDataFile.getFixedFilePath());
   }
 
