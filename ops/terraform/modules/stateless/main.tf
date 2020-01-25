@@ -144,9 +144,9 @@ data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
-#
+##
 # Start to build stuff
-#
+##
 
 # IAM roles
 # 
@@ -173,7 +173,11 @@ module "fhir_lb" {
   layer           = "dmz"
   log_bucket      = data.aws_s3_bucket.logs.id
 
-  ingress = {
+  ingress = var.is_public ? {
+    description   = "Public Internet access"
+    port          = 443
+    cidr_blocks   = ["0.0.0.0/0"]
+  } : {
     description   = "From VPC peerings, the MGMT VPC, and self"
     port          = 443
     cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])

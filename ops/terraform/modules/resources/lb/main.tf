@@ -4,6 +4,7 @@
 #
 locals {
   tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
+  is_public   = contains(var.ingress.cidr_blocks, "0.0.0.0/0")
   log_prefix  = "${var.role}_elb_access_logs" 
 }
 
@@ -48,7 +49,7 @@ resource "aws_elb" "main" {
   name                  = "bfd-${var.env_config.env}-${var.role}"
   tags                  = local.tags
 
-  internal              = true
+  internal              = !local.is_public
   subnets               = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
   security_groups       = [aws_security_group.lb.id]
 
