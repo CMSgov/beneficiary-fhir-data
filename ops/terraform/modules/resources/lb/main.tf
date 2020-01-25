@@ -6,6 +6,7 @@ locals {
   tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
   is_public   = contains(var.ingress.cidr_blocks, "0.0.0.0/0")
   log_prefix  = "${var.role}_elb_access_logs" 
+  is_prod     = substr(var.env_config.env, 0, 4) == "prod" 
 }
 
 ##
@@ -78,6 +79,11 @@ resource "aws_elb" "main" {
     bucket              = var.log_bucket
     bucket_prefix       = local.log_prefix
     interval            = 5   # (minutes) Match HealthApt      
+  }
+
+  lifecycle {
+    # Destroying the LB will be an outage if it has traffic. Don't do this accidentially. 
+    prevent_destroy     = local.is_prod
   }
 }
 
