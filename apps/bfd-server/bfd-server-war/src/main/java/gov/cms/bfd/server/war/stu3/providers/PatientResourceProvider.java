@@ -106,12 +106,12 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
-    if (hasHICN(includeIdentifiersValues) || hasMBI(includeIdentifiersValues)) {
-      // For efficiency, grab these relations in the same query.
-      // For security, only grab them when needed.
+    if (hasHICN(includeIdentifiersValues))
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+
+    if (hasMBI(includeIdentifiersValues))
       root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
-    }
+
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
 
