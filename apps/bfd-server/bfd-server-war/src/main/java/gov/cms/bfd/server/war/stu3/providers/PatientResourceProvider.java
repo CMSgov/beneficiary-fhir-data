@@ -483,7 +483,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
-      Arrays.asList("true", "false", "hicn", "mbi");
+      Arrays.asList("true", "false", "hicn", "mbi", "");
 
   /**
    * Return a valid List of values for the IncludeIdenfifiers header
