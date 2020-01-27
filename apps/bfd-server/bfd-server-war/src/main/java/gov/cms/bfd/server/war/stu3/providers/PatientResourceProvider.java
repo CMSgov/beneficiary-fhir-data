@@ -378,12 +378,12 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
 
-    if (hasHICN(includeIdentifiersValues) || hasMBI(includeIdentifiersValues)) {
-      // For efficiency, grab these relations in the same query.
-      // For security, only grab them when needed.
+    if (hasHICN(includeIdentifiersValues))
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+
+    if (hasMBI(includeIdentifiersValues))
       beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
-    }
+
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
     if (!matchingIdsFromBeneHistory.isEmpty()) {
