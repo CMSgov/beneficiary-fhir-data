@@ -504,11 +504,7 @@ public final class PatientResourceProvider implements IResourceProvider {
               c -> {
                 if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
                   throw new InvalidRequestException(
-                      "Unsupported "
-                          + HEADER_NAME_INCLUDE_IDENTIFIERS
-                          + " header value: -"
-                          + c
-                          + "-");
+                      "Unsupported " + HEADER_NAME_INCLUDE_IDENTIFIERS + " header value: " + c);
               })
           .distinct()
           .sorted()
