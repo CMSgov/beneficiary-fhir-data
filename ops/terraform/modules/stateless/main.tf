@@ -172,6 +172,7 @@ module "fhir_lb" {
   role            = "fhir"
   layer           = "dmz"
   log_bucket      = data.aws_s3_bucket.logs.id
+  is_public       = var.is_public
 
   ingress = var.is_public ? {
     description   = "Public Internet access"
