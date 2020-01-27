@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
@@ -200,115 +201,113 @@ public final class PatientResourceProvider implements IResourceProvider {
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.identifier") TokenParam coverageId,
+      @OptionalParam(name = "startIndex") String startIndex,
       RequestDetails requestDetails) {
 
     if (coverageId.getQueryParameterQualifier() != null)
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
 
-    CcwCodebookVariable ccwVariable = partDCwVariableFor(coverageId.getSystem());
+    CcwCodebookVariable ccwVariable =
+        partDCwVariableFor(
+            coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1));
     SingularAttribute<Beneficiary, String> contractMonth = partDFieldFor(ccwVariable);
 
     String contractCode = coverageId.getValueNotNull();
     if (contractCode.length() != 5)
-      throw new InvalidRequestException(
-          "Unsupported query parameter value: " + contractCode);
+      throw new InvalidRequestException("Unsupported query parameter value: " + contractCode);
 
     List<Beneficiary> matchingBeneficiaries = queryBeneficiariesBy(contractMonth, contractCode);
 
     IncludeIdentifiersMode includeIdentifiersMode =
         IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
-    List<Patient> patients = matchingBeneficiaries.stream().map(bene -> {
-	    // Then, null out the HICN and MBI if we're not supposed to be returning those.
-	    if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
-	      beneficiary.setHicnUnhashed(Optional.empty());
-	      beneficiary.setMedicareBeneficiaryId(Optional.empty());
-	    }
+    List<IBaseResource> patients =
+        matchingBeneficiaries.stream()
+            .map(
+                beneficiary -> {
+                  // Then, null out the HICN and MBI if we're not supposed to be returning those.
+                  if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+                    beneficiary.setHicnUnhashed(Optional.empty());
+                    beneficiary.setMedicareBeneficiaryId(Optional.empty());
+                  }
 
-	    Patient patient =
-		BeneficiaryTransformer.transform(
-				metricRegistry,
-				beneficiary,
-				includeIdentifiersMode);
-	    return patient;
-    }).collect(Collectors.toList());
-    
+                  Patient patient =
+                      BeneficiaryTransformer.transform(
+                          metricRegistry, beneficiary, includeIdentifiersMode);
+                  return patient;
+                })
+            .collect(Collectors.toList());
+
     PagingArguments pagingArgs = new PagingArguments(requestDetails);
     Bundle bundle =
         TransformerUtils.createBundle(
             pagingArgs,
-	    "/Patient?_has:Coverage.identifier",
-	    coverageId.getSystem(),
-	    coverageId.getValue(),
-	    patients);
+            "/Patient?",
+            "_has:Coverage.identifier",
+            coverageId.getValueAsQueryToken(null),
+            patients);
     return bundle;
   }
 
   private CcwCodebookVariable partDCwVariableFor(String system) {
-	switch (system) {
-		case CcwCodebookVariable.PTDCNTRCT01.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT01;
-		case CcwCodebookVariable.PTDCNTRCT02.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT02;
-		case CcwCodebookVariable.PTDCNTRCT03.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT03;
-		case CcwCodebookVariable.PTDCNTRCT04.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT04;
-		case CcwCodebookVariable.PTDCNTRCT05.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT05;
-		case CcwCodebookVariable.PTDCNTRCT06.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT06;
-		case CcwCodebookVariable.PTDCNTRCT07.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT07;
-		case CcwCodebookVariable.PTDCNTRCT08.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT08;
-		case CcwCodebookVariable.PTDCNTRCT09.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT09;
-		case CcwCodebookVariable.PTDCNTRCT10.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT10;
-		case CcwCodebookVariable.PTDCNTRCT11.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT11;
-		case CcwCodebookVariable.PTDCNTRCT12.getVariable().getId().toLowerCase():
-			return CcwCodebookVariable.PTDCNTRCT12;
-	}
-		  throw new InvalidRequestException(
-		      "Unsupported identifier system: " + system));
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT01.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT01;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT02.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT02;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT03.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT03;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT04.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT04;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT05.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT05;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT06.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT06;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT07.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT07;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT08.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT08;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT09.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT09;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT10.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT10;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT11.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT11;
+    if (system.equals(CcwCodebookVariable.PTDCNTRCT12.getVariable().getId().toLowerCase()))
+      return CcwCodebookVariable.PTDCNTRCT12;
+    throw new InvalidRequestException("Unsupported identifier system: " + system);
   }
 
-  private SingularAttribute<Beneficiary, String> partDFieldFor(CcwCodebookVariable v) {
-	switch (v) {
-		case CcwCodebookVariable.PTDCNTRCT01:
-			return Beneficiary_.partDContractNumberJanId;
-		case CcwCodebookVariable.PTDCNTRCT02:
-			return Beneficiary_.partDContractNumberFebId;
-		case CcwCodebookVariable.PTDCNTRCT03:
-			return Beneficiary_.partDContractNumberMarId;
-		case CcwCodebookVariable.PTDCNTRCT04:
-			return Beneficiary_.partDContractNumberAprId;
-		case CcwCodebookVariable.PTDCNTRCT05:
-			return Beneficiary_.partDContractNumberMayId;
-		case CcwCodebookVariable.PTDCNTRCT06:
-			return Beneficiary_.partDContractNumberJunId;
-		case CcwCodebookVariable.PTDCNTRCT07:
-			return Beneficiary_.partDContractNumberJulId;
-		case CcwCodebookVariable.PTDCNTRCT08:
-			return Beneficiary_.partDContractNumberAugId;
-		case CcwCodebookVariable.PTDCNTRCT09:
-			return Beneficiary_.partDContractNumberSepId;
-		case CcwCodebookVariable.PTDCNTRCT10:
-			return Beneficiary_.partDContractNumberOctId;
-		case CcwCodebookVariable.PTDCNTRCT11:
-			return Beneficiary_.partDContractNumberNovId;
-		case CcwCodebookVariable.PTDCNTRCT12:
-			return Beneficiary_.partDContractNumberDecId;
-	}
-		  throw new InvalidRequestException(
-		      "Unsupported identifier system: " + v.getVariable().getId().toLowerCase());
+  private SingularAttribute<Beneficiary, String> partDFieldFor(CcwCodebookVariable cntrctMonth) {
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT01)
+      return Beneficiary_.partDContractNumberJanId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT02)
+      return Beneficiary_.partDContractNumberFebId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT03)
+      return Beneficiary_.partDContractNumberMarId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT04)
+      return Beneficiary_.partDContractNumberAprId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT05)
+      return Beneficiary_.partDContractNumberMayId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT06)
+      return Beneficiary_.partDContractNumberJunId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT07)
+      return Beneficiary_.partDContractNumberJulId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT08)
+      return Beneficiary_.partDContractNumberAugId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT09)
+      return Beneficiary_.partDContractNumberSeptId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT10)
+      return Beneficiary_.partDContractNumberOctId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT11)
+      return Beneficiary_.partDContractNumberNovId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT12)
+      return Beneficiary_.partDContractNumberDecId;
+    throw new InvalidRequestException(
+        "Unsupported identifier system: " + cntrctMonth.getVariable().getId().toLowerCase());
   }
 
   private List<Beneficiary> queryBeneficiariesBy(
-      SingularAttribute<Beneficiary, String> field,
-      String value) {
+      SingularAttribute<Beneficiary, String> field, String value) {
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
