@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class ExtraParamsInterceptor implements IClientInterceptor {
 
-  private String includeIdentifiersValues = "false";
+  private String includeIdentifiersValues = "";
 
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
