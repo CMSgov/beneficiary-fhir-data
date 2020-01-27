@@ -483,7 +483,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
-      Arrays.asList("true", "false", "hicn", "mbi", "");
+      Arrays.asList("true", "false", "hicn", "mbi");
 
   /**
    * Return a valid List of values for the IncludeIdenfifiers header
@@ -496,7 +496,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
-    if (headerValues == null) return Arrays.asList("");
+    if (headerValues == null || headerValues == "") return Arrays.asList("");
     else
       // Return values split on a comma with any whitespace, valid, distict, and sort
       return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
