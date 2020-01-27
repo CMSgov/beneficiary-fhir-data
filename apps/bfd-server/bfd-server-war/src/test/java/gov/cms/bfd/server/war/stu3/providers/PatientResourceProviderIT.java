@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -51,7 +52,7 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = ["true"].
+   * works as expected for a {@link Patient} when include identifiers value = "true".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
@@ -66,7 +67,7 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = ["hicn,mbi"].
+   * works as expected for a {@link Patient} when include identifiers value = "hicn,mbi".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersHicnMbi() {
@@ -81,7 +82,7 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = ["hicn"].
+   * works as expected for a {@link Patient} when include identifiers value = "hicn".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersHicn() {
@@ -96,7 +97,7 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = ["mbi"].
+   * works as expected for a {@link Patient} when include identifiers value = "mbi".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersMbi() {
@@ -111,7 +112,7 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = ["false"].
+   * works as expected for a {@link Patient} when include identifiers value = "false".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersFalse() {
@@ -126,11 +127,43 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link Patient} when include identifiers value = [""].
+   * works as expected for a {@link Patient} when include identifiers value = "".
    */
   @Test
   public void readExistingPatientIncludeIdentifiersBlank() {
     String includeIdentifiersValue = "";
+    boolean expectingHicn = false;
+    boolean expectingMbi = false;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link Patient} when include identifiers value =
+   * "invalid-identifier-value" and that an exception is thrown.
+   */
+  @Test(expected = InvalidRequestException.class)
+  public void readExistingPatientIncludeIdentifiersInvalid1() {
+    String includeIdentifiersValue = "invalid-identifier-value";
+    boolean expectingHicn = false;
+    boolean expectingMbi = false;
+
+    assertExistingPatientIncludeIdentifiersExpected(
+        includeIdentifiersValue, expectingHicn, expectingMbi);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link Patient} when include identifiers value =
+   * ["mbi,invalid-identifier-value"] and that an exception is thrown.
+   */
+  @Test(expected = InvalidRequestException.class)
+  public void readExistingPatientIncludeIdentifiersInvalid2() {
+    String includeIdentifiersValue = "mbi,invalid-identifier-value";
     boolean expectingHicn = false;
     boolean expectingMbi = false;
 
