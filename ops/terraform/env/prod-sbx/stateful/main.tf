@@ -16,7 +16,9 @@ module "stateful" {
     allocated_storage = 2000
   }
 
-  db_params = []
+  db_params = [
+    {name="max_wal_senders", value="15", apply_on_reboot=true},
+  ]
 
   db_import_mode = {
     enabled = false
