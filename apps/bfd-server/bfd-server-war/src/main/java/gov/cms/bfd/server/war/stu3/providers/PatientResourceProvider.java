@@ -205,9 +205,6 @@ public final class PatientResourceProvider implements IResourceProvider {
       @OptionalParam(name = "startIndex") String startIndex,
       RequestDetails requestDetails) {
 
-    IncludeIdentifiersMode includeIdentifiersMode =
-        IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
-
     if (coverageId.getQueryParameterQualifier() != null)
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
@@ -221,12 +218,14 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (contractCode.length() != 5)
       throw new InvalidRequestException("Unsupported query parameter value: " + contractCode);
 
+    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
     List<SetAttribute<Beneficiary, ?>> withRelations =
         new LinkedList<SetAttribute<Beneficiary, ?>>();
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+    if (hasHICN(includeIdentifiersValues))
       withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.beneficiaryHistories);
+
+    if (hasMBI(includeIdentifiersValues))
       withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.medicareBeneficiaryIdHistories);
-    }
 
     List<Beneficiary> matchingBeneficiaries =
         queryBeneficiariesBy(contractMonth, contractCode, withRelations);
@@ -235,15 +234,18 @@ public final class PatientResourceProvider implements IResourceProvider {
         matchingBeneficiaries.stream()
             .map(
                 beneficiary -> {
-                  // Then, null out the HICN and MBI if we're not supposed to be returning those.
-                  if (includeIdentifiersMode != IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+                  // Null out the unhashed HICNs if we're not supposed to be returning them
+                  if (!hasHICN(includeIdentifiersValues)) {
                     beneficiary.setHicnUnhashed(Optional.empty());
+                  }
+                  // Null out the unhashed MBIs if we're not supposed to be returning
+                  if (!hasMBI(includeIdentifiersValues)) {
                     beneficiary.setMedicareBeneficiaryId(Optional.empty());
                   }
 
                   Patient patient =
                       BeneficiaryTransformer.transform(
-                          metricRegistry, beneficiary, includeIdentifiersMode);
+                          metricRegistry, beneficiary, includeIdentifiersValues);
                   return patient;
                 })
             .collect(Collectors.toList());
