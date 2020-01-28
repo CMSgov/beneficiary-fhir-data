@@ -33,6 +33,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -204,23 +205,32 @@ public final class PatientResourceProvider implements IResourceProvider {
       @OptionalParam(name = "startIndex") String startIndex,
       RequestDetails requestDetails) {
 
+    IncludeIdentifiersMode includeIdentifiersMode =
+        IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
+
     if (coverageId.getQueryParameterQualifier() != null)
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
 
-    CcwCodebookVariable ccwVariable =
+    CcwCodebookVariable partDContractMonth =
         partDCwVariableFor(
             coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1));
-    SingularAttribute<Beneficiary, String> contractMonth = partDFieldFor(ccwVariable);
+    SingularAttribute<Beneficiary, String> contractMonth = partDFieldFor(partDContractMonth);
 
     String contractCode = coverageId.getValueNotNull();
     if (contractCode.length() != 5)
       throw new InvalidRequestException("Unsupported query parameter value: " + contractCode);
 
-    List<Beneficiary> matchingBeneficiaries = queryBeneficiariesBy(contractMonth, contractCode);
+    List<SetAttribute<Beneficiary, ?>> withRelations =
+        new LinkedList<SetAttribute<Beneficiary, ?>>();
+    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
+      withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.beneficiaryHistories);
+      withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.medicareBeneficiaryIdHistories);
+    }
 
-    IncludeIdentifiersMode includeIdentifiersMode =
-        IncludeIdentifiersMode.determineIncludeIdentifiersMode(requestDetails);
+    List<Beneficiary> matchingBeneficiaries =
+        queryBeneficiariesBy(contractMonth, contractCode, withRelations);
+
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
             .map(
@@ -308,10 +318,24 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   private List<Beneficiary> queryBeneficiariesBy(
       SingularAttribute<Beneficiary, String> field, String value) {
+    List<SetAttribute<Beneficiary, ?>> withRelations =
+        new LinkedList<SetAttribute<Beneficiary, ?>>();
+    return queryBeneficiariesBy(field, value, withRelations);
+  }
+
+  private List<Beneficiary> queryBeneficiariesBy(
+      SingularAttribute<Beneficiary, String> field,
+      String value,
+      List<SetAttribute<Beneficiary, ?>> preFetchList) {
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
+    preFetchList.stream()
+        .forEach(
+            f -> {
+              beneMatchesRoot.fetch(f, JoinType.LEFT);
+            });
     beneMatches.select(beneMatchesRoot);
     beneMatches.where(builder.equal(beneMatchesRoot.get(field), value));
 
