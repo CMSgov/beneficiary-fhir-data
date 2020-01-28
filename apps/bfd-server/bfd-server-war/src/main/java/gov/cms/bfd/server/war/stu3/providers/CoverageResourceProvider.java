@@ -14,7 +14,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -168,10 +167,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
     } finally {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
       TransformerUtils.recordQueryInMdc(
-          String.format(
-              "bene_by_id.%s", IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS.name().toLowerCase()),
-          beneByIdQueryNanoSeconds,
-          beneficiary == null ? 0 : 1);
+          "bene_by_id.include_", beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
     }
 
     return beneficiary;
