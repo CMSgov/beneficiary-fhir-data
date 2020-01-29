@@ -425,7 +425,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     } else if (distinctBeneIds > 1) {
       MDC.put("database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
       throw new ResourceNotFoundException(
-          "By hash query found more than one distinct BENI_ID: " + Long.toString(distinctBeneIds));
+          "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
       beneficiary = matchingBenes.get(0);
     }
