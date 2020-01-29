@@ -7,7 +7,7 @@
 * JIRA Ticket(s):
     * [BLUEBUTTON-1517](https://jira.cms.gov/browse/BLUEBUTTON-1517)
 
-Search by Coverage.identity, initially only supporting the part D coverage identities.
+Search by Coverage.extension, initially only supporting the Part D coverage identities.
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
@@ -29,21 +29,22 @@ Search by Coverage.identity, initially only supporting the part D coverage ident
 
 To increase the usability of the API
 provided by the BFD
-by enabaling searching for beneficiaries
+by enabling searching for beneficiaries
 by certain attributes.
 In this case
-their Part D entrollment status.
+their Part D enrollment status
+for a given month of the current year.
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
 ### Patient centric interface
 
-Following the fhir pattern of [reverse chaining](https://www.hl7.org/fhir/search.html#has) the interface will request a list of patients that `have` `Coverage` identified by the `prdcntrct<month code>` identifier.
+Following the fhir pattern of [reverse chaining](https://www.hl7.org/fhir/search.html#has) the interface will request a list of patients that `have` `Coverage` identified by the `prdcntrct<month code>` extension.
 
 Calls to
 
-`v1/fhir/Patient/?_has:Coverage.identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month code>|<contract id>`
+`v1/fhir/Patient/?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month code>|<contract id>`
 
 will return a [bundle](https://www.hl7.org/fhir/bundle.html) of [patient resources](https://www.hl7.org/fhir/patient.html)
 that have the specified `contract_id` for the specified `month_code`.
@@ -128,6 +129,12 @@ https://bluebutton.cms.gov/resources/variables/ptdcntrct01 is a valid coding
 ## Future Work
 [Future Work]: #future-work
 
+### Improve synthetic data
+
+Current synthetic data is invalid for this usecase.
+Synthetic contract numbers of 5 characters will have to be generated and assigned to beneficiaries.
+The assignments should be spred out so that a range of different numbers of results are returned.
+
 ### Store coverage in a more robust way
 
 In the current system Coverage information
@@ -156,7 +163,7 @@ while simplifying the system.
 
 ### Coverage centric interface
 
-`/Coverage/?identifier=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month_code>|<contract_id>`
+`/Coverage/?extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month_code>|<contract_id>`
 
 returns a set of Coverage resources
 for that `contract_id` and `month_code`.
