@@ -41,6 +41,8 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_bluebutton_frontend_sbx
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_sbx_certificate.pem') }}"
+  - alias: client_bluebutton_frontend_local
+    certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_local_certificate.pem') }}"
   - alias: client_bcda_dev
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_dev_certificate.pem') }}"
   - alias: client_bcda_test
