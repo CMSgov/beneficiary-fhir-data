@@ -201,7 +201,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      @RequiredParam(name = "_has:Coverage.identifier") TokenParam coverageId,
+      @RequiredParam(name = "_has:Coverage.extension") TokenParam coverageId,
       @OptionalParam(name = "startIndex") String startIndex,
       RequestDetails requestDetails) {
 
@@ -255,7 +255,7 @@ public final class PatientResourceProvider implements IResourceProvider {
         TransformerUtils.createBundle(
             pagingArgs,
             "/Patient?",
-            "_has:Coverage.identifier",
+            "_has:Coverage.extension",
             coverageId.getValueAsQueryToken(null),
             patients);
     return bundle;
@@ -286,7 +286,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       return CcwCodebookVariable.PTDCNTRCT11;
     if (system.equals(CcwCodebookVariable.PTDCNTRCT12.getVariable().getId().toLowerCase()))
       return CcwCodebookVariable.PTDCNTRCT12;
-    throw new InvalidRequestException("Unsupported identifier system: " + system);
+    throw new InvalidRequestException("Unsupported extension system: " + system);
   }
 
   private SingularAttribute<Beneficiary, String> partDFieldFor(CcwCodebookVariable cntrctMonth) {
@@ -315,7 +315,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT12)
       return Beneficiary_.partDContractNumberDecId;
     throw new InvalidRequestException(
-        "Unsupported identifier system: " + cntrctMonth.getVariable().getId().toLowerCase());
+        "Unsupported extension system: " + cntrctMonth.getVariable().getId().toLowerCase());
   }
 
   private List<Beneficiary> queryBeneficiariesBy(

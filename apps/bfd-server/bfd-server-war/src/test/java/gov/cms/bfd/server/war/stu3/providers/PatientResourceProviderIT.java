@@ -1601,7 +1601,7 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                new TokenClientParam("_has:Coverage.identifier")
+                new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(
@@ -1629,7 +1629,7 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                new TokenClientParam("_has:Coverage.identifier")
+                new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(
@@ -1678,7 +1678,7 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                new TokenClientParam("_has:Coverage.identifier")
+                new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(
@@ -1724,7 +1724,7 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                new TokenClientParam("_has:Coverage.identifier")
+                new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(
@@ -1757,7 +1757,7 @@ public final class PatientResourceProviderIT {
             .search()
             .forResource(Patient.class)
             .where(
-                new TokenClientParam("_has:Coverage.identifier")
+                new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(
