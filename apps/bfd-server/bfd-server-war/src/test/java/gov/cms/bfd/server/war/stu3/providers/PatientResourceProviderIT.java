@@ -20,7 +20,6 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
@@ -599,7 +598,6 @@ public final class PatientResourceProviderIT {
    * Verifies that the correct bene id is returned when a hicn points to more than one bene id in
    * either the Beneficiaries and/or BeneficiariesHistory table.
    */
-  @Ignore
   @Test
   public void searchForExistingPatientByHicnHashWithBeneDups() {
     List<Object> loadedRecords =
@@ -625,88 +623,91 @@ public final class PatientResourceProviderIT {
         beneficiariesHistoryStream.collect(Collectors.toList());
 
     boolean useHicnFromBeneficiaryTable;
+    boolean expectsSingleBeneMatch;
+
     /*
      * The following scenario tests when the same hicn is in the
-     * Beneficiaries table but points to different bene ids. Next check is
-     * to pull back the bene record in the Beneficiaries table with the most
-     * recent rfrnc_yr.
+     * Beneficiaries table but points to different bene ids.
      *
-     * bene id=567834 hicn=543217066U rfrnc_yr=2019 should be pulled back.
      */
     useHicnFromBeneficiaryTable = true;
-    assertPatientByHicnHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = false;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "567834",
         "543217066U",
-        useHicnFromBeneficiaryTable);
+        useHicnFromBeneficiaryTable,
+        "hicn",
+        expectsSingleBeneMatch);
 
     /*
-     * The following scenario tests when only one hicn is in the
-     * Beneficiaries table but has a rfrnc_yr value of null.
-     *
-     * bene id=123456NULLREFYR hicn=543217066N rfrnc_yr=null should be
-     * pulled back.
+     * The following scenario tests when only one hicn is in the Beneficiaries table
      */
     useHicnFromBeneficiaryTable = true;
-    assertPatientByHicnHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = true;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "123456NULLREFYR",
         "543217066N",
-        useHicnFromBeneficiaryTable);
+        useHicnFromBeneficiaryTable,
+        "hicn",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when the same hicn is in the
      * Beneficiaries and also in the BeneficiariesHistory table. The bene id
-     * is different between the tables so the bene record from the
-     * Beneficiaries table should be used.
-     *
-     * bene id=BENE1234 hicn=SAMEHICN rfrnc_yr=2019 should be pulled back.
+     * is different between the tables
      */
     useHicnFromBeneficiaryTable = true;
-    assertPatientByHicnHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = false;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "BENE1234",
         "SAMEHICN",
-        useHicnFromBeneficiaryTable);
+        useHicnFromBeneficiaryTable,
+        "hicn",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when the requested hicn is only in the
      * BeneficiariesHistory table. Use the bene id from the
      * BeneficiariesHistory table to then read the Beneficiaries table.
      *
-     * bene id=55555 hicn=HISTHICN rfrnc_yr=2019 should be pulled back.
      */
     useHicnFromBeneficiaryTable = false;
-    assertPatientByHicnHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = true;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "55555",
         "HISTHICN",
-        useHicnFromBeneficiaryTable);
+        useHicnFromBeneficiaryTable,
+        "hicn",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when the requested hicn is only in the
      * BeneficiariesHistory table but this hicn points to more than one bene
-     * id in history. Next check is to pull back the bene record in the
-     * Beneficiaries table with the most recent rfrnc_yr.
-     *
-     * bene id=66666 hicn=DUPHISTHIC rfrnc_yr=2018 should be pulled back.
+     * id in history.
      */
     useHicnFromBeneficiaryTable = false;
-    assertPatientByHicnHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = false;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "66666",
         "DUPHISTHIC",
-        useHicnFromBeneficiaryTable);
+        useHicnFromBeneficiaryTable,
+        "hicn",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when a hicn is not found in the
@@ -725,68 +726,6 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertEquals(0, searchResults.getTotal());
-  }
-
-  /**
-   * The following method tests which beneficiary record should be returned when there are instances
-   * of one hicn pointing to more than bene id between the Beneficiaries and BeneficiariesHistory
-   * tables.
-   *
-   * @param fhirClient
-   * @param beneficiariesList
-   * @param beneficiariesHistoryList
-   * @param beneficiaryId
-   * @param hicnUnhashed
-   * @param useHicnFromBeneficiaryTable
-   */
-  private void assertPatientByHicnHashWithBeneDupsMatch(
-      IGenericClient fhirClient,
-      List<Beneficiary> beneficiariesList,
-      List<BeneficiaryHistory> beneficiariesHistoryList,
-      String beneficiaryId,
-      String hicnUnhashed,
-      Boolean useHicnFromBeneficiaryTable) {
-
-    String hicnHashed;
-    if (useHicnFromBeneficiaryTable) {
-      Beneficiary beneficiaryHicnToMatchTo =
-          beneficiariesList.stream()
-              .filter(r -> hicnUnhashed.equals(r.getHicnUnhashed().get()))
-              .findFirst()
-              .get();
-      hicnHashed = beneficiaryHicnToMatchTo.getHicn();
-    } else {
-      BeneficiaryHistory beneficiaryHistoryHicnToMatchTo =
-          beneficiariesHistoryList.stream()
-              .filter(r -> hicnUnhashed.equals(r.getHicnUnhashed().get()))
-              .findFirst()
-              .get();
-      hicnHashed = beneficiaryHistoryHicnToMatchTo.getHicn();
-    }
-
-    // return bene record based on hicnUnhashed passed to this method
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.IDENTIFIER
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, hicnHashed))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getTotal());
-
-    Beneficiary beneficiary =
-        beneficiariesList.stream()
-            .filter(r -> beneficiaryId.equals(r.getBeneficiaryId()))
-            .findAny()
-            .get();
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
   }
 
   /**
@@ -1145,10 +1084,9 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that the correct bene id is returned when an MBI points to more than one bene id in
-   * either the Beneficiaries and/or BeneficiariesHistory table.
+   * Verifies that the correct bene id or exception is returned when an MBI points to more than one
+   * bene id in either the Beneficiaries and/or BeneficiariesHistory table.
    */
-  @Ignore
   @Test
   public void searchForExistingPatientByMbiHashWithBeneDups() {
     List<Object> loadedRecords =
@@ -1174,38 +1112,39 @@ public final class PatientResourceProviderIT {
         beneficiariesHistoryStream.collect(Collectors.toList());
 
     boolean useMbiFromBeneficiaryTable;
+    boolean expectsSingleBeneMatch;
+
     /*
      * The following scenario tests when the same mbi is in the
-     * Beneficiaries table but points to different bene ids. Next check is
-     * to pull back the bene record in the Beneficiaries table with the most
-     * recent rfrnc_yr.
-     *
-     * bene id=567834 mbi=3456789 rfrnc_yr=2019 should be pulled back.
+     * Beneficiaries table but points to different bene ids.
      */
     useMbiFromBeneficiaryTable = true;
-    assertPatientByMbiHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = false;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "567834",
         "3456789",
-        useMbiFromBeneficiaryTable);
+        useMbiFromBeneficiaryTable,
+        "mbi",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when only one mbi is in the
-     * Beneficiaries table but has a rfrnc_yr value of null.
-     *
-     * bene id=123456NULLREFYR mbi=3456789N rfrnc_yr=null should be
-     * pulled back.
+     * Beneficiaries table.
      */
     useMbiFromBeneficiaryTable = true;
-    assertPatientByMbiHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = true;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "123456NULLREFYR",
         "3456789N",
-        useMbiFromBeneficiaryTable);
+        useMbiFromBeneficiaryTable,
+        "mbi",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when the same mbi is in the
@@ -1216,46 +1155,50 @@ public final class PatientResourceProviderIT {
      * bene id=BENE1234 mbi=SAMEMBI rfrnc_yr=2019 should be pulled back.
      */
     useMbiFromBeneficiaryTable = true;
-    assertPatientByMbiHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = false;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "BENE1234",
         "SAMEMBI",
-        useMbiFromBeneficiaryTable);
+        useMbiFromBeneficiaryTable,
+        "mbi",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when the requested mbi is only in the
      * BeneficiariesHistory table. Use the bene id from the
      * BeneficiariesHistory table to then read the Beneficiaries table.
-     *
-     * bene id=55555 mbi=HISTMBI rfrnc_yr=2019 should be pulled back.
      */
     useMbiFromBeneficiaryTable = false;
-    assertPatientByMbiHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = true;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "55555",
         "HISTMBI",
-        useMbiFromBeneficiaryTable);
+        useMbiFromBeneficiaryTable,
+        "mbi",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when the requested mbi is only in the
      * BeneficiariesHistory table but this mbi points to more than one bene
-     * id in history. Next check is to pull back the bene record in the
-     * Beneficiaries table with the most recent rfrnc_yr.
-     *
-     * bene id=66666 mbi=DUPHISTMBI rfrnc_yr=2018 should be pulled back.
+     * id in history.
      */
     useMbiFromBeneficiaryTable = false;
-    assertPatientByMbiHashWithBeneDupsMatch(
+    expectsSingleBeneMatch = false;
+    assertPatientByHashTypeMatch(
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
         "66666",
         "DUPHISTMBI",
-        useMbiFromBeneficiaryTable);
+        useMbiFromBeneficiaryTable,
+        "mbi",
+        expectsSingleBeneMatch);
 
     /*
      * The following scenario tests when a mbi is not found in the
@@ -1277,64 +1220,124 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * The following method tests which beneficiary record should be returned when there are instances
-   * of one MBI pointing to more than bene id between the Beneficiaries and BeneficiariesHistory
-   * tables.
+   * The following method tests that a ResourceNotFoundException exception is thrown when there are
+   * instances of one hash value (hicn or mbi) pointing to more than bene id between the
+   * Beneficiaries and BeneficiariesHistory tables.
+   *
+   * <p>Or that single match is found when the expectsSingleBeneMatch param is = true.
+   *
+   * <p>The hashType param chooses which type of values/hash to use. This is either "hicn" or "mbi".
    *
    * @param fhirClient
    * @param beneficiariesList
    * @param beneficiariesHistoryList
    * @param beneficiaryId
-   * @param mbi
-   * @param useMbiFromBeneficiaryTable
+   * @param unhashedValue
+   * @param useFromBeneficiaryTable
+   * @param hashType
+   * @param expectsSingleBeneMatch
    */
-  private void assertPatientByMbiHashWithBeneDupsMatch(
+  private void assertPatientByHashTypeMatch(
       IGenericClient fhirClient,
       List<Beneficiary> beneficiariesList,
       List<BeneficiaryHistory> beneficiariesHistoryList,
       String beneficiaryId,
-      String mbi,
-      Boolean useMbiFromBeneficiaryTable) {
+      String unhashedValue,
+      Boolean useFromBeneficiaryTable,
+      String hashType,
+      Boolean expectsSingleBeneMatch) {
 
-    String mbiHash;
-    if (useMbiFromBeneficiaryTable) {
-      Beneficiary beneficiaryMbiToMatchTo =
-          beneficiariesList.stream()
-              .filter(r -> mbi.equals(r.getMedicareBeneficiaryId().get()))
-              .findFirst()
-              .get();
-      mbiHash = beneficiaryMbiToMatchTo.getMbiHash().get();
-    } else {
-      BeneficiaryHistory beneficiaryHistoryMbiToMatchTo =
-          beneficiariesHistoryList.stream()
-              .filter(r -> mbi.equals(r.getMedicareBeneficiaryId().get()))
-              .findFirst()
-              .get();
-      mbiHash = beneficiaryHistoryMbiToMatchTo.getMbiHash().get();
+    Bundle searchResults = null;
+    String hicnHashed = "";
+    String mbiHash = "";
+
+    if (hashType != "hicn" && hashType != "mbi") {
+      Assert.fail("hashType value must be: hicn or mbi.");
     }
 
-    // return bene record based on MBI passed to this method
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                Patient.IDENTIFIER
-                    .exactly()
-                    .systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, mbiHash))
-            .returnBundle(Bundle.class)
-            .execute();
+    if (useFromBeneficiaryTable) {
+      if (hashType.equals("hicn")) {
+        Beneficiary beneficiaryHicnToMatchTo =
+            beneficiariesList.stream()
+                .filter(r -> unhashedValue.equals(r.getHicnUnhashed().get()))
+                .findFirst()
+                .get();
+        hicnHashed = beneficiaryHicnToMatchTo.getHicn();
+      } else if (hashType.equals("mbi")) {
+        Beneficiary beneficiaryMbiToMatchTo =
+            beneficiariesList.stream()
+                .filter(r -> unhashedValue.equals(r.getMedicareBeneficiaryId().get()))
+                .findFirst()
+                .get();
+        mbiHash = beneficiaryMbiToMatchTo.getMbiHash().get();
+      }
+    } else {
+      if (hashType.equals("hicn")) {
+        BeneficiaryHistory beneficiaryHistoryHicnToMatchTo =
+            beneficiariesHistoryList.stream()
+                .filter(r -> unhashedValue.equals(r.getHicnUnhashed().get()))
+                .findFirst()
+                .get();
+        hicnHashed = beneficiaryHistoryHicnToMatchTo.getHicn();
+      } else if (hashType.equals("mbi")) {
+        BeneficiaryHistory beneficiaryHistoryMbiToMatchTo =
+            beneficiariesHistoryList.stream()
+                .filter(r -> unhashedValue.equals(r.getMedicareBeneficiaryId().get()))
+                .findFirst()
+                .get();
+        mbiHash = beneficiaryHistoryMbiToMatchTo.getMbiHash().get();
+      }
+    }
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getTotal());
+    try {
+      // return bene record based on unhashedValue passed to this method
+      if (hashType.equals("hicn")) {
+        searchResults =
+            fhirClient
+                .search()
+                .forResource(Patient.class)
+                .where(
+                    Patient.IDENTIFIER
+                        .exactly()
+                        .systemAndIdentifier(
+                            TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, hicnHashed))
+                .returnBundle(Bundle.class)
+                .execute();
+      } else if (hashType.equals("mbi")) {
+        searchResults =
+            fhirClient
+                .search()
+                .forResource(Patient.class)
+                .where(
+                    Patient.IDENTIFIER
+                        .exactly()
+                        .systemAndIdentifier(
+                            TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, mbiHash))
+                .returnBundle(Bundle.class)
+                .execute();
+      }
 
-    Beneficiary beneficiary =
-        beneficiariesList.stream()
-            .filter(r -> beneficiaryId.equals(r.getBeneficiaryId()))
-            .findAny()
-            .get();
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+      if (!expectsSingleBeneMatch) {
+        // Should throw exception before here, so assert a failed test.
+        Assert.fail("An exception was expected when there are duplicate bene id matches.");
+      }
+    } catch (ResourceNotFoundException e) {
+      // Test passes if an exception was thrown.
+    }
+
+    // Validate result if a single match is expected for test.
+    if (expectsSingleBeneMatch) {
+      Assert.assertNotNull(searchResults);
+      Assert.assertEquals(1, searchResults.getTotal());
+
+      Beneficiary beneficiary =
+          beneficiariesList.stream()
+              .filter(r -> beneficiaryId.equals(r.getBeneficiaryId()))
+              .findAny()
+              .get();
+      Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+      BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    }
   }
 
   /**

@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -39,6 +38,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -423,7 +423,9 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
     } else if (distinctBeneIds > 1) {
-      throw new NonUniqueResultException();
+      MDC.put("database_query.by_hash.collision.distinct_bene_ids", Long.toString(distinctBeneIds));
+      throw new ResourceNotFoundException(
+          "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
       beneficiary = matchingBenes.get(0);
     }
