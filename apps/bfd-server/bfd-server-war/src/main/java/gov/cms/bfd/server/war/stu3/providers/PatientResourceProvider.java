@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -227,8 +228,12 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (hasMBI(includeIdentifiersValues))
       withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.medicareBeneficiaryIdHistories);
 
-    List<Beneficiary> matchingBeneficiaries =
+    CriteriaQuery beneficiariesQuery =
         queryBeneficiariesBy(contractMonth, contractCode, withRelations);
+
+    PagingArguments pagingArgs = new PagingArguments(requestDetails);
+    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, pagingArgs);
+    Long count = fetchResultCount(beneficiariesQuery);
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
@@ -250,14 +255,14 @@ public final class PatientResourceProvider implements IResourceProvider {
                 })
             .collect(Collectors.toList());
 
-    PagingArguments pagingArgs = new PagingArguments(requestDetails);
     Bundle bundle =
         TransformerUtils.createBundle(
             pagingArgs,
             "/Patient?",
             "_has:Coverage.extension",
             coverageId.getValueAsQueryToken(null),
-            patients);
+            patients,
+            count.intValue());
     return bundle;
   }
 
@@ -318,14 +323,35 @@ public final class PatientResourceProvider implements IResourceProvider {
         "Unsupported extension system: " + cntrctMonth.getVariable().getId().toLowerCase());
   }
 
-  private List<Beneficiary> queryBeneficiariesBy(
+  private Long fetchResultCount(CriteriaQuery criteria) {
+    Predicate restriction = criteria.getRestriction();
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+    countQuery.where(restriction);
+    return entityManager
+        .createQuery(countQuery.select(builder.count(countQuery.from(Beneficiary.class))))
+        .getSingleResult();
+  }
+
+  private List<Beneficiary> fetchBeneficiaries(CriteriaQuery criteria, PagingArguments pagingArgs) {
+    Query query = entityManager.createQuery(criteria);
+
+    if (pagingArgs.isPagingRequested()) {
+      query.setFirstResult(pagingArgs.getStartIndex());
+      query.setMaxResults(pagingArgs.getPageSize());
+    }
+
+    return query.getResultList();
+  }
+
+  private CriteriaQuery queryBeneficiariesBy(
       SingularAttribute<Beneficiary, String> field, String value) {
     List<SetAttribute<Beneficiary, ?>> withRelations =
         new LinkedList<SetAttribute<Beneficiary, ?>>();
     return queryBeneficiariesBy(field, value, withRelations);
   }
 
-  private List<Beneficiary> queryBeneficiariesBy(
+  private CriteriaQuery queryBeneficiariesBy(
       SingularAttribute<Beneficiary, String> field,
       String value,
       List<SetAttribute<Beneficiary, ?>> preFetchList) {
@@ -341,7 +367,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     beneMatches.select(beneMatchesRoot);
     beneMatches.where(builder.equal(beneMatchesRoot.get(field), value));
 
-    return entityManager.createQuery(beneMatches).getResultList();
+    return beneMatches;
   }
 
   /**
