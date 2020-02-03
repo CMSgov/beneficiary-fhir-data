@@ -107,6 +107,7 @@ mod tls;
 #[macro_use]
 extern crate diesel;
 
+use actix_rt;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpResponse, HttpServer};
 use config::AppConfig;
@@ -128,7 +129,8 @@ fn config_logging() -> slog::Logger {
     logger
 }
 
-fn main() -> error::Result<()> {
+#[actix_rt::main]
+async fn main() -> error::Result<()> {
     // First, initialize logging.
     let logger = config_logging();
 
@@ -161,11 +163,11 @@ fn main() -> error::Result<()> {
     let db_connection_pool_data = web::Data::new(db_connection_pool.clone());
     let mut server = HttpServer::new(move || {
         App::new()
-            .register_data(db_connection_pool_data.clone())
-            .register_data(app_config_data.clone())
+            .app_data(db_connection_pool_data.clone())
+            .app_data(app_config_data.clone())
             .service(web::scope("/v1/fhir").route(
                 "/ExplanationOfBenefit",
-                web::get().to_async(fhir::v1::eob::eob_for_bene_id),
+                web::get().to(fhir::v1::eob::eob_for_bene_id),
             ))
             .service(web::scope("/v2").route("/", web::to(|| HttpResponse::Ok())))
             .route("/", web::to(|| HttpResponse::Ok()))
@@ -188,7 +190,7 @@ fn main() -> error::Result<()> {
                 .bind(format!("0.0.0.0:{}", &app_config.server_http_port))?
                 // FIXME Figure out why RusTLS isn't working.
                 //.bind_rustls("0.0.0.0:3001", tls::create_rustls_config(&app_config)?)?
-                .bind_ssl("0.0.0.0:3001", tls::create_openssl_config(&app_config)?)?
+                .bind_openssl("0.0.0.0:3001", tls::create_openssl_config(&app_config)?)?
         } else {
             server.bind(format!("127.0.0.1:{}", &app_config.server_http_port))?
         }
@@ -199,7 +201,7 @@ fn main() -> error::Result<()> {
      * that honors the `shutdown_timeout`, while SIGINT and SIGQUIT will close all open connections
      * immediately.
      */
-    server.run()?;
+    server.run().await?;
 
     Ok(())
 }

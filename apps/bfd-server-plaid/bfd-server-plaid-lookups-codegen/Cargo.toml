@@ -7,8 +7,8 @@ edition = "2018"
 [dependencies]
 
 # Download source lookups data files.
-reqwest = "0.9"
-tempfile = "3.1"
+reqwest = { version = "0.10", features = ["blocking"] }
+tempfile = "3"
 zip = "0.5" # FIXME: recently went unmaintained; find a replacement
 encoding = "0.2"
 
@@ -16,9 +16,9 @@ encoding = "0.2"
 phf_codegen = "0.8"
 
 # Parse the input data files used for the app's lookup data.
-csv = "1.1"
-serde = "1.0"
-serde_json = "1.0"
-serde_derive = "1.0"
-lazy_static = "1.4.0"
-regex = "1.3.1"
+csv = "1"
+serde = "1"
+serde_json = "1"
+serde_derive = "1"
+lazy_static = "1"
+regex = "1"

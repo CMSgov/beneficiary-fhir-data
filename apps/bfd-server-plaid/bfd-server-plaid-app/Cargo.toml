@@ -20,43 +20,45 @@ bfd-server-plaid-lookups = { path = "../bfd-server-plaid-lookups" }
 
 # Provide application logging facilities.
 log = "0.4"
-slog = { version = "2.5.2", features = ["max_level_trace", "release_max_level_trace"] }
-slog-async = { version = "2.3.0" }
-slog-stdlog = { version = "4.0.0" }
-slog-scope = { version = "4.1.2" }
-slog-json = { version = "2.3.0" }
-slog-term = { version = "2.4.1" }
+slog = { version = "2", features = ["max_level_trace", "release_max_level_trace"] }
+slog-async = { version = "2" }
+slog-stdlog = { version = "4" }
+slog-scope = { version = "4" }
+slog-json = { version = "2" }
+slog-term = { version = "2" }
 
 # Read environment variables from a file, if present.
-dotenv = "0.14.1"
+dotenv = "0.15"
 
 # Allow for complex static variables.
-lazy_static = "1.4.0"
+lazy_static = "1"
 
 # Actix is the web framework used by this application.
-actix-web = { version = "1.0", features = ["ssl", "rust-tls"] }
-rustls = { version = "0.15.2", features = ["logging"] }
-webpki = "0.19" # Only included as it's part of rustls's public API. Has to match version used by rustls.
+actix-web = { version = "2", features = ["openssl", "rustls"] }
+actix-rt = "1"
+rustls = { version = "0.16", features = ["logging"] }
+webpki = "0.21" # Only included as it's part of rustls's public API. Has to match version used by rustls.
 openssl = { version = "0.10" }
 openssl-sys = "0.9"
-futures = "0.1"
+# FIXME: Latest is 0.3 and I think it's now part of stdlib so doesn't need to be specified?
+#futures = "0.1"
 num_cpus = "1"
 
 # Serde is used for JSON serialization.
-serde = "1.0"
-serde_json = { version = "1.0", features = ["arbitrary_precision"] }
-serde_derive = "1.0"
+serde = "1"
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+serde_derive = "1"
 json = "*"
 
 # The ORM used to access the application's database.
-diesel = { version = "1.0.0", features = ["r2d2", "postgres", "64-column-tables", "numeric", "chrono"] }
-bigdecimal = "0.1.0"
+diesel = { version = "1", features = ["r2d2", "postgres", "64-column-tables", "numeric", "chrono"] }
+bigdecimal = "0.1"
 
 # Allows for auto-reload of the server in development, per https://actix.rs/docs/autoreload/.
 listenfd = "0.3"
 
 # Date & time.
-chrono = { version = "0.4.9", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
 
 # Regular expressions.
-regex = "1.3.1"
+regex = "1"

@@ -112,7 +112,7 @@ fn download_ndc_data() -> error::Result<Vec<u8>> {
 
     // Download the ZIP file from the FDA.
     let zip_url = "https://www.accessdata.fda.gov/cder/ndctext.zip";
-    let mut zip_response = reqwest::get(zip_url)?;
+    let mut zip_response = reqwest::blocking::get(zip_url)?;
     let mut zip_dest = tempfile::tempfile()?;
     std::io::copy(&mut zip_response, &mut zip_dest)?;
 

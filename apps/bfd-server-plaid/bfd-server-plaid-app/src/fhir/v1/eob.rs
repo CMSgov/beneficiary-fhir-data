@@ -10,7 +10,6 @@ use crate::fhir::v1::util::*;
 use crate::models::structs::PartDEvent;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
-use futures::future::{self, Future};
 use serde::Deserialize;
 use std::convert::TryFrom;
 
@@ -19,38 +18,33 @@ pub struct EobQueryParams {
     patient: String,
 }
 
-pub fn eob_for_bene_id(
+pub async fn eob_for_bene_id(
     db_pool: web::Data<PgPool>,
     query_params: web::Query<EobQueryParams>,
-) -> impl Future<Item = HttpResponse, Error = error::AppError> {
+) -> Result<HttpResponse, error::AppError> {
     // Run Diesel's synchronous query via an Actix Future, then transform the results, returning a
     // chained Future with the final result.
-    query_claims_partd_by_bene_id(db_pool, query_params)
-        .and_then(|claims| transform_claims_partd(claims))
-        .and_then(|bundle| {
-            Ok(HttpResponse::Ok()
-                .content_type("application/fhir+json")
-                .json(bundle))
-        })
+    let claims = query_claims_partd_by_bene_id(db_pool, query_params).await?;
+    let bundle = transform_claims_partd(claims)?;
+
+    Ok(HttpResponse::Ok()
+        .content_type("application/fhir+json")
+        .json(bundle))
 }
 
 /// Parses the specified HTTP query parameters and returns the raw results of the specified DB query as a `Future`.
-pub fn query_claims_partd_by_bene_id(
+pub async fn query_claims_partd_by_bene_id(
     db_pool: web::Data<PgPool>,
     query_params: web::Query<EobQueryParams>,
-) -> impl Future<Item = Vec<PartDEvent>, Error = error::AppError> {
+) -> Result<Vec<PartDEvent>, error::AppError> {
     let bene_id = util::parse_relative_reference_expected(&query_params.patient, "Patient").ok_or(
         error::AppError::BadRequestError(String::from(
             "Unable to parse the specified 'patient' parameter.",
         )),
-    );
+    )?;
 
-    future::result(bene_id)
-        .and_then(|bene_id| {
-            web::block(move || crate::db::claims_partd_by_bene_id(db_pool, &bene_id))
-                .map_err(|err| err.into())
-        })
-        .from_err()
+    let claims = web::block(move || crate::db::claims_partd_by_bene_id(db_pool, &bene_id)).await?;
+    Ok(claims)
 }
 
 /// Returns a `Bundle` of `ExplanationOfBenefit`s that represents the specified `PartDEvent`s.
