@@ -199,7 +199,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
      */
 
     String beneficiaryId = patient.getIdPart();
-    Set<ClaimType> types = parseTypeParam(type);
+    Set<ClaimType> claimTypes = parseTypeParam(type);
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
@@ -208,6 +208,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
       return TransformerUtils.createBundle(
           requestDetails,
           lastUpdated,
+          type != null ? claimTypes : null,
+          excludeSamhsa,
           "/ExplanationOfBenefit?",
           ExplanationOfBenefit.SP_PATIENT,
           beneficiaryId,
@@ -220,50 +222,52 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (types.contains(ClaimType.CARRIER))
+    if (claimTypes.contains(ClaimType.CARRIER))
       eobs.addAll(
           transformToEobs(
               ClaimType.CARRIER,
               findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, lastUpdated)));
-    if (types.contains(ClaimType.DME))
+    if (claimTypes.contains(ClaimType.DME))
       eobs.addAll(
           transformToEobs(
               ClaimType.DME, findClaimTypeByPatient(ClaimType.DME, beneficiaryId, lastUpdated)));
-    if (types.contains(ClaimType.HHA))
+    if (claimTypes.contains(ClaimType.HHA))
       eobs.addAll(
           transformToEobs(
               ClaimType.HHA, findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, lastUpdated)));
-    if (types.contains(ClaimType.HOSPICE))
+    if (claimTypes.contains(ClaimType.HOSPICE))
       eobs.addAll(
           transformToEobs(
               ClaimType.HOSPICE,
               findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, lastUpdated)));
-    if (types.contains(ClaimType.INPATIENT))
+    if (claimTypes.contains(ClaimType.INPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.INPATIENT,
               findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId, lastUpdated)));
-    if (types.contains(ClaimType.OUTPATIENT))
+    if (claimTypes.contains(ClaimType.OUTPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.OUTPATIENT,
               findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated)));
-    if (types.contains(ClaimType.PDE))
+    if (claimTypes.contains(ClaimType.PDE))
       eobs.addAll(
           transformToEobs(
               ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
-    if (types.contains(ClaimType.SNF))
+    if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(
           transformToEobs(
               ClaimType.SNF, findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, lastUpdated)));
 
-    if (Boolean.parseBoolean(excludeSamhsa) == true) filterSamhsa(eobs);
+    if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
 
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     return TransformerUtils.createBundle(
         requestDetails,
         lastUpdated,
+        type != null ? claimTypes : null,
+        excludeSamhsa,
         "/ExplanationOfBenefit?",
         ExplanationOfBenefit.SP_PATIENT,
         beneficiaryId,

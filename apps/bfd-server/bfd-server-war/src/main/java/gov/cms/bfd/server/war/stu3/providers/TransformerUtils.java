@@ -2923,6 +2923,43 @@ public final class TransformerUtils {
       String value,
       List<IBaseResource> resources,
       Date filterManagerLastDatabaseUpdate) {
+    return TransformerUtils.createBundle(
+        requestDetails,
+        lastUpdated,
+        null,
+        null,
+        resourceType,
+        identifier,
+        value,
+        resources,
+        filterManagerLastDatabaseUpdate);
+  }
+
+  /**
+   * @param requestDetails a {@link RequestDetails} used to determine if paging is requested and the
+   *     parameters for doing so
+   * @param lastUpdated the {@link DateRangeParam} used as predicate for the search. Maybe null.
+   * @param types a list of {@link ClaimType} to include in the result. May be null.
+   * @param excludeSamhsa the {@link String} from the "excludeSAMHSA" parameter. May be null.
+   * @param resourceType the {@link String} the resource being provided by the paging link
+   * @param identifier the {@link String} field the search is being performed on
+   * @param value the {@link String} value of the identifier being searched for
+   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
+   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param filterManagerLastDatabaseUpdate the last update to database from the filterManager
+   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
+   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
+   */
+  public static Bundle createBundle(
+      RequestDetails requestDetails,
+      DateRangeParam lastUpdated,
+      Set<ClaimType> types,
+      String excludeSamhsa,
+      String resourceType,
+      String identifier,
+      String value,
+      List<IBaseResource> resources,
+      Date filterManagerLastDatabaseUpdate) {
     Bundle bundle = new Bundle();
     PagingArguments pagingArgs = new PagingArguments(requestDetails);
     if (pagingArgs.isPagingRequested()) {
@@ -2937,7 +2974,15 @@ public final class TransformerUtils {
           resources.subList(pagingArgs.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
       TransformerUtils.addPagingLinks(
-          pagingArgs, bundle, resourceType, identifier, value, resources.size(), lastUpdated);
+          pagingArgs,
+          bundle,
+          resourceType,
+          identifier,
+          value,
+          resources.size(),
+          lastUpdated,
+          types,
+          excludeSamhsa);
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
@@ -3007,6 +3052,9 @@ public final class TransformerUtils {
    * @param identifier the {@link String} identifier being searched for
    * @param numTotalResults the number of total resources matching the {@link
    *     Beneficiary#getBeneficiaryId()}
+   * @param lastUpdated the {@link DateRangeParam} used as predicate for the search. Maybe null.
+   * @param types a list of {@link ClaimType} to include in the result. May be null..
+   * @param excludeSamhsa the {@link String} from the "excludeSAMHSA" parameter. May be null.
    */
   public static void addPagingLinks(
       PagingArguments pagingArgs,
@@ -3015,7 +3063,9 @@ public final class TransformerUtils {
       String searchByDesc,
       String identifier,
       int numTotalResults,
-      DateRangeParam lastUpdated) {
+      DateRangeParam lastUpdated,
+      Set<ClaimType> types,
+      String excludeSamhsa) {
 
     Integer pageSize = pagingArgs.getPageSize();
     Integer startIndex = pagingArgs.getStartIndex();
@@ -3026,7 +3076,14 @@ public final class TransformerUtils {
             .setRelation(Constants.LINK_FIRST)
             .setUrl(
                 createPagingLink(
-                    serverBase + resource, searchByDesc, identifier, 0, pageSize, lastUpdated)));
+                    serverBase + resource,
+                    searchByDesc,
+                    identifier,
+                    0,
+                    pageSize,
+                    lastUpdated,
+                    types,
+                    excludeSamhsa)));
 
     if (startIndex + pageSize < numTotalResults) {
       bundle.addLink(
@@ -3039,7 +3096,9 @@ public final class TransformerUtils {
                       identifier,
                       startIndex + pageSize,
                       pageSize,
-                      lastUpdated)));
+                      lastUpdated,
+                      types,
+                      excludeSamhsa)));
     }
 
     if (startIndex > 0) {
@@ -3053,7 +3112,9 @@ public final class TransformerUtils {
                       identifier,
                       Math.max(startIndex - pageSize, 0),
                       pageSize,
-                      lastUpdated)));
+                      lastUpdated,
+                      types,
+                      excludeSamhsa)));
     }
 
     /*
@@ -3076,7 +3137,9 @@ public final class TransformerUtils {
                     identifier,
                     lastIndex,
                     pageSize,
-                    lastUpdated)));
+                    lastUpdated,
+                    types,
+                    excludeSamhsa)));
   }
 
   /** @return Returns the URL string for a paging link. */
@@ -3086,7 +3149,10 @@ public final class TransformerUtils {
       String id,
       int startIndex,
       int theCount,
-      DateRangeParam lastUpdated) {
+      DateRangeParam lastUpdated,
+      Set<ClaimType> types,
+      String excludeSamhsa) {
+
     StringBuilder b = new StringBuilder();
     b.append(baseURL);
     b.append(Constants.PARAM_COUNT + "=" + theCount);
@@ -3114,6 +3180,14 @@ public final class TransformerUtils {
                 + upperBound.getValueAsString());
       }
     }
+
+    // Add the "type" parameter if present
+    if (types != null) {
+      b.append("&type=" + types.toString().toLowerCase().replaceAll("[\\[\\] ]", ""));
+    }
+
+    // Add the "excludeSamhsa" parameter if present
+    if (excludeSamhsa != null) b.append("&excludeSAMHSA=" + excludeSamhsa);
 
     return b.toString();
   }
