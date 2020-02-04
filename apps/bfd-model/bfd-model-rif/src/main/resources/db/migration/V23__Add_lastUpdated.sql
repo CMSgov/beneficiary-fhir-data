@@ -46,7 +46,7 @@ create table "LoadedFiles" (
 ${logic.tablespaces-escape} tablespace "loadedfiles_ts"
 ;
 
-create sequence loadedFiles_loadedFileId_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 20 cycle;
+create sequence loadedFiles_loadedFileId_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 1 cycle;
 
 -- One row for each batch of beneficiaries loaded. Indexed on loadedFileId.
 --
@@ -70,4 +70,4 @@ alter table "LoadedBatches"
     foreign key ("loadedFileId") 
     references "LoadedFiles";
 
-create sequence loadedBatches_loadedBatchId_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 100 cycle;
+create sequence loadedBatches_loadedBatchId_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 20  cycle;
