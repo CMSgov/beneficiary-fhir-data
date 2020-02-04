@@ -8,6 +8,7 @@ import java.util.List;
 public class LoadedBatchBuilder {
   private final List<String> beneficiaries;
   private final long loadedFileId;
+  private final Date timestamp;
 
   /**
    * Create a builder from a particular file event
@@ -18,6 +19,7 @@ public class LoadedBatchBuilder {
   public LoadedBatchBuilder(long loadedFileId, int capacityIncrement) {
     this.loadedFileId = loadedFileId;
     this.beneficiaries = new ArrayList<>(capacityIncrement);
+    this.timestamp = new Date();
   }
 
   /**
@@ -41,7 +43,16 @@ public class LoadedBatchBuilder {
     final LoadedBatch loadedBatch = new LoadedBatch();
     loadedBatch.setLoadedFileId(loadedFileId);
     loadedBatch.setBeneficiaries(beneficiaries);
-    loadedBatch.setCreated(new Date());
+    loadedBatch.setCreated(timestamp);
     return loadedBatch;
+  }
+
+  /**
+   * Return the Batch's timestamp
+   *
+   * @return the timestamp of the batch
+   */
+  public Date getTimestamp() {
+    return timestamp;
   }
 }

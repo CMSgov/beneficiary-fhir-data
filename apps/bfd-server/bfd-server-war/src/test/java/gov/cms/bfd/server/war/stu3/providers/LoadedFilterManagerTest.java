@@ -111,50 +111,6 @@ public final class LoadedFilterManagerTest {
   }
 
   @Test
-  public void calcBoundsWithInitial() {
-    final Date upper = LoadedFilterManager.calcUpperBound(Collections.emptyList(), preDates[7]);
-    final Date lower = LoadedFilterManager.calcLowerBound(Collections.emptyList(), upper);
-
-    Assert.assertEquals(preDates[7], upper);
-    Assert.assertEquals(preDates[7], lower);
-  }
-
-  @Test
-  public void calcBoundsWithEmpty() {
-    final MockDb mockDb = new MockDb().insert(1, preDates[1]);
-    final Date upper = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[7]);
-    final Date lower = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upper);
-
-    Assert.assertEquals(preDates[7], upper);
-    Assert.assertEquals(preDates[1], lower);
-  }
-
-  @Test
-  public void calcBoundsWithOne() {
-    final MockDb mockDb = new MockDb().insert(1, preDates[1]).insert(preBatches[0]);
-    final Date upper = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[7]);
-    final Date lower = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upper);
-
-    Assert.assertEquals(preDates[7], upper);
-    Assert.assertEquals(preDates[1], lower);
-  }
-
-  @Test
-  public void calcBoundsWithMany() {
-    final MockDb mockDb =
-        new MockDb()
-            .insert(1, preDates[1])
-            .insert(2, preDates[11])
-            .insert(3, preDates[21])
-            .insert(preBatches[0], preBatches[2], preBatches[4]);
-    final Date upper = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[28]);
-    final Date lower = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upper);
-
-    Assert.assertEquals(preDates[28], upper);
-    Assert.assertEquals(preDates[1], lower);
-  }
-
-  @Test
   public void testIsResultSetEmpty() {
     final MockDb mockDb =
         new MockDb()
@@ -165,31 +121,27 @@ public final class LoadedFilterManagerTest {
     final List<LoadedFileFilter> aFilters =
         LoadedFilterManager.buildFilters(tuples, mockDb::fetchById);
     Assert.assertEquals(2, aFilters.size());
-    final Date upperA = LoadedFilterManager.calcUpperBound(tuples, preDates[19]);
-    final Date lowerA = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upperA);
-    Assert.assertEquals(preDates[19], upperA);
-    Assert.assertEquals(preDates[1], lowerA);
 
     // Setup the manager and test a few lastUpdated ranges
-    final LoadedFilterManager filterManagerA = new LoadedFilterManager(0);
-    filterManagerA.set(aFilters, lowerA, upperA, 1, 2);
+    final LoadedFilterManager filterManagerA = new LoadedFilterManager();
+    filterManagerA.set(aFilters, preDates[1], preBatches[2].getCreated());
     final DateRangeParam beforeRange = new DateRangeParam(preDates[0], preDates[1]);
-    Assert.assertFalse(filterManagerA.isInKnownBounds(beforeRange));
+    Assert.assertFalse(filterManagerA.isInBounds(beforeRange));
     Assert.assertFalse(filterManagerA.isResultSetEmpty(SAMPLE_BENE, beforeRange));
     final DateRangeParam duringRange1 = new DateRangeParam(preDates[2], preDates[3]);
-    Assert.assertTrue(filterManagerA.isInKnownBounds(duringRange1));
+    Assert.assertTrue(filterManagerA.isInBounds(duringRange1));
     Assert.assertFalse(filterManagerA.isResultSetEmpty(SAMPLE_BENE, duringRange1));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(INVALID_BENE, duringRange1));
     final DateRangeParam duringRange2 =
         new DateRangeParam()
             .setLowerBoundExclusive(preDates[9])
             .setUpperBoundExclusive(preDates[10]);
-    Assert.assertTrue(filterManagerA.isInKnownBounds(duringRange2));
+    Assert.assertTrue(filterManagerA.isInBounds(duringRange2));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(SAMPLE_BENE, duringRange2));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(INVALID_BENE, duringRange2));
     final DateRangeParam afterRange = new DateRangeParam(preDates[20], preDates[21]);
-    Assert.assertFalse(filterManagerA.isInKnownBounds(afterRange));
-    Assert.assertFalse(filterManagerA.isResultSetEmpty(SAMPLE_BENE, afterRange));
+    Assert.assertTrue(filterManagerA.isInBounds(afterRange));
+    Assert.assertTrue(filterManagerA.isResultSetEmpty(SAMPLE_BENE, afterRange));
   }
 
   @Test
@@ -202,31 +154,19 @@ public final class LoadedFilterManagerTest {
     final List<LoadedFileFilter> aFilters =
         LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
     Assert.assertEquals(2, aFilters.size());
-    final Date upperA = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[19]);
-    final Date lowerA = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upperA);
-    Assert.assertEquals(preDates[19], upperA);
-    Assert.assertEquals(preDates[1], lowerA);
 
     // Simulate starting a new file with no mockDb
     mockDb.insert(3, preDates[21]);
     final List<LoadedFileFilter> bFilters =
         LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
     Assert.assertEquals(2, bFilters.size());
-    final Date upperB = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[22]);
-    final Date lowerB = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upperB);
-    Assert.assertEquals(preDates[22], upperB);
-    Assert.assertEquals(preDates[1], lowerB);
 
     // Simulate adding a new batch with the same fileId
     mockDb.insert(preBatches[4]);
     final List<LoadedFileFilter> cFilters =
         LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
-    final Date upperC = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[25]);
-    final Date lowerC = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upperC);
     Assert.assertEquals(3, cFilters.size());
     Assert.assertEquals(1, cFilters.get(1).getBatchesCount());
-    Assert.assertEquals(preDates[25], upperC);
-    Assert.assertEquals(preDates[1], lowerC);
   }
 
   @Test
@@ -244,22 +184,14 @@ public final class LoadedFilterManagerTest {
     mockDb.insert(3, preDates[21]);
     final List<LoadedFileFilter> bFilters =
         LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
-    final Date upperB = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[22]);
-    final Date lowerB = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upperB);
     Assert.assertEquals(2, bFilters.size());
-    Assert.assertEquals(preDates[22], upperB);
-    Assert.assertEquals(preDates[1], lowerB);
 
     // Simulate adding a new batch not in the same file id
     mockDb.insert(4, preDates[28]).insert(preBatches[6]);
     final List<LoadedFileFilter> cFilters =
         LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
-    final Date upperC = LoadedFilterManager.calcUpperBound(mockDb.fetchAllTuples(), preDates[33]);
-    final Date lowerC = LoadedFilterManager.calcLowerBound(mockDb.fetchAllFiles(), upperC);
     Assert.assertEquals(3, cFilters.size());
     Assert.assertEquals(1, cFilters.get(0).getBatchesCount());
-    Assert.assertEquals(preDates[34], upperC);
-    Assert.assertEquals(preDates[1], lowerC);
   }
 
   @Test
@@ -287,21 +219,21 @@ public final class LoadedFilterManagerTest {
 
   /** Helper class that mocks a DB for LoadedFilterManager testing */
   private static class MockDb {
-    private final ArrayList<LoadedBatch> mockDb = new ArrayList<>();
+    private final ArrayList<LoadedBatch> batches = new ArrayList<>();
     private final ArrayList<LoadedFile> files = new ArrayList<>();
 
-    MockDb insert(LoadedBatch... mockDb) {
-      Collections.addAll(this.mockDb, mockDb);
+    MockDb insert(LoadedBatch... batches) {
+      Collections.addAll(this.batches, batches);
       return this;
     }
 
     MockDb insert(long loadedFileId, Date firstUpdated) {
-      files.add(new LoadedFile(loadedFileId, "BENFICIARY", firstUpdated));
+      files.add(new LoadedFile(loadedFileId, "BENEFICIARY", firstUpdated));
       return this;
     }
 
     List<LoadedBatch> fetchById(Long loadedFiledId) {
-      return mockDb.stream()
+      return batches.stream()
           .filter(b -> b.getLoadedFileId() == loadedFiledId)
           .collect(Collectors.toList());
     }
@@ -311,14 +243,14 @@ public final class LoadedFilterManagerTest {
     }
 
     ArrayList<LoadedFilterManager.LoadedTuple> fetchAllTuples() {
-      if (mockDb.size() + files.size() == 0) {
+      if (batches.size() + files.size() == 0) {
         return new ArrayList<>();
       }
       ArrayList<LoadedFilterManager.LoadedTuple> tuples = new ArrayList<>();
       files.forEach(
           file -> {
             Optional<Date> lastUpdated =
-                mockDb.stream()
+                batches.stream()
                     .filter(b -> b.getLoadedFileId() == file.getLoadedFileId())
                     .map(LoadedBatch::getCreated)
                     .reduce((a, b) -> a.after(b) ? a : b);

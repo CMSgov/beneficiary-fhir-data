@@ -1714,6 +1714,23 @@ public final class PatientResourceProviderIT {
 
     Assert.assertFalse(hicnUnhashedPresent);
     Assert.assertFalse(mbiUnhashedPresent);
+    
+    // Build up a list of lastUpdatedURLs that return > all values values
+    String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
+    String earlyDateTime = "2019-10-01T00:00:00-04:00";
+    List<String> allUrls =
+        Arrays.asList(
+            "_lastUpdated=gt" + earlyDateTime,
+            "_lastUpdated=ge" + earlyDateTime,
+            "_lastUpdated=le" + nowDateTime,
+            "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
+            "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
+    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 1);
+
+    // Empty searches
+    List<String> emptyUrls =
+        Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
+    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
   }
 
   @Test

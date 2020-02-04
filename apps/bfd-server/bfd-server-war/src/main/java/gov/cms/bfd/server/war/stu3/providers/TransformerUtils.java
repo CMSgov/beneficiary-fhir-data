@@ -50,16 +50,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -544,7 +535,7 @@ public final class TransformerUtils {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
-   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
+   * @param procedure the {@link CCWProcedure} to add, if it's not already present
    * @return the {@link ProcedureComponent#getSequence()} of the existing or newly-added entry
    */
   static int addProcedureCode(ExplanationOfBenefit eob, CCWProcedure procedure) {
@@ -1581,7 +1572,7 @@ public final class TransformerUtils {
    * from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param benficiaryId BEME_ID, *
+   * @param beneficiaryId BEME_ID, *
    * @param carrierNumber CARR_NUM,
    * @param clinicalTrialNumber CLM_CLNCL_TRIL_NUM,
    * @param beneficiaryPartBDeductAmount CARR_CLM_CASH_DDCTBL_APLD_AMT,
@@ -1821,7 +1812,7 @@ public final class TransformerUtils {
    * claim types to FHIR. The method parameter fields from {@link InpatientClaimLine} {@link
    * OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine} are
    * listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HopsiceClaimColumn} {@link
+   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HospiceClaimColumn} {@link
    * HHAClaimColumn} and {@link SNFClaimColumn}).
    *
    * @param item the {@ ItemComponent} to modify
@@ -1906,7 +1897,8 @@ public final class TransformerUtils {
    * HospiceClaimLine} and {@link HHAClaimLine} claim types to FHIR. The method parameter fields
    * from {@link OutpatientClaimLine} {@link HospiceClaimLine} and {@link HHAClaimLine} are listed
    * below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * OutpatientClaimColumn} {@link HopsiceClaimColumn} and {@link HHAClaimColumn}.
+   * OutpatientClaimColumn} {@link gov.cms.bfd.model.rif.HospiceClaimColumn} and {@link
+   * HHAClaimColumn}.
    *
    * @param item the {@ ItemComponent} to modify
    * @param revenueCenterDate REV_CNTR_DT,
@@ -2091,7 +2083,7 @@ public final class TransformerUtils {
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimAdmissionDate CLM_ADMSN_DT,
-   * @param benficiaryDischargeDate,
+   * @param beneficiaryDischargeDate,
    * @param utilizedDays CLM_UTLZTN_CNT,
    * @return the {@link ExplanationOfBenefit}
    */
@@ -2135,7 +2127,7 @@ public final class TransformerUtils {
    *
    * @param eob the root {@link ExplanationOfBenefit} that the {@link ItemComponent} is part of
    * @param item the {@link ItemComponent} to modify
-   * @param deductibleCoinsruanceCd REV_CNTR_DDCTBL_COINSRNC_CD
+   * @param deductibleCoinsuranceCd REV_CNTR_DDCTBL_COINSRNC_CD
    */
   static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
       ExplanationOfBenefit eob, ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
@@ -2919,6 +2911,7 @@ public final class TransformerUtils {
    * @param value the {@link String} value of the identifier being searched for
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param filterManagerLastDatabaseUpdate the last update to database from the filterManager
    * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
@@ -2928,7 +2921,8 @@ public final class TransformerUtils {
       String resourceType,
       String identifier,
       String value,
-      List<IBaseResource> resources) {
+      List<IBaseResource> resources,
+      Date filterManagerLastDatabaseUpdate) {
     Bundle bundle = new Bundle();
     PagingArguments pagingArgs = new PagingArguments(requestDetails);
     if (pagingArgs.isPagingRequested()) {
@@ -2948,6 +2942,23 @@ public final class TransformerUtils {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
 
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
+     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
+     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(filterManagerLastDatabaseUpdate);
+    bundle
+        .getMeta()
+        .setLastUpdated(
+            filterManagerLastDatabaseUpdate.after(maxBundleDate)
+                ? filterManagerLastDatabaseUpdate
+                : maxBundleDate);
     bundle.setTotal(resources.size());
     return bundle;
   }

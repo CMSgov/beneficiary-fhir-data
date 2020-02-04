@@ -33,6 +33,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,6 +45,8 @@ import org.springframework.stereotype.Component;
 public final class CoverageResourceProvider implements IResourceProvider {
   /** A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application. */
   private static final Pattern COVERAGE_ID_PATTERN = Pattern.compile("(.*)-(\\p{Alnum}+)");
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProvider.class);
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -160,7 +164,8 @@ public final class CoverageResourceProvider implements IResourceProvider {
             "/Coverage?",
             Coverage.SP_BENEFICIARY,
             beneficiary.getIdPart(),
-            coverages);
+            coverages,
+            loadedFilterManager.getLastDatabaseUpdate());
     return bundle;
   }
 

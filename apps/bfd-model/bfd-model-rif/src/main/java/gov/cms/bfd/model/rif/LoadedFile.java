@@ -3,16 +3,7 @@ package gov.cms.bfd.model.rif;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "`LoadedFiles`")
@@ -23,13 +14,14 @@ public class LoadedFile {
   @SequenceGenerator(
       name = "loadedFiles_loadedFileId_seq",
       sequenceName = "loadedFiles_loadedFileId_seq",
-      allocationSize = 20)
+      allocationSize = 1)
   private long loadedFileId;
 
   @Column(name = "`rifType`", nullable = false)
   private String rifType;
 
   @Column(name = "`created`", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
   private Date created;
 
   @OneToMany(

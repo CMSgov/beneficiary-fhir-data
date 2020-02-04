@@ -50,28 +50,12 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * This <code>javac</code> annotation {@link Processor} reads in an Excel file that details a RIF
@@ -559,6 +543,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         TypeSpec.classBuilder(mappingSpec.getHeaderEntity())
             .addAnnotation(entityAnnotation)
             .addAnnotation(tableAnnotation)
+            .addSuperinterface(ClassName.get("gov.cms.bfd.model.rif", "RifRecordBase"))
             .addModifiers(Modifier.PUBLIC);
 
     // Create an Entity field with accessors for the generated-ID field (if any).
@@ -753,39 +738,34 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       }
     }
 
-    // Add a lastUpdated field. Use the Hibernate UpdateTimestamp feature to set this field.
-    if (mappingSpec.getHasLastUpdated()) {
-      // lastUpdated field
-      final FieldSpec lastUpdatedField =
-          FieldSpec.builder(Date.class, "lastUpdated", Modifier.PRIVATE)
-              .addAnnotation(
-                  AnnotationSpec.builder(Column.class)
-                      .addMember("name", "$S", "lastUpdated")
-                      .addMember("nullable", "$L", "true")
-                      .build())
-              .addAnnotation(UpdateTimestamp.class)
-              .build();
-      headerEntityClass.addField(lastUpdatedField);
+    // Add a lastUpdated field.
+    final FieldSpec lastUpdatedField =
+        FieldSpec.builder(Date.class, "lastUpdated", Modifier.PRIVATE)
+            .addAnnotation(
+                AnnotationSpec.builder(Temporal.class)
+                    .addMember("value", "$T.TIMESTAMP", TemporalType.class)
+                    .build())
+            .build();
+    headerEntityClass.addField(lastUpdatedField);
 
-      // Getter method
-      final MethodSpec lastUpdatedGetter =
-          MethodSpec.methodBuilder("getLastUpdated")
-              .addModifiers(Modifier.PUBLIC)
-              .addStatement("return Optional.ofNullable(lastUpdated)")
-              .returns(ParameterizedTypeName.get(Optional.class, Date.class))
-              .build();
-      headerEntityClass.addMethod(lastUpdatedGetter);
+    // Getter method
+    final MethodSpec lastUpdatedGetter =
+        MethodSpec.methodBuilder("getLastUpdated")
+            .addModifiers(Modifier.PUBLIC)
+            .addStatement("return Optional.ofNullable(lastUpdated)")
+            .returns(ParameterizedTypeName.get(Optional.class, Date.class))
+            .build();
+    headerEntityClass.addMethod(lastUpdatedGetter);
 
-      // Setter method which is useful for testing, but not needed in the main modules
-      final MethodSpec lastUpdatedSetter =
-          MethodSpec.methodBuilder("setLastUpdated")
-              .addModifiers(Modifier.PUBLIC)
-              .addParameter(ParameterSpec.builder(Date.class, "lastUpdated").build())
-              .addStatement("this.lastUpdated = lastUpdated")
-              .returns(TypeName.VOID)
-              .build();
-      headerEntityClass.addMethod(lastUpdatedSetter);
-    }
+    // Setter method which is useful for testing, but not needed in the main modules
+    final MethodSpec lastUpdatedSetter =
+        MethodSpec.methodBuilder("setLastUpdated")
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(ParameterSpec.builder(Date.class, "lastUpdated").build())
+            .addStatement("this.lastUpdated = lastUpdated")
+            .returns(TypeName.VOID)
+            .build();
+    headerEntityClass.addMethod(lastUpdatedSetter);
 
     TypeSpec headerEntityFinal = headerEntityClass.build();
     JavaFile headerEntityFile =

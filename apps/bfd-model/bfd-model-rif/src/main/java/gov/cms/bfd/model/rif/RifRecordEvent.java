@@ -7,7 +7,7 @@ package gov.cms.bfd.model.rif;
  *
  * @param <R> the record type stored in this {@link RifRecordEvent}
  */
-public final class RifRecordEvent<R> {
+public final class RifRecordEvent<R extends RifRecordBase> {
   private final RifFileEvent fileEvent;
   private final RecordAction recordAction;
   private final String beneficiaryId;

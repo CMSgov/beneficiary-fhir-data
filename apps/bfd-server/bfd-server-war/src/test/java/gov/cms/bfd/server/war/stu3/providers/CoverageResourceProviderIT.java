@@ -17,9 +17,14 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider}. */
 public final class CoverageResourceProviderIT {
+  @SuppressWarnings("unused")
+  private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProviderIT.class);
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
@@ -322,9 +327,23 @@ public final class CoverageResourceProviderIT {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Coverage.class)
+            .where(Coverage.BENEFICIARY.hasId(TransformerUtils.buildPatientId(beneficiary)))
+            .returnBundle(Bundle.class)
+            .execute();
+    LOGGER.info(
+        "Bundle information: database {}, first {}",
+        searchResults.getMeta().getLastUpdated(),
+        searchResults.getEntry().get(0).getResource().getMeta().getLastUpdated());
     Date nowDate = new Date();
     Date secondsAgoDate = Date.from(Instant.now().minusSeconds(100));
-    DateRangeParam inBoundsRange = new DateRangeParam(secondsAgoDate, nowDate);
+    DateRangeParam inBoundsRange =
+        new DateRangeParam().setLowerBoundInclusive(secondsAgoDate).setUpperBoundExclusive(nowDate);
+    LOGGER.info("Query Date Range {}", inBoundsRange);
     Bundle searchInBoundsResults =
         fhirClient
             .search()

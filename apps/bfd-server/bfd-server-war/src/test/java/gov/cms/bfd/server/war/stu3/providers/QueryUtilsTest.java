@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import java.time.Instant;
 import java.util.Date;
 import org.junit.Assert;
@@ -31,11 +29,6 @@ public class QueryUtilsTest {
     Assert.assertTrue(QueryUtils.isInRange(middleDate, new DateRangeParam(lowerDate, upperDate)));
     Assert.assertFalse(QueryUtils.isInRange(lowerDate, new DateRangeParam(middleDate, upperDate)));
     Assert.assertFalse(QueryUtils.isInRange(upperDate, new DateRangeParam(lowerDate, middleDate)));
-
-    DateParam equalParam = new DateParam(ParamPrefixEnum.EQUAL, middleDate);
-    Assert.assertTrue(QueryUtils.isInRange(middleDate, new DateRangeParam(equalParam, equalParam)));
-    Assert.assertFalse(QueryUtils.isInRange(lowerDate, new DateRangeParam(equalParam, equalParam)));
-    Assert.assertFalse(QueryUtils.isInRange(upperDate, new DateRangeParam(equalParam, equalParam)));
   }
 
   @Test

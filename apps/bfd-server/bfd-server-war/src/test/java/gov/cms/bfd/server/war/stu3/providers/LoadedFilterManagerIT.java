@@ -31,10 +31,36 @@ public final class LoadedFilterManagerIT {
   private static final String INVALID_BENE = "1";
 
   @Test
+  public void emptyFilters() {
+    RifLoaderTestUtils.doTestWithDb(
+        (dataSource, entityManager) -> {
+          final LoadedFilterManager filterManager = new LoadedFilterManager();
+          filterManager.init();
+          filterManager.setEntityManager(entityManager);
+
+          // After init manager should have an empty filter list
+          final List<LoadedFileFilter> beforeFilters = filterManager.getFilters();
+          Assert.assertEquals(0, beforeFilters.size());
+          final DateRangeParam testBound =
+              new DateRangeParam().setLowerBoundExclusive(Date.from(Instant.now().plusSeconds(1)));
+          Assert.assertFalse(filterManager.isInBounds(testBound));
+
+          // Refresh the filter list
+          filterManager.refreshFilters();
+
+          // Should have zero filters
+          final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
+          Assert.assertEquals(0, afterFilters.size());
+          Assert.assertFalse(filterManager.isInBounds(testBound));
+        });
+  }
+
+  @Test
   public void refreshFilters() {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
-          final LoadedFilterManager filterManager = new LoadedFilterManager(0);
+          final LoadedFilterManager filterManager = new LoadedFilterManager();
+          filterManager.init();
           filterManager.setEntityManager(entityManager);
           loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
           Date afterLoad = new Date();
@@ -42,9 +68,6 @@ public final class LoadedFilterManagerIT {
           // Without a refresh, the manager should have an empty filter list
           final List<LoadedFileFilter> beforeFilters = filterManager.getFilters();
           Assert.assertEquals(0, beforeFilters.size());
-          Assert.assertEquals(0, filterManager.getMaxBatchId());
-          Assert.assertEquals(0, filterManager.getMinBatchId());
-          Assert.assertEquals(0, filterManager.getReplicaDelay());
 
           // Refresh the filter list
           filterManager.refreshFilters();
@@ -52,11 +75,9 @@ public final class LoadedFilterManagerIT {
 
           // Should have many filters
           final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
-          Assert.assertTrue(filterManager.getKnownLowerBound().getTime() <= afterLoad.getTime());
-          Assert.assertTrue(filterManager.getKnownUpperBound().getTime() <= afterRefresh.getTime());
-          Assert.assertTrue(filterManager.getMaxBatchId() > 0);
-          Assert.assertTrue(filterManager.getMinBatchId() > 0);
-          Assert.assertTrue(filterManager.getMinBatchId() <= filterManager.getMaxBatchId());
+          Assert.assertTrue(filterManager.getFirstBatchUpdate().getTime() <= afterLoad.getTime());
+          Assert.assertTrue(
+              filterManager.getLastDatabaseUpdate().getTime() <= afterRefresh.getTime());
           Assert.assertTrue(afterFilters.size() > 1);
         });
   }
@@ -66,7 +87,8 @@ public final class LoadedFilterManagerIT {
   public void isResultSetEmpty() {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
-          final LoadedFilterManager filterManager = new LoadedFilterManager(0);
+          final LoadedFilterManager filterManager = new LoadedFilterManager();
+          filterManager.init();
           filterManager.setEntityManager(entityManager);
 
           // Establish a before load time
@@ -94,13 +116,13 @@ public final class LoadedFilterManagerIT {
           // Assert on isInKnownBounds
           Assert.assertTrue(
               "Known bound should include a time range before refresh",
-              filterManager.isInKnownBounds(beforeRefreshRange));
-          Assert.assertFalse(
-              "Known bound should not include a time range after refresh",
-              filterManager.isInKnownBounds(afterRefreshRange));
+              filterManager.isInBounds(beforeRefreshRange));
+          Assert.assertTrue(
+              "Known bound includes time after refresh",
+              filterManager.isInBounds(afterRefreshRange));
           Assert.assertFalse(
               "Unbounded lower range always match null lastUpdated which are not known",
-              filterManager.isInKnownBounds(beforeLoadUnbounded));
+              filterManager.isInBounds(beforeLoadUnbounded));
 
           // Assert on isResultSetEmpty
           Assert.assertTrue(
@@ -117,7 +139,8 @@ public final class LoadedFilterManagerIT {
   public void testWithMultipleRefreshes() {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
-          final LoadedFilterManager filterManager = new LoadedFilterManager(0);
+          final LoadedFilterManager filterManager = new LoadedFilterManager();
+          filterManager.init();
           filterManager.setEntityManager(entityManager);
           loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -135,7 +158,7 @@ public final class LoadedFilterManagerIT {
 
           // Test after refresh
           int after1Count = filterManager.getFilters().size();
-          Assert.assertTrue(filterManager.isInKnownBounds(afterSampleARange));
+          Assert.assertTrue(filterManager.isInBounds(afterSampleARange));
           Assert.assertTrue(
               "Expected date range to not have a matching filter",
               filterManager.isResultSetEmpty(SAMPLE_BENE, afterSampleARange));

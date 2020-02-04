@@ -20,6 +20,7 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rif.load.RifRecordLoadResult.LoadAction;
@@ -486,13 +487,21 @@ public final class RifLoader implements AutoCloseable {
       txn = entityManager.getTransaction();
       txn.begin();
       List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
+
+      /*
+       * Dev Note: All timestamps of records in the batch and the LoadedBatch must be the same for data consistency.
+       * The timestamp from the LoadedBatchBuilder is used.
+       */
       LoadedBatchBuilder loadedBatchBuilder =
           new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         RecordAction recordAction = rifRecordEvent.getRecordAction();
-        Object record = rifRecordEvent.getRecord();
+        RifRecordBase record = rifRecordEvent.getRecord();
 
         LOGGER.trace("Loading '{}' record.", rifFileType);
+
+        // Set lastUpdated to the same value for the whole batch
+        record.setLastUpdated(loadedBatchBuilder.getTimestamp());
 
         // Associate the beneficiary with this file loaded
         loadedBatchBuilder.associateBeneficiary(rifRecordEvent.getBeneficiaryId());
@@ -529,7 +538,8 @@ public final class RifLoader implements AutoCloseable {
              * current/previous state as a BeneficiaryHistory record.
              */
             if (record instanceof Beneficiary) {
-              updateBeneficaryHistory(entityManager, (Beneficiary) record);
+              updateBeneficaryHistory(
+                  entityManager, (Beneficiary) record, loadedBatchBuilder.getTimestamp());
             }
 
             entityManager.merge(record);
@@ -594,9 +604,10 @@ public final class RifLoader implements AutoCloseable {
    *
    * @param entityManager the {@link EntityManager} to use
    * @param newBeneficiaryRecord the {@link Beneficiary} record being processed
+   * @param batchTimestamp the timestamp of the batch
    */
   private static void updateBeneficaryHistory(
-      EntityManager entityManager, Beneficiary newBeneficiaryRecord) {
+      EntityManager entityManager, Beneficiary newBeneficiaryRecord, Date batchTimestamp) {
     Beneficiary oldBeneficiaryRecord =
         entityManager.find(Beneficiary.class, newBeneficiaryRecord.getBeneficiaryId());
 
@@ -608,6 +619,7 @@ public final class RifLoader implements AutoCloseable {
       oldBeneCopy.setHicnUnhashed(oldBeneficiaryRecord.getHicnUnhashed());
       oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
       oldBeneCopy.setMedicareBeneficiaryId(oldBeneficiaryRecord.getMedicareBeneficiaryId());
+      oldBeneCopy.setLastUpdated(batchTimestamp);
 
       entityManager.persist(oldBeneCopy);
     }

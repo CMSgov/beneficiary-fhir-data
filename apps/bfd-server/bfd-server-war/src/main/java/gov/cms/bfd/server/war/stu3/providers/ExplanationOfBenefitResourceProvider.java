@@ -211,7 +211,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
           "/ExplanationOfBenefit?",
           ExplanationOfBenefit.SP_PATIENT,
           beneficiaryId,
-          eobs);
+          eobs,
+          loadedFilterManager.getLastDatabaseUpdate());
     }
 
     /*
@@ -266,7 +267,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
         "/ExplanationOfBenefit?",
         ExplanationOfBenefit.SP_PATIENT,
         beneficiaryId,
-        eobs);
+        eobs,
+        loadedFilterManager.getLastDatabaseUpdate());
   }
 
   /*

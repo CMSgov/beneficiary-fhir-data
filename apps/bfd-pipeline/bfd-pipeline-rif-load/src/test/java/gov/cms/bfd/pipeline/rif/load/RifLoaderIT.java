@@ -75,7 +75,7 @@ public final class RifLoaderIT {
           Assert.assertEquals(
               "Expected to match the sample-a beneficiary",
               "567834",
-              allBatches.getBeneficiaries().get(0));
+              allBatches.getBeneficiariesAsList().get(0));
         });
   }
 
@@ -145,7 +145,7 @@ public final class RifLoaderIT {
 
   @Ignore
   @Test
-  public void buildSynteticLoadedFiles() {
+  public void buildSyntheticLoadedFiles() {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);

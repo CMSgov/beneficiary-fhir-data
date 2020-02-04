@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -42,7 +41,6 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -1486,39 +1484,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     // Empty searches
     List<String> emptyUrls =
-        Arrays.asList(
-            "_lastUpdated=lt" + earlyDateTime,
-            "_lastUpdated=le" + earlyDateTime,
-            "_lastUpdated=eq" + earlyDateTime);
+        Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
     testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
-  }
-
-  /** Verifies that a search with a lastUpdated with eq param works */
-  @Test
-  public void searchEobWithLastUpdatedEq() throws FHIRException {
-    Beneficiary beneficiary = loadSampleA();
-    String beneId = beneficiary.getBeneficiaryId();
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-
-    // Find an EOB
-    Bundle allEobs = fetchWithLastUpdated(fhirClient, beneId, "");
-    Assert.assertTrue(allEobs.getEntry().size() > 0);
-    Resource testEob = allEobs.getEntry().get(0).getResource();
-
-    // Fetch it again with an lastupdate
-    Date testDate = testEob.getMeta().getLastUpdated();
-    DateTimeDt fhirTestMillis = new DateTimeDt(testDate, TemporalPrecisionEnum.MILLI);
-    String lastUpdatedEq = "_lastUpdated=eq" + fhirTestMillis.getValueAsString();
-    Bundle eobsWithTime = fetchWithLastUpdated(fhirClient, beneId, lastUpdatedEq);
-    Assert.assertTrue("Expected to have at least one match", eobsWithTime.getEntry().size() > 0);
-
-    // Test that each retrived match the testDate with second percision
-    eobsWithTime.getEntry().stream()
-        .forEach(
-            eob -> {
-              Date actualDate = eob.getResource().getMeta().getLastUpdated();
-              Assert.assertEquals(testDate.getTime(), actualDate.getTime());
-            });
   }
 
   /**
