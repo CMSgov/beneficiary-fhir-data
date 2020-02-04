@@ -3,14 +3,14 @@ variable "env_config" {
   type              = object({env=string, tags=map(string)})
 }
 
+variable "azs" {
+  description       = "AZ to use"
+  type              = list
+}
+
 variable "jenkins_ami" {
   type              = string
   description       = "Jenkins server AMI"
-}
-
-variable "vpn_security_group_id" {
-  type              = string
-  description       = "Security group that provides access via VPN"
 }
 
 variable "jenkins_key_name" {
@@ -18,14 +18,20 @@ variable "jenkins_key_name" {
   description       = "The EC2 key pair name to assign to jenkins instances"
 }
 
-variable "instance_size" {
+variable "jenkins_instance_size" {
   type              = string
   description       = "The EC2 instance size to use"
-  default           = "m5.xlarge"
+  default           = "c5.xlarge"
 }
 
 variable "mgmt_network_ci_cidrs" {
   type              = string
   description       = "The CIDR of the MGMT Network"
   default           = "10.252.40.0/21"
+}
+
+variable "is_public" {
+  description       = "If true, open the FHIR data end-point to the public Internet"
+  type              = bool
+  default           = false 
 }
