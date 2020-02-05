@@ -13,7 +13,7 @@ function gen_keystore {
         -validity 730 -keypass changeit -keystore "$3-bluebutton-appserver-keystore.jks" -storepass changeit
 
     echo "Extracting public cert..."
-    keytool -export -keystore "$3-bluebutton-appserver-keystore.jks" -alias server -storepass changeit -file "$3-bluebutton-appserver-public-cert.pem" -rfc 
+    keytool -export -keystore "$3-bluebutton-appserver-keystore.jks" -storetype jks -alias server -storepass changeit -file "$3-bluebutton-appserver-public-cert.pem" -rfc 
 }
 
 # Prod
