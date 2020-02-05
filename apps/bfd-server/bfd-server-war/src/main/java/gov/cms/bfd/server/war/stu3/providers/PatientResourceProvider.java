@@ -210,18 +210,19 @@ public final class PatientResourceProvider implements IResourceProvider {
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
 
-    CcwCodebookVariable partDContractMonth =
-        partDCwVariableFor(
-            coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1));
-    SingularAttribute<Beneficiary, String> contractMonth = partDFieldFor(partDContractMonth);
-
     String contractCode = coverageId.getValueNotNull();
     if (contractCode.length() != 5)
       throw new InvalidRequestException("Unsupported query parameter value: " + contractCode);
 
+    String contractMonth =
+        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
+    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
+    SingularAttribute<Beneficiary, String> contractMonthField = partDFieldFor(partDContractMonth);
+
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
     List<SetAttribute<Beneficiary, ?>> withRelations =
         new LinkedList<SetAttribute<Beneficiary, ?>>();
+
     if (hasHICN(includeIdentifiersValues))
       withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.beneficiaryHistories);
 
@@ -229,7 +230,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.medicareBeneficiaryIdHistories);
 
     CriteriaQuery beneficiariesQuery =
-        queryBeneficiariesBy(contractMonth, contractCode, withRelations);
+        queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
 
     PagingArguments pagingArgs = new PagingArguments(requestDetails);
     List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, pagingArgs);
@@ -354,12 +355,12 @@ public final class PatientResourceProvider implements IResourceProvider {
   private CriteriaQuery queryBeneficiariesBy(
       SingularAttribute<Beneficiary, String> field,
       String value,
-      List<SetAttribute<Beneficiary, ?>> preFetchList) {
+      List<SetAttribute<Beneficiary, ?>> relations) {
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-    preFetchList.stream()
+    relations.stream()
         .forEach(
             f -> {
               beneMatchesRoot.fetch(f, JoinType.LEFT);
