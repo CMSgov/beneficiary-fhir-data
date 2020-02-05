@@ -1,5 +1,28 @@
 # API Changelog
 
+## BLUEBUTTON-1784: Search for patients by ptdcntrct
+
+The Patient resource supports searching a part D Contract Number for a given month:
+
+Requests using this feature should be of the form `v1/fhir/Patient/?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month code>|<contract id>`.
+For example: `v1/fhir/Patient/?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct02|S0000`
+
+#### valid parameter systems:
+```
+https://bluebutton.cms.gov/resources/variables/ptdcntrct01
+https://bluebutton.cms.gov/resources/variables/ptdcntrct02
+https://bluebutton.cms.gov/resources/variables/ptdcntrct03
+https://bluebutton.cms.gov/resources/variables/ptdcntrct04
+https://bluebutton.cms.gov/resources/variables/ptdcntrct05
+https://bluebutton.cms.gov/resources/variables/ptdcntrct06
+https://bluebutton.cms.gov/resources/variables/ptdcntrct07
+https://bluebutton.cms.gov/resources/variables/ptdcntrct08
+https://bluebutton.cms.gov/resources/variables/ptdcntrct09
+https://bluebutton.cms.gov/resources/variables/ptdcntrct10
+https://bluebutton.cms.gov/resources/variables/ptdcntrct11
+https://bluebutton.cms.gov/resources/variables/ptdcntrct12
+```
+
 ## BLUEBUTTON-1536: Extend `IncludeIdentifiers` header options for the Patient Resource
 
 The `IncludeIdentifiers` header has been extended to handle values of [ "true", "hicn", "mbi' ]. 
