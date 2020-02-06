@@ -18,7 +18,7 @@ resource "aws_kms_key" "pii_bucket_key" {
     name   = var.pii_bucket_config.name
     admins = formatlist("%s", var.pii_bucket_config.admin_arns)
     roles  = formatlist("%s", concat(var.pii_bucket_config.read_arns, var.pii_bucket_config.write_arns))
-    root   = data.aws_caller_identity.current.account_id
+    root   = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
   })
 }
 
@@ -84,6 +84,6 @@ resource "aws_s3_bucket_policy" "pii_bucket_policy" {
     admins      = formatlist("%s", var.pii_bucket_config.admin_arns)
     readers     = formatlist("%s", var.pii_bucket_config.read_arns)
     writers     = formatlist("%s", var.pii_bucket_config.write_arns)
-    root        = data.aws_caller_identity.current.account_id
+    root        = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
   })
 }
