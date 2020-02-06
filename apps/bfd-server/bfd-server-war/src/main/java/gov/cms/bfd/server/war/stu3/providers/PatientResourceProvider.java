@@ -268,31 +268,11 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   private CcwCodebookVariable partDCwVariableFor(String system) {
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT01.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT01;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT02.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT02;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT03.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT03;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT04.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT04;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT05.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT05;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT06.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT06;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT07.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT07;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT08.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT08;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT09.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT09;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT10.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT10;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT11.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT11;
-    if (system.equals(CcwCodebookVariable.PTDCNTRCT12.getVariable().getId().toLowerCase()))
-      return CcwCodebookVariable.PTDCNTRCT12;
-    throw new InvalidRequestException("Unsupported extension system: " + system);
+    try {
+      return CcwCodebookVariable.valueOf(system.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      throw new InvalidRequestException("Unsupported extension system: " + system);
+    }
   }
 
   private SingularAttribute<Beneficiary, String> partDFieldFor(CcwCodebookVariable cntrctMonth) {
