@@ -42,7 +42,7 @@ true | include HICN and MBI
 hicn | include HICN
 mbi | include MBI
 hicn,mbi or mbi,hicn | include HICN and MBI
-\<any\> | omit HICN and MBI
+\<any invalid value\> | Throws an InvalidRequest exception (400 HTTP status code)
 
 
 ## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
