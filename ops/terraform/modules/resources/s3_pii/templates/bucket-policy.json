@@ -1,0 +1,98 @@
+{
+  "Version": "2012-10-17",
+  "Id": "bfd-${env}-${bucket_name}-s3-policy",
+  "Statement": [
+    {
+      "Sid": "BFDPIIS3ListBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          %{ for reader in readers ~}"${reader}",%{ endfor ~}
+          %{ for writer in writers ~}"${writer}",%{ endfor ~}
+          %{ for admin in admins ~}"${admin}",%{ endfor ~}
+          "${root}"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::${bucket_id}"
+    },
+    {
+      "Sid": "BFDPIIS3ReadBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          %{ for reader in readers ~}"${reader}",%{ endfor ~}
+          %{ for writer in writers ~}"${writer}",%{ endfor ~}
+          %{ for admin in admins ~}"${admin}",%{ endfor ~}
+          "${root}"
+        ]
+      },
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": "arn:aws:s3:::${bucket_id}/*"
+    },
+    {
+      "Sid": "BFDPIIS3WriteBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          %{ for writer in writers ~}"${writer}",%{ endfor ~}
+          %{ for admin in admins ~}"${admin}",%{ endfor ~}
+          "${root}"
+        ]
+      },
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::${bucket_id}/*"
+    },
+    {
+      "Sid": "BFDPIIS3AdminBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          %{ for admin in admins ~}"${admin}",%{ endfor ~}
+          "${root}"
+        ]
+      },
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}",
+        "arn:aws:s3:::${bucket_id}/*"
+      ]
+    },
+    {
+      "Sid": "BFDPIIS3DenyNonExplicitUsers",
+      "Effect": "Deny",
+      "NotPrincipal": {
+        "AWS": [
+          %{ for reader in readers ~}"${reader}",%{ endfor ~}
+          %{ for writer in writers ~}"${writer}",%{ endfor ~}
+          %{ for admin in admins ~}"${admin}",%{ endfor ~}
+          "${root}"
+        ]
+      },
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}/*",
+        "arn:aws:s3:::${bucket_id}"
+      ]
+    },
+    {
+      "Sid": "BFDPIIS3DenyUnencrypted",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${bucket_id}/*",
+      "Condition": {
+        "StringNotEquals": {
+            "s3:x-amz-server-side-encryption": "aws:kms"
+        }
+      }
+    }
+  ]
+}

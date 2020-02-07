@@ -218,3 +218,56 @@ resource "aws_iam_role_policy_attachment" "packer_S3" {
   policy_arn = aws_iam_policy.packer_s3.arn
 }
 
+# IAM policy, user, and attachment to allow GitHub Actions
+# to perform app integration testing against S3
+
+resource "aws_iam_user" "github_actions" {
+  name       = "bfd-github-actions"
+}
+
+resource "aws_iam_user_policy_attachment" "github_actions_s3its" {
+  user       = aws_iam_user.github_actions.name
+  policy_arn = aws_iam_policy.github_actions_s3its.arn
+}
+
+resource "aws_iam_policy" "github_actions_s3its" {
+  name        = "bfd-github-actions-s3its"
+  description = "GitHub Actions policy for S3 integration tests"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BFDGitHubActionsS3ITs",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:ListAllMyBuckets"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    },
+    {
+      "Sid": "BFDGitHubActionsS3ITsBucket",
+      "Action": [
+        "s3:DeleteBucket",
+        "s3:HeadBucket",
+        "s3:ListBucket"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::bb-test-*"
+    },
+    {
+      "Sid": "BFDGitHubActionsS3ITsObject",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::bb-test-*/*"
+    }
+  ]
+}
+EOF
+}

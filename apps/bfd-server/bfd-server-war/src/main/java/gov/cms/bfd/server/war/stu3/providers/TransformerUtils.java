@@ -2946,6 +2946,25 @@ public final class TransformerUtils {
     return bundle;
   }
 
+  public static Bundle createBundle(
+      PagingArguments pagingArgs,
+      String resourceType,
+      String identifier,
+      String value,
+      List<IBaseResource> resources,
+      int total) {
+    Bundle bundle = new Bundle();
+
+    if (pagingArgs.isPagingRequested()) {
+      TransformerUtils.addPagingLinks(pagingArgs, bundle, resourceType, identifier, value, total);
+    }
+
+    bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+
+    bundle.setTotal(total);
+    return bundle;
+  }
+
   /**
    * @param bundle a {@link Bundle} to add the list of {@link ExplanationOfBenefit} resources to.
    * @param resources a list of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link

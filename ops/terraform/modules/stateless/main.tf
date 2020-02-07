@@ -311,6 +311,17 @@ module "bfd_server_metrics_dpc" {
   }
 }
 
+module "bfd_server_metrics_ab2d" {
+  source = "../resources/bfd_server_metrics"
+
+  env    = var.env_config.env
+
+  metric_config = {
+    partner_name  = "ab2d"
+    partner_regex = "*ab2d*"
+  }
+}
+
 # FHIR server alarms, partner specific
 #
 module "bfd_server_alarm_all_500s" {
