@@ -2,8 +2,10 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
@@ -1580,6 +1582,187 @@ public final class PatientResourceProviderIT {
                 Patient.IDENTIFIER
                     .exactly()
                     .systemAndIdentifier(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "1234"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(0, searchResults.getTotal());
+  }
+
+  @Test
+  public void searchForExistingPatientByPartDContractNum() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // No data is loaded, so this should return 0 matches.
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getTotal());
+  }
+
+  @Test
+  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setIncludeIdentifiers("true");
+    fhirClient.registerInterceptor(extraParamsInterceptor);
+
+    // No data is loaded, so this should return 0 matches.
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getTotal());
+    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+
+    Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
+    Assert.assertEquals(
+        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+
+    Boolean hicnUnhashedPresent = false;
+    Boolean mbiUnhashedPresent = false;
+    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
+    while (identifiers.hasNext()) {
+      Identifier identifier = identifiers.next();
+      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
+        hicnUnhashedPresent = true;
+      if (identifier
+          .getSystem()
+          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+        mbiUnhashedPresent = true;
+    }
+
+    Assert.assertTrue(hicnUnhashedPresent);
+    Assert.assertTrue(mbiUnhashedPresent);
+  }
+
+  @Test
+  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setIncludeIdentifiers("false");
+    fhirClient.registerInterceptor(extraParamsInterceptor);
+
+    // No data is loaded, so this should return 0 matches.
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getTotal());
+    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+
+    Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
+    Assert.assertEquals(
+        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+
+    Boolean hicnUnhashedPresent = false;
+    Boolean mbiUnhashedPresent = false;
+    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
+    while (identifiers.hasNext()) {
+      Identifier identifier = identifiers.next();
+      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
+        hicnUnhashedPresent = true;
+      if (identifier
+          .getSystem()
+          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+        mbiUnhashedPresent = true;
+    }
+
+    Assert.assertFalse(hicnUnhashedPresent);
+    Assert.assertFalse(mbiUnhashedPresent);
+  }
+
+  @Test
+  public void searchForPatientByPartDContractNumWithPaging() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // No data is loaded, so this should return 0 matches.
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .count(1)
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getTotal());
+
+    /*
+     * Verify that only the first and last paging links exist, since there should
+     * only be one page.
+     */
+    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
+    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
+    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
+    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
+  }
+
+  @Test
+  public void searchForMissingPatientByPartDContractNum() {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // No data is loaded, so this should return 0 matches.
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "12345"))
             .returnBundle(Bundle.class)
             .execute();
 

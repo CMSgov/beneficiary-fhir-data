@@ -78,6 +78,9 @@
         "code" : "search-type"
       } ],
       "searchParam" : [ {
+        "name" : "_has:Coverage",
+        "type" : "token"
+      }, {
         "name" : "_id",
         "type" : "token",
         "documentation" : "The ID of the resource"
@@ -85,6 +88,9 @@
         "name" : "identifier",
         "type" : "token",
         "documentation" : "A patient identifier"
+      }, {
+        "name" : "startIndex",
+        "type" : "string"
       }, {
         "name" : "startIndex",
         "type" : "string"

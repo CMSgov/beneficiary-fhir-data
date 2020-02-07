@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
@@ -27,11 +28,13 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -193,6 +196,159 @@ public final class PatientResourceProvider implements IResourceProvider {
         TransformerUtils.createBundle(
             pagingArgs, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(), patients);
     return bundle;
+  }
+
+  @Search
+  public Bundle searchByCoverageContract(
+      // This is very explicit as a place holder until this kind
+      // of relational search is more common.
+      @RequiredParam(name = "_has:Coverage.extension") TokenParam coverageId,
+      @OptionalParam(name = "startIndex") String startIndex,
+      RequestDetails requestDetails) {
+
+    if (coverageId.getQueryParameterQualifier() != null)
+      throw new InvalidRequestException(
+          "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
+
+    String contractCode = coverageId.getValueNotNull();
+    if (contractCode.length() != 5)
+      throw new InvalidRequestException("Unsupported query parameter value: " + contractCode);
+
+    String contractMonth =
+        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
+    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
+    SingularAttribute<Beneficiary, String> contractMonthField = partDFieldFor(partDContractMonth);
+
+    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+    List<SetAttribute<Beneficiary, ?>> withRelations =
+        new LinkedList<SetAttribute<Beneficiary, ?>>();
+
+    if (hasHICN(includeIdentifiersValues))
+      withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.beneficiaryHistories);
+
+    if (hasMBI(includeIdentifiersValues))
+      withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.medicareBeneficiaryIdHistories);
+
+    CriteriaQuery beneficiariesQuery =
+        queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
+
+    PagingArguments pagingArgs = new PagingArguments(requestDetails);
+    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, pagingArgs);
+    Long count = fetchResultCount(beneficiariesQuery);
+
+    List<IBaseResource> patients =
+        matchingBeneficiaries.stream()
+            .map(
+                beneficiary -> {
+                  // Null out the unhashed HICNs if we're not supposed to be returning them
+                  if (!hasHICN(includeIdentifiersValues)) {
+                    beneficiary.setHicnUnhashed(Optional.empty());
+                  }
+                  // Null out the unhashed MBIs if we're not supposed to be returning
+                  if (!hasMBI(includeIdentifiersValues)) {
+                    beneficiary.setMedicareBeneficiaryId(Optional.empty());
+                  }
+
+                  Patient patient =
+                      BeneficiaryTransformer.transform(
+                          metricRegistry, beneficiary, includeIdentifiersValues);
+                  return patient;
+                })
+            .collect(Collectors.toList());
+
+    Bundle bundle =
+        TransformerUtils.createBundle(
+            pagingArgs,
+            "/Patient?",
+            "_has:Coverage.extension",
+            coverageId.getValueAsQueryToken(null),
+            patients,
+            count.intValue());
+    return bundle;
+  }
+
+  private CcwCodebookVariable partDCwVariableFor(String system) {
+    try {
+      return CcwCodebookVariable.valueOf(system.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      throw new InvalidRequestException("Unsupported extension system: " + system);
+    }
+  }
+
+  private SingularAttribute<Beneficiary, String> partDFieldFor(CcwCodebookVariable cntrctMonth) {
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT01)
+      return Beneficiary_.partDContractNumberJanId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT02)
+      return Beneficiary_.partDContractNumberFebId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT03)
+      return Beneficiary_.partDContractNumberMarId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT04)
+      return Beneficiary_.partDContractNumberAprId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT05)
+      return Beneficiary_.partDContractNumberMayId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT06)
+      return Beneficiary_.partDContractNumberJunId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT07)
+      return Beneficiary_.partDContractNumberJulId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT08)
+      return Beneficiary_.partDContractNumberAugId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT09)
+      return Beneficiary_.partDContractNumberSeptId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT10)
+      return Beneficiary_.partDContractNumberOctId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT11)
+      return Beneficiary_.partDContractNumberNovId;
+    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT12)
+      return Beneficiary_.partDContractNumberDecId;
+    throw new InvalidRequestException(
+        "Unsupported extension system: " + cntrctMonth.getVariable().getId().toLowerCase());
+  }
+
+  private Long fetchResultCount(CriteriaQuery criteria) {
+    Predicate restriction = criteria.getRestriction();
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+    countQuery.where(restriction);
+    return entityManager
+        .createQuery(countQuery.select(builder.count(countQuery.from(Beneficiary.class))))
+        .getSingleResult();
+  }
+
+  private List<Beneficiary> fetchBeneficiaries(CriteriaQuery criteria, PagingArguments pagingArgs) {
+    Query query = entityManager.createQuery(criteria);
+
+    if (pagingArgs.isPagingRequested()) {
+      query.setFirstResult(pagingArgs.getStartIndex());
+      query.setMaxResults(pagingArgs.getPageSize());
+    }
+
+    return query.getResultList();
+  }
+
+  private CriteriaQuery queryBeneficiariesBy(
+      SingularAttribute<Beneficiary, String> field, String value) {
+    List<SetAttribute<Beneficiary, ?>> withRelations =
+        new LinkedList<SetAttribute<Beneficiary, ?>>();
+    return queryBeneficiariesBy(field, value, withRelations);
+  }
+
+  private CriteriaQuery queryBeneficiariesBy(
+      SingularAttribute<Beneficiary, String> field,
+      String value,
+      List<SetAttribute<Beneficiary, ?>> relations) {
+
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
+    Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
+    relations.stream()
+        .forEach(
+            f -> {
+              beneMatchesRoot.fetch(f, JoinType.LEFT);
+            });
+    beneMatches.select(beneMatchesRoot);
+    beneMatches.where(builder.equal(beneMatchesRoot.get(field), value));
+
+    return beneMatches;
   }
 
   /**
