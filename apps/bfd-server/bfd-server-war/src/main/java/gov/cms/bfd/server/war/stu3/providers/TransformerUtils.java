@@ -2882,7 +2882,6 @@ public final class TransformerUtils {
             String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
             ndcProductColumns[3] + " - " + ndcProductColumns[13]);
       }
-      ndcProductsIn.close();
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
     }
@@ -2944,6 +2943,25 @@ public final class TransformerUtils {
     }
 
     bundle.setTotal(resources.size());
+    return bundle;
+  }
+
+  public static Bundle createBundle(
+      PagingArguments pagingArgs,
+      String resourceType,
+      String identifier,
+      String value,
+      List<IBaseResource> resources,
+      int total) {
+    Bundle bundle = new Bundle();
+
+    if (pagingArgs.isPagingRequested()) {
+      TransformerUtils.addPagingLinks(pagingArgs, bundle, resourceType, identifier, value, total);
+    }
+
+    bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+
+    bundle.setTotal(total);
     return bundle;
   }
 

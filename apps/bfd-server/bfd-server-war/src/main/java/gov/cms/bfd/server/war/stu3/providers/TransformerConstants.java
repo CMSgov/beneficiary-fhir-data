@@ -206,6 +206,13 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/sid/us-medicare";
 
   /**
+   * The {@link Identifier#getSystem()} used in {@link Patient} resources to store a one-way
+   * cryptographic hash of each Medicare beneficiaries' MBI.
+   */
+  public static final String CODING_BBAPI_BENE_MBI_HASH =
+      BASE_URL_BBAPI_RESOURCES + "/identifier/mbi-hash";
+
+  /**
    * The {@link Identifier#getSystem()} used in {@link Patient} resources to store the unhashed
    * version of each Medicare beneficiaries' medicare beneficiary id.
    */

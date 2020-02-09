@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -121,6 +122,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(LocalDate.of(1979, Month.MARCH, 17), beneficiaryHistory0.getBirthDate());
     Assert.assertEquals(('2'), beneficiaryHistory0.getSex());
     Assert.assertEquals("543217066Z", beneficiaryHistory0.getHicn());
+    Assert.assertEquals(Optional.of("3456689"), beneficiaryHistory0.getMedicareBeneficiaryId());
 
     /*
      * We should expect and be able to cope with BENEFICIARY_HISTORY records that
@@ -139,6 +141,7 @@ public final class RifFilesProcessorTest {
       Assert.assertEquals(LocalDate.of(1980, Month.MARCH, 17), beneficiaryHistory.getBirthDate());
       Assert.assertEquals(('1'), beneficiaryHistory.getSex());
       Assert.assertEquals("543217066T", beneficiaryHistory.getHicn());
+      Assert.assertEquals(Optional.of("3456789"), beneficiaryHistory.getMedicareBeneficiaryId());
     }
   }
 
@@ -231,7 +234,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("01", pdeRow.getPrescriberIdQualifierCode());
     Assert.assertEquals("1750384806", pdeRow.getPrescriberId());
     Assert.assertEquals(new BigDecimal(799999), pdeRow.getPrescriptionReferenceNumber());
-    Assert.assertEquals("46122005000", pdeRow.getNationalDrugCode());
+    Assert.assertEquals("49035044700", pdeRow.getNationalDrugCode());
     Assert.assertEquals("H9999", pdeRow.getPlanContractId());
     Assert.assertEquals("020", pdeRow.getPlanBenefitPackageId());
     Assert.assertEquals(1, pdeRow.getCompoundCode());
@@ -391,7 +394,7 @@ public final class RifFilesProcessorTest {
     Assert.assertFalse(claimLine.getRxNumber().isPresent());
     Assert.assertEquals(new BigDecimal("42.0"), claimLine.getHctHgbTestResult());
     Assert.assertEquals("R1", claimLine.getHctHgbTestTypeCode().get());
-    Assert.assertEquals("46122005000", claimLine.getNationalDrugCode().get());
+    Assert.assertEquals("49035044700", claimLine.getNationalDrugCode().get());
     Assert.assertEquals("BB889999AA", claimLine.getCliaLabNumber().get());
     Assert.assertEquals(new BigDecimal(0), claimLine.getAnesthesiaUnitCount());
   }
@@ -989,7 +992,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals('3', claimLine.getMtusCode().get().charValue());
     Assert.assertEquals(new BigDecimal("44.4"), claimLine.getHctHgbTestResult());
     Assert.assertEquals("R2", claimLine.getHctHgbTestTypeCode().get());
-    Assert.assertEquals("46122005000", claimLine.getNationalDrugCode().get());
+    Assert.assertEquals("49035044700", claimLine.getNationalDrugCode().get());
   }
 
   /**

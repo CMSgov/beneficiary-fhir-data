@@ -41,12 +41,16 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_bluebutton_frontend_sbx
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_sbx_certificate.pem') }}"
+  - alias: client_bluebutton_frontend_local
+    certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_local_certificate.pem') }}"
   - alias: client_bcda_dev
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_dev_certificate.pem') }}"
   - alias: client_bcda_test
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_test_certificate.pem') }}"
   - alias: client_bcda_sbx
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_sbx_certificate.pem') }}"
+  - alias: client_bcda_local
+    certificate: "{{ lookup('file', 'files/client_data_server_bcda_local_certificate.pem') }}"  
   - alias: client_mct_test
     certificate: "{{ lookup('file', 'files/client_data_server_mct_test_certificate.pem') }}"
   - alias: client_mct_imp
@@ -57,3 +61,11 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_dpc_prod_sbx_certificate.pem') }}"
   - alias: client_dpc_test
     certificate: "{{ lookup('file', 'files/client_data_server_dpc_test_certificate.pem') }}"
+  - alias: client_dpc_local
+    certificate: "{{ lookup('file', 'files/client_data_server_dpc_local_certificate.pem') }}"
+  - alias: client_ab2d_dev
+    certificate: "{{ lookup('file', 'files/client_data_server_ab2d_dev_certificate.pem') }}"
+  - alias: client_ab2d_sbx
+    certificate: "{{ lookup('file', 'files/client_data_server_ab2d_sbx_certificate.pem') }}"
+  - alias: client_ab2d_imp
+    certificate: "{{ lookup('file', 'files/client_data_server_ab2d_imp_certificate.pem') }}"

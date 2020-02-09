@@ -144,9 +144,9 @@ data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
-#
+##
 # Start to build stuff
-#
+##
 
 # IAM roles
 # 
@@ -172,8 +172,13 @@ module "fhir_lb" {
   role            = "fhir"
   layer           = "dmz"
   log_bucket      = data.aws_s3_bucket.logs.id
+  is_public       = var.is_public
 
-  ingress = {
+  ingress = var.is_public ? {
+    description   = "Public Internet access"
+    port          = 443
+    cidr_blocks   = ["0.0.0.0/0"]
+  } : {
     description   = "From VPC peerings, the MGMT VPC, and self"
     port          = 443
     cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
@@ -306,6 +311,17 @@ module "bfd_server_metrics_dpc" {
   }
 }
 
+module "bfd_server_metrics_ab2d" {
+  source = "../resources/bfd_server_metrics"
+
+  env    = var.env_config.env
+
+  metric_config = {
+    partner_name  = "ab2d"
+    partner_regex = "*ab2d*"
+  }
+}
+
 # FHIR server alarms, partner specific
 #
 module "bfd_server_alarm_all_500s" {
@@ -319,9 +335,9 @@ module "bfd_server_alarm_all_500s" {
     metric_prefix    = "http-requests/count-500"
     eval_periods     = "1"
     period           = "300"
-    statistic        = "Maximum"
+    statistic        = "Sum"
     ext_statistic    = null
-    threshold        = "0.0"
+    threshold        = "20.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }

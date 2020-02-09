@@ -16,3 +16,9 @@ ssh_users:
   - username: richard.hawes
     sudoer: true
     public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDF+hlmi85ErLP0rFUBqhckuPZebklgz4WKWCwgrNG/vUDI3gl4BNAW4qyh54kr4qE9VSavWh65P52lmkVBf7AwZX8r+Jsa51vXQmkkYmcnpT7wVhyfTDERqY5l+6qHOnOPj7Mtaxx3sMbCMOyKgRZvEoZR/eaMrRBAxyDD73Ts1ZSvv5GnQdxHQFZ5+85g2CV+/UjQ30jIsU6ak/ozCydtD/k6IlqM/EFfSFyn20+j3R68zU5x+tgdit3TVEJVxZFxrk+SQ7MRSUakVGtxVhoJGPhJuSm9hULnGL3XGrfTa+zBMugODwqeQ4iNQBO+jyUpFL5eT3Tm+4YaLMf/t6sJ rickhawes@RicksMacBook"
+  - username: dave.tisza
+    sudoer: true
+    public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD8VVCW0uPuUXm8/79H4komaYI175lHF6+hZOu3SGkqZMI47/fGgX9bbWO7tQDsj2kbqq88Sd8y6i6UjUjmedDLbSaeDZ/z7r3VV2kxtxQFn+ZqY9Oc5rqqITkb3c/ZvBZgX2vRR6sPP5W+nIiljYruNiMmPKVcBsq+UgzphmcNgpvddbXhLddQFB/ArSftto8lnhFVmMmsXPdpjHR3g7om0803gdOFHZq2KICA9OphAiLXKJgVA7+Zz44zwZMVreJzNmePVnHTBDoCS5v21w6Si+7hnRPsTZO8Z2ve8iyCsEKGKFhrBYL75TKHc5LeMdkHbpEo4/goLuxnJjqeROdl dtisza ssh pub key."
+  - username: ron.heft
+    sudoer: true
+    public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXO/FXBK7mDGEfsjtghYW2bCw+RcRtuL7cEP6iescORhvEwuKjKDVi9mD37vmUOrwJGNFSP0az6rnx8gx1UVd5344CbDf8rzmamaVXMlUhMeggYqxI8283tAsGl/zKQert90qgWr/Py/2PdXjSzib5bO5BF1fy3xkkLzY3TjcjFmaPbuCnIBoXJwyZxcUUGPdQs1TMlDvGGK0N6s6GQeHcwJEab2lhP1X/IVYSv758vnkKxKna0ClRDfwq97TsBq1NyRlqjNeFWU5i7YdLMNChixPcKXxuyd26EwRYUxffiK2RPrmoE4Tpb2lFYbMoCjrexQ0ckvzPEPhEbktgFU+/ hyyc@C02XT8YYJG5J"

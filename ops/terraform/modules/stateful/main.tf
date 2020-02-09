@@ -27,7 +27,8 @@ locals {
   cw_period             = 60    # Seconds
   cw_eval_periods       = 3
   cw_disk_queue_depth   = 5
-  cw_replica_lag        = 600   # Seconds
+  cw_replica_lag_period = 3600
+  cw_replica_lag        = 1800   # Seconds
   cw_latency            = 0.2   # Seconds
 
 }
@@ -242,6 +243,11 @@ resource "aws_db_parameter_group" "import_mode" {
     name  = "autovacuum"
     value = "0"
   }
+  
+  parameter {
+    name = "log_connections"
+    value = "1"
+  }
 
 }
 
@@ -357,7 +363,7 @@ module "replica1_alarms" {
   }
 
   replica_lag = {
-    period            = local.cw_period
+    period            = local.cw_replica_lag_period
     eval_periods      = local.cw_eval_periods
     threshold         = local.cw_replica_lag
   }
@@ -383,7 +389,7 @@ module "replica2_alarms" {
   }
 
   replica_lag = {
-    period            = local.cw_period
+    period            = local.cw_replica_lag_period
     eval_periods      = local.cw_eval_periods
     threshold         = local.cw_replica_lag
   }
@@ -409,7 +415,7 @@ module "replica3_alarms" {
   }
 
   replica_lag = {
-    period            = local.cw_period
+    period            = local.cw_replica_lag_period
     eval_periods      = local.cw_eval_periods
     threshold         = local.cw_replica_lag
   }
@@ -500,6 +506,21 @@ resource "aws_iam_user" "etl" {
 resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
   user       = aws_iam_user.etl.name
   policy_arn = aws_iam_policy.etl_rw_s3.arn
+}
+
+# S3 bucket, policy, and KMS key for medicare opt out data
+#
+module "medicare_opt_out" {
+  source            = "../resources/s3_pii"
+  env_config        = local.env_config
+
+  pii_bucket_config = {
+    name            = "medicare-opt-out"
+    log_bucket      = module.logs.id
+    read_arns       = var.medicare_opt_out_config.read_roles
+    write_arns      = var.medicare_opt_out_config.write_roles
+    admin_arns      = var.medicare_opt_out_config.admin_users
+  }
 }
 
 # CloudWatch Log Groups

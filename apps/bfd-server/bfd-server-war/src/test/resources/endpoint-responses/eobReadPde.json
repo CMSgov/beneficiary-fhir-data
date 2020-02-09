@@ -281,8 +281,8 @@
     "service" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "46122005000",
-        "display" : "Childrens Acetaminophen Cherry - ACETAMINOPHEN"
+        "code" : "49035044700",
+        "display" : "Childrens Acetaminophen - ACETAMINOPHEN"
       } ]
     },
     "servicedDate" : "2015-05-12",

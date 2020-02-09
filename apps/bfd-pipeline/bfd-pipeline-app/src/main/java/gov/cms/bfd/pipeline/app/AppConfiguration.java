@@ -6,6 +6,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.rif.load.LoadAppOptions;
+import gov.cms.bfd.pipeline.rif.load.RifLoaderIdleTasks;
 import java.io.Serializable;
 import java.util.Optional;
 import org.apache.commons.codec.DecoderException;
@@ -81,6 +82,18 @@ public final class AppConfiguration implements Serializable {
    * #getLoadOptions()} {@link LoadAppOptions#isIdempotencyRequired()} value.
    */
   public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "IDEMPOTENCY_REQUIRED";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
+   */
+  public static final String ENV_VAR_KEY_FIXUPS_ENABLED = "FIXUPS_ENABLED";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getLoadOptions()} {@link LoadAppOptions#getFixupThreads()} value.
+   */
+  public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
 
   private final ExtractionOptions extractionOptions;
   private final LoadAppOptions loadOptions;
@@ -243,6 +256,18 @@ public final class AppConfiguration implements Serializable {
               "Invalid value for configuration environment variable '%s'.",
               ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
 
+    String fixupsEnabledText = System.getenv(ENV_VAR_KEY_FIXUPS_ENABLED);
+    boolean fixupsEnabled = false;
+    if (fixupsEnabledText != null && !fixupsEnabledText.isEmpty()) {
+      fixupsEnabled = Boolean.parseBoolean(fixupsEnabledText);
+    }
+
+    String fixupThreadsText = System.getenv(ENV_VAR_KEY_FIXUP_THREADS);
+    int fixupThreads = RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT;
+    if (fixupThreadsText != null && !fixupThreadsText.isEmpty()) {
+      fixupThreads = Integer.parseInt(fixupThreadsText);
+    }
+
     /*
      * Just for convenience: make sure DefaultAWSCredentialsProviderChain
      * has whatever it needs.
@@ -272,7 +297,9 @@ public final class AppConfiguration implements Serializable {
             databaseUsername,
             databasePassword.toCharArray(),
             loaderThreads,
-            idempotencyRequired.get()));
+            idempotencyRequired.get().booleanValue(),
+            fixupsEnabled,
+            fixupThreads));
   }
 
   /**

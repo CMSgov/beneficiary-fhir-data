@@ -1,0 +1,37 @@
+{
+  "Version": "2012-10-17",
+  "Id": "bfd-${env}-${name}-kms-policy",
+  "Statement": [
+    {
+      "Sid": "Admin Permissions",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          %{ for admin in admins ~}"${admin}",%{ endfor ~}
+          "${root}"
+        ]
+      },
+      "Action": [
+        "kms:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Role Permissions",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          %{ for idx, role in roles ~}"${role}"%{ if idx + 1 != length(roles) ~},%{ endif ~}%{ endfor ~}
+        ]
+      },
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
