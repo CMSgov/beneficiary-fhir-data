@@ -101,6 +101,10 @@
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
       }, {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
         "name" : "identifier",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
@@ -108,7 +112,14 @@
         "name" : "startIndex",
         "type" : "string",
         "documentation" : "The offset used for result pagination"
-      }]
+      }, {
+        "name" : "startIndex",
+        "type" : "string"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      } ]
     }, {
       "type" : "StructureDefinition",
       "profile" : {

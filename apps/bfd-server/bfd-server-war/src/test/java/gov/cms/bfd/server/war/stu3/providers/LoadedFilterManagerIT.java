@@ -76,8 +76,7 @@ public final class LoadedFilterManagerIT {
           // Should have many filters
           final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
           Assert.assertTrue(filterManager.getFirstBatchUpdate().getTime() <= afterLoad.getTime());
-          Assert.assertTrue(
-              filterManager.getLastDatabaseUpdate().getTime() <= afterRefresh.getTime());
+          Assert.assertTrue(filterManager.getTransactionTime().getTime() <= afterRefresh.getTime());
           Assert.assertTrue(afterFilters.size() > 1);
         });
   }

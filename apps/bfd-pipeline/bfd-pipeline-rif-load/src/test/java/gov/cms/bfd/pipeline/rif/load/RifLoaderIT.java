@@ -455,19 +455,19 @@ public final class RifLoaderIT {
     MetricRegistry appMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
     LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
-    AtomicInteger failureCount = new AtomicInteger(0);
-    AtomicInteger loadCount = new AtomicInteger(0);
     RifLoader loader = new RifLoader(appMetrics, options);
 
     // Link up the pipeline and run it.
     LOGGER.info("Loading RIF records...");
+    AtomicInteger failureCount = new AtomicInteger(0);
+    AtomicInteger loadCount = new AtomicInteger(0);
     for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
       RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
       loader.process(
           rifFileRecords,
           error -> {
             failureCount.incrementAndGet();
-            LOGGER.error("Record(s) failed to load.", error);
+            LOGGER.warn("Record(s) failed to load.", error);
           },
           result -> {
             loadCount.incrementAndGet();

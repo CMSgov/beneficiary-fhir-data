@@ -2,11 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -50,14 +45,23 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -535,7 +539,7 @@ public final class TransformerUtils {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
-   * @param procedure the {@link CCWProcedure} to add, if it's not already present
+   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
    * @return the {@link ProcedureComponent#getSequence()} of the existing or newly-added entry
    */
   static int addProcedureCode(ExplanationOfBenefit eob, CCWProcedure procedure) {
@@ -1572,7 +1576,7 @@ public final class TransformerUtils {
    * from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param beneficiaryId BEME_ID, *
+   * @param benficiaryId BEME_ID, *
    * @param carrierNumber CARR_NUM,
    * @param clinicalTrialNumber CLM_CLNCL_TRIL_NUM,
    * @param beneficiaryPartBDeductAmount CARR_CLM_CASH_DDCTBL_APLD_AMT,
@@ -1812,7 +1816,7 @@ public final class TransformerUtils {
    * claim types to FHIR. The method parameter fields from {@link InpatientClaimLine} {@link
    * OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine} are
    * listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HospiceClaimColumn} {@link
+   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HopsiceClaimColumn} {@link
    * HHAClaimColumn} and {@link SNFClaimColumn}).
    *
    * @param item the {@ ItemComponent} to modify
@@ -1897,8 +1901,7 @@ public final class TransformerUtils {
    * HospiceClaimLine} and {@link HHAClaimLine} claim types to FHIR. The method parameter fields
    * from {@link OutpatientClaimLine} {@link HospiceClaimLine} and {@link HHAClaimLine} are listed
    * below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * OutpatientClaimColumn} {@link gov.cms.bfd.model.rif.HospiceClaimColumn} and {@link
-   * HHAClaimColumn}.
+   * OutpatientClaimColumn} {@link HopsiceClaimColumn} and {@link HHAClaimColumn}.
    *
    * @param item the {@ ItemComponent} to modify
    * @param revenueCenterDate REV_CNTR_DT,
@@ -2083,7 +2086,7 @@ public final class TransformerUtils {
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimAdmissionDate CLM_ADMSN_DT,
-   * @param beneficiaryDischargeDate,
+   * @param benficiaryDischargeDate,
    * @param utilizedDays CLM_UTLZTN_CNT,
    * @return the {@link ExplanationOfBenefit}
    */
@@ -2127,7 +2130,7 @@ public final class TransformerUtils {
    *
    * @param eob the root {@link ExplanationOfBenefit} that the {@link ItemComponent} is part of
    * @param item the {@link ItemComponent} to modify
-   * @param deductibleCoinsuranceCd REV_CNTR_DDCTBL_COINSRNC_CD
+   * @param deductibleCoinsruanceCd REV_CNTR_DDCTBL_COINSRNC_CD
    */
   static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
       ExplanationOfBenefit eob, ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
@@ -2903,86 +2906,28 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param requestDetails a {@link RequestDetails} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param lastUpdated the {@link DateRangeParam} used as predicate for the search. Maybe null.
-   * @param resourceType the {@link String} the resource being provided by the paging link
-   * @param identifier the {@link String} field the search is being performed on
-   * @param value the {@link String} value of the identifier being searched for
+   * Create a bundle from the entire search result
+   *
+   * @param paging contains the {@link PagingLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
-   * @param filterManagerLastDatabaseUpdate the last update to database from the filterManager
+   * @param transactionTime date for the bundle
    * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      RequestDetails requestDetails,
-      DateRangeParam lastUpdated,
-      String resourceType,
-      String identifier,
-      String value,
-      List<IBaseResource> resources,
-      Date filterManagerLastDatabaseUpdate) {
-    return TransformerUtils.createBundle(
-        requestDetails,
-        lastUpdated,
-        null,
-        null,
-        resourceType,
-        identifier,
-        value,
-        resources,
-        filterManagerLastDatabaseUpdate);
-  }
-
-  /**
-   * @param requestDetails a {@link RequestDetails} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param lastUpdated the {@link DateRangeParam} used as predicate for the search. Maybe null.
-   * @param types a list of {@link ClaimType} to include in the result. May be null.
-   * @param excludeSamhsa the {@link String} from the "excludeSAMHSA" parameter. May be null.
-   * @param resourceType the {@link String} the resource being provided by the paging link
-   * @param identifier the {@link String} field the search is being performed on
-   * @param value the {@link String} value of the identifier being searched for
-   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
-   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
-   * @param filterManagerLastDatabaseUpdate the last update to database from the filterManager
-   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
-   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
-   */
-  public static Bundle createBundle(
-      RequestDetails requestDetails,
-      DateRangeParam lastUpdated,
-      Set<ClaimType> types,
-      String excludeSamhsa,
-      String resourceType,
-      String identifier,
-      String value,
-      List<IBaseResource> resources,
-      Date filterManagerLastDatabaseUpdate) {
+      PagingLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
-    PagingArguments pagingArgs = new PagingArguments(requestDetails);
-    if (pagingArgs.isPagingRequested()) {
+    if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
        * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
        * working correctly.
        */
-      int endIndex =
-          Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList =
-          resources.subList(pagingArgs.getStartIndex(), endIndex);
+      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+      List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
-      TransformerUtils.addPagingLinks(
-          pagingArgs,
-          bundle,
-          resourceType,
-          identifier,
-          value,
-          resources.size(),
-          lastUpdated,
-          types,
-          excludeSamhsa);
+      paging.addPagingLinks(bundle, resources.size());
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
@@ -2997,32 +2942,49 @@ public final class TransformerUtils {
             .map(r -> r.getMeta().getLastUpdated())
             .filter(Objects::nonNull)
             .max(Date::compareTo)
-            .orElse(filterManagerLastDatabaseUpdate);
+            .orElse(transactionTime);
     bundle
         .getMeta()
-        .setLastUpdated(
-            filterManagerLastDatabaseUpdate.after(maxBundleDate)
-                ? filterManagerLastDatabaseUpdate
-                : maxBundleDate);
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
     bundle.setTotal(resources.size());
     return bundle;
   }
 
+  /**
+   * Create a bundle from one page of resources
+   *
+   * @param paging a {@link PagingLinkBuilder} used to determine if paging is requested and the
+   *     parameters for doing so. The resources list is trimmed to fit the requested page.
+   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
+   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param total number of resources in the entire search result
+   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
+   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
+   */
   public static Bundle createBundle(
-      PagingArguments pagingArgs,
-      String resourceType,
-      String identifier,
-      String value,
-      List<IBaseResource> resources,
-      int total) {
+      PagingLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
     Bundle bundle = new Bundle();
 
-    if (pagingArgs.isPagingRequested()) {
-      TransformerUtils.addPagingLinks(pagingArgs, bundle, resourceType, identifier, value, total);
+    if (paging.isPagingRequested()) {
+      paging.addPagingLinks(bundle, total);
     }
 
     bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
 
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
+     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
+     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
     bundle.setTotal(total);
     return bundle;
   }
@@ -3039,157 +3001,7 @@ public final class TransformerUtils {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
     }
-
     return bundle;
-  }
-
-  /**
-   * @param pagingArgs a {@link PagingArguments} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param bundle the {@link Bundle} to which links are being added
-   * @param resource the {@link String} the resource being provided by the paging link
-   * @param searchByDesc the {@link String} field the search is being performed on
-   * @param identifier the {@link String} identifier being searched for
-   * @param numTotalResults the number of total resources matching the {@link
-   *     Beneficiary#getBeneficiaryId()}
-   * @param lastUpdated the {@link DateRangeParam} used as predicate for the search. Maybe null.
-   * @param types a list of {@link ClaimType} to include in the result. May be null..
-   * @param excludeSamhsa the {@link String} from the "excludeSAMHSA" parameter. May be null.
-   */
-  public static void addPagingLinks(
-      PagingArguments pagingArgs,
-      Bundle bundle,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      int numTotalResults,
-      DateRangeParam lastUpdated,
-      Set<ClaimType> types,
-      String excludeSamhsa) {
-
-    Integer pageSize = pagingArgs.getPageSize();
-    Integer startIndex = pagingArgs.getStartIndex();
-    String serverBase = pagingArgs.getServerBase();
-
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_FIRST)
-            .setUrl(
-                createPagingLink(
-                    serverBase + resource,
-                    searchByDesc,
-                    identifier,
-                    0,
-                    pageSize,
-                    lastUpdated,
-                    types,
-                    excludeSamhsa)));
-
-    if (startIndex + pageSize < numTotalResults) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_NEXT)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      startIndex + pageSize,
-                      pageSize,
-                      lastUpdated,
-                      types,
-                      excludeSamhsa)));
-    }
-
-    if (startIndex > 0) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_PREVIOUS)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      Math.max(startIndex - pageSize, 0),
-                      pageSize,
-                      lastUpdated,
-                      types,
-                      excludeSamhsa)));
-    }
-
-    /*
-     * This formula rounds numTotalResults down to the nearest multiple of pageSize
-     * that's less than and not equal to numTotalResults
-     */
-    int lastIndex;
-    try {
-      lastIndex = (numTotalResults - 1) / pageSize * pageSize;
-    } catch (ArithmeticException e) {
-      throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
-    }
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_LAST)
-            .setUrl(
-                createPagingLink(
-                    serverBase + resource,
-                    searchByDesc,
-                    identifier,
-                    lastIndex,
-                    pageSize,
-                    lastUpdated,
-                    types,
-                    excludeSamhsa)));
-  }
-
-  /** @return Returns the URL string for a paging link. */
-  private static String createPagingLink(
-      String baseURL,
-      String descriptor,
-      String id,
-      int startIndex,
-      int theCount,
-      DateRangeParam lastUpdated,
-      Set<ClaimType> types,
-      String excludeSamhsa) {
-
-    StringBuilder b = new StringBuilder();
-    b.append(baseURL);
-    b.append(Constants.PARAM_COUNT + "=" + theCount);
-    b.append("&startIndex=" + startIndex);
-    b.append("&" + descriptor + "=" + id);
-
-    // Add the lastUpdated parameters if present
-    if (lastUpdated != null) {
-      DateParam lowerBound = lastUpdated.getLowerBound();
-      if (lowerBound != null && !lowerBound.isEmpty()) {
-        b.append(
-            "&"
-                + Constants.PARAM_LASTUPDATED
-                + "="
-                + lowerBound.getPrefix().getValue()
-                + lowerBound.getValueAsString());
-      }
-      DateParam upperBound = lastUpdated.getUpperBound();
-      if (upperBound != null && !upperBound.isEmpty()) {
-        b.append(
-            "&"
-                + Constants.PARAM_LASTUPDATED
-                + "="
-                + upperBound.getPrefix().getValue()
-                + upperBound.getValueAsString());
-      }
-    }
-
-    // Add the "type" parameter if present
-    if (types != null) {
-      b.append("&type=" + types.toString().toLowerCase().replaceAll("[\\[\\] ]", ""));
-    }
-
-    // Add the "excludeSamhsa" parameter if present
-    if (excludeSamhsa != null) b.append("&excludeSAMHSA=" + excludeSamhsa);
-
-    return b.toString();
   }
 
   /**

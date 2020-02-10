@@ -8,13 +8,7 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -219,13 +213,13 @@ public final class BeneficiaryTransformerTest {
     beneficiary.setLastUpdated(new Date());
     Patient patientWithLastUpdated =
         BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+            new MetricRegistry(), beneficiary, Collections.emptyList());
     assertMatches(beneficiary, patientWithLastUpdated);
 
     beneficiary.setLastUpdated(null);
     Patient patientWithoutLastUpdated =
         BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+            new MetricRegistry(), beneficiary, Collections.emptyList());
     assertMatches(beneficiary, patientWithoutLastUpdated);
   }
 
@@ -242,7 +236,7 @@ public final class BeneficiaryTransformerTest {
 
     Patient patient =
         BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS);
+            new MetricRegistry(), beneficiary, Collections.emptyList());
     assertMatches(beneficiary, patient);
   }
 

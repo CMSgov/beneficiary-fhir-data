@@ -978,8 +978,8 @@ public final class PatientResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)}
-
-   * works as expected for a {@link Patient} that does exist in the DB.
+   *
+   * <p>works as expected for a {@link Patient} that does exist in the DB.
    */
   @Test
   public void searchForExistingPatientByMbiHash() {
@@ -1714,23 +1714,6 @@ public final class PatientResourceProviderIT {
 
     Assert.assertFalse(hicnUnhashedPresent);
     Assert.assertFalse(mbiUnhashedPresent);
-    
-    // Build up a list of lastUpdatedURLs that return > all values values
-    String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
-    String earlyDateTime = "2019-10-01T00:00:00-04:00";
-    List<String> allUrls =
-        Arrays.asList(
-            "_lastUpdated=gt" + earlyDateTime,
-            "_lastUpdated=ge" + earlyDateTime,
-            "_lastUpdated=le" + nowDateTime,
-            "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
-            "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
-    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 1);
-
-    // Empty searches
-    List<String> emptyUrls =
-        Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
-    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
   }
 
   @Test
@@ -1791,31 +1774,36 @@ public final class PatientResourceProviderIT {
     Assert.assertEquals(0, searchResults.getTotal());
   }
 
-    @Test
-    public void searchWithLastUpdated() {
-        List<Object> loadedRecords =
+  @Test
+  public void searchWithLastUpdated() {
+    List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-        IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-        // Build up a list of lastUpdatedURLs that return > all values values
-        String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
-        String earlyDateTime = "2019-10-01T00:00:00-04:00";
-        List<String> allUrls =
-            Arrays.asList(
-                "_lastUpdated=gt" + earlyDateTime,
-                "_lastUpdated=ge" + earlyDateTime,
-                "_lastUpdated=le" + nowDateTime,
-                "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
-                "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
-        testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 1);
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
-        // Empty searches
-        List<String> emptyUrls =
-            Arrays.asList(
-                "_lastUpdated=lt" + earlyDateTime,
-                "_lastUpdated=le" + earlyDateTime,
-                "_lastUpdated=eq" + earlyDateTime);
-        testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
-    }
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    // Build up a list of lastUpdatedURLs that return > all values values
+    String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
+    String earlyDateTime = "2019-10-01T00:00:00-04:00";
+    List<String> allUrls =
+        Arrays.asList(
+            "_lastUpdated=gt" + earlyDateTime,
+            "_lastUpdated=ge" + earlyDateTime,
+            "_lastUpdated=le" + nowDateTime,
+            "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
+            "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
+    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 1);
+
+    // Empty searches
+    List<String> emptyUrls =
+        Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
+    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
+  }
 
   /**
    * Test the set of lastUpdated values

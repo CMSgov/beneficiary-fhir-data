@@ -200,21 +200,21 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     String beneficiaryId = patient.getIdPart();
     Set<ClaimType> claimTypes = parseTypeParam(type);
+    PagingLinkBuilder paging =
+        new PagingLinkBuilder(
+            requestDetails,
+            "/ExplanationOfBenefit?",
+            ExplanationOfBenefit.SP_PATIENT,
+            beneficiaryId,
+            lastUpdated,
+            type != null ? claimTypes : null,
+            excludeSamhsa);
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
-      return TransformerUtils.createBundle(
-          requestDetails,
-          lastUpdated,
-          type != null ? claimTypes : null,
-          excludeSamhsa,
-          "/ExplanationOfBenefit?",
-          ExplanationOfBenefit.SP_PATIENT,
-          beneficiaryId,
-          eobs,
-          loadedFilterManager.getLastDatabaseUpdate());
+      return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
     }
 
     /*
@@ -263,16 +263,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
-    return TransformerUtils.createBundle(
-        requestDetails,
-        lastUpdated,
-        type != null ? claimTypes : null,
-        excludeSamhsa,
-        "/ExplanationOfBenefit?",
-        ExplanationOfBenefit.SP_PATIENT,
-        beneficiaryId,
-        eobs,
-        loadedFilterManager.getLastDatabaseUpdate());
+    return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
 
   /*

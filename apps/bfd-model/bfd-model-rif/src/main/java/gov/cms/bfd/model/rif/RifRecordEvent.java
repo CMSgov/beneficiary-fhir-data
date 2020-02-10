@@ -61,6 +61,8 @@ public final class RifRecordEvent<R extends RifRecordBase> {
     builder.append(fileEvent);
     builder.append(", recordAction=");
     builder.append(recordAction);
+    builder.append(", beneficiaryId=");
+    builder.append(beneficiaryId);
     builder.append(", record=");
     builder.append(record);
     builder.append("]");

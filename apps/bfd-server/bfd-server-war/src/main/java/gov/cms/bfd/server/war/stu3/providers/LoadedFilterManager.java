@@ -35,8 +35,10 @@ public class LoadedFilterManager {
   // The filter set
   private List<LoadedFileFilter> filters;
 
-  // Information from the database's LoadedBatch table
-  private Date lastDatabaseUpdate;
+  // Max created date from the database's LoadedBatch table
+  private Date transactionTime;
+
+  // Min created date from the databases's LoadedBatch table
   private Date firstBatchUpdate;
 
   /**
@@ -82,11 +84,11 @@ public class LoadedFilterManager {
    *
    * @return the last batch's created timestamp
    */
-  public Date getLastDatabaseUpdate() {
-    if (lastDatabaseUpdate == null) {
+  public Date getTransactionTime() {
+    if (transactionTime == null) {
       throw new RuntimeException("LoadedFilterManager has not been initialized.");
     }
-    return lastDatabaseUpdate;
+    return transactionTime;
   }
 
   /**
@@ -95,7 +97,7 @@ public class LoadedFilterManager {
    * @return the first batch's created timestamp
    */
   public Date getFirstBatchUpdate() {
-    if (lastDatabaseUpdate == null) {
+    if (transactionTime == null) {
       throw new RuntimeException("LoadedFilterManager has not been initialized.");
     }
     return firstBatchUpdate;
@@ -173,8 +175,7 @@ public class LoadedFilterManager {
   /**
    * Called periodically to build and refresh the filters list from the entityManager.
    *
-   * <p>The {@link #lastDatabaseUpdate} and {@link #firstBatchUpdate} fields are updated by this
-   * call.
+   * <p>The {@link #transactionTime} and {@link #firstBatchUpdate} fields are updated by this call.
    */
   @Scheduled(fixedDelay = 1000, initialDelay = 2000)
   public synchronized void refreshFilters() {
@@ -188,15 +189,14 @@ public class LoadedFilterManager {
     try {
       // If new batches are present, then build new filters for the affected files
       final Date currentLastDatabaseUpdate = fetchLastLoadedBatchTime();
-      if (this.lastDatabaseUpdate == null
-          || this.lastDatabaseUpdate.before(currentLastDatabaseUpdate)) {
+      if (this.transactionTime == null || this.transactionTime.before(currentLastDatabaseUpdate)) {
         LOGGER.info(
             "Refreshing LoadedFile filters with new filters from {} to {}",
-            lastDatabaseUpdate,
+            transactionTime,
             currentLastDatabaseUpdate);
-        List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastDatabaseUpdate);
+        List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.transactionTime);
         this.filters = updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
-        this.lastDatabaseUpdate = currentLastDatabaseUpdate;
+        this.transactionTime = currentLastDatabaseUpdate;
       }
 
       // If batches been trimmed, then remove filters which are no longer present
@@ -222,7 +222,7 @@ public class LoadedFilterManager {
   public void set(List<LoadedFileFilter> filters, Date firstBatchUpdate, Date lastDatabaseUpdate) {
     this.filters = filters;
     this.firstBatchUpdate = firstBatchUpdate;
-    this.lastDatabaseUpdate = lastDatabaseUpdate;
+    this.transactionTime = lastDatabaseUpdate;
   }
 
   /** @return a info about the filter manager state */
@@ -233,7 +233,7 @@ public class LoadedFilterManager {
         + ", firstFilterUpdate="
         + firstBatchUpdate
         + ", lastDatabaseUpdate="
-        + lastDatabaseUpdate
+        + transactionTime
         + "]";
   }
 
@@ -362,7 +362,7 @@ public class LoadedFilterManager {
         entityManager
             .createQuery("select min(b.created) from LoadedBatch b", Date.class)
             .getSingleResult();
-    return Optional.ofNullable(minBatchId).orElse(this.lastDatabaseUpdate);
+    return Optional.ofNullable(minBatchId).orElse(this.transactionTime);
   }
 
   /**

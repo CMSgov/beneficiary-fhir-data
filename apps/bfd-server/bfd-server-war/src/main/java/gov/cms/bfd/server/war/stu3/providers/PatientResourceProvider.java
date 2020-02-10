@@ -218,15 +218,11 @@ public final class PatientResourceProvider implements IResourceProvider {
       }
     }
 
+    PagingLinkBuilder paging =
+        new PagingLinkBuilder(
+            requestDetails, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(), lastUpdated);
     Bundle bundle =
-        TransformerUtils.createBundle(
-            requestDetails,
-            lastUpdated,
-            "/Patient?",
-            Patient.SP_RES_ID,
-            logicalId.getValue(),
-            patients,
-            loadedFilterManager.getLastDatabaseUpdate());
+        TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
     return bundle;
   }
 
@@ -264,8 +260,14 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaQuery beneficiariesQuery =
         queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
 
-    PagingArguments pagingArgs = new PagingArguments(requestDetails);
-    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, pagingArgs);
+    PagingLinkBuilder paging =
+        new PagingLinkBuilder(
+            requestDetails,
+            "/Patient?",
+            "_has:Coverage.extension",
+            coverageId.getValueAsQueryToken(null),
+            null);
+    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, paging);
     Long count = fetchResultCount(beneficiariesQuery);
 
     List<IBaseResource> patients =
@@ -290,12 +292,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     Bundle bundle =
         TransformerUtils.createBundle(
-            pagingArgs,
-            "/Patient?",
-            "_has:Coverage.extension",
-            coverageId.getValueAsQueryToken(null),
-            patients,
-            count.intValue());
+            paging, patients, count.intValue(), loadedFilterManager.getTransactionTime());
     return bundle;
   }
 
@@ -346,7 +343,8 @@ public final class PatientResourceProvider implements IResourceProvider {
         .getSingleResult();
   }
 
-  private List<Beneficiary> fetchBeneficiaries(CriteriaQuery criteria, PagingArguments pagingArgs) {
+  private List<Beneficiary> fetchBeneficiaries(
+      CriteriaQuery criteria, PagingLinkBuilder pagingArgs) {
     Query query = entityManager.createQuery(criteria);
 
     if (pagingArgs.isPagingRequested()) {
@@ -452,15 +450,11 @@ public final class PatientResourceProvider implements IResourceProvider {
       patients = new LinkedList<>();
     }
 
+    PagingLinkBuilder paging =
+        new PagingLinkBuilder(
+            requestDetails, "/Patient?", Patient.SP_IDENTIFIER, identifier.getValue(), lastUpdated);
     Bundle bundle =
-        TransformerUtils.createBundle(
-            requestDetails,
-            lastUpdated,
-            "/Patient?",
-            Patient.SP_IDENTIFIER,
-            identifier.getValue(),
-            patients,
-            loadedFilterManager.getLastDatabaseUpdate());
+        TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
     return bundle;
   }
 
@@ -704,8 +698,8 @@ public final class PatientResourceProvider implements IResourceProvider {
    *
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out include identifiers values
-   * @return List of validated header values against the {@link
-   *     VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS} list.
+   * @return List of validated header values against the VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
+   *     list.
    */
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
