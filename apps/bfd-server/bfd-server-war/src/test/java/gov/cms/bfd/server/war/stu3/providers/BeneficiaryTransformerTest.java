@@ -43,7 +43,7 @@ public final class BeneficiaryTransformerTest {
         TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
         "567834");
     assertValuesInPatientIdentifiers(
-        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+        patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
   }
 
   /**
@@ -69,7 +69,7 @@ public final class BeneficiaryTransformerTest {
         TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
         "567834");
     assertValuesInPatientIdentifiers(
-        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+        patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
     assertValuesInPatientIdentifiers(
@@ -104,7 +104,7 @@ public final class BeneficiaryTransformerTest {
         TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
         "567834");
     assertValuesInPatientIdentifiers(
-        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+        patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
     assertValuesInPatientIdentifiers(
@@ -139,7 +139,7 @@ public final class BeneficiaryTransformerTest {
         TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
         "567834");
     assertValuesInPatientIdentifiers(
-        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+        patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
     assertValuesInPatientIdentifiers(
@@ -170,7 +170,7 @@ public final class BeneficiaryTransformerTest {
         TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
         "567834");
     assertValuesInPatientIdentifiers(
-        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "somehash");
+        patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "3456789");
     assertValuesInPatientIdentifiers(
@@ -213,7 +213,7 @@ public final class BeneficiaryTransformerTest {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    // Pull out the base Beneficiary record and fix its HICN fields.
+    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
     Beneficiary beneficiary =
         parsedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -222,6 +222,7 @@ public final class BeneficiaryTransformerTest {
             .get();
     beneficiary.setHicnUnhashed(Optional.of(beneficiary.getHicn()));
     beneficiary.setHicn("somehash");
+    beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
     // Add the HICN history records to the Beneficiary, and fix their HICN fields.
     Set<BeneficiaryHistory> beneficiaryHistories =
