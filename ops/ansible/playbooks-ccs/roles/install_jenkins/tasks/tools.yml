@@ -57,7 +57,7 @@
     name: 
       - jq
 
-- name: Install -nfs-utils
+- name: Install nfs-utils
   yum:
     name:
       - nfs-utils
