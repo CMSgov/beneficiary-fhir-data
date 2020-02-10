@@ -6,10 +6,10 @@
   package: "name={{ nfs_package }} state=installed"
 
 - name: Find Jenkins EFS in current AZ
-  efs_info:
+  efs_facts:
     tags:
         name: "bfd-{{ env }}-jenkins-data"
-  register: efs_info.id
+  register: efs_facts.id
 
 - name: Ensure mount directory exists.
   file:
