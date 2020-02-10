@@ -55,6 +55,13 @@ public final class RifLoaderIT {
     loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
   }
 
+  @Ignore
+  @Test
+  public void loadSampleAWithoutClean() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabase();
+    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+  }
+
   @Test
   public void singleFileLoad() {
     RifLoaderTestUtils.doTestWithDb(

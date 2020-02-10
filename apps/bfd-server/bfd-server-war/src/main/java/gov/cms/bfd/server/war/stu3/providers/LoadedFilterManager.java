@@ -197,15 +197,16 @@ public class LoadedFilterManager {
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.transactionTime);
         this.filters = updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
         this.transactionTime = currentLastDatabaseUpdate;
-      }
 
-      // If batches been trimmed, then remove filters which are no longer present
-      final Date currentFirstBatchUpdate = fetchFirstLoadedBatchTime();
-      if (this.firstBatchUpdate == null || this.firstBatchUpdate.before(currentFirstBatchUpdate)) {
-        LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
-        List<LoadedFile> loadedFiles = fetchLoadedFiles();
-        this.filters = trimFilters(this.filters, loadedFiles);
-        this.firstBatchUpdate = currentFirstBatchUpdate;
+        // If batches been trimmed, then remove filters which are no longer present
+        final Date currentFirstBatchUpdate = fetchFirstLoadedBatchTime();
+        if (this.firstBatchUpdate == null
+            || this.firstBatchUpdate.before(currentFirstBatchUpdate)) {
+          LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
+          List<LoadedFile> loadedFiles = fetchLoadedFiles();
+          this.filters = trimFilters(this.filters, loadedFiles);
+          this.firstBatchUpdate = currentFirstBatchUpdate;
+        }
       }
     } catch (Exception ex) {
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
