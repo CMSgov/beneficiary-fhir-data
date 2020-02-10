@@ -5,14 +5,11 @@
 - name: Ensure NFS is installed.
   package: "name={{ nfs_package }} state=installed"
 
-- name: Searching all EFS instances with tag Name = 'myTestNameTag', in subnet 'subnet-1a2b3c4d' and with security group 'sg-4d3c2b1a'
+- name: Find Jenkins EFS in current AZ
   efs_info:
     tags:
-        name: myTestNameTag
-    targets:
-        - subnet-1a2b3c4d
-        - sg-4d3c2b1a
-  register: result
+        name: "bfd-{{ env }}-jenkins-data"
+  register: efs_info.id
 
 - name: Ensure mount directory exists.
   file:
@@ -29,7 +26,7 @@
 - name: Ensure EFS volume is mounted.
   mount:
     name: "{{ efs_mount_dir }}"
-    src: "{{ aws_current_az.content }}.{{ efs_file_system_id }}.efs.{{ aws_region }}.amazonaws.com:/"
+    src: "{{ aws_current_az.content }}.{{ efs_info.id }}.efs.{{ aws_region }}.amazonaws.com:/"
     fstype: nfs4
     opts: nfsvers=4.1
     state: mounted
