@@ -28,6 +28,8 @@ public final class LoadAppOptions implements Serializable {
   private final DataSource databaseDataSource;
   private final int loaderThreads;
   private final boolean idempotencyRequired;
+  private final boolean fixupsEnabled;
+  private final int fixupThreads;
 
   /**
    * Constructs a new {@link LoadAppOptions} instance.
@@ -39,6 +41,8 @@ public final class LoadAppOptions implements Serializable {
    * @param databasePassword the value to use for {@link #getDatabasePassword()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
+   * @param fixupsEnabled the value to use for {@link #isFixupsEnabled()}
+   * @param fixupThreads the value fot use for {@link #getFixupThreads()}
    */
   public LoadAppOptions(
       int hicnHashIterations,
@@ -47,7 +51,9 @@ public final class LoadAppOptions implements Serializable {
       String databaseUsername,
       char[] databasePassword,
       int loaderThreads,
-      boolean idempotencyRequired) {
+      boolean idempotencyRequired,
+      boolean fixupsEnabled,
+      int fixupThreads) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
 
     this.hicnHashIterations = hicnHashIterations;
@@ -58,6 +64,8 @@ public final class LoadAppOptions implements Serializable {
     this.databaseDataSource = null;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
+    this.fixupsEnabled = fixupsEnabled;
+    this.fixupThreads = fixupThreads;
   }
 
   /**
@@ -68,13 +76,17 @@ public final class LoadAppOptions implements Serializable {
    * @param databaseDataSource the value to use for {@link #getDatabaseDataSource()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
+   * @param fixupsEnabled the value to use for {@link #isFixupsEnabled()}
+   * @param fixupThreads the value fot use for {@link #getFixupThreads()}
    */
   public LoadAppOptions(
       int hicnHashIterations,
       byte[] hicnHashPepper,
       DataSource databaseDataSource,
       int loaderThreads,
-      boolean idempotencyRequired) {
+      boolean idempotencyRequired,
+      boolean fixupsEnabled,
+      int fixupThreads) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
 
     this.hicnHashIterations = hicnHashIterations;
@@ -85,6 +97,8 @@ public final class LoadAppOptions implements Serializable {
     this.databaseDataSource = databaseDataSource;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
+    this.fixupsEnabled = fixupsEnabled;
+    this.fixupThreads = fixupThreads;
   }
 
   /**
@@ -155,6 +169,24 @@ public final class LoadAppOptions implements Serializable {
     return idempotencyRequired;
   }
 
+  /**
+   * Feature flag for fixups processing
+   *
+   * @return is enabled
+   */
+  public boolean isFixupsEnabled() {
+    return fixupsEnabled;
+  }
+
+  /**
+   * Feature flag for fixups processing
+   *
+   * @return is enabled
+   */
+  public int getFixupThreads() {
+    return fixupThreads;
+  }
+
   /** @see java.lang.Object#toString() */
   @Override
   public String toString() {
@@ -175,6 +207,10 @@ public final class LoadAppOptions implements Serializable {
     builder.append(loaderThreads);
     builder.append(", idempotencyRequired=");
     builder.append(idempotencyRequired);
+    builder.append(", fixupEnabled=");
+    builder.append(fixupsEnabled);
+    builder.append(", fixupThreads=");
+    builder.append(fixupThreads);
     builder.append("]");
     return builder.toString();
   }

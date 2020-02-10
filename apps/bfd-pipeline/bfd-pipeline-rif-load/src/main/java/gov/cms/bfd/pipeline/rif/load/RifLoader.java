@@ -88,6 +88,7 @@ public final class RifLoader implements AutoCloseable {
   private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final SecretKeyFactory secretKeyFactory;
+  private final RifLoaderIdleTasks idleTasks;
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -105,6 +106,17 @@ public final class RifLoader implements AutoCloseable {
     this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
     this.secretKeyFactory = createSecretKeyFactory();
+    this.idleTasks =
+        new RifLoaderIdleTasks(options, appMetrics, entityManagerFactory, secretKeyFactory);
+  }
+
+  /**
+   * Get the IdleTask manager associated with this loader. Useful for testing.
+   *
+   * @return the RifLoaderIdleTasks associated with this
+   */
+  public RifLoaderIdleTasks getIdleTasks() {
+    return idleTasks;
   }
 
   /**
@@ -238,6 +250,11 @@ public final class RifLoader implements AutoCloseable {
     }
 
     return result.get();
+  }
+
+  /** Do the idle tasks on the database. */
+  public void doIdleTask() {
+    idleTasks.doIdleTask();
   }
 
   /**
@@ -403,11 +420,15 @@ public final class RifLoader implements AutoCloseable {
 
     // If these are Beneficiary records, first hash their HICNs.
     if (rifFileType == RifFileType.BENEFICIARY) {
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         hashBeneficiaryHicn(fileEventMetrics, rifRecordEvent);
+        hashBeneficiaryMbi(fileEventMetrics, rifRecordEvent);
+      }
     } else if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         hashBeneficiaryHistoryHicn(fileEventMetrics, rifRecordEvent);
+        hashBeneficiaryHistoryMbi(fileEventMetrics, rifRecordEvent);
+      }
     }
 
     // Only one of each failure/success Timer.Contexts will be applied.
@@ -623,6 +644,38 @@ public final class RifLoader implements AutoCloseable {
 
   /**
    * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
+   * Beneficiary}, computes the {@link Beneficiary#getMedicareBeneficiaryId()} ()} property to a
+   * cryptographic hash of its current value. This is done for security purposes, and the Blue
+   * Button API frontend applications know how to compute the exact same hash, which allows the two
+   * halves of the system to interoperate.
+   *
+   * <p>All other {@link RifRecordEvent}s are left unmodified.
+   *
+   * @param metrics the {@link MetricRegistry} to use
+   * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
+   */
+  private void hashBeneficiaryMbi(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
+
+    Timer.Context timerHashing =
+        metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "mbisHashed")).time();
+
+    Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
+
+    // set the hashed MBI
+    beneficiary
+        .getMedicareBeneficiaryId()
+        .ifPresent(
+            mbi -> {
+              String mbiHash = computeMbiHash(options, secretKeyFactory, mbi);
+              beneficiary.setMbiHash(Optional.of(mbiHash));
+            });
+
+    timerHashing.stop();
+  }
+
+  /**
+   * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
    * BeneficiaryHistory}, switches the {@link BeneficiaryHistory#getHicn()} property to a
    * cryptographic hash of its current value. This is done for security purposes, and the Blue
    * Button API frontend applications know how to compute the exact same hash, which allows the two
@@ -653,6 +706,39 @@ public final class RifLoader implements AutoCloseable {
     timerHashing.stop();
   }
 
+  /**
+   * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
+   * BeneficiaryHistory}, switches the {@link BeneficiaryHistory#getHicn()} property to a
+   * cryptographic hash of its current value. This is done for security purposes, and the Blue
+   * Button API frontend applications know how to compute the exact same hash, which allows the two
+   * halves of the system to interoperate.
+   *
+   * <p>All other {@link RifRecordEvent}s are left unmodified.
+   *
+   * @param metrics the {@link MetricRegistry} to use
+   * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
+   */
+  private void hashBeneficiaryHistoryMbi(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
+      return;
+
+    Timer.Context timerHashing =
+        metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "mbisHashed")).time();
+
+    BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
+
+    // set the hashed MBI
+    beneficiaryHistory
+        .getMedicareBeneficiaryId()
+        .ifPresent(
+            mbi -> {
+              String mbiHash = computeMbiHash(options, secretKeyFactory, mbi);
+              beneficiaryHistory.setMbiHash(Optional.of(mbiHash));
+            });
+
+    timerHashing.stop();
+  }
+
   /** @return a new {@link SecretKeyFactory} for the <code>PBKDF2WithHmacSHA256</code> algorithm */
   static SecretKeyFactory createSecretKeyFactory() {
     try {
@@ -674,15 +760,35 @@ public final class RifLoader implements AutoCloseable {
    */
   static String computeHicnHash(
       LoadAppOptions options, SecretKeyFactory secretKeyFactory, String hicn) {
+    return computeIdentifierHash(options, secretKeyFactory, hicn);
+  }
+
+  /**
+   * Computes a one-way cryptographic hash of the specified MBI value.
+   *
+   * @param options the {@link LoadAppOptions} to use
+   * @param secretKeyFactory the {@link SecretKeyFactory} to use
+   * @param mbi the Medicare beneficiary id to be hashed
+   * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
+   */
+  static String computeMbiHash(
+      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String mbi) {
+    return computeIdentifierHash(options, secretKeyFactory, mbi);
+  }
+
+  private static String computeIdentifierHash(
+      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String identifier) {
     try {
       /*
        * Our approach here is NOT using a salt, as salts must be randomly
        * generated for each value to be hashed and then included in
        * plaintext with the hash results. Random salts would prevent the
        * Blue Button API frontend systems from being able to produce equal
-       * hashes for the same HICNs. Instead, we use a secret "pepper" that
+       * hashes for the same identifiers. Instead, we use a secret "pepper" that
        * is shared out-of-band with the frontend. This value MUST be kept
        * secret.
+       *
+       * We are re-using the same pepper between HICNs and MBIs
        */
       byte[] salt = options.getHicnHashPepper();
 
@@ -693,11 +799,12 @@ public final class RifLoader implements AutoCloseable {
        */
       int derivedKeyLength = 256;
 
-      PBEKeySpec hicnKeySpec =
+      /* We're reusing the same hicn hash iterations, so the algorithm is exactly the same */
+      PBEKeySpec keySpec =
           new PBEKeySpec(
-              hicn.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
-      SecretKey hicnSecret = secretKeyFactory.generateSecret(hicnKeySpec);
-      String hexEncodedHash = Hex.encodeHexString(hicnSecret.getEncoded());
+              identifier.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
+      SecretKey secret = secretKeyFactory.generateSecret(keySpec);
+      String hexEncodedHash = Hex.encodeHexString(secret.getEncoded());
 
       return hexEncodedHash;
     } catch (InvalidKeySpecException e) {

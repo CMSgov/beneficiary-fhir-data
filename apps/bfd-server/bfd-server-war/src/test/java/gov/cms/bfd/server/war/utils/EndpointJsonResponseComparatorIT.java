@@ -26,7 +26,6 @@ import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvide
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import gov.cms.bfd.server.war.stu3.providers.MedicareSegment;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 import gov.cms.bfd.server.war.stu3.providers.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.io.File;
@@ -322,8 +321,7 @@ public final class EndpointJsonResponseComparatorIT {
   /**
    * @return the results of the {@link
    *     PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation when {@link
-   *     ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersMode)} set to {@link
-   *     IncludeIdentifiersMode#INCLUDE_HICNS_AND_MBIS}
+   *     ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to "hicn,mbi"
    */
   public static String patientReadWithIncludeIdentifiers() {
     List<Object> loadedRecords =
@@ -337,7 +335,7 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -374,8 +372,8 @@ public final class EndpointJsonResponseComparatorIT {
   /**
    * @return the results of the {@link
    *     PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)} operation
-   *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersMode)} set to
-   *     {@link IncludeIdentifiersMode#INCLUDE_HICNS_AND_MBIS}
+   *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
+   *     "hicn, mbi"
    */
   public static String patientSearchByIdWithIncludeIdentifiers() {
     List<Object> loadedRecords =
@@ -389,7 +387,7 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -435,8 +433,8 @@ public final class EndpointJsonResponseComparatorIT {
   /**
    * @return the results of the {@link
    *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
-   *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersMode)} set to
-   *     {@link IncludeIdentifiersMode#INCLUDE_HICNS_AND_MBIS}
+   *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
+   *     "hicn,mbi"
    */
   public static String patientByIdentifierWithIncludeIdentifiers() {
     List<Object> loadedRecords =
@@ -450,7 +448,7 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS);
+    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 

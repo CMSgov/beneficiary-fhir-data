@@ -12,6 +12,9 @@
 	<!-- At 'debug', Hibernate will log SQL statements. -->
 	<logger name="org.hibernate.SQL" level="info" />
 
+  <!-- At 'debug', will display timing information about the idle task batches -->
+	<logger name="gov.cms.bfd.pipeline.rif.load" level="info" />
+
 	<!-- At 'trace', Hibernate will log SQL parameter values. -->
 	<logger name="org.hibernate.type" level="info" />
 	

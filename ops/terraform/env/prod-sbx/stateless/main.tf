@@ -20,4 +20,5 @@ module "stateless" {
   ssh_key_name        = var.ssh_key_name
   git_branch_name     = var.git_branch_name
   git_commit_id       = var.git_commit_id
+  is_public           = true
 }

@@ -1,5 +1,58 @@
 # API Changelog
 
+## BLUEBUTTON-1784: Search for patients by ptdcntrct
+
+The Patient resource supports searching a part D Contract Number for a given month:
+
+Requests using this feature should be of the form `v1/fhir/Patient/?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month code>|<contract id>`.
+For example: `v1/fhir/Patient/?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct02|S0000`
+
+#### valid parameter systems:
+```
+https://bluebutton.cms.gov/resources/variables/ptdcntrct01
+https://bluebutton.cms.gov/resources/variables/ptdcntrct02
+https://bluebutton.cms.gov/resources/variables/ptdcntrct03
+https://bluebutton.cms.gov/resources/variables/ptdcntrct04
+https://bluebutton.cms.gov/resources/variables/ptdcntrct05
+https://bluebutton.cms.gov/resources/variables/ptdcntrct06
+https://bluebutton.cms.gov/resources/variables/ptdcntrct07
+https://bluebutton.cms.gov/resources/variables/ptdcntrct08
+https://bluebutton.cms.gov/resources/variables/ptdcntrct09
+https://bluebutton.cms.gov/resources/variables/ptdcntrct10
+https://bluebutton.cms.gov/resources/variables/ptdcntrct11
+https://bluebutton.cms.gov/resources/variables/ptdcntrct12
+```
+
+## BLUEBUTTON-1536: Extend `IncludeIdentifiers` header options for the Patient Resource
+
+The `IncludeIdentifiers` header has been extended to handle values of [ "true", "hicn", "mbi' ]. 
+
+To enable this, set an "`IncludeIdentifiers: <value>`" HTTP header in the `/Patient` request.
+
+Multiple values can be seperated by a comma (","). For example, "`IncludeIdentifiers: hicn,mbi`" .
+
+The following table describes the response behaviors:
+
+
+HEADER: IncludeIdentifier | Response Behavior
+--- | ---
+\<blank\> | omit HICN and MBI
+false | omit HICN and MBI
+true | include HICN and MBI
+hicn | include HICN
+mbi | include MBI
+hicn,mbi or mbi,hicn | include HICN and MBI
+\<any invalid value\> | Throws an InvalidRequest exception (400 HTTP status code)
+
+
+## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
+
+The Patient resource supports searching by a hashed MBI identifier:
+
+```
+https://bluebutton.cms.gov/resources/identifier/mbi-hash
+```
+
 ## BLUEBUTTON-1191: Allow Filtering of EOB Searches by type
 
 A new optional query parameter has been added to `ExplanationOfBenefit` searches that will filter the returned results by `type`.

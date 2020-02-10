@@ -21,6 +21,7 @@ module "stateful" {
     {name="effective_io_concurrency", value="300", apply_on_reboot=false},
     {name="default_statistics_target", value="1000", apply_on_reboot=false},
     {name="max_worker_processes", value="96", apply_on_reboot=true},
+    {name="max_wal_senders", value="15", apply_on_reboot=true},
     {name="max_parallel_workers_per_gather", value="48", apply_on_reboot=false},
     {name="random_page_cost", value="1", apply_on_reboot=false},
     {name="temp_buffers", value="8192", apply_on_reboot=false},
@@ -38,4 +39,11 @@ module "stateful" {
   }
 
   victor_ops_url      = var.victor_ops_url
+
+  medicare_opt_out_config = {
+    # TODO: add read roles for DPC
+    read_roles        = []
+    write_roles       = ["arn:aws:iam::755619740999:role/bcda-prod-nfs-instance"]
+    admin_users       = ["arn:aws:iam::577373831711:user/DS7H", "arn:aws:iam::577373831711:user/VZG9", "arn:aws:iam::577373831711:user/BYSK"]
+  }
 }
