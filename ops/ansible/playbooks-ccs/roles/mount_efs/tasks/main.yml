@@ -5,6 +5,15 @@
 - name: Ensure NFS is installed.
   package: "name={{ nfs_package }} state=installed"
 
+- name: Searching all EFS instances with tag Name = 'myTestNameTag', in subnet 'subnet-1a2b3c4d' and with security group 'sg-4d3c2b1a'
+  efs_info:
+    tags:
+        name: myTestNameTag
+    targets:
+        - subnet-1a2b3c4d
+        - sg-4d3c2b1a
+  register: result
+
 - name: Ensure mount directory exists.
   file:
     path: "{{ efs_mount_dir }}"
