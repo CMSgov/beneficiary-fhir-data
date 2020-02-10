@@ -39,7 +39,7 @@ __Summary:__ This playbook and associated roles configures a CCS Gold Image with
          - Device: /dev/sdf 
          - Filesystem: xfs 
    - Build the Jenkins AMI from within the Ansible/ directory of the ops code (i.e. bfd-ops) by running the following command to build AND configure the Jenkins instance and volume for the first time. 
-     - *packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' update_jenkins.json*
+     - *packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' build_jenkins.json*
    - Note the AMI ID that was created. You'll update the terraform variables at a later stage to deploy this.
    
 ##### Post Installation Config 
