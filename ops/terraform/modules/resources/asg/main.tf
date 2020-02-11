@@ -271,7 +271,7 @@ resource "aws_cloudwatch_metric_alarm" "low-cpu" {
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = 60
+  period              = 120
   statistic           = "Average"
   threshold           = 20
 
