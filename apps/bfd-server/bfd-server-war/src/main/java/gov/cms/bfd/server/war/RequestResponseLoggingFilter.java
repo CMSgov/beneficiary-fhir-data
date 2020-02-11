@@ -82,7 +82,7 @@ public final class RequestResponseLoggingFilter implements Filter {
         String headerName = headerNames.nextElement();
         List<String> headerValues = Collections.list(servletRequest.getHeaders(headerName));
         if (headerValues.isEmpty())
-          MDC.put(computeMdcRequestKey("request.header." + headerName), "");
+          MDC.put(computeMdcRequestKey("header." + headerName), "");
         else if (headerValues.size() == 1)
           MDC.put(computeMdcRequestKey("header." + headerName), headerValues.get(0));
         else MDC.put(computeMdcRequestKey("header." + headerName), headerValues.toString());
