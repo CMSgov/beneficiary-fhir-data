@@ -200,8 +200,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     String beneficiaryId = patient.getIdPart();
     Set<ClaimType> claimTypes = parseTypeParam(type);
-    PagingLinkBuilder paging =
-        new PagingLinkBuilder(
+    PageLinkBuilder paging =
+        new PageLinkBuilder(
             requestDetails,
             "/ExplanationOfBenefit?",
             ExplanationOfBenefit.SP_PATIENT,

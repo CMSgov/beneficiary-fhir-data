@@ -2908,7 +2908,7 @@ public final class TransformerUtils {
   /**
    * Create a bundle from the entire search result
    *
-   * @param paging contains the {@link PagingLinkBuilder} information
+   * @param paging contains the {@link PageLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
    * @param transactionTime date for the bundle
@@ -2916,7 +2916,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PagingLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
+      PageLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
     if (paging.isPagingRequested()) {
       /*
@@ -2927,7 +2927,7 @@ public final class TransformerUtils {
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
-      paging.addPagingLinks(bundle, resources.size());
+      paging.addPageLinks(bundle, resources.size());
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
@@ -2953,7 +2953,7 @@ public final class TransformerUtils {
   /**
    * Create a bundle from one page of resources
    *
-   * @param paging a {@link PagingLinkBuilder} used to determine if paging is requested and the
+   * @param paging a {@link PageLinkBuilder} used to determine if paging is requested and the
    *     parameters for doing so. The resources list is trimmed to fit the requested page.
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
@@ -2962,11 +2962,11 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PagingLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
+      PageLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
     Bundle bundle = new Bundle();
 
     if (paging.isPagingRequested()) {
-      paging.addPagingLinks(bundle, total);
+      paging.addPageLinks(bundle, total);
     }
 
     bundle = TransformerUtils.addResourcesToBundle(bundle, resources);

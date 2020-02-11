@@ -91,7 +91,8 @@
       } ],
       "searchParam" : [ {
         "name" : "_has:Coverage",
-        "type" : "token"
+        "type" : "token",
+        "documentation" : "Part D coverage type"
       }, {
         "name" : "_id",
         "type" : "token",
@@ -114,7 +115,8 @@
         "documentation" : "The offset used for result pagination"
       }, {
         "name" : "startIndex",
-        "type" : "string"
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
       }, {
         "name" : "startIndex",
         "type" : "string",

@@ -157,8 +157,8 @@ public final class CoverageResourceProvider implements IResourceProvider {
       coverages = new LinkedList<IBaseResource>();
     }
 
-    PagingLinkBuilder paging =
-        new PagingLinkBuilder(
+    PageLinkBuilder paging =
+        new PageLinkBuilder(
             requestDetails,
             "/Coverage?",
             Coverage.SP_BENEFICIARY,

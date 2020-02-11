@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * PagingArguments encapsulates the arguments related to paging for the
  * {@link ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
  */
-public final class PagingLinkBuilder {
+public final class PageLinkBuilder {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
@@ -32,7 +32,7 @@ public final class PagingLinkBuilder {
   private final String excludeSamhsa;
   private final Set<ClaimType> claimTypes;
 
-  public PagingLinkBuilder(
+  public PageLinkBuilder(
       RequestDetails requestDetails,
       String resource,
       String searchByDesc,
@@ -51,7 +51,7 @@ public final class PagingLinkBuilder {
     this.excludeSamhsa = excludeSamhsa;
   }
 
-  public PagingLinkBuilder(
+  public PageLinkBuilder(
       RequestDetails requestDetails,
       String resource,
       String searchByDesc,
@@ -132,27 +132,27 @@ public final class PagingLinkBuilder {
    * @param toBundle to add the links
    * @param numTotalResults from the search
    */
-  public void addPagingLinks(Bundle toBundle, int numTotalResults) {
+  public void addPageLinks(Bundle toBundle, int numTotalResults) {
     Integer pageSize = getPageSize();
     Integer startIndex = getStartIndex();
 
     toBundle.addLink(
         new Bundle.BundleLinkComponent()
             .setRelation(Constants.LINK_FIRST)
-            .setUrl(createPagingLink(0)));
+            .setUrl(createPageLink(0)));
 
     if (startIndex + pageSize < numTotalResults) {
       toBundle.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_NEXT)
-              .setUrl(createPagingLink(startIndex + pageSize)));
+              .setUrl(createPageLink(startIndex + pageSize)));
     }
 
     if (startIndex > 0) {
       toBundle.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_PREVIOUS)
-              .setUrl(createPagingLink(Math.max(startIndex - pageSize, 0))));
+              .setUrl(createPageLink(Math.max(startIndex - pageSize, 0))));
     }
 
     /*
@@ -168,7 +168,7 @@ public final class PagingLinkBuilder {
     toBundle.addLink(
         new Bundle.BundleLinkComponent()
             .setRelation(Constants.LINK_LAST)
-            .setUrl(createPagingLink(lastIndex)));
+            .setUrl(createPageLink(lastIndex)));
   }
 
   /**
@@ -177,7 +177,7 @@ public final class PagingLinkBuilder {
    * @param startIndex start index
    * @return the link requested
    */
-  private String createPagingLink(int startIndex) {
+  private String createPageLink(int startIndex) {
     StringBuilder b = new StringBuilder();
     b.append(serverBase);
     b.append(resource);

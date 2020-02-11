@@ -218,8 +218,8 @@ public final class PatientResourceProvider implements IResourceProvider {
       }
     }
 
-    PagingLinkBuilder paging =
-        new PagingLinkBuilder(
+    PageLinkBuilder paging =
+        new PageLinkBuilder(
             requestDetails, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(), lastUpdated);
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
@@ -230,8 +230,12 @@ public final class PatientResourceProvider implements IResourceProvider {
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      @RequiredParam(name = "_has:Coverage.extension") TokenParam coverageId,
-      @OptionalParam(name = "startIndex") String startIndex,
+      @RequiredParam(name = "_has:Coverage.extension")
+          @Description(shortDefinition = "Part D coverage type")
+          TokenParam coverageId,
+      @OptionalParam(name = "startIndex")
+          @Description(shortDefinition = "The offset used for result pagination")
+          String startIndex,
       RequestDetails requestDetails) {
 
     if (coverageId.getQueryParameterQualifier() != null)
@@ -260,8 +264,8 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaQuery beneficiariesQuery =
         queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
 
-    PagingLinkBuilder paging =
-        new PagingLinkBuilder(
+    PageLinkBuilder paging =
+        new PageLinkBuilder(
             requestDetails,
             "/Patient?",
             "_has:Coverage.extension",
@@ -343,8 +347,7 @@ public final class PatientResourceProvider implements IResourceProvider {
         .getSingleResult();
   }
 
-  private List<Beneficiary> fetchBeneficiaries(
-      CriteriaQuery criteria, PagingLinkBuilder pagingArgs) {
+  private List<Beneficiary> fetchBeneficiaries(CriteriaQuery criteria, PageLinkBuilder pagingArgs) {
     Query query = entityManager.createQuery(criteria);
 
     if (pagingArgs.isPagingRequested()) {
@@ -450,8 +453,8 @@ public final class PatientResourceProvider implements IResourceProvider {
       patients = new LinkedList<>();
     }
 
-    PagingLinkBuilder paging =
-        new PagingLinkBuilder(
+    PageLinkBuilder paging =
+        new PageLinkBuilder(
             requestDetails, "/Patient?", Patient.SP_IDENTIFIER, identifier.getValue(), lastUpdated);
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
