@@ -1,6 +1,6 @@
 ---
 ##
-# Configures the LSS zone's build server (e.g. Jenkins).
+# Updates the exiswting BFD Build Server, Jenkins
 ##
 - name: Update Build Server Jenkins
   hosts: all

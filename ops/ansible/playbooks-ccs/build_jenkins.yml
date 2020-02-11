@@ -1,6 +1,6 @@
 ---
 ##
-# Configures the LSS zone's build server (e.g. Jenkins).
+# Installs and Configures the BFD Build Server, Jenkins
 ##
 - name: Install and Configure Build Server
   hosts: all
@@ -9,7 +9,7 @@
   gather_facts: no
   vars_files:
     - host_vars/builds.bfd-mgmt.cmscloud.local/vault.yml
-    - host_vars/builds.bfd-mgmt.cmscloud.local/000_cross_env_vars.yml
+    - vars/000_cross_env_vars.yml
   vars:
     ansible_ssh_pipelining: no
     env: mgmt
