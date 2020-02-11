@@ -218,6 +218,11 @@ resource "aws_iam_role_policy_attachment" "packer_S3" {
   policy_arn = aws_iam_policy.packer_s3.arn
 }
 
+resource "aws_iam_role_policy_attachment" "packer_EFS" {
+  role       = aws_iam_role.packer.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess"
+}
+
 # IAM policy, user, and attachment to allow GitHub Actions
 # to perform app integration testing against S3
 
