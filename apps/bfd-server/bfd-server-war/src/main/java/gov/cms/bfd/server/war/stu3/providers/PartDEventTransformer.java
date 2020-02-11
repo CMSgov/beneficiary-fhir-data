@@ -354,6 +354,7 @@ final class PartDEventTransformer {
           CcwCodebookVariable.SUBMSN_CLR_CD,
           claimGroup.getSubmissionClarificationCode());
 
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }

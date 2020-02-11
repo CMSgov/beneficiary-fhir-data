@@ -2,8 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -55,6 +53,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -63,7 +62,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -2908,59 +2906,85 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param pagingArgs a {@link PagingArguments} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param resourceType the {@link String} the resource being provided by the paging link
-   * @param identifier the {@link String} field the search is being performed on
-   * @param value the {@link String} value of the identifier being searched for
+   * Create a bundle from the entire search result
+   *
+   * @param paging contains the {@link PageLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param transactionTime date for the bundle
    * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PagingArguments pagingArgs,
-      String resourceType,
-      String identifier,
-      String value,
-      List<IBaseResource> resources) {
+      PageLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
-    if (pagingArgs.isPagingRequested()) {
+    if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
        * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
        * working correctly.
        */
-      int endIndex =
-          Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList =
-          resources.subList(pagingArgs.getStartIndex(), endIndex);
+      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+      List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
-      TransformerUtils.addPagingLinks(
-          pagingArgs, bundle, resourceType, identifier, value, resources.size());
+      paging.addPageLinks(bundle, resources.size());
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
 
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
+     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
+     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
     bundle.setTotal(resources.size());
     return bundle;
   }
 
+  /**
+   * Create a bundle from one page of resources
+   *
+   * @param paging a {@link PageLinkBuilder} used to determine if paging is requested and the
+   *     parameters for doing so. The resources list is trimmed to fit the requested page.
+   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
+   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param total number of resources in the entire search result
+   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
+   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
+   */
   public static Bundle createBundle(
-      PagingArguments pagingArgs,
-      String resourceType,
-      String identifier,
-      String value,
-      List<IBaseResource> resources,
-      int total) {
+      PageLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
     Bundle bundle = new Bundle();
 
-    if (pagingArgs.isPagingRequested()) {
-      TransformerUtils.addPagingLinks(pagingArgs, bundle, resourceType, identifier, value, total);
+    if (paging.isPagingRequested()) {
+      paging.addPageLinks(bundle, total);
     }
 
     bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
 
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
+     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
+     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
     bundle.setTotal(total);
     return bundle;
   }
@@ -2977,92 +3001,7 @@ public final class TransformerUtils {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
     }
-
     return bundle;
-  }
-
-  /**
-   * @param pagingArgs a {@link PagingArguments} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param bundle the {@link Bundle} to which links are being added
-   * @param resource the {@link String} the resource being provided by the paging link
-   * @param searchByDesc the {@link String} field the search is being performed on
-   * @param identifier the {@link String} identifier being searched for
-   * @param numTotalResults the number of total resources matching the {@link
-   *     Beneficiary#getBeneficiaryId()}
-   */
-  public static void addPagingLinks(
-      PagingArguments pagingArgs,
-      Bundle bundle,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      int numTotalResults) {
-
-    Integer pageSize = pagingArgs.getPageSize();
-    Integer startIndex = pagingArgs.getStartIndex();
-    String serverBase = pagingArgs.getServerBase();
-
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_FIRST)
-            .setUrl(
-                createPagingLink(serverBase + resource, searchByDesc, identifier, 0, pageSize)));
-
-    if (startIndex + pageSize < numTotalResults) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_NEXT)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      startIndex + pageSize,
-                      pageSize)));
-    }
-
-    if (startIndex > 0) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_PREVIOUS)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      Math.max(startIndex - pageSize, 0),
-                      pageSize)));
-    }
-
-    /*
-     * This formula rounds numTotalResults down to the nearest multiple of pageSize
-     * that's less than and not equal to numTotalResults
-     */
-    int lastIndex;
-    try {
-      lastIndex = (numTotalResults - 1) / pageSize * pageSize;
-    } catch (ArithmeticException e) {
-      throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
-    }
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_LAST)
-            .setUrl(
-                createPagingLink(
-                    serverBase + resource, searchByDesc, identifier, lastIndex, pageSize)));
-  }
-
-  /** @return Returns the URL string for a paging link. */
-  private static String createPagingLink(
-      String baseURL, String descriptor, String id, int startIndex, int theCount) {
-    StringBuilder b = new StringBuilder();
-    b.append(baseURL);
-    b.append(Constants.PARAM_COUNT + "=" + theCount);
-    b.append("&startIndex=" + startIndex);
-    b.append("&" + descriptor + "=" + id);
-
-    return b.toString();
   }
 
   /**
@@ -3103,5 +3042,35 @@ public final class TransformerUtils {
         String.format("%s.duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
     MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+  }
+
+  /**
+   * Sets the lastUpdated value in the resource
+   *
+   * @param resource is the FHIR resource to set LastUp
+   * @param lastUpdated is the lastUpdated value from the entity
+   */
+  public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+    lastUpdated.ifPresent(
+        value -> {
+          resource.getMeta().setLastUpdated(value);
+        });
+  }
+
+  /**
+   * Sets the lastUpdated value in the resource if the passed in value is later than the current
+   * value.
+   *
+   * @param resource is the FHIR resource to update
+   * @param lastUpdated is the lastUpdated value from the entity
+   */
+  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+    lastUpdated.ifPresent(
+        newDate -> {
+          Date currentDate = resource.getMeta().getLastUpdated();
+          if (currentDate != null && newDate.after(currentDate)) {
+            resource.getMeta().setLastUpdated(newDate);
+          }
+        });
   }
 }

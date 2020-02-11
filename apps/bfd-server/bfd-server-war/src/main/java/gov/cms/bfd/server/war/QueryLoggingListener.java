@@ -169,6 +169,10 @@ public final class QueryLoggingListener implements QueryExecutionListener {
 
     EOBS_BY_BENE_ID_SNF("eobs_by_bene_id.snf", (s -> s.contains(" from \"SNFClaims\" "))),
 
+    LOADED_BATCH("loaded_batch", (s -> s.contains(" from \"LoadedBatches\" "))),
+
+    LOADED_FILE("loaded_file", (s -> s.contains(" from \"LoadedFiles\" "))),
+
     UNKNOWN("unknown", null);
 
     private final String id;

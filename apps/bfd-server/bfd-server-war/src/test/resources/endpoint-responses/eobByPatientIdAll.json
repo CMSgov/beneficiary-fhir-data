@@ -14,6 +14,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "outpatient-1234567890",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt",
         "valueMoney" : {
@@ -625,6 +628,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "dme-2188888888",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
         "id" : "1",
@@ -1111,6 +1117,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "hha-2925555555",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
@@ -1520,6 +1529,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "inpatient-333333222222",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
         "valueMoney" : {
@@ -2271,6 +2283,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "snf-777777777",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
         "valueMoney" : {
@@ -2880,6 +2895,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "pde-89",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/pde_id",
         "value" : "89"
@@ -3322,6 +3340,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "carrier-9991831999",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
         "id" : "1",
@@ -3828,6 +3849,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "hospice-9992223422",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
