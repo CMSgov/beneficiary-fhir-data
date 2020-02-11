@@ -3,7 +3,7 @@
 # Installs additional build and deploy tools
 ###
 
-- name: Install tfenv to manage terrfaorm
+- name: Install tfenv to manage terraform
   git:
     repo: https://github.com/tfutils/tfenv.git 
     dest: ~/.tfenv
@@ -37,19 +37,19 @@
 
 - name: Create .aws directory in the home directory
   file:
-    path: "/home/{{ansible_user}}/.aws/"
+    path: "{{ jenkins_home }}/.aws/"
     state: directory
-    owner: "{{ansible_user}}"
-    group: "{{ansible_user}}"
+    owner: "jenkins"
+    group: "jenkins"
     mode: 0755
 
 - name: Copy the aws config file to the box
   sudo: yes
   template:
     src: ../templates/aws_config.j2
-    dest: "/home/{{ansible_user}}/.aws/config"
-    owner: "{{ansible_user}}"
-    group: "{{ansible_user}}"
+    dest: "{{ jenkins_home }}/.aws/config"
+    owner: "jenkins"
+    group: "jenkins"
     mode: 0600
 
 - name: Install - jq
