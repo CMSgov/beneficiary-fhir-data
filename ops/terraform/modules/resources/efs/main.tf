@@ -7,14 +7,22 @@ locals {
   tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags) 
 }
 
+data "aws_vpc" "main" {
+  filter {
+    name = "tag:Name"
+    values = ["bfd-mgmt-vpc"]
+  }
+}
+
 data "aws_subnet" "main" {
-  vpc_id            = var.env_config.vpc_id
-  availability_zone = var.az
+  vpc_id            = data.aws_vpc.main.id
+  availability_zone = var.env_config.azs
   filter {
     name    = "tag:Layer"
     values  = [var.layer] 
   }
 }
+
 
 resource "aws_efs_file_system" "efs" {
    creation_token = "bfd-${var.env_config.env}-${var.role}-efs"
@@ -27,30 +35,32 @@ resource "aws_efs_file_system" "efs" {
   }
 }
 
+resource "aws_security_group" "efs-sg" {
+  name        = "bfd-${var.env_config.env}-${var.role}-efs-sg"
+  description = "EFS Security Group"
+  vpc_id      = data.aws_vpc.main.id
+
+  // NFS
+  ingress {
+    description     = "Inbound access for EFS"
+    from_port = 2049
+    to_port = 2049
+    protocol = "tcp"
+    cidr_blocks = ["10.252.40.0/21"]
+  }
+
+  // Terraform removes the default rule
+  egress {
+    description     = "Outbound Access for EFS"
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["10.252.40.0/21"]
+  }
+}
+
 resource "aws_efs_mount_target" "efs-mnt" {
   file_system_id  = "${aws_efs_file_system.efs.id}"
   subnet_id = data.aws_subnet.main.id
-  security_groups = ["${aws_security_group.ingress-efs.id}"]
+  security_groups = ["${aws_security_group.efs-sg.id}"]
 }
-
- resource "aws_security_group" "ingress-efs" {
-   name = "ingress-efs-test-sg"
-   name = "bfd-${var.env_config.env}-${var.role}-efs"
-   vpc_id = "${aws_vpc.test-env.id}"
-
-   // NFS
-   ingress {
-     security_groups = ["${aws_security_group.ingress-test-env.id}"]
-     from_port = 2049
-     to_port = 2049
-     protocol = "tcp"
-   }
-
-   // Terraform removes the default rule
-   egress {
-     security_groups = ["${aws_security_group.ingress-test-env.id}"]
-     from_port = 0
-     to_port = 0
-     protocol = "-1"
-   }
- }

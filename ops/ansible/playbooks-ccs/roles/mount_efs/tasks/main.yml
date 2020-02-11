@@ -5,12 +5,12 @@
 - name: Ensure NFS is installed.
   package: "name={{ nfs_package }} state=installed"
 
-- name: Find Jenkins EFS in current AZ
+- name: Find Jenkins EFS
   efs_facts:
     region: "{{ aws_region }}"
     tags:
-        name: "bfd-{{ env }}-jenkins-data"
-  register: efs_facts.id
+        Name: "bfd-mgmt-test-jenkins-efs"
+  register: efsfacts
 
 - name: Ensure mount directory exists.
   file:
@@ -18,16 +18,10 @@
     state: directory
     mode: 0755
 
-- name: Get current AZ from AWS.
-  uri:
-    url: http://169.254.169.254/latest/meta-data/placement/availability-zone
-    return_content: yes
-  register: aws_current_az
-
 - name: Ensure EFS volume is mounted.
   mount:
     name: "{{ efs_mount_dir }}"
-    src: "{{ aws_current_az.content }}.{{ efs_info.id }}.efs.{{ aws_region }}.amazonaws.com:/"
+    src: "{{ efsfacts.ansible_facts.efs[0].filesystem_address }}"
     fstype: nfs4
     opts: nfsvers=4.1
     state: mounted
