@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -7,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -25,11 +27,14 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,8 +46,11 @@ public final class CoverageResourceProvider implements IResourceProvider {
   /** A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application. */
   private static final Pattern COVERAGE_ID_PATTERN = Pattern.compile("(.*)-(\\p{Alnum}+)");
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProvider.class);
+
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
+  private LoadedFilterManager loadedFilterManager;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -54,6 +62,12 @@ public final class CoverageResourceProvider implements IResourceProvider {
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
+  }
+
+  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
+  @Inject
+  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
+    this.loadedFilterManager = loadedFilterManager;
   }
 
   /** @see ca.uhn.fhir.rest.server.IResourceProvider#getResourceType() */
@@ -93,7 +107,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
     Beneficiary beneficiaryEntity;
     try {
-      beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText);
+      beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText, null);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
@@ -116,6 +130,8 @@ public final class CoverageResourceProvider implements IResourceProvider {
    *     and find matches for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
+   * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
+   *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
    * @return Returns a {@link List} of {@link Coverage}s, which may contain multiple matching
@@ -123,22 +139,33 @@ public final class CoverageResourceProvider implements IResourceProvider {
    */
   @Search
   public Bundle searchByBeneficiary(
-      @RequiredParam(name = Coverage.SP_BENEFICIARY) ReferenceParam beneficiary,
-      @OptionalParam(name = "startIndex") String startIndex,
+      @RequiredParam(name = Coverage.SP_BENEFICIARY)
+          @Description(shortDefinition = "The patient identifier to search for")
+          ReferenceParam beneficiary,
+      @OptionalParam(name = "startIndex")
+          @Description(shortDefinition = "The offset used for result pagination")
+          String startIndex,
+      @OptionalParam(name = "_lastUpdated")
+          @Description(shortDefinition = "Include resources last updated in the given range")
+          DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     List<IBaseResource> coverages;
     try {
-      Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart());
+      Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart(), lastUpdated);
       coverages = CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
     }
 
-    PagingArguments pagingArgs = new PagingArguments(requestDetails);
-    Bundle bundle =
-        TransformerUtils.createBundle(
-            pagingArgs, "/Coverage?", Coverage.SP_BENEFICIARY, beneficiary.getIdPart(), coverages);
-    return bundle;
+    PageLinkBuilder paging =
+        new PageLinkBuilder(
+            requestDetails,
+            "/Coverage?",
+            Coverage.SP_BENEFICIARY,
+            beneficiary.getIdPart(),
+            lastUpdated);
+    return TransformerUtils.createBundle(
+        paging, coverages, loadedFilterManager.getTransactionTime());
   }
 
   /**
@@ -149,12 +176,22 @@ public final class CoverageResourceProvider implements IResourceProvider {
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found in the database.
    */
-  private Beneficiary findBeneficiaryById(String beneficiaryId) throws NoResultException {
+  private Beneficiary findBeneficiaryById(String beneficiaryId, DateRangeParam lastUpdatedRange)
+      throws NoResultException {
+    // Optimize when the lastUpdated parameter is specified and result set is empty
+    if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdatedRange)) {
+      throw new NoResultException();
+    }
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
     criteria.select(root);
-    criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId));
+    Predicate wherePredicate = builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId);
+    if (lastUpdatedRange != null) {
+      Predicate predicate = QueryUtils.createLastUpdatedPredicate(builder, root, lastUpdatedRange);
+      wherePredicate = builder.and(wherePredicate, predicate);
+    }
+    criteria.where(wherePredicate);
 
     Beneficiary beneficiary = null;
     Long beneByIdQueryNanoSeconds = null;
@@ -169,7 +206,6 @@ public final class CoverageResourceProvider implements IResourceProvider {
       TransformerUtils.recordQueryInMdc(
           "bene_by_id.include_", beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
     }
-
     return beneficiary;
   }
 }

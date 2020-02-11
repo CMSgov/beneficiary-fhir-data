@@ -8,11 +8,7 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import java.sql.Date;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -205,6 +201,46 @@ public final class BeneficiaryTransformerTest {
   }
 
   /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
+   * a lastUpdated field set.
+   */
+  @Test
+  public void transformSampleARecordWithLastUpdated() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+
+    beneficiary.setLastUpdated(new Date());
+    Patient patientWithLastUpdated =
+        BeneficiaryTransformer.transform(
+            new MetricRegistry(), beneficiary, Collections.emptyList());
+    assertMatches(beneficiary, patientWithLastUpdated);
+
+    beneficiary.setLastUpdated(null);
+    Patient patientWithoutLastUpdated =
+        BeneficiaryTransformer.transform(
+            new MetricRegistry(), beneficiary, Collections.emptyList());
+    assertMatches(beneficiary, patientWithoutLastUpdated);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
+   * a lastUpdated field not set.
+   */
+  @Test
+  public void transformSampleARecordWithoutLastUpdated() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+    beneficiary.setLastUpdated(null);
+
+    Patient patient =
+        BeneficiaryTransformer.transform(
+            new MetricRegistry(), beneficiary, Collections.emptyList());
+    assertMatches(beneficiary, patient);
+  }
+
+  /**
    * @return the {@link StaticRifResourceGroup#SAMPLE_A} {@link Beneficiary} record, with the {@link
    *     Beneficiary#getBeneficiaryHistories()} and {@link
    *     Beneficiary#getMedicareBeneficiaryIdHistories()} fields populated.
@@ -286,7 +322,7 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
     Assert.assertEquals(beneficiary.getCountyCode(), patient.getAddress().get(0).getDistrict());
     Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
-    Assert.assertEquals(Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
+    Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
     if (beneficiary.getSex() == Sex.MALE.getCode())
       Assert.assertEquals(
           AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());
@@ -309,5 +345,7 @@ public final class BeneficiaryTransformerTest {
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
       TransformerTestUtils.assertExtensionDateYearEquals(
           CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), patient);
+
+    TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
   }
 }

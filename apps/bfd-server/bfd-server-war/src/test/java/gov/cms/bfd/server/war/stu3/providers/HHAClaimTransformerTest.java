@@ -170,5 +170,8 @@ public final class HHAClaimTransformerTest {
         Optional.empty(),
         Optional.of(claim.getNearLineRecordIdCode()),
         Optional.of(claim.getClaimTypeCode()));
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }

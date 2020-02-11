@@ -57,6 +57,11 @@ hicn,mbi or mbi,hicn | include HICN and MBI
 \<any invalid value\> | Throws an InvalidRequest exception (400 HTTP status code)
 
 
+## BLUEBUTTON-1506: Support for _Since Parameter
+
+Support for `_lastUpdated` as a search parameter is added for resources. RFC-0004 explains the details of the schanges.
+
+
 ## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
 
 The Patient resource supports searching by a hashed MBI identifier:

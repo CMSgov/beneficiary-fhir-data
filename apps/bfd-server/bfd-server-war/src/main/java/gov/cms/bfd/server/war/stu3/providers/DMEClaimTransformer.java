@@ -262,6 +262,7 @@ final class DMEClaimTransformer {
                     claimLine.getSupplierTypeCode()));
       }
     }
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }
