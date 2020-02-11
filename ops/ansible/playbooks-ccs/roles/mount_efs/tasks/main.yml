@@ -7,6 +7,7 @@
 
 - name: Find Jenkins EFS in current AZ
   efs_facts:
+    region: "{{ aws_region }}"
     tags:
         name: "bfd-{{ env }}-jenkins-data"
   register: efs_facts.id
