@@ -212,18 +212,18 @@ resource "aws_autoscaling_policy" "high-cpu" {
   step_adjustment {
     scaling_adjustment          = 1
     metric_interval_lower_bound = 0.0
-    metric_interval_upper_bound = 10.0
+    metric_interval_upper_bound = 15.0
   }
 
   step_adjustment {
     scaling_adjustment          = 2
-    metric_interval_lower_bound = 10.0
-    metric_interval_upper_bound = 20.0
+    metric_interval_lower_bound = 15.0
+    metric_interval_upper_bound = 35.0
   }
 
   step_adjustment {
     scaling_adjustment          = 3
-    metric_interval_lower_bound = 20.0
+    metric_interval_lower_bound = 35.0
   }
 }
 
@@ -235,7 +235,7 @@ resource "aws_cloudwatch_metric_alarm" "high-cpu" {
   namespace           = "AWS/EC2"
   period              = 60
   statistic           = "Average"
-  threshold           = 30
+  threshold           = 35
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.main.name
