@@ -17,7 +17,7 @@ data "aws_vpc" "main" {
   }
 }
 
-# Subnets
+# Subnets for App
 data "aws_subnet_ids" "app_subnets" {
   vpc_id = data.aws_vpc.main.id
 
@@ -26,6 +26,16 @@ data "aws_subnet_ids" "app_subnets" {
   }
 }
 
+# Subnet for EFS 
+
+data "aws_subnet_ids" "efs" {
+  vpc_id = data.aws_vpc.main.id
+
+  tags = {
+    Name = "bfd-mgmt-az3-app"
+  }
+}
+#
 # KMS 
 #
 # The customer master key is created outside of this script
@@ -133,17 +143,17 @@ module "logs" {
   kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
-# EFS for Jenkins Data (JENKINS_HOME)
-resource "aws_efs_file_system" "foo" {
-  creation_token = "bfd-${var.env_config.env}-jenkins-data"
+# EFS Resource, Mount and Security Group for Jenkins 
 
-  tags = {
-    Name = "bfd-${var.env_config.env}-jenkins-data"
-  }
+module "efs" {
+  source          = "../resources/efs"
+  env_config      = local.env_config
+  role            = "jenkins"
+  layer           = "app"
 }
 
 resource "aws_ebs_volume" "jenkins_data" {
-  availability_zone = var.az
+  availability_zone = local.env_config.azs
   size              = 1000
   type              = "gp2"
   encrypted         = true
@@ -227,7 +237,7 @@ resource "aws_iam_role_policy_attachment" "packer_EFS" {
 # to perform app integration testing against S3
 
 resource "aws_iam_user" "github_actions" {
-  name       = "bfd-github-actions"
+  name       = "bfd-${var.env_config.env}-github-actions"
 }
 
 resource "aws_iam_user_policy_attachment" "github_actions_s3its" {
@@ -236,7 +246,7 @@ resource "aws_iam_user_policy_attachment" "github_actions_s3its" {
 }
 
 resource "aws_iam_policy" "github_actions_s3its" {
-  name        = "bfd-github-actions-s3its"
+  name        = "bfd-${var.env_config.env}-github-actions-s3its"
   description = "GitHub Actions policy for S3 integration tests"
 
   policy = <<EOF
