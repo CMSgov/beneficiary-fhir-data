@@ -50,18 +50,6 @@
   register: shell_jenkins_security_recommendations
   changed_when: "(shell_jenkins_security_recommendations is success) and 'Changed' in shell_jenkins_security_recommendations.output"
 
-- name: Get Jenkins Crumb
-  uri:
-    force_basic_auth: yes
-    url_username:     "{{ jenkins_dynamic_admin_username | default(omit) }}"
-    url_password:     "{{ jenkins_dynamic_admin_password | default(omit) }}"
-    url:              "{{ jenkins_url_local }}"
-    return_content:   yes
-  register:           jenkins_crumb
-  until:              jenkins_crumb.content.find('Please wait while Jenkins is getting ready') == -1
-  retries:            10
-  delay:              5
-
 - name: Configure File Provider Plugin
   jenkins_script:
     url: "{{ jenkins_url_local }}"
@@ -116,14 +104,14 @@
     - dest_name: gpg-bluebutton-build-key-private.asc
       content: "{{ vault_gpg_bluebutton_build_key_private }}"
 
-- name: GPG Key - Import
-  command: gpg --no-tty --import "/var/lib/jenkins/{{ item }}"
-  when: copy_gpg_build_key.changed
-  become: true
-  become_user: jenkins
-  with_items:
-    - gpg-bluebutton-build-key-public.asc
-    - gpg-bluebutton-build-key-private.asc
+# - name: GPG Key - Import
+#   command: gpg --no-tty --import "/var/lib/jenkins/{{ item }}"
+#   when: copy_gpg_build_key.changed
+#   become: true
+#   become_user: jenkins
+#   with_items:
+#     - gpg-bluebutton-build-key-public.asc
+#     - gpg-bluebutton-build-key-private.asc
     
 #Fire any pending restart handlers now, or else the tests below here may not be valid.
 - meta: flush_handlers
