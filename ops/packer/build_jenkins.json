@@ -30,7 +30,7 @@
       "command": "./ansible-playbook-wrapper",
       "playbook_file": "./build_jenkins.yml",
       "extra_arguments": [
-        "-vvv",
+        "-vv",
         "--extra-vars",
         "ansible_python_interpreter=/usr/bin/python"
       ],

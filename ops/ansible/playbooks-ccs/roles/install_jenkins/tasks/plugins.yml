@@ -59,7 +59,7 @@
     force_basic_auth: yes
     url_username: "{{ jenkins_dynamic_admin_username | default(omit) }}"
     url_password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
-    url: "{{ jenkins_url_local }}"
+    url: "{{ jenkins_url_local }}/crumbIssuer/api/json"
     return_content: yes
   register: jenkins_crumb
   until: jenkins_crumb.content.find('Please wait while Jenkins is getting ready') == -1
