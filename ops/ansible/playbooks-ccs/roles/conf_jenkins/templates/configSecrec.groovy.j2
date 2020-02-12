@@ -54,8 +54,7 @@ if (agentProtocolWasDisabled) {
 // Enable CSRF, as its strongly recommended.
 // Reference: <https://wiki.jenkins.io/display/JENKINS/CSRF+Protection>
 if (Jenkins.instance.getCrumbIssuer() == null ) {
-  Jenkins.instance.setCrumbIssuer(null)
-//  Jenkins.instance.setCrumbIssuer(new hudson.security.csrf.DefaultCrumbIssuer(true))
+  Jenkins.instance.setCrumbIssuer(new hudson.security.csrf.DefaultCrumbIssuer(true))
   Jenkins.instance.save()
   println "Changed CSRF: enabled."
 }
