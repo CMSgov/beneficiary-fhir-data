@@ -59,8 +59,7 @@ log() {
 ##
 check_endpoint() {
   set -o pipefail
-#  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
-  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" --key ${KEYFILE} --cacert ${CACERT} "$1" | grep "$2"
+  curl --max-time $STARTUP_TESTING_REQ_TIMEOUT --silent --insecure --cert-type pem --cert "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem" "$1" | grep "$2"
 }
 
 ##
