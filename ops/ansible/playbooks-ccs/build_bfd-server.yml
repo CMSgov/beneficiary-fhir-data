@@ -69,6 +69,19 @@
       tags:
         - pre-ami
 
+    - name: Copy CA SSL Cert
+      copy:
+        # Note: This PEM file is encrypted within the project via Ansible Vault, which will
+        # automagically decrypt it as part of the copy operation.
+        src: "{{ data_server_ssl_ca_test }}"
+        dest: "{{ bfd_server_dir }}/test-bluebutton-appserver-public-cert.pem"
+        owner: "{{ data_server_user }}"
+        group: "{{ data_server_user }}"
+        mode: 'u=rw,g=,o='
+      become: true
+      tags:
+        - pre-ami
+
     - name: Build CloudWatch unified agent configuration
       template:
         src: cwagent-data-server.json.j2
