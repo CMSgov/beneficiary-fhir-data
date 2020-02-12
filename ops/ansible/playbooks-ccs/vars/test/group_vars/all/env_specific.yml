@@ -36,7 +36,7 @@ data_server_ssl_ca_test: 'files/test-bluebutton-appserver-public-cert.pem'
 
 # The path (in this project) to the keystore that will be copied to the Data Servers
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.
-data_server_appserver_keystore: 'files/test-bluebutton-appserver-keystore.jks'
+data_server_appserver_keystore: 'files/{{ env_name_std }}-bluebutton-appserver-keystore.jks'
 
 # These are the SSL keypairs authorized to query this environment's Data Servers.
 data_server_ssl_client_certificates:
