@@ -50,6 +50,18 @@
   register: shell_jenkins_security_recommendations
   changed_when: "(shell_jenkins_security_recommendations is success) and 'Changed' in shell_jenkins_security_recommendations.output"
 
+- name: Get Jenkins Crumb
+  uri:
+    force_basic_auth: yes
+    url_username:     "{{ jenkins_dynamic_admin_username | default(omit) }}"
+    url_password:     "{{ jenkins_dynamic_admin_password | default(omit) }}"
+    url:              "{{ jenkins_url_local }}"
+    return_content:   yes
+  register:           jenkins_crumb
+  until:              jenkins_crumb.content.find('Please wait while Jenkins is getting ready') == -1
+  retries:            10
+  delay:              5
+
 - name: Configure File Provider Plugin
   jenkins_script:
     url: "{{ jenkins_url_local }}"
