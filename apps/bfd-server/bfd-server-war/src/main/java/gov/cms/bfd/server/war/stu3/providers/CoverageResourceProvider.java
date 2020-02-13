@@ -157,9 +157,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
       coverages = new LinkedList<IBaseResource>();
     }
 
-    PageLinkBuilder paging =
-        new PageLinkBuilder(
-            requestDetails, "/Coverage?", Coverage.SP_BENEFICIARY, beneficiary.getIdPart());
+    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Coverage?");
     return TransformerUtils.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
   }

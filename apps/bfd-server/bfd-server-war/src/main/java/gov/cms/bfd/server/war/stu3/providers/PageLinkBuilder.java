@@ -24,20 +24,14 @@ public final class PageLinkBuilder {
   private final Optional<Integer> pageSize;
   private final Optional<Integer> startIndex;
   private final String serverBase;
-
   private final String resource;
-  private final String searchByDesc;
-  private final String identifier;
   private final RequestDetails requestDetails;
 
-  public PageLinkBuilder(
-      RequestDetails requestDetails, String resource, String searchByDesc, String identifier) {
+  public PageLinkBuilder(RequestDetails requestDetails, String resource) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
     this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
     this.serverBase = requestDetails.getServerBaseForRequest();
     this.resource = resource;
-    this.searchByDesc = searchByDesc;
-    this.identifier = identifier;
     this.requestDetails = requestDetails;
   }
 
