@@ -161,9 +161,9 @@ public final class PageLinkBuilder {
     b.append(resource);
 
     // Get a copy of all request parameters.
-    Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
+    Map<String, String[]> params = new HashMap<>(requestDetails.getParameters());
 
-    // Add in paging related changes. Note: _lastUpdated is already in params.
+    // Add in paging related changes.
     params.put("startIndex", new String[] {String.valueOf(startIndex)});
     params.put("_count", new String[] {String.valueOf(getPageSize())});
 
