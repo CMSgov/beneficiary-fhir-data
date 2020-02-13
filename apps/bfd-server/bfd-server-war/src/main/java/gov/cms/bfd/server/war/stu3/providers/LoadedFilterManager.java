@@ -32,7 +32,8 @@ public class LoadedFilterManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManager.class);
 
   // A date before the lastUpdate feature was rolled out
-  private static final Date BEFORE_LAST_UPDATE = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+  private static final Date BEFORE_LAST_UPDATED_FEATURE =
+      Date.from(Instant.parse("2020-01-01T00:00:00Z"));
 
   // The size of the beneficiaryId column
   private static final int BENE_ID_SIZE = 15;
@@ -139,7 +140,8 @@ public class LoadedFilterManager {
   /** Called to finish initialization of the manager */
   @PostConstruct
   public synchronized void init() {
-    transactionTime = fetchLastLoadedBatchCreated();
+    // The transaction time will either the last LoadedBatch or some earlier time
+    transactionTime = fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
   }
 
   /**
@@ -212,7 +214,8 @@ public class LoadedFilterManager {
      */
     try {
       // If new batches are present, then build new filters for the affected files
-      final Date currentLastBatchCreated = fetchLastLoadedBatchCreated();
+      final Date currentLastBatchCreated =
+          fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
       if (this.lastBatchCreated == null || this.lastBatchCreated.before(currentLastBatchCreated)) {
         LOGGER.info(
             "Refreshing LoadedFile filters with new filters from {} to {}",
@@ -223,7 +226,8 @@ public class LoadedFilterManager {
         this.lastBatchCreated = currentLastBatchCreated;
 
         // If batches been trimmed, then remove filters which are no longer present
-        final Date currentFirstBatchUpdate = fetchFirstLoadedBatchCreated();
+        final Date currentFirstBatchUpdate =
+            fetchFirstLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
         if (this.firstBatchCreated == null
             || this.firstBatchCreated.before(currentFirstBatchUpdate)) {
           LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
@@ -376,12 +380,12 @@ public class LoadedFilterManager {
    *
    * @return the max date
    */
-  private Date fetchLastLoadedBatchCreated() {
+  private Optional<Date> fetchLastLoadedBatchCreated() {
     Date maxCreated =
         entityManager
             .createQuery("select max(b.created) from LoadedBatch b", Date.class)
             .getSingleResult();
-    return Optional.ofNullable(maxCreated).orElse(BEFORE_LAST_UPDATE);
+    return Optional.ofNullable(maxCreated);
   }
 
   /**
@@ -389,12 +393,12 @@ public class LoadedFilterManager {
    *
    * @return the min date
    */
-  private Date fetchFirstLoadedBatchCreated() {
+  private Optional<Date> fetchFirstLoadedBatchCreated() {
     Date minBatchId =
         entityManager
             .createQuery("select min(b.created) from LoadedBatch b", Date.class)
             .getSingleResult();
-    return Optional.ofNullable(minBatchId).orElse(this.lastBatchCreated);
+    return Optional.ofNullable(minBatchId);
   }
 
   /**
