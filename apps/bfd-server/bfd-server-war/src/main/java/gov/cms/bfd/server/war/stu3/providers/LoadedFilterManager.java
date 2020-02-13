@@ -244,13 +244,14 @@ public class LoadedFilterManager {
    * Set the current state. Used in tests.
    *
    * @param filters to use
-   * @param firstBatchUpdate to use
-   * @param lastDatabaseUpdate to use
+   * @param firstBatchCreated to use
+   * @param lastBatchCreated to use
    */
-  public void set(List<LoadedFileFilter> filters, Date firstBatchUpdate, Date lastDatabaseUpdate) {
+  public void set(List<LoadedFileFilter> filters, Date firstBatchCreated, Date lastBatchCreated) {
     this.filters = filters;
-    this.firstBatchCreated = firstBatchUpdate;
-    this.lastBatchCreated = lastDatabaseUpdate;
+    this.firstBatchCreated = firstBatchCreated;
+    this.lastBatchCreated = lastBatchCreated;
+    this.transactionTime = lastBatchCreated;
   }
 
   /** @return a info about the filter manager state */
