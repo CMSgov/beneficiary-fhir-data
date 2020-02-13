@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -25,6 +26,7 @@ final class BeneficiaryTransformer {
    * @param includeIdentifiersValues the includeIdentifiers header values to use
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
+  @Trace
   public static Patient transform(
       MetricRegistry metricRegistry,
       Beneficiary beneficiary,
