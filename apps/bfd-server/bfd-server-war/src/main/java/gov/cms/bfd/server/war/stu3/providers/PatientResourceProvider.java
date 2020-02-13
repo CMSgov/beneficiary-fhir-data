@@ -219,8 +219,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     }
 
     PageLinkBuilder paging =
-        new PageLinkBuilder(
-            requestDetails, "/Patient?", Patient.SP_RES_ID, logicalId.getValue(), lastUpdated);
+        new PageLinkBuilder(requestDetails, "/Patient?", Patient.SP_RES_ID, logicalId.getValue());
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
     return bundle;
@@ -269,8 +268,7 @@ public final class PatientResourceProvider implements IResourceProvider {
             requestDetails,
             "/Patient?",
             "_has:Coverage.extension",
-            coverageId.getValueAsQueryToken(null),
-            null);
+            coverageId.getValueAsQueryToken(null));
     List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, paging);
     Long count = fetchResultCount(beneficiariesQuery);
 
@@ -455,7 +453,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     PageLinkBuilder paging =
         new PageLinkBuilder(
-            requestDetails, "/Patient?", Patient.SP_IDENTIFIER, identifier.getValue(), lastUpdated);
+            requestDetails, "/Patient?", Patient.SP_IDENTIFIER, identifier.getValue());
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
     return bundle;

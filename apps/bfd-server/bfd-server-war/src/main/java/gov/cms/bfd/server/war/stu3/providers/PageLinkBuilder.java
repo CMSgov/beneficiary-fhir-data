@@ -2,12 +2,12 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,36 +28,17 @@ public final class PageLinkBuilder {
   private final String resource;
   private final String searchByDesc;
   private final String identifier;
-  private final DateRangeParam lastUpdated;
-  private final String excludeSamhsa;
-  private final Set<ClaimType> claimTypes;
+  private final RequestDetails requestDetails;
 
   public PageLinkBuilder(
-      RequestDetails requestDetails,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      DateRangeParam lastUpdated,
-      Set<ClaimType> claimTypes,
-      String excludeSamhsa) {
+      RequestDetails requestDetails, String resource, String searchByDesc, String identifier) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
     this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
     this.serverBase = requestDetails.getServerBaseForRequest();
     this.resource = resource;
     this.searchByDesc = searchByDesc;
     this.identifier = identifier;
-    this.lastUpdated = lastUpdated;
-    this.claimTypes = claimTypes;
-    this.excludeSamhsa = excludeSamhsa;
-  }
-
-  public PageLinkBuilder(
-      RequestDetails requestDetails,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      DateRangeParam lastUpdate) {
-    this(requestDetails, resource, searchByDesc, identifier, lastUpdate, null, null);
+    this.requestDetails = requestDetails;
   }
 
   /**
@@ -68,6 +49,7 @@ public final class PageLinkBuilder {
    */
   private Optional<Integer> parseIntegerParameters(
       RequestDetails requestDetails, String parameterToParse) {
+
     if (requestDetails.getParameters().containsKey(parameterToParse)) {
       try {
         return Optional.of(
@@ -179,41 +161,27 @@ public final class PageLinkBuilder {
    */
   private String createPageLink(int startIndex) {
     StringBuilder b = new StringBuilder();
+
+    // Setup URL base and resource.
     b.append(serverBase);
     b.append(resource);
-    b.append(Constants.PARAM_COUNT + "=" + getPageSize());
-    b.append("&startIndex=" + startIndex);
-    b.append("&" + searchByDesc + "=" + identifier);
 
-    // Add the lastUpdated parameters if present
-    if (lastUpdated != null) {
-      DateParam lowerBound = lastUpdated.getLowerBound();
-      if (lowerBound != null && !lowerBound.isEmpty()) {
-        b.append(
-            "&"
-                + Constants.PARAM_LASTUPDATED
-                + "="
-                + lowerBound.getPrefix().getValue()
-                + lowerBound.getValueAsString());
-      }
-      DateParam upperBound = lastUpdated.getUpperBound();
-      if (upperBound != null && !upperBound.isEmpty()) {
-        b.append(
-            "&"
-                + Constants.PARAM_LASTUPDATED
-                + "="
-                + upperBound.getPrefix().getValue()
-                + upperBound.getValueAsString());
+    // Get a copy of all request parameters.
+    Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
+
+    // Add in paging related changes. Note: _lastUpdated is already in params.
+    params.put("startIndex", new String[] {String.valueOf(startIndex)});
+    params.put("_count", new String[] {String.valueOf(getPageSize())});
+
+    // Create query parameters by iterating thru all params entry sets. Handle multi values for same
+    // parameter key.
+    ArrayList<String> queryParams = new ArrayList<String>();
+    for (Map.Entry<String, String[]> paramSet : params.entrySet()) {
+      for (String param : paramSet.getValue()) {
+        queryParams.add(paramSet.getKey() + "=" + param);
       }
     }
-
-    // Add the "type" parameter if present
-    if (claimTypes != null) {
-      b.append("&type=" + claimTypes.toString().toLowerCase().replaceAll("[\\[\\] ]", ""));
-    }
-
-    // Add the "excludeSamhsa" parameter if present
-    if (excludeSamhsa != null) b.append("&excludeSAMHSA=" + excludeSamhsa);
+    b.append(String.join("&", queryParams));
 
     return b.toString();
   }

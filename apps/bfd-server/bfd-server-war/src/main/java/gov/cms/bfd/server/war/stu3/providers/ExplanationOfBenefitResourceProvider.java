@@ -205,10 +205,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
             requestDetails,
             "/ExplanationOfBenefit?",
             ExplanationOfBenefit.SP_PATIENT,
-            beneficiaryId,
-            lastUpdated,
-            type != null ? claimTypes : null,
-            excludeSamhsa);
+            beneficiaryId);
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
