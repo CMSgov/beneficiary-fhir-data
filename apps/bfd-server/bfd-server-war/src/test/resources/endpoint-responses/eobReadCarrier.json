@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "carrier-9991831999",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "contained" : [ {
     "resourceType" : "ReferralRequest",
     "id" : "1",

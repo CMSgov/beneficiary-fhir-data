@@ -71,6 +71,8 @@ final class BeneficiaryTransformer {
         TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
     Extension historicalIdentifier =
         TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+    // Add lastUpdated
+    TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
 
     if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
@@ -86,6 +88,7 @@ final class BeneficiaryTransformer {
       for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
         Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
         if (hicnUnhashedHistoric.isPresent()) unhashedHicns.add(hicnUnhashedHistoric.get());
+        TransformerUtils.updateMaxLastUpdated(patient, beneHistory.getLastUpdated());
       }
 
       List<String> unhashedHicnsNoDupes =
@@ -114,6 +117,7 @@ final class BeneficiaryTransformer {
           beneficiary.getMedicareBeneficiaryIdHistories()) {
         Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
         if (mbiUnhashedHistoric.isPresent()) unhashedMbis.add(mbiUnhashedHistoric.get());
+        TransformerUtils.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
       }
 
       List<String> unhashedMbisNoDupes =

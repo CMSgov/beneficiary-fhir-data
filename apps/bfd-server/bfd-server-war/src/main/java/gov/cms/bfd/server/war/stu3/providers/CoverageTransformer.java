@@ -138,6 +138,7 @@ final class CoverageTransformer {
     }
 
     transformEntitlementBuyInIndicators(coverage, beneficiary);
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
@@ -192,6 +193,7 @@ final class CoverageTransformer {
     }
 
     transformEntitlementBuyInIndicators(coverage, beneficiary);
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
@@ -521,6 +523,7 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd()));
     }
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
@@ -940,6 +943,7 @@ final class CoverageTransformer {
               CcwCodebookVariable.RDSIND12,
               beneficiary.getPartDRetireeDrugSubsidyDecInd()));
     }
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;

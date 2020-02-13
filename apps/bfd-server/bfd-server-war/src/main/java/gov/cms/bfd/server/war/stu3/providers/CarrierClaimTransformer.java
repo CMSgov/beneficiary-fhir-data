@@ -262,6 +262,7 @@ final class CarrierClaimTransformer {
       }
     }
 
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }
