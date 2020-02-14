@@ -40,7 +40,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -258,21 +257,34 @@ public final class PatientResourceProvider implements IResourceProvider {
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
     SingularAttribute<Beneficiary, String> contractMonthField = partDFieldFor(partDContractMonth);
 
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
-    List<SetAttribute<Beneficiary, ?>> withRelations =
-        new LinkedList<SetAttribute<Beneficiary, ?>>();
+    PageQueryBuilder<Beneficiary> queryBuilder =
+        new PageQueryBuilder<Beneficiary>(Beneficiary.class, entityManager);
 
-    if (hasHICN(includeIdentifiersValues)) withRelations.add(Beneficiary_.beneficiaryHistories);
+    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+
+    if (hasHICN(includeIdentifiersValues))
+      queryBuilder.root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
     if (hasMBI(includeIdentifiersValues))
-      withRelations.add(Beneficiary_.medicareBeneficiaryIdHistories);
+      queryBuilder.root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
-    CriteriaQuery beneficiariesQuery =
-        queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
+    queryBuilder.criteria.where(
+        queryBuilder.builder.equal(queryBuilder.root.get(contractMonthField), contractCode));
+
+    Long count = queryBuilder.count();
+
+    List<Beneficiary> matchingBeneficiaries = Collections.emptyList();
 
     PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Patient?");
-    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, paging);
-    Long count = fetchResultCount(beneficiariesQuery);
+
+    if (count > 0) {
+      Query query = queryBuilder.createQuery();
+      if (paging.isPagingRequested()) {
+        query.setFirstResult(paging.getStartIndex());
+        query.setMaxResults(paging.getPageSize());
+      }
+      matchingBeneficiaries = query.getResultList();
+    }
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
@@ -335,53 +347,6 @@ public final class PatientResourceProvider implements IResourceProvider {
       return Beneficiary_.partDContractNumberDecId;
     throw new InvalidRequestException(
         "Unsupported extension system: " + cntrctMonth.getVariable().getId().toLowerCase());
-  }
-
-  private Long fetchResultCount(CriteriaQuery criteria) {
-    Predicate restriction = criteria.getRestriction();
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
-    countQuery.where(restriction);
-    return entityManager
-        .createQuery(countQuery.select(builder.count(countQuery.from(Beneficiary.class))))
-        .getSingleResult();
-  }
-
-  private List<Beneficiary> fetchBeneficiaries(CriteriaQuery criteria, PageLinkBuilder pagingArgs) {
-    Query query = entityManager.createQuery(criteria);
-
-    if (pagingArgs.isPagingRequested()) {
-      query.setFirstResult(pagingArgs.getStartIndex());
-      query.setMaxResults(pagingArgs.getPageSize());
-    }
-
-    return query.getResultList();
-  }
-
-  private CriteriaQuery queryBeneficiariesBy(
-      SingularAttribute<Beneficiary, String> field, String value) {
-    List<SetAttribute<Beneficiary, ?>> withRelations =
-        new LinkedList<SetAttribute<Beneficiary, ?>>();
-    return queryBeneficiariesBy(field, value, withRelations);
-  }
-
-  private CriteriaQuery queryBeneficiariesBy(
-      SingularAttribute<Beneficiary, String> field,
-      String value,
-      List<SetAttribute<Beneficiary, ?>> relations) {
-
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
-    Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-    relations.stream()
-        .forEach(
-            f -> {
-              beneMatchesRoot.fetch(f, JoinType.LEFT);
-            });
-    beneMatches.select(beneMatchesRoot);
-    beneMatches.where(builder.equal(beneMatchesRoot.get(field), value));
-
-    return beneMatches;
   }
 
   /**
