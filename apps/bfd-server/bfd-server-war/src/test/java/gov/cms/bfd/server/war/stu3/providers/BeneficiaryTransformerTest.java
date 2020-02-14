@@ -57,7 +57,7 @@ public final class BeneficiaryTransformerTest {
             new MetricRegistry(), beneficiary, Arrays.asList("hicn", "mbi"));
     assertMatches(beneficiary, patient);
 
-    Assert.assertEquals("Number of identifiers should be 7", 7, patient.getIdentifier().size());
+    Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
 
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -66,6 +66,8 @@ public final class BeneficiaryTransformerTest {
         "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "someHICNhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
     assertValuesInPatientIdentifiers(
@@ -92,7 +94,7 @@ public final class BeneficiaryTransformerTest {
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("true"));
     assertMatches(beneficiary, patient);
 
-    Assert.assertEquals("Number of identifiers should be 7", 7, patient.getIdentifier().size());
+    Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
 
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -101,6 +103,8 @@ public final class BeneficiaryTransformerTest {
         "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "someHICNhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
     assertValuesInPatientIdentifiers(
@@ -127,7 +131,7 @@ public final class BeneficiaryTransformerTest {
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("hicn"));
     assertMatches(beneficiary, patient);
 
-    Assert.assertEquals("Number of identifiers should be 5", 5, patient.getIdentifier().size());
+    Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
 
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -136,6 +140,8 @@ public final class BeneficiaryTransformerTest {
         "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
+    assertValuesInPatientIdentifiers(
+        patient, TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, "someHICNhash");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
     assertValuesInPatientIdentifiers(
@@ -146,6 +152,16 @@ public final class BeneficiaryTransformerTest {
 
   /**
    * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
+   * assertValuesInPatientIdentifiers( patient,
+   * TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066U");
+   * assertValuesInPatientIdentifiers( patient,
+   * TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
+   * assertValuesInPatientIdentifiers( patient,
+   * TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z"); }
+   *
+   * <p>/** Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary},
    * with {@link IncludeIdentifiersValues} = ["mbi"].
@@ -257,7 +273,7 @@ public final class BeneficiaryTransformerTest {
             .findFirst()
             .get();
     beneficiary.setHicnUnhashed(Optional.of(beneficiary.getHicn()));
-    beneficiary.setHicn("somehash");
+    beneficiary.setHicn("someHICNhash");
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
     // Add the HICN history records to the Beneficiary, and fix their HICN fields.
@@ -270,7 +286,7 @@ public final class BeneficiaryTransformerTest {
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
     for (BeneficiaryHistory beneficiaryHistory : beneficiary.getBeneficiaryHistories()) {
       beneficiaryHistory.setHicnUnhashed(Optional.of(beneficiaryHistory.getHicn()));
-      beneficiaryHistory.setHicn("somehash");
+      beneficiaryHistory.setHicn("someHICNhash");
     }
 
     // Add the MBI history records to the Beneficiary.
