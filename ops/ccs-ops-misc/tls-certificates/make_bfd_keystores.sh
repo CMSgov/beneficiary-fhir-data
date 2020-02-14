@@ -18,17 +18,17 @@ function gen_keystore {
 
 # Prod
 gen_keystore "cn=bfd.cms.gov" \
-    "san=dns:prod.bfdcloud.net,dns:mct.prod.bfdcloud.net,dns:dpc.prod.bfdcloud.net,dns:bcda.prod.bfdcloud.net,dns:bb.prod.bfdcloud.net,dns:internal-pdcw10lb01-1951212262.us-east-1.elb.amazonaws.com,dns:bfd.cms.gov,dns:prod.bfd.cms.gov,dns:internal-bfd-prod-fhir-1481369778.us-east-1.elb.amazonaws.com" \
+    "san=dns:prod.bfdcloud.net,dns:mct.prod.bfdcloud.net,dns:dpc.prod.bfdcloud.net,dns:bcda.prod.bfdcloud.net,dns:bb.prod.bfdcloud.net,dns:bfd.cms.gov,dns:prod.bfd.cms.gov,dns:internal-bfd-prod-fhir-1481369778.us-east-1.elb.amazonaws.com" \
     "prod" 
 
 # Prod-SBX
 gen_keystore "cn=prod-sbx.bfd.cms.gov" \
-    "san=dns:prod-sbx.bfdcloud.net,dns:mct.prod-sbx.bfdcloud.net,dns:dpc.prod-sbx.bfdcloud.net,dns:bcda.prod-sbx.bfdcloud.net,dns:bb.prod-sbx.bfdcloud.net,dns:internal-dpcwelb01-2074070868.us-east-1.elb.amazonaws.com,dns:prod-sbx.bfd.cms.gov,dns:fhir.backend.bluebutton.hhsdevcloud.us,dns:bfd-prod-sbx-fhir-730339399.us-east-1.elb.amazonaws.com" \
+    "san=dns:prod-sbx.bfdcloud.net,dns:mct.prod-sbx.bfdcloud.net,dns:dpc.prod-sbx.bfdcloud.net,dns:bcda.prod-sbx.bfdcloud.net,dns:bb.prod-sbx.bfdcloud.net,dns:fhir.backend.bluebutton.hhsdevcloud.us,dns:bfd-prod-sbx-fhir-730339399.us-east-1.elb.amazonaws.com" \
     "prod-sbx" 
 
 # Test
 gen_keystore "cn=test.bfd.cms.gov" \
-    "san=dns:test.bfdcloud.net,dns:internal-tsbb10lb01-758855236.us-east-1.elb.amazonaws.com,dns:test.bfd.cms.gov,dns:internal-bfd-test-fhir-1155075561.us-east-1.elb.amazonaws.com,dns:bb.test.bfdcloud.net" \
+    "san=dns:test.bfdcloud.net,dns:test.bfd.cms.gov,dns:internal-bfd-test-fhir-1155075561.us-east-1.elb.amazonaws.com,dns:bb.test.bfdcloud.net" \
     "test" 
 
 # Encrypt
