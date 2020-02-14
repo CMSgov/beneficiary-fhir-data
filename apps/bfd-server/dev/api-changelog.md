@@ -4,7 +4,9 @@
 
 The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule. This is to leave no traces of the HICN-hash in any external facing data requests to BFD. 
 
-The following is an example of the identifier that is NO LONGER included in the response:
+For internal facing requests using the `IncludeIdentifiers` header, the Hashed HICN identifier will still be included in the response for the following values: [ "true", "hicn" ]. 
+
+The following is an example of the identifier that is NO LONGER included in external facing responses:
 
     <identifier>
        <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"></system>
