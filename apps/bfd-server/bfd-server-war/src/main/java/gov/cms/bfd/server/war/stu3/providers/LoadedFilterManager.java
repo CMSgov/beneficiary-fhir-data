@@ -3,7 +3,11 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -27,6 +31,11 @@ import org.springframework.stereotype.Component;
 public class LoadedFilterManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManager.class);
 
+  // A date before the lastUpdate feature was rolled out
+  private static final Date BEFORE_LAST_UPDATED_FEATURE =
+      Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+
+  // The size of the beneficiaryId column
   private static final int BENE_ID_SIZE = 15;
 
   // The connection to the DB
@@ -35,11 +44,14 @@ public class LoadedFilterManager {
   // The filter set
   private List<LoadedFileFilter> filters;
 
-  // Max created date from the database's LoadedBatch table
+  // The latest transaction time from the LoadedBatch files
   private Date transactionTime;
 
-  // Min created date from the databases's LoadedBatch table
-  private Date firstBatchUpdate;
+  // The last LoadedBatch.created in the filter set
+  private Date lastBatchCreated;
+
+  // The first LoadedBatch.created in the filter set
+  private Date firstBatchCreated;
 
   /**
    * A tuple of values: LoadedFile.loadedFileid, LoadedFile.created, max(LoadedBatch.created). Used
@@ -96,11 +108,23 @@ public class LoadedFilterManager {
    *
    * @return the first batch's created timestamp
    */
-  public Date getFirstBatchUpdate() {
-    if (transactionTime == null) {
-      throw new RuntimeException("LoadedFilterManager has not been initialized.");
+  public Date getLastBatchCreated() {
+    if (lastBatchCreated == null) {
+      throw new RuntimeException("LoadedFilterManager has not been refreshed.");
     }
-    return firstBatchUpdate;
+    return lastBatchCreated;
+  }
+
+  /**
+   * The return the first batch that the filter manager knows about
+   *
+   * @return the first batch's created timestamp
+   */
+  public Date getFirstBatchCreated() {
+    if (firstBatchCreated == null) {
+      throw new RuntimeException("LoadedFilterManager has not been refreshed.");
+    }
+    return firstBatchCreated;
   }
 
   /**
@@ -115,8 +139,9 @@ public class LoadedFilterManager {
 
   /** Called to finish initialization of the manager */
   @PostConstruct
-  public void init() {
-    refreshFilters();
+  public synchronized void init() {
+    // The transaction time will either the last LoadedBatch or some earlier time
+    transactionTime = fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
   }
 
   /**
@@ -169,13 +194,14 @@ public class LoadedFilterManager {
     // The manager has a "known" interval which it has information about. The known range
     // is from the firstFilterUpdate to the future.
     final Date lowerBound = range.getLowerBoundAsInstant();
-    return lowerBound != null && lowerBound.getTime() >= getFirstBatchUpdate().getTime();
+    return lowerBound != null && lowerBound.getTime() >= getFirstBatchCreated().getTime();
   }
 
   /**
    * Called periodically to build and refresh the filters list from the entityManager.
    *
-   * <p>The {@link #transactionTime} and {@link #firstBatchUpdate} fields are updated by this call.
+   * <p>The {@link #lastBatchCreated} and {@link #firstBatchCreated} fields are updated by this
+   * call.
    */
   @Scheduled(fixedDelay = 1000, initialDelay = 2000)
   public synchronized void refreshFilters() {
@@ -188,25 +214,30 @@ public class LoadedFilterManager {
      */
     try {
       // If new batches are present, then build new filters for the affected files
-      final Date currentLastDatabaseUpdate = fetchLastLoadedBatchTime();
-      if (this.transactionTime == null || this.transactionTime.before(currentLastDatabaseUpdate)) {
+      final Date currentLastBatchCreated =
+          fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+      if (this.lastBatchCreated == null || this.lastBatchCreated.before(currentLastBatchCreated)) {
         LOGGER.info(
             "Refreshing LoadedFile filters with new filters from {} to {}",
-            transactionTime,
-            currentLastDatabaseUpdate);
-        List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.transactionTime);
+            lastBatchCreated,
+            currentLastBatchCreated);
+        List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
         this.filters = updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
-        this.transactionTime = currentLastDatabaseUpdate;
+        this.lastBatchCreated = currentLastBatchCreated;
 
         // If batches been trimmed, then remove filters which are no longer present
-        final Date currentFirstBatchUpdate = fetchFirstLoadedBatchTime();
-        if (this.firstBatchUpdate == null
-            || this.firstBatchUpdate.before(currentFirstBatchUpdate)) {
+        final Date currentFirstBatchUpdate =
+            fetchFirstLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+        if (this.firstBatchCreated == null
+            || this.firstBatchCreated.before(currentFirstBatchUpdate)) {
           LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
           List<LoadedFile> loadedFiles = fetchLoadedFiles();
           this.filters = trimFilters(this.filters, loadedFiles);
-          this.firstBatchUpdate = currentFirstBatchUpdate;
+          this.firstBatchCreated = currentFirstBatchUpdate;
         }
+
+        // update the transaction time as well
+        this.transactionTime = currentLastBatchCreated;
       }
     } catch (Exception ex) {
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
@@ -217,13 +248,14 @@ public class LoadedFilterManager {
    * Set the current state. Used in tests.
    *
    * @param filters to use
-   * @param firstBatchUpdate to use
-   * @param lastDatabaseUpdate to use
+   * @param firstBatchCreated to use
+   * @param lastBatchCreated to use
    */
-  public void set(List<LoadedFileFilter> filters, Date firstBatchUpdate, Date lastDatabaseUpdate) {
+  public void set(List<LoadedFileFilter> filters, Date firstBatchCreated, Date lastBatchCreated) {
     this.filters = filters;
-    this.firstBatchUpdate = firstBatchUpdate;
-    this.transactionTime = lastDatabaseUpdate;
+    this.firstBatchCreated = firstBatchCreated;
+    this.lastBatchCreated = lastBatchCreated;
+    this.transactionTime = lastBatchCreated;
   }
 
   /** @return a info about the filter manager state */
@@ -231,10 +263,12 @@ public class LoadedFilterManager {
   public String toString() {
     return "LoadedFilterManager [filters.size="
         + (filters != null ? String.valueOf(filters.size()) : "null")
-        + ", firstFilterUpdate="
-        + firstBatchUpdate
-        + ", lastDatabaseUpdate="
+        + ", transactionTime="
         + transactionTime
+        + ", firstBatchCreated="
+        + firstBatchCreated
+        + ", lastBatchCreated="
+        + lastBatchCreated
         + "]";
   }
 
@@ -341,16 +375,17 @@ public class LoadedFilterManager {
   /* DB Operations */
 
   /**
-   * Return the max date from the LoadedBatch table
+   * Return the max date from the LoadedBatch table. If no batches are present, then the schema
+   * migration time which will be a timestamp before the first loaded batch
    *
    * @return the max date
    */
-  private Date fetchLastLoadedBatchTime() {
+  private Optional<Date> fetchLastLoadedBatchCreated() {
     Date maxCreated =
         entityManager
             .createQuery("select max(b.created) from LoadedBatch b", Date.class)
             .getSingleResult();
-    return Optional.ofNullable(maxCreated).orElse(new Date());
+    return Optional.ofNullable(maxCreated);
   }
 
   /**
@@ -358,12 +393,12 @@ public class LoadedFilterManager {
    *
    * @return the min date
    */
-  private Date fetchFirstLoadedBatchTime() {
+  private Optional<Date> fetchFirstLoadedBatchCreated() {
     Date minBatchId =
         entityManager
             .createQuery("select min(b.created) from LoadedBatch b", Date.class)
             .getSingleResult();
-    return Optional.ofNullable(minBatchId).orElse(this.transactionTime);
+    return Optional.ofNullable(minBatchId);
   }
 
   /**

@@ -17,7 +17,9 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.server.war.Operation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -108,6 +110,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
+  @Trace
   public ExplanationOfBenefit read(@IdParam IdType eobId) {
     if (eobId == null) throw new IllegalArgumentException();
     if (eobId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
@@ -121,6 +124,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
     String eobIdClaimIdText = eobIdMatcher.group(2);
+
+    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    operation.setOption("by", "id");
+    operation.publishOperationName();
 
     Class<?> entityClass = eobIdType.get().getEntityClass();
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -174,6 +181,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    *     matching resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)
           @Description(shortDefinition = "The patient identifier to search for")
@@ -201,6 +209,12 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     String beneficiaryId = patient.getIdPart();
     Set<ClaimType> claimTypes = parseTypeParam(type);
     PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+
+    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    operation.setOption("by", "patient");
+    operation.setOption("types", claimTypes.toString());
+    operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operation.publishOperationName();
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
 
@@ -290,6 +304,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * @return the matching claim/event entities
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
+  @Trace
   private <T> List<T> findClaimTypeByPatient(
       ClaimType claimType, String patientId, DateRangeParam lastUpdated) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -337,6 +352,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified
    *     claim/event
    */
+  @Trace
   private List<ExplanationOfBenefit> transformToEobs(ClaimType claimType, List<?> claims) {
     return claims.stream()
         .map(c -> claimType.getTransformer().apply(metricRegistry, c))

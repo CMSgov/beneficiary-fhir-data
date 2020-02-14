@@ -35,23 +35,31 @@ public final class LoadedFilterManagerIT {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           final LoadedFilterManager filterManager = new LoadedFilterManager();
-          filterManager.init();
           filterManager.setEntityManager(entityManager);
+          filterManager.init();
 
-          // After init manager should have an empty filter list
+          // After init manager should have an empty filter list but a valid transaction time
+          Assert.assertTrue(
+              "Expect transactionTime be before now",
+              filterManager.getTransactionTime().before(new Date()));
           final List<LoadedFileFilter> beforeFilters = filterManager.getFilters();
           Assert.assertEquals(0, beforeFilters.size());
           final DateRangeParam testBound =
               new DateRangeParam().setLowerBoundExclusive(Date.from(Instant.now().plusSeconds(1)));
           Assert.assertFalse(filterManager.isInBounds(testBound));
+          Assert.assertFalse(filterManager.isResultSetEmpty(INVALID_BENE, testBound));
 
           // Refresh the filter list
           filterManager.refreshFilters();
 
           // Should have zero filters
+          Assert.assertTrue(
+              "Expect transactionTime be before now",
+              filterManager.getTransactionTime().before(new Date()));
           final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
           Assert.assertEquals(0, afterFilters.size());
           Assert.assertFalse(filterManager.isInBounds(testBound));
+          Assert.assertFalse(filterManager.isResultSetEmpty(INVALID_BENE, testBound));
         });
   }
 
@@ -60,8 +68,10 @@ public final class LoadedFilterManagerIT {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           final LoadedFilterManager filterManager = new LoadedFilterManager();
-          filterManager.init();
           filterManager.setEntityManager(entityManager);
+          filterManager.init();
+          final Date initialTransactionTime = filterManager.getTransactionTime();
+          Assert.assertTrue(initialTransactionTime.before(Date.from(Instant.now().plusMillis(1))));
           loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
           Date afterLoad = new Date();
 
@@ -75,8 +85,11 @@ public final class LoadedFilterManagerIT {
 
           // Should have many filters
           final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
-          Assert.assertTrue(filterManager.getFirstBatchUpdate().getTime() <= afterLoad.getTime());
-          Assert.assertTrue(filterManager.getTransactionTime().getTime() <= afterRefresh.getTime());
+          Assert.assertTrue(filterManager.getFirstBatchCreated().getTime() <= afterLoad.getTime());
+          Assert.assertTrue(
+              filterManager.getLastBatchCreated().getTime() <= afterRefresh.getTime());
+          Assert.assertTrue(
+              filterManager.getTransactionTime().getTime() > initialTransactionTime.getTime());
           Assert.assertTrue(afterFilters.size() > 1);
         });
   }
@@ -87,8 +100,8 @@ public final class LoadedFilterManagerIT {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           final LoadedFilterManager filterManager = new LoadedFilterManager();
-          filterManager.init();
           filterManager.setEntityManager(entityManager);
+          filterManager.init();
 
           // Establish a before load time
           final Date beforeLoad = new Date();
@@ -139,8 +152,8 @@ public final class LoadedFilterManagerIT {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           final LoadedFilterManager filterManager = new LoadedFilterManager();
-          filterManager.init();
           filterManager.setEntityManager(entityManager);
+          filterManager.init();
           loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
           // Establish a couple of times

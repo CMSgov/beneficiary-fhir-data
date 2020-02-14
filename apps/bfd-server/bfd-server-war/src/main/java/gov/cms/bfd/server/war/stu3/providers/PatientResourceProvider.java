@@ -15,11 +15,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
+import gov.cms.bfd.server.war.Operation;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -106,6 +108,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     exists.
    */
   @Read(version = false)
+  @Trace
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null) throw new IllegalArgumentException();
     if (patientId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
@@ -114,6 +117,11 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+
+    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    operation.setOption("by", "id");
+    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    operation.publishOperationName();
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
@@ -182,6 +190,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
           @Description(shortDefinition = "The patient identifier to search for")
@@ -253,11 +262,10 @@ public final class PatientResourceProvider implements IResourceProvider {
     List<SetAttribute<Beneficiary, ?>> withRelations =
         new LinkedList<SetAttribute<Beneficiary, ?>>();
 
-    if (hasHICN(includeIdentifiersValues))
-      withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.beneficiaryHistories);
+    if (hasHICN(includeIdentifiersValues)) withRelations.add(Beneficiary_.beneficiaryHistories);
 
     if (hasMBI(includeIdentifiersValues))
-      withRelations.add((SetAttribute<Beneficiary, ?>) Beneficiary_.medicareBeneficiaryIdHistories);
+      withRelations.add(Beneficiary_.medicareBeneficiaryIdHistories);
 
     CriteriaQuery beneficiariesQuery =
         queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
@@ -403,6 +411,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
           @Description(shortDefinition = "The patient identifier to search for")
@@ -421,16 +430,23 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
+    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+
+    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    operation.setOption("by", "identifier");
+    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    operation.publishOperationName();
+
     List<IBaseResource> patients;
     try {
       Patient patient;
       switch (identifier.getSystem()) {
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
-          patient = queryDatabaseByHicnHash(identifier.getValue(), requestDetails);
+          patient = queryDatabaseByHicnHash(identifier.getValue(), includeIdentifiersValues);
           break;
         case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
-          patient = queryDatabaseByMbiHash(identifier.getValue(), requestDetails);
+          patient = queryDatabaseByMbiHash(identifier.getValue(), includeIdentifiersValues);
           break;
         default:
           throw new InvalidRequestException(
@@ -453,32 +469,43 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /**
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
+   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
+   *     value to use
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
-  private Patient queryDatabaseByHicnHash(String hicnHash, RequestDetails requestDetails) {
+  @Trace
+  private Patient queryDatabaseByHicnHash(String hicnHash, List<String> includeIdentifiersValues) {
     return queryDatabaseByHash(
-        hicnHash, "hicn", requestDetails, Beneficiary_.hicn, BeneficiaryHistory_.hicn);
+        hicnHash, "hicn", includeIdentifiersValues, Beneficiary_.hicn, BeneficiaryHistory_.hicn);
   }
 
   /**
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
+   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
+   *     value to use
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
-  private Patient queryDatabaseByMbiHash(String mbiHash, RequestDetails requestDetails) {
+  @Trace
+  private Patient queryDatabaseByMbiHash(String mbiHash, List<String> includeIdentifiersValues) {
     return queryDatabaseByHash(
-        mbiHash, "mbi", requestDetails, Beneficiary_.mbiHash, BeneficiaryHistory_.mbiHash);
+        mbiHash,
+        "mbi",
+        includeIdentifiersValues,
+        Beneficiary_.mbiHash,
+        BeneficiaryHistory_.mbiHash);
   }
 
   /**
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param requestDetails
+   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
+   *     value to use
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
@@ -486,10 +513,11 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
+  @Trace
   private Patient queryDatabaseByHash(
       String hash,
       String hashType,
-      RequestDetails requestDetails,
+      List<String> includeIdentifiersValues,
       SingularAttribute<Beneficiary, String> beneficiaryHashField,
       SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField) {
     if (hash == null || hash.trim().isEmpty()) throw new IllegalArgumentException();
@@ -569,8 +597,6 @@ public final class PatientResourceProvider implements IResourceProvider {
     // Then, find all Beneficiary records that match the hash or those BENE_IDs.
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
 
     if (hasHICN(includeIdentifiersValues))
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -653,6 +679,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return a FHIR {@link Beneficiary} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    */
+  @Trace
   private Beneficiary selectBeneWithLatestReferenceYear(List<Beneficiary> duplicateBenes) {
     BigDecimal maxReferenceYear = new BigDecimal(-0001);
     String maxReferenceYearMatchingBeneficiaryId = null;

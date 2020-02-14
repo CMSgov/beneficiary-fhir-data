@@ -14,8 +14,10 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
+import gov.cms.bfd.server.war.Operation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -89,6 +91,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
    *     exists.
    */
   @Read(version = false)
+  @Trace
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) throw new IllegalArgumentException();
     if (coverageId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
@@ -96,6 +99,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
     String coverageIdText = coverageId.getIdPart();
     if (coverageIdText == null || coverageIdText.trim().isEmpty())
       throw new IllegalArgumentException();
+
+    Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
+    operation.setOption("by", "id");
+    operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
     if (!coverageIdMatcher.matches()) throw new ResourceNotFoundException(coverageId);
@@ -138,6 +145,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
    *     resources, or may also be empty.
    */
   @Search
+  @Trace
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
           @Description(shortDefinition = "The patient identifier to search for")
@@ -158,6 +166,12 @@ public final class CoverageResourceProvider implements IResourceProvider {
     }
 
     PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Coverage?");
+
+    Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
+    operation.setOption("by", "beneficiary");
+    operation.publishOperationName();
+    operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+
     return TransformerUtils.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
   }
@@ -170,6 +184,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found in the database.
    */
+  @Trace
   private Beneficiary findBeneficiaryById(String beneficiaryId, DateRangeParam lastUpdatedRange)
       throws NoResultException {
     // Optimize when the lastUpdated parameter is specified and result set is empty
