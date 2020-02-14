@@ -234,5 +234,8 @@ public final class OutpatientClaimTransformerTest {
         CcwCodebookVariable.REV_CNTR_STUS_IND_CD,
         claimLine1.getStatusCode(),
         eobItem0.getRevenue());
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }

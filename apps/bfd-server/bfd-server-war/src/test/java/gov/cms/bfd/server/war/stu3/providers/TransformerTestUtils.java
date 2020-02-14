@@ -29,10 +29,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import junit.framework.AssertionFailedError;
@@ -60,6 +60,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.junit.Assert;
@@ -1804,8 +1805,10 @@ final class TransformerTestUtils {
       throws FHIRException {
 
     if (revenueCenterDate.isPresent()) {
+      // Convert both LocalDate and Date type to millisconds to compare.
       Assert.assertEquals(
-          Date.valueOf(revenueCenterDate.get()), item.getServicedDateType().getValue());
+          java.sql.Date.valueOf(revenueCenterDate.get()).getTime(),
+          item.getServicedDateType().getValue().getTime());
     }
 
     assertAdjudicationAmountEquals(
@@ -1994,5 +1997,24 @@ final class TransformerTestUtils {
   static void assertNPICodeDisplayEquals(String npiCode, String npiCodeDisplayValue)
       throws IOException {
     Assert.assertEquals(TransformerUtils.retrieveNpiCodeDisplay(npiCode), npiCodeDisplayValue);
+  }
+
+  /**
+   * Test that the resource being tested has a matching lastUpdated
+   *
+   * @param expectedDateTime from the entity
+   * @param actualResource that is being created by the transform
+   */
+  static void assertLastUpdatedEquals(
+      Optional<Date> expectedDateTime, IAnyResource actualResource) {
+    if (expectedDateTime.isPresent()) {
+      final Date lastUpdated = expectedDateTime.get();
+      Assert.assertEquals(
+          "Expect lastUpdated to be equal",
+          actualResource.getMeta().getLastUpdated().toInstant(),
+          lastUpdated.toInstant());
+    } else {
+      Assert.assertNull("Expect lastUpdated to be null", actualResource.getMeta().getLastUpdated());
+    }
   }
 }

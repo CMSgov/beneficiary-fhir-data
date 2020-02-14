@@ -225,7 +225,7 @@ module "fhir_asg" {
     max             = 8*length(local.azs)
     desired         = length(local.azs)
     sns_topic_arn   = ""
-    instance_warmup = 400
+    instance_warmup = 430
   }
 
   launch_config   = {

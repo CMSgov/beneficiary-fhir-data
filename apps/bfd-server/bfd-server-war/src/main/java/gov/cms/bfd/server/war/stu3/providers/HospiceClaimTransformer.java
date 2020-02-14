@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaimLine;
@@ -22,6 +23,7 @@ final class HospiceClaimTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HospiceClaim}
    */
+  @Trace
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
@@ -230,6 +232,7 @@ final class HospiceClaimTransformer {
       TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
           eob, item, claimLine.getDeductibleCoinsuranceCd());
     }
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }

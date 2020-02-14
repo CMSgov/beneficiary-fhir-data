@@ -19,6 +19,7 @@ DB_CONNECTIONS_MAX='{{ data_server_db_connections_max }}'
 export NEW_RELIC_LICENSE_KEY='{{ data_server_new_relic_license_key }}'
 export NEW_RELIC_LOG_FILE_PATH="${LOGS_DIR}"
 export NEW_RELIC_HIGH_SECURITY='true'
+export NEW_RELIC_EXTENSIONS_DIR='{{ data_server_dir }}/newrelic/extensions/'
 {% if data_server_proxy_host is defined %}
 export NEW_RELIC_PROXY_HOST='{{ data_server_proxy_host }}'
 {% endif %}
@@ -35,7 +36,7 @@ export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
 
 # Begin smoke testing startup routine
 STARTUP_TESTING_RETRIES='3'
-STARTUP_TESTING_BOOT_TIMEOUT='30'
+STARTUP_TESTING_BOOT_TIMEOUT='60'
 STARTUP_TESTING_REQ_TIMEOUT='15'
 STARTUP_TESTING_REQ_BACKOFF_TIMEOUT='10'
 STARTUP_TESTING_BENE_ID='-201'
@@ -107,7 +108,7 @@ JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 
 # 3... 2... 1... launch!
 java \
-  -javaagent:{{ data_server_dir }}/newrelic.jar \
+  -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
   "-DbfdServer.db.url=${DB_URL}" \

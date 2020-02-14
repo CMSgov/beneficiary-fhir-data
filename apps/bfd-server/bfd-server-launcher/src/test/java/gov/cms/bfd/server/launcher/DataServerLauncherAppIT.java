@@ -63,9 +63,10 @@ public final class DataServerLauncherAppIT {
    * Verifies that {@link DataServerLauncherApp} starts up as expected when properly configured
    *
    * @throws IOException (indicates a test error)
+   * @throws InterruptedException
    */
   @Test
-  public void normalUsage() throws IOException {
+  public void normalUsage() throws IOException, InterruptedException {
     ServerProcess serverProcess = null;
     try {
       // Launch the server.
