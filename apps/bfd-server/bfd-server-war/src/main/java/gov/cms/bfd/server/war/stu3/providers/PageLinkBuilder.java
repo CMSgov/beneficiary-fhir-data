@@ -4,10 +4,12 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.http.client.utils.URIBuilder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,11 +156,6 @@ public final class PageLinkBuilder {
    * @return the link requested
    */
   private String createPageLink(int startIndex) {
-    StringBuilder b = new StringBuilder();
-
-    // Setup URL base and resource.
-    b.append(serverBase);
-    b.append(resource);
 
     // Get a copy of all request parameters.
     Map<String, String[]> params = new HashMap<>(requestDetails.getParameters());
@@ -167,16 +164,21 @@ public final class PageLinkBuilder {
     params.put("startIndex", new String[] {String.valueOf(startIndex)});
     params.put("_count", new String[] {String.valueOf(getPageSize())});
 
-    // Create query parameters by iterating thru all params entry sets. Handle multi values for same
-    // parameter key.
-    ArrayList<String> queryParams = new ArrayList<String>();
-    for (Map.Entry<String, String[]> paramSet : params.entrySet()) {
-      for (String param : paramSet.getValue()) {
-        queryParams.add(paramSet.getKey() + "=" + param);
-      }
-    }
-    b.append(String.join("&", queryParams));
+    try {
+      // Setup URL base and resource.
+      URIBuilder uri = new URIBuilder(serverBase + resource);
 
-    return b.toString();
+      // Create query parameters by iterating thru all params entry sets. Handle multi values for
+      // the same parameter key.
+      ArrayList<String> queryParams = new ArrayList<String>();
+      for (Map.Entry<String, String[]> paramSet : params.entrySet()) {
+        for (String param : paramSet.getValue()) {
+          uri.addParameter(paramSet.getKey(), param);
+        }
+      }
+      return uri.build().toString();
+    } catch (URISyntaxException e) {
+      throw new InvalidRequestException("Invalid URI:" + e);
+    }
   }
 }
