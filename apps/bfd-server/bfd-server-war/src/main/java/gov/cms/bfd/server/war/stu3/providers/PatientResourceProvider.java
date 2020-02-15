@@ -277,11 +277,15 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Patient?");
 
-    if (count > 0) {
+    if (count > paging.getStartIndex()) {
       Query query = queryBuilder.createQuery();
       if (paging.isPagingRequested()) {
+				int pageSize = paging.getPageSize();
+				if (count < paging.getStartIndex() + paging.getPageSize()) {
+					pageSize = count - startIndex;
+				}
         query.setFirstResult(paging.getStartIndex());
-        query.setMaxResults(paging.getPageSize());
+        query.setMaxResults(pageSize);
       }
       matchingBeneficiaries = query.getResultList();
     }
