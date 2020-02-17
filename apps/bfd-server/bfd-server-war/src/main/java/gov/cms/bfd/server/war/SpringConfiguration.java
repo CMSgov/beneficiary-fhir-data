@@ -1,8 +1,7 @@
 package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.*;
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -350,15 +349,5 @@ public class SpringConfiguration {
   public HealthCheckRegistry healthCheckRegistry() {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
-  }
-
-  /**
-   * @return an {@link IServerInterceptor} that will add some pretty syntax highlighting in
-   *     responses when a browser is detected
-   */
-  @Bean
-  public IServerInterceptor responseHighlighterInterceptor() {
-    ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
-    return retVal;
   }
 }
