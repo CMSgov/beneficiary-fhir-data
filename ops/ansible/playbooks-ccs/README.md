@@ -38,8 +38,8 @@ __Summary:__ This playbook and associated roles configures a CCS Gold Image with
          - Encryption: Yes, use MGMT CMK
          - Device: /dev/sdf 
          - Filesystem: xfs 
-   - Build the Jenkins AMI from within the Ansible/ directory of the ops code (i.e. bfd-ops) by running the following command to build AND configure the Jenkins instance and volume for the first time. 
-     - *packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' build_jenkins.json*
+   - Build the Jenkins AMI from within the `ops/ansible/playbooks-ccs` directory of the ops code by running the following command to build AND configure the Jenkins instance and volume for the first time. 
+     - *packer build -var 'source_ami=ami-0f2d8f925de453e46' -var 'subnet_id=subnet-092c2a68bd18b34d1' ../../packer/build_jenkins.json *
    - Note the AMI ID that was created. You'll update the terraform variables at a later stage to deploy this.
    
 ##### Post Installation Config 
