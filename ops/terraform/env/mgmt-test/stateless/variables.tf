@@ -1,15 +1,10 @@
 variable "env" {
-  description       = "Environment"
+  description       = "The environment to use, in this case mgmt or mgmt-test"
   type              = string
 }
 
 variable "jenkins_ami" {
   description       = "Jenkins server AMI"
-  type              = string
-}
-
-variable "vpn_security_group_id" {
-  description       = "Security group that provides access via VPN"
   type              = string
 }
 

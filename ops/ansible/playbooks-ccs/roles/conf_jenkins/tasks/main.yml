@@ -104,14 +104,14 @@
     - dest_name: gpg-bluebutton-build-key-private.asc
       content: "{{ vault_gpg_bluebutton_build_key_private }}"
 
-- name: GPG Key - Import
-  command: gpg --no-tty --import "/var/lib/jenkins/{{ item }}"
-  when: copy_gpg_build_key.changed
-  become: true
-  become_user: jenkins
-  with_items:
-    - gpg-bluebutton-build-key-public.asc
-    - gpg-bluebutton-build-key-private.asc
+# - name: GPG Key - Import
+#   command: gpg --no-tty --import "/var/lib/jenkins/{{ item }}"
+#   when: copy_gpg_build_key.changed
+#   become: true
+#   become_user: jenkins
+#   with_items:
+#     - gpg-bluebutton-build-key-public.asc
+#     - gpg-bluebutton-build-key-private.asc
     
 #Fire any pending restart handlers now, or else the tests below here may not be valid.
 - meta: flush_handlers
