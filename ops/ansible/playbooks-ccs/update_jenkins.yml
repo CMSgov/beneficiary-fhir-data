@@ -1,6 +1,6 @@
 ---
 ##
-# Updates the exiswting BFD Build Server, Jenkins
+# Updates the existing BFD Build Server, Jenkins
 ##
 - name: Update Build Server Jenkins
   hosts: all

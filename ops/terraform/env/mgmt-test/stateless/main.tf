@@ -11,12 +11,12 @@ module "stateless" {
   source = "../../../modules/mgmt_stateless"
 
   env_config = {
-    env               = "mgmt"
-    tags              = {application="bfd", business="oeda", stack="mgmt", Environment="mgmt"}
+    env               = "mgmt-test"
+    tags              = {application="bfd", business="oeda", stack="mgmt", Environment="mgmt-test"}
   }  
 
   jenkins_ami            = var.jenkins_ami
-  vpn_security_group_id  = var.vpn_security_group_id
   jenkins_key_name       = var.jenkins_key_name
-  
+  jenkins_instance_size  = var.jenkins_instance_size
+  azs                    = var.azs
 }
