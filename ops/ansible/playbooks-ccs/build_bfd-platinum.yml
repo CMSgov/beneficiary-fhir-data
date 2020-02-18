@@ -22,11 +22,3 @@
         name: install_java
     - import_role: 
         name: ops_tools
-
-    # Workaround for: https://jira.cms.gov/browse/BLUEBUTTON-1844
-    - name: Force TrendMicro into background
-      replace:
-        path: /root/.trendmicro_policy_set_region.sh
-        backup: yes
-        regexp: '^(.*)30$'
-        replace: '\1 30 &'
