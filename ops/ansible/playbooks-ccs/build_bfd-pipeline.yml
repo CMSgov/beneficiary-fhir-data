@@ -56,16 +56,6 @@
       become: true
       tags:
         - pre-ami
-
-    # Workaround for: https://jira.cms.gov/browse/BLUEBUTTON-1844
-    - name: Force TrendMicro into background
-      replace:
-        path: /root/.trendmicro_policy_set_region.sh
-        backup: yes
-        regexp: '^(.*)30$'
-        replace: '\1 30 &'
-      tags:
-        - pre-ami
         
   handlers:
     - import_tasks: handlers/main.yml
