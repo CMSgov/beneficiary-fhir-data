@@ -29,4 +29,4 @@
         path: /root/.trendmicro_policy_set_region.sh
         backup: yes
         regexp: '^(.*)30$'
-        replace: '\1 30 &'
+        replace: 'nohup \1 30 >/var/log/trendmicro_policy_set_region.log 2>&1 &'
