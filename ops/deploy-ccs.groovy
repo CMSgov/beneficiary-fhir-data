@@ -138,7 +138,6 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 			def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
 
 			varsFile.write(JsonOutput.toJson([
-				env: environmentId,
 				data_server_launcher: "${workspace}/${appBuildResults.dataServerLauncher}",
 				data_server_war: "${workspace}/${appBuildResults.dataServerWar}",
 				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
@@ -149,7 +148,6 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
-				-var 'env=${environmentId}' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
 				../../packer/build_bfd-pipeline.json"
@@ -159,7 +157,6 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
-				-var 'env=${environmentId}' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
 				../../packer/build_bfd-server.json"
@@ -167,9 +164,9 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
 				bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-pipeline.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
 				bfdServerAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-server.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
 			)
 		}
 	}

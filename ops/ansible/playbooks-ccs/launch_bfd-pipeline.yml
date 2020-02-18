@@ -4,8 +4,6 @@
 ##
 - name: Configure ETL Server
   hosts: localhost
-  vars:
-    env: "test"
 
   tasks:
     - name: Include global variables
