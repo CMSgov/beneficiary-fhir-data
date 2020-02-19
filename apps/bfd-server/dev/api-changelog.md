@@ -1,5 +1,19 @@
 # API Changelog
 
+## BLUEBUTTON-1679: Hashed HICN needs to be removed from Patient Resource
+
+The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule. This is to leave no traces of the HICN-hash in any external facing data requests to BFD. 
+
+For internal facing requests using the `IncludeIdentifiers` header, the Hashed HICN identifier will still be included in the response for the following values: [ "true", "hicn" ]. 
+
+The following is an example of the identifier that is NO LONGER included in external facing responses:
+
+    <identifier>
+       <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"></system>
+       <value value="96228a57f37efea543f4f370f96f1dbf01c3e3129041dba3ea4367545507c6e7"></value>
+    </identifier>
+
+
 ## BLUEBUTTON-1784: Search for patients by ptdcntrct
 
 The Patient resource supports searching a part D Contract Number for a given month:
