@@ -89,6 +89,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.index-create-concurrently", "");
         placeholders.put("logic.sequence-start", "start with");
         placeholders.put("logic.sequence-increment", "increment by");
+        placeholders.put("logic.using-hash", "");
       } else {
         placeholders.put("type.int4", "int4");
         placeholders.put("logic.tablespaces-escape", "--");
@@ -97,6 +98,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.index-create-concurrently", "concurrently");
         placeholders.put("logic.sequence-start", "start");
         placeholders.put("logic.sequence-increment", "increment");
+        placeholders.put("logic.using-hash", "using hash");
       }
     } catch (SQLException e) {
       throw new UncheckedSqlException(e);
