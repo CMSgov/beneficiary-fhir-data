@@ -2,12 +2,14 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import org.apache.http.client.utils.URIBuilder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,40 +26,15 @@ public final class PageLinkBuilder {
   private final Optional<Integer> pageSize;
   private final Optional<Integer> startIndex;
   private final String serverBase;
-
   private final String resource;
-  private final String searchByDesc;
-  private final String identifier;
-  private final DateRangeParam lastUpdated;
-  private final String excludeSamhsa;
-  private final Set<ClaimType> claimTypes;
+  private final RequestDetails requestDetails;
 
-  public PageLinkBuilder(
-      RequestDetails requestDetails,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      DateRangeParam lastUpdated,
-      Set<ClaimType> claimTypes,
-      String excludeSamhsa) {
+  public PageLinkBuilder(RequestDetails requestDetails, String resource) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
     this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
     this.serverBase = requestDetails.getServerBaseForRequest();
     this.resource = resource;
-    this.searchByDesc = searchByDesc;
-    this.identifier = identifier;
-    this.lastUpdated = lastUpdated;
-    this.claimTypes = claimTypes;
-    this.excludeSamhsa = excludeSamhsa;
-  }
-
-  public PageLinkBuilder(
-      RequestDetails requestDetails,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      DateRangeParam lastUpdate) {
-    this(requestDetails, resource, searchByDesc, identifier, lastUpdate, null, null);
+    this.requestDetails = requestDetails;
   }
 
   /**
@@ -68,6 +45,7 @@ public final class PageLinkBuilder {
    */
   private Optional<Integer> parseIntegerParameters(
       RequestDetails requestDetails, String parameterToParse) {
+
     if (requestDetails.getParameters().containsKey(parameterToParse)) {
       try {
         return Optional.of(
@@ -178,43 +156,29 @@ public final class PageLinkBuilder {
    * @return the link requested
    */
   private String createPageLink(int startIndex) {
-    StringBuilder b = new StringBuilder();
-    b.append(serverBase);
-    b.append(resource);
-    b.append(Constants.PARAM_COUNT + "=" + getPageSize());
-    b.append("&startIndex=" + startIndex);
-    b.append("&" + searchByDesc + "=" + identifier);
 
-    // Add the lastUpdated parameters if present
-    if (lastUpdated != null) {
-      DateParam lowerBound = lastUpdated.getLowerBound();
-      if (lowerBound != null && !lowerBound.isEmpty()) {
-        b.append(
-            "&"
-                + Constants.PARAM_LASTUPDATED
-                + "="
-                + lowerBound.getPrefix().getValue()
-                + lowerBound.getValueAsString());
+    // Get a copy of all request parameters.
+    Map<String, String[]> params = new HashMap<>(requestDetails.getParameters());
+
+    // Add in paging related changes.
+    params.put("startIndex", new String[] {String.valueOf(startIndex)});
+    params.put("_count", new String[] {String.valueOf(getPageSize())});
+
+    try {
+      // Setup URL base and resource.
+      URIBuilder uri = new URIBuilder(serverBase + resource);
+
+      // Create query parameters by iterating thru all params entry sets. Handle multi values for
+      // the same parameter key.
+      ArrayList<String> queryParams = new ArrayList<String>();
+      for (Map.Entry<String, String[]> paramSet : params.entrySet()) {
+        for (String param : paramSet.getValue()) {
+          uri.addParameter(paramSet.getKey(), param);
+        }
       }
-      DateParam upperBound = lastUpdated.getUpperBound();
-      if (upperBound != null && !upperBound.isEmpty()) {
-        b.append(
-            "&"
-                + Constants.PARAM_LASTUPDATED
-                + "="
-                + upperBound.getPrefix().getValue()
-                + upperBound.getValueAsString());
-      }
+      return uri.build().toString();
+    } catch (URISyntaxException e) {
+      throw new InvalidRequestException("Invalid URI:" + e);
     }
-
-    // Add the "type" parameter if present
-    if (claimTypes != null) {
-      b.append("&type=" + claimTypes.toString().toLowerCase().replaceAll("[\\[\\] ]", ""));
-    }
-
-    // Add the "excludeSamhsa" parameter if present
-    if (excludeSamhsa != null) b.append("&excludeSAMHSA=" + excludeSamhsa);
-
-    return b.toString();
   }
 }

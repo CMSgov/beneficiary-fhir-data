@@ -165,13 +165,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
       coverages = new LinkedList<IBaseResource>();
     }
 
-    PageLinkBuilder paging =
-        new PageLinkBuilder(
-            requestDetails,
-            "/Coverage?",
-            Coverage.SP_BENEFICIARY,
-            beneficiary.getIdPart(),
-            lastUpdated);
+    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Coverage?");
 
     Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "beneficiary");
