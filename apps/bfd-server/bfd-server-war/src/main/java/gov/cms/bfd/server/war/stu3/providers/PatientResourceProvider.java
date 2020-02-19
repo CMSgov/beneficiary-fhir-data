@@ -280,10 +280,10 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (count > paging.getStartIndex()) {
       Query query = queryBuilder.createQuery();
       if (paging.isPagingRequested()) {
-				int pageSize = paging.getPageSize();
-				if (count < paging.getStartIndex() + paging.getPageSize()) {
-					pageSize = count - startIndex;
-				}
+        int pageSize = paging.getPageSize();
+        if (count < paging.getStartIndex() + paging.getPageSize()) {
+          pageSize = count.intValue() - paging.getStartIndex();
+        }
         query.setFirstResult(paging.getStartIndex());
         query.setMaxResults(pageSize);
       }
