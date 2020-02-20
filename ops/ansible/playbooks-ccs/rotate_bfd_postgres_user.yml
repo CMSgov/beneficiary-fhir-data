@@ -12,6 +12,7 @@
 #      rds_instance_info: #requires Ansible 2.9+
       rds_instance_facts:
         db_instance_identifier: "{{ rds_database }}"
+        region: "{{ rds_region }}"
 
       register: database_info
 
