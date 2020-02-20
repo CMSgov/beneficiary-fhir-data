@@ -91,7 +91,6 @@ public final class PageLinkBuilder {
    * @throws InvalidRequestException HTTP 400: indicates a startIndex less than 0 was provided
    */
   public int getStartIndex() {
-    if (!isPagingRequested()) throw new BadCodeMonkeyException();
     if (startIndex.isPresent()) {
       if (startIndex.get() < 0) {
         throw new InvalidRequestException(
