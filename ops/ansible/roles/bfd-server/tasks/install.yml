@@ -36,15 +36,6 @@
     dest: "{{ data_server_dir }}/{{ data_server_war | basename }}"
   become: true
 
-- name: Create BFD Server Service Definition
-  template:
-    src: bluebutton-appserver.service.j2
-    dest: "/etc/systemd/system/{{ data_server_appserver_service }}.service"
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  become: true
-
 # FIXME: Switch to the maven_artifact module after we move to the CCS.
 - name: Download New Relic Java Agent Bundle
   get_url:

@@ -8,6 +8,15 @@
     mode: u=rwx,g=rwx,o=rx
   become: true
 
+- name: Create BFD Server Service Definition
+  template:
+    src: bluebutton-appserver.service.j2
+    dest: "/etc/systemd/system/{{ data_server_appserver_service }}.service"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+
 - name: Copy Local Test SSL Keypair
   copy:
     # Note: This PEM file is encrypted within the project via Ansible Vault, which will
