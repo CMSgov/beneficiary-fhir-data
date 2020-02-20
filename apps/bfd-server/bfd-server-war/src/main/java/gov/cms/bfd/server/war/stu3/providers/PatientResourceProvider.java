@@ -260,16 +260,20 @@ public final class PatientResourceProvider implements IResourceProvider {
     PageQueryBuilder<Beneficiary> queryBuilder =
         new PageQueryBuilder<Beneficiary>(Beneficiary.class, entityManager);
 
-    queryBuilder.criteria.where(
-        queryBuilder.builder.equal(queryBuilder.root.get(contractMonthField), contractCode));
+    queryBuilder
+        .criteria()
+        .where(
+            queryBuilder
+                .builder()
+                .equal(queryBuilder.root().get(contractMonthField), contractCode));
 
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
 
     if (hasHICN(includeIdentifiersValues))
-      queryBuilder.root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+      queryBuilder.root().fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
     if (hasMBI(includeIdentifiersValues))
-      queryBuilder.root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+      queryBuilder.root().fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     List<Beneficiary> matchingBeneficiaries = Collections.emptyList();
     Query query = queryBuilder.createQuery();

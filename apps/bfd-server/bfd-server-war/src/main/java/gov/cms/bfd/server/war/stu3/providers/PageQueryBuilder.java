@@ -8,9 +8,9 @@ import javax.persistence.criteria.Root;
 
 public final class PageQueryBuilder<T> {
 
-  public final Root<T> root;
-  public final CriteriaBuilder builder;
-  public final CriteriaQuery criteria;
+  private final Root<T> root;
+  private final CriteriaBuilder builder;
+  private final CriteriaQuery criteria;
   private final EntityManager entityManager;
 
   public PageQueryBuilder(Class<T> returnType, EntityManager em) {
@@ -18,6 +18,18 @@ public final class PageQueryBuilder<T> {
     builder = entityManager.getCriteriaBuilder();
     criteria = builder.createQuery(returnType);
     root = criteria.from(returnType);
+  }
+
+  public Root<T> root() {
+    return this.root;
+  }
+
+  public CriteriaBuilder builder() {
+    return this.builder;
+  }
+
+  public CriteriaQuery criteria() {
+    return this.criteria;
   }
 
   private CriteriaQuery<Long> createCountCriteria() {
