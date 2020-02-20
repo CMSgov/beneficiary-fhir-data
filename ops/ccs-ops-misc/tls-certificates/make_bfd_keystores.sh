@@ -23,7 +23,7 @@ gen_keystore "cn=bfd.cms.gov" \
 
 # Prod-SBX
 gen_keystore "cn=prod-sbx.bfd.cms.gov" \
-    "san=dns:prod-sbx.bfdcloud.net,dns:mct.prod-sbx.bfdcloud.net,dns:dpc.prod-sbx.bfdcloud.net,dns:bcda.prod-sbx.bfdcloud.net,dns:bb.prod-sbx.bfdcloud.net,dns:fhir.backend.bluebutton.hhsdevcloud.us,dns:bfd-prod-sbx-fhir-730339399.us-east-1.elb.amazonaws.com" \
+    "san=dns:prod-sbx.bfdcloud.net,dns:mct.prod-sbx.bfdcloud.net,dns:dpc.prod-sbx.bfdcloud.net,dns:bcda.prod-sbx.bfdcloud.net,dns:bb.prod-sbx.bfdcloud.net,dns:fhir.backend.bluebutton.hhsdevcloud.us,dns:prod-sbx.bfd.cms.gov,dns:bfd-prod-sbx-fhir-730339399.us-east-1.elb.amazonaws.com" \
     "prod-sbx" 
 
 # Test
