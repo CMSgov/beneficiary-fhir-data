@@ -46,29 +46,6 @@
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
         data_server_new_relic_environment: "{{ env_name_std }}"
 
-    # Overwrite bfd-server role copy of the keystore file 
-    - name: Copy the appserver keystore  
-      copy:
-        # Note: this JKS file is encrypted via the Ansible Vault 
-        src: "{{ data_server_appserver_keystore }}"
-        dest: "{{ bfd_server_dir }}/bluebutton-appserver-keystore.jks"
-        force: yes # overwrite the existing keystore
-      tags:
-        - pre-ami
-        
-    - name: Copy Local Test SSL Keypair
-      copy:
-        # Note: This PEM file is encrypted within the project via Ansible Vault, which will
-        # automagically decrypt it as part of the copy operation.
-        src: "{{ data_server_ssl_client_certificate_test }}"
-        dest: "{{ bfd_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
-        owner: "{{ data_server_user }}"
-        group: "{{ data_server_user }}"
-        mode: 'u=rw,g=,o='
-      become: true
-      tags:
-        - pre-ami
-
     - name: Build CloudWatch unified agent configuration
       template:
         src: cwagent-data-server.json.j2
