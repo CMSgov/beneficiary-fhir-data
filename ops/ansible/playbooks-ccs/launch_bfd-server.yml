@@ -38,11 +38,6 @@
         data_server_new_relic_license_key: "{{ vault_data_server_new_relic_license_key }}"
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
         data_server_new_relic_environment: "{{ env_name_std }}"
-
-    - name: Add SSH users
-      import_role:
-        name: ssh_users
-      tags: [post-ami]
         
   handlers:
     - import_tasks: handlers/main.yml
