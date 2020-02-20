@@ -21,17 +21,23 @@ public final class PageQueryBuilder<T> {
   }
 
   private CriteriaQuery<Long> createCountCriteria() {
-    criteria.select(builder.count(root));
-    return criteria;
+    CriteriaQuery countCriteria = builder.createQuery(Long.class);
+    Root<T> countRoot = countCriteria.from(this.criteria.getResultType());
+    countCriteria.select(builder.count(countRoot));
+    countCriteria.where(this.criteria.getRestriction());
+    return countCriteria;
   }
 
   public Long count() {
     return entityManager.createQuery(createCountCriteria()).getSingleResult();
   }
 
-  public Query createQuery() {
+  private CriteriaQuery<T> createCriteria() {
     criteria.select(root);
+    return criteria;
+  }
 
-    return entityManager.createQuery(criteria);
+  public Query createQuery() {
+    return entityManager.createQuery(createCriteria());
   }
 }
