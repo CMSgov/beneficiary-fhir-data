@@ -22,6 +22,8 @@
         name: base_patch
     - import_role:
         name: rhel_python_pip
+    - import_role:
+        name: ops_tools
     - import_role: 
         name: mount_efs
     - import_role:
