@@ -236,7 +236,7 @@ public class LoadedFilterManager {
           newFilters = trimFilters(newFilters, loadedFiles);
         }
 
-        set(newFilters, currentFirstBatchUpdate, currentFirstBatchUpdate);
+        set(newFilters, currentFirstBatchUpdate, currentLastBatchCreated);
       }
     } catch (Exception ex) {
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
