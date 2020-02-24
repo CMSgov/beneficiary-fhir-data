@@ -1,36 +1,59 @@
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_jan_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberJanId");
+    on "Beneficiaries" ("partDContractNumberJanId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberJanId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_feb_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberFebId");
-
+    on "Beneficiaries" ("partDContractNumberFebId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberFebId") = 5
+    ;
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_mar_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberMarId");
+    on "Beneficiaries" ("partDContractNumberMarId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberMarId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_apr_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberAprId");
+    on "Beneficiaries" ("partDContractNumberAprId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberAprId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_may_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberMayId");
+    on "Beneficiaries" ("partDContractNumberMayId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberMayId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_jun_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberJunId");
+    on "Beneficiaries" ("partDContractNumberJunId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberJunId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_jul_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberJulId");
+    on "Beneficiaries" ("partDContractNumberJulId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberJulId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_aug_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberAugId");
+    on "Beneficiaries" ("partDContractNumberAugId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberAugId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_sept_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberSeptId");
+    on "Beneficiaries" ("partDContractNumberSeptId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberSeptId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_oct_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberOctId");
+    on "Beneficiaries" ("partDContractNumberOctId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberOctId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_nov_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberNovId");
+    on "Beneficiaries" ("partDContractNumberNovId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberNovId") = 5
+    ;
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_dec_id_idx"
-    on "Beneficiaries" ${logic.using-hash} ("partDContractNumberDecId");
+    on "Beneficiaries" ("partDContractNumberDecId")
+    ${logic.non-hsql-only-line} where length("partDContractNumberDecId") = 5
+    ;
