@@ -379,9 +379,11 @@ public final class PatientResourceProvider implements IResourceProvider {
               beneMatchesRoot.fetch(f, JoinType.LEFT);
             });
     beneMatches.select(beneMatchesRoot);
-    beneMatches.where(builder.equal(beneMatchesRoot.get(field), value));
-    // Triggers indexes built with a where field = length clause
-    beneMatches.where(builder.equal(builder.length(beneMatchesRoot.get(field)), value.length()));
+    beneMatches.where(
+        builder.and(
+            builder.equal(beneMatchesRoot.get(field), value),
+            // Triggers indexes built with a where field = length clause
+            builder.equal(builder.length(beneMatchesRoot.get(field)), value.length())));
 
     return beneMatches;
   }
