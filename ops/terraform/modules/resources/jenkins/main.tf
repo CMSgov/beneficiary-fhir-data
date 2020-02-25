@@ -286,9 +286,9 @@ resource "aws_launch_template" "main" {
   name                          = "bfd-${var.env_config.env}-${var.role}"
   description                   = "Template for the ${var.env_config.env} environment ${var.role} servers"
   vpc_security_group_ids        = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], aws_security_group.app[*].id)
-  key_name                      = var.key_name
-  image_id                      = var.ami_id
-  instance_type                 = var.jenkins_instance_size
+  key_name                      = var.launch_config.key_name
+  image_id                      = var.launch_config.ami_id
+  instance_type                 = var.launch_config.instance_type
   ebs_optimized                 = true
 
   iam_instance_profile {
@@ -300,7 +300,7 @@ resource "aws_launch_template" "main" {
   }
 
   monitoring {
-    enabled = true
+    enabled = false
   }
   
   // block_device_mappings {    

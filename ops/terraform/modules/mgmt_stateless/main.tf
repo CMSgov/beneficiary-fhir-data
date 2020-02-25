@@ -90,9 +90,9 @@ module "jenkins_lb" {
     port          = 443
     cidr_blocks   = ["0.0.0.0/0"]
   } : {
-    description   = "From Self"
+    description   = "From Self, and VPN"
     port          = 443
-    cidr_blocks   = concat([data.aws_vpc.main.cidr_block])
+    cidr_blocks   = concat([data.aws_vpc.main.cidr_block], ["10.0.0.0/8"])
   }
 
   egress = {
@@ -111,6 +111,7 @@ module "jenkins" {
   key_name              = var.jenkins_key_name
   layer                 = "app"
   role                  = "jenkins"
+  lb_config             = module.jenkins_lb.lb_config
   
   # Initial size is one server per AZ
   asg_config      = {
