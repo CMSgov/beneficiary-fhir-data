@@ -220,11 +220,12 @@ module "fhir_asg" {
   lb_config       = module.fhir_lb.lb_config
 
   # Initial size is one server per AZ
-  asg_config      = {
-    min           = length(local.azs)
-    max           = 8*length(local.azs)
-    desired       = length(local.azs)
-    sns_topic_arn = ""
+  asg_config        = {
+    min             = length(local.azs)
+    max             = 8*length(local.azs)
+    desired         = length(local.azs)
+    sns_topic_arn   = ""
+    instance_warmup = 430
   }
 
   launch_config   = {
