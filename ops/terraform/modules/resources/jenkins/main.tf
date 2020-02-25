@@ -313,30 +313,7 @@ resource "aws_launch_template" "main" {
   //     kms_key_id                = data.aws_kms_key.master_key.arn
   //   }
 }
-  
-// ##
-// # Launch configuration
-// ##
 
-// resource "aws_launch_configuration" "main" {
-//   # Generate a new config on every revision
-//   name_prefix                 = "bfd-${var.env_config.env}-${var.role}-"
-//   security_groups             = concat([aws_security_group.base.id], aws_security_group.app[*].id)
-//   key_name                    = var.launch_config.key_name
-//   image_id                    = var.launch_config.ami_id
-//   instance_type               = var.launch_config.instance_type
-//   associate_public_ip_address = false
-//   iam_instance_profile        = var.launch_config.profile
-//   placement_tenancy           = local.is_prod ? "dedicated" : "default"
-
-//   user_data                   = templatefile("${path.module}/../templates/jenkins.tpl", {
-//     env    = var.env_config.env
-//   })
-
-//   lifecycle {
-//     create_before_destroy = true
-//   }
-// }
 
 ##
 # Autoscaling group
@@ -395,49 +372,3 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
-// ##
-// # Autoscaling group
-// ##
-// resource "aws_autoscaling_group" "main" {
-//   # Generate a new config on every revision
-//   name_prefix               = "bfd-${aws_launch_configuration.main.name}"
-//   desired_capacity          = var.asg_config.desired
-//   max_size                  = var.asg_config.max
-//   min_size                  = var.asg_config.min
-
-//   min_elb_capacity          = var.asg_config.desired
-//   wait_for_elb_capacity     = var.asg_config.desired
-//   wait_for_capacity_timeout = "10m"
-
-//   health_check_grace_period = 300
-//   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
-//   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
-//   launch_configuration      = aws_launch_configuration.main.name
-//   target_group_arns         = var.lb_config == null ? [] : [var.lb_config.tg_arn]
-
-//   enabled_metrics = [
-//     "GroupMinSize",
-//     "GroupMaxSize",
-//     "GroupDesiredCapacity",
-//     "GroupInServiceInstances",
-//     "GroupPendingInstances",
-//     "GroupStandbyInstances",
-//     "GroupTerminatingInstances",
-//     "GroupTotalInstances",
-//   ]
-
-//   dynamic "tag" {
-//     for_each = local.tags
-//     content {
-//       key                 = tag.key
-//       value               = tag.value
-//       propagate_at_launch = true
-//     }
-//   }
-
-//   tag {
-//     key                   = "Name"
-//     value                 = "bfd-${var.env_config.env}-${var.role}"
-//     propagate_at_launch   = true
-//   }
-// }

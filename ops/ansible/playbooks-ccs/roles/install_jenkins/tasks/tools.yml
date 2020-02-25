@@ -6,24 +6,24 @@
 - name: Install tfenv to manage terraform
   git:
     repo: https://github.com/tfutils/tfenv.git 
-    dest: ~/.tfenv
+    dest: /usr/bin/.tfenv
 
 - name: Create symlinks for tfenv
   file:
-    src: ~/.tfenv/bin/tfenv
+    src: /usr/bin/.tfenv/bin/tfenv
     dest: /usr/bin/tfenv
     mode: '0755'
     state: link
     
 - name: Link tfenv tf wrapper. 
   file:
-    src: ~/.tfenv/bin/terraform
+    src: /usr/bin/.tfenv/bin/terraform
     dest: /usr/bin/terraform
     mode: '0755'
     state: link
 
 - name: Install terraform 
-  shell: tfenv install 0.12.5
+  shell: tfenv install 0.12.8
   
 - name: Install packer
   unarchive:
