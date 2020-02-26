@@ -133,7 +133,7 @@ stage('Build App AMIs') {
 	milestone(label: 'stage_build_app_amis_test_start')
 
 	node {
-		amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+		amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 }
 
