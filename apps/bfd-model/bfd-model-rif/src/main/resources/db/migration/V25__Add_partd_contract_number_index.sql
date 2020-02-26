@@ -1,3 +1,9 @@
+/*
+ * Create an index for each of the Part D Contract Number fields (jan - dec).
+ * This makes finding a patient by a specific contract number tenable.
+ * 
+ * More context can be found in BLUEBUTTON-1841 and related ticktes.
+ */
 
 create index ${logic.index-create-concurrently} "Beneficiaries_partd_contract_number_jan_id_idx"
     on "Beneficiaries" ("partDContractNumberJanId");
