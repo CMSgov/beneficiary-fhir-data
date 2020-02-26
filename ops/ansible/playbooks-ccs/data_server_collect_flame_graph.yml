@@ -92,14 +92,17 @@
         PERF_RECORD_SECONDS: "{{ perf_record_seconds }}"
       become: true
 
-      #    - name: Attach Java Symbol Agent to Java Process
-      #      shell: "java -cp attach-main.jar:$JAVA_HOME/lib/tools.jar net.virtualvoid.perf.AttachOnce {{ process_pid }}"
-      #      args:
-      #        chdir: "{{ perf_map_agent_path_remote }}/out"
-      #      environment:
-      #        JAVA_HOME: "{{ jdk_path }}"
-      #      become: true
-      #      become_user: "{{ java_user }}"
+    # Note: This task will only work once per Java process. If you have to re-run this play against the same
+    # box (without a restart) it will fail. If you run into this, consider adding `failed_when: false` to
+    # this task. Haven't quite convinced myself it's a good default, yet.
+    - name: Attach Java Symbol Agent to Java Process
+      shell: "java -cp attach-main.jar:$JAVA_HOME/lib/tools.jar net.virtualvoid.perf.AttachOnce {{ process_pid }}"
+      args:
+        chdir: "{{ perf_map_agent_path_remote }}/out"
+      environment:
+        JAVA_HOME: "{{ jdk_path }}"
+      become: true
+      become_user: "{{ java_user }}"
 
     - name: Fix Symbol Map Ownership
       file:
