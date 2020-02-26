@@ -127,8 +127,7 @@ resource "aws_launch_template" "main" {
     port          = var.lb_config.port
     accountId     = var.launch_config.account_id
     gitBranchName = var.launch_config.git_branch
-    # At this time gitCommitId is a unique merge commit in Jenkins that cannot be properly utilized this way
-    # gitCommitId   = var.launch_config.git_commit
+    gitCommitId   = var.launch_config.git_commit
   }))
 
   tag_specifications {
