@@ -5,17 +5,17 @@
 #
 # Usage:
 #
-#     $ pipenv run ./ansible-playbook-wrapper data_server_collect_flame_graph.yml --extra-vars "perf_record_seconds=15 find_process_command='pgrep java' jdk_path=/etc/alternatives/java_sdk_1.8.0_openjdk" --limit bluebutton-healthapt-test-data-server-a-1
+#     $ pipenv run ./ansible-playbook-wrapper data_server_collect_flame_graph.yml --inventory='somehost.ec2.internal' --extra-vars "perf_record_seconds=15 find_process_command='pgrep -f bfd-server-launcher.*jetty' java_user='bfd' jdk_path=/etc/alternatives/java_sdk_1.8.0_openjdk"
 ##
 
 - name: Configure Data Server System
-  hosts: data_server_systems
+  hosts: all
   tasks:
 
     - name: Set Helper Variables
       set_fact:
         tools_root_remote: '/usr/local'
-        tools_root_local: '/usr/local'
+        tools_root_local: '/tmp'
         find_process_command_default: 'pgrep java'
         perf_record_seconds_default: 15
         jdk_path_default: '/etc/alternatives/java_sdk_1.8.0_openjdk'
@@ -34,7 +34,6 @@
         repo: 'https://github.com/jvm-profiling-tools/perf-map-agent.git'
         dest: "{{ perf_map_agent_path_local }}"
       delegate_to: localhost
-      become: true
 
     - name: Copy perf-map-agent to Target
       synchronize:
@@ -49,6 +48,7 @@
           - cmake
           - gcc
           - gcc-c++
+          - java-1.8.0-openjdk-devel
         state: present
       become: true
 
@@ -92,6 +92,23 @@
         PERF_RECORD_SECONDS: "{{ perf_record_seconds }}"
       become: true
 
+      #    - name: Attach Java Symbol Agent to Java Process
+      #      shell: "java -cp attach-main.jar:$JAVA_HOME/lib/tools.jar net.virtualvoid.perf.AttachOnce {{ process_pid }}"
+      #      args:
+      #        chdir: "{{ perf_map_agent_path_remote }}/out"
+      #      environment:
+      #        JAVA_HOME: "{{ jdk_path }}"
+      #      become: true
+      #      become_user: "{{ java_user }}"
+
+    - name: Fix Symbol Map Ownership
+      file:
+        path: "/tmp/perf-{{ process_pid }}.map"
+        owner: root
+        group: root
+        mode: 'u=rw,g=r,o=r'
+      become: true
+
     - name: Generate Trace Output
       shell: "perf script -i /tmp/perf-{{ process_pid }}.data > perf-{{ process_pid }}.stacks"
       args:
@@ -110,7 +127,6 @@
         dest: "{{ flamegraph_path_local }}"
         depth: 1
       delegate_to: localhost
-      become: true
 
     - name: Run FlameGrapgh stackcollapse Script
       shell: "{{ flamegraph_path_local }}/stackcollapse-perf.pl /tmp/perf-{{ process_pid }}.stacks > /tmp/perf-{{ process_pid }}.collapsed"
