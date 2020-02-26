@@ -13,7 +13,8 @@ git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBran
 
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
-git checkout ${gitCommitId}
+# At this time gitCommitId is a unique merge commit in Jenkins that cannot be properly utilized this way
+# git checkout ${gitCommitId}
 
 aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 

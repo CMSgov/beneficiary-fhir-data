@@ -91,7 +91,8 @@ resource "aws_instance" "main" {
     env    = var.env_config.env,
     accountId = data.aws_caller_identity.current.account_id
     gitBranchName = var.launch_config.git_branch
-    gitCommitId = var.launch_config.git_commit
+    # At this time gitCommitId is a unique merge commit in Jenkins that cannot be properly utilized this way
+    # gitCommitId = var.launch_config.git_commit
   })
 
   # Note: This is a workaround for Terraform's lack of support for `depends_on` in modules.
