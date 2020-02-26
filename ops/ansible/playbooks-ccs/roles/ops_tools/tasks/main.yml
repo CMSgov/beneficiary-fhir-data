@@ -13,3 +13,7 @@
     name: git
     state: latest
      
+- name: Install rng-tools to increase entropy on EC2 boot
+  yum:
+    name: rng-tools
+    state: latest
