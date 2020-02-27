@@ -26,6 +26,6 @@ cat <<EOF >> extra_vars.json
 }
 EOF
 
-ansible-playbook --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-server.yml
+ansible-playbook -vvv --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-server.yml
 
 rm vault.password
