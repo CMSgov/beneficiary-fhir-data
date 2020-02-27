@@ -56,17 +56,6 @@
 # BEGIN DEBUG STATEMENTS, REMOVE BEFORE MERGING!
 - name: Debug
   command: ls /tmp
-  changed_when: false
-  become: true
-  become_user: "{{ data_server_user }}"
-
-- name: Debug
-  command: "{{ item }}"
-  with_items:
-    - "ls /tmp"
-    - "ls /tmp"
-    - "ls /tmp"
-  changed_when: false
   become: true
   become_user: "{{ data_server_user }}"
 
@@ -74,7 +63,6 @@
   command: ls /tmp
   changed_when: false
   become: true
-  become_user: "{{ data_server_user }}"
 # END DEBUG STATEMENTS
 
 - name: Create Empty App Server SSL Truststore Working Copy
