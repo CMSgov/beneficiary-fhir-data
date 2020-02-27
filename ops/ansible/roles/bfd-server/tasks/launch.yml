@@ -58,11 +58,8 @@
   command: "{{ item }}"
   with_items:
     - "ls /tmp"
-    - "head -n 1 /dev/random"
     - "ls /tmp"
-    - "head -n 1 /dev/random"
     - "ls /tmp"
-    - "head -n 1 /dev/random"
   changed_when: false
   become: true
   become_user: "{{ data_server_user }}"
