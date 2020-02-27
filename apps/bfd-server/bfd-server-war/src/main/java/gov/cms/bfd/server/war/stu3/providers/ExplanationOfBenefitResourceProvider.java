@@ -208,15 +208,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     String beneficiaryId = patient.getIdPart();
     Set<ClaimType> claimTypes = parseTypeParam(type);
-    PageLinkBuilder paging =
-        new PageLinkBuilder(
-            requestDetails,
-            "/ExplanationOfBenefit?",
-            ExplanationOfBenefit.SP_PATIENT,
-            beneficiaryId,
-            lastUpdated,
-            type != null ? claimTypes : null,
-            excludeSamhsa);
+    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
     Operation operation = new Operation(Operation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");

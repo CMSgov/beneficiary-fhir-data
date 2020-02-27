@@ -204,10 +204,11 @@ public class LoadedFilterManager {
    * call.
    */
   @Scheduled(fixedDelay = 1000, initialDelay = 2000)
-  public synchronized void refreshFilters() {
+  public void refreshFilters() {
     /*
      * Dev note: the pipeline has a process to trim the files list. Nevertheless, building a set of
-     * bloom filters may take a while. This method is expected to be called on it's own thread, so
+     * bloom filters may take a while. This method is expected to be called on it's own thread by the
+     * the Spring framework. In addition, it doesn't lock this object until the end of the process, so
      * this filter building process can happen without interfering with serving. Also, this refresh
      * time will be proportional to the number of files which have been loaded in the past refresh
      * period. If no files have been loaded, this refresh should take less than a millisecond.
@@ -222,8 +223,8 @@ public class LoadedFilterManager {
             lastBatchCreated,
             currentLastBatchCreated);
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
-        this.filters = updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
-        this.lastBatchCreated = currentLastBatchCreated;
+        List<LoadedFileFilter> newFilters =
+            updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
 
         // If batches been trimmed, then remove filters which are no longer present
         final Date currentFirstBatchUpdate =
@@ -232,12 +233,10 @@ public class LoadedFilterManager {
             || this.firstBatchCreated.before(currentFirstBatchUpdate)) {
           LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
           List<LoadedFile> loadedFiles = fetchLoadedFiles();
-          this.filters = trimFilters(this.filters, loadedFiles);
-          this.firstBatchCreated = currentFirstBatchUpdate;
+          newFilters = trimFilters(newFilters, loadedFiles);
         }
 
-        // update the transaction time as well
-        this.transactionTime = currentLastBatchCreated;
+        set(newFilters, currentFirstBatchUpdate, currentLastBatchCreated);
       }
     } catch (Exception ex) {
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
@@ -245,13 +244,14 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Set the current state. Used in tests.
+   * Set the current state in consistent fashion
    *
    * @param filters to use
    * @param firstBatchCreated to use
    * @param lastBatchCreated to use
    */
-  public void set(List<LoadedFileFilter> filters, Date firstBatchCreated, Date lastBatchCreated) {
+  public synchronized void set(
+      List<LoadedFileFilter> filters, Date firstBatchCreated, Date lastBatchCreated) {
     this.filters = filters;
     this.firstBatchCreated = firstBatchCreated;
     this.lastBatchCreated = lastBatchCreated;
@@ -336,7 +336,7 @@ public class LoadedFilterManager {
   }
 
   /**
-   * Build a filter for this loaded file. Should be called in a synchronized context.
+   * Build a filter for this loaded file. Should be a pure function.
    *
    * @param fileId to build a filter for
    * @param firstUpdated time stamp

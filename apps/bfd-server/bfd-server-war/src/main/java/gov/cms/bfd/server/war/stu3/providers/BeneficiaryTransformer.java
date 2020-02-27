@@ -55,10 +55,14 @@ final class BeneficiaryTransformer {
     patient.addIdentifier(
         TransformerUtils.createIdentifier(
             CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
-    patient
-        .addIdentifier()
-        .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
-        .setValue(beneficiary.getHicn());
+
+    // Add hicn-hash identifier ONLY if raw hicn is requested.
+    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+      patient
+          .addIdentifier()
+          .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
+          .setValue(beneficiary.getHicn());
+    }
 
     if (beneficiary.getMbiHash().isPresent()) {
       patient

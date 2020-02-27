@@ -1,5 +1,33 @@
 # API Changelog
 
+## BLUEBUTTON-1843: HAPI 4.1.0 Upgrade
+
+As part of the upgrade of the HAPI package used by the BFD, the FHIR version was changed from `3.0.1` to `3.0.2`. 
+This is a minor FHIR version change. 
+
+The `CapabilitiesStatement` resource returned by the metadata endpoint reflects this change. 
+In the resource the `fhirVersion` field changed and the profile path changed from:
+```
+"reference" : "http://hl7.org/fhir/StructureDefinition/<Resource Type>"
+```
+to:
+```
+"reference" : "http://hl7.org/fhir/Profile/<Resource Type>"
+```
+
+## BLUEBUTTON-1679: Hashed HICN needs to be removed from Patient Resource
+
+The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule. This is to leave no traces of the HICN-hash in any external facing data requests to BFD. 
+
+For internal facing requests using the `IncludeIdentifiers` header, the Hashed HICN identifier will still be included in the response for the following values: [ "true", "hicn" ]. 
+
+The following is an example of the identifier that is NO LONGER included in external facing responses:
+
+    <identifier>
+       <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"></system>
+       <value value="96228a57f37efea543f4f370f96f1dbf01c3e3129041dba3ea4367545507c6e7"></value>
+    </identifier>
+
 ## BLUEBUTTON-1784: Search for patients by ptdcntrct
 
 The Patient resource supports searching a part D Contract Number for a given month:
