@@ -106,6 +106,7 @@
     state: directory
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
+    recurse: yes
   become: true
 # END TEMP FIX
 
