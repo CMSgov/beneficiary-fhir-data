@@ -5,9 +5,9 @@
 
 - name: Launch BFD Data Server
   hosts: localhost
+  connection: local
   gather_facts: yes
   vars:
-    ansible_ssh_pipelining: no
     bfd_server_dir: '/usr/local/bfd-server'
 
   tasks:
