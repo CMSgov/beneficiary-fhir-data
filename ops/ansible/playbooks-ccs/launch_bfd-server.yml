@@ -5,7 +5,6 @@
 
 - name: Launch BFD Data Server
   hosts: localhost
-  connection: local
   gather_facts: yes
   vars:
     bfd_server_dir: '/usr/local/bfd-server'

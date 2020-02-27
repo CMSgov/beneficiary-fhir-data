@@ -57,9 +57,7 @@
 - name: Debug
   command: ls /tmp
   become: true
-  become_user: "{{ data_server_user }}"
-  become_method: su
-  become_flags: '-s /bin/sh'
+  # become_user: "{{ data_server_user }}"
 # END DEBUG STATEMENTS
 
 - name: Create Empty App Server SSL Truststore Working Copy
@@ -69,7 +67,7 @@
     - "keytool -delete -alias fake -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit -keypass changeit"
   changed_when: false
   become: true
-  become_user: "{{ data_server_user }}"
+  # become_user: "{{ data_server_user }}"
 
 - name: Save App Server SSL Truststore Certificates
   copy:
@@ -78,7 +76,7 @@
   with_items: "{{ data_server_ssl_client_certificates }}"
   changed_when: false
   become: true
-  become_user: "{{ data_server_user }}"
+  # become_user: "{{ data_server_user }}"
 
 - name: Import Certificates into App Server SSL Truststore Working Copy
   java_cert:
@@ -89,7 +87,7 @@
   with_items: "{{ data_server_ssl_client_certificates }}"
   changed_when: false
   become: true
-  become_user: "{{ data_server_user }}"
+  # become_user: "{{ data_server_user }}"
 
 - name: Update App Server SSL Truststore
   copy:
@@ -100,6 +98,16 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=rw,o=r
   become: true
+
+# BEGIN TEMP FIX
+- name: Fix permissions on data server directory
+  file:
+    path: "{{ data_server_dir }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+  become: true
+# END TEMP FIX
 
 - name: Trigger Launch Handlers
   debug:
