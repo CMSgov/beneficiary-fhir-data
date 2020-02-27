@@ -58,6 +58,8 @@
   command: ls /tmp
   become: true
   become_user: "{{ data_server_user }}"
+  become_method: su
+  become_flags: '-s /bin/sh'
 # END DEBUG STATEMENTS
 
 - name: Create Empty App Server SSL Truststore Working Copy
