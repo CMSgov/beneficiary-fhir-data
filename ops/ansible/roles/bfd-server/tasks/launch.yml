@@ -53,6 +53,28 @@
     mode: u=rwx,g=rwx,o=rx
   become: true
 
+# BEGIN DEBUG STATEMENTS, REMOVE BEFORE MERGING!
+- name: Debug 1
+  debug:
+    msg: "{{ item }}"
+  with_items:
+    - "Msg 1"
+    - "Msg 2"
+    - "Msg 3"
+  changed_when: false
+  become: true
+  become_user: "{{ data_server_user }}"
+
+- name: Debug 2
+  command: "{{ item }}"
+  with_items:
+    - "keytool -genkeypair -alias fake -dname cn=fake -keypass changeit -keystore /tmp/debug-truststore.jks -storepass changeit"
+    - "keytool -delete -alias fake -keystore /tmp/debug-truststore.jks -storepass changeit -keypass changeit"
+  changed_when: false
+  become: true
+  become_user: "{{ data_server_user }}"
+# END DEBUG STATEMENTS
+
 - name: Create Empty App Server SSL Truststore Working Copy
   command: "{{ item }}"
   with_items:
