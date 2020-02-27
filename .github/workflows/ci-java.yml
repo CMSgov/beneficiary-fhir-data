@@ -1,8 +1,5 @@
 name: 'CI - Java'
-on:
-  pull_request:
-    paths:
-      - apps/**
+on: pull_request
 jobs:
   mvn-job:
     runs-on: ubuntu-latest
