@@ -16,6 +16,9 @@ pub enum TLSConfigError {
 }
 
 /// Parses the SSL certificate(s) in the specified PEM file into `Certificate` instances.
+///
+/// Note: PEM files are the base 64 encoded ones, not the binary files (those are likely DER-encoded,
+/// instead).
 fn load_certs(certs_filename: &str) -> error::Result<Vec<rustls::Certificate>> {
     let certs_file = fs::File::open(certs_filename)
         .map_err(|err| TLSConfigError::IoError(err, "Can't open certificates file.".to_string()))?;

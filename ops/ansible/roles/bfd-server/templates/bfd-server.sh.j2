@@ -117,7 +117,7 @@ java \
   "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
   "-DbfdServer.plaid.path={{ data_server_dir }}/{{ data_server_plaid_app | basename }}" \
   "-DbfdServer.plaid.log=${LOGS_DIR}/plaid-console.log" \
-  "-DbfdServer.plaid.tls.server.cert={{ data_server_dir }}/bluebutton-appserver-certificate.der" \
+  "-DbfdServer.plaid.tls.server.cert={{ data_server_dir }}/bluebutton-appserver-certificate.pem" \
   "-DbfdServer.plaid.tls.server.key={{ data_server_dir }}/bluebutton-appserver-certificate.key" \
   "-DbfdServer.plaid.tls.client.certs={{ data_server_dir }}/clients-trusted.crt" \
   -jar "{{ data_server_dir }}/{{ data_server_launcher | basename }}" \
