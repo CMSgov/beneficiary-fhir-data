@@ -18,12 +18,16 @@ pub struct EobQueryParams {
     patient: String,
 }
 
+/// This Actix handler method provides support for queries like
+/// `https://example.com/v1/fhir/ExplanationOfBenefit?patient=Patient/1234`. (The route for it is configured
+/// in `crate::main()`.)
+///
+/// It returns an Actix `HttpResponse` containing a JSON-serialized FHIR `Bundle` resource, which itself
+/// contains all of the `ExplanationOfBenefit` resources associated with the specified beneficiary/`Patient`.
 pub async fn eob_for_bene_id(
     db_pool: web::Data<PgPool>,
     query_params: web::Query<EobQueryParams>,
 ) -> Result<HttpResponse, error::AppError> {
-    // Run Diesel's synchronous query via an Actix Future, then transform the results, returning a
-    // chained Future with the final result.
     let claims = query_claims_partd_by_bene_id(db_pool, query_params).await?;
     let bundle = transform_claims_partd(claims)?;
 
@@ -32,7 +36,8 @@ pub async fn eob_for_bene_id(
         .json(bundle))
 }
 
-/// Parses the specified HTTP query parameters and returns the raw results of the specified DB query as a `Future`.
+/// Parses the specified HTTP query parameters and returns the raw results of the equivalent DB query as a
+/// `Future`.
 pub async fn query_claims_partd_by_bene_id(
     db_pool: web::Data<PgPool>,
     query_params: web::Query<EobQueryParams>,
@@ -43,6 +48,8 @@ pub async fn query_claims_partd_by_bene_id(
         )),
     )?;
 
+    // Run Diesel's synchronous query via a Future (that runs the query in a separate thread pool), to
+    // ensure it doesn't block the HTTP response threads, then get back to responding once it's done.
     let claims = web::block(move || crate::db::claims_partd_by_bene_id(db_pool, &bene_id)).await?;
     Ok(claims)
 }
