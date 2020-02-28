@@ -1,5 +1,5 @@
-use phf;
 use lazy_static::lazy_static;
+use phf;
 use regex::Regex;
 
 include!(concat!(env!("OUT_DIR"), "/ndc_descriptions.rs"));
@@ -39,8 +39,6 @@ pub fn lookup_ndc_description(ndc_code: &str) -> Option<&str> {
                 None => None,
             }
         }
-        None =>{
-            None
-        }
+        None => None,
     }
 }

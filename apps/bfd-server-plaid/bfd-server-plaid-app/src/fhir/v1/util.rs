@@ -162,10 +162,7 @@ pub fn create_concept_for_value_set_code(
 }
 
 /// Creates a `Coding` for the specified `CcwCodebookVariable` and value.
-pub fn create_coding_for_codebook_value(
-    codebook_var: &CcwCodebookVariable,
-    code: &str,
-) -> Coding {
+pub fn create_coding_for_codebook_value(codebook_var: &CcwCodebookVariable, code: &str) -> Coding {
     Coding {
         system: Some(create_codebook_system(codebook_var)),
         code: Some(code.to_string()),
@@ -347,10 +344,7 @@ pub fn create_extension_quantity(codebook_var: &CcwCodebookVariable, value: Quan
 }
 
 /// Converts a `Coding` to a `Extension` with an `ExtensionValue::ValueCoding`.
-pub fn create_extension_coding(
-    codebook_var: &CcwCodebookVariable,
-    value: Coding,
-) -> Extension {
+pub fn create_extension_coding(codebook_var: &CcwCodebookVariable, value: Coding) -> Extension {
     Extension {
         url: create_codebook_system(codebook_var),
         value: ExtensionValue::ValueCoding(value),
