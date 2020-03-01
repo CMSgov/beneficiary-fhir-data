@@ -5,13 +5,14 @@
   },
   "builders": [{
       "type": "amazon-ebs",
-      "iam_instance_profile": "bfd-packer",
+      "iam_instance_profile": "bfd-mgmt-packer",
       "ssh_username": "ec2-user",
       "instance_type": "m5.xlarge",
       "region": "us-east-1",
       "subnet_id": "{{user `subnet_id`}}",
       "associate_public_ip_address": "false",
       "source_ami": "{{user `source_ami`}}",
+      "env": "{{ user `env`}}",
       "security_group_filter": {
         "filters": {
           "tag:Name": "bfd-mgmt-vpn-private"

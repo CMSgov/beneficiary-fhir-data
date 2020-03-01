@@ -9,7 +9,7 @@
   efs_facts:
     region: "{{ aws_region }}"
     tags:
-        Name: "bfd-mgmt-test-jenkins-efs"
+        Name: "bfd-{{ env }}-jenkins-efs"
   register: efsfacts
 
 - name: Ensure mount directory exists.
