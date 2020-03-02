@@ -133,6 +133,7 @@ CREATE OR REPLACE VIEW benes_monthly AS
 CREATE OR REPLACE VIEW claims_partd AS
   SELECT
     "eventId" AS PDE_ID,
+    lastUpdated AS LAST_UPDATED,
     "adjustmentDeletionCode" AS ADJSTMT_DLTN_CD,
     "beneficiaryId" AS BENE_ID,
     "brandGenericCode" AS BRND_GNRC_CD,

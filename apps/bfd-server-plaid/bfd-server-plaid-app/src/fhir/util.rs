@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 /// Contains FHIR utiltity functions useful for all supported versions of FHIR.
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -50,5 +51,18 @@ pub fn parse_relative_reference_expected(
             }
         }
         None => None,
+    }
+}
+
+/// Returns an `Ordering` for the specified  `Option<DateTime<Utc>>` values.
+pub fn cmp_option_date_times(
+    x: &Option<DateTime<Utc>>,
+    y: &Option<DateTime<Utc>>,
+) -> std::cmp::Ordering {
+    match (x, y) {
+        (Some(x), Some(y)) => x.cmp(y),
+        (Some(_x), None) => std::cmp::Ordering::Greater,
+        (None, Some(_y)) => std::cmp::Ordering::Less,
+        (None, None) => std::cmp::Ordering::Equal,
     }
 }

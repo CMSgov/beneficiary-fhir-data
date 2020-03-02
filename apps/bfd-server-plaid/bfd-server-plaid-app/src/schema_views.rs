@@ -1,13 +1,31 @@
 /*
  * Manually specify the Diesel schema for the views we want to support. Allows us to workaround
- * Diesel's column count limitations.
+ * Diesel's column count limitations. Reference: <https://deterministic.space/diesel-view-table-trick.html>.
  *
- * Reference: <https://deterministic.space/diesel-view-table-trick.html>.
+ * To update this, you'll likely want to run `diesel print-schema` against the underlying DB tables, e.g.:
+ *
+ * ```
+ * # First, run the build and test to create a local copy of the DB.
+ * $ cd apps/
+ * $ POSTGRES_PORT=5432 docker-compose --file dev/docker-compose.yml up --detach
+ * $ mvn clean verify "-Dits.db.url=jdbc:postgresql://$(docker-compose --file dev/docker-compose.yml port postgresql 5432)/bfd?user=bfd&password=InsecureLocalDev"
+ *
+ * # Then, generate the Diesel schema for it.
+ * $ cd bfd-server-plaid/
+ * $ diesel print-schema --database-url "postgresql://$(docker-compose --file dev/docker-compose.yml port postgresql 5432)/bfd?user=bfd&password=InsecureLocalDev"
+ *
+ * # Remove the local DB.
+ * $ cd ..
+ * $ docker-compose --file dev/docker-compose.yml down
+ * ```
+ *
+ * The output produced by that should help determine what Diesel column types to use for the view columns.
  */
 
 table! {
     claims_partd (pde_id) {
         pde_id -> Varchar,
+        last_updated ->  Nullable<Timestamptz>,
         adjstmt_dltn_cd -> Nullable<Bpchar>,
         bene_id -> Varchar,
         brnd_gnrc_cd -> Nullable<Bpchar>,

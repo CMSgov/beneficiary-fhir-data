@@ -3,7 +3,14 @@
 //! Note: We want to match FHIR naming conventions here, so we aren't using snake case.
 #![allow(non_snake_case)]
 
+use chrono::{DateTime, Utc};
 use serde::Serialize;
+
+#[derive(Debug, Serialize)]
+pub struct Meta {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lastUpdated: Option<DateTime<Utc>>,
+}
 
 /// Just about every FHIR resource and element can contain an `Extension`.
 ///
@@ -122,24 +129,19 @@ mod tests {
 
 /// Contains structs specific to the FHIR Bundle resource.
 pub mod bundle {
-    use chrono::{DateTime, Utc};
     use serde::Serialize;
 
     #[derive(Debug, Serialize)]
     #[serde(tag = "resourceType")]
     pub struct Bundle {
         pub id: String,
-        pub meta: ResourceMeta,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub meta: Option<super::Meta>,
         pub r#type: String,
         // FYI: FHIR has a max of 2,147,483,647, while Rust's u32 has a max of 4,294,967,295.
         pub total: u32,
         pub link: Vec<BundleLink>,
         pub entry: Vec<BundleEntry>,
-    }
-
-    #[derive(Debug, Serialize)]
-    pub struct ResourceMeta {
-        pub lastUpdated: DateTime<Utc>,
     }
 
     #[derive(Debug, Serialize)]
@@ -163,6 +165,8 @@ pub mod explanation_of_benefit {
     pub struct ExplanationOfBenefit {
         pub resourceType: String,
         pub id: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub meta: Option<super::Meta>,
         pub status: Option<String>,
         pub patient: Option<super::Reference>,
         pub r#type: Option<super::CodeableConcept>,

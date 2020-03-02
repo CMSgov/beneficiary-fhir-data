@@ -2,12 +2,26 @@ use crate::ccw_codebook;
 use crate::ccw_codebook::CcwCodebookVariable;
 use crate::error;
 use crate::fhir::constants::*;
-use crate::fhir::util::ClaimType;
+use crate::fhir::util::*;
 use crate::fhir::v1::code_systems;
 use crate::fhir::v1::structures::explanation_of_benefit::*;
 use crate::fhir::v1::structures::*;
 use crate::models::traits::*;
 use bfd_server_plaid_lookups;
+use chrono::{DateTime, Utc};
+
+/// Returns the maximum `ExplanationOfBenefit.meta.lastUpdated` value, or `None` if no values were present.
+pub fn calculate_max_resource_last_updated(
+    resources: &Vec<ExplanationOfBenefit>,
+) -> Option<DateTime<Utc>> {
+    resources
+        .into_iter()
+        .map(|resource| match &resource.meta {
+            Some(meta) => meta.lastUpdated,
+            None => None,
+        })
+        .max_by(cmp_option_date_times)?
+}
 
 /// Maps the common claim header CCW fields into the specified `ExplanationOfBenefit`.
 pub fn map_claim_header_common<T: PartABDClaim>(
@@ -16,6 +30,9 @@ pub fn map_claim_header_common<T: PartABDClaim>(
 ) -> error::Result<ExplanationOfBenefit> {
     eob.resourceType = String::from("ExplanationOfBenefit");
     eob.id = create_eob_id(ClaimType::PartDEvent, &claim.claim_id());
+    eob.meta = Some(Meta {
+        lastUpdated: claim.last_updated().clone(),
+    });
     eob.status = Some(match &claim.final_action_code() as &str {
         "F" => code_systems::explanation_of_benefit::status::ACTIVE
             .code

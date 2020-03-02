@@ -268,16 +268,19 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
               ClaimType.OUTPATIENT,
               findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated)));
     if (claimTypes.contains(ClaimType.PDE)) {
-      // eobs.addAll(
-      //     transformToEobs(
-      //         ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
       // FIXME: the lastUpdated parameter is not yet supported by Plaid
-      Bundle plaidBundle =
-          findByPatientViaPlaid(
-              patient, new TokenAndListParam().addAnd(new TokenOrListParam(null, "pde")), "true");
-      List plaidResource =
-          plaidBundle.getEntry().stream().map(e -> e.getResource()).collect(Collectors.toList());
-      eobs.addAll(plaidResource);
+      if (lastUpdated != null && !lastUpdated.isEmpty()) {
+        eobs.addAll(
+            transformToEobs(
+                ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
+      } else {
+        Bundle plaidBundle =
+            findByPatientViaPlaid(
+                patient, new TokenAndListParam().addAnd(new TokenOrListParam(null, "pde")), "true");
+        List plaidResource =
+            plaidBundle.getEntry().stream().map(e -> e.getResource()).collect(Collectors.toList());
+        eobs.addAll(plaidResource);
+      }
     }
     if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(

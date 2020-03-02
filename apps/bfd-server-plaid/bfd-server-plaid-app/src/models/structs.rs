@@ -7,12 +7,13 @@
 #![allow(clippy::all)]
 
 use bigdecimal::BigDecimal;
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDate, Utc};
 
 /// Represents records returned from the `claims_partd` table.
 #[derive(Queryable, Debug)]
 pub struct PartDEvent {
     pub PDE_ID: String,
+    pub LAST_UPDATED: Option<DateTime<Utc>>,
     pub ADJSTMT_DLTN_CD: Option<String>,
     pub BENE_ID: String,
     pub BRND_GNRC_CD: Option<String>,

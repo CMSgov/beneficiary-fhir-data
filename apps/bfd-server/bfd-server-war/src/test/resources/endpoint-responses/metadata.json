@@ -71,9 +71,15 @@
         "type" : "token",
         "documentation" : "A list of claim types to include"
       }, {
+        "name" : "patient",
+        "type" : "reference",
+        "documentation" : "The reference to the patient"
+      }, {
         "name" : "plaid",
-        "type" : "string",
-        "documentation" : "Specify true to use the Plaid application where possible."
+        "type" : "string"
+      }, {
+        "name" : "type",
+        "type" : "token"
       } ]
     }, {
       "type" : "OperationDefinition",

@@ -9,7 +9,6 @@ use crate::fhir::v1::structures::*;
 use crate::fhir::v1::util::*;
 use crate::models::structs::PartDEvent;
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
 use serde::Deserialize;
 use std::convert::TryFrom;
 
@@ -61,9 +60,9 @@ fn transform_claims_partd(claims: Vec<PartDEvent>) -> error::Result<Bundle> {
     let eobs: Vec<ExplanationOfBenefit> = eobs?;
     let bundle = Bundle {
         id: String::from("TODO"),
-        meta: ResourceMeta {
-            lastUpdated: Utc::now(),
-        },
+        meta: Some(Meta {
+            lastUpdated: calculate_max_resource_last_updated(&eobs),
+        }),
         r#type: String::from("searchset"),
         // FYI: FHIR has a max of 2,147,483,647, while Rust's u32 has a max of 4,294,967,295.
         total: u32::try_from(claims.len())?,
