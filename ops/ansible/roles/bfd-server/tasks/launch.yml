@@ -54,10 +54,10 @@
   become: true
 
 # BEGIN DEBUG STATEMENTS, REMOVE BEFORE MERGING!
-- name: Debug
-  command: ls /tmp
-  become: true
-  become_user: "{{ data_server_user }}"
+# - name: Debug
+#   command: ls /tmp
+#   become: true
+#   become_user: "{{ data_server_user }}"
 # END DEBUG STATEMENTS
 
 - name: Create Empty App Server SSL Truststore Working Copy
