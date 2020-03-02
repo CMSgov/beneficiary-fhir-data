@@ -1,20 +1,18 @@
 {
   "variables": {
-    "iam_instance_profile": "",
+    "env": "",
     "source_ami": "",
-    "subnet_id": "",
-    "env": ""
+    "subnet_id": ""
   },
   "builders": [{
                  "type": "amazon-ebs",
-                 "iam_instance_profile": "{{user `iam_instance_profile`}}",
+                 "iam_instance_profile": "bfd-{{user `env`}}-packer",
                  "ssh_username": "ec2-user",
                  "instance_type": "m5.xlarge",
                  "region": "us-east-1",
                  "subnet_id": "{{user `subnet_id`}}",
                  "associate_public_ip_address": "false",
                  "source_ami": "{{user `source_ami`}}",
-                 "env": "{{ user `env`}}",
                  "security_group_filter": {
                    "filters": {
                      "tag:Name": "bfd-mgmt-vpn-private"
@@ -33,9 +31,11 @@
       "command": "./ansible-playbook-wrapper",
       "playbook_file": "./update_jenkins.yml",
       "extra_arguments": [
-        "--extra-vars",
-        "ansible_python_interpreter=/usr/bin/python"
-      ],
+                           "--extra-vars",
+                           "env={{user `env`}}",
+                           "--extra-vars",
+                           "ansible_python_interpreter=/usr/bin/python"
+                         ], 
       "ansible_env_vars": [
         "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
     ]
