@@ -42,6 +42,7 @@ __Summary:__ This playbook and associated roles configures a CCS Gold Image with
 - `packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' update_jenkins.json`
 
 ### Jenkins Deployment
+- __STOP the current jenkins service on the live instance.__
 - Update the terraform vars in Keybase (/infrastructure/secrets/terraform-vars) and supply the new AMI form the previous build or update packer job. 
 - Move into the `ops/terraform/env/mgmt, mgmt-test/stateless
 - Run the following command: 
