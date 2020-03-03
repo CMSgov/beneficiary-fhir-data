@@ -52,3 +52,8 @@ variable "lb_config" {
   type        = object({name=string, port=number, sg=string})
   default     = null
 }
+
+variable "efs_dns" {
+  type              = string
+  description       = "The DNS address of the EFS Mount"
+}

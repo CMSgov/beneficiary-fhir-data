@@ -146,32 +146,32 @@ resource "aws_iam_role_policy_attachment" "jenkins_boundary" {
   policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
 }
 
-### Add Jenkins user to group and attach policy to group
+// ### Add Jenkins user to group and attach policy to group
 
-data "aws_iam_group" "managed_service" {
-  group_name = "managed-service"
-}
+// data "aws_iam_group" "managed_service" {
+//   group_name = "managed-service"
+// }
 
-data "aws_iam_user" "jenkins" {
-  user_name = "VZG9"
-}
+// data "aws_iam_user" "jenkins" {
+//   user_name = "VZG9"
+// }
 
-resource "aws_iam_group_membership" "managed_service_group" {
-  name = "managed-service-group-membership"
+// resource "aws_iam_group_membership" "managed_service_group" {
+//   name = "managed-service-group-membership"
 
-  users = [
-    "${data.aws_iam_user.jenkins.user_name}",
-  ]
+//   users = [
+//     "${data.aws_iam_user.jenkins.user_name}",
+//   ]
 
-  group = "${data.aws_iam_group.managed_service.group_name}"
-}
+//   group = "${data.aws_iam_group.managed_service.group_name}"
+// }
 
-resource "aws_iam_policy_attachment" "jenkins_policy_boundary" {
-  name       = "bfd-${var.env_config.env}-jenkins-permission-boundary"
-  policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
+// resource "aws_iam_policy_attachment" "jenkins_policy_boundary" {
+//   name       = "bfd-${var.env_config.env}-jenkins-permission-boundary"
+//   policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
 
-  groups = ["${data.aws_iam_group.managed_service.group_name}"]
-}
+//   groups = ["${data.aws_iam_group.managed_service.group_name}"]
+// }
 
 ### Lock Down Packer SG for Jenkins, Data App and Data Server
 
@@ -292,7 +292,7 @@ resource "aws_launch_template" "main" {
   ebs_optimized                 = true
 
   iam_instance_profile {
-    name                        = "bfd-jenkins"
+    name                        = "bfd-${var.env_config.env}-jenkins"
   }
 
   placement {
@@ -302,16 +302,6 @@ resource "aws_launch_template" "main" {
   monitoring {
     enabled = false
   }
-  
-  // block_device_mappings {    
-  //   device_name = "/dev/sda1"
-  //   ebs {
-  //     volume_type               = "gp2"
-  //     volume_size               = var.launch_config.volume_size
-  //     delete_on_termination     = true
-  //     encrypted                 = true
-  //     kms_key_id                = data.aws_kms_key.master_key.arn
-  //   }
 }
 
 

@@ -112,6 +112,7 @@ module "jenkins" {
   layer                 = "app"
   role                  = "jenkins"
   lb_config             = module.jenkins_lb.lb_config
+  efs_dns               = var.efs_dns
   
   # Initial size is one server per AZ
   asg_config      = {
