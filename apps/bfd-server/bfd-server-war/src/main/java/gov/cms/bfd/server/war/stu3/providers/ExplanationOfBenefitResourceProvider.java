@@ -268,19 +268,30 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
               ClaimType.OUTPATIENT,
               findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated)));
     if (claimTypes.contains(ClaimType.PDE)) {
-      // FIXME: the lastUpdated parameter is not yet supported by Plaid
-      if (lastUpdated != null && !lastUpdated.isEmpty()) {
-        eobs.addAll(
-            transformToEobs(
-                ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
-      } else {
-        Bundle plaidBundle =
-            findByPatientViaPlaid(
-                patient, new TokenAndListParam().addAnd(new TokenOrListParam(null, "pde")), "true");
-        List plaidResource =
-            plaidBundle.getEntry().stream().map(e -> e.getResource()).collect(Collectors.toList());
-        eobs.addAll(plaidResource);
-      }
+      eobs.addAll(
+          transformToEobs(
+              ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
+      /*
+       * Note: This commented out code uses Plaid under the hood for most all PDE lookups. It's disabled,
+       * because we don't always want that behavior; add `plaid=true` as a query param to opt-in to Plaid
+       * usage.
+       */
+      // // FIXME: the lastUpdated parameter is not yet supported by Plaid
+      // if (lastUpdated != null && !lastUpdated.isEmpty()) {
+      //   eobs.addAll(
+      //       transformToEobs(
+      //           ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId,
+      // lastUpdated)));
+      // } else {
+      //   Bundle plaidBundle =
+      //       findByPatientViaPlaid(
+      //           patient, new TokenAndListParam().addAnd(new TokenOrListParam(null, "pde")),
+      // "true");
+      //   List plaidResource =
+      //       plaidBundle.getEntry().stream().map(e ->
+      // e.getResource()).collect(Collectors.toList());
+      //   eobs.addAll(plaidResource);
+      // }
     }
     if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(
