@@ -146,33 +146,6 @@ resource "aws_iam_role_policy_attachment" "jenkins_boundary" {
   policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
 }
 
-// ### Add Jenkins user to group and attach policy to group
-
-// data "aws_iam_group" "managed_service" {
-//   group_name = "managed-service"
-// }
-
-// data "aws_iam_user" "jenkins" {
-//   user_name = "VZG9"
-// }
-
-// resource "aws_iam_group_membership" "managed_service_group" {
-//   name = "managed-service-group-membership"
-
-//   users = [
-//     "${data.aws_iam_user.jenkins.user_name}",
-//   ]
-
-//   group = "${data.aws_iam_group.managed_service.group_name}"
-// }
-
-// resource "aws_iam_policy_attachment" "jenkins_policy_boundary" {
-//   name       = "bfd-${var.env_config.env}-jenkins-permission-boundary"
-//   policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
-
-//   groups = ["${data.aws_iam_group.managed_service.group_name}"]
-// }
-
 ### Lock Down Packer SG for Jenkins, Data App and Data Server
 
 data "aws_security_group" "managed_public" {
@@ -358,7 +331,7 @@ resource "aws_autoscaling_group" "main" {
   }
 
   lifecycle {
-    create_before_destroy = true
+    create_before_destroy = false
   }
 }
 
