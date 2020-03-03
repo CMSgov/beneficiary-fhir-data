@@ -200,11 +200,19 @@ module "fhir_lb" {
       egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
     },
     {
-      ingress_description   = "From VPC peerings, the MGMT VPC, and self"
+      ingress_description   = "Plaid HTTP from VPC peerings, the MGMT VPC, and self"
       ingress_port          = 3000
       ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
-      egress_description    = "To VPC instances"
+      egress_description    = "Plaid HTTP to VPC instances"
       egress_port           = 3000
+      egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
+    },
+    {
+      ingress_description   = "Plaid HTTPS from VPC peerings, the MGMT VPC, and self"
+      ingress_port          = 3001
+      ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+      egress_description    = "Plaid HTTPS to VPC instances"
+      egress_port           = 3001
       egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
     }
   ]
