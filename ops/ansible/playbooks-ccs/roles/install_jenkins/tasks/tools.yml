@@ -44,7 +44,7 @@
     mode: 0755
 
 - name: Copy the aws config file to the box
-  sudo: yes
+  become: yes
   template:
     src: ../templates/aws_config.j2
     dest: "{{ jenkins_home }}/.aws/config"

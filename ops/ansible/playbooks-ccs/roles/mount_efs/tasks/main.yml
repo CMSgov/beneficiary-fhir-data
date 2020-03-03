@@ -25,8 +25,3 @@
     fstype: nfs4
     opts: nfsvers=4.1
     state: mounted
-
-# Print the contents of the mount to the log.
-- command: "ls -lah {{ efs_mount_dir }}"
-  register: efs_contents
-- debug: var=efs_contents
