@@ -19,4 +19,5 @@ module "stateless" {
   jenkins_key_name       = var.jenkins_key_name
   jenkins_instance_size  = var.jenkins_instance_size
   azs                    = var.azs
+  efs_dns                = var.efs_dns
 }
