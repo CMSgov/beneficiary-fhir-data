@@ -8,8 +8,6 @@
     # Needed to run the ETL service.
     - java-1.8.0-openjdk
   become: true
-  notify:
-    - 'Restart Pipeline Service'
   tags: 
     - pre-ami
 

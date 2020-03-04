@@ -127,7 +127,7 @@ resource "aws_launch_template" "main" {
     port          = var.lb_config.port
     accountId     = var.launch_config.account_id
     gitBranchName = var.launch_config.git_branch
-    gitCommitId   = var.launch_config.git_branch
+    gitCommitId   = var.launch_config.git_commit
   }))
 
   tag_specifications {
