@@ -64,6 +64,7 @@ jenkins_plugins_recommended:
   - email-ext
   - mailer
   - parameterized-scheduler
+  - swarm
 
 
 # The additional plugins that users of this role would like to be installed
