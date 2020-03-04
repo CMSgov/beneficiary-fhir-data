@@ -142,23 +142,14 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
 			]))
 
-			// build the ETL pipeline
+			// build AMIs in parallel
 			sh "/usr/bin/packer build -color=false \
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
-				../../packer/build_bfd-pipeline.json"
-
-			// build the FHIR server
-			sh "/usr/bin/packer build -color=false \
-				-var vault_password_file=${vaultPasswordFile} \
-				-var 'source_ami=${amiIds.platinumAmiId}' \
-				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
-				-var 'git_branch=${gitBranchName}' \
-				-var 'git_commit=${gitCommitId}' \
-				../../packer/build_bfd-server.json"
+				../../packer/build_bfd-all.json"
 
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
