@@ -22,6 +22,7 @@ __Summary:__ This playbook and associated roles configures a CCS Gold Image with
    - A Gold Image ID provided by the CCS (GDIT)
    - A previously created EFS mount (this is completed with the Terraform `mgmt-stateful` module) 
    - Subnet ID - changes with mgmt (us-east-1a) or mgmt-test (us-east-1c)
+   __STOP the current jenkins service on the live instance.__
    - Build the Jenkins AMI from within the `ops/ansible/playbooks-ccs` directory of the ops code by running the following command to build AND configure the Jenkins instance and volume for the first time. 
      - `packer build -var 'source_ami=ami-0f2d8f925de453e46' -var 'subnet_id=subnet-092c2a68bd18b34d1' - var 'env=mgmt' ../../packer/build_jenkins.json`
    - Note the AMI ID that was created. You'll update the terraform variables at a later stage to deploy this.
@@ -39,12 +40,12 @@ __Summary:__ This playbook and associated roles configures a CCS Gold Image with
     - Tools: Packer, Ansible
    - A Gold Image ID provided by the CCS (GDIT)
    - Subnet ID changes with mgmt (us-east-1a) or mgmt-test (us-east-1c)
+   __STOP the current jenkins service on the live instance.__
  - __example command__: from within the `ops/ansible/playbooks-ccs` directory and replacing the ami and subnet values that meet your deployment needs. 
 
 - `packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' - var 'env=mgmt' update_jenkins.json`
 
 ### Jenkins Deployment
-- __STOP the current jenkins service on the live instance.__
 - Update the terraform vars in Keybase (/infrastructure/secrets/terraform-vars) and supply the new AMI form the previous build or update packer job. 
 - Move into the `ops/terraform/env/mgmt, mgmt-test/stateless
 - Run the following command: 
