@@ -46,7 +46,7 @@ resource "aws_security_group" "efs-sg" {
     from_port = 2049
     to_port = 2049
     protocol = "tcp"
-    cidr_blocks = ["10.252.40.0/21"]
+    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
   }
 
   // Terraform removes the default rule
@@ -55,7 +55,7 @@ resource "aws_security_group" "efs-sg" {
     from_port = 0
     to_port = 0
     protocol = "-1"
-    cidr_blocks = ["10.252.40.0/21"]
+    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
   }
 }
 

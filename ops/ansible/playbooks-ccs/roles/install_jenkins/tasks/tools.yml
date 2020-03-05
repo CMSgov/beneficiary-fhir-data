@@ -23,7 +23,7 @@
     state: link
 
 - name: Install terraform 
-  shell: tfenv install 0.12.8
+  shell: tfenv install {{ tf_version }}
   
 - name: Install packer
   unarchive:

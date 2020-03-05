@@ -20,7 +20,7 @@ import org.jenkins.plugins.lockableresources.LockableResource
 import org.jenkins.plugins.lockableresources.LockableResourcesManager
 
 if(!binding.hasVariable('lockable_resources')) {
-    lockable_resources = [‘name' : ‘env_test’, ‘name’ : 'env_prod_stg' ‘name : 'env_prod', ‘name’ : 'env_prod_sbx' ]
+    lockable_resources = [‘name' : ‘env_test’, ‘name : 'env_prod', ‘name’ : 'env_prod_sbx' ]
 }
 if(!(lockable_resources in List)) {
     throw new Exception('lockable_resources must be a List of Maps.')

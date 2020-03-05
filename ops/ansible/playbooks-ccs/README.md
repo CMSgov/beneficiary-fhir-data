@@ -1,6 +1,6 @@
 # __BFD OPS__
 
-This folder currently hosts DevOps related code (Ansible, Packer, Terraform, etc). I suspect this organization can be revisited once the monorepo is in place. Until then, things could live here. 
+This folder currently hosts Ansible plays and tasks. 
 
 ## ANSIBLE
 
@@ -47,7 +47,7 @@ __Summary:__ This playbook and associated roles configures a CCS Gold Image with
 
 ### Jenkins Deployment
 - Update the terraform vars in Keybase (/infrastructure/secrets/terraform-vars) and supply the new AMI form the previous build or update packer job. 
-- Move into the `ops/terraform/env/mgmt, mgmt-test/stateless
+- Move into the `ops/terraform/env/mgmt, mgmt-test/stateless`
 - Run the following command: 
 - `terraform apply -var-file=/keybase/team/oeda_bfs/infrastructure/secrets/terraform-vars/mgmt-test/jenkins/terraform.tfvars`
 - You will see a new ASG and launch template being created. 
