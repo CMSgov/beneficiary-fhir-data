@@ -24,7 +24,3 @@ variable "azs" {
   type              = list
 }
 
-variable "efs_dns" {
-  type              = string
-  description       = "The DNS address of the EFS Mount"
-}

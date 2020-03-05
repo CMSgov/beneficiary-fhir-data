@@ -35,8 +35,3 @@ variable "is_public" {
   type              = bool
   default           = false 
 }
-
-variable "efs_dns" {
-  type              = string
-  description       = "The DNS address of the EFS Mount"
-}
