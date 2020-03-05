@@ -209,7 +209,7 @@ resource "aws_db_parameter_group" "default_mode" {
 
 resource "aws_db_parameter_group" "import_mode" {
   name        = "bfd-${local.env_config.env}-import-mode-parameter-group"
-  family      = "postgres9.6"
+  family      = "postgres11.6"
   description = "Sets parameters that optimize bulk data imports"
 
   parameter {
@@ -253,6 +253,8 @@ resource "aws_db_parameter_group" "import_mode" {
 
 # Master Database
 #
+# TODO: Remove this once switch to Aurora is complete.
+
 module "master" {
   source              = "../resources/rds"
   db_config           = var.db_config
@@ -267,6 +269,66 @@ module "master" {
 
   apply_immediately    = var.db_import_mode.enabled
   parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : aws_db_parameter_group.default_mode.name
+}
+
+# Testing Aurora Resources
+##
+# The DB instances in the RDS Aurora DB cluster.
+##
+resource "aws_rds_cluster_instance" "cluster_instances" {
+  count = 2
+  identifier = "aurora-cluster-demo-${count.index}"
+  cluster_identifier = "${aws_rds_cluster.default.id}"
+  instance_class = "db.r5.24xlarge"
+}
+
+# Testing Aurora Resources
+##
+# An RDS Aurora (PostgreSQL-compatible) cluster, to house the BFD database.
+##
+resource "aws_rds_cluster" "default" {
+  cluster_identifier = "bfd-${local.env_config.env}"
+  
+  availability_zones = local.azs
+  db_subnet_group_name = aws_db_subnet_group.db.name
+  port = 5432
+  vpc_security_group_ids = local.master_db_sgs
+  
+  storage_encrypted = true
+  kms_key_id = data.aws_kms_key.master_key.arn
+  
+  engine = "aurora-postgresql"
+  engine_version = "11.6"
+  
+  db_cluster_parameter_group_name = aws_db_parameter_group.import_mode.name
+  deletion_protection = substr(local.env_config.env, 0, 4) == "prod"
+  preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
+  preferred_backup_window = "05:00-06:00"  # 1 am EST
+  
+  enabled_cloudwatch_logs_exports = [
+    "audit",
+    "error",
+    "general",
+    "slowquery",
+    "postgresql"
+  ]
+  apply_immediately = var.db_import_mode.enabled
+  
+  # Note: When migrating to Aurora from RDS, we have to use pg_dump and pg_restore, as Aurora's
+  # built-in support for DB snapshot migration doesn't support version upgrades.
+  database_name = "bfdtemp"
+  master_username = "bfduser"
+  master_password = "changeme!"
+
+  tags = merge({Layer="data"}, local.env_config.tags)
+  copy_tags_to_snapshot = true
+
+  lifecycle {
+    ignore_changes = [
+      "database_name",
+      "master_password"
+    ]
+  }
 }
 
 # Replicas Database 
@@ -447,11 +509,33 @@ module "logs" {
   kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
+# Testing Aurora Resources
+# S3 bucket for Aurora env logs 
+#
+module "logs-aurora" { 
+  source              = "../resources/s3"
+  role                = "logs-aurora"
+  env_config          = local.env_config
+  acl                 = "log-delivery-write"  # For AWS bucket logs
+  kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
+}
+
 # S3 bucket for ETL files
 #
 module "etl" {
   source              = "../resources/s3"
   role                = "etl"
+  env_config          = local.env_config
+  kms_key_id          = data.aws_kms_key.master_key.arn
+  log_bucket          = module.logs.id
+}
+
+# Testing Aurora Resources
+# S3 bucket for ETL files
+#
+module "etl-aurora" {
+  source              = "../resources/s3"
+  role                = "etl-aurora"
   env_config          = local.env_config
   kms_key_id          = data.aws_kms_key.master_key.arn
   log_bucket          = module.logs.id
@@ -465,6 +549,8 @@ module "etl" {
 # by which we control access is through a manually provisioned
 # access key
 #
+
+# Testing Aurora Resources, added etl-aurora bucket to IAM policy, below. 
 resource "aws_iam_policy" "etl_rw_s3" {
   name        = "bfd-${local.env_config.env}-etl-rw-s3"
   description = "ETL read-write S3 policy"
@@ -483,7 +569,7 @@ resource "aws_iam_policy" "etl_rw_s3" {
       "Sid": "ETLRWBucketList",
       "Action": ["s3:ListBucket"],
       "Effect": "Allow",
-      "Resource": ["${module.etl.arn}"]
+      "Resource": ["${module.etl.arn}", "${module.etl-aurora.arn}"]
     },
     {
       "Sid": "ETLRWBucketActions",
@@ -492,7 +578,7 @@ resource "aws_iam_policy" "etl_rw_s3" {
         "s3:PutObject"
       ],
       "Effect": "Allow",
-      "Resource": ["${module.etl.arn}/*"]
+      "Resource": ["${module.etl.arn}/*", "${module.etl-aurora.arn}/*"]
     }
   ]
 }
@@ -569,6 +655,13 @@ resource "aws_cloudwatch_log_group" "bfd_server_newrelic_agent" {
 
 resource "aws_cloudwatch_log_group" "bfd_server_gc" {
   name       = "/bfd/${var.env_config.env}/bfd-server/gc.log"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+# Test Log Group used by Karls plaid testing. 
+resource "aws_cloudwatch_log_group" "bfd_server_messages_plaid_json" {
+  name       = "/bfd/test/bfd-server/messages-plaid.json"
   kms_key_id = data.aws_kms_key.master_key.arn
   tags       = var.env_config.tags
 }

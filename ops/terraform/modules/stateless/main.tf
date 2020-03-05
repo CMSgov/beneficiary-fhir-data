@@ -76,6 +76,11 @@ data "aws_s3_bucket" "logs" {
   bucket = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
+# Testing Aurora Resources
+data "aws_s3_bucket" "logs-aurora" {
+  bucket = "bfd-${var.env_config.env}-logs-aurora-${data.aws_caller_identity.current.account_id}"
+}
+
 # CloudWatch
 #
 data "aws_sns_topic" "cloudwatch_alarms" {
@@ -191,6 +196,33 @@ module "fhir_lb" {
   }    
 }
 
+# LB for Aurora Testing
+module "fhir_lb-aurora" {
+  source = "../resources/lb"
+
+  env_config      = local.env_config
+  role            = "fhir-aurora"
+  layer           = "dmz"
+  log_bucket      = data.aws_s3_bucket.logs-aurora.id
+  is_public       = var.is_public
+
+  ingress = var.is_public ? {
+    description   = "Public Internet access"
+    port          = 443
+    cidr_blocks   = ["0.0.0.0/0"]
+  } : {
+    description   = "From VPC peerings, the MGMT VPC, and self"
+    port          = 443
+    cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+  }
+
+  egress = {
+    description   = "To VPC instances"
+    port          = local.port
+    cidr_blocks   = [data.aws_vpc.main.cidr_block]
+  }    
+}
+
 module "lb_alarms" {
   source = "../resources/lb_alarms"  
 
@@ -218,6 +250,52 @@ module "fhir_asg" {
   role            = "fhir"
   layer           = "app"
   lb_config       = module.fhir_lb.lb_config
+
+  # Initial size is one server per AZ
+  asg_config        = {
+    min             = length(local.azs)
+    max             = 8*length(local.azs)
+    desired         = length(local.azs)
+    sns_topic_arn   = ""
+    instance_warmup = 430
+  }
+
+  launch_config   = {
+    # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
+    instance_type   = "m5.xlarge"             # Use reserve instances
+    volume_size     = 100 # GB
+    ami_id          = var.fhir_ami 
+    key_name        = var.ssh_key_name 
+
+    profile         = module.fhir_iam.profile
+    user_data_tpl   = "fhir_server.tpl"       # See templates directory for choices
+    account_id      = data.aws_caller_identity.current.account_id
+    git_branch      = var.git_branch_name
+    git_commit      = var.git_commit_id
+  }
+
+  db_config       = {
+    db_sg         = data.aws_security_group.db_replicas.id
+    role          = "replica"
+  }
+
+  mgmt_config     = {
+    vpn_sg        = data.aws_security_group.vpn.id
+    tool_sg       = data.aws_security_group.tools.id
+    remote_sg     = data.aws_security_group.remote.id
+    ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
+  }
+}
+
+# Aurora Autoscale group for testing resources
+#
+module "fhir-aurora_asg" {
+  source = "../resources/asg"
+
+  env_config      = local.env_config
+  role            = "fhir-aurora"
+  layer           = "app"
+  lb_config       = module.fhir_lb-aurora.lb_config
 
   # Initial size is one server per AZ
   asg_config        = {
