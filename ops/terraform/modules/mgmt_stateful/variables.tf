@@ -5,5 +5,5 @@ variable "env_config" {
 
 variable "app_subnet" {
   description       = "The bfd-mgmt-azX-app tpo use. MGMT is az1 and MGMT-TEST is az3"
-  type              = String
+  type              = string
 }
