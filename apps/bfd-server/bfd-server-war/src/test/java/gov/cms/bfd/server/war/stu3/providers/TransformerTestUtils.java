@@ -2014,7 +2014,10 @@ final class TransformerTestUtils {
           actualResource.getMeta().getLastUpdated().toInstant(),
           lastUpdated.toInstant());
     } else {
-      Assert.assertNull("Expect lastUpdated to be null", actualResource.getMeta().getLastUpdated());
+      Assert.assertEquals(
+          "Expect lastUpdated to be the fallback value",
+          TransformerConstants.FALLBACK_LAST_UPDATED,
+          actualResource.getMeta().getLastUpdated());
     }
   }
 }
