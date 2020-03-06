@@ -21,3 +21,18 @@ module "stateless" {
   git_branch_name     = var.git_branch_name
   git_commit_id       = var.git_commit_id
 }
+
+module "aurora_test" {
+  source = "../../../modules/aurora_test"
+
+  env_config = {
+    env               = "test"
+    tags              = {application="bfd", business="oeda", stack="test", Environment="test"}
+  }  
+
+  fhir_ami            = var.fhir_ami
+  etl_ami             = var.etl_ami
+  ssh_key_name        = var.ssh_key_name
+  git_branch_name     = var.git_branch_name
+  git_commit_id       = var.git_commit_id
+}

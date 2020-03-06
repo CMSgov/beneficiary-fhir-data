@@ -209,7 +209,7 @@ resource "aws_db_parameter_group" "default_mode" {
 
 resource "aws_db_parameter_group" "import_mode" {
   name        = "bfd-${local.env_config.env}-import-mode-parameter-group"
-  family      = "postgres11.6"
+  family      = "postgres9.6"
   description = "Sets parameters that optimize bulk data imports"
 
   parameter {
@@ -276,7 +276,7 @@ module "master" {
 # The DB instances in the RDS Aurora DB cluster.
 ##
 resource "aws_rds_cluster_instance" "cluster_instances" {
-  count = 2
+  count = 3
   identifier = "aurora-cluster-demo-${count.index}"
   cluster_identifier = "${aws_rds_cluster.default.id}"
   instance_class = "db.r5.24xlarge"
@@ -300,7 +300,6 @@ resource "aws_rds_cluster" "default" {
   engine = "aurora-postgresql"
   engine_version = "11.6"
   
-  db_cluster_parameter_group_name = aws_db_parameter_group.import_mode.name
   deletion_protection = substr(local.env_config.env, 0, 4) == "prod"
   preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
   preferred_backup_window = "05:00-06:00"  # 1 am EST
