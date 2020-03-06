@@ -7,7 +7,8 @@ locals {
   azs                     = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config              = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
   bfd_server_port         = 7443
-  bfd_server_plaid_port   = 3001
+  bfd_server_plaid_http_port    = 3000
+  bfd_server_plaid_https_port   = 3001
   cw_period               = 60    # Seconds
   cw_eval_periods         = 3
 
@@ -192,27 +193,19 @@ module "fhir_lb" {
       egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
     },
     {
-      ingress_description   = "From VPC peerings, the MGMT VPC, and self"
-      ingress_port          = local.bfd_server_plaid_port
-      ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
-      egress_description    = "To VPC instances"
-      egress_port           = local.bfd_server_plaid_port
-      egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
-    },
-    {
       ingress_description   = "Plaid HTTP from VPC peerings, the MGMT VPC, and self"
-      ingress_port          = 3000
+      ingress_port          = local.bfd_server_plaid_http_port
       ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
       egress_description    = "Plaid HTTP to VPC instances"
-      egress_port           = 3000
+      egress_port           = local.bfd_server_plaid_http_port
       egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
     },
     {
       ingress_description   = "Plaid HTTPS from VPC peerings, the MGMT VPC, and self"
-      ingress_port          = 3001
+      ingress_port          = local.bfd_server_plaid_https_port
       ingress_cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
       egress_description    = "Plaid HTTPS to VPC instances"
-      egress_port           = 3001
+      egress_port           = local.bfd_server_plaid_https_port
       egress_cidr_blocks    = [data.aws_vpc.main.cidr_block]
     }
   ]
