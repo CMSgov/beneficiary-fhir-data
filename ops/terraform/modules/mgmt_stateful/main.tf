@@ -26,15 +26,6 @@ data "aws_subnet_ids" "app_subnets" {
   }
 }
 
-# Subnet for EFS 
-
-data "aws_subnet_ids" "efs" {
-  vpc_id = data.aws_vpc.main.id
-
-  tags = {
-    Name = "bfd-mgmt-az3-app"
-  }
-}
 #
 # KMS 
 #
