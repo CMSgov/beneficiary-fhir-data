@@ -120,10 +120,6 @@ data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
-data "aws_iam_instance_profile" "instance" {
-  name    = "bfd-${var.env_config.env}-remote-management"
-}
-
 # CloudWatch
 #
 data "aws_sns_topic" "cloudwatch_alarms" {
@@ -187,7 +183,7 @@ module "fhir-aurora_asg" {
     ami_id          = var.fhir_ami 
     key_name        = var.ssh_key_name 
 
-    profile         = data.aws_iam_instance_profile.instance
+    profile         = "bfd-${var.env_config.env}-fhir-profile"
     user_data_tpl   = "fhir_server_aurora.tpl"       # See templates directory for choices
     account_id      = data.aws_caller_identity.current.account_id
     git_branch      = var.git_branch_name
