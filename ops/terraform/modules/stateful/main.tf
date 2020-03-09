@@ -275,51 +275,53 @@ module "master" {
 ##
 # The DB instances in the RDS Aurora DB cluster.
 ##
-resource "aws_rds_cluster_instance" "cluster_instances" {
-  count = 3
-  identifier = "aurora-cluster-demo-${count.index}"
-  cluster_identifier = "${aws_rds_cluster.default.id}"
-  instance_class = "db.r5.24xlarge"
+resource "aws_rds_cluster_instance" "aurora_demo_instances" {
+  count                = 3
+  identifier           = "bfd-${local.env_config.env}-aurora-demo-${count.index}"
+  cluster_identifier   = aws_rds_cluster.aurora_demo.id
+
+  engine               = "aurora-postgresql"
+  engine_version       = "11.6"
+
+  instance_class       = "db.r5.24xlarge"
+  db_subnet_group_name = aws_db_subnet_group.db.name
+  apply_immediately    = true
 }
 
 # Testing Aurora Resources
 ##
 # An RDS Aurora (PostgreSQL-compatible) cluster, to house the BFD database.
 ##
-resource "aws_rds_cluster" "default" {
-  cluster_identifier = "bfd-${local.env_config.env}"
+resource "aws_rds_cluster" "aurora_demo" {
+  cluster_identifier = "bfd-${local.env_config.env}-aurora-demo"
   
-  availability_zones = local.azs
-  db_subnet_group_name = aws_db_subnet_group.db.name
-  port = 5432
+  availability_zones    = local.azs
+  db_subnet_group_name  = aws_db_subnet_group.db.name
   vpc_security_group_ids = local.master_db_sgs
   
   storage_encrypted = true
-  kms_key_id = data.aws_kms_key.master_key.arn
+  kms_key_id        = data.aws_kms_key.master_key.arn
   
-  engine = "aurora-postgresql"
+  engine         = "aurora-postgresql"
   engine_version = "11.6"
   
-  deletion_protection = substr(local.env_config.env, 0, 4) == "prod"
-  preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
-  preferred_backup_window = "05:00-06:00"  # 1 am EST
+  backup_retention_period      = 0   # Disable backups during testing
+  skip_final_snapshot          = true   # Disable backups during testing
+  # preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
+  # preferred_backup_window      = "05:00-06:00"  # 1 am EST
   
   enabled_cloudwatch_logs_exports = [
-    "audit",
-    "error",
-    "general",
-    "slowquery",
     "postgresql"
   ]
-  apply_immediately = var.db_import_mode.enabled
+  apply_immediately = true
   
   # Note: When migrating to Aurora from RDS, we have to use pg_dump and pg_restore, as Aurora's
   # built-in support for DB snapshot migration doesn't support version upgrades.
-  database_name = "bfdtemp"
+  database_name  = "bfdtemp"
   master_username = "bfduser"
   master_password = "changeme!"
 
-  tags = merge({Layer="data"}, local.env_config.tags)
+  tags                  = merge({Layer="data"}, local.env_config.tags)
   copy_tags_to_snapshot = true
 
   lifecycle {
