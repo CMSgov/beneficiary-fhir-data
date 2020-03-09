@@ -305,10 +305,10 @@ resource "aws_rds_cluster" "aurora_demo" {
   engine         = "aurora-postgresql"
   engine_version = "11.6"
   
-  backup_retention_period      = 0   # Disable backups during testing
+  backup_retention_period      = 1   # Disable backups during testing
   skip_final_snapshot          = true   # Disable backups during testing
-  # preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
-  # preferred_backup_window      = "05:00-06:00"  # 1 am EST
+  preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
+  preferred_backup_window      = "05:00-06:00"  # 1 am EST
   
   enabled_cloudwatch_logs_exports = [
     "postgresql"
