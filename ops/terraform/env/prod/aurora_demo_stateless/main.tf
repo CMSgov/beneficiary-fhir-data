@@ -7,12 +7,12 @@ provider "aws" {
   region = "us-east-1"
 }
 
-module "stateless" {
-  source = "../../../modules/stateless"
+module "aurora_demo_stateless" {
+  source = "../../../modules/aurora_demo_stateless"
 
   env_config = {
-    env               = "test"
-    tags              = {application="bfd", business="oeda", stack="test", Environment="test"}
+    env               = "prod"
+    tags              = {application="bfd", business="oeda", stack="prod", Environment="prod"}
   }  
 
   fhir_ami            = var.fhir_ami

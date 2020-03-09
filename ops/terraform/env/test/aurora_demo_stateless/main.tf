@@ -7,8 +7,8 @@ provider "aws" {
   region = "us-east-1"
 }
 
-module "stateless" {
-  source = "../../../modules/stateless"
+module "aurora_demo_stateless" {
+  source = "../../../modules/aurora_demo_stateless"
 
   env_config = {
     env               = "test"
