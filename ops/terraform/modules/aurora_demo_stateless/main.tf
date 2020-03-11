@@ -27,6 +27,14 @@ locals {
     ]
   }
   vpc_peerings      = local.vpc_peerings_by_env[var.env_config.env]
+
+  endpoints = {
+    "all": "*",
+    "metadata": "*/metadata*",
+    "coverageAll": "*/Coverage*",
+    "patientAll": "*/Patient*",
+    "eobAll": "*/ExplanationOfBenefit*",
+  }
 }
 
 # Find resources defined outside this script 
@@ -190,6 +198,38 @@ module "fhir-aurora_asg" {
     tool_sg       = data.aws_security_group.tools.id
     remote_sg     = data.aws_security_group.remote.id
     ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
+  }
+}
+
+# Count requests per endpoint
+#
+resource "aws_cloudwatch_log_metric_filter" "http-requests-count" {
+  for_each       = local.endpoints
+  name           = "bfd-${var.env_config.env}/bfd-server-aurora/http-requests/count/${each.key}/all"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user = \"*\", timestamp, request = \"${each.value}\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  log_group_name = "/bfd/${var.env_config.env}/bfd-server-aurora/access.txt"
+
+  metric_transformation {
+    name          = "http-requests/count/${each.key}/all"
+    namespace     = "bfd-${var.env_config.env}/bfd-server-aurora"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
+# Latency per endpoint
+#
+resource "aws_cloudwatch_log_metric_filter" "http-requests-latency" {
+  for_each       = local.endpoints
+  name           = "bfd-${var.env_config.env}/bfd-server-aurora/http-requests/latency/${each.key}/all"
+  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user = \"*\", timestamp, request = \"${each.value}\", query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
+  log_group_name = "/bfd/${var.env_config.env}/bfd-server-aurora/access.txt"
+
+  metric_transformation {
+    name          = "http-requests/latency/${each.key}/all"
+    namespace     = "bfd-${var.env_config.env}/bfd-server-aurora"
+    value         = "$duration_milliseconds"
+    default_value = null
   }
 }
 

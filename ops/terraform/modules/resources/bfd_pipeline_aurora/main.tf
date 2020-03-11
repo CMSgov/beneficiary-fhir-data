@@ -18,21 +18,6 @@ data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
-# CloudWatch metric filters
-#
-resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
-  name            = "bfd-${var.env_config.env}/bfd-pipeline-aurora/messages/count/error"
-  pattern         = "[date, time, java_thread, level = \"ERROR\", java_class, message]"
-  log_group_name  = local.log_groups.messages
-
-  metric_transformation {
-    name          = "messages/count/error"
-    namespace     = "bfd-${var.env_config.env}/bfd-pipeline"
-    value         = "1"
-    default_value = "0"
-  }
-}
-
 # Security group for application-specific (i.e. non-management) traffic.
 #
 resource "aws_security_group" "app" {
