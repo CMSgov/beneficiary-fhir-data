@@ -20,15 +20,3 @@ variable "mgmt_config" {
 variable "launch_config" {
   type        = object({ami_id=string, account_id=string, ssh_key_name=string, git_branch=string, git_commit=string})
 }
-
-variable "alarm_notification_arn" {
-  description = "The CloudWatch Alarm notification ARN."
-  type        = "string"
-  default     = null
-}
-
-variable "ok_notification_arn" {
-  description = "The CloudWatch OK notification ARN."
-  type        = "string"
-  default     = null
-}

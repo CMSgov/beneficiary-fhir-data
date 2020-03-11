@@ -120,16 +120,6 @@ data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
-# CloudWatch
-#
-data "aws_sns_topic" "cloudwatch_alarms" {
-  name  = "bfd-${var.env_config.env}-cloudwatch-alarms"
-}
-
-data "aws_sns_topic" "cloudwatch_ok" {
-  name  = "bfd-${var.env_config.env}-cloudwatch-ok"
-}
-
 # LB for Aurora Testing
 module "fhir_lb-aurora" {
   source = "../resources/lb"
@@ -229,8 +219,5 @@ module "bfd_pipeline_aurora" {
     remote_sg     = data.aws_security_group.remote.id
     ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
   }
-
-  alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-  ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
 }
 
