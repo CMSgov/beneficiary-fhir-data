@@ -7,7 +7,6 @@ pub enum AppError {
     IoError(std::io::Error),
     SetLoggerError(log::SetLoggerError),
     RustlsError(rustls::TLSError),
-    OpenSslError(openssl::error::ErrorStack),
     TLSConfigError(crate::tls::TLSConfigError),
     DieselPoolError(diesel::r2d2::PoolError),
     DieselResultError(diesel::result::Error),
@@ -46,12 +45,6 @@ impl From<log::SetLoggerError> for AppError {
 impl From<rustls::TLSError> for AppError {
     fn from(err: rustls::TLSError) -> AppError {
         AppError::RustlsError(err)
-    }
-}
-
-impl From<openssl::error::ErrorStack> for AppError {
-    fn from(err: openssl::error::ErrorStack) -> AppError {
-        AppError::OpenSslError(err)
     }
 }
 
