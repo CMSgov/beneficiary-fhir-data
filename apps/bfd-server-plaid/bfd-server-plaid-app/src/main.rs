@@ -143,7 +143,7 @@ async fn main() -> error::Result<()> {
     //
     // Note: The ACTIX_THREADPOOL environment variable isn't documented anywhere, but if you look
     // at that crate's `lib.rs`, it's used to configure the number of `actix_web::web::block`
-    // workers available.
+    // workers available, which are used to background non-async tasks.
     trace!(logger, "Application configuration: loading...");
     let app_config = AppConfig::new()?;
     std::env::set_var(
@@ -152,7 +152,7 @@ async fn main() -> error::Result<()> {
     );
     trace!(logger, "Application configuration: loaded.");
 
-    // Verify that the DB connection is copacetic.
+    // Create the DB connection pool.
     trace!(logger, "DB connection pool: creating...");
     let db_connection_pool = db::create_db_connection_pool(&app_config)?;
     trace!(logger, "DB connection pool: created.");
@@ -185,7 +185,7 @@ async fn main() -> error::Result<()> {
         {
             // Offer HTTP to localhost and HTTPS to remote clients.
             server
-                // FIXME Only run HTTP on localhost.
+                // FIXME Only run HTTP on localhost, once everything is benchmarked.
                 //.bind(format!("127.0.0.1:{}", &app_config.server_http_port))?
                 .bind(format!("0.0.0.0:{}", &app_config.server_http_port))?
                 // FIXME Figure out why RusTLS isn't working.

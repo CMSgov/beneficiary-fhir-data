@@ -9,6 +9,8 @@ use std::env;
 /// processing averages 10 milliseconds each, that works out to about a 1:10 ratio. This makes
 /// sense, given that the DB queries are relatively slow, but CPU-cheap while we're just waiting
 /// for them to complete.
+///
+/// TODO: benchmark things to properly tune this constant
 const QUERIES_PER_CPU: u8 = 10;
 
 /// Stores application configuration. Re-created for each processing thread, but threads are reused
