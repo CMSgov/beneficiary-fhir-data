@@ -297,7 +297,7 @@ resource "aws_rds_cluster" "aurora_demo" {
   
   availability_zones    = local.azs
   db_subnet_group_name  = aws_db_subnet_group.db.name
-  vpc_security_group_ids = local.master_db_sgs
+  vpc_security_group_ids = [aws_security_group.db.id, aws_security_group.master_db.id, data.aws_security_group.vpn.id, data.aws_security_group.tools.id, data.aws_security_group.management.id]
   
   storage_encrypted = true
   kms_key_id        = data.aws_kms_key.master_key.arn
