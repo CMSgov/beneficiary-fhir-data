@@ -660,6 +660,44 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
   tags       = var.env_config.tags
 }
 
+# Test Aurora Resources - CloudWatch Log Groups
+#
+resource "aws_cloudwatch_log_group" "bfd_pipeline_aurora_messages_txt" {
+  name       = "/bfd/${var.env_config.env}/bfd-pipeline-aurora/messages.txt"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_aurora_access_txt" {
+  name       = "/bfd/${var.env_config.env}/bfd-server-aurora/access.txt"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_aurora_access_json" {
+  name       = "/bfd/${var.env_config.env}/bfd-server-aurora/access.json"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_aurora_messages_json" {
+  name       = "/bfd/${var.env_config.env}/bfd-server-aurora/messages.json"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_aurora_newrelic_agent" {
+  name       = "/bfd/${var.env_config.env}/bfd-server-aurora/newrelic_agent.log"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
+resource "aws_cloudwatch_log_group" "bfd_server_aurora_gc" {
+  name       = "/bfd/${var.env_config.env}/bfd-server-aurora/gc.log"
+  kms_key_id = data.aws_kms_key.master_key.arn
+  tags       = var.env_config.tags
+}
+
 # Test Log Group used by Karls plaid testing. 
 resource "aws_cloudwatch_log_group" "bfd_server_messages_plaid_json" {
   name       = "/bfd/test/bfd-server/messages-plaid.json"
