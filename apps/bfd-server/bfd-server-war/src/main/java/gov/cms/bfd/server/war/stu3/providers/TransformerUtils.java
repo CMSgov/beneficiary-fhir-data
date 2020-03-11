@@ -140,9 +140,6 @@ public final class TransformerUtils {
   /** Stores the diagnosis ICD codes and their display values */
   private static Map<String, String> icdMap = null;
 
-  /** Tracks the diagnosis ICD codes that have already had code lookup failures. */
-  private static final Set<String> icdLookupMissingFailures = new HashSet<>();
-
   /** Stores the procedure codes and their display values */
   private static Map<String, String> procedureMap = null;
 
