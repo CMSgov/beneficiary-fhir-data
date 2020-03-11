@@ -12,10 +12,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer}. */
@@ -32,6 +35,32 @@ public final class OutpatientClaimTransformerTest {
   public void transformSampleARecord() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    OutpatientClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof OutpatientClaim)
+            .map(r -> (OutpatientClaim) r)
+            .findFirst()
+            .get();
+
+    ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
+    assertMatches(claim, eob);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SYNTHETIC_OUTPATIENT_1999_1999} {@link
+   * OutpatientClaim}.
+   *
+   * <p>Note: This test is normally disabled like other synthetic data tests
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Ignore
+  @Test
+  public void transformSyntheticRecord() throws FHIRException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResource.SYNTHETIC_OUTPATIENT_1999_1999));
     OutpatientClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof OutpatientClaim)
@@ -106,21 +135,25 @@ public final class OutpatientClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber());
 
-    Assert.assertEquals(5, eob.getDiagnosis().size());
+    Assert.assertEquals(countDiagnosisCodes(claim), eob.getDiagnosis().size());
 
-    Assert.assertEquals(1, eob.getProcedure().size());
-    CCWProcedure ccwProcedure =
-        new CCWProcedure(
-            claim.getProcedure1Code(), claim.getProcedure1CodeVersion(), claim.getProcedure1Date());
-    TransformerTestUtils.assertHasCoding(
-        ccwProcedure.getFhirSystem().toString(),
-        claim.getProcedure1Code().get(),
-        eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
-    Assert.assertEquals(
-        Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        eob.getProcedure().get(0).getDate());
+    if (claim.getProcedure1Code().isPresent()) {
+      CCWProcedure ccwProcedure =
+          new CCWProcedure(
+              claim.getProcedure1Code(),
+              claim.getProcedure1CodeVersion(),
+              claim.getProcedure1Date());
+      TransformerTestUtils.assertHasCoding(
+          ccwProcedure.getFhirSystem().toString(),
+          claim.getProcedure1Code().get(),
+          eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
+      Assert.assertEquals(
+          Date.from(
+              claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+          eob.getProcedure().get(0).getDate());
+    }
 
-    Assert.assertEquals(1, eob.getItem().size());
+    Assert.assertTrue(1 <= eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     OutpatientClaimLine claimLine1 = claim.getLines().get(0);
     Assert.assertEquals(
@@ -237,5 +270,28 @@ public final class OutpatientClaimTransformerTest {
 
     // Test lastUpdated
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
+  }
+
+  public static long countDiagnosisCodes(OutpatientClaim claim) {
+    Stream<String> methodNames =
+        Stream.concat(
+            IntStream.range(1, 26).mapToObj(i -> "getDiagnosis" + i + "Code"),
+            Stream.concat(
+                IntStream.range(1, 16).mapToObj(i -> "getDiagnosisExternal" + i + "Code"),
+                IntStream.range(1, 4).mapToObj(i -> "getDiagnosisAdmission" + i + "Code")));
+
+    return methodNames
+        .filter(
+            methodName -> {
+              try {
+                // invoke the claim.getDiagnosisXXCode() method
+                final Optional<String> optional =
+                    (Optional<String>) claim.getClass().getDeclaredMethod(methodName).invoke(claim);
+                return optional.isPresent();
+              } catch (Exception e) {
+                return false;
+              }
+            })
+        .count();
   }
 }

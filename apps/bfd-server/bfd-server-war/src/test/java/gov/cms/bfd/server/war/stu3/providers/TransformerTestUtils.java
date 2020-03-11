@@ -334,7 +334,10 @@ final class TransformerTestUtils {
       ExplanationOfBenefit eob) {
     CareTeamComponent careTeamEntry =
         findCareTeamEntryForProviderIdentifier(
-            TransformerConstants.CODING_NPI_US, expectedPractitioner, eob.getCareTeam());
+            TransformerConstants.CODING_NPI_US,
+            expectedPractitioner,
+            expectedCareTeamRole,
+            eob.getCareTeam());
     Assert.assertNotNull(careTeamEntry);
     assertCodingEquals(
         expectedCareTeamRole.getSystem(),
@@ -1014,6 +1017,22 @@ final class TransformerTestUtils {
   }
 
   /**
+   * Does the role of the care team component match what is expected
+   *
+   * @param expectedRole expected role; maybe empty
+   * @param actualComponent the Care Team Component to test
+   * @return iff it matches or expected role is empty
+   */
+  private static boolean doesCareTeamComponentMatchRole(
+      ClaimCareteamrole expectedRole, CareTeamComponent actualComponent) {
+    if (expectedRole == null) return true;
+    if (!actualComponent.hasRole()) return false;
+    final Coding actualRole = actualComponent.getRole().getCodingFirstRep();
+    return actualRole.getCode().equals(expectedRole.toCode())
+        && actualRole.getSystem().equals(ClaimCareteamrole.NULL.getSystem());
+  }
+
+  /**
    * @param expectedProviderNpi the {@link Identifier#getValue()} of the provider to find a matching
    *     {@link CareTeamComponent} for
    * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
@@ -1024,7 +1043,7 @@ final class TransformerTestUtils {
   static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        TransformerConstants.CODING_NPI_US, expectedProviderNpi, careTeam);
+        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
   }
 
   /**
@@ -1040,6 +1059,7 @@ final class TransformerTestUtils {
   private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedIdentifierSystem,
       String expectedIdentifierValue,
+      ClaimCareteamrole expectedRole,
       List<CareTeamComponent> careTeam) {
     Optional<CareTeamComponent> careTeamEntry =
         careTeam.stream()
@@ -1047,6 +1067,7 @@ final class TransformerTestUtils {
                 ctc ->
                     doesReferenceMatchIdentifier(
                         expectedIdentifierSystem, expectedIdentifierValue, ctc.getProvider()))
+            .filter(ctc -> doesCareTeamComponentMatchRole(expectedRole, ctc))
             .findFirst();
     return careTeamEntry.orElse(null);
   }
@@ -1836,6 +1857,7 @@ final class TransformerTestUtils {
 
     TransformerTestUtils.assertCareTeamEquals(
         operatingPhysicianNpi.get(), ClaimCareteamrole.ASSIST, eob);
+
     TransformerTestUtils.assertCareTeamEquals(
         otherPhysicianNpi.get(), ClaimCareteamrole.OTHER, eob);
 

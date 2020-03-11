@@ -267,6 +267,41 @@ public enum StaticRifResource {
       RifFileType.PDE,
       145526),
 
+  SYNTHETIC_OUTPATIENT_1999_1999(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-1999-1999.rif"),
+      RifFileType.OUTPATIENT,
+      20744),
+
+  SYNTHETIC_OUTPATIENT_2000_1999(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2000-1999.rif"),
+      RifFileType.OUTPATIENT,
+      22439),
+
+  SYNTHETIC_OUTPATIENT_2001_1999(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2001-1999.rif"),
+      RifFileType.OUTPATIENT,
+      23241),
+
+  SYNTHETIC_OUTPATIENT_2002_2000(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2002-2000.rif"),
+      RifFileType.OUTPATIENT,
+      24575),
+
+  SYNTHETIC_OUTPATIENT_2014_2014(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2014-2014.rif"),
+      RifFileType.OUTPATIENT,
+      25194),
+
+  SYNTHETIC_OUTPATIENT_2015_2014(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2015-2014.rif"),
+      RifFileType.OUTPATIENT,
+      26996),
+
+  SYNTHETIC_OUTPATIENT_2016_2014(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2016-2014.rif"),
+      RifFileType.OUTPATIENT,
+      27955),
+
   SAMPLE_MCT_BENES(
       resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
 
