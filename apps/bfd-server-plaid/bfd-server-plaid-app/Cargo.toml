@@ -38,8 +38,6 @@ actix-web = { version = "2", features = ["openssl", "rustls"] }
 actix-rt = "1"
 rustls = { version = "0.16", features = ["logging"] }
 webpki = "0.21" # Only included as it's part of rustls's public API. Has to match version used by rustls.
-# FIXME: Latest is 0.3 and I think it's now part of stdlib so doesn't need to be specified?
-#futures = "0.1"
 num_cpus = "1"
 
 # Serde is used for JSON serialization.
