@@ -253,8 +253,6 @@ resource "aws_db_parameter_group" "import_mode" {
 
 # Master Database
 #
-# TODO: Remove this once switch to Aurora is complete.
-
 module "master" {
   source              = "../resources/rds"
   db_config           = var.db_config
@@ -271,10 +269,12 @@ module "master" {
   parameter_group_name = var.db_import_mode.enabled ? aws_db_parameter_group.import_mode.name : aws_db_parameter_group.default_mode.name
 }
 
-# Testing Aurora Resources
-##
+#############################################################
+## BEGIN AURORA DEMO RESOURCES - TO BE REMOVED AFTER TESTING!
+#############################################################
+
 # The DB instances in the RDS Aurora DB cluster.
-##
+#
 resource "aws_rds_cluster_instance" "aurora_demo_instances" {
   count                = 3
   identifier           = "bfd-${local.env_config.env}-aurora-demo-${count.index}"
@@ -288,10 +288,8 @@ resource "aws_rds_cluster_instance" "aurora_demo_instances" {
   apply_immediately    = true
 }
 
-# Testing Aurora Resources
-##
 # An RDS Aurora (PostgreSQL-compatible) cluster, to house the BFD database.
-##
+#
 resource "aws_rds_cluster" "aurora_demo" {
   cluster_identifier = "bfd-${local.env_config.env}-aurora-demo"
   
@@ -331,6 +329,10 @@ resource "aws_rds_cluster" "aurora_demo" {
     ]
   }
 }
+
+#############################################################
+## END AURORA DEMO RESOURCES - TO BE REMOVED AFTER TESTING!
+#############################################################
 
 # Replicas Database 
 # 
@@ -510,7 +512,20 @@ module "logs" {
   kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
-# Testing Aurora Resources
+# S3 bucket for ETL files
+#
+module "etl" {
+  source              = "../resources/s3"
+  role                = "etl"
+  env_config          = local.env_config
+  kms_key_id          = data.aws_kms_key.master_key.arn
+  log_bucket          = module.logs.id
+}
+
+#############################################################
+## BEGIN AURORA DEMO RESOURCES - TO BE REMOVED AFTER TESTING!
+#############################################################
+
 # S3 bucket for Aurora env logs 
 #
 module "logs-aurora" { 
@@ -523,17 +538,6 @@ module "logs-aurora" {
 
 # S3 bucket for ETL files
 #
-module "etl" {
-  source              = "../resources/s3"
-  role                = "etl"
-  env_config          = local.env_config
-  kms_key_id          = data.aws_kms_key.master_key.arn
-  log_bucket          = module.logs.id
-}
-
-# Testing Aurora Resources
-# S3 bucket for ETL files
-#
 module "etl-aurora" {
   source              = "../resources/s3"
   role                = "etl-aurora"
@@ -541,6 +545,10 @@ module "etl-aurora" {
   kms_key_id          = data.aws_kms_key.master_key.arn
   log_bucket          = module.logs.id
 }
+
+#############################################################
+## END AURORA DEMO RESOURCES - TO BE REMOVED AFTER TESTING!
+#############################################################
 
 # IAM policy, user, and attachment to allow external read-write
 # access to ETL bucket
@@ -550,8 +558,6 @@ module "etl-aurora" {
 # by which we control access is through a manually provisioned
 # access key
 #
-
-# Testing Aurora Resources, added etl-aurora bucket to IAM policy, below. 
 resource "aws_iam_policy" "etl_rw_s3" {
   name        = "bfd-${local.env_config.env}-etl-rw-s3"
   description = "ETL read-write S3 policy"
@@ -570,7 +576,7 @@ resource "aws_iam_policy" "etl_rw_s3" {
       "Sid": "ETLRWBucketList",
       "Action": ["s3:ListBucket"],
       "Effect": "Allow",
-      "Resource": ["${module.etl.arn}", "${module.etl-aurora.arn}"]
+      "Resource": ["${module.etl.arn}"]
     },
     {
       "Sid": "ETLRWBucketActions",
@@ -579,7 +585,7 @@ resource "aws_iam_policy" "etl_rw_s3" {
         "s3:PutObject"
       ],
       "Effect": "Allow",
-      "Resource": ["${module.etl.arn}/*", "${module.etl-aurora.arn}/*"]
+      "Resource": ["${module.etl.arn}/*"]
     }
   ]
 }
@@ -660,7 +666,11 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
   tags       = var.env_config.tags
 }
 
-# Test Aurora Resources - CloudWatch Log Groups
+#############################################################
+## BEGIN AURORA DEMO RESOURCES - TO BE REMOVED AFTER TESTING!
+#############################################################
+
+# Aurora CloudWatch Log Groups
 #
 resource "aws_cloudwatch_log_group" "bfd_pipeline_aurora_messages_txt" {
   name       = "/bfd/${var.env_config.env}/bfd-pipeline-aurora/messages.txt"
@@ -697,6 +707,10 @@ resource "aws_cloudwatch_log_group" "bfd_server_aurora_gc" {
   kms_key_id = data.aws_kms_key.master_key.arn
   tags       = var.env_config.tags
 }
+
+#############################################################
+## END AURORA DEMO RESOURCES - TO BE REMOVED AFTER TESTING!
+#############################################################
 
 # Test Log Group used by Karls plaid testing. 
 resource "aws_cloudwatch_log_group" "bfd_server_messages_plaid_json" {

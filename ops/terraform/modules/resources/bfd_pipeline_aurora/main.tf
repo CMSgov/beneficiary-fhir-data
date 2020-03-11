@@ -2,23 +2,14 @@ locals {
   is_prod        = var.env_config.env == "prod"
 
   log_groups = {
-    messages     = "/bfd/${var.env_config.env}/bfd-pipeline/messages.txt"
+    messages     = "/bfd/${var.env_config.env}/bfd-pipeline-aurora/messages.txt"
   }
-
-  pipeline_messages_error = {
-    period       = "300"
-    eval_periods = "1"
-    threshold    = "0"
-  }
-
-  alarm_actions  = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
-  ok_actions     = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
 }
 
 # Locate the S3 bucket that stores the RIF data to be processed by the BFD Pipeline application.
 #
 data "aws_s3_bucket" "rif" {
-  bucket = "bfd-${var.env_config.env}-etl-${var.launch_config.account_id}"
+  bucket = "bfd-${var.env_config.env}-etl-aurora-${var.launch_config.account_id}"
 }
 
 # Locate the customer master key for this environment.
@@ -30,7 +21,7 @@ data "aws_kms_key" "master_key" {
 # CloudWatch metric filters
 #
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
-  name            = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/error"
+  name            = "bfd-${var.env_config.env}/bfd-pipeline-aurora/messages/count/error"
   pattern         = "[date, time, java_thread, level = \"ERROR\", java_class, message]"
   log_group_name  = local.log_groups.messages
 
@@ -42,34 +33,13 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   }
 }
 
-# CloudWatch metric alarms
-#
-resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
-  alarm_name          = "bfd-${var.env_config.env}-pipeline-messages-error"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = local.pipeline_messages_error.eval_periods
-  period              = local.pipeline_messages_error.period
-  statistic           = "Maximum"
-  threshold           = local.pipeline_messages_error.threshold
-  alarm_description   = "Pipeline errors detected within ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${var.env_config.env}"
-
-  metric_name         = "messages/count/error"
-  namespace           = "bfd-${var.env_config.env}/bfd-pipeline"
-
-  alarm_actions       = local.is_prod ? local.alarm_actions : []
-  ok_actions          = local.is_prod ? local.ok_actions : []
-
-  datapoints_to_alarm = "1"
-  treat_missing_data  = "notBreaching"
-}
-
 # Security group for application-specific (i.e. non-management) traffic.
 #
 resource "aws_security_group" "app" {
-  name          = "bfd-${var.env_config.env}-etl-app"
+  name          = "bfd-${var.env_config.env}-etl-aurora-app"
   description   = "Access specific to the BFD Pipeline application."
   vpc_id        = var.env_config.vpc_id
-  tags          = merge({Name="bfd-${var.env_config.env}-etl-app"}, var.env_config.tags)
+  tags          = merge({Name="bfd-${var.env_config.env}-etl-aurora-app"}, var.env_config.tags)
 
   # Note: The application does not currently listen on any ports, so no ingress rules are needed.
 
@@ -97,7 +67,7 @@ resource "aws_security_group_rule" "allow_db_primary_access" {
 # IAM policy and role to allow the BFD Pipeline read-write access to ETL bucket.
 #
 resource "aws_iam_policy" "bfd_pipeline_rif" {
-  name        = "bfd-${var.env_config.env}-pipeline-rw-s3-rif"
+  name        = "bfd-${var.env_config.env}-pipeline-aurora-rw-s3-rif"
   description = "Allow the BFD Pipeline application to read-write the S3 bucket with the RIF in it."
 
   policy = <<EOF
@@ -143,7 +113,7 @@ module "iam_profile_bfd_pipeline" {
   source = "../iam"
 
   env_config      = var.env_config
-  name            = "bfd_pipeline"
+  name            = "bfd_pipeline_aurora"
 }
 
 resource "aws_iam_role_policy_attachment" "bfd_pipeline_rif" {
@@ -168,7 +138,7 @@ module "ec2_instance" {
   source = "../ec2"
 
   env_config      = var.env_config
-  role            = "etl"
+  role            = "etl-aurora"
   layer           = "data"
   az              = "us-east-1b" # Same as the master db
 
@@ -180,7 +150,7 @@ module "ec2_instance" {
 
     key_name      = var.launch_config.ssh_key_name
     profile       = module.iam_profile_bfd_pipeline.profile
-    user_data_tpl = "pipeline_server_aurora.tpl"
+    user_data_tpl = "pipeline_server.tpl"
     git_branch    = var.launch_config.git_branch
     git_commit    = var.launch_config.git_commit
   }

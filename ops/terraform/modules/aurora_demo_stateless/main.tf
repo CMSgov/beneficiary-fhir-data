@@ -184,7 +184,7 @@ module "fhir-aurora_asg" {
     key_name        = var.ssh_key_name 
 
     profile         = "bfd-${var.env_config.env}-fhir-profile"
-    user_data_tpl   = "fhir_server_aurora.tpl"       # See templates directory for choices
+    user_data_tpl   = "fhir_server.tpl"       # See templates directory for choices
     account_id      = data.aws_caller_identity.current.account_id
     git_branch      = var.git_branch_name
     git_commit      = var.git_commit_id
