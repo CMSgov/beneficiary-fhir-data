@@ -3,8 +3,10 @@ package gov.cms.bfd.server.war.stu3.providers;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -83,5 +85,16 @@ public final class TransformerUtilsTest {
         TransformerUtils.createCodeableConcept(
             patientA, CcwCodebookVariable.REV_CNTR_PMT_MTHD_IND_CD, "1");
     Assert.assertNull(paymentMethodConcept_1.getCodingFirstRep().getDisplay());
+  }
+
+  @Test
+  public void addCareTeamPractitioner() {
+    ExplanationOfBenefit eob = new ExplanationOfBenefit();
+    TransformerUtils.addCareTeamPractitioner(eob, null, "system", "123", ClaimCareteamrole.PRIMARY);
+    Assert.assertEquals("Expect there to be one care team member", 1, eob.getCareTeam().size());
+    TransformerUtils.addCareTeamPractitioner(eob, null, "system", "123", ClaimCareteamrole.ASSIST);
+    Assert.assertEquals("Expect there to be two care team members", 2, eob.getCareTeam().size());
+    TransformerUtils.addCareTeamPractitioner(eob, null, "system", "123", ClaimCareteamrole.ASSIST);
+    Assert.assertEquals("Expect there to be two care team members", 2, eob.getCareTeam().size());
   }
 }

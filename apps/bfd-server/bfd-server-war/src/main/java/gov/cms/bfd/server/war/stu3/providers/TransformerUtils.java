@@ -308,6 +308,13 @@ public final class TransformerUtils {
                 ctc ->
                     practitionerIdSystem.equals(ctc.getProvider().getIdentifier().getSystem())
                         && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
+            .filter(ctc -> ctc.hasRole())
+            .filter(
+                ctc ->
+                    careTeamRole.toCode().equals(ctc.getRole().getCodingFirstRep().getCode())
+                        && careTeamRole
+                            .getSystem()
+                            .equals(ctc.getRole().getCodingFirstRep().getSystem()))
             .findAny()
             .orElse(null);
 
