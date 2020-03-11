@@ -14,3 +14,10 @@ members = [
   # The primary app: the Beneficiary FHIR Data Server.
   "bfd-server-plaid-app",
 ]
+
+
+[profile.release]
+
+# Ensure that debug symbols are left in compiled release binaries, as they can aid with
+# investigating bugs and performance issues in production.
+debug = true
