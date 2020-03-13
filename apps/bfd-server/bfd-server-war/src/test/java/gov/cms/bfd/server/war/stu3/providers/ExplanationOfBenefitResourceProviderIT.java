@@ -1551,7 +1551,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneId)))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNull(
+    Assert.assertEquals(
+        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
+        TransformerConstants.FALLBACK_LAST_UPDATED,
         filterToClaimType(searchAll, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
 
     // Find all EOBs with < now()
@@ -1563,10 +1565,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .lastUpdated(new DateRangeParam().setUpperBoundInclusive(new Date()))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNull(
+    Assert.assertEquals(
+        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
+        TransformerConstants.FALLBACK_LAST_UPDATED,
         filterToClaimType(searchWithLessThan, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
     Assert.assertEquals(
-        "Expected the search for lastUpdated <= now() to include null lastUpdated resources",
+        "Expected the search for lastUpdated <= now() to include resources with fallback lastUpdated values",
         searchAll.getTotal(),
         searchWithLessThan.getTotal());
 

@@ -3049,16 +3049,15 @@ public final class TransformerUtils {
   }
 
   /**
-   * Sets the lastUpdated value in the resource
+   * Sets the lastUpdated value in the resource.
    *
-   * @param resource is the FHIR resource to set LastUp
-   * @param lastUpdated is the lastUpdated value from the entity
+   * @param resource is the FHIR resource to set lastUpdate
+   * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUdpated.
    */
   public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
-    lastUpdated.ifPresent(
-        value -> {
-          resource.getMeta().setLastUpdated(value);
-        });
+    resource
+        .getMeta()
+        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
   }
 
   /**

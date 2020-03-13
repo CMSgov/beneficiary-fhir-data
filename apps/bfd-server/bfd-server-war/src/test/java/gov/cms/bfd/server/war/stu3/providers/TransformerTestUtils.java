@@ -2030,13 +2030,16 @@ final class TransformerTestUtils {
   static void assertLastUpdatedEquals(
       Optional<Date> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
-      final Date lastUpdated = expectedDateTime.get();
+      final Date expectedLastUpdated = expectedDateTime.get();
       Assert.assertEquals(
           "Expect lastUpdated to be equal",
-          actualResource.getMeta().getLastUpdated().toInstant(),
-          lastUpdated.toInstant());
+          expectedLastUpdated.toInstant(),
+          actualResource.getMeta().getLastUpdated().toInstant());
     } else {
-      Assert.assertNull("Expect lastUpdated to be null", actualResource.getMeta().getLastUpdated());
+      Assert.assertEquals(
+          "Expect lastUpdated to be the fallback value",
+          TransformerConstants.FALLBACK_LAST_UPDATED,
+          actualResource.getMeta().getLastUpdated());
     }
   }
 }
