@@ -1,11 +1,13 @@
 {
   "variables": {
+    "env": "",
     "source_ami": "",
     "subnet_id": ""
   },
-  "builders": [{
+  "builders": [
+    {
       "type": "amazon-ebs",
-      "iam_instance_profile": "bfd-packer",
+      "iam_instance_profile": "bfd-{{user `env`}}-packer",
       "ssh_username": "ec2-user",
       "instance_type": "m5.xlarge",
       "region": "us-east-1",
@@ -25,17 +27,18 @@
       }
     }
   ],
-  "provisioners": [{
+  "provisioners": [
+    {
       "type": "ansible",
       "command": "./ansible-playbook-wrapper",
       "playbook_file": "./build_jenkins.yml",
       "extra_arguments": [
         "--extra-vars",
+        "env={{user `env`}}",
+        "--extra-vars",
         "ansible_python_interpreter=/usr/bin/python"
       ],
-      "ansible_env_vars": [
-        "ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"
-    ]
+      "ansible_env_vars": ["ANSIBLE_SSH_ARGS='-o IdentitiesOnly=yes'"]
     }
   ]
 }

@@ -53,15 +53,37 @@
   until: >
      'status' in jenkins_service_status and
      jenkins_service_status['status'] == 200
-     
+
+- name: Configure Security Recommendations
+  jenkins_script:
+    url: "{{ jenkins_url_local }}"
+    user: "{{ jenkins_dynamic_admin_username | default(omit) }}"
+    password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
+    script: "{{ lookup('template', 'templates/configSecrec.groovy.j2') }}"
+  register: shell_jenkins_security_recommendations
+  changed_when: "(shell_jenkins_security_recommendations is success) and 'Changed' in shell_jenkins_security_recommendations.output"
+
+- name: Get Jenkins Crumb
+  uri:
+    force_basic_auth: yes
+    url_username: "{{ jenkins_dynamic_admin_username | default(omit) }}"
+    url_password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
+    url: "{{ jenkins_url_local }}/crumbIssuer/api/json"
+    return_content: yes
+  register: jenkins_crumb
+  until: jenkins_crumb.content.find('Please wait while Jenkins is getting ready') == -1
+  retries: 10
+  delay: 5
+
 - name: Install Plugins
   jenkins_plugin:
     name: "{{ item }}"
-    state: present
+    state: latest
     jenkins_home: "{{ jenkins_home }}"
     url: "{{ jenkins_url_local }}"
     url_username: "{{ jenkins_dynamic_admin_username | default(omit) }}"
     url_password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
+    http_agent: "Jenkins-Crumb:{{ jenkins_crumb.json.crumb }}"
     validate_certs: true
     timeout: "{{ jenkins_plugins_timeout }}"
   with_items:
@@ -72,21 +94,3 @@
   notify:
     - "Restart Service 'jenkins'"
 
-- name: Update Plugins
-  jenkins_plugin:
-    name: "{{ item }}"
-    state: latest
-    jenkins_home: "{{ jenkins_home }}"
-    url: "{{ jenkins_url_local }}"
-    url_username: "{{ jenkins_dynamic_admin_username | default(omit) }}"
-    url_password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
-    validate_certs: true
-    timeout: "{{ jenkins_plugins_timeout }}"
-  with_items:
-    - "{{ jenkins_plugins_recommended }}"
-    - "{{ jenkins_plugins_extra }}"
-  become: true
-  when: jenkins_plugins_update
-  retries: "{{ jenkins_plugins_retries }}"
-  notify:
-    - "Restart Service 'jenkins'"

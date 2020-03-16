@@ -1,3 +1,8 @@
+variable "env" {
+  description       = "The environment to use, in this case mgmt or mgmt-test"
+  type              = string
+}
+
 variable "jenkins_ami" {
   description       = "Jenkins server AMI"
   type              = string
