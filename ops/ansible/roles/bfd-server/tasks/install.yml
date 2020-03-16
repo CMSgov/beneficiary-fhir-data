@@ -79,3 +79,10 @@
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
   become: true
+
+### Logrotate Stuff
+- name: Configure bfd-server Log Rotation
+  template:
+    src: 'bfd-server.j2'
+    dest: /etc/logrotate.d/bfd-server
+  become: true

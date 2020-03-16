@@ -13,7 +13,6 @@
       "subnet_id": "{{user `subnet_id`}}",
       "associate_public_ip_address": "false",
       "source_ami": "{{user `source_ami`}}",
-      "user_data_file": "./disk_space.sh",
       "security_group_filter": {
         "filters": {
           "tag:Name": "bfd-mgmt-vpn-private"
