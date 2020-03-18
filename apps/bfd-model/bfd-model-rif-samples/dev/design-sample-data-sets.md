@@ -64,6 +64,7 @@ The `OutpatientClaimTransformerTest.transformSyntheticData` is a good model to f
 ### TEST, PROD-SBX, and PROD
 
 Before loading data into an environment, ensure that the data loads and works in your local environment. 
+Experience from outages has shown that engineers should test every record that is being loaded, not a sample of records. 
 
 To manually load data into an environment, one essentially needs to duplicate the process that the CCW does for its weekly drop of RIF files. 
 Every ETL service monitors an S3 bucket for incoming RIF files. 
@@ -234,7 +235,7 @@ With a change in AWS accounts for the BFD project, the synthetic data set was mo
     
 5. A set of Outpatient claims were generated and added to the synthetic data set. 
 The source data is kept in a team Keybase folder. 
-All the fixups on the source data that was performed are documented in the `outpatient-claims/convert_outpatient_claims_csv_file_to_rif.py` script. 
+All the fixups on the source data that was performed are documented in the `ops/ccs-ops-misc/synthetic-data/scripts/outpatient/convert_outpatient_claims_csv_file_to_rif.py` script.
 
    ``` 
      $ wget \
@@ -284,9 +285,6 @@ It's important to note that the synthetic data set does not yet cover all suppor
 |Inpatient Claims|70212|
 |Part D Events|413347|
 |Outpatient Claims|171144|
-
-
-
 
 ### `SAMPLE_MCT`: MCT-Compatible Test Data (Derived from Synthetic)
 
