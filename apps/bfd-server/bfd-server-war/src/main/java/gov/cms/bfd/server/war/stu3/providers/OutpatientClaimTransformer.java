@@ -227,7 +227,7 @@ final class OutpatientClaimTransformer {
       TransformerUtils.addDiagnosisCode(
           eob,
           Diagnosis.from(
-                  claimGroup.getDiagnosisAdmission2Code(),
+                  claimGroup.getDiagnosisAdmission3Code(),
                   claimGroup.getDiagnosisAdmission3CodeVersion(),
                   DiagnosisLabel.REASONFORVISIT)
               .get());
