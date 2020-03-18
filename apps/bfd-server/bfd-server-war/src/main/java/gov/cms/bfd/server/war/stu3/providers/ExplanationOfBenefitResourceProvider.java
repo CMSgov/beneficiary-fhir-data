@@ -22,6 +22,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -212,7 +213,14 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     Operation operation = new Operation(Operation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
-    operation.setOption("types", claimTypes.toString());
+    operation.setOption(
+        "types",
+        (claimTypes.size() == ClaimType.values().length)
+            ? "*"
+            : claimTypes.stream()
+                .sorted(Comparator.comparing(ClaimType::name))
+                .collect(Collectors.toList())
+                .toString());
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
     operation.publishOperationName();
 
