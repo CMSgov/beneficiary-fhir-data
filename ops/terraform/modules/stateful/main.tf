@@ -275,10 +275,31 @@ module "master" {
 
 # The DB instances in the RDS Aurora DB cluster.
 #
-resource "aws_rds_cluster_instance" "aurora_demo_instances" {
-  count                = 3
-  identifier           = "bfd-${local.env_config.env}-aurora-demo-${count.index}"
+resource "aws_rds_cluster_instance" "aurora_demo_writer" {
+  count                = 1
+  identifier           = "bfd-${local.env_config.env}-aurora-demo-writer"
   cluster_identifier   = aws_rds_cluster.aurora_demo.id
+
+  # promotion tier 0 ensures this node gets writer priority
+  promotion_tier       = 0
+  availability_zone    = local.azs[1]
+
+  engine               = "aurora-postgresql"
+  engine_version       = "11.6"
+
+  instance_class       = "db.r5.24xlarge"
+  db_subnet_group_name = aws_db_subnet_group.db.name
+  apply_immediately    = true
+}
+
+resource "aws_rds_cluster_instance" "aurora_demo_readers" {
+  count                = 3
+  identifier           = "bfd-${local.env_config.env}-aurora-demo-reader-${count.index}"
+  cluster_identifier   = aws_rds_cluster.aurora_demo.id
+
+  # promotion tier 1 ensures these nodes do not get writer priority
+  promotion_tier       = 1
+  availability_zone    = local.azs[count.index]
 
   engine               = "aurora-postgresql"
   engine_version       = "11.6"
