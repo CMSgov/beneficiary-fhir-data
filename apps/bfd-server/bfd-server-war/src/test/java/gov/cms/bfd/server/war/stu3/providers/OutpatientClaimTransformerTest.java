@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
+import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -20,9 +22,13 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer}. */
 public final class OutpatientClaimTransformerTest {
+  private static final org.slf4j.Logger LOGGER =
+      LoggerFactory.getLogger(OutpatientClaimTransformerTest.class);
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
@@ -70,6 +76,41 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
     assertMatches(claim, eob);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
+   * expected when run against all synthetic data outpatient claims
+   *
+   * <p>Note: This test is normally disabled like other synthetic data tests. It will take 20
+   * minutes or more to run.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Ignore
+  @Test
+  public void transformAllSyntheticRecords() throws FHIRException {
+    List<StaticRifResource> outpatientSyntheticFiles =
+        Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()).stream()
+            .filter(r -> r.getRifFileType().equals(RifFileType.OUTPATIENT))
+            .collect(Collectors.toList());
+
+    List<Object> parsedRecords = ServerTestUtils.parseData(outpatientSyntheticFiles);
+
+    parsedRecords.stream()
+        .filter(r -> r instanceof OutpatientClaim)
+        .map(r -> (OutpatientClaim) r)
+        .forEach(
+            claim -> {
+              LOGGER.info(
+                  "Running at Bene-Id: {}, Claim-Id: {}",
+                  claim.getBeneficiaryId(),
+                  claim.getClaimId());
+              ExplanationOfBenefit eob =
+                  OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
+              assertMatches(claim, eob);
+            });
   }
 
   /**
@@ -135,7 +176,9 @@ public final class OutpatientClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber());
 
-    Assert.assertEquals(countDiagnosisCodes(claim), eob.getDiagnosis().size());
+    Assert.assertTrue(
+        "Expect actual diagnosis count is less than or equal to the claim count",
+        countDiagnosisCodes(claim) >= eob.getDiagnosis().size());
 
     if (claim.getProcedure1Code().isPresent()) {
       CCWProcedure ccwProcedure =
@@ -153,7 +196,7 @@ public final class OutpatientClaimTransformerTest {
           eob.getProcedure().get(0).getDate());
     }
 
-    Assert.assertTrue(1 <= eob.getItem().size());
+    Assert.assertTrue("Expect actual item count is above 0", 1 <= eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     OutpatientClaimLine claimLine1 = claim.getLines().get(0);
     Assert.assertEquals(
@@ -275,10 +318,12 @@ public final class OutpatientClaimTransformerTest {
   public static long countDiagnosisCodes(OutpatientClaim claim) {
     Stream<String> methodNames =
         Stream.concat(
-            IntStream.range(1, 26).mapToObj(i -> "getDiagnosis" + i + "Code"),
+            Stream.concat(
+                IntStream.range(1, 26).mapToObj(i -> "getDiagnosis" + i + "Code"),
+                IntStream.range(1, 5).mapToObj(i -> "getDiagnosisAdmission" + i + "Code")),
             Stream.concat(
                 IntStream.range(1, 16).mapToObj(i -> "getDiagnosisExternal" + i + "Code"),
-                IntStream.range(1, 4).mapToObj(i -> "getDiagnosisAdmission" + i + "Code")));
+                Stream.of("getDiagnosisPrincipalCode", "getDiagnosisExternalFirstCode")));
 
     return methodNames
         .filter(
