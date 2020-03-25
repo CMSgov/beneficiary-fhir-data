@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+
+  msls:
+    build:
+      context: ../../bb.dev/msls
+      dockerfile: Dockerfile
+    command: msls
+    ports: 
+      - "8080:8080"

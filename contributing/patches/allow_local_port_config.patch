@@ -1,0 +1,25 @@
+From 658471fed3017910668a29f60c66223543cc8c6e Mon Sep 17 00:00:00 2001
+From: David Gage <whytheplatypus@gmail.com>
+Date: Wed, 23 Oct 2019 19:04:30 +0000
+Subject: [PATCH] Allow bfd port to be set during local development
+
+---
+ apps/bfd-server/bfd-server-war/src/main/config/server-start.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/apps/bfd-server/bfd-server-war/src/main/config/server-start.sh b/apps/bfd-server/bfd-server-war/src/main/config/server-start.sh
+index 6a0cd5ae..a789595b 100755
+--- a/apps/bfd-server/bfd-server-war/src/main/config/server-start.sh
++++ b/apps/bfd-server/bfd-server-war/src/main/config/server-start.sh
+@@ -136,7 +136,7 @@ if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
+ if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
+ 
+ # Read the server port to be used from the ports file.
+-serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )
++serverPortHttps=${BFD_PORT?$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2 )}
+ if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
+ echo "Configured server to run on HTTPS port '${serverPortHttps}'."
+ 
+-- 
+2.23.0
+
