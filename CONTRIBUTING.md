@@ -18,7 +18,7 @@ To simply run tests or execute other tasks in the BFD bring up the docker contai
 make up
 ```
 
-This brings services up in the background and displays the logs from the `bfd` container. Once the logs show that that the system is started (this can take a minute or so depending on your machine) the logs can be exited with Ctrl+C (Cmd+C on a mac).
+This brings services up in the background and displays the logs from the `bfd` container. Once the logs show that that the system is started (this can take a minute or so depending on your machine) the logs can be exited with Ctrl+C.
 
 Now the system can be interacted with. Here's an example of running tests for the `bfd-server` module.
 ```
