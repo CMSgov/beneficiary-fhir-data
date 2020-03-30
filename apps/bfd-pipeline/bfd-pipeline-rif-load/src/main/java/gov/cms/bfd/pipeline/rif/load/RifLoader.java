@@ -62,9 +62,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
@@ -685,25 +683,21 @@ public final class RifLoader implements AutoCloseable {
         txn.begin();
         final Date oldDate = Date.from(Instant.now().minus(MAX_FILE_AGE_DAYS));
 
-        final CriteriaBuilder cb = em.getCriteriaBuilder();
-        final CriteriaQuery<LoadedFile> oldFileCriteria = cb.createQuery(LoadedFile.class);
-        final Root<LoadedFile> f = oldFileCriteria.from(LoadedFile.class);
-        oldFileCriteria
-            .select(oldFileCriteria.from(LoadedFile.class))
-            .where(cb.lessThan(f.get("created"), oldDate));
-        List<LoadedFile> oldFiles = em.createQuery(oldFileCriteria).getResultList();
+        em.clear(); // Must be done before JPQL statements
+        em.flush();
+        List<Long> oldIds =
+            em.createQuery("select f.loadedFileId from LoadedFile f where created < :oldDate")
+                .setParameter("oldDate", oldDate)
+                .getResultList();
 
-        if (oldFiles.size() > 0) {
-          for (LoadedFile oldFile : oldFiles) {
-            LOGGER.info("Deleting LoadedFile id:{}", oldFile.getLoadedFileId());
-            final CriteriaDelete<LoadedBatch> deleteBatches =
-                cb.createCriteriaDelete(LoadedBatch.class);
-            final Root<LoadedBatch> b = deleteBatches.from(LoadedBatch.class);
-            deleteBatches.where(cb.equal(b.get("loadedFileId"), oldFile.getLoadedFileId()));
-            em.createQuery(deleteBatches).executeUpdate();
-
-            em.remove(oldFile);
-          }
+        if (oldIds.size() > 0) {
+          LOGGER.info("Deleting old files: {}", oldIds.size());
+          em.createQuery("delete from LoadedBatch where loadedFileId in :ids")
+              .setParameter("ids", oldIds)
+              .executeUpdate();
+          em.createQuery("delete from LoadedFile where loadedFileId in :ids")
+              .setParameter("ids", oldIds)
+              .executeUpdate();
           txn.commit();
         } else {
           txn.rollback();
