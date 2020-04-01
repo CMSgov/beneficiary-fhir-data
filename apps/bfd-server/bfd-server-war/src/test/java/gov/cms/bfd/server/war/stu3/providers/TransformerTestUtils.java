@@ -70,6 +70,9 @@ import org.junit.Assert;
  * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer}).
  */
 final class TransformerTestUtils {
+  /* Do this very slow operation once */
+  private static final FhirContext fhirContext = FhirContext.forDstu3();
+
   /**
    * @param categoryVariable the {@link CcwCodebookVariable} for the {@link Extension#getUrl()} to
    *     find and verify
@@ -912,12 +915,7 @@ final class TransformerTestUtils {
    * @param resource the FHIR {@link Resource} to check
    */
   static void assertNoEncodedOptionals(Resource resource) {
-    FhirContext fhirContext = FhirContext.forDstu3();
     String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource);
-    String encodedResourceJson = fhirContext.newJsonParser().encodeResourceToString(resource);
-    System.out.println(encodedResourceXml);
-    System.out.println(encodedResourceJson);
-
     Assert.assertFalse(encodedResourceXml.contains("Optional"));
   }
 
