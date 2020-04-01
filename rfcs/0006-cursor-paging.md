@@ -1,3 +1,5 @@
+# RFC0006 - Cursor-Based Paging
+
 * RFC Proposal ID: RFC0006 
 * Status: First Draft
 * Start Date: 2020-04-01
