@@ -140,9 +140,6 @@ public final class TransformerUtils {
   /** Stores the diagnosis ICD codes and their display values */
   private static Map<String, String> icdMap = null;
 
-  /** Tracks the diagnosis ICD codes that have already had code lookup failures. */
-  private static final Set<String> icdLookupMissingFailures = new HashSet<>();
-
   /** Stores the procedure codes and their display values */
   private static Map<String, String> procedureMap = null;
 
@@ -3052,16 +3049,15 @@ public final class TransformerUtils {
   }
 
   /**
-   * Sets the lastUpdated value in the resource
+   * Sets the lastUpdated value in the resource.
    *
-   * @param resource is the FHIR resource to set LastUp
-   * @param lastUpdated is the lastUpdated value from the entity
+   * @param resource is the FHIR resource to set lastUpdate
+   * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUdpated.
    */
   public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
-    lastUpdated.ifPresent(
-        value -> {
-          resource.getMeta().setLastUpdated(value);
-        });
+    resource
+        .getMeta()
+        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
   }
 
   /**

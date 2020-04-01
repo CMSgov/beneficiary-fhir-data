@@ -23,3 +23,4 @@ variable "azs" {
   description       = "AZs to use"
   type              = list
 }
+

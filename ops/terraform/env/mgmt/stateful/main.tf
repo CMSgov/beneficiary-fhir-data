@@ -14,5 +14,5 @@ module "stateful" {
     env               = "mgmt"
     tags              = {application="bfd", business="oeda", stack="mgmt", Environment="mgmt"}
     azs               = "us-east-1a"
-  }  
+  }
 }
