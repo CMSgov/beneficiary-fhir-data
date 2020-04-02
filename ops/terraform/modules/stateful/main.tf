@@ -287,7 +287,7 @@ resource "aws_rds_cluster_instance" "aurora_demo_writer" {
   engine               = "aurora-postgresql"
   engine_version       = "11.6"
 
-  instance_class       = "db.r5.24xlarge"
+  instance_class       = "db.r5.12xlarge"
   db_subnet_group_name = aws_db_subnet_group.db.name
   apply_immediately    = true
 }
@@ -304,7 +304,7 @@ resource "aws_rds_cluster_instance" "aurora_demo_readers" {
   engine               = "aurora-postgresql"
   engine_version       = "11.6"
 
-  instance_class       = "db.r5.24xlarge"
+  instance_class       = "db.r5.12xlarge"
   db_subnet_group_name = aws_db_subnet_group.db.name
   apply_immediately    = true
 }
