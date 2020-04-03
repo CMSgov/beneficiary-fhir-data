@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * PagingArguments encapsulates the arguments related to paging for the
  * {@link ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
  */
-public final class OffsetLinkBuilder {
+public final class OffsetLinkBuilder implements LinkBuilder {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
@@ -28,6 +28,7 @@ public final class OffsetLinkBuilder {
   private final String serverBase;
   private final String resource;
   private final RequestDetails requestDetails;
+  private int numTotalResults = -1;
 
   public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
@@ -104,15 +105,21 @@ public final class OffsetLinkBuilder {
     return 0;
   }
 
+  public LinkBuilder setTotal(int numTotalResults) {
+    this.numTotalResults = numTotalResults;
+    return this;
+  }
+
   /**
    * Add next, first, last, and previous links to a bundle
    *
    * @param toBundle to add the links
-   * @param numTotalResults from the search
    */
-  public void addPageLinks(Bundle toBundle, int numTotalResults) {
+  public void addLinks(Bundle toBundle) {
     Integer pageSize = getPageSize();
     Integer startIndex = getStartIndex();
+    if (numTotalResults == -1)
+      throw new BadCodeMonkeyException("setTotal() should have been called");
 
     toBundle.addLink(
         new Bundle.BundleLinkComponent()

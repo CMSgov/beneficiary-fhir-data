@@ -2931,7 +2931,7 @@ public final class TransformerUtils {
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
-      paging.addPageLinks(bundle, resources.size());
+      paging.setTotal(resources.size()).addLinks(bundle);
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
@@ -2970,7 +2970,7 @@ public final class TransformerUtils {
     Bundle bundle = new Bundle();
 
     if (paging.isPagingRequested()) {
-      paging.addPageLinks(bundle, total);
+      paging.setTotal(total).addLinks(bundle);
     }
 
     bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
