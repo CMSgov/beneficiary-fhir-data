@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * PagingArguments encapsulates the arguments related to paging for the
  * {@link ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
  */
-public final class PageLinkBuilder {
+public final class OffsetLinkBuilder {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
@@ -29,7 +29,7 @@ public final class PageLinkBuilder {
   private final String resource;
   private final RequestDetails requestDetails;
 
-  public PageLinkBuilder(RequestDetails requestDetails, String resource) {
+  public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
     this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
     this.serverBase = requestDetails.getServerBaseForRequest();

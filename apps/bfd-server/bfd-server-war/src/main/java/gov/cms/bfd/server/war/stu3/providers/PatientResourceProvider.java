@@ -227,7 +227,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       }
     }
 
-    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Patient?");
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
     return bundle;
@@ -270,7 +270,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaQuery beneficiariesQuery =
         queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
 
-    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Patient?");
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, paging);
     Long count = fetchResultCount(beneficiariesQuery);
 
@@ -347,7 +347,8 @@ public final class PatientResourceProvider implements IResourceProvider {
         .getSingleResult();
   }
 
-  private List<Beneficiary> fetchBeneficiaries(CriteriaQuery criteria, PageLinkBuilder pagingArgs) {
+  private List<Beneficiary> fetchBeneficiaries(
+      CriteriaQuery criteria, OffsetLinkBuilder pagingArgs) {
     Query query = entityManager.createQuery(criteria);
 
     if (pagingArgs.isPagingRequested()) {
@@ -461,7 +462,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       patients = new LinkedList<>();
     }
 
-    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Patient?");
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
     return bundle;

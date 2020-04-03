@@ -2912,7 +2912,7 @@ public final class TransformerUtils {
   /**
    * Create a bundle from the entire search result
    *
-   * @param paging contains the {@link PageLinkBuilder} information
+   * @param paging contains the {@link OffsetLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
    * @param transactionTime date for the bundle
@@ -2920,7 +2920,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PageLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
     if (paging.isPagingRequested()) {
       /*
@@ -2957,7 +2957,7 @@ public final class TransformerUtils {
   /**
    * Create a bundle from one page of resources
    *
-   * @param paging a {@link PageLinkBuilder} used to determine if paging is requested and the
+   * @param paging a {@link OffsetLinkBuilder} used to determine if paging is requested and the
    *     parameters for doing so. The resources list is trimmed to fit the requested page.
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
@@ -2966,7 +2966,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PageLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
     Bundle bundle = new Bundle();
 
     if (paging.isPagingRequested()) {
