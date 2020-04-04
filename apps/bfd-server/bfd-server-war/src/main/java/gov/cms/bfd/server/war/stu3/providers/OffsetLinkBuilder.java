@@ -66,6 +66,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    * @return Returns true if the pageSize either startIndex is present (i.e. paging is requested),
    *     false if neither present.
    */
+  @Override
   public boolean isPagingRequested() {
     return pageSize.isPresent() || startIndex.isPresent();
   }
@@ -75,6 +76,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
    *     startIndex does (paging is requested) default to pageSize of 10.
    * @throws InvalidRequestException HTTP 400: indicates a pageSize less than 0 was provided
    */
+  @Override
   public int getPageSize() {
     if (!isPagingRequested()) throw new BadCodeMonkeyException();
     if (!pageSize.isPresent()) return 10;
@@ -85,6 +87,11 @@ public final class OffsetLinkBuilder implements LinkBuilder {
               pageSize.get()));
     }
     return pageSize.get();
+  }
+
+  @Override
+  public boolean isFirstPage() {
+    return getStartIndex() == 0;
   }
 
   /**
@@ -118,22 +125,20 @@ public final class OffsetLinkBuilder implements LinkBuilder {
   public void addLinks(Bundle toBundle) {
     Integer pageSize = getPageSize();
     Integer startIndex = getStartIndex();
-    if (numTotalResults == -1)
-      throw new BadCodeMonkeyException("setTotal() should have been called");
-
+    int total = numTotalResults == -1 ? toBundle.getEntry().size() : numTotalResults;
     toBundle.addLink(
         new Bundle.BundleLinkComponent()
             .setRelation(Constants.LINK_FIRST)
             .setUrl(createPageLink(0)));
 
-    if (startIndex + pageSize < numTotalResults) {
+    if (startIndex + pageSize < total) {
       toBundle.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_NEXT)
               .setUrl(createPageLink(startIndex + pageSize)));
     }
 
-    if (startIndex > 0) {
+    if (!isFirstPage()) {
       toBundle.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_PREVIOUS)
@@ -146,7 +151,7 @@ public final class OffsetLinkBuilder implements LinkBuilder {
      */
     int lastIndex;
     try {
-      lastIndex = (numTotalResults - 1) / pageSize * pageSize;
+      lastIndex = (total - 1) / pageSize * pageSize;
     } catch (ArithmeticException e) {
       throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
     }

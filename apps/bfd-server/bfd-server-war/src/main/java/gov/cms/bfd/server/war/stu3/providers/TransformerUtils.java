@@ -2994,6 +2994,39 @@ public final class TransformerUtils {
   }
 
   /**
+   * Create a bundle from the entire search result
+   *
+   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
+   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param paging contains the {@link LinkBuilder} information
+   * @param transactionTime date for the bundle
+   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
+   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
+   */
+  public static Bundle createBundle(
+      List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
+    Bundle bundle = new Bundle();
+    TransformerUtils.addResourcesToBundle(bundle, resources);
+    if (paging.isPagingRequested()) paging.addLinks(bundle);
+
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
+     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
+     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
+    return bundle;
+  }
+
+  /**
    * @param bundle a {@link Bundle} to add the list of {@link ExplanationOfBenefit} resources to.
    * @param resources a list of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion will be added to the bundle based on the paging values

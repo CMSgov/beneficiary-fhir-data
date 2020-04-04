@@ -34,7 +34,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -240,39 +239,17 @@ public final class PatientResourceProvider implements IResourceProvider {
       @RequiredParam(name = "_has:Coverage.extension")
           @Description(shortDefinition = "Part D coverage type")
           TokenParam coverageId,
-      @OptionalParam(name = "startIndex")
-          @Description(shortDefinition = "The offset used for result pagination")
-          String startIndex,
+      @OptionalParam(name = "cursor")
+          @Description(shortDefinition = "The cursor used for result pagination")
+          String cursor,
       RequestDetails requestDetails) {
-
-    if (coverageId.getQueryParameterQualifier() != null)
-      throw new InvalidRequestException(
-          "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
-
-    String contractCode = coverageId.getValueNotNull();
-    if (contractCode.length() != 5)
-      throw new InvalidRequestException("Unsupported query parameter value: " + contractCode);
-
-    String contractMonth =
-        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
-    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
-    SingularAttribute<Beneficiary, String> contractMonthField = partDFieldFor(partDContractMonth);
-
+    checkCoverageId(coverageId);
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
-    List<SetAttribute<Beneficiary, ?>> withRelations =
-        new LinkedList<SetAttribute<Beneficiary, ?>>();
+    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    checkPageSize(paging);
 
-    if (hasHICN(includeIdentifiersValues)) withRelations.add(Beneficiary_.beneficiaryHistories);
-
-    if (hasMBI(includeIdentifiersValues))
-      withRelations.add(Beneficiary_.medicareBeneficiaryIdHistories);
-
-    CriteriaQuery beneficiariesQuery =
-        queryBeneficiariesBy(contractMonthField, contractCode, withRelations);
-
-    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
-    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(beneficiariesQuery, paging);
-    Long count = fetchResultCount(beneficiariesQuery);
+    List<Beneficiary> matchingBeneficiaries =
+        fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
@@ -294,10 +271,8 @@ public final class PatientResourceProvider implements IResourceProvider {
                 })
             .collect(Collectors.toList());
 
-    Bundle bundle =
-        TransformerUtils.createBundle(
-            paging, patients, count.intValue(), loadedFilterManager.getTransactionTime());
-    return bundle;
+    return TransformerUtils.createBundle(
+        patients, paging, loadedFilterManager.getTransactionTime());
   }
 
   private CcwCodebookVariable partDCwVariableFor(String system) {
@@ -337,52 +312,65 @@ public final class PatientResourceProvider implements IResourceProvider {
         "Unsupported extension system: " + cntrctMonth.getVariable().getId().toLowerCase());
   }
 
-  private Long fetchResultCount(CriteriaQuery criteria) {
-    Predicate restriction = criteria.getRestriction();
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
-    countQuery.where(restriction);
-    return entityManager
-        .createQuery(countQuery.select(builder.count(countQuery.from(Beneficiary.class))))
-        .getSingleResult();
-  }
-
+  /**
+   * Fetch beneficiaries for the PartD coverage parameter
+   *
+   * @param coverageId coverage type
+   * @param includedIdentifiers list from the includeIdentifier header
+   * @param paging specified
+   * @return the beneficiaries
+   */
   private List<Beneficiary> fetchBeneficiaries(
-      CriteriaQuery criteria, OffsetLinkBuilder pagingArgs) {
-    Query query = entityManager.createQuery(criteria);
+      TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
+    List<SetAttribute<Beneficiary, ?>> withRelations = new LinkedList<>();
+    if (hasHICN(includedIdentifiers)) withRelations.add(Beneficiary_.beneficiaryHistories);
+    if (hasMBI(includedIdentifiers)) withRelations.add(Beneficiary_.medicareBeneficiaryIdHistories);
 
-    if (pagingArgs.isPagingRequested()) {
-      query.setFirstResult(pagingArgs.getStartIndex());
-      query.setMaxResults(pagingArgs.getPageSize());
-    }
+    String contractMonth =
+        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
+    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
+    SingularAttribute<Beneficiary, String> contractMonthField = partDFieldFor(partDContractMonth);
+    String contractCode = coverageId.getValueNotNull();
 
-    return query.getResultList();
+    CriteriaQuery<Beneficiary> criteria =
+        queryBeneficiariesBy(contractMonthField, contractCode, paging, withRelations);
+    return entityManager.createQuery(criteria).setMaxResults(paging.getPageSize()).getResultList();
   }
 
-  private CriteriaQuery queryBeneficiariesBy(
-      SingularAttribute<Beneficiary, String> field, String value) {
-    List<SetAttribute<Beneficiary, ?>> withRelations =
-        new LinkedList<SetAttribute<Beneficiary, ?>>();
-    return queryBeneficiariesBy(field, value, withRelations);
-  }
-
-  private CriteriaQuery queryBeneficiariesBy(
+  /**
+   * Build a criteria for a general Beneficiary query
+   *
+   * @param field to match on
+   * @param value to match on
+   * @param paging to use for the result set
+   * @param joins to add for many-to-one relations
+   * @return the criteria
+   */
+  private CriteriaQuery<Beneficiary> queryBeneficiariesBy(
       SingularAttribute<Beneficiary, String> field,
       String value,
-      List<SetAttribute<Beneficiary, ?>> relations) {
+      PatientLinkBuilder paging,
+      List<SetAttribute<Beneficiary, ?>> joins) {
 
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
-    Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
-    relations.stream()
-        .forEach(
-            f -> {
-              beneMatchesRoot.fetch(f, JoinType.LEFT);
-            });
-    beneMatches.select(beneMatchesRoot);
-    beneMatches.where(builder.equal(beneMatchesRoot.get(field), value));
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Beneficiary> criteria = cb.createQuery(Beneficiary.class);
+    Root<Beneficiary> b = criteria.from(Beneficiary.class);
+    joins.forEach(f -> b.fetch(f, JoinType.LEFT));
 
-    return beneMatches;
+    if (paging.isPagingRequested() && !paging.isFirstPage()) {
+      return criteria
+          .select(b)
+          .where(
+              cb.and(
+                  cb.equal(b.get(field), value),
+                  cb.greaterThan(b.get("beneficiaryId"), paging.getCursor())))
+          .orderBy(cb.asc(b.get("beneficiaryId")));
+    } else {
+      return criteria
+          .select(b)
+          .where(cb.equal(b.get(field), value))
+          .orderBy(cb.asc(b.get("beneficiaryId")));
+    }
   }
 
   /**
@@ -758,5 +746,30 @@ public final class PatientResourceProvider implements IResourceProvider {
    */
   public static boolean hasMBI(List<String> includeIdentifiersValues) {
     return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
+  }
+
+  /**
+   * Check that coverageId value is valid
+   *
+   * @param coverageId
+   * @throws InvalidRequestException if invalid coverageId
+   */
+  public static void checkCoverageId(TokenParam coverageId) {
+    if (coverageId.getQueryParameterQualifier() != null)
+      throw new InvalidRequestException(
+          "Unsupported query parameter qualifier: " + coverageId.getQueryParameterQualifier());
+    if (coverageId.getValueNotNull().length() != 5)
+      throw new InvalidRequestException(
+          "Unsupported query parameter value: " + coverageId.getValueNotNull());
+  }
+
+  /**
+   * Check that the page size is valid
+   *
+   * @param paging to check
+   */
+  public static void checkPageSize(LinkBuilder paging) {
+    if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
+    if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
   }
 }
