@@ -25,7 +25,6 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
@@ -1717,7 +1716,6 @@ public final class PatientResourceProviderIT {
     Assert.assertFalse(mbiUnhashedPresent);
   }
 
-  @Ignore
   @Test
   public void searchForPatientByPartDContractNumWithPaging() {
     List<Object> loadedRecords =
@@ -1736,7 +1734,7 @@ public final class PatientResourceProviderIT {
                         TransformerUtils.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
-            .count(1)
+            .count(10)
             .returnBundle(Bundle.class)
             .execute();
 
@@ -1749,8 +1747,6 @@ public final class PatientResourceProviderIT {
      */
     Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
     Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_PREVIOUS));
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_LAST));
   }
 
   @Test
