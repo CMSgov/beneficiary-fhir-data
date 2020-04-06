@@ -271,8 +271,10 @@ public final class PatientResourceProvider implements IResourceProvider {
                 })
             .collect(Collectors.toList());
 
-    return TransformerUtils.createBundle(
-        patients, paging, loadedFilterManager.getTransactionTime());
+    Bundle bundle =
+        TransformerUtils.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
+    TransformerUtils.workAroundHAPIIssue1985(requestDetails);
+    return bundle;
   }
 
   private CcwCodebookVariable partDCwVariableFor(String system) {

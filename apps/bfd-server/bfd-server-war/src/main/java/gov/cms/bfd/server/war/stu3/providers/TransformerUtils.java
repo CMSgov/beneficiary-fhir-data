@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -2955,50 +2957,11 @@ public final class TransformerUtils {
   }
 
   /**
-   * Create a bundle from one page of resources
-   *
-   * @param paging a {@link OffsetLinkBuilder} used to determine if paging is requested and the
-   *     parameters for doing so. The resources list is trimmed to fit the requested page.
-   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
-   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
-   * @param total number of resources in the entire search result
-   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
-   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
-   */
-  public static Bundle createBundle(
-      OffsetLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
-    Bundle bundle = new Bundle();
-
-    if (paging.isPagingRequested()) {
-      paging.setTotal(total).addLinks(bundle);
-    }
-
-    bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
-
-    /*
-     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
-     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
-     * the resources of the bundle may be after the filter manager's version of the timestamp.
-     */
-    Date maxBundleDate =
-        resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
-            .filter(Objects::nonNull)
-            .max(Date::compareTo)
-            .orElse(transactionTime);
-    bundle
-        .getMeta()
-        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
-    bundle.setTotal(total);
-    return bundle;
-  }
-
-  /**
    * Create a bundle from the entire search result
    *
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
-   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
-   * @param paging contains the {@link LinkBuilder} information
+   *     Patient}s, all of which will be added to the bundle
+   * @param paging contains the {@link LinkBuilder} information to add to the bundle
    * @param transactionTime date for the bundle
    * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
@@ -3108,5 +3071,19 @@ public final class TransformerUtils {
             resource.getMeta().setLastUpdated(newDate);
           }
         });
+  }
+
+  /**
+   * Work around https://github.com/jamesagnew/hapi-fhir/issues/1585.
+   *
+   * @param requestDetails of a resource provider
+   */
+  public static void workAroundHAPIIssue1985(RequestDetails requestDetails) {
+    // The hack is to remove the _count parameter from theDetails so that total is not modified.
+    Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
+    if (params.remove(Constants.PARAM_COUNT) != null) {
+      // Remove _count parameter from the current request details
+      requestDetails.setParameters(params);
+    }
   }
 }

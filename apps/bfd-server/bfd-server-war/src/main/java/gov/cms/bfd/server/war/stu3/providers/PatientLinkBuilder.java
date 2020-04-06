@@ -6,6 +6,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
@@ -50,6 +51,10 @@ public final class PatientLinkBuilder implements LinkBuilder {
     if (!isPagingRequested()) return;
 
     to.addLink(
+        new Bundle.BundleLinkComponent()
+            .setRelation(Constants.LINK_SELF)
+            .setUrl(components.toUriString()));
+    to.addLink(
         new Bundle.BundleLinkComponent().setRelation(Constants.LINK_FIRST).setUrl(buildUrl("")));
 
     if (entries.size() == getPageSize() && entries.size() > 0) {
@@ -60,6 +65,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
               .setRelation(Constants.LINK_NEXT)
               .setUrl(buildUrl(lastPatientId)));
     }
+    to.setTotalElement(new UnsignedIntType());
   }
 
   private Integer extractCountParam(UriComponents components) {
