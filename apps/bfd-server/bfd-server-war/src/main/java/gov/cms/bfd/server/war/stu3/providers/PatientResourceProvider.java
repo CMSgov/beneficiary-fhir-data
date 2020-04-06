@@ -248,6 +248,11 @@ public final class PatientResourceProvider implements IResourceProvider {
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
     checkPageSize(paging);
 
+    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    operation.setOption("by", "coverageContract");
+    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    operation.publishOperationName();
+
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
 
