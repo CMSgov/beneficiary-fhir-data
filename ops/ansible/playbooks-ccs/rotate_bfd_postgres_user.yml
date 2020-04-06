@@ -1,11 +1,19 @@
 - hosts: localhost
   vars:
     rds_database: 
-    master_user: 
-    master_pw: 
-    db_user:
-    db_user_pw:
+    master_user: "{{ vault_rds_maser_user }}"
+    master_pw: "{{ vault_rds_master_password }}"
+#    db_user:
+#    db_user_pw:
     rds_region:
+
+    db_users:
+      data_pipeline_db_user: 
+        db_user: "{{ vault_data_pipeline_db_username }}"
+        db_user_pw: "{{ vault_data_pipeline_db_password }}"
+      data_server_db_user:
+        db_user: "{{ vault_data_server_db_username }}"
+        db_user_pw: "{{ vault_data_server_db_password }}"
 
   tasks:
     - name: RDS Gather Facts/Info
@@ -25,5 +33,7 @@
         login_user: "{{ database_info.instances[0].master_username }}"
         login_password: "{{ master_pw }}"
         db: postgres
-        name: "{{ db_user }}"
-        password: "{{ db_user_pw }}"
+        name: "{{ item.value.db_user }}"
+        password: "{{ item.value.db_user_pw }}"
+      with_dict: "{{ db_users }}"
+      no_log: true
