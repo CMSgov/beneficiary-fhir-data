@@ -28,6 +28,21 @@ public class PatientLinkBuilderTest {
   }
 
   @Test
+  public void missingCountTest() {
+    // Missing _count
+    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&cursor=999");
+
+    Assert.assertFalse(paging.isPagingRequested());
+    Assert.assertTrue(paging.isFirstPage());
+    Assert.assertEquals(Integer.MAX_VALUE, paging.getPageSize());
+
+    Bundle bundle = new Bundle();
+    Assert.assertTrue(bundle.getLink().isEmpty());
+    paging.addLinks(bundle);
+    Assert.assertTrue(bundle.getLink().isEmpty());
+  }
+
+  @Test
   public void emptyPageTest() {
     PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=10");
 
@@ -40,6 +55,15 @@ public class PatientLinkBuilderTest {
     paging.addLinks(bundle);
     Assert.assertNotNull(bundle.getLink(Constants.LINK_SELF));
     Assert.assertNotNull(bundle.getLink(Constants.LINK_FIRST));
+  }
+
+  @Test
+  public void emptyCursorTest() {
+    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=10&cursor=");
+
+    Assert.assertTrue(paging.isPagingRequested());
+    Assert.assertTrue(paging.isFirstPage());
+    Assert.assertEquals(10, paging.getPageSize());
   }
 
   @Test

@@ -32,16 +32,12 @@ public final class PatientLinkBuilder implements LinkBuilder {
 
   @Override
   public int getPageSize() {
-    return count == null ? Integer.MAX_VALUE : count;
+    return isPagingRequested() ? count : Integer.MAX_VALUE;
   }
 
   @Override
   public boolean isFirstPage() {
-    return cursor == null;
-  }
-
-  public String getCursor() {
-    return cursor;
+    return cursor == null || !isPagingRequested();
   }
 
   @Override
@@ -64,6 +60,10 @@ public final class PatientLinkBuilder implements LinkBuilder {
               .setRelation(Constants.LINK_NEXT)
               .setUrl(buildUrl(lastPatientId)));
     }
+  }
+
+  public String getCursor() {
+    return cursor;
   }
 
   private Integer extractCountParam(UriComponents components) {
