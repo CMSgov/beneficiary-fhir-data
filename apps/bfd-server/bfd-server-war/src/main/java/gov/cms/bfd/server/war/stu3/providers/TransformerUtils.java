@@ -3076,11 +3076,12 @@ public final class TransformerUtils {
   }
 
   /**
-   * Work around https://github.com/jamesagnew/hapi-fhir/issues/1585.
+   * Work around for https://github.com/jamesagnew/hapi-fhir/issues/1585. HAPI will fill in the
+   * resource count as a total value when a Bundle has no total value.
    *
    * @param requestDetails of a resource provider
    */
-  public static void workAroundHAPIIssue1985(RequestDetails requestDetails) {
+  public static void workAroundHAPIIssue1585(RequestDetails requestDetails) {
     // The hack is to remove the _count parameter from theDetails so that total is not modified.
     Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
     if (params.remove(Constants.PARAM_COUNT) != null) {

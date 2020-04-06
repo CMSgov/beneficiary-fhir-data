@@ -273,7 +273,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     Bundle bundle =
         TransformerUtils.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
-    TransformerUtils.workAroundHAPIIssue1985(requestDetails);
+    TransformerUtils.workAroundHAPIIssue1585(requestDetails);
     return bundle;
   }
 
