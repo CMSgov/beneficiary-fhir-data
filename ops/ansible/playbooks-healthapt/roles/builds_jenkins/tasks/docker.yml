@@ -27,18 +27,18 @@
 # Docker will not automatically pick up the system's HTTP proxy environment
 # variables and has to be configured to use such a proxy separately.
 # Reference: https://docs.docker.com/config/daemon/systemd/#httphttps-proxy
-- name: Configure HTTP Proxy for Docker
-  copy:
-    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
-    content: |
-      [Service]
-      Environment="HTTP_PROXY=http://{{ vault_proxy_host }}:{{ vault_proxy_port }}/" "HTTPS_PROXY=http://{{ vault_proxy_host }}:{{ vault_proxy_port }}/" "NO_PROXY=localhost"
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  become: true
-  notify:
-    - Restart Docker
+# - name: Configure HTTP Proxy for Docker
+#   copy:
+#     dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+#     content: |
+#       [Service]
+#       Environment="HTTP_PROXY=http://{{ vault_proxy_host }}:{{ vault_proxy_port }}/" "HTTPS_PROXY=http://{{ vault_proxy_host }}:{{ vault_proxy_port }}/" "NO_PROXY=localhost"
+#     owner: root
+#     group: root
+#     mode: u=rw,g=r,o=r
+#   become: true
+#   notify:
+#     - Restart Docker
 
 - name: Create Docker Group
   group:

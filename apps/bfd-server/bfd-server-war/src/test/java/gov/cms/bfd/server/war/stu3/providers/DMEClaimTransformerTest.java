@@ -206,5 +206,8 @@ public final class DMEClaimTransformerTest {
         claimLine1.getHctHgbTestResult(),
         claimLine1.getCmsServiceTypeCode(),
         claimLine1.getNationalDrugCode());
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }

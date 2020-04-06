@@ -4,6 +4,8 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.Variable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
+import java.time.Instant;
+import java.util.Date;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
@@ -206,6 +208,13 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/sid/us-medicare";
 
   /**
+   * The {@link Identifier#getSystem()} used in {@link Patient} resources to store a one-way
+   * cryptographic hash of each Medicare beneficiaries' MBI.
+   */
+  public static final String CODING_BBAPI_BENE_MBI_HASH =
+      BASE_URL_BBAPI_RESOURCES + "/identifier/mbi-hash";
+
+  /**
    * The {@link Identifier#getSystem()} used in {@link Patient} resources to store the unhashed
    * version of each Medicare beneficiaries' medicare beneficiary id.
    */
@@ -218,4 +227,10 @@ public final class TransformerConstants {
    */
   static final String CODING_BBAPI_BENE_HICN_HASH_OLD =
       "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
+
+  /**
+   * Fallback value to use when a record does not have a lastUpdated value. These records where
+   * loaded before the lastUpdated feature was in place.
+   */
+  static final Date FALLBACK_LAST_UPDATED = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
 }

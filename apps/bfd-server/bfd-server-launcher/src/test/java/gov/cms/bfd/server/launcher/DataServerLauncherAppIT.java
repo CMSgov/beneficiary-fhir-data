@@ -63,9 +63,10 @@ public final class DataServerLauncherAppIT {
    * Verifies that {@link DataServerLauncherApp} starts up as expected when properly configured
    *
    * @throws IOException (indicates a test error)
+   * @throws InterruptedException
    */
   @Test
-  public void normalUsage() throws IOException {
+  public void normalUsage() throws IOException, InterruptedException {
     ServerProcess serverProcess = null;
     try {
       // Launch the server.
@@ -87,6 +88,11 @@ public final class DataServerLauncherAppIT {
       }
 
       // Verify that the access log is working, as expected.
+      try {
+        TimeUnit.MILLISECONDS.sleep(
+            100); // Needed in some configurations to resolve a race condition
+      } catch (InterruptedException e) {
+      }
       Path accessLog =
           ServerTestUtils.getLauncherProjectDirectory()
               .resolve("target")

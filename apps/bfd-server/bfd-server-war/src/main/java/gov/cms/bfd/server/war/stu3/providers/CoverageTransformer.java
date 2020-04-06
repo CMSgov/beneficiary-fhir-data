@@ -4,6 +4,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ final class CoverageTransformer {
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
    * @return the {@link Coverage} resource that was generated
    */
+  @Trace
   public static Coverage transform(
       MetricRegistry metricRegistry, MedicareSegment medicareSegment, Beneficiary beneficiary) {
     Objects.requireNonNull(medicareSegment);
@@ -47,6 +49,7 @@ final class CoverageTransformer {
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
+  @Trace
   public static List<IBaseResource> transform(
       MetricRegistry metricRegistry, Beneficiary beneficiary) {
     return Arrays.stream(MedicareSegment.values())
@@ -135,6 +138,7 @@ final class CoverageTransformer {
     }
 
     transformEntitlementBuyInIndicators(coverage, beneficiary);
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
@@ -189,6 +193,7 @@ final class CoverageTransformer {
     }
 
     transformEntitlementBuyInIndicators(coverage, beneficiary);
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
@@ -518,6 +523,7 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd()));
     }
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
@@ -937,6 +943,7 @@ final class CoverageTransformer {
               CcwCodebookVariable.RDSIND12,
               beneficiary.getPartDRetireeDrugSubsidyDecInd()));
     }
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;

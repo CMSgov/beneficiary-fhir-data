@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -43,10 +41,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
+@EnableScheduling
 public class SpringConfiguration {
   public static final String PROP_DB_URL = "bfdServer.db.url";
   public static final String PROP_DB_USERNAME = "bfdServer.db.username";
@@ -348,15 +348,5 @@ public class SpringConfiguration {
   public HealthCheckRegistry healthCheckRegistry() {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
-  }
-
-  /**
-   * @return an {@link IServerInterceptor} that will add some pretty syntax highlighting in
-   *     responses when a browser is detected
-   */
-  @Bean
-  public IServerInterceptor responseHighlighterInterceptor() {
-    ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
-    return retVal;
   }
 }

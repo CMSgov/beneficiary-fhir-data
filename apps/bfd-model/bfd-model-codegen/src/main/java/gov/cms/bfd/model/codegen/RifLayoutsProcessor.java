@@ -9,6 +9,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -28,6 +29,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -63,6 +65,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -184,7 +188,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("Beneficiaries")
               .setHeaderEntityIdField("beneficiaryId")
               .setHeaderEntityAdditionalDatabaseFields(
-                  createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
+                  createDetailsForAdditionalDatabaseFields(
+                      Arrays.asList("hicnUnhashed", "mbiHash")))
               .setInnerJoinRelationship(
                   Arrays.asList(
                       new InnerJoinRelationship(
@@ -224,7 +229,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   "nameMiddleInitial")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
-                      Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
+                      Arrays.asList("hicnUnhashed", "mbiHash")))
               .setHasLines(false));
 
       mappingSpecs.add(
@@ -316,6 +321,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     generate source files.
    */
   private void generateCode(MappingSpec mappingSpec) throws IOException {
+    logNote("Generated code for %s", mappingSpec.getRifLayout().getName());
+
     /*
      * First, create the Java enum for the RIF columns.
      */
@@ -553,6 +560,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         TypeSpec.classBuilder(mappingSpec.getHeaderEntity())
             .addAnnotation(entityAnnotation)
             .addAnnotation(tableAnnotation)
+            .addSuperinterface(ClassName.get("gov.cms.bfd.model.rif", "RifRecordBase"))
             .addModifiers(Modifier.PUBLIC);
 
     // Create an Entity field with accessors for the generated-ID field (if any).
@@ -746,6 +754,35 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         headerEntityClass.addMethod(childGetter);
       }
     }
+
+    // Add a lastUpdated field.
+    final FieldSpec lastUpdatedField =
+        FieldSpec.builder(Date.class, "lastUpdated", Modifier.PRIVATE)
+            .addAnnotation(
+                AnnotationSpec.builder(Temporal.class)
+                    .addMember("value", "$T.TIMESTAMP", TemporalType.class)
+                    .build())
+            .build();
+    headerEntityClass.addField(lastUpdatedField);
+
+    // Getter method
+    final MethodSpec lastUpdatedGetter =
+        MethodSpec.methodBuilder("getLastUpdated")
+            .addModifiers(Modifier.PUBLIC)
+            .addStatement("return Optional.ofNullable(lastUpdated)")
+            .returns(ParameterizedTypeName.get(Optional.class, Date.class))
+            .build();
+    headerEntityClass.addMethod(lastUpdatedGetter);
+
+    // Setter method which is useful for testing, but not needed in the main modules
+    final MethodSpec lastUpdatedSetter =
+        MethodSpec.methodBuilder("setLastUpdated")
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(ParameterSpec.builder(Date.class, "lastUpdated").build())
+            .addStatement("this.lastUpdated = lastUpdated")
+            .returns(TypeName.VOID)
+            .build();
+    headerEntityClass.addMethod(lastUpdatedSetter);
 
     TypeSpec headerEntityFinal = headerEntityClass.build();
     JavaFile headerEntityFile =
@@ -1291,18 +1328,18 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         addlDatabaseFields.add(hicnUnhashed);
         continue;
       }
-      if (additionalDatabaseField.contentEquals("medicareBeneficiaryId")) {
-        RifField medicareBeneficiaryId =
+      if (additionalDatabaseField.contentEquals("mbiHash")) {
+        RifField mbiHash =
             new RifField(
                 "MBI_NUM",
                 RifColumnType.CHAR,
-                Optional.of(11),
+                Optional.of(64),
                 Optional.of(0),
                 Boolean.TRUE,
-                new URL(DATA_DICTIONARY_LINK + "mbinum"),
+                new URL(DATA_DICTIONARY_LINK + "mbiHash"),
                 "MBI_NUM",
-                "medicareBeneficiaryId");
-        addlDatabaseFields.add(medicareBeneficiaryId);
+                "mbiHash");
+        addlDatabaseFields.add(mbiHash);
         continue;
       }
     }

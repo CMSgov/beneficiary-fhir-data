@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
+import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -12,14 +13,22 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer}. */
 public final class OutpatientClaimTransformerTest {
+  private static final org.slf4j.Logger LOGGER =
+      LoggerFactory.getLogger(OutpatientClaimTransformerTest.class);
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
@@ -41,6 +50,67 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
     assertMatches(claim, eob);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SYNTHETIC_OUTPATIENT_1999_1999} {@link
+   * OutpatientClaim}.
+   *
+   * <p>Note: This test is normally disabled like other synthetic data tests
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Ignore
+  @Test
+  public void transformSyntheticRecord() throws FHIRException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResource.SYNTHETIC_OUTPATIENT_1999_1999));
+    OutpatientClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof OutpatientClaim)
+            .map(r -> (OutpatientClaim) r)
+            .findFirst()
+            .get();
+
+    ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
+    assertMatches(claim, eob);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform(Object)} works as
+   * expected when run against all synthetic data outpatient claims
+   *
+   * <p>Note: This test is normally disabled like other synthetic data tests. It will take 20
+   * minutes or more to run.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Ignore
+  @Test
+  public void transformAllSyntheticRecords() throws FHIRException {
+    List<StaticRifResource> outpatientSyntheticFiles =
+        Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()).stream()
+            .filter(r -> r.getRifFileType().equals(RifFileType.OUTPATIENT))
+            .collect(Collectors.toList());
+
+    List<Object> parsedRecords = ServerTestUtils.parseData(outpatientSyntheticFiles);
+
+    parsedRecords.stream()
+        .filter(r -> r instanceof OutpatientClaim)
+        .map(r -> (OutpatientClaim) r)
+        .forEach(
+            claim -> {
+              LOGGER.info(
+                  "Running at Bene-Id: {}, Claim-Id: {}",
+                  claim.getBeneficiaryId(),
+                  claim.getClaimId());
+              ExplanationOfBenefit eob =
+                  OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
+              assertMatches(claim, eob);
+            });
   }
 
   /**
@@ -106,21 +176,27 @@ public final class OutpatientClaimTransformerTest {
         claim.getPrimaryPayerPaidAmount(),
         claim.getFiscalIntermediaryNumber());
 
-    Assert.assertEquals(5, eob.getDiagnosis().size());
+    Assert.assertTrue(
+        "Expect actual diagnosis count is less than or equal to the claim count",
+        countDiagnosisCodes(claim) >= eob.getDiagnosis().size());
 
-    Assert.assertEquals(1, eob.getProcedure().size());
-    CCWProcedure ccwProcedure =
-        new CCWProcedure(
-            claim.getProcedure1Code(), claim.getProcedure1CodeVersion(), claim.getProcedure1Date());
-    TransformerTestUtils.assertHasCoding(
-        ccwProcedure.getFhirSystem().toString(),
-        claim.getProcedure1Code().get(),
-        eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
-    Assert.assertEquals(
-        Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        eob.getProcedure().get(0).getDate());
+    if (claim.getProcedure1Code().isPresent()) {
+      CCWProcedure ccwProcedure =
+          new CCWProcedure(
+              claim.getProcedure1Code(),
+              claim.getProcedure1CodeVersion(),
+              claim.getProcedure1Date());
+      TransformerTestUtils.assertHasCoding(
+          ccwProcedure.getFhirSystem().toString(),
+          claim.getProcedure1Code().get(),
+          eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
+      Assert.assertEquals(
+          Date.from(
+              claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+          eob.getProcedure().get(0).getDate());
+    }
 
-    Assert.assertEquals(1, eob.getItem().size());
+    Assert.assertTrue("Expect actual item count is above 0", 1 <= eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     OutpatientClaimLine claimLine1 = claim.getLines().get(0);
     Assert.assertEquals(
@@ -234,5 +310,33 @@ public final class OutpatientClaimTransformerTest {
         CcwCodebookVariable.REV_CNTR_STUS_IND_CD,
         claimLine1.getStatusCode(),
         eobItem0.getRevenue());
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
+  }
+
+  public static long countDiagnosisCodes(OutpatientClaim claim) {
+    Stream<String> methodNames =
+        Stream.concat(
+            Stream.concat(
+                IntStream.range(1, 26).mapToObj(i -> "getDiagnosis" + i + "Code"),
+                IntStream.range(1, 5).mapToObj(i -> "getDiagnosisAdmission" + i + "Code")),
+            Stream.concat(
+                IntStream.range(1, 16).mapToObj(i -> "getDiagnosisExternal" + i + "Code"),
+                Stream.of("getDiagnosisPrincipalCode", "getDiagnosisExternalFirstCode")));
+
+    return methodNames
+        .filter(
+            methodName -> {
+              try {
+                // invoke the claim.getDiagnosisXXCode() method
+                final Optional<String> optional =
+                    (Optional<String>) claim.getClass().getDeclaredMethod(methodName).invoke(claim);
+                return optional.isPresent();
+              } catch (Exception e) {
+                return false;
+              }
+            })
+        .count();
   }
 }

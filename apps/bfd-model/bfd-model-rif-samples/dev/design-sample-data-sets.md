@@ -11,6 +11,7 @@ Some notes:
     * Sample/test values for the following fields should be negative (i.e. prefixed with a "`-`"): `BENE_ID`, `CLM_ID`, `PDE_ID`, `CLM_GRP_ID`.
     * Sample/test values for `BENE_CRNT_HIC_NUM` (i.e. HICNs) should follow the following pattern, which is used by CMS' Next Generation Desktop (NGD) system for sample/test data: `MBPnnnnnnA` (where "`n`" is a numeric digit).
         * At this time, NGD is known to have exactly the following sample/test HICNs loaded in (at least) some of its lower environments: `MBP000201A`, `MBP000202A`, `MBP000203A`, `MBP000204A`, `MBP000207A`, `MBP000208A`, `MBP000209A`, `MBP000210A`.
+    * Synthetic MBIs use an `S` in the second character. This is a forbidden value for a real MBI. 
     * Note that most of our sample/test data sets do not yet conform to this best practice.
 3. Ideally, all sample data beneficiary and claim identifiers will be unique when compared to each other and also when compared to production data. This allows for arbitrary subsets of sample data to be deployed into development, test, and production environments.
     * It's very important to have "safe" sample/test data in production! This enables all sorts of best practices around testing code in its actual habitat.
@@ -44,6 +45,47 @@ The following table details the ideal/desired key ranges for all known sample an
 |Random      |`T10000000A` - `T99999999A`                                           |`-10000000` - `-99999999`|`-1000000000` - `-999999999999`|`-1000000000` - `-999999999999`|
 |Synthetic   |`T01000000A` - `T01999999A`                                           | `-1000000` -  `-1999999`| `-100000000` -    `-199999999`| `-100000000` -    `-199999999`|
 |`SAMPLE_MCT`|HICNs: `MBP000201A` - `MBP000210A`, RRBs: `{0099190316`, `B3499290814`|     `-201` -      `-212`|       `-240` -          `-285`|       `-240` -          `-285`|
+
+## Procedures to Load Data 
+
+### Local Dev
+
+The synthetic data set can be loaded to a local Postgres database. An HSQL database
+**cannot** be used. The `RifLoaderIT#loadSyntheticData` test will load the synthetic data set. 
+Normally, this test is marked with `@Ignore` because it will take as much as 20 minutes to run. 
+
+```$xslt
+mvn -Dits.db.url=jdbc:postgresql://localhost:5432/fhir -Dit.test=RifLoaderIT#loadSyntheticData clean install
+```
+
+When adding test new synthetic data, developers should create new integration tests for the new data. 
+The `OutpatientClaimTransformerTest.transformSyntheticData` is a good model to follow for this type of test. 
+
+### TEST, PROD-SBX, and PROD
+
+Before loading data into an environment, ensure that the data loads and works in your local environment. 
+Experience from outages has shown that engineers should test every record that is being loaded, not a sample of records. 
+
+To manually load data into an environment, one essentially needs to duplicate the process that the CCW does for its weekly drop of RIF files. 
+Every ETL service monitors an S3 bucket for incoming RIF files. 
+The buckets used in the CCS account are:
+
+| Environment | Bucket         |
+|-------------|-------------------------|
+| Test        | bfd-test-etl-577373831711 |
+| Prod-Sbx    | bfd-prod-sbx-etl-577373831711 |
+| Prod        | bfd-prod-etl-577373831711 |
+
+In each of these buckets there are two special directories: `Done` and `Incoming`. 
+The `Incoming` directory further contains a subdirectory that holds the data for a single data load. 
+The name of this subdirectory must match the timestamp in the manifest file. 
+
+In the subdirectory, there are two types of files: RIF files which hold the data records to be loaded and manifest files which point the RIF files.
+Each manifest file follows the naming convention of `<sequenceId>_manifest.xml` where `sequenceId` is the must match the `sequenceId` found in the manifest file. 
+After the ETL service processes a manifest file in the `Incoming` directory, it writes the RIF file and the manifest file into the `Done` directory.
+After all incoming files are processed, the `Incoming` directory is deleted. 
+
+The `bfd-prod-etl-577373831711` bucket is a good place to find examples of manifest files and data load subdirectories. 
 
 ## Sample Data Set Details
 
@@ -158,10 +200,83 @@ It was created via the following process:
         https://s3.amazonaws.com/gov-hhs-cms-bluebutton-sandbox-etl-test-data/data-synthetic/2017-11-27T00%3A00%3A00.000Z-fixed-with-negative-ids/synthetic-pde-2016.rif
     ```
 
+4. A random MBIs were generated for each synthetic beneficiary. 
+These MBI's have a `S` in as their second character to distinguish them from real MBIs. 
+With a change in AWS accounts for the BFD project, the synthetic data set was moved to a different S3 bucket: `bfd-public-test-data` 
 
+   ```
+    $ wget \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/0_manifest.xml \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-beneficiary-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-beneficiary-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-beneficiary-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-1999-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-1999-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-2000-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-2000-2002.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-2014-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-carrier-2014-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-1999-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-1999-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-2000-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-2000-2002.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-2014-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-inpatient-2014-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-pde-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-pde-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-1-25-mbi-with-negative-ids/synthetic-pde-2016.rif
+   ```
+    
+5. A set of Outpatient claims were generated and added to the synthetic data set. 
+The source data is kept in a team Keybase folder. 
+All the fixups on the source data that was performed are documented in the `ops/ccs-ops-misc/synthetic-data/scripts/outpatient/convert_outpatient_claims_csv_file_to_rif.py` script.
+
+   ``` 
+     $ wget \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/0_manifest.xml \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-beneficiary-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-beneficiary-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-beneficiary-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-1999-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-1999-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-2000-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-2000-2002.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-2014-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-carrier-2014-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-1999-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-1999-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-2000-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-2000-2002.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-2014-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-inpatient-2014-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-pde-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-pde-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-pde-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2000-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2001-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2001-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2002-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2015-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2016-2014.rif
+   ```     
 The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/beneficiary-fhir-data:bfd-model-rif-samples/dev](./).
 
-It's important to note that the synthetic data set does not yet cover all supported claim types: it has carrier claims, inpatient claims, and Part D events but does not have DME claims, HHA claims, hospice claims, outpatient claims, or SNF claims. The synthetic data set has the following counts, by record type:
+It's important to note that the synthetic data set does not yet cover all supported claim types: it has carrier claims, inpatient claims, outpatient claims, and Part D events but does not have DME claims, HHA claims, hospice claims, or SNF claims. The synthetic data set has the following counts, by record type:
 
 |Record Type|Count|
 |---|---|
@@ -169,6 +284,7 @@ It's important to note that the synthetic data set does not yet cover all suppor
 |Carrier CLaims|1744920|
 |Inpatient Claims|70212|
 |Part D Events|413347|
+|Outpatient Claims|171144|
 
 ### `SAMPLE_MCT`: MCT-Compatible Test Data (Derived from Synthetic)
 

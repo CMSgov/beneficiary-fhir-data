@@ -221,9 +221,10 @@ public final class PartDEventTransformerTest {
           CcwCodebookVariable.SUBMSN_CLR_CD,
           claim.getSubmissionClarificationCode(),
           eob);
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "Childrens Acetaminophen Cherry - ACETAMINOPHEN");
+          claim.getNationalDrugCode(), "Childrens Acetaminophen - ACETAMINOPHEN");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

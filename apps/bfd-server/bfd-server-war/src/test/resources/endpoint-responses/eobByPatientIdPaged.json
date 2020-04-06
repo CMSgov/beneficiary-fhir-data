@@ -20,6 +20,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "outpatient-1234567890",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt",
         "valueMoney" : {
@@ -351,7 +354,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-06:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -631,6 +634,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "dme-2188888888",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
         "id" : "1",
@@ -888,8 +894,8 @@
           "url" : "http://hl7.org/fhir/sid/ndc",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "46122005000",
-            "display" : "Childrens Acetaminophen Cherry - ACETAMINOPHEN"
+            "code" : "49035044700",
+            "display" : "Childrens Acetaminophen - ACETAMINOPHEN"
           }
         } ],
         "sequence" : 1,
@@ -1117,6 +1123,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "hha-2925555555",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
@@ -1526,6 +1535,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "inpatient-333333222222",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
         "valueMoney" : {
@@ -2083,7 +2095,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-06:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2092,7 +2104,7 @@
         }
       }, {
         "sequence" : 2,
-        "date" : "2016-01-16T00:00:00-06:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2101,7 +2113,7 @@
         }
       }, {
         "sequence" : 3,
-        "date" : "2016-01-15T00:00:00-06:00",
+        "date" : "2016-01-15T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2110,7 +2122,7 @@
         }
       }, {
         "sequence" : 4,
-        "date" : "2016-01-17T00:00:00-06:00",
+        "date" : "2016-01-17T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2119,7 +2131,7 @@
         }
       }, {
         "sequence" : 5,
-        "date" : "2016-01-24T00:00:00-06:00",
+        "date" : "2016-01-24T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2128,7 +2140,7 @@
         }
       }, {
         "sequence" : 6,
-        "date" : "2016-01-24T00:00:00-06:00",
+        "date" : "2016-01-24T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2277,6 +2289,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "snf-777777777",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
         "valueMoney" : {
@@ -2746,7 +2761,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-06:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
@@ -2886,6 +2901,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "pde-89",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/pde_id",
         "value" : "89"
@@ -3166,8 +3184,8 @@
         "service" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "46122005000",
-            "display" : "Childrens Acetaminophen Cherry - ACETAMINOPHEN"
+            "code" : "49035044700",
+            "display" : "Childrens Acetaminophen - ACETAMINOPHEN"
           } ]
         },
         "servicedDate" : "2015-05-12",
@@ -3328,6 +3346,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "carrier-9991831999",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "contained" : [ {
         "resourceType" : "ReferralRequest",
         "id" : "1",
@@ -3610,8 +3631,8 @@
           "url" : "http://hl7.org/fhir/sid/ndc",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "46122005000",
-            "display" : "Childrens Acetaminophen Cherry - ACETAMINOPHEN"
+            "code" : "49035044700",
+            "display" : "Childrens Acetaminophen - ACETAMINOPHEN"
           }
         } ],
         "sequence" : 6,
@@ -3834,6 +3855,9 @@
     "resource" : {
       "resourceType" : "ExplanationOfBenefit",
       "id" : "hospice-9992223422",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {

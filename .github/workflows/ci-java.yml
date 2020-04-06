@@ -1,0 +1,41 @@
+name: 'CI - Java'
+on: pull_request
+jobs:
+  mvn-job:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java_version: [1.8]
+        mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
+    steps:
+      - name: 'Configure AWS credentials'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GA_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GA_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java_version }}
+      - name: 'Generate maven toolchain config'
+        run: |
+          cat << EOF > ~/.m2/toolchains.xml
+          <toolchains>
+            <toolchain>
+              <type>jdk</type>
+              <provides>
+                <version>${{ matrix.java_version }}</version>
+                <vendor>OpenJDK</vendor>
+              </provides>
+              <configuration>
+                <jdkHome>$JAVA_HOME</jdkHome>
+              </configuration>
+            </toolchain>
+          </toolchains>
+          EOF
+      - name: 'Run maven ${{ matrix.mvn_commmand }}'
+        run: mvn ${{ matrix.mvn_command }}
+        working-directory: ./apps

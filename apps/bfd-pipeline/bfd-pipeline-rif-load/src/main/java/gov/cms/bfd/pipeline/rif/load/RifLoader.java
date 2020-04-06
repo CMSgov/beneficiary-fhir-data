@@ -12,11 +12,15 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimCsvWriter;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.model.rif.LoadedBatch;
+import gov.cms.bfd.model.rif.LoadedBatchBuilder;
+import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RecordAction;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rif.load.RifRecordLoadResult.LoadAction;
@@ -29,9 +33,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +58,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -79,6 +87,8 @@ public final class RifLoader implements AutoCloseable {
    */
   private static final int RECORD_BATCH_SIZE = 100;
 
+  private static final Period MAX_FILE_AGE_DAYS = Period.ofDays(40);
+
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoader.class);
   private static final Logger LOGGER_RECORD_COUNTS =
       LoggerFactory.getLogger(RifLoader.class.getName() + ".recordCounts");
@@ -88,6 +98,7 @@ public final class RifLoader implements AutoCloseable {
   private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final SecretKeyFactory secretKeyFactory;
+  private final RifLoaderIdleTasks idleTasks;
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -105,6 +116,17 @@ public final class RifLoader implements AutoCloseable {
     this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
     this.secretKeyFactory = createSecretKeyFactory();
+    this.idleTasks =
+        new RifLoaderIdleTasks(options, appMetrics, entityManagerFactory, secretKeyFactory);
+  }
+
+  /**
+   * Get the IdleTask manager associated with this loader. Useful for testing.
+   *
+   * @return the RifLoaderIdleTasks associated with this
+   */
+  public RifLoaderIdleTasks getIdleTasks() {
+    return idleTasks;
   }
 
   /**
@@ -240,6 +262,11 @@ public final class RifLoader implements AutoCloseable {
     return result.get();
   }
 
+  /** Do the idle tasks on the database. */
+  public void doIdleTask() {
+    idleTasks.doIdleTask();
+  }
+
   /**
    * Consumes the input {@link Stream} of {@link RifRecordEvent}s, pushing each {@link
    * RifRecordEvent}'s record to the database, and passing the result for each of those bundles to
@@ -295,6 +322,15 @@ public final class RifLoader implements AutoCloseable {
               }
             });
 
+    // Trim the LoadedFiles & LoadedBatches table
+    trimLoadedFiles(errorHandler);
+
+    // Insert a LoadedFiles entry
+    final long loadedFileId = insertLoadedFile(dataToLoad.getSourceEvent(), errorHandler);
+    if (loadedFileId < 0) {
+      return; // Something went wrong, the error handler was called.
+    }
+
     /*
      * Design history note: Initially, this function just returned a stream
      * of CompleteableFutures, which seems like the obvious choice.
@@ -319,7 +355,13 @@ public final class RifLoader implements AutoCloseable {
              * pending. That's desirable behavior, as it prevents
              * OutOfMemoryErrors.
              */
-            processAsync(loadExecutor, recordsBatch, postgresBatch, resultHandler, errorHandler);
+            processAsync(
+                loadExecutor,
+                recordsBatch,
+                loadedFileId,
+                postgresBatch,
+                resultHandler,
+                errorHandler);
           };
 
       // Collect records into batches and submit each to batchProcessor.
@@ -366,6 +408,7 @@ public final class RifLoader implements AutoCloseable {
   /**
    * @param loadExecutor the {@link BlockingThreadPoolExecutor} to use for asynchronous load tasks
    * @param recordsBatch the {@link RifRecordEvent}s to process
+   * @param loadedFileBuilder the builder for the {@LoadedFiled} associated with this batch
    * @param postgresBatch the {@link PostgreSqlCopyInserter} for the current set of {@link
    *     RifFilesEvent}s being processed
    * @param resultHandler the {@link Consumer} to notify when the batch completes successfully
@@ -374,13 +417,15 @@ public final class RifLoader implements AutoCloseable {
   private void processAsync(
       BlockingThreadPoolExecutor loadExecutor,
       List<RifRecordEvent<?>> recordsBatch,
+      long loadedFileId,
       PostgreSqlCopyInserter postgresBatch,
       Consumer<RifRecordLoadResult> resultHandler,
       Consumer<Throwable> errorHandler) {
     loadExecutor.submit(
         () -> {
           try {
-            List<RifRecordLoadResult> processResults = process(recordsBatch, postgresBatch);
+            List<RifRecordLoadResult> processResults =
+                process(recordsBatch, loadedFileId, postgresBatch);
             processResults.forEach(resultHandler::accept);
           } catch (Throwable e) {
             errorHandler.accept(e);
@@ -390,12 +435,15 @@ public final class RifLoader implements AutoCloseable {
 
   /**
    * @param recordsBatch the {@link RifRecordEvent}s to process
+   * @param loadedFileBuilder the builder for the {@LoadedFile} associated with this batch
    * @param postgresBatch the {@link PostgreSqlCopyInserter} for the current set of {@link
    *     RifFilesEvent}s being processed
    * @return the {@link RifRecordLoadResult}s that model the results of the operation
    */
   private List<RifRecordLoadResult> process(
-      List<RifRecordEvent<?>> recordsBatch, PostgreSqlCopyInserter postgresBatch) {
+      List<RifRecordEvent<?>> recordsBatch,
+      long loadedFileId,
+      PostgreSqlCopyInserter postgresBatch) {
     RifFileEvent fileEvent = recordsBatch.get(0).getFileEvent();
     MetricRegistry fileEventMetrics = fileEvent.getEventMetrics();
 
@@ -403,11 +451,15 @@ public final class RifLoader implements AutoCloseable {
 
     // If these are Beneficiary records, first hash their HICNs.
     if (rifFileType == RifFileType.BENEFICIARY) {
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         hashBeneficiaryHicn(fileEventMetrics, rifRecordEvent);
+        hashBeneficiaryMbi(fileEventMetrics, rifRecordEvent);
+      }
     } else if (rifFileType == RifFileType.BENEFICIARY_HISTORY) {
-      for (RifRecordEvent<?> rifRecordEvent : recordsBatch)
+      for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         hashBeneficiaryHistoryHicn(fileEventMetrics, rifRecordEvent);
+        hashBeneficiaryHistoryMbi(fileEventMetrics, rifRecordEvent);
+      }
     }
 
     // Only one of each failure/success Timer.Contexts will be applied.
@@ -425,21 +477,35 @@ public final class RifLoader implements AutoCloseable {
             .time();
 
     EntityManager entityManager = null;
+    EntityTransaction txn = null;
 
     // TODO: refactor the following to be less of an indented mess
     try {
       entityManager = entityManagerFactory.createEntityManager();
-      entityManager.getTransaction().begin();
-
+      txn = entityManager.getTransaction();
+      txn.begin();
       List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
+
+      /*
+       * Dev Note: All timestamps of records in the batch and the LoadedBatch must be the same for data consistency.
+       * The timestamp from the LoadedBatchBuilder is used.
+       */
+      LoadedBatchBuilder loadedBatchBuilder =
+          new LoadedBatchBuilder(loadedFileId, recordsBatch.size());
       for (RifRecordEvent<?> rifRecordEvent : recordsBatch) {
         RecordAction recordAction = rifRecordEvent.getRecordAction();
-        Object record = rifRecordEvent.getRecord();
+        RifRecordBase record = rifRecordEvent.getRecord();
 
         LOGGER.trace("Loading '{}' record.", rifFileType);
+
+        // Set lastUpdated to the same value for the whole batch
+        record.setLastUpdated(loadedBatchBuilder.getTimestamp());
+
+        // Associate the beneficiary with this file loaded
+        loadedBatchBuilder.associateBeneficiary(rifRecordEvent.getBeneficiaryId());
+
         LoadStrategy strategy = selectStrategy(recordAction);
         LoadAction loadAction;
-
         if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
           // Check to see if record already exists.
           Timer.Context timerIdempotencyQuery =
@@ -470,7 +536,8 @@ public final class RifLoader implements AutoCloseable {
              * current/previous state as a BeneficiaryHistory record.
              */
             if (record instanceof Beneficiary) {
-              updateBeneficaryHistory(entityManager, (Beneficiary) record);
+              updateBeneficaryHistory(
+                  entityManager, (Beneficiary) record, loadedBatchBuilder.getTimestamp());
             }
 
             entityManager.merge(record);
@@ -489,8 +556,10 @@ public final class RifLoader implements AutoCloseable {
 
         loadResults.add(new RifRecordLoadResult(rifRecordEvent, loadAction));
       }
+      LoadedBatch loadedBatch = loadedBatchBuilder.build();
+      entityManager.persist(loadedBatch);
 
-      entityManager.getTransaction().commit();
+      txn.commit();
 
       // Update the metrics now that things have been pushed.
       timerBatchSuccess.stop();
@@ -512,8 +581,7 @@ public final class RifLoader implements AutoCloseable {
        * ensure that the failing data is captured.
        */
       try {
-        if (entityManager != null && entityManager.getTransaction().isActive())
-          entityManager.getTransaction().rollback();
+        if (txn != null && txn.isActive()) txn.rollback();
       } catch (Throwable t) {
         timerBundleFailure.stop();
         fileEventMetrics
@@ -534,9 +602,10 @@ public final class RifLoader implements AutoCloseable {
    *
    * @param entityManager the {@link EntityManager} to use
    * @param newBeneficiaryRecord the {@link Beneficiary} record being processed
+   * @param batchTimestamp the timestamp of the batch
    */
   private static void updateBeneficaryHistory(
-      EntityManager entityManager, Beneficiary newBeneficiaryRecord) {
+      EntityManager entityManager, Beneficiary newBeneficiaryRecord, Date batchTimestamp) {
     Beneficiary oldBeneficiaryRecord =
         entityManager.find(Beneficiary.class, newBeneficiaryRecord.getBeneficiaryId());
 
@@ -548,8 +617,101 @@ public final class RifLoader implements AutoCloseable {
       oldBeneCopy.setHicnUnhashed(oldBeneficiaryRecord.getHicnUnhashed());
       oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
       oldBeneCopy.setMedicareBeneficiaryId(oldBeneficiaryRecord.getMedicareBeneficiaryId());
+      oldBeneCopy.setLastUpdated(batchTimestamp);
 
       entityManager.persist(oldBeneCopy);
+    }
+  }
+
+  /**
+   * Insert the LoadedFile into the database
+   *
+   * @param fileEvent to base this new LoadedFile
+   * @param errorHandler to call if something bad happens
+   * @return the loadedFileId of the new LoadedFile record
+   */
+  private long insertLoadedFile(RifFileEvent fileEvent, Consumer<Throwable> errorHandler) {
+    if (fileEvent == null || fileEvent.getFile().getFileType() == null) {
+      throw new IllegalArgumentException();
+    }
+
+    final LoadedFile loadedFile = new LoadedFile();
+    loadedFile.setRifType(fileEvent.getFile().getFileType().toString());
+    loadedFile.setCreated(new Date());
+
+    try {
+      EntityManager em = entityManagerFactory.createEntityManager();
+      EntityTransaction txn = null;
+      try {
+        // Insert the passed in loaded file
+        txn = em.getTransaction();
+        txn.begin();
+        em.persist(loadedFile);
+        txn.commit();
+        LOGGER.info(
+            "Inserting LoadedFile {} of type {} created at {}",
+            loadedFile.getLoadedFileId(),
+            loadedFile.getRifType(),
+            loadedFile.getCreated());
+
+        return loadedFile.getLoadedFileId();
+      } finally {
+        if (em != null && em.isOpen()) {
+          if (txn != null && txn.isActive()) {
+            txn.rollback();
+          }
+          em.close();
+        }
+      }
+    } catch (Exception ex) {
+      errorHandler.accept(ex);
+      return -1;
+    }
+  }
+
+  /**
+   * Trim the LoadedFiles and LoadedBatches tables if necessary
+   *
+   * @param errorHandler is called on exceptions
+   */
+  private void trimLoadedFiles(Consumer<Throwable> errorHandler) {
+    try {
+      EntityManager em = entityManagerFactory.createEntityManager();
+      EntityTransaction txn = null;
+      try {
+        txn = em.getTransaction();
+        txn.begin();
+        final Date oldDate = Date.from(Instant.now().minus(MAX_FILE_AGE_DAYS));
+
+        em.clear(); // Must be done before JPQL statements
+        em.flush();
+        List<Long> oldIds =
+            em.createQuery("select f.loadedFileId from LoadedFile f where created < :oldDate")
+                .setParameter("oldDate", oldDate)
+                .getResultList();
+
+        if (oldIds.size() > 0) {
+          LOGGER.info("Deleting old files: {}", oldIds.size());
+          em.createQuery("delete from LoadedBatch where loadedFileId in :ids")
+              .setParameter("ids", oldIds)
+              .executeUpdate();
+          em.createQuery("delete from LoadedFile where loadedFileId in :ids")
+              .setParameter("ids", oldIds)
+              .executeUpdate();
+          txn.commit();
+        } else {
+          txn.rollback();
+        }
+      } finally {
+        if (em != null && em.isOpen()) {
+          if (txn != null && txn.isActive()) {
+            txn.rollback();
+          }
+          em.close();
+        }
+      }
+    } catch (Exception ex) {
+      errorHandler.accept(ex);
     }
   }
 
@@ -623,6 +785,38 @@ public final class RifLoader implements AutoCloseable {
 
   /**
    * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
+   * Beneficiary}, computes the {@link Beneficiary#getMedicareBeneficiaryId()} ()} property to a
+   * cryptographic hash of its current value. This is done for security purposes, and the Blue
+   * Button API frontend applications know how to compute the exact same hash, which allows the two
+   * halves of the system to interoperate.
+   *
+   * <p>All other {@link RifRecordEvent}s are left unmodified.
+   *
+   * @param metrics the {@link MetricRegistry} to use
+   * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
+   */
+  private void hashBeneficiaryMbi(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY) return;
+
+    Timer.Context timerHashing =
+        metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "mbisHashed")).time();
+
+    Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
+
+    // set the hashed MBI
+    beneficiary
+        .getMedicareBeneficiaryId()
+        .ifPresent(
+            mbi -> {
+              String mbiHash = computeMbiHash(options, secretKeyFactory, mbi);
+              beneficiary.setMbiHash(Optional.of(mbiHash));
+            });
+
+    timerHashing.stop();
+  }
+
+  /**
+   * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
    * BeneficiaryHistory}, switches the {@link BeneficiaryHistory#getHicn()} property to a
    * cryptographic hash of its current value. This is done for security purposes, and the Blue
    * Button API frontend applications know how to compute the exact same hash, which allows the two
@@ -653,6 +847,39 @@ public final class RifLoader implements AutoCloseable {
     timerHashing.stop();
   }
 
+  /**
+   * For {@link RifRecordEvent}s where the {@link RifRecordEvent#getRecord()} is a {@link
+   * BeneficiaryHistory}, switches the {@link BeneficiaryHistory#getHicn()} property to a
+   * cryptographic hash of its current value. This is done for security purposes, and the Blue
+   * Button API frontend applications know how to compute the exact same hash, which allows the two
+   * halves of the system to interoperate.
+   *
+   * <p>All other {@link RifRecordEvent}s are left unmodified.
+   *
+   * @param metrics the {@link MetricRegistry} to use
+   * @param rifRecordEvent the {@link RifRecordEvent} to (possibly) modify
+   */
+  private void hashBeneficiaryHistoryMbi(MetricRegistry metrics, RifRecordEvent<?> rifRecordEvent) {
+    if (rifRecordEvent.getFileEvent().getFile().getFileType() != RifFileType.BENEFICIARY_HISTORY)
+      return;
+
+    Timer.Context timerHashing =
+        metrics.timer(MetricRegistry.name(getClass().getSimpleName(), "mbisHashed")).time();
+
+    BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
+
+    // set the hashed MBI
+    beneficiaryHistory
+        .getMedicareBeneficiaryId()
+        .ifPresent(
+            mbi -> {
+              String mbiHash = computeMbiHash(options, secretKeyFactory, mbi);
+              beneficiaryHistory.setMbiHash(Optional.of(mbiHash));
+            });
+
+    timerHashing.stop();
+  }
+
   /** @return a new {@link SecretKeyFactory} for the <code>PBKDF2WithHmacSHA256</code> algorithm */
   static SecretKeyFactory createSecretKeyFactory() {
     try {
@@ -674,15 +901,35 @@ public final class RifLoader implements AutoCloseable {
    */
   static String computeHicnHash(
       LoadAppOptions options, SecretKeyFactory secretKeyFactory, String hicn) {
+    return computeIdentifierHash(options, secretKeyFactory, hicn);
+  }
+
+  /**
+   * Computes a one-way cryptographic hash of the specified MBI value.
+   *
+   * @param options the {@link LoadAppOptions} to use
+   * @param secretKeyFactory the {@link SecretKeyFactory} to use
+   * @param mbi the Medicare beneficiary id to be hashed
+   * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
+   */
+  static String computeMbiHash(
+      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String mbi) {
+    return computeIdentifierHash(options, secretKeyFactory, mbi);
+  }
+
+  private static String computeIdentifierHash(
+      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String identifier) {
     try {
       /*
        * Our approach here is NOT using a salt, as salts must be randomly
        * generated for each value to be hashed and then included in
        * plaintext with the hash results. Random salts would prevent the
        * Blue Button API frontend systems from being able to produce equal
-       * hashes for the same HICNs. Instead, we use a secret "pepper" that
+       * hashes for the same identifiers. Instead, we use a secret "pepper" that
        * is shared out-of-band with the frontend. This value MUST be kept
        * secret.
+       *
+       * We are re-using the same pepper between HICNs and MBIs
        */
       byte[] salt = options.getHicnHashPepper();
 
@@ -693,11 +940,12 @@ public final class RifLoader implements AutoCloseable {
        */
       int derivedKeyLength = 256;
 
-      PBEKeySpec hicnKeySpec =
+      /* We're reusing the same hicn hash iterations, so the algorithm is exactly the same */
+      PBEKeySpec keySpec =
           new PBEKeySpec(
-              hicn.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
-      SecretKey hicnSecret = secretKeyFactory.generateSecret(hicnKeySpec);
-      String hexEncodedHash = Hex.encodeHexString(hicnSecret.getEncoded());
+              identifier.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
+      SecretKey secret = secretKeyFactory.generateSecret(keySpec);
+      String hexEncodedHash = Hex.encodeHexString(secret.getEncoded());
 
       return hexEncodedHash;
     } catch (InvalidKeySpecException e) {

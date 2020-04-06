@@ -2,11 +2,11 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,18 +23,19 @@ final class BeneficiaryTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersMode the {@link IncludeIdentifiersMode} to use
+   * @param includeIdentifiersValues the includeIdentifiers header values to use
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
+  @Trace
   public static Patient transform(
       MetricRegistry metricRegistry,
       Beneficiary beneficiary,
-      IncludeIdentifiersMode includeIdentifiersMode) {
+      List<String> includeIdentifiersValues) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, includeIdentifiersMode);
+    Patient patient = transform(beneficiary, includeIdentifiersValues);
     timer.stop();
 
     return patient;
@@ -42,11 +43,10 @@ final class BeneficiaryTransformer {
 
   /**
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersMode the {@link IncludeIdentifiersMode} to use
+   * @param includeIdentifiersValues the includeIdentifiers header values to use
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(
-      Beneficiary beneficiary, IncludeIdentifiersMode includeIdentifiersMode) {
+  private static Patient transform(Beneficiary beneficiary, List<String> includeIdentifiersValues) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -55,16 +55,32 @@ final class BeneficiaryTransformer {
     patient.addIdentifier(
         TransformerUtils.createIdentifier(
             CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
-    patient
-        .addIdentifier()
-        .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
-        .setValue(beneficiary.getHicn());
 
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
-      Extension currentIdentifier =
-          TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
+    // Add hicn-hash identifier ONLY if raw hicn is requested.
+    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+      patient
+          .addIdentifier()
+          .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
+          .setValue(beneficiary.getHicn());
+    }
 
+    if (beneficiary.getMbiHash().isPresent()) {
+      patient
+          .addIdentifier()
+          .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+          .setValue(beneficiary.getMbiHash().get());
+    }
+
+    Extension currentIdentifier =
+        TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
+    Extension historicalIdentifier =
+        TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+    // Add lastUpdated
+    TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
+
+    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
+
       if (hicnUnhashedCurrent.isPresent())
         addUnhashedIdentifier(
             patient,
@@ -72,22 +88,13 @@ final class BeneficiaryTransformer {
             TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
             currentIdentifier);
 
-      Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
-      if (mbiUnhashedCurrent.isPresent())
-        addUnhashedIdentifier(
-            patient,
-            mbiUnhashedCurrent.get(),
-            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
-            currentIdentifier);
-
-      Extension historicalIdentifier =
-          TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
-
       List<String> unhashedHicns = new ArrayList<String>();
       for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
         Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
         if (hicnUnhashedHistoric.isPresent()) unhashedHicns.add(hicnUnhashedHistoric.get());
+        TransformerUtils.updateMaxLastUpdated(patient, beneHistory.getLastUpdated());
       }
+
       List<String> unhashedHicnsNoDupes =
           unhashedHicns.stream().distinct().collect(Collectors.toList());
       for (String hicn : unhashedHicnsNoDupes) {
@@ -97,13 +104,26 @@ final class BeneficiaryTransformer {
             TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
             historicalIdentifier);
       }
+    }
+
+    if (PatientResourceProvider.hasMBI(includeIdentifiersValues)) {
+      Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
+
+      if (mbiUnhashedCurrent.isPresent())
+        addUnhashedIdentifier(
+            patient,
+            mbiUnhashedCurrent.get(),
+            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+            currentIdentifier);
 
       List<String> unhashedMbis = new ArrayList<String>();
       for (MedicareBeneficiaryIdHistory mbiHistory :
           beneficiary.getMedicareBeneficiaryIdHistories()) {
         Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
         if (mbiUnhashedHistoric.isPresent()) unhashedMbis.add(mbiUnhashedHistoric.get());
+        TransformerUtils.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
       }
+
       List<String> unhashedMbisNoDupes =
           unhashedMbis.stream().distinct().collect(Collectors.toList());
       for (String mbi : unhashedMbisNoDupes) {

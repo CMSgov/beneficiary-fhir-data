@@ -14,6 +14,10 @@
     env: "test"
 
   tasks:
+    - name: Include global variables
+      include_vars:
+        file: vars/000_cross_env_vars.yml
+      tags: [pre-ami, post-ami]
     
     - name: Include env specific variables
       include_vars:
@@ -31,7 +35,7 @@
         data_server_dir: "{{ bfd_server_dir }}"
         data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
         data_server_container_name: jboss-eap-7.0
-        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:{{ bfd_server_dir }}/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution"
+        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:{{ bfd_server_dir }}/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PreserveFramePointer"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
         data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
         data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
@@ -46,43 +50,9 @@
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
         data_server_new_relic_environment: "{{ env_name_std }}"
 
-    # Overwrite bfd-server role copy of the keystore file 
-    - name: Copy the appserver keystore  
-      copy:
-        # Note: this JKS file is encrypted via the Ansible Vault 
-        src: "{{ data_server_appserver_keystore }}"
-        dest: "{{ bfd_server_dir }}/bluebutton-appserver-keystore.jks"
-        force: yes # overwrite the existing keystore
-      tags:
-        - pre-ami
-        
-    - name: Copy Local Test SSL Keypair
-      copy:
-        # Note: This PEM file is encrypted within the project via Ansible Vault, which will
-        # automagically decrypt it as part of the copy operation.
-        src: "{{ data_server_ssl_client_certificate_test }}"
-        dest: "{{ bfd_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
-        owner: "{{ data_server_user }}"
-        group: "{{ data_server_user }}"
-        mode: 'u=rw,g=,o='
-      become: true
-      tags:
-        - pre-ami
-
-    - name: Build CloudWatch unified agent configuration
-      template:
-        src: cwagent-data-server.json.j2
-        dest: '/tmp/cwagent-data-server.json'
-        owner: root
-        group: root
-        mode: u=rw,g=r,o=r
-      become: true
-      tags:
-        - pre-ami
-
-    - name: Reconfigure and relaunch CloudWatch unified agent
-      shell: "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a append-config -m ec2 -c file:/tmp/cwagent-data-server.json -s"
-      become: true
+    - name: Add SSH users
+      import_role:
+        name: ssh_users
       tags:
         - pre-ami
         

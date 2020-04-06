@@ -2,8 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -55,6 +53,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -63,7 +62,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -141,9 +139,6 @@ public final class TransformerUtils {
 
   /** Stores the diagnosis ICD codes and their display values */
   private static Map<String, String> icdMap = null;
-
-  /** Tracks the diagnosis ICD codes that have already had code lookup failures. */
-  private static final Set<String> icdLookupMissingFailures = new HashSet<>();
 
   /** Stores the procedure codes and their display values */
   private static Map<String, String> procedureMap = null;
@@ -310,6 +305,13 @@ public final class TransformerUtils {
                 ctc ->
                     practitionerIdSystem.equals(ctc.getProvider().getIdentifier().getSystem())
                         && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
+            .filter(ctc -> ctc.hasRole())
+            .filter(
+                ctc ->
+                    careTeamRole.toCode().equals(ctc.getRole().getCodingFirstRep().getCode())
+                        && careTeamRole
+                            .getSystem()
+                            .equals(ctc.getRole().getCodingFirstRep().getSystem()))
             .findAny()
             .orElse(null);
 
@@ -2617,20 +2619,18 @@ public final class TransformerUtils {
    * in the src/main/resources directory
    */
   private static Map<String, String> readIcdCodeFile() {
-
     Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
-    InputStream icdCodeDisplayStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream("DGNS_CD.txt");
 
-    BufferedReader icdCodesIn = null;
-    icdCodesIn = new BufferedReader(new InputStreamReader(icdCodeDisplayStream));
-    /*
-     * We want to extract the ICD Diagnosis codes and display values and put in a
-     * map for easy retrieval to get the display value icdColumns[1] is
-     * DGNS_DESC(i.e. 7840 code is HEADACHE description)
-     */
-    String line = "";
-    try {
+    try (final InputStream icdCodeDisplayStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream("DGNS_CD.txt");
+        final BufferedReader icdCodesIn =
+            new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
+      /*
+       * We want to extract the ICD Diagnosis codes and display values and put in a
+       * map for easy retrieval to get the display value icdColumns[1] is
+       * DGNS_DESC(i.e. 7840 code is HEADACHE description)
+       */
+      String line = "";
       icdCodesIn.readLine();
       while ((line = icdCodesIn.readLine()) != null) {
         String icdColumns[] = line.split("\t");
@@ -2688,24 +2688,22 @@ public final class TransformerUtils {
   private static Map<String, String> readNpiCodeFile() {
 
     Map<String, String> npiCodeMap = new HashMap<String, String>();
-    InputStream npiCodeDisplayStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream("NPI_Coded_Display_Values_Tab.txt");
-
-    BufferedReader npiCodesIn = null;
-    npiCodesIn = new BufferedReader(new InputStreamReader(npiCodeDisplayStream));
-    /*
-     * We want to extract the NPI codes and display values and put in a map for easy
-     * retrieval to get the display value-- npiColumns[0] is the NPI Code,
-     * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
-     * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
-     * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
-     * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
-     * provider credential.
-     */
-    String line = "";
-    try {
+    try (final InputStream npiCodeDisplayStream =
+            Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("NPI_Coded_Display_Values_Tab.txt");
+        final BufferedReader npiCodesIn =
+            new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
+      /*
+       * We want to extract the NPI codes and display values and put in a map for easy
+       * retrieval to get the display value-- npiColumns[0] is the NPI Code,
+       * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
+       * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
+       * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
+       * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
+       * provider credential.
+       */
+      String line = "";
       npiCodesIn.readLine();
       while ((line = npiCodesIn.readLine()) != null) {
         String npiColumns[] = line.split("\t");
@@ -2727,11 +2725,9 @@ public final class TransformerUtils {
           npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
         }
       }
-      npiCodesIn.close();
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI code data.", e);
     }
-
     return npiCodeMap;
   }
 
@@ -2780,19 +2776,16 @@ public final class TransformerUtils {
   private static Map<String, String> readProcedureCodeFile() {
 
     Map<String, String> procedureCodeMap = new HashMap<String, String>();
-    InputStream procedureCodeDisplayStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream("PRCDR_CD.txt");
-
-    BufferedReader procedureCodesIn = null;
-    procedureCodesIn = new BufferedReader(new InputStreamReader(procedureCodeDisplayStream));
-
-    /*
-     * We want to extract the procedure codes and display values and put in a map
-     * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
-     * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
-     */
-    String line = "";
-    try {
+    try (final InputStream procedureCodeDisplayStream =
+            Thread.currentThread().getContextClassLoader().getResourceAsStream("PRCDR_CD.txt");
+        final BufferedReader procedureCodesIn =
+            new BufferedReader(new InputStreamReader(procedureCodeDisplayStream))) {
+      /*
+       * We want to extract the procedure codes and display values and put in a map
+       * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
+       * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
+       */
+      String line = "";
       procedureCodesIn.readLine();
       while ((line = procedureCodesIn.readLine()) != null) {
         String icdColumns[] = line.split("\t");
@@ -2860,22 +2853,19 @@ public final class TransformerUtils {
    */
   public static Map<String, String> readFDADrugCodeFile() {
     Map<String, String> ndcProductHashMap = new HashMap<String, String>();
-    InputStream ndcProductStream =
-        Thread.currentThread()
-            .getContextClassLoader()
-            .getResourceAsStream(FDADrugDataUtilityApp.FDA_PRODUCTS_RESOURCE);
-
-    BufferedReader ndcProductsIn = null;
-    ndcProductsIn = new BufferedReader(new InputStreamReader(ndcProductStream));
-
-    /*
-     * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
-     * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
-     * put in a Map for easy retrieval to get the display value which is a
-     * combination of PROPRIETARYNAME & SUBSTANCENAME
-     */
-    String line = "";
-    try {
+    try (final InputStream ndcProductStream =
+            Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(FDADrugDataUtilityApp.FDA_PRODUCTS_RESOURCE);
+        final BufferedReader ndcProductsIn =
+            new BufferedReader(new InputStreamReader(ndcProductStream))) {
+      /*
+       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
+       * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
+       * put in a Map for easy retrieval to get the display value which is a
+       * combination of PROPRIETARYNAME & SUBSTANCENAME
+       */
+      String line = "";
       ndcProductsIn.readLine();
       while ((line = ndcProductsIn.readLine()) != null) {
         String ndcProductColumns[] = line.split("\t");
@@ -2894,11 +2884,9 @@ public final class TransformerUtils {
             String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
             ndcProductColumns[3] + " - " + ndcProductColumns[13]);
       }
-      ndcProductsIn.close();
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
     }
-
     return ndcProductHashMap;
   }
 
@@ -2922,41 +2910,86 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param pagingArgs a {@link PagingArguments} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param resourceType the {@link String} the resource being provided by the paging link
-   * @param identifier the {@link String} field the search is being performed on
-   * @param value the {@link String} value of the identifier being searched for
+   * Create a bundle from the entire search result
+   *
+   * @param paging contains the {@link PageLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param transactionTime date for the bundle
    * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PagingArguments pagingArgs,
-      String resourceType,
-      String identifier,
-      String value,
-      List<IBaseResource> resources) {
+      PageLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
-    if (pagingArgs.isPagingRequested()) {
+    if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
        * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
        * working correctly.
        */
-      int endIndex =
-          Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList =
-          resources.subList(pagingArgs.getStartIndex(), endIndex);
+      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+      List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
-      TransformerUtils.addPagingLinks(
-          pagingArgs, bundle, resourceType, identifier, value, resources.size());
+      paging.addPageLinks(bundle, resources.size());
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
 
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
+     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
+     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
     bundle.setTotal(resources.size());
+    return bundle;
+  }
+
+  /**
+   * Create a bundle from one page of resources
+   *
+   * @param paging a {@link PageLinkBuilder} used to determine if paging is requested and the
+   *     parameters for doing so. The resources list is trimmed to fit the requested page.
+   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
+   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param total number of resources in the entire search result
+   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
+   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
+   */
+  public static Bundle createBundle(
+      PageLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
+    Bundle bundle = new Bundle();
+
+    if (paging.isPagingRequested()) {
+      paging.addPageLinks(bundle, total);
+    }
+
+    bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
+     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
+     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
+    bundle.setTotal(total);
     return bundle;
   }
 
@@ -2972,92 +3005,7 @@ public final class TransformerUtils {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
     }
-
     return bundle;
-  }
-
-  /**
-   * @param pagingArgs a {@link PagingArguments} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param bundle the {@link Bundle} to which links are being added
-   * @param resource the {@link String} the resource being provided by the paging link
-   * @param searchByDesc the {@link String} field the search is being performed on
-   * @param identifier the {@link String} identifier being searched for
-   * @param numTotalResults the number of total resources matching the {@link
-   *     Beneficiary#getBeneficiaryId()}
-   */
-  public static void addPagingLinks(
-      PagingArguments pagingArgs,
-      Bundle bundle,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      int numTotalResults) {
-
-    Integer pageSize = pagingArgs.getPageSize();
-    Integer startIndex = pagingArgs.getStartIndex();
-    String serverBase = pagingArgs.getServerBase();
-
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_FIRST)
-            .setUrl(
-                createPagingLink(serverBase + resource, searchByDesc, identifier, 0, pageSize)));
-
-    if (startIndex + pageSize < numTotalResults) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_NEXT)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      startIndex + pageSize,
-                      pageSize)));
-    }
-
-    if (startIndex > 0) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_PREVIOUS)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      Math.max(startIndex - pageSize, 0),
-                      pageSize)));
-    }
-
-    /*
-     * This formula rounds numTotalResults down to the nearest multiple of pageSize
-     * that's less than and not equal to numTotalResults
-     */
-    int lastIndex;
-    try {
-      lastIndex = (numTotalResults - 1) / pageSize * pageSize;
-    } catch (ArithmeticException e) {
-      throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
-    }
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_LAST)
-            .setUrl(
-                createPagingLink(
-                    serverBase + resource, searchByDesc, identifier, lastIndex, pageSize)));
-  }
-
-  /** @return Returns the URL string for a paging link. */
-  private static String createPagingLink(
-      String baseURL, String descriptor, String id, int startIndex, int theCount) {
-    StringBuilder b = new StringBuilder();
-    b.append(baseURL);
-    b.append(Constants.PARAM_COUNT + "=" + theCount);
-    b.append("&startIndex=" + startIndex);
-    b.append("&" + descriptor + "=" + id);
-
-    return b.toString();
   }
 
   /**
@@ -3098,5 +3046,34 @@ public final class TransformerUtils {
         String.format("%s.duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
     MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+  }
+
+  /**
+   * Sets the lastUpdated value in the resource.
+   *
+   * @param resource is the FHIR resource to set lastUpdate
+   * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUdpated.
+   */
+  public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+    resource
+        .getMeta()
+        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
+  }
+
+  /**
+   * Sets the lastUpdated value in the resource if the passed in value is later than the current
+   * value.
+   *
+   * @param resource is the FHIR resource to update
+   * @param lastUpdated is the lastUpdated value from the entity
+   */
+  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+    lastUpdated.ifPresent(
+        newDate -> {
+          Date currentDate = resource.getMeta().getLastUpdated();
+          if (currentDate != null && newDate.after(currentDate)) {
+            resource.getMeta().setLastUpdated(newDate);
+          }
+        });
   }
 }

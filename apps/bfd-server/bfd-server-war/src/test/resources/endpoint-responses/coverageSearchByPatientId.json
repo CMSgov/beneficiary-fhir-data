@@ -14,6 +14,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-a-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
         "valueCoding" : {
@@ -160,6 +163,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-b-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
         "valueCoding" : {
@@ -281,6 +287,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-c-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_01",
         "valueCoding" : {
@@ -577,6 +586,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-d-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
         "valueCoding" : {

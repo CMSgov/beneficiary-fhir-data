@@ -124,13 +124,12 @@ def deployManagement(AmiIds amiIds) {
 /**
  * Builds the BFD Pipeline and BFD Server AMIs.
  *
- * @param environmentId The name of the environment for which the AMIs are being built
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that already exist
  * @param appBuildResults the {@link AppBuildResults} containing the paths to the app binaries that were built
  * @return a new {@link AmiIds} instance detailing the shiny new AMIs that are now available for use
  * @throws RuntimeException An exception will be bubbled up if the AMI-builder tooling returns a non-zero exit code.
  */
-def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
+def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	dir('ops/ansible/playbooks-ccs'){
 		withCredentials([file(credentialsId: 'bluebutton-ansible-playbooks-data-ansible-vault-password', variable: 'vaultPasswordFile')]) {
  
@@ -138,38 +137,26 @@ def buildAppAmis(String environmentId, String gitBranchName, String gitCommitId,
 			def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
 
 			varsFile.write(JsonOutput.toJson([
-				env: environmentId,
 				data_server_launcher: "${workspace}/${appBuildResults.dataServerLauncher}",
 				data_server_war: "${workspace}/${appBuildResults.dataServerWar}",
 				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
 			]))
 
-			// build the ETL pipeline
+			// build AMIs in parallel
 			sh "/usr/bin/packer build -color=false \
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
-				-var 'env=${environmentId}' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
-				../../packer/build_bfd-pipeline.json"
-
-			// build the FHIR server
-			sh "/usr/bin/packer build -color=false \
-				-var vault_password_file=${vaultPasswordFile} \
-				-var 'source_ami=${amiIds.platinumAmiId}' \
-				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
-				-var 'env=${environmentId}' \
-				-var 'git_branch=${gitBranchName}' \
-				-var 'git_commit=${gitCommitId}' \
-				../../packer/build_bfd-server.json"
+				../../packer/build_bfd-all.json"
 
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
 				bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-pipeline.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
 				bfdServerAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_${environmentId}_data-server.json")),
+					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
 			)
 		}
 	}

@@ -1,8 +1,23 @@
 package gov.cms.bfd.pipeline.rif.load;
 
+import gov.cms.bfd.model.rif.LoadedFile;
+import gov.cms.bfd.model.rif.RifFile;
+import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiConsumer;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Contains utilities that are useful when running the {@link RifLoader}.
@@ -20,6 +35,80 @@ public final class RifLoaderTestUtils {
   /** The value to use for {@link LoadAppOptions#isIdempotencyRequired()}. */
   public static final boolean IDEMPOTENCY_REQUIRED = true;
 
+  /** The value to use for {@link LoadAppOptions#isFixupsEnabled()} */
+  public static final boolean FIXUPS_ENABLED = true;
+
+  @SuppressWarnings("unused")
+  private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderTestUtils.class);
+
+  /**
+   * A wrapper for the entity manager logic and action. The consumer is called within a transaction
+   * to which is rolled back.
+   *
+   * @param consumer to call with an entity manager.
+   */
+  public static void doTestWithDb(BiConsumer<DataSource, EntityManager> consumer) {
+    final DataSource jdbcDataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DatabaseSchemaManager.createOrUpdateSchema(jdbcDataSource);
+    final EntityManagerFactory entityManagerFactory =
+        RifLoader.createEntityManagerFactory(jdbcDataSource);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      consumer.accept(jdbcDataSource, entityManager);
+    } finally {
+      if (entityManager != null && entityManager.isOpen()) {
+        entityManager.close();
+      }
+    }
+  }
+
+  /**
+   * Get the list of loaded files from the passed in db, latest first
+   *
+   * @param entityManager to use
+   * @return the list of loaded files in the db
+   */
+  public static List<LoadedFile> findLoadedFiles(EntityManager entityManager) {
+    entityManager.clear();
+    return entityManager
+        .createQuery("select f from LoadedFile f order by f.created desc", LoadedFile.class)
+        .getResultList();
+  }
+
+  /**
+   * Return a Files Event with a single dummy file
+   *
+   * @return a new RifFilesEvent
+   */
+  public static RifFilesEvent createDummyFilesEvent() {
+    RifFile dummyFile =
+        new RifFile() {
+
+          @Override
+          public InputStream open() {
+            return null;
+          }
+
+          @Override
+          public RifFileType getFileType() {
+            return RifFileType.BENEFICIARY;
+          }
+
+          @Override
+          public String getDisplayName() {
+            return "Dummy.txt";
+          }
+
+          @Override
+          public Charset getCharset() {
+            return StandardCharsets.UTF_8;
+          }
+        };
+
+    return new RifFilesEvent(Instant.now(), Arrays.asList(dummyFile));
+  }
+
   /**
    * @param dataSource a {@link DataSource} for the test DB to connect to
    * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
@@ -31,7 +120,9 @@ public final class RifLoaderTestUtils {
         HICN_HASH_PEPPER,
         dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        IDEMPOTENCY_REQUIRED);
+        IDEMPOTENCY_REQUIRED,
+        FIXUPS_ENABLED,
+        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
   }
 
   /**
@@ -45,5 +136,17 @@ public final class RifLoaderTestUtils {
 
     DataSource dataSource = options.getDatabaseDataSource();
     return RifLoader.createEntityManagerFactory(dataSource);
+  }
+
+  /**
+   * Pause of a number milliseconds.
+   *
+   * @param millis to sleap
+   */
+  public static void pauseMillis(long millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException ex) {
+    }
   }
 }

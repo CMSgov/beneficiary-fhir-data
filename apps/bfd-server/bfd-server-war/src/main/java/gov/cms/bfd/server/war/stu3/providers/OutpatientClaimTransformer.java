@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
@@ -24,6 +25,7 @@ final class OutpatientClaimTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
+  @Trace
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
@@ -225,7 +227,7 @@ final class OutpatientClaimTransformer {
       TransformerUtils.addDiagnosisCode(
           eob,
           Diagnosis.from(
-                  claimGroup.getDiagnosisAdmission2Code(),
+                  claimGroup.getDiagnosisAdmission3Code(),
                   claimGroup.getDiagnosisAdmission3CodeVersion(),
                   DiagnosisLabel.REASONFORVISIT)
               .get());
@@ -453,6 +455,7 @@ final class OutpatientClaimTransformer {
               TransformerUtils.createExtensionCoding(
                   eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
     }
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }
