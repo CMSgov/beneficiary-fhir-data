@@ -2970,7 +2970,9 @@ public final class TransformerUtils {
       List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
     Bundle bundle = new Bundle();
     TransformerUtils.addResourcesToBundle(bundle, resources);
-    if (paging.isPagingRequested()) paging.addLinks(bundle);
+    paging.addLinks(bundle);
+    bundle.setTotalElement(
+        paging.isPagingRequested() ? new UnsignedIntType() : new UnsignedIntType(resources.size()));
 
     /*
      * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
