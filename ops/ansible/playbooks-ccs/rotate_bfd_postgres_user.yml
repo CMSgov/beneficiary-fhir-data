@@ -14,6 +14,7 @@
       data_server_db_user:
         db_user: "{{ vault_data_server_db_username }}"
         db_user_pw: "{{ vault_data_server_db_password }}"
+        db_user_group: read_only_bb
 
   tasks:
     - name: RDS Gather Facts/Info
@@ -35,5 +36,18 @@
         db: postgres
         name: "{{ item.value.db_user }}"
         password: "{{ item.value.db_user_pw }}"
+      with_dict: "{{ db_users }}"
+      no_log: true
+
+    - name: Grant group to user
+      postgresql_user:
+        login_host: "{{ database_info.instances[0].endpoint.address }}"
+        login_user: "{{ database_info.instances[0].master_username }}"
+        login_password: "{{ master_pw }}"
+        db: postgres
+        name: "{{ item.value.db_user }}"
+        groups: 
+        - "{{ item.value.db_user_group }}"
+      when: item.value.db_user_group is defined
       with_dict: "{{ db_users }}"
       no_log: true
