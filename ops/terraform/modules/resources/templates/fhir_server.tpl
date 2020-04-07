@@ -6,10 +6,10 @@ exec > >(tee -a /var/log/user_data.log 2>&1)
 # Extend gold image defined root partition with all available free space
 # The extend gold image has been commented out in favor of rotating the logs
 # Doing this should improve deploy time, BLUEBUTTON-1582
-sudo growpart /dev/nvme0n1 2
-sudo pvresize /dev/nvme0n1p2
-sudo lvextend -l +100%FREE /dev/VolGroup00/rootVol
-sudo xfs_growfs /
+growpart /dev/nvme0n1 2
+pvresize /dev/nvme0n1p2
+lvextend -l +100%FREE /dev/VolGroup00/rootVol
+xfs_growfs /
 
 git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBranchName} --single-branch
 
