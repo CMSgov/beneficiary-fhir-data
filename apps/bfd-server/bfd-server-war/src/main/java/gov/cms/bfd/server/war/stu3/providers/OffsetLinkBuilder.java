@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * PagingArguments encapsulates the arguments related to paging for the
  * {@link ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
  */
-public final class PageLinkBuilder {
+public final class OffsetLinkBuilder implements LinkBuilder {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProvider.class);
@@ -28,8 +28,9 @@ public final class PageLinkBuilder {
   private final String serverBase;
   private final String resource;
   private final RequestDetails requestDetails;
+  private int numTotalResults = -1;
 
-  public PageLinkBuilder(RequestDetails requestDetails, String resource) {
+  public OffsetLinkBuilder(RequestDetails requestDetails, String resource) {
     this.pageSize = parseIntegerParameters(requestDetails, Constants.PARAM_COUNT);
     this.startIndex = parseIntegerParameters(requestDetails, "startIndex");
     this.serverBase = requestDetails.getServerBaseForRequest();
@@ -65,6 +66,7 @@ public final class PageLinkBuilder {
    * @return Returns true if the pageSize either startIndex is present (i.e. paging is requested),
    *     false if neither present.
    */
+  @Override
   public boolean isPagingRequested() {
     return pageSize.isPresent() || startIndex.isPresent();
   }
@@ -74,6 +76,7 @@ public final class PageLinkBuilder {
    *     startIndex does (paging is requested) default to pageSize of 10.
    * @throws InvalidRequestException HTTP 400: indicates a pageSize less than 0 was provided
    */
+  @Override
   public int getPageSize() {
     if (!isPagingRequested()) throw new BadCodeMonkeyException();
     if (!pageSize.isPresent()) return 10;
@@ -84,6 +87,11 @@ public final class PageLinkBuilder {
               pageSize.get()));
     }
     return pageSize.get();
+  }
+
+  @Override
+  public boolean isFirstPage() {
+    return getStartIndex() == 0;
   }
 
   /**
@@ -104,29 +112,33 @@ public final class PageLinkBuilder {
     return 0;
   }
 
+  public LinkBuilder setTotal(int numTotalResults) {
+    this.numTotalResults = numTotalResults;
+    return this;
+  }
+
   /**
    * Add next, first, last, and previous links to a bundle
    *
    * @param toBundle to add the links
-   * @param numTotalResults from the search
    */
-  public void addPageLinks(Bundle toBundle, int numTotalResults) {
+  public void addLinks(Bundle toBundle) {
     Integer pageSize = getPageSize();
     Integer startIndex = getStartIndex();
-
+    int total = numTotalResults == -1 ? toBundle.getEntry().size() : numTotalResults;
     toBundle.addLink(
         new Bundle.BundleLinkComponent()
             .setRelation(Constants.LINK_FIRST)
             .setUrl(createPageLink(0)));
 
-    if (startIndex + pageSize < numTotalResults) {
+    if (startIndex + pageSize < total) {
       toBundle.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_NEXT)
               .setUrl(createPageLink(startIndex + pageSize)));
     }
 
-    if (startIndex > 0) {
+    if (!isFirstPage()) {
       toBundle.addLink(
           new Bundle.BundleLinkComponent()
               .setRelation(Constants.LINK_PREVIOUS)
@@ -139,7 +151,7 @@ public final class PageLinkBuilder {
      */
     int lastIndex;
     try {
-      lastIndex = (numTotalResults - 1) / pageSize * pageSize;
+      lastIndex = (total - 1) / pageSize * pageSize;
     } catch (ArithmeticException e) {
       throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
     }
