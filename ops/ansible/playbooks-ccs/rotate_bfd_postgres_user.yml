@@ -3,8 +3,6 @@
     rds_database: 
     master_user: "{{ vault_rds_maser_user }}"
     master_pw: "{{ vault_rds_master_password }}"
-#    db_user:
-#    db_user_pw:
     rds_region:
 
     db_users:
@@ -39,6 +37,31 @@
       with_dict: "{{ db_users }}"
       no_log: true
 
+#    - name: Grant privileges to new user
+#      postgresql_privs:
+#        login_host: "{{ database_info.instances[0].endpoint.address }}"
+#        login_user: "{{ database_info.instances[0].master_username }}"
+#        login_password: "{{ master_pw }}"
+#        db: fhirdb
+#        privs: ALL
+#        type: database
+#        role: "{{ item.value.db_user }}"
+#        state: present
+#      when: db_users.data_pipeline_db_user.db_user is defined
+#      with_dict: "{{ db_users }}"
+
+    - name: Make sure the new PostgreSQL User is present
+      postgresql_query:
+        login_host: "{{ database_info.instances[0].endpoint.address }}"
+        login_user: "{{ database_info.instances[0].master_username }}"
+        login_password: "{{ master_pw }}"
+        db: postgres
+        query: GRANT ALL PRIVILEGES ON DATABASE fhirdb TO svc_fhir_etl_2;
+#        path_to_script: userlookup.sql
+#        path_to_script: testlookup.sql
+      when: db_users.data_pipeline_db_user.db_user is defined
+      with_dict: "{{ db_users }}"
+
     - name: Grant group to user
       postgresql_user:
         login_host: "{{ database_info.instances[0].endpoint.address }}"
@@ -51,3 +74,15 @@
       when: item.value.db_user_group is defined
       with_dict: "{{ db_users }}"
       no_log: true
+
+
+
+#          - name: Make sure the new PostgreSQL User is present
+#      postgresql_query:
+#        db: postgres
+#        login_host: "{{ database_info.instances[0].endpoint.address }}"
+#        login_user: "{{ new_user }}"
+#        login_password: "{{ new_user_pw }}"
+#        query: GRANT ALL PRIVILEGES ON DATABASE fhirdb TO svc_fhir_etl;
+##        path_to_script: userlookup.sql
+##        path_to_script: testlookup.sql
