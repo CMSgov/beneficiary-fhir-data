@@ -190,6 +190,29 @@ resource "aws_db_subnet_group" "db" {
   subnet_ids      = [for s in data.aws_subnet.data_subnets: s.id]
 }
 
+# Aurora module: supplants separate param groups, rds modules, and rds
+# alarms modules
+#
+module "aurora" {
+  source = "../resources/aurora"
+
+  env_config         = local.env_config
+  aurora_config      = var.aurora_config
+  aurora_node_params = var.aurora_node_params
+  stateful_config    = {
+    azs          = local.azs
+    kms_key_id   = data.aws_kms_key.master_key.arn
+    subnet_group = aws_db_subnet_group.db.name
+    vpc_sg_ids   = [
+      aws_security_group.db.id,
+      aws_security_group.master_db.id,
+      data.aws_security_group.vpn.id,
+      data.aws_security_group.tools.id,
+      data.aws_security_group.management.id
+    ]
+  }
+}
+
 # Parameter Group
 #
 resource "aws_db_parameter_group" "default_mode" {
