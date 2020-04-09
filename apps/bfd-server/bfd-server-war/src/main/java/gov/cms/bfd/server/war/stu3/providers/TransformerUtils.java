@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -2912,7 +2914,7 @@ public final class TransformerUtils {
   /**
    * Create a bundle from the entire search result
    *
-   * @param paging contains the {@link PageLinkBuilder} information
+   * @param paging contains the {@link OffsetLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
    * @param transactionTime date for the bundle
@@ -2920,7 +2922,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PageLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
     if (paging.isPagingRequested()) {
       /*
@@ -2931,7 +2933,7 @@ public final class TransformerUtils {
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
-      paging.addPageLinks(bundle, resources.size());
+      paging.setTotal(resources.size()).addLinks(bundle);
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
@@ -2955,25 +2957,22 @@ public final class TransformerUtils {
   }
 
   /**
-   * Create a bundle from one page of resources
+   * Create a bundle from the entire search result
    *
-   * @param paging a {@link PageLinkBuilder} used to determine if paging is requested and the
-   *     parameters for doing so. The resources list is trimmed to fit the requested page.
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
-   *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
-   * @param total number of resources in the entire search result
+   *     Patient}s, all of which will be added to the bundle
+   * @param paging contains the {@link LinkBuilder} information to add to the bundle
+   * @param transactionTime date for the bundle
    * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PageLinkBuilder paging, List<IBaseResource> resources, int total, Date transactionTime) {
+      List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
     Bundle bundle = new Bundle();
-
-    if (paging.isPagingRequested()) {
-      paging.addPageLinks(bundle, total);
-    }
-
-    bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
+    TransformerUtils.addResourcesToBundle(bundle, resources);
+    paging.addLinks(bundle);
+    bundle.setTotalElement(
+        paging.isPagingRequested() ? new UnsignedIntType() : new UnsignedIntType(resources.size()));
 
     /*
      * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
@@ -2989,7 +2988,6 @@ public final class TransformerUtils {
     bundle
         .getMeta()
         .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
-    bundle.setTotal(total);
     return bundle;
   }
 
@@ -3075,5 +3073,20 @@ public final class TransformerUtils {
             resource.getMeta().setLastUpdated(newDate);
           }
         });
+  }
+
+  /**
+   * Work around for https://github.com/jamesagnew/hapi-fhir/issues/1585. HAPI will fill in the
+   * resource count as a total value when a Bundle has no total value.
+   *
+   * @param requestDetails of a resource provider
+   */
+  public static void workAroundHAPIIssue1585(RequestDetails requestDetails) {
+    // The hack is to remove the _count parameter from theDetails so that total is not modified.
+    Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
+    if (params.remove(Constants.PARAM_COUNT) != null) {
+      // Remove _count parameter from the current request details
+      requestDetails.setParameters(params);
+    }
   }
 }
