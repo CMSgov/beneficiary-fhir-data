@@ -6,9 +6,9 @@
     rds_region:
 
     db_users:
-      data_pipeline_db_user: 
-        db_user: "{{ vault_data_pipeline_db_username }}"
-        db_user_pw: "{{ vault_data_pipeline_db_password }}"
+#      data_pipeline_db_user: 
+#        db_user: "{{ vault_data_pipeline_db_username }}"
+#        db_user_pw: "{{ vault_data_pipeline_db_password }}"
       data_server_db_user:
         db_user: "{{ vault_data_server_db_username }}"
         db_user_pw: "{{ vault_data_server_db_password }}"
@@ -50,17 +50,17 @@
 #      when: db_users.data_pipeline_db_user.db_user is defined
 #      with_dict: "{{ db_users }}"
 
-    - name: Make sure the new PostgreSQL User is present
-      postgresql_query:
-        login_host: "{{ database_info.instances[0].endpoint.address }}"
-        login_user: "{{ database_info.instances[0].master_username }}"
-        login_password: "{{ master_pw }}"
-        db: postgres
-        query: GRANT ALL PRIVILEGES ON DATABASE fhirdb TO svc_fhir_etl_2;
-#        path_to_script: userlookup.sql
-#        path_to_script: testlookup.sql
-      when: db_users.data_pipeline_db_user.db_user is defined
-      with_dict: "{{ db_users }}"
+#    - name: Grant privileges to new user
+#      postgresql_query:
+#        login_host: "{{ database_info.instances[0].endpoint.address }}"
+#        login_user: "{{ database_info.instances[0].master_username }}"
+#        login_password: "{{ master_pw }}"
+#        db: postgres
+#        query: GRANT ALL PRIVILEGES ON DATABASE fhirdb TO svc_fhir_etl_2;
+##        path_to_script: userlookup.sql
+##        path_to_script: testlookup.sql
+#      when: db_users.data_pipeline_db_user.db_user is defined
+#      with_dict: "{{ db_users }}"
 
     - name: Grant group to user
       postgresql_user:
@@ -74,15 +74,3 @@
       when: item.value.db_user_group is defined
       with_dict: "{{ db_users }}"
       no_log: true
-
-
-
-#          - name: Make sure the new PostgreSQL User is present
-#      postgresql_query:
-#        db: postgres
-#        login_host: "{{ database_info.instances[0].endpoint.address }}"
-#        login_user: "{{ new_user }}"
-#        login_password: "{{ new_user_pw }}"
-#        query: GRANT ALL PRIVILEGES ON DATABASE fhirdb TO svc_fhir_etl;
-##        path_to_script: userlookup.sql
-##        path_to_script: testlookup.sql
