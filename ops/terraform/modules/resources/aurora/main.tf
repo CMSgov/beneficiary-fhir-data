@@ -1,5 +1,4 @@
 locals {
-  tags    = merge({Layer="data"}, var.env_config.tags)
   is_prod = substr(var.env_config.env, 0, 4) == "prod" 
 }
 
@@ -37,7 +36,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
 
   deletion_protection       = local.is_prod
   skip_final_snapshot       = !local.is_prod
-  final_snapshot_identifier = local.is_prod ? "${local.name}-final" : null
+  final_snapshot_identifier = local.is_prod ? "bfd-${var.env_config.env}-aurora-cluster-final" : null
 
   backup_retention_period      = 21
   preferred_backup_window      = "05:00-06:00"  # 1 am EST
@@ -54,7 +53,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   master_username = "bfduser"
   master_password = "changeme!"
 
-  tags                  = merge({Layer="data"}, local.env_config.tags)
+  tags                  = merge({Layer="data"}, var.env_config.tags)
   copy_tags_to_snapshot = true
 
   lifecycle {
@@ -85,6 +84,6 @@ resource "aws_rds_cluster_instance" "aurora_nodes" {
   performance_insights_enabled    = true
   performance_insights_kms_key_id = var.stateful_config.kms_key_id
 
-  tags                  = merge({Layer="data"}, local.env_config.tags)
+  tags                  = merge({Layer="data"}, var.env_config.tags)
   copy_tags_to_snapshot = true
 }
