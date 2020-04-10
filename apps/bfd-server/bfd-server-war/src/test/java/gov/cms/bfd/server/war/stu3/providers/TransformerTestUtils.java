@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -2028,11 +2030,18 @@ final class TransformerTestUtils {
   static void assertLastUpdatedEquals(
       Optional<Date> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
-      final Date expectedLastUpdated = expectedDateTime.get();
-      Assert.assertEquals(
-          "Expect lastUpdated to be equal",
-          expectedLastUpdated.toInstant(),
-          actualResource.getMeta().getLastUpdated().toInstant());
+      /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
+       * use one instance of an IT DB with the same resources for most tests.
+       * The actual resources a test finds may have a lastUpdated value slightly after the time the test wrote it
+       * because another test over wrote the same resource.
+       * To handle this case, dates that are within a second of each other match.
+       */
+      final Instant expectedLastUpdated = expectedDateTime.get().toInstant();
+      final Instant actualLastUpdated = actualResource.getMeta().getLastUpdated().toInstant();
+      final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
+      Assert.assertTrue(
+          "Expect the actual lastUpdated to be equal or after the loaded resources",
+          diff.compareTo(Duration.ofSeconds(1)) <= 0);
     } else {
       Assert.assertEquals(
           "Expect lastUpdated to be the fallback value",
