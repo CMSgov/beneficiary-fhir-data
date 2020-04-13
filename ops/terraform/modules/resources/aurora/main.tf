@@ -87,3 +87,21 @@ resource "aws_rds_cluster_instance" "aurora_nodes" {
   tags                  = merge({Layer="data"}, var.env_config.tags)
   copy_tags_to_snapshot = true
 }
+
+resource "aws_route53_record" "aurora_writer" {
+  name    = "aurora-writer"
+  type    = "CNAME"
+  zone_id = var.env_config.zone_id
+  ttl     = "300"
+
+  records = [aws_rds_cluster.aurora_cluster.endpoint]
+}
+
+resource "aws_route53_record" "aurora_reader" {
+  name    = "aurora-reader"
+  type    = "CNAME"
+  zone_id = var.env_config.zone_id
+  ttl     = "300"
+
+  records = [aws_rds_cluster.aurora_cluster.reader_endpoint]
+}
