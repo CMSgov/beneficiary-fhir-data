@@ -72,10 +72,6 @@ resource "aws_rds_cluster" "aurora_cluster" {
   preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
 
   enabled_cloudwatch_logs_exports = [
-    "audit",
-    "error",
-    "general",
-    "slowquery",
     "postgresql"
   ]
 
