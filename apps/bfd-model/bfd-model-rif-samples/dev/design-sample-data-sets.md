@@ -273,7 +273,58 @@ All the fixups on the source data that was performed are documented in the `ops/
         https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2014-2014.rif \
         https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2015-2014.rif \
         https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-02-27-add-outpatient/synthetic-outpatient-2016-2014.rif
-   ```     
+   ```
+6. Synthetic part D contract IDs were generated for each synthetic beneficiary.
+The contract ID fields `PTD_CNTRCT_JAN_ID`...`PTD_CNTRCT_DEC_ID` (or `PTDCNTRCT01`...`PTDCNTRCT12` CCW Codebook) were set for all months using the following rules:
+  * Assigned Z0000 to 100 BENE_ID's: -19990000000001 thru -19990000000100
+  * Assigned Z0001 to 1000 BENE_ID's: -19990000000101 thru -19990000001100
+  * Assigned Z0002 to 2000 BENE_ID's: -19990000001101 thru -19990000003100
+  * Assigned Z0005 to 5000 BENE_ID's: -19990000003101 thru -19990000008100
+  * Assigned Z0010 to 10000 BENE_ID's: -19990000008101 thru -19990000010000 and -20000000000001 thru -20000000008100
+  * Assigned Z0012 to 11900 BENE_ID's: -20000000008101 thru -20000000010000 and -20140000000001 thru -20140000010000
+
+  The source data was from the previous iteration #5 synthetic-beneficiary RIF files.
+  All the changes on the source data that was performed are documented in the `ops/ccs-ops-misc/synthetic-data/scripts/beneficiary/update_beneficiary_rif_files_for_bb1896.py` script. That data set can be downloaded using the following command:
+
+   ```
+     $ wget \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/0_manifest.xml \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-beneficiary-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-beneficiary-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-beneficiary-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-1999-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-1999-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-2000-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-2000-2002.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-2014-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-carrier-2014-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-1999-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-1999-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-2000-2001.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-2000-2002.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-2014-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-inpatient-2014-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-pde-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-pde-2015.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-pde-2016.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-1999-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2000-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2001-1999.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2000-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2001-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2002-2000.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2014-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2015-2014.rif \
+        https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2016-2014.rif
+   ```
+
+
 The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/beneficiary-fhir-data:bfd-model-rif-samples/dev](./).
 
 It's important to note that the synthetic data set does not yet cover all supported claim types: it has carrier claims, inpatient claims, outpatient claims, and Part D events but does not have DME claims, HHA claims, hospice claims, or SNF claims. The synthetic data set has the following counts, by record type:
