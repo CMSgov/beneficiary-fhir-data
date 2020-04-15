@@ -45,6 +45,11 @@ resource "aws_db_parameter_group" "aurora_node" {
   }
 }
 
+resource "random_password" "aurora_cluster" {
+  length  = 20
+  special = false
+}
+
 resource "aws_rds_cluster" "aurora_cluster" {
   cluster_identifier = "bfd-${var.env_config.env}-aurora-cluster"
 
@@ -75,7 +80,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   ]
 
   master_username = "bfduser"
-  master_password = "changeme!"
+  master_password = random_password.aurora_cluster.result
 
   tags                  = merge({Layer="data"}, var.env_config.tags)
   copy_tags_to_snapshot = true
