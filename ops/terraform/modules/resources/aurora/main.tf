@@ -24,8 +24,9 @@ resource "aws_security_group" "aurora_cluster" {
 }
 
 resource "aws_db_subnet_group" "aurora_cluster" {
-  name       = "bfd-${var.env_config.env}-aurora-cluster"
-  subnet_ids = var.stateful_config.subnet_ids
+  name        = "bfd-${var.env_config.env}-aurora-cluster"
+  description = "Subnet group for aurora cluster"
+  subnet_ids  = var.stateful_config.subnet_ids
 
   tags = var.env_config.tags
 }
