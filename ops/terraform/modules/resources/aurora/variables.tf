@@ -15,5 +15,5 @@ variable "aurora_node_params" {
 
 variable "stateful_config" {
   description = "Aurora networking and security config passed from stateful"
-  type        = object({azs = list(string), vpc_sg_ids = list(string), subnet_group = string, kms_key_id = string})
+  type        = object({azs = list(string), vpc_sg_ids = list(string), subnet_ids = list(string), kms_key_id = string})
 }

@@ -6,6 +6,30 @@ data "aws_iam_role" "rds_monitoring" {
   name = "rds-monitoring-role"
 }
 
+resource "aws_security_group" "aurora_cluster" {
+  name        = "bfd-${var.env_config.env}-aurora-cluster"
+  description = "Security group for aurora cluster"
+  vpc_id      = var.env_config.vpc_id
+
+  # Ingress will come from security group rules defined stateless module
+  egress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge({Name="bfd-${var.env_config.env}-aurora-cluster"}, var.env_config.tags)
+}
+
+resource "aws_db_subnet_group" "aurora_cluster" {
+  name       = "bfd-${var.env_config.env}-aurora-cluster"
+  subnet_ids = var.stateful_config.subnet_ids
+
+  tags = var.env_config.tags
+}
+
 resource "aws_db_parameter_group" "aurora_node" {
   name        = "bfd-${var.env_config.env}-aurora-node"
   family      = var.aurora_config.param_version
@@ -25,8 +49,8 @@ resource "aws_rds_cluster" "aurora_cluster" {
   cluster_identifier = "bfd-${var.env_config.env}-aurora-cluster"
 
   availability_zones     = var.stateful_config.azs
-  db_subnet_group_name   = var.stateful_config.subnet_group
-  vpc_security_group_ids = var.stateful_config.vpc_sg_ids
+  db_subnet_group_name   = aws_db_subnet_group.aurora_cluster.name
+  vpc_security_group_ids = concat([aws_security_group.aurora_cluster.id], var.stateful_config.vpc_sg_ids)
 
   storage_encrypted = true
   kms_key_id        = var.stateful_config.kms_key_id
@@ -69,7 +93,7 @@ resource "aws_rds_cluster_instance" "aurora_nodes" {
   cluster_identifier = aws_rds_cluster.aurora_cluster.id
 
   availability_zone       = var.stateful_config.azs[count.index]
-  db_subnet_group_name    = var.stateful_config.subnet_group
+  db_subnet_group_name    = aws_db_subnet_group.aurora_cluster.name
   db_parameter_group_name = aws_db_parameter_group.aurora_node.name
 
   engine         = "aurora-postgresql"
