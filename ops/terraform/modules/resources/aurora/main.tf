@@ -104,7 +104,6 @@ resource "aws_rds_cluster_instance" "aurora_nodes" {
   monitoring_role_arn  = data.aws_iam_role.rds_monitoring.arn
   monitoring_interval  = 15
 
-  preferred_backup_window      = "05:00-06:00"  # 1 am EST
   preferred_maintenance_window = "Fri:07:00-Fri:08:00"  # 3 am EST
 
   performance_insights_enabled    = true
