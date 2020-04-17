@@ -19,10 +19,6 @@ module "stateful" {
 
   aurora_node_params = [
     {name = "auto_explain.log_min_duration", value = "6000", apply_on_reboot = false},
-    {name = "auto_explain.log_analyze", value = "1", apply_on_reboot = false},
-    {name = "auto_explain.log_buffers", value = "1", apply_on_reboot = false},
-    {name = "auto_explain.log_timing", value = "1", apply_on_reboot = false},
-    {name = "auto_explain.log_nested_statements", value = "1", apply_on_reboot = false},
     {name = "shared_preload_libraries", value = "pg_stat_statements,auto_explain", apply_on_reboot = true},
     {name = "log_min_duration_statement", value = "6000", apply_on_reboot = false},
     {name = "log_connections", value = "1", apply_on_reboot = false},
