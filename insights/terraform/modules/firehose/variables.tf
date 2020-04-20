@@ -1,5 +1,10 @@
 variable "stream" {
-  description = "name of the stream"
+  description = "Name of the stream"
+  type        = string
+}
+
+variable "project" {
+  description = "Name of the project"
   type        = string
 }
 
@@ -8,13 +13,20 @@ variable "sensitivity" {
   type        = string
 }
 
-variable "bucket_arn" {
-  description = "ARN for the delivery bucket"
-  type        = string
-}
-
 variable "tags" {
   description = "tags"
   type        = map(string)
+}
+
+variable "buffer_size" {
+  description = "Size of the buffer in MB"
+  type        = number
+  default     = 5
+}
+
+variable "buffer_interval" {
+  description = "The interval of buffer refresh in SEC"
+  type        = number
+  default     = 300
 }
 

@@ -1,8 +1,13 @@
 data "aws_caller_identity" "current" {}
 
+data "aws_s3_bucket" "moderate_bucket" {
+  bucket      = "bfd-insights-moderate-${data.aws_caller_identity.current.account_id}"
+}
+
 locals {
-  full_name   = "bfd-insights-${var.sensitivity}-${var.stream}"
+  full_name   = "bfd-insights-${var.project}-${var.stream}"
   account_id  = data.aws_caller_identity.current.account_id
+  bucket_arn  = data.aws_s3_bucket.moderate_bucket.arn
 }
 
 resource "aws_iam_role" "firehose" {
@@ -42,11 +47,11 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
 
   extended_s3_configuration {
     role_arn            = aws_iam_role.firehose.arn
-    bucket_arn          = var.bucket_arn
-    buffer_size         = 1
-    buffer_interval     = 60
+    bucket_arn          = local.bucket_arn
+    buffer_size         = var.buffer_size
+    buffer_interval     = var.buffer_interval
     compression_format  = "Snappy"
-    prefix              = "firehose/${var.stream}/dt=!{timestamp:yyyy-MM-dd-HH}/"
-    error_output_prefix = "firehose/${var.stream}-errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
+    prefix              = "projects/${var.project}/${var.stream}_firehose/dt=!{timestamp:yyyy-MM-dd-HH}/"
+    error_output_prefix = "projects/${var.project}/${var.stream}_firehose_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
   }
 }

@@ -63,7 +63,7 @@ Where
 
 Conventions for source-type include:
 
-- **stream** for Kinesis Firehose streams delivery
+- **firehose** for Kinesis Firehose streams delivery
 - **snap** for Glue database snapshots
 - **dump** for hand-loaded data dumps
 - **work** for the output of a Glue workflow 
