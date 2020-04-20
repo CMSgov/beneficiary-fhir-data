@@ -252,8 +252,8 @@ module "fhir_asg" {
   }
 
   db_config       = {
-    db_sg         = data.aws_security_group.db_replicas.id
-    role          = "replica"
+    db_sg         = data.aws_security_group.aurora_cluster.id
+    role          = "aurora cluster"
   }
 
   mgmt_config     = {
@@ -427,7 +427,7 @@ module "bfd_pipeline" {
   }
 
   db_config       = {
-    db_sg         = data.aws_security_group.db_primary.id
+    db_sg         = data.aws_security_group.aurora_cluster.id
   }
 
   mgmt_config     = {
