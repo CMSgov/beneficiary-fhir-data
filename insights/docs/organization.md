@@ -43,27 +43,16 @@ Bucket names reflect the sensitivity of the information they contain. Since s3 b
 At the top level of a bucket, these folders are setup:
 
 - **users** folder for specific users to store data and query results
-- **projects** folder for data from projects and 
-- **dasg** folder to hold aggregations for all DASG projects
+- **databases** folder for data from projects
 - **adhoc** folder to hold miscellaneous 
 
 ### Table Folders
 
 Folders that hold data follow the following convention: 
 ```
-<project>/optional group/<database>/<content>_<source-type>/<partitions>
+<database>/<table>/<partitions>
 ```
 Where
-- **project** is the abbreviated name of the project
-- **database** is the name of the Glue/Hive database 
-- **content** describes the content of the table
-- **source-type** describes the source of the data
-- **content_source-type** form the Glue/Hive table name 
+- **database** is the abbreviated name of the project plus any other suffixes if there are multiple databases in a project
+- **table** describes the content of the table
 - **partition** are folders used by table partitions. These must follow the Hive convention of `<partition_name>=<value>`
-
-Conventions for source-type include:
-
-- **firehose** for Kinesis Firehose streams delivery
-- **snap** for Glue database snapshots
-- **dump** for hand-loaded data dumps
-- **work** for the output of a Glue workflow 

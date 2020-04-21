@@ -29,7 +29,7 @@ resource "aws_iam_policy" "firehose" {
             ],
             "Resource": [
                 "${local.bucket_arn}",
-                "${local.bucket_arn}/projects/${var.project}/*"
+                "${local.bucket_arn}/databases/${var.database}/*"
             ]
         },
         {
@@ -48,7 +48,7 @@ resource "aws_iam_policy" "firehose" {
                 },
                 "StringLike": {
                     "kms:EncryptionContext:aws:s3:arn": [
-                        "${local.bucket_arn}/projects/${var.project}/*"
+                        "${local.bucket_arn}/databases/${var.database}/*"
                     ]
                 }
             }

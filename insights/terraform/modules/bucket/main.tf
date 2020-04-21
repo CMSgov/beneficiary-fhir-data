@@ -30,7 +30,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
 ## Folders in bucket
 
 resource "aws_s3_bucket_object" "top" {
-  for_each      = toset(["adhoc", "dasg", "projects", "users"])
+  for_each      = toset(["adhoc", "databases", "users"])
   bucket        = aws_s3_bucket.main.id
   content_type  = "application/x-directory"
   key           = "${each.value}/"

@@ -3,8 +3,8 @@ variable "stream" {
   type        = string
 }
 
-variable "project" {
-  description = "Name of the project"
+variable "database" {
+  description = "Name of the database"
   type        = string
 }
 
