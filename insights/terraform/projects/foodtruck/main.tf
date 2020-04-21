@@ -32,7 +32,7 @@ module "table" {
   tags            = local.tags
   partitions      = module.firehose.partitions
   columns = [
-    {name="timestamp", type="string", comment="time of purchase"},
+    {name="timestamp", type="timestamp", comment="Time of purchase ISO format"},
     {name="truck", type="string", comment="Food truck"},
     {name="state", type="string", comment="State 2-letter abbreviation"},
     {name="hamburgers", type="int", comment="Number of hamburgers"},

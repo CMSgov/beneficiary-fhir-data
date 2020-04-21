@@ -17,9 +17,14 @@ module "group_analysts" {
   source      = "../modules/iam_group"
   name        = "analysts"
   policy_arns = [
-    data.aws_iam_policy.athena_full_access.arn,
+    # Add new policies at the end
     module.kms_policies.use_moderate_cmk_arn,
-    module.moderate_bucket.full_arn
+    module.moderate_bucket.full_arn,
+    data.aws_iam_policy.athena_full_access.arn,
+    data.aws_iam_policy.kinesis_firehose_full_access.arn,
+    data.aws_iam_policy.kinesis_stream_full_access.arn,
+    data.aws_iam_policy.kinesis_analytics_full_access.arn,
+    data.aws_iam_policy.glue_full_access.arn
   ]
 }
 
@@ -40,6 +45,21 @@ data "aws_iam_policy" "quicksight_athena_access" {
   arn = "arn:aws:iam::aws:policy/AWSQuicksightAthenaAccess"
 }
 
+data "aws_iam_policy" "kinesis_firehose_full_access" {
+  arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
+}
+
+data "aws_iam_policy" "kinesis_stream_full_access" {
+  arn = "arn:aws:iam::aws:policy/AmazonKinesisFullAccess"
+}
+
+data "aws_iam_policy" "kinesis_analytics_full_access" {
+  arn = "arn:aws:iam::aws:policy/AmazonKinesisAnalyticsFullAccess"
+}
+
+data "aws_iam_policy" "glue_full_access" {
+  arn = "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess"
+}
 
 ## Policies 
 

@@ -50,9 +50,19 @@ At the top level of a bucket, these folders are setup:
 
 Folders that hold data follow the following convention: 
 ```
-<database>/<table>/<partitions>
+/databases/<database>/<table>/<partitions>
 ```
 Where
 - **database** is the abbreviated name of the project plus any other suffixes if there are multiple databases in a project
 - **table** describes the content of the table
 - **partition** are folders used by table partitions. These must follow the Hive convention of `<partition_name>=<value>`
+
+All names should be lower cased and only inlcude letters, numbers and _. 
+
+### Users Folders
+All user folders follow this convention. 
+
+```
+/users/<user-name>
+/users/<user-name>/query_results
+```

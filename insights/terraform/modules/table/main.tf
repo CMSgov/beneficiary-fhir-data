@@ -51,7 +51,8 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
       name                  = var.table
       serialization_library = "org.apache.hive.hcatalog.data.JsonSerDe"
       parameters = {
-        "ignore.malformed.json" = true
+        "ignore.malformed.json" = true,
+        "timestamp.formats" = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
       }
     }
   }
