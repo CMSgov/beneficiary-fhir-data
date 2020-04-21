@@ -28,7 +28,7 @@ have access to all except security configs.
 - **Authors** create QuickSight dashboards.
 - **Readers** are leadership and product stakeholders with access to read QuickSight dashboards. 
 
-## Naming Conventions
+## Resources Naming Conventions
 
 ### All resources
 
@@ -46,7 +46,15 @@ At the top level of a bucket, these folders are setup:
 - **databases** folder for data from projects
 - **adhoc** folder to hold miscellaneous 
 
-### Table Folders
+### Databases and Tables
+
+Databases follow this convention: `<project><_suffix>`. The project is required, but any suffix can follow
+
+Tables 
+
+All database and table names should be lower-cased and only inlcude letters, numbers and _. 
+
+### Data Folders 
 
 Folders that hold data follow the following convention: 
 ```
