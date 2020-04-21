@@ -18,7 +18,6 @@ module "group_analysts" {
   name        = "analysts"
   policy_arns = [
     # Add new policies at the end
-    module.kms_policies.use_moderate_cmk_arn,
     module.moderate_bucket.full_arn,
     data.aws_iam_policy.athena_full_access.arn,
     data.aws_iam_policy.kinesis_firehose_full_access.arn,
@@ -62,10 +61,5 @@ data "aws_iam_policy" "glue_full_access" {
 }
 
 ## Policies 
-
-module "kms_policies" {
-  source      = "../modules/kms_policies"
-}
-
 
 
