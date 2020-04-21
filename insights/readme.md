@@ -9,4 +9,4 @@ It contains sub-projects that corresponds to the other DASG projects.
 
 - **[Terraform](Terraform/readme.md)** scripts to deploy changes
 - **[Docs](Docs/index.md)** Engineering documents about the project 
-- **Scripts** that are helpful for operations and testing
+- **[Scripts](scripts)** that are helpful for operations and testing
