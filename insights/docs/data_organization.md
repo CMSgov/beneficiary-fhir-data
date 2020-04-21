@@ -50,7 +50,7 @@ At the top level of a bucket, these folders are setup:
 
 Databases follow this convention: `<project><_suffix>`. The project is required, but any suffix can follow
 
-Tables 
+Table names should be simple and reflect the contents of the table.
 
 All database and table names should be lower-cased and only inlcude letters, numbers and _. 
 
