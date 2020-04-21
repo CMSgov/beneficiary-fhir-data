@@ -10,6 +10,23 @@ provider "aws" {
 module "stateful" {
   source = "../../../modules/stateful"
 
+  aurora_config = {
+    instance_class = "db.r5.2xlarge"
+    cluster_nodes  = 3
+    engine_version = "11.6"
+    param_version  = "aurora-postgresql11"
+  }
+
+  aurora_node_params = [
+    {name = "auto_explain.log_min_duration", value = "6000", apply_on_reboot = false},
+    {name = "shared_preload_libraries", value = "pg_stat_statements,auto_explain", apply_on_reboot = true},
+    {name = "log_min_duration_statement", value = "6000", apply_on_reboot = false},
+    {name = "log_connections", value = "1", apply_on_reboot = false},
+    {name = "default_statistics_target", value = "1000", apply_on_reboot = false},
+    {name = "random_page_cost", value = "1.1", apply_on_reboot = false},
+    {name = "work_mem", value = "32768", apply_on_reboot = false}
+  ]
+
   db_config = { 
     instance_class    = "db.r5.24xlarge"
     iops              = 6000

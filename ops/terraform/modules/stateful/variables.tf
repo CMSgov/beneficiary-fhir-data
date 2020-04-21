@@ -1,3 +1,13 @@
+variable "aurora_config" {
+  description = "Aurora sizing and version config"
+  type        = object({instance_class = string, cluster_nodes = number, engine_version = string, param_version = string})
+}
+
+variable "aurora_node_params" {
+  description = "Aurora node parameter group config"
+  type        = list(object({name = string, value = string, apply_on_reboot = bool}))
+}
+
 variable "db_config" {
   description       = "All the high-level configuration needed to setup an RDS instances"
   type              = object({instance_class = string, allocated_storage=number, iops = number})

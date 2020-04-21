@@ -109,6 +109,15 @@ data "aws_security_group" "db_replicas" {
   }
 }
 
+# Aurora security group
+#
+data "aws_security_group" "aurora_cluster" {
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-aurora-cluster"]
+  }
+}
+
 # Other Security Groups
 #
 # Find the security group for the Cisco VPN
