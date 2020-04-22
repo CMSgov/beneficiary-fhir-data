@@ -21,7 +21,7 @@ trucks = [
   {'truck': 'SD1', 'state': 'CA'},  
 ]
 
-firehose = boto3.client('firehose', region_name='us-east-1')
+firehose = boto3.client('firehose')
 
 for i in range(100):
   truck = random.choice(range(0, len(trucks)))
