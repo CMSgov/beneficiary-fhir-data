@@ -35,6 +35,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -349,20 +350,16 @@ public final class PatientResourceProvider implements IResourceProvider {
         (hasHICN(includedIdentifiers) || hasMBI(includedIdentifiers)) && paging.isPagingRequested();
     if (useTwoSteps) {
       // Fetch ids
-      CriteriaQuery<String> idQuery =
-          queryBeneficiaryIdsBy(contractMonthField, contractCode, paging);
       List<String> ids =
-          entityManager.createQuery(idQuery).setMaxResults(paging.getPageSize()).getResultList();
+          queryBeneficiaryIds(contractMonthField, contractCode, paging)
+              .setMaxResults(paging.getPageSize())
+              .getResultList();
 
       // Fetch the benes using the ids
-      CriteriaQuery<Beneficiary> beneQuery = queryBeneficiariesByIds(ids, joins);
-      return entityManager.createQuery(beneQuery).getResultList();
+      return queryBeneficiariesByIds(ids, joins).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      CriteriaQuery<Beneficiary> criteria =
-          queryBeneficiariesBy(contractMonthField, contractCode, paging, joins);
-      return entityManager
-          .createQuery(criteria)
+      return queryBeneficiariesBy(contractMonthField, contractCode, paging, joins)
           .setMaxResults(paging.getPageSize())
           .getResultList();
     }
@@ -377,31 +374,26 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @param joins to add for many-to-one relations
    * @return the criteria
    */
-  private CriteriaQuery<Beneficiary> queryBeneficiariesBy(
+  private TypedQuery<Beneficiary> queryBeneficiariesBy(
       SingularAttribute<Beneficiary, String> field,
       String value,
       PatientLinkBuilder paging,
       List<SetAttribute<Beneficiary, ?>> joins) {
-
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = cb.createQuery(Beneficiary.class);
     Root<Beneficiary> b = criteria.from(Beneficiary.class);
+
     joins.forEach(f -> b.fetch(f, JoinType.LEFT));
 
-    if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      return criteria
-          .select(b)
-          .where(
-              cb.and(
-                  cb.equal(b.get(field), value),
-                  cb.greaterThan(b.get("beneficiaryId"), paging.getCursor())))
-          .orderBy(cb.asc(b.get("beneficiaryId")));
-    } else {
-      return criteria
-          .select(b)
-          .where(cb.equal(b.get(field), value))
-          .orderBy(cb.asc(b.get("beneficiaryId")));
-    }
+    Predicate whereClause =
+        paging.isPagingRequested() && !paging.isFirstPage()
+            ? cb.and(
+                cb.equal(b.get(field), value),
+                cb.greaterThan(b.get("beneficiaryId"), paging.getCursor()))
+            : cb.equal(b.get(field), value);
+
+    return entityManager.createQuery(
+        criteria.select(b).where(whereClause).orderBy(cb.asc(b.get("beneficiaryId"))));
   }
 
   /**
@@ -412,26 +404,24 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @param paging to use for the result set
    * @return the criteria
    */
-  private CriteriaQuery<String> queryBeneficiaryIdsBy(
+  private TypedQuery<String> queryBeneficiaryIds(
       SingularAttribute<Beneficiary, String> field, String value, PatientLinkBuilder paging) {
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<String> criteria = cb.createQuery(String.class);
     Root<Beneficiary> b = criteria.from(Beneficiary.class);
 
-    if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      return criteria
-          .select(b.get("beneficiaryId"))
-          .where(
-              cb.and(
-                  cb.equal(b.get(field), value),
-                  cb.greaterThan(b.get("beneficiaryId"), paging.getCursor())))
-          .orderBy(cb.asc(b.get("beneficiaryId")));
-    } else {
-      return criteria
-          .select(b.get("beneficiaryId"))
-          .where(cb.equal(b.get(field), value))
-          .orderBy(cb.asc(b.get("beneficiaryId")));
-    }
+    Predicate whereClause =
+        paging.isPagingRequested() && !paging.isFirstPage()
+            ? cb.and(
+                cb.equal(b.get(field), value),
+                cb.greaterThan(b.get("beneficiaryId"), paging.getCursor()))
+            : cb.equal(b.get(field), value);
+
+    return entityManager.createQuery(
+        criteria
+            .select(b.get("beneficiaryId"))
+            .where(whereClause)
+            .orderBy(cb.asc(b.get("beneficiaryId"))));
   }
 
   /**
@@ -441,16 +431,17 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @param joins to add for many-to-one relations
    * @return the criteria
    */
-  private CriteriaQuery<Beneficiary> queryBeneficiariesByIds(
+  private TypedQuery<Beneficiary> queryBeneficiariesByIds(
       List<String> ids, List<SetAttribute<Beneficiary, ?>> joins) {
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = cb.createQuery(Beneficiary.class);
     Root<Beneficiary> b = criteria.from(Beneficiary.class);
     joins.forEach(f -> b.fetch(f, JoinType.LEFT));
-    return criteria
-        .select(b)
-        .where(b.get("beneficiaryId").in(ids))
-        .orderBy(cb.asc(b.get("beneficiaryId")));
+    return entityManager.createQuery(
+        criteria
+            .select(b)
+            .where(b.get("beneficiaryId").in(ids))
+            .orderBy(cb.asc(b.get("beneficiaryId"))));
   }
 
   /**
