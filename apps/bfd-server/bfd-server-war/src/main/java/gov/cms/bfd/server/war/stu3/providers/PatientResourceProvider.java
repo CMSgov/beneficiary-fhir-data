@@ -345,7 +345,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     // Fetching with joins is not compatible with setMaxResults as explained in this post:
     // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
-    // So, in cases where there are joins and paging, we query in two steps.
+    // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
+    // with paging and the fetch full benes with joins.
     boolean useTwoSteps =
         (hasHICN(includedIdentifiers) || hasMBI(includedIdentifiers)) && paging.isPagingRequested();
     if (useTwoSteps) {
