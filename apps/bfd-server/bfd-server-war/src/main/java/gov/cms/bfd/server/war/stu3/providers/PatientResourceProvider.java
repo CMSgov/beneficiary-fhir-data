@@ -23,6 +23,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -320,7 +321,8 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   /**
-   * Fetch beneficiaries for the PartD coverage parameter
+   * Fetch beneficiaries for the PartD coverage parameter. If includeIdentiers are present then the
+   * entity mappings are fetched as well
    *
    * @param coverageId coverage type
    * @param includedIdentifiers list from the includeIdentifier header
@@ -329,19 +331,41 @@ public final class PatientResourceProvider implements IResourceProvider {
    */
   private List<Beneficiary> fetchBeneficiaries(
       TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
-    List<SetAttribute<Beneficiary, ?>> withRelations = new LinkedList<>();
-    if (hasHICN(includedIdentifiers)) withRelations.add(Beneficiary_.beneficiaryHistories);
-    if (hasMBI(includedIdentifiers)) withRelations.add(Beneficiary_.medicareBeneficiaryIdHistories);
-
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
     SingularAttribute<Beneficiary, String> contractMonthField = partDFieldFor(partDContractMonth);
     String contractCode = coverageId.getValueNotNull();
 
-    CriteriaQuery<Beneficiary> criteria =
-        queryBeneficiariesBy(contractMonthField, contractCode, paging, withRelations);
-    return entityManager.createQuery(criteria).setMaxResults(paging.getPageSize()).getResultList();
+    // Use joins to fetch the mbi and hicn histories
+    List<SetAttribute<Beneficiary, ?>> joins = new ArrayList<>();
+    if (hasHICN(includedIdentifiers)) joins.add(Beneficiary_.beneficiaryHistories);
+    if (hasMBI(includedIdentifiers)) joins.add(Beneficiary_.medicareBeneficiaryIdHistories);
+
+    // Fetching with joins is not compatible with setMaxResults as explained in this post:
+    // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
+    // So, in cases where there are joins and paging, we query in two steps.
+    boolean useTwoSteps =
+        (hasHICN(includedIdentifiers) || hasMBI(includedIdentifiers)) && paging.isPagingRequested();
+    if (useTwoSteps) {
+      // Fetch ids
+      CriteriaQuery<String> idQuery =
+          queryBeneficiaryIdsBy(contractMonthField, contractCode, paging);
+      List<String> ids =
+          entityManager.createQuery(idQuery).setMaxResults(paging.getPageSize()).getResultList();
+
+      // Fetch the benes using the ids
+      CriteriaQuery<Beneficiary> beneQuery = queryBeneficiariesByIds(ids, joins);
+      return entityManager.createQuery(beneQuery).getResultList();
+    } else {
+      // Fetch benes and their histories in one query
+      CriteriaQuery<Beneficiary> criteria =
+          queryBeneficiariesBy(contractMonthField, contractCode, paging, joins);
+      return entityManager
+          .createQuery(criteria)
+          .setMaxResults(paging.getPageSize())
+          .getResultList();
+    }
   }
 
   /**
@@ -378,6 +402,55 @@ public final class PatientResourceProvider implements IResourceProvider {
           .where(cb.equal(b.get(field), value))
           .orderBy(cb.asc(b.get("beneficiaryId")));
     }
+  }
+
+  /**
+   * Build a criteria for a general beneficiaryId query
+   *
+   * @param field to match on
+   * @param value to match on
+   * @param paging to use for the result set
+   * @return the criteria
+   */
+  private CriteriaQuery<String> queryBeneficiaryIdsBy(
+      SingularAttribute<Beneficiary, String> field, String value, PatientLinkBuilder paging) {
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<String> criteria = cb.createQuery(String.class);
+    Root<Beneficiary> b = criteria.from(Beneficiary.class);
+
+    if (paging.isPagingRequested() && !paging.isFirstPage()) {
+      return criteria
+          .select(b.get("beneficiaryId"))
+          .where(
+              cb.and(
+                  cb.equal(b.get(field), value),
+                  cb.greaterThan(b.get("beneficiaryId"), paging.getCursor())))
+          .orderBy(cb.asc(b.get("beneficiaryId")));
+    } else {
+      return criteria
+          .select(b.get("beneficiaryId"))
+          .where(cb.equal(b.get(field), value))
+          .orderBy(cb.asc(b.get("beneficiaryId")));
+    }
+  }
+
+  /**
+   * Build a criteria for a beneficiary query using the passed in list of ids
+   *
+   * @param ids to use
+   * @param joins to add for many-to-one relations
+   * @return the criteria
+   */
+  private CriteriaQuery<Beneficiary> queryBeneficiariesByIds(
+      List<String> ids, List<SetAttribute<Beneficiary, ?>> joins) {
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Beneficiary> criteria = cb.createQuery(Beneficiary.class);
+    Root<Beneficiary> b = criteria.from(Beneficiary.class);
+    joins.forEach(f -> b.fetch(f, JoinType.LEFT));
+    return criteria
+        .select(b)
+        .where(b.get("beneficiaryId").in(ids))
+        .orderBy(cb.asc(b.get("beneficiaryId")));
   }
 
   /**
