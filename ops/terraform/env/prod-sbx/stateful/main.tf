@@ -52,6 +52,6 @@ module "stateful" {
   medicare_opt_out_config = {
     read_roles        = ["arn:aws:iam::755619740999:role/dpc-dev-consent-execution-role"]
     write_roles       = ["arn:aws:iam::755619740999:role/bcda-dev-nfs-instance", "arn:aws:iam::755619740999:role/bcda-test-nfs-instance"]
-    admin_users       = ["arn:aws:iam::577373831711:user/DS7H", "arn:aws:iam::577373831711:user/VZG9", "arn:aws:iam::577373831711:user/BYSK"]
+    admin_users       = ["arn:aws:iam::577373831711:user/DS7H", "arn:aws:iam::577373831711:user/VZG9"]
   }
 }
