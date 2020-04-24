@@ -2,6 +2,7 @@ locals {
   # Add new group members here
   member_map  = {
     analysts  = ["HWRI", "SKKH"]
+    authors   = ["TUVE"]
     readers   = []
   }
 }
