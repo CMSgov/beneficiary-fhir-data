@@ -252,9 +252,8 @@ module "fhir_asg" {
   }
 
   db_config       = {
-    # TODO: remove once prod has fully restored in aurora
-    db_sg         = var.env_config.env == "prod" ? data.aws_security_group.db_replicas.id : data.aws_security_group.aurora_cluster.id
-    role          = var.env_config.env == "prod" ? "replica" : "aurora cluster"
+    db_sg         = data.aws_security_group.aurora_cluster.id
+    role          = "aurora cluster"
   }
 
   mgmt_config     = {
@@ -428,8 +427,7 @@ module "bfd_pipeline" {
   }
 
   db_config       = {
-    # TODO: remove once prod has fully restored in aurora
-    db_sg         = var.env_config.env == "prod" ? data.aws_security_group.db_primary.id : data.aws_security_group.aurora_cluster.id
+    db_sg         = data.aws_security_group.aurora_cluster.id
   }
 
   mgmt_config     = {
