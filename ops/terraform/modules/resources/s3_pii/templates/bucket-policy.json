@@ -66,23 +66,6 @@
       ]
     },
     {
-      "Sid": "BFDPIIS3DenyNonExplicitUsers",
-      "Effect": "Deny",
-      "NotPrincipal": {
-        "AWS": [
-          %{ for reader in readers ~}"${reader}",%{ endfor ~}
-          %{ for writer in writers ~}"${writer}",%{ endfor ~}
-          %{ for admin in admins ~}"${admin}",%{ endfor ~}
-          "${root}"
-        ]
-      },
-      "Action": "s3:*",
-      "Resource": [
-        "arn:aws:s3:::${bucket_id}/*",
-        "arn:aws:s3:::${bucket_id}"
-      ]
-    },
-    {
       "Sid": "BFDPIIS3DenyUnencrypted",
       "Effect": "Deny",
       "Principal": "*",
