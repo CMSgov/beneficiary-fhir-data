@@ -34,12 +34,12 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -290,37 +290,26 @@ public final class PatientResourceProvider implements IResourceProvider {
     }
   }
 
-  private SingularAttribute<Beneficiary, String> partDFieldFor(CcwCodebookVariable cntrctMonth) {
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT01)
-      return Beneficiary_.partDContractNumberJanId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT02)
-      return Beneficiary_.partDContractNumberFebId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT03)
-      return Beneficiary_.partDContractNumberMarId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT04)
-      return Beneficiary_.partDContractNumberAprId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT05)
-      return Beneficiary_.partDContractNumberMayId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT06)
-      return Beneficiary_.partDContractNumberJunId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT07)
-      return Beneficiary_.partDContractNumberJulId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT08)
-      return Beneficiary_.partDContractNumberAugId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT09)
-      return Beneficiary_.partDContractNumberSeptId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT10)
-      return Beneficiary_.partDContractNumberOctId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT11)
-      return Beneficiary_.partDContractNumberNovId;
-    if (cntrctMonth == CcwCodebookVariable.PTDCNTRCT12)
-      return Beneficiary_.partDContractNumberDecId;
+  private String partDFieldFor(CcwCodebookVariable month) {
+    if (month == CcwCodebookVariable.PTDCNTRCT01) return "partDContractNumberJanId";
+    if (month == CcwCodebookVariable.PTDCNTRCT02) return "partDContractNumberFebId";
+    if (month == CcwCodebookVariable.PTDCNTRCT03) return "partDContractNumberMarId";
+    if (month == CcwCodebookVariable.PTDCNTRCT04) return "partDContractNumberAprId";
+    if (month == CcwCodebookVariable.PTDCNTRCT05) return "partDContractNumberMayId";
+    if (month == CcwCodebookVariable.PTDCNTRCT06) return "partDContractNumberJunId";
+    if (month == CcwCodebookVariable.PTDCNTRCT07) return "partDContractNumberJulId";
+    if (month == CcwCodebookVariable.PTDCNTRCT08) return "partDContractNumberAugId";
+    if (month == CcwCodebookVariable.PTDCNTRCT09) return "partDContractNumberSeptId";
+    if (month == CcwCodebookVariable.PTDCNTRCT10) return "partDContractNumberOctId";
+    if (month == CcwCodebookVariable.PTDCNTRCT11) return "partDContractNumberNovId";
+    if (month == CcwCodebookVariable.PTDCNTRCT12) return "partDContractNumberDecId";
     throw new InvalidRequestException(
-        "Unsupported extension system: " + cntrctMonth.getVariable().getId().toLowerCase());
+        "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }
 
   /**
-   * Fetch beneficiaries for the PartD coverage parameter
+   * Fetch beneficiaries for the PartD coverage parameter. If includeIdentiers are present then the
+   * entity mappings are fetched as well
    *
    * @param coverageId coverage type
    * @param includedIdentifiers list from the includeIdentifier header
@@ -329,19 +318,33 @@ public final class PatientResourceProvider implements IResourceProvider {
    */
   private List<Beneficiary> fetchBeneficiaries(
       TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
-    List<SetAttribute<Beneficiary, ?>> withRelations = new LinkedList<>();
-    if (hasHICN(includedIdentifiers)) withRelations.add(Beneficiary_.beneficiaryHistories);
-    if (hasMBI(includedIdentifiers)) withRelations.add(Beneficiary_.medicareBeneficiaryIdHistories);
-
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
-    SingularAttribute<Beneficiary, String> contractMonthField = partDFieldFor(partDContractMonth);
+    String contractMonthField = partDFieldFor(partDContractMonth);
     String contractCode = coverageId.getValueNotNull();
 
-    CriteriaQuery<Beneficiary> criteria =
-        queryBeneficiariesBy(contractMonthField, contractCode, paging, withRelations);
-    return entityManager.createQuery(criteria).setMaxResults(paging.getPageSize()).getResultList();
+    // Fetching with joins is not compatible with setMaxResults as explained in this post:
+    // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
+    // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
+    // with paging and then fetch full benes with joins.
+    boolean useTwoSteps =
+        (hasHICN(includedIdentifiers) || hasMBI(includedIdentifiers)) && paging.isPagingRequested();
+    if (useTwoSteps) {
+      // Fetch ids
+      List<String> ids =
+          queryBeneficiaryIds(contractMonthField, contractCode, paging)
+              .setMaxResults(paging.getPageSize())
+              .getResultList();
+
+      // Fetch the benes using the ids
+      return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
+    } else {
+      // Fetch benes and their histories in one query
+      return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
+          .setMaxResults(paging.getPageSize())
+          .getResultList();
+    }
   }
 
   /**
@@ -350,34 +353,94 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @param field to match on
    * @param value to match on
    * @param paging to use for the result set
-   * @param joins to add for many-to-one relations
+   * @param identifiers to add for many-to-one relations
    * @return the criteria
    */
-  private CriteriaQuery<Beneficiary> queryBeneficiariesBy(
-      SingularAttribute<Beneficiary, String> field,
-      String value,
-      PatientLinkBuilder paging,
-      List<SetAttribute<Beneficiary, ?>> joins) {
-
-    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Beneficiary> criteria = cb.createQuery(Beneficiary.class);
-    Root<Beneficiary> b = criteria.from(Beneficiary.class);
-    joins.forEach(f -> b.fetch(f, JoinType.LEFT));
+  private TypedQuery<Beneficiary> queryBeneficiariesBy(
+      String field, String value, PatientLinkBuilder paging, List<String> identifiers) {
+    String joinsClause = "";
+    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      return criteria
-          .select(b)
-          .where(
-              cb.and(
-                  cb.equal(b.get(field), value),
-                  cb.greaterThan(b.get("beneficiaryId"), paging.getCursor())))
-          .orderBy(cb.asc(b.get("beneficiaryId")));
+      String query =
+          "select b from Beneficiary b "
+              + joinsClause
+              + "where b."
+              + field
+              + " = :value and b.beneficiaryId > :cursor "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager
+          .createQuery(query, Beneficiary.class)
+          .setParameter("value", value)
+          .setParameter("cursor", paging.getCursor());
     } else {
-      return criteria
-          .select(b)
-          .where(cb.equal(b.get(field), value))
-          .orderBy(cb.asc(b.get("beneficiaryId")));
+      String query =
+          "select b from Beneficiary b "
+              + joinsClause
+              + "where b."
+              + field
+              + " = :value "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager.createQuery(query, Beneficiary.class).setParameter("value", value);
     }
+  }
+
+  /**
+   * Build a criteria for a general beneficiaryId query
+   *
+   * @param field to match on
+   * @param value to match on
+   * @param paging to use for the result set
+   * @return the criteria
+   */
+  private TypedQuery<String> queryBeneficiaryIds(
+      String field, String value, PatientLinkBuilder paging) {
+    if (paging.isPagingRequested() && !paging.isFirstPage()) {
+      String query =
+          "select b.beneficiaryId from Beneficiary b "
+              + "where b."
+              + field
+              + " = :value and b.beneficiaryId > :cursor "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager
+          .createQuery(query, String.class)
+          .setParameter("value", value)
+          .setParameter("cursor", paging.getCursor());
+    } else {
+      String query =
+          "select b.beneficiaryId from Beneficiary b "
+              + "where b."
+              + field
+              + " = :value "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager.createQuery(query, String.class).setParameter("value", value);
+    }
+  }
+
+  /**
+   * Build a criteria for a beneficiary query using the passed in list of ids
+   *
+   * @param ids to use
+   * @param identifiers to add for many-to-one relations
+   * @return the criteria
+   */
+  private TypedQuery<Beneficiary> queryBeneficiariesByIds(
+      List<String> ids, List<String> identifiers) {
+    String joinsClause = "";
+    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
+
+    String query =
+        "select b from Beneficiary b "
+            + joinsClause
+            + "where b.beneficiaryId in :ids "
+            + "order by b.beneficiaryId asc";
+    return entityManager.createQuery(query, Beneficiary.class).setParameter("ids", ids);
   }
 
   /**
