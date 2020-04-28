@@ -404,6 +404,43 @@ public final class ExplanationOfBenefitResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not
+   * exist in the DB using a negative ID.
+   */
+  @Test(expected = ResourceNotFoundException.class)
+  public void readEobForMissingNegativePartDEvent() {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // No data is loaded, so this should return nothing. Tests negative ID will pass regex pattern.
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1234"))
+        .execute();
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an
+   * invalid {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#IdParam} parameter.
+   */
+  @Test(expected = InvalidRequestException.class)
+  public void readEobForInvalidIdParamPartDEvent() {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // The IdParam is not valid, so this should return an exception.
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1?234"))
+        .execute();
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
    * works as expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does exist
    * in the DB.
    *
