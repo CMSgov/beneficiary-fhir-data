@@ -58,7 +58,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
   /**
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
-   * application.
+   * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
 

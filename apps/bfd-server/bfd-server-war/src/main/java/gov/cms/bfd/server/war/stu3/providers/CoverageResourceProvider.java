@@ -45,7 +45,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class CoverageResourceProvider implements IResourceProvider {
-  /** A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application. */
+  /**
+   * A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application, e.g.
+   * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
+   */
   private static final Pattern COVERAGE_ID_PATTERN =
       Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Alnum}+)");
 
