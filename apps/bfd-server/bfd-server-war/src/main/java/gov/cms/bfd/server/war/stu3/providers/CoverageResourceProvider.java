@@ -106,7 +106,9 @@ public final class CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    if (!coverageIdMatcher.matches()) throw new ResourceNotFoundException(coverageId);
+    if (!coverageIdMatcher.matches())
+      throw new IllegalArgumentException("Unsupported ID pattern: " + coverageIdText);
+
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
         MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
