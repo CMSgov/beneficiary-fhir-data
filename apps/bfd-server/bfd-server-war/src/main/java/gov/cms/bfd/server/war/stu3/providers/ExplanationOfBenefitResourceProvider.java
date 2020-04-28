@@ -120,7 +120,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     if (eobIdText == null || eobIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
     Matcher eobIdMatcher = EOB_ID_PATTERN.matcher(eobIdText);
-    if (!eobIdMatcher.matches()) throw new ResourceNotFoundException(eobId);
+    if (!eobIdMatcher.matches())
+      throw new IllegalArgumentException("Unsupported ID pattern: " + eobIdText);
+
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
