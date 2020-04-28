@@ -21,6 +21,7 @@ module "database" {
   source          = "../../modules/database"
   database        = local.database
   sensitivity     = "moderate"
+  role_names      = ["bfd-insights-foodtruck-purchases"]
   tags            = local.tags
 }
 
