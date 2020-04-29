@@ -6,10 +6,12 @@ locals {
 
 module "moderate_bucket" {
   source      = "../modules/bucket"
-  sensitivity = "moderate"
+  name        = "moderate"
+  full_groups = [module.group_analysts.name]
+  athena_groups = [module.group_readers.name, module.group_authors.name]
+  folders     = ["databases", "adhoc", "users"]
   tags        = local.tags
 }
-
 
 # Provision Groups with Policies
 
@@ -18,7 +20,6 @@ module "group_analysts" {
   name        = "analysts"
   policy_arns = [
     # Add new policies at the end
-    module.moderate_bucket.full_arn,
     data.aws_iam_policy.athena_full_access.arn,
     data.aws_iam_policy.kinesis_firehose_full_access.arn,
     data.aws_iam_policy.kinesis_stream_full_access.arn,
@@ -32,7 +33,6 @@ module "group_readers" {
   name        = "readers"
   policy_arns = [
     # Add new policies at the end
-    module.moderate_bucket.athena_query_arn,
     data.aws_iam_policy.quicksight_athena_access.arn
   ]
 }
@@ -42,7 +42,6 @@ module "group_authors" {
   name        = "authors"
   policy_arns = [
     # Add new policies at the end
-    module.moderate_bucket.athena_query_arn,
     data.aws_iam_policy.quicksight_athena_access.arn
   ]
 }

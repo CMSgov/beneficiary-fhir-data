@@ -1,7 +1,7 @@
 resource "aws_iam_policy" "firehose" {
   name        = local.full_name
   path        = "/bfd-insights/"
-  description = "Allow firehose delivery to the ${var.sensitivity} bucket"
+  description = "Allow firehose delivery to ${var.bucket}"
   policy      = <<-EOF
 {
     "Version": "2012-10-17",

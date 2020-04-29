@@ -3,8 +3,8 @@ variable "database" {
   type        = string
 }
 
-variable "sensitivity" {
-  description = "Sensitivity name (ie. high or moderate)"
+variable "bucket" {
+  description = "bucket with that holds the database (Must have a databases folder)"
   type        = string
 }
 
@@ -12,5 +12,4 @@ variable "tags" {
   description = "tags"
   type        = map(string)
 }
-
 

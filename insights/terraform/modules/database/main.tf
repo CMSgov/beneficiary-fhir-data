@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
-data "aws_s3_bucket" "moderate_bucket" {
-  bucket      = "bfd-insights-moderate-${data.aws_caller_identity.current.account_id}"
+data "aws_s3_bucket" "main" {
+  bucket      = var.bucket
 }
 
 data "aws_kms_alias" "s3" {
@@ -10,7 +10,7 @@ data "aws_kms_alias" "s3" {
 
 locals {
   account_id  = data.aws_caller_identity.current.account_id
-  bucket_arn  = data.aws_s3_bucket.moderate_bucket.arn
+  bucket_arn  = data.aws_s3_bucket.main.arn
 }
 
 resource "aws_glue_catalog_database" "main" {

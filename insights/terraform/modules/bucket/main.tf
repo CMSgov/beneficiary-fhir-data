@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "main" {
-  bucket    = "bfd-insights-${var.sensitivity}-${data.aws_caller_identity.current.account_id}"
+  bucket    = "bfd-insights-${var.name}-${data.aws_caller_identity.current.account_id}"
   acl       = "private"
   tags      = merge({sensitivity = var.sensitivity}, var.tags)
 
@@ -30,7 +30,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
 ## Folders in bucket
 
 resource "aws_s3_bucket_object" "top" {
-  for_each      = toset(["adhoc", "databases", "users"])
+  for_each      = toset(var.folders)
   bucket        = aws_s3_bucket.main.id
   content_type  = "application/x-directory"
   key           = "${each.value}/"

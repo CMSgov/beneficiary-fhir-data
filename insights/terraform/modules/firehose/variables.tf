@@ -8,8 +8,8 @@ variable "database" {
   type        = string
 }
 
-variable "sensitivity" {
-  description = "Sensitivity name (ie. high or moderate)"
+variable "bucket" {
+  description = "the bucket that holds the database"
   type        = string
 }
 

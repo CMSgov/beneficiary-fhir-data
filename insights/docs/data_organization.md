@@ -12,7 +12,7 @@ A lake is a set of databases and their query engines, plus the ELT jobs and work
 Visulization tools like QuickSight conceptually sit outside the data lake. 
 
 ### Projects 
-Projects contain all the resources and data for a particular DASG project. The abbreviated name of the projects are used. Examples include `ab2d`, `bb2`, `bfd`, `bcda`, and `dpc`. `dasg` is sometime to used as a project name to indicate concerns that cross-project boundaries. 
+Projects represent a particular DASG project. The abbreviated name of the projects are used. Examples include `ab2d`, `bb2`, `bfd`, `bcda`, and `dpc`. `dasg` is sometime to used as a project name to indicate concerns that cross-project boundaries. 
 
 ### Moderate and High Sensitivity
 At the first level, a lake's data is divided according to the sensitivity of the data. There are different buckets for each sensitivity level. 
@@ -22,6 +22,7 @@ At the first level, a lake's data is divided according to the sensitivity of the
 
 ### Groups 
 There are 4 groups of users defined: 
+
 - **Admins** are .gov employees who setup security policies.
 - **Analysts** are Data Engineers who
 have access to all except security configs.
@@ -37,22 +38,24 @@ have access to all except security configs.
 `product` `sensitivity`, and `project`.  
 
 ### Buckets
-Bucket names reflect the sensitivity of the information they contain. Since s3 buckets need to be globally unique names, they also include the account-id to ensure they unique. Example: `bfd-insights-moderate-577373831711`
+There are two forms of bucket names: a per project name or a sensitivity name. Since s3 buckets need to be globally unique names, they also include the account-id to ensure they unique. 
+
+Examples: `bfd-insights-moderate-577373831711`, `bfd-insights-ab2d-577373831711`
 
 ### Top-level Folders
 At the top level of a bucket, these folders are setup:
 
-- **users** folder for specific users to store data and query results
-- **databases** folder for data from projects
-- **adhoc** folder to hold miscellaneous 
+- **users** (optional) folder for specific users to store data and query results
+- **databases** folder for databases
+- **adhoc** (optional) folder to hold miscellaneous 
 
 ### Databases and Tables
 
-Databases follow this convention: `<project><_suffix>`. The project is required, but any suffix can follow
+Databases names follow this convention: `<project><_suffix>`. The project is required, but any suffix can follow including no suffix.
 
 Table names should be simple and reflect the contents of the table.
 
-All database and table names should be lower-cased and only inlcude letters, numbers and _. 
+All database and table names should be lower-cased and only inlcude letters, numbers and _. They should not include `bfd` or `insights` as a prefix. 
 
 ### Data Folders 
 

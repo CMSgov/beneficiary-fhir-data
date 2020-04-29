@@ -4,13 +4,21 @@ locals {
   table     = "purchases"
 }
 
+## Bucket for the project
+module "bucket" {
+  source          = "../../modules/bucket"
+  name            = "foodtruck"
+  sensitivity     = "moderate"
+  tags            = local.tags
+}
+
 ## Firehose for gathering purchase data
 
 module "firehose" {
   source          = "../../modules/firehose"
   stream          = local.table
   database        = local.database
-  sensitivity     = "moderate"
+  bucket          = module.bucket.id
   buffer_interval = 60
   tags            = local.tags
 }
@@ -20,8 +28,7 @@ module "firehose" {
 module "database" {
   source          = "../../modules/database"
   database        = local.database
-  sensitivity     = "moderate"
-  role_names      = ["bfd-insights-foodtruck-purchases"]
+  bucket          = module.bucket.id
   tags            = local.tags
 }
 
@@ -29,7 +36,7 @@ module "table" {
   source          = "../../modules/table"
   database        = module.database.name          # adds a dependency
   table           = local.table
-  sensitivity     = "moderate"
+  bucket          = module.bucket.id
   tags            = local.tags
   partitions      = module.firehose.partitions
   columns = [

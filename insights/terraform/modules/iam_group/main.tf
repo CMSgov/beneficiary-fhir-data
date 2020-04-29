@@ -1,5 +1,9 @@
+locals {
+  full_name = "bfd-insights-${var.name}"
+}
+
 resource "aws_iam_group" "main" {
-  name = "bfd-insights-${var.name}"
+  name = local.full_name
 }
 
 resource "aws_iam_group_policy_attachment" "main_attach" {

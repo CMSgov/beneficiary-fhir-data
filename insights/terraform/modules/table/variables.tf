@@ -4,12 +4,12 @@ variable "table" {
 }
 
 variable "database" {
-  description = "Name of the project"
+  description = "Name of the database that holds the table"
   type        = string
 }
 
-variable "sensitivity" {
-  description = "Sensitivity name (ie. high or moderate)"
+variable "bucket" {
+  description = "the bucket that holds the database and table"
   type        = string
 }
 

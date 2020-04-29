@@ -1,8 +1,8 @@
 resource "aws_iam_policy" "full" {
-  name        = "bfd-insights-full-${var.sensitivity}"
+  name        = "bfd-insights-full-${var.name}"
   path        = "/bfd-insights/"
-  description = "Allow access and use of the ${var.sensitivity} bucket"
-  policy      = <<-EOF
+  description = "Allow full access and use of the ${var.name} bucket"
+  policy      = <<-POLICY
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -98,15 +98,21 @@ resource "aws_iam_policy" "full" {
         }
     ]
 }
-EOF  
+POLICY  
+}
+
+resource "aws_iam_group_policy_attachment" "full_attach" {
+  count       = length(var.full_groups)
+  group       = var.full_groups[count.index]
+  policy_arn  = aws_iam_policy.full.arn
 }
 
 # Allows writes to outputs
 resource "aws_iam_policy" "athena_query" {
-  name        = "bfd-insights-athena-query-${var.sensitivity}"
+  name        = "bfd-insights-athena-query-${var.name}"
   path        = "/bfd-insights/"
-  description = "Allow access and use of the customer managed key"
-  policy      = <<-EOF
+  description = "Rights needed for athena query access"
+  policy      = <<-POLICY
   {
     "Version": "2012-10-17",
     "Statement": {
@@ -129,32 +135,46 @@ resource "aws_iam_policy" "athena_query" {
       ]
     }
   } 
-  EOF  
+  POLICY  
 }
 
-resource "aws_iam_policy" "read" {
-  name        = "bfd-insights-read-${var.sensitivity}"
-  path        = "/bfd-insights/"
-  description = "Allow access and use of the customer managed key"
-  policy      = <<-EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": {
-      "Sid": "s3ReadPolicy",
-      "Effect": "Allow",
-      "Action": [
-          "s3:GetBucketLocation",
-          "s3:GetObject",
-          "s3:ListBucket",
-          "s3:HeadBucket",
-          "s3:ListBucketMultipartUploads",
-          "s3:ListMultipartUploadParts"
-      ],
-      "Resource": [
-          "${aws_s3_bucket.main.arn}",
-          "${aws_s3_bucket.main.arn}/*"
+resource "aws_iam_group_policy_attachment" "athena_attach" {
+  count       = length(var.athena_groups)
+  group       = var.athena_groups[count.index]
+  policy_arn  = aws_iam_policy.full.arn
+}
+
+resource "aws_s3_bucket_policy" "cross_account" {
+    count       = length(var.cross_accounts) > 0 ? 1 : 0
+    bucket      = aws_s3_bucket.main.id
+    policy      = <<-POLICY
+    {
+      "Version": "2012-10-17",
+      "Id": "AccessToDB",
+      "Statement": [
+          {
+              "Sid": "StmtID",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  ${join(",", formatlist("\"%s\"", var.cross_accounts))}
+                ]
+              },
+              "Action": [
+                  "s3:AbortMultipartUpload",
+                  "s3:GetBucketLocation",
+                  "s3:GetObject",
+                  "s3:ListBucket",
+                  "s3:ListBucketMultipartUploads",
+                  "s3:PutObject",
+                  "s3:PutObjectAcl"
+              ],
+              "Resource": [
+                  "${aws_s3_bucket.main.arn}/*",
+                  "${aws_s3_bucket.main.arn}"
+              ]
+          }
       ]
     }
-  }
-  EOF  
+    POLICY
 }

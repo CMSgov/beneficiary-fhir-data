@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
-data "aws_s3_bucket" "moderate_bucket" {
-  bucket      = "bfd-insights-moderate-${data.aws_caller_identity.current.account_id}"
+data "aws_s3_bucket" "main" {
+  bucket      = var.bucket
 }
 
 data "aws_kms_alias" "s3" {
@@ -33,7 +33,7 @@ resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
   }
 
   storage_descriptor {
-    location      = "s3://${data.aws_s3_bucket.moderate_bucket.id}/databases/${var.database}/${var.table}"
+    location      = "s3://${data.aws_s3_bucket.main.id}/databases/${var.database}/${var.table}"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 
