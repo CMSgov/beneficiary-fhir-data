@@ -56,7 +56,7 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
     kms_key_arn         = data.aws_kms_alias.s3.arn # Encrypt on delivery
     buffer_size         = var.buffer_size
     buffer_interval     = var.buffer_interval
-    #compression_format  = "Snappy"
+    compression_format  = "GZIP"
     prefix              = "databases/${var.database}/${var.stream}/dt=!{timestamp:yyyy-MM-dd-HH}/"
     error_output_prefix = "databases/${var.database}/${var.stream}_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
   }
