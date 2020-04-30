@@ -22,7 +22,7 @@ services:
       - ${BFD_DIR}:${BFD_MOUNT_POINT:-/app}
       - ${SYNTHETIC_DATA}:/synthetic-data
     environment:
-      JAVA_HOME: "/usr/lib/jvm/java-1.8.0-openjdk-amd64/"
+      JAVA_HOME: "/usr/lib/jvm/java-1.8.0-openjdk"
       BFD_PORT: 9954
       LOCAL_SYNTHETIC_DATA: "/synthetic-data"
       BFD_MOUNT_POINT: ${BFD_MOUNT_POINT:-/app}

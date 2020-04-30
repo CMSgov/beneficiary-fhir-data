@@ -62,7 +62,7 @@ A: First issues will be tracked on the BFD’s jira board and labeled (via versi
 
 Q: What kind of changes don't require an RFC?
 
-A: In general bug fixes and small changes that do not affect behavior or meening. If you're unsure please quickly ask in the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) channel.
+A: In general bug fixes and small changes that do not affect behavior or meaning. If you're unsure please quickly ask in the [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ) channel.
 
 ### Proposing substantive changes
 
@@ -106,6 +106,12 @@ A: Anyone can coordinate with you and the core team to take over the work.
 
 Setting up the FHIR server locally
 ---
+Requirements: Docker 
+
+Caution: Setting up your local environments requires git patches to run. Please make sure you `make unservable` and `make unloadadable` before you commit your changes to revert these patches. 
+
+Let's begin!
+
 Clone the repository onto you're computer.
 ```
 git clone https://github.com/CMSgov/beneficiary-fhir-data
@@ -114,6 +120,15 @@ git clone https://github.com/CMSgov/beneficiary-fhir-data
 The instructions from here on should be run from the `contributing` directory in repository.
 
 To simply run tests or execute other tasks in the BFD bring up the docker containers:
+Note: As a prerequisite, the bfd system needs a few variables to be set in the .env file:
+- `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
+- (optional) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
+- (defaults to `/app`) `BFD_MOUNT_POINT` the path within the service container where the beneficiary-fhir-data directory will be mounted.
+
+Here's an example `.env` file that docker-compose could use:
+```
+BFD_DIR=../../beneficiary-fhir-data
+SYNTHETIC_DATA=./synthetic-data
 ```
 make up
 ```
@@ -136,7 +151,7 @@ make servable
 ```
 To undo the changes run `make unservable`.
 
-Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes.
+Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes and to be aware of them while making your own changes.
 
 Once the changes are applied the server needs to be started in order for them to take effect.
 Run `make up` if no docker containers are running or
@@ -147,7 +162,8 @@ make restart
 
 if they're already running.
 
-The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one.
+The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one. 
+Note MacOOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application. 
 
 ### Loading data to work with
 
