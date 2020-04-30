@@ -32,7 +32,7 @@ git push origin <your username>/<your feature name>
 # replace "origin" with that remotes name in the origional command
 ```
 In order to obtain permission to do this contact a github administrator or reach out on [#bfd](https://cmsgov.slack.com/archives/C010WDXAZFZ).
-Once pushed, [open a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
+Once pushed, [open a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request) and use this [PR template](https://github.com/CMSgov/cms-oeda-dasg) found in .github
 
 Please fill out each section of the body of the PR or quickly justify why the section does not apply to this particular change.
 Reviewers will automatically be suggested or requested based on the projects CODEOWNERS file, feel free to add other reviewers if desired.
