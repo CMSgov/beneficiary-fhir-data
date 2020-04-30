@@ -23,6 +23,7 @@ module "firehose" {
   stream          = local.table
   database        = local.database
   bucket          = module.bucket.id
+  bucket_cmk      = module.bucket.bucket_cmk
   buffer_interval = 60
   tags            = local.tags
 }
@@ -34,6 +35,7 @@ module "database" {
   source          = "../../modules/database"
   database        = local.database
   bucket          = module.bucket.id
+  bucket_cmk      = module.bucket.bucket_cmk
   tags            = local.tags
 }
 
@@ -44,7 +46,9 @@ module "table" {
   source          = "../../modules/table"
   database        = module.database.name          # adds a dependency
   table           = local.table
+  description     = "test table for the AB2D projects"
   bucket          = module.bucket.id
+  bucket_cmk      = module.bucket.bucket_cmk
   tags            = local.tags
   partitions      = module.firehose.partitions
   columns = [
