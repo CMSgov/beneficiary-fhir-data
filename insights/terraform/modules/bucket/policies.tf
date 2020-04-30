@@ -95,6 +95,18 @@ resource "aws_iam_policy" "full" {
                 "${aws_s3_bucket.main.arn}/*",
                 "${aws_s3_bucket.main.arn}"
             ]
+        },
+        {
+          "Sid": "CMK",
+          "Effect": "Allow",
+          "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*",
+              "kms:DescribeKey"
+          ],
+          "Resource": "${aws_kms_key.main.arn}"
         }
     ]
 }
@@ -115,7 +127,7 @@ resource "aws_iam_policy" "athena_query" {
   policy      = <<-POLICY
   {
     "Version": "2012-10-17",
-    "Statement": {
+    "Statement": [{
       "Sid": "s3QueryPolicy",
       "Effect": "Allow",
       "Action": [
@@ -133,7 +145,19 @@ resource "aws_iam_policy" "athena_query" {
           "${aws_s3_bucket.main.arn}",
           "${aws_s3_bucket.main.arn}/*"
       ]
-    }
+    },
+    {
+      "Sid": "CMK",
+      "Effect": "Allow",
+      "Action": [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+      ],
+      "Resource": "${aws_kms_key.main.arn}"
+    }]
   } 
   POLICY  
 }
@@ -178,3 +202,31 @@ resource "aws_s3_bucket_policy" "cross_account" {
     }
     POLICY
 }
+
+data "aws_iam_policy_document" "cmk_policy" {
+  statement {
+    sid = "1"
+    effect = "Allow"
+    actions = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+    ]
+    resources = ["*"]
+    principals {
+      type        = "AWS"
+      identifiers = var.cross_accounts
+    }
+  }
+}
+
+# Grant to QuickSight access to the key
+resource "aws_kms_grant" "cmk_grant" {
+  name              = "${local.key_name}-grant"
+  key_id            = aws_kms_key.main.key_id
+  grantee_principal = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/aws-quicksight-service-role-v0"
+  operations        = ["Encrypt", "Decrypt", "GenerateDataKey", "DescribeKey", "ReEncryptTo", "ReEncryptFrom"]
+}
+

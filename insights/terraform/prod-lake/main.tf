@@ -9,7 +9,7 @@ module "moderate_bucket" {
   name        = "moderate"
   full_groups = [module.group_analysts.name]
   athena_groups = [module.group_readers.name, module.group_authors.name]
-  folders     = ["databases", "adhoc", "users"]
+  folders     = ["databases", "adhoc", "users", "workgroups"]
   tags        = local.tags
 }
 

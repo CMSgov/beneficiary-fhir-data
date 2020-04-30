@@ -4,8 +4,8 @@ data "aws_s3_bucket" "main" {
   bucket      = var.bucket
 }
 
-data "aws_kms_alias" "s3" {
-  name = "alias/aws/s3"
+data "aws_kms_key" "bucket_cmk" {
+  key_id      = var.bucket_cmk
 }
 
 locals {
@@ -15,6 +15,7 @@ locals {
 resource "aws_glue_catalog_table" "aws_glue_catalog_table" {
   name          = var.table
   database_name = var.database
+  description   = var.description
 
   table_type = "EXTERNAL_TABLE"
 

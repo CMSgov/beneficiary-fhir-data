@@ -4,8 +4,8 @@ data "aws_s3_bucket" "main" {
   bucket      = var.bucket
 }
 
-data "aws_kms_alias" "s3" {
-  name = "alias/aws/s3"
+data "aws_kms_key" "bucket_cmk" {
+  key_id      = var.bucket_cmk
 }
 
 locals {
@@ -31,7 +31,8 @@ resource "aws_glue_security_configuration" "main" {
     }
 
     s3_encryption {
-      s3_encryption_mode = "SSE-S3"
+      kms_key_arn        = data.aws_kms_key.bucket_cmk.arn
+      s3_encryption_mode = "SSE-KMS"
     }
   }
 }

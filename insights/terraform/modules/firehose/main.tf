@@ -4,8 +4,8 @@ data "aws_s3_bucket" "main" {
   bucket      = var.bucket
 }
 
-data "aws_kms_alias" "s3" {
-  name = "alias/aws/s3"
+data "aws_kms_key" "bucket_cmk" {
+  key_id      = var.bucket_cmk
 }
 
 locals {
@@ -53,7 +53,7 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
   extended_s3_configuration {
     role_arn            = aws_iam_role.firehose.arn
     bucket_arn          = local.bucket_arn
-    kms_key_arn         = data.aws_kms_alias.s3.arn # Encrypt on delivery
+    kms_key_arn         = data.aws_kms_key.bucket_cmk.arn # Encrypt on delivery
     buffer_size         = var.buffer_size
     buffer_interval     = var.buffer_interval
     compression_format  = "GZIP"

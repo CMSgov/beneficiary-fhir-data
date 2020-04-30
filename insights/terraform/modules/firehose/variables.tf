@@ -13,6 +13,11 @@ variable "bucket" {
   type        = string
 }
 
+variable "bucket_cmk" {
+  description = "the bucket's CMK"
+  type        = string
+}
+
 variable "tags" {
   description = "tags"
   type        = map(string)

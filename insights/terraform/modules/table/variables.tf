@@ -3,6 +3,12 @@ variable "table" {
   type        = string
 }
 
+variable "description" {
+  description = "Description of the table"
+  type        = string
+  default     = ""
+}
+
 variable "database" {
   description = "Name of the database that holds the table"
   type        = string
@@ -10,6 +16,11 @@ variable "database" {
 
 variable "bucket" {
   description = "the bucket that holds the database and table"
+  type        = string
+}
+
+variable "bucket_cmk" {
+  description = "the bucket's CMK"
   type        = string
 }
 

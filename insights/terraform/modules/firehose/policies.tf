@@ -35,23 +35,15 @@ resource "aws_iam_policy" "firehose" {
         {
             "Effect": "Allow",
             "Action": [
-                "kms:GenerateDataKey",
                 "kms:Encrypt",
-                "kms:Decrypt"
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey"
             ],
             "Resource": [
-                "arn:aws:kms:us-east-1:${local.account_id}:key/f1619a71-58e3-4ada-92ed-81ecb7b72a42"
-            ],
-            "Condition": {
-                "StringEquals": {
-                    "kms:ViaService": "s3.us-east-1.amazonaws.com"
-                },
-                "StringLike": {
-                    "kms:EncryptionContext:aws:s3:arn": [
-                        "${local.bucket_arn}/databases/${var.database}/*"
-                    ]
-                }
-            }
+                "${data.aws_kms_key.bucket_cmk.arn}"
+            ]
         },
         {
             "Sid": "",
