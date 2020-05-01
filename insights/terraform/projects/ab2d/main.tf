@@ -17,18 +17,6 @@ module "bucket" {
 }
 
 
-## Firehose for gathering project data
-
-module "firehose" {
-  source          = "../../modules/firehose"
-  stream          = local.table
-  database        = local.database
-  bucket          = module.bucket.id
-  bucket_cmk      = module.bucket.bucket_cmk
-  buffer_interval = 60
-  tags            = local.tags
-}
-
 ## Athena workgroup
 
 module "workgroup" {
@@ -49,19 +37,3 @@ module "database" {
   tags            = local.tags
 }
 
-
-## Dummy table for the project
-
-module "table" {
-  source          = "../../modules/table"
-  database        = module.database.name          # adds a dependency
-  table           = local.table
-  description     = "test table for the AB2D projects"
-  bucket          = module.bucket.id
-  bucket_cmk      = module.bucket.bucket_cmk
-  tags            = local.tags
-  partitions      = module.firehose.partitions
-  columns = [
-    {name="timestamp", type="timestamp", comment="Time of purchase ISO format"},
-  ] 
-}

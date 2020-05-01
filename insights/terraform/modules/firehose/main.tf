@@ -57,7 +57,7 @@ resource "aws_kinesis_firehose_delivery_stream" "main" {
     buffer_size         = var.buffer_size
     buffer_interval     = var.buffer_interval
     compression_format  = "GZIP"
-    prefix              = "databases/${var.database}/${var.stream}/dt=!{timestamp:yyyy-MM-dd-HH}/"
+    prefix              = "databases/${var.database}/${var.stream}/dt=!{timestamp:yyyy-MM-dd}/"
     error_output_prefix = "databases/${var.database}/${var.stream}_errors/!{firehose:error-output-type}/!{timestamp:yyyy-MM-dd}/"
   }
 }
