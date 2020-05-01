@@ -205,7 +205,18 @@ resource "aws_s3_bucket_policy" "cross_account" {
 
 data "aws_iam_policy_document" "cmk_policy" {
   statement {
-    sid = "1"
+    sid     = "AllowAdmin"
+    effect  = "Allow"
+    actions = ["kms:*"]
+    principals {
+      type = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    resources = ["*"]
+  }
+  
+  statement {
+    sid = "AllowUse"
     effect = "Allow"
     actions = [
           "kms:Encrypt",

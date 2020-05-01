@@ -3,6 +3,7 @@ data "aws_caller_identity" "current" {}
 locals {
   full_name = "bfd-insights-${var.name}-${data.aws_caller_identity.current.account_id}"
   key_name  = "bfd-insights-${var.name}-cmk"
+  account_id = data.aws_caller_identity.current.account_id
 }
 
 resource "aws_s3_bucket" "main" {

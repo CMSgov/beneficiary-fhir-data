@@ -29,7 +29,7 @@ resource "aws_iam_policy" "firehose" {
             ],
             "Resource": [
                 "${local.bucket_arn}",
-                "${local.bucket_arn}/databases/${var.database}/*"
+                "${local.bucket_arn}/*"
             ]
         },
         {
