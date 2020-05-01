@@ -13,6 +13,7 @@ module "bucket" {
   name            = local.project
   sensitivity     = "moderate"
   tags            = local.tags  
+  cross_accounts  = ["777200079629","595094747606", "330810004472"]
 }
 
 
@@ -28,6 +29,15 @@ module "firehose" {
   tags            = local.tags
 }
 
+## Athena workgroup
+
+module "workgroup" {
+  source          = "../../modules/workgroup"
+  bucket          = module.bucket.id
+  bucket_cmk      = module.bucket.bucket_cmk
+  name            = local.database
+  tags            = local.tags
+}
 
 ## Database for the project
 

@@ -7,10 +7,11 @@ locals {
 ## Bucket for the project
 module "bucket" {
   source          = "../../modules/bucket"
-  name            = "foodtruck"
+  name            = local.database
   sensitivity     = "moderate"
   tags            = local.tags
 }
+
 
 ## Firehose for gathering purchase data
 
@@ -33,6 +34,18 @@ module "database" {
   bucket_cmk      = module.bucket.bucket_cmk
   tags            = local.tags
 }
+
+## A Athena workgroup for the project
+
+module "workgroup" {
+  source          = "../../modules/workgroup"
+  bucket          = module.bucket.id
+  bucket_cmk      = module.bucket.bucket_cmk
+  name            = local.database
+  tags            = local.tags
+}
+
+## Finally the table for purchases
 
 module "table" {
   source          = "../../modules/table"
