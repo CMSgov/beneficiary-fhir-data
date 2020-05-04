@@ -59,7 +59,7 @@ module "stateful" {
   victor_ops_url      = var.victor_ops_url
 
   medicare_opt_out_config = {
-    read_roles        = ["arn:aws:iam::755619740999:role/dpc-dev-consent-execution-role", "arn:aws:iam::349849222861:role/Ab2dInstanceRole", "arn:aws:iam::777200079629:role/Ab2dInstanceRole", "arn:aws:iam::330810004472:role/Ab2dInstanceRole"]
+    read_roles        = ["arn:aws:iam::755619740999:role/dpc-dev-consent-execution-role", "arn:aws:iam::349849222861:role/Ab2dInstanceRole", "arn:aws:iam::349849222861:root", "arn:aws:iam::777200079629:role/Ab2dInstanceRole", "arn:aws:iam::777200079629:root", "arn:aws:iam::330810004472:role/Ab2dInstanceRole", "arn:aws:iam::330810004472:root"]
     write_roles       = ["arn:aws:iam::755619740999:role/bcda-dev-nfs-instance", "arn:aws:iam::755619740999:role/bcda-test-nfs-instance"]
     admin_users       = ["arn:aws:iam::577373831711:user/DS7H", "arn:aws:iam::577373831711:user/VZG9"]
   }
