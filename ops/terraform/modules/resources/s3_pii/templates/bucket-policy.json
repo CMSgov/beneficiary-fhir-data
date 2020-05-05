@@ -3,22 +3,6 @@
   "Id": "bfd-${env}-${bucket_name}-s3-policy",
   "Statement": [
     {
-      "Sid": "BFDPIIS3ListBucket",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": [
-          %{ for reader in readers ~}"${reader}",%{ endfor ~}
-          %{ for writer in writers ~}"${writer}",%{ endfor ~}
-          %{ for admin in admins ~}"${admin}",%{ endfor ~}
-          "${root}"
-        ]
-      },
-      "Action": [
-        "s3:ListBucket"
-      ],
-      "Resource": "arn:aws:s3:::${bucket_id}"
-    },
-    {
       "Sid": "BFDPIIS3ReadBucket",
       "Effect": "Allow",
       "Principal": {
@@ -30,9 +14,13 @@
         ]
       },
       "Action": [
+        "s3:ListBucket",
         "s3:GetObject"
       ],
-      "Resource": "arn:aws:s3:::${bucket_id}/*"
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}",
+        "arn:aws:s3:::${bucket_id}/*"
+      ]
     },
     {
       "Sid": "BFDPIIS3WriteBucket",
@@ -48,7 +36,10 @@
         "s3:PutObject",
         "s3:DeleteObject"
       ],
-      "Resource": "arn:aws:s3:::${bucket_id}/*"
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}",
+        "arn:aws:s3:::${bucket_id}/*"
+      ]
     },
     {
       "Sid": "BFDPIIS3AdminBucket",
