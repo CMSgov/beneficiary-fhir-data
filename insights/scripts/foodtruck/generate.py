@@ -26,7 +26,7 @@ firehose = boto3.client('firehose')
 for i in range(100):
   truck = random.choice(range(0, len(trucks)))
   purchase = {
-    'timestamp': datetime.utcnow().isoformat(),
+    'timestamp': datetime.utcnow().isoformat() + 'Z',
     'truck': trucks[truck]['truck'],
     'state': trucks[truck]['state'],
     'hamburgers': random.choice(range(0,3)),
