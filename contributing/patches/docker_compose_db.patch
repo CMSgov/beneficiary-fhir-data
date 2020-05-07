@@ -10,7 +10,7 @@ index 5997d32f..1535d3e3 100644
 +    if (!url.contains("localhost")
 +        && !url.contains("127.0.0.1")
 +        && !url.contains("hsqldb:mem")
-+        && !url.contains("bfddb")) {
++        && !url.contains("local_bfddb")) {
        throw new BadCodeMonkeyException("Our builds can only be run against local test DBs.");
      }
  
