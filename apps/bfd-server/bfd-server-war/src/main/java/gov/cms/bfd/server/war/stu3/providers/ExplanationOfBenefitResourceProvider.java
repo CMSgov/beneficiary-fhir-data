@@ -58,9 +58,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
   /**
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
-   * application.
+   * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
-  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(\\p{Alnum}+)");
+  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -120,7 +120,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     if (eobIdText == null || eobIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
     Matcher eobIdMatcher = EOB_ID_PATTERN.matcher(eobIdText);
-    if (!eobIdMatcher.matches()) throw new ResourceNotFoundException(eobId);
+    if (!eobIdMatcher.matches())
+      throw new IllegalArgumentException("Unsupported ID pattern: " + eobIdText);
+
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
