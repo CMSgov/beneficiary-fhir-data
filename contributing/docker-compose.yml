@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
 
-  bfddb:
+  local_bfddb:
     image: postgres:9.6
     environment:
       POSTGRES_DB: bfd
@@ -29,4 +29,4 @@ services:
     ports:
       - "1337:9954"
     depends_on:
-      - bfddb
+      - local_bfddb
