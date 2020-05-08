@@ -1,9 +1,6 @@
 synthetic-data/*.rif:
 	./fetch.sh
-
-.env:
-	cp .env.example .env
-
+	
 servable:
 	cd ../; git apply contributing/patches/allow_local_port_config.patch
 
