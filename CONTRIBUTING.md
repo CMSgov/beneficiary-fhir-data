@@ -120,7 +120,8 @@ git clone https://github.com/CMSgov/beneficiary-fhir-data
 The instructions from here on should be run from the `contributing` directory in repository.
 
 To simply run tests or execute other tasks in the BFD bring up the docker containers:
-Note: As a prerequisite, the bfd system needs a few variables to be set in the .env file:
+Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory.
+
 - `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
 - (optional) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
 - (defaults to `/app`) `BFD_MOUNT_POINT` the path within the service container where the beneficiary-fhir-data directory will be mounted.
@@ -128,7 +129,7 @@ Note: As a prerequisite, the bfd system needs a few variables to be set in the .
 Here's an example `.env` file that docker-compose could use:
 ```
 BFD_DIR=../../beneficiary-fhir-data
-SYNTHETIC_DATA=./synthetic-data
+SYNTHETIC_DATA=../../synthetic-data
 ```
 make up
 ```
@@ -144,14 +145,14 @@ mvn verify
 
 ### Serving the BFD
 
-To run the BFD locally in a way that will allow you and other systems to interact with it some modifications need to be made so that it serves on a consistent port. These changes are contained in the file `contributing/patches/allow_local_port_config.patch` and can be applied with 
+To run the BFD locally in a way that will allow you and other systems to interact with it some modifications need to be made so that it serves on a consistent port. Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes.
+
+These changes are contained in the file `contributing/patches/allow_local_port_config.patch` and can be applied with 
 
 ```
 make servable
 ```
 To undo the changes run `make unservable`.
-
-Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes and to be aware of them while making your own changes.
 
 Once the changes are applied the server needs to be started in order for them to take effect.
 Run `make up` if no docker containers are running or
@@ -162,10 +163,14 @@ make restart
 
 if they're already running.
 
-The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one. 
-Note MacOOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application. 
+The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'. 
+
+In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one. 
+Note MacOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application. 
 
 ### Loading data to work with
+
+Caution: Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes. Reverse them before you submit your changes. 
 
 To load some data for the BFD to return first apply the patches that allow the system to load local data: 
 ```make loadable```
