@@ -131,12 +131,14 @@ Here's an example `.env` file that docker-compose could use:
 BFD_DIR=../../beneficiary-fhir-data
 SYNTHETIC_DATA=../../synthetic-data
 ```
+```
 make up
 ```
 
 This brings services up in the background and displays the logs from the `bfd` container. Once the logs show that that the system is started (this can take a minute or so depending on your machine) the logs can be exited with Ctrl+C.
 
 Now the system can be interacted with. Here's an example of running tests for the `bfd-server` module.
+
 ```
 docker-compose exec bfd bash
 cd /app/apps/bfd-server
