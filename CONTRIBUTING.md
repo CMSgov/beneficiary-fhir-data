@@ -171,7 +171,9 @@ Note MacOS Users: To make this cert available to Chrome or Firefox you'll need t
 ### Loading data to work with
 
 First you'll want some synthetic data to load and work with. To fetch the synthetic data from a public S3 bucket:
-``` make synthetic-data/*.rif```
+```
+make synthetic-data/*.rif
+```
 
 Tip: This will download to a folder within the contributing folder within the repo. Consider moving this synthetic data outside the repo and updating your .env file to point to this new location. It will save you some steps in the future. 
 
