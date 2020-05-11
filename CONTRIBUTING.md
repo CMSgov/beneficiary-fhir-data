@@ -119,7 +119,7 @@ git clone https://github.com/CMSgov/beneficiary-fhir-data
 
 The instructions from here on should be run from the `contributing` directory in repository.
 
-To simply run tests or execute other tasks in the BFD bring up the docker containers:
+To simply run tests or execute other tasks in the BFD bring up the docker containers.
 Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory.
 
 - `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
@@ -170,9 +170,15 @@ Note MacOS Users: To make this cert available to Chrome or Firefox you'll need t
 
 ### Loading data to work with
 
-Caution: Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes. Reverse them before you submit your changes. 
+First you'll want some synthetic data to load and work with. To fetch the synthetic data from a public S3 bucket:
+``` make synthetic-data/*.rif```
+
+Tip: This will download to a folder within the contributing folder within the repo. Consider moving this synthetic data outside the repo and updating your .env file to point to this new location. It will save you some steps in the future. 
 
 To load some data for the BFD to return first apply the patches that allow the system to load local data: 
+
+Caution: Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes. Reverse them before you submit your changes. 
+
 ```make loadable```
 Then load the data 
 ```make load```
