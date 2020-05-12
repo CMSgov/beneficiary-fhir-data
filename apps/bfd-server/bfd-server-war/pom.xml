@@ -27,6 +27,9 @@
 			(in settings.xml) for Windows dev environments. Seedev/devenv-readme.md
 			for details. -->
 		<bash.exe>bash</bash.exe>
+		<!-- maven command line parameters defaults to original min / max ports values -->
+		<min_port>8000</min_port>
+		<max_port>9999</max_port>
 	</properties>
 
 	<dependencyManagement>
@@ -292,8 +295,8 @@
 						<phase>pre-integration-test</phase>
 						<configuration>
 							<outputFile>${project.build.directory}/server-work/server-ports.properties</outputFile>
-							<minPortNumber>8000</minPortNumber>
-							<maxPortNumber>9999</maxPortNumber>
+							<minPortNumber>${min_port}</minPortNumber>
+							<maxPortNumber>${max_port}</maxPortNumber>
 							<randomPort>true</randomPort>
 							<portNames>
 								<portName>server.port.https</portName>
