@@ -13,7 +13,8 @@
       },
       "Action": [
         "s3:ListBucket*",
-        "s3:GetObject*"
+        "s3:GetObject*",
+        "s3:HeadBucket"
       ],
       "Resource": [
         "arn:aws:s3:::${bucket_id}",
