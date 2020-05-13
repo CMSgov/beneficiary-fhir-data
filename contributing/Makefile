@@ -2,14 +2,14 @@ synthetic-data/*.rif:
 	./fetch.sh
 	
 servable:
-	cd ../; git apply contributing/patches/allow_local_port_config.patch
+	cd ../; git apply --ignore-space-change --ignore-whitespace contributing/patches/allow_local_port_config.patch
 
 unservable:
 	cd ../; git apply -R contributing/patches/allow_local_port_config.patch
 
 loadable:
-	cd ../; git apply contributing/patches/load_local_synthetic_data.patch
-	cd ../; git apply contributing/patches/docker_compose_db.patch
+	cd ../; git apply --ignore-space-change --ignore-whitespace contributing/patches/load_local_synthetic_data.patch
+	cd ../; git apply --ignore-space-change --ignore-whitespace contributing/patches/docker_compose_db.patch
 
 unloadable:
 	cd ../; git apply -R contributing/patches/load_local_synthetic_data.patch
