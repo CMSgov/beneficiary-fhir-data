@@ -87,3 +87,35 @@ resource "aws_s3_bucket_policy" "pii_bucket_policy" {
     root        = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
   })
 }
+
+resource "aws_iam_role" "pii_bucket_write_assume_role" {
+  name = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-write-assume-role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "${var.pii_bucket_config.write_assume_arn}"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "pii_bucket_write_assume_policy" {
+  name = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-write-assume-policy"
+
+  policy = templatefile("${path.module}/templates/iam-write-assume-policy.json", {
+    bucket_id = aws_s3_bucket.pii_bucket.id
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "pii_bucket_write_assume_policy_attachment" {
+  role       = aws_iam_role.pii_bucket_write_assume_role.name
+  policy_arn = aws_iam_policy.pii_bucket_write_assume_policy.arn
+}
