@@ -536,11 +536,12 @@ module "medicare_opt_out" {
   env_config        = local.env_config
 
   pii_bucket_config = {
-    name            = "medicare-opt-out"
-    log_bucket      = module.logs.id
-    read_arns       = var.medicare_opt_out_config.read_roles
-    write_arns      = var.medicare_opt_out_config.write_roles
-    admin_arns      = var.medicare_opt_out_config.admin_users
+    name             = "medicare-opt-out"
+    log_bucket       = module.logs.id
+    read_arns        = var.medicare_opt_out_config.read_roles
+    write_arns       = var.medicare_opt_out_config.write_roles
+    write_assume_arn = var.medicare_opt_out_config.write_assume_acct
+    admin_arns       = var.medicare_opt_out_config.admin_users
   }
 }
 
