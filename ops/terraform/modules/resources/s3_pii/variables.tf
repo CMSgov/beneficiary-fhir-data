@@ -9,8 +9,7 @@ variable "pii_bucket_config" {
     name             = string
     log_bucket       = string
     read_arns        = list(string)
-    write_arns       = list(string)
-    write_assume_arn = string
+    write_accts      = list(string)
     admin_arns       = list(string)
   })
 }

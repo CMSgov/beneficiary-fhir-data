@@ -539,8 +539,7 @@ module "medicare_opt_out" {
     name             = "medicare-opt-out"
     log_bucket       = module.logs.id
     read_arns        = var.medicare_opt_out_config.read_roles
-    write_arns       = var.medicare_opt_out_config.write_roles
-    write_assume_arn = var.medicare_opt_out_config.write_assume_acct
+    write_accts      = var.medicare_opt_out_config.write_accts
     admin_arns       = var.medicare_opt_out_config.admin_users
   }
 }

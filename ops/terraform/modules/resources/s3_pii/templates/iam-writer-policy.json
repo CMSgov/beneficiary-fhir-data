@@ -1,5 +1,7 @@
+${jsonencode(
 {
   "Version": "2012-10-17",
+  "Id": "bfd-${env}-${name}-iam-writer-policy",
   "Statement": [
     {
       "Sid": "BFDPIIS3ReadAll",
@@ -27,3 +29,4 @@
     }
   ]
 }
+)}
