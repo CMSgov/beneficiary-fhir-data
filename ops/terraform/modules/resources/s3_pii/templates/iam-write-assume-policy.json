@@ -9,7 +9,7 @@
         "s3:HeadBucket"
       ],
       "Resource": "*"
-    }
+    },
     {
       "Sid": "BFDPIIS3WriteAssume",
       "Effect": "Allow",
