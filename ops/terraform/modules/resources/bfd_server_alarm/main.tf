@@ -13,7 +13,7 @@ resource "aws_cloudwatch_metric_alarm" "bfd-server-alarm" {
   statistic           = var.alarm_config.statistic
   extended_statistic  = var.alarm_config.ext_statistic
   threshold           = var.alarm_config.threshold
-  datapoints_to_alarm = "1"
+  datapoints_to_alarm = var.alarm_config.datapoints
   treat_missing_data  = "notBreaching"
 
   alarm_actions       = var.alarm_config.alarm_notify_arn == null ? [] : [var.alarm_config.alarm_notify_arn]
