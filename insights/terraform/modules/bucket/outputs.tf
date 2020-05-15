@@ -9,3 +9,7 @@ output "id" {
 output "bucket_cmk" {
   value = aws_kms_key.main.key_id
 }
+
+output "bucket_cmk_arn" {
+  value = aws_kms_key.main.arn
+}

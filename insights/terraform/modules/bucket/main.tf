@@ -47,6 +47,8 @@ resource "aws_s3_bucket_object" "top" {
 resource "aws_kms_key" "main" {
   description   = "CMK for the ${local.full_name} bucket"
   tags          = var.tags
+  key_usage     = "ENCRYPT_DECRYPT"
+  is_enabled    = true
   policy        = length(var.cross_accounts) > 0 ? data.aws_iam_policy_document.cmk_policy.json : null
   enable_key_rotation = true
 }
