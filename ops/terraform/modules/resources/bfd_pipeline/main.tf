@@ -72,7 +72,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   period              = local.pipeline_messages_error.period
   statistic           = "Sum"
   threshold           = local.pipeline_messages_error.threshold
-  alarm_description   = "Pipeline errors detected within ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${var.env_config.env}"
+  alarm_description   = "Pipeline errors detected over ${local.pipeline-messages_error.eval_periods} evaluation periods of ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${var.env_config.env}"
 
   metric_name         = "messages/count/error"
   namespace           = "bfd-${var.env_config.env}/bfd-pipeline"
