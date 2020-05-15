@@ -16,7 +16,7 @@
   become: yes 
   import_tasks: optional_rpms_repo.yml
   
-- name: Install NTP 
+- name: Install NTP and set TZ
   become: yes 
   import_tasks: ntp.yml
   
