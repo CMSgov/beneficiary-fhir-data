@@ -1,3 +1,5 @@
+## Athena policies
+
 resource "aws_iam_policy" "full" {
   name        = "bfd-insights-full-${var.name}"
   path        = "/bfd-insights/"
@@ -187,11 +189,11 @@ resource "aws_s3_bucket_policy" "cross_account" {
               "Action": [
                   "s3:AbortMultipartUpload",
                   "s3:GetBucketLocation",
-                  "s3:GetObject",
+                  "s3:GetObject*",
                   "s3:ListBucket",
                   "s3:ListBucketMultipartUploads",
-                  "s3:PutObject",
-                  "s3:PutObjectAcl"
+                  "s3:PutObject*",
+                  "s3:DeleteObject*"
               ],
               "Resource": [
                   "${aws_s3_bucket.main.arn}/*",
@@ -202,6 +204,8 @@ resource "aws_s3_bucket_policy" "cross_account" {
     }
     POLICY
 }
+
+## KMS CMK 
 
 data "aws_iam_policy_document" "cmk_policy" {
   statement {
