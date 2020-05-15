@@ -16,7 +16,7 @@ resource "aws_iam_role" "glue_role" {
           "Service": "glue.amazonaws.com"
         },
         "Effect": "Allow",
-        "Sid": ""
+        "Sid": "assume"
       }
     ]
   }
