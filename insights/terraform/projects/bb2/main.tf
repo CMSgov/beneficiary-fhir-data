@@ -6,6 +6,8 @@ locals {
   partitions = [{name="dt", type="string", comment="Approximate delivery time"}]
 }
 
+data "aws_caller_identity" "current" {}
+
 
 ## Bucket for the project's data
 
@@ -21,13 +23,12 @@ module "bucket" {
 }
 
 data "aws_s3_bucket" "moderate_bucket" {
-  bucket = "bfd-insights-moderate-577373831711"
+  bucket = "bfd-insights-moderate-${data.aws_caller_identity.current.account_id}"
 }
 
 data "aws_kms_alias" "moderate_cmk" {
   name = "alias/bfd-insights-moderate-cmk"
 }
-
 
 
 ## Athena workgroup
