@@ -35,6 +35,17 @@ data "aws_iam_policy" "athena_service" {
 
 data "aws_iam_policy_document" "s3_access" {
   statement {
+    sid = "testData"
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:HeadBucket",
+      "s3:ListBucket",
+      "s3:GetObject*"
+    ]
+    resources = ["arn:aws:s3:::awsglue-datasets", "arn:aws:s3:::awsglue-datasets/*"]
+  }
+
+  statement {
     sid = "s3Buckets"
     actions = [
       "s3:GetBucketLocation",
@@ -90,5 +101,5 @@ locals {
 resource "aws_iam_role_policy_attachment" "glue_role_attach" {
   count       = length(local.glue_role_policies)
   role        = aws_iam_role.glue_role.name
-  policy_arn  = aws_iam_policy.s3_access.arn
+  policy_arn  = local.glue_role_policies[count.index]
 }
