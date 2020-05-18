@@ -14,11 +14,12 @@ resource "aws_kms_key" "pii_bucket_key" {
   enable_key_rotation     = true
 
   policy = templatefile("${path.module}/templates/kms-policy.json", {
-    env    = var.env_config.env
-    name   = var.pii_bucket_config.name
-    admins = formatlist("%s", var.pii_bucket_config.admin_arns)
-    roles  = formatlist("%s", concat(var.pii_bucket_config.read_arns, var.pii_bucket_config.write_arns))
-    root   = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+    env     = var.env_config.env
+    name    = var.pii_bucket_config.name
+    admins  = var.pii_bucket_config.admin_arns
+    readers = var.pii_bucket_config.read_arns
+    writers = [aws_iam_role.pii_bucket_writer_role.arn]
+    root    = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
   })
 }
 
@@ -81,9 +82,34 @@ resource "aws_s3_bucket_policy" "pii_bucket_policy" {
     env         = var.env_config.env
     bucket_id   = aws_s3_bucket.pii_bucket.id
     bucket_name = var.pii_bucket_config.name
-    admins      = formatlist("%s", var.pii_bucket_config.admin_arns)
-    readers     = formatlist("%s", var.pii_bucket_config.read_arns)
-    writers     = formatlist("%s", var.pii_bucket_config.write_arns)
-    root        = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+    admins      = var.pii_bucket_config.admin_arns
+    readers     = var.pii_bucket_config.read_arns
+    writers     = [aws_iam_role.pii_bucket_writer_role.arn]
+    root        = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
   })
+}
+
+resource "aws_iam_role" "pii_bucket_writer_role" {
+  name = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-writer-role"
+
+  assume_role_policy = templatefile("${path.module}/templates/iam-writer-assume-policy.json", {
+    env     = var.env_config.env
+    name    = var.pii_bucket_config.name
+    writers = var.pii_bucket_config.write_accts
+  })
+}
+
+resource "aws_iam_policy" "pii_bucket_writer_policy" {
+  name = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-writer-policy"
+
+  policy = templatefile("${path.module}/templates/iam-writer-policy.json", {
+    env       = var.env_config.env
+    name      = var.pii_bucket_config.name
+    bucket_id = aws_s3_bucket.pii_bucket.id
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "pii_bucket_writer_policy_attachment" {
+  role       = aws_iam_role.pii_bucket_writer_role.name
+  policy_arn = aws_iam_policy.pii_bucket_writer_policy.arn
 }

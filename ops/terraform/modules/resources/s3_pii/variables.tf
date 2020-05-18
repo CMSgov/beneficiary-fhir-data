@@ -6,10 +6,10 @@ variable "env_config" {
 variable "pii_bucket_config" {
   description = "Config for PII S3 bucket"
   type        = object({
-    name       = string
-    log_bucket = string
-    read_arns  = list(string)
-    write_arns = list(string)
-    admin_arns = list(string)
+    name        = string
+    log_bucket  = string
+    read_arns   = list(string)
+    write_accts = list(string)
+    admin_arns  = list(string)
   })
 }
