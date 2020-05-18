@@ -1,0 +1,32 @@
+version: '3.3'
+
+services:
+
+  local_bfddb:
+    image: postgres:9.6
+    environment:
+      POSTGRES_DB: bfd
+      POSTGRES_USER: bfd
+      POSTGRES_PASSWORD: InsecureLocalDev
+    ports:
+      - "5433:5432"
+  bfd:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    user: dev
+    working_dir: /code
+    command: ./start-server.sh
+    volumes:
+      - ./docker:/code
+      - ${BFD_DIR}:${BFD_MOUNT_POINT:-/app}
+      - ${SYNTHETIC_DATA}:/synthetic-data
+    environment:
+      JAVA_HOME: "/usr/lib/jvm/java-1.8.0-openjdk"
+      BFD_PORT: 9954
+      LOCAL_SYNTHETIC_DATA: "/synthetic-data"
+      BFD_MOUNT_POINT: ${BFD_MOUNT_POINT:-/app}
+    ports:
+      - "1337:9954"
+    depends_on:
+      - local_bfddb

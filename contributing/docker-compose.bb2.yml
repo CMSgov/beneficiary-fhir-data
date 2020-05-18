@@ -1,0 +1,33 @@
+version: '3.3'
+
+services:
+  bbdb:
+    image: postgres
+    environment:
+      - POSTGRES_DB=bluebutton
+      - POSTGRES_PASSWORD=toor
+  bb20:
+    build:
+      context: ${BB20_CONTEXT}
+      dockerfile: Dockerfile
+    command: python3 manage.py runserver 0.0.0.0:8000
+    environment:
+      - DJANGO_SETTINGS_MODULE=hhs_oauth_server.settings.dev
+      - DJANGO_FHIR_CERTSTORE=/certstore
+      - DATABASES_CUSTOM=postgres://postgres:toor@bbdb:5432/bluebutton
+      - OAUTHLIB_INSECURE_TRANSPORT=true
+      - DJANGO_DEFAULT_SAMPLE_FHIR_ID="-20140000008325"
+      - DJANGO_SECURE_SESSION=False
+      - DJANGO_MEDICARE_LOGIN_URI=https://dev2.account.mymedicare.gov/?scope=openid%20profile&client_id=bluebutton
+      - DJANGO_SLS_USERINFO_ENDPOINT=http://msls:8080/userinfo
+      - DJANGO_SLS_TOKEN_ENDPOINT=http://msls:8080/token
+      - FHIR_URL=https://bfd.local:9954/v1/fhir/
+    ports:
+      - "8000:8000"
+    links:
+      - "bfd:bfd.local"
+    volumes:
+      - ${BB20_CONTEXT}:/code
+      - ${CERTSTORE}:/certstore
+    depends_on:
+      - bbdb
