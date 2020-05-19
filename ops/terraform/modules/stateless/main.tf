@@ -344,9 +344,9 @@ module "bfd_server_alarm_all_500s" {
     alarm_name       = "all-500s"
     partner_name     = "all"
     metric_prefix    = "http-requests/count-500"
-    eval_periods     = "10"
+    eval_periods     = "15"
     period           = "60"
-    datapoints       = "10"
+    datapoints       = "15"
     statistic        = "Sum"
     ext_statistic    = null
     threshold        = "8.0"
@@ -355,41 +355,41 @@ module "bfd_server_alarm_all_500s" {
   }
 }
 
-module "bfd_server_alarm_all_eob_4s-p95" {
+module "bfd_server_alarm_all_eob_6s-p95" {
   source = "../resources/bfd_server_alarm"
 
   env    = var.env_config.env
 
   alarm_config = {
-    alarm_name       = "all-eob-4s-p95"
+    alarm_name       = "all-eob-6s-p95"
     partner_name     = "all"
     metric_prefix    = "http-requests/latency/eobAll"
-    eval_periods     = "10"
-    period           = "300"
-    datapoints       = "10"
+    eval_periods     = "15"
+    period           = "60"
+    datapoints       = "15"
     statistic        = null
     ext_statistic    = "p95"
-    threshold        = "4000.0"
+    threshold        = "6000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
-module "bfd_server_alarm_mct_eob_4s_p95" {
+module "bfd_server_alarm_mct_eob_3s_p95" {
   source = "../resources/bfd_server_alarm"
 
   env    = var.env_config.env
 
   alarm_config = {
-    alarm_name       = "mct-eob-4s-p95"
+    alarm_name       = "mct-eob-3s-p95"
     partner_name     = "mct"
     metric_prefix    = "http-requests/latency/eobAll"
-    eval_periods     = "10"
+    eval_periods     = "15"
     period           = "60"
-    datapoints       = "10"
+    datapoints       = "15"
     statistic        = null
     ext_statistic    = "p95"
-    threshold        = "4000.0"
+    threshold        = "3000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
