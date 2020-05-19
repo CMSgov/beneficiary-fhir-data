@@ -38,9 +38,10 @@ def main():
     verify_restore = input("\nAre the above details correct (y/n)? ")
     if verify_restore.lower() != "y":
         sys.exit("\nExiting script")
+    else:
+        print("\nProceeding with restore")
 
     # try:
-    #     print("\nProceeding with restore")
     #     restore_db_cluster = rds_client.restore_db_cluster_from_snapshot(
 
     #     )
