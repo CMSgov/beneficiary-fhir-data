@@ -76,22 +76,22 @@ def main():
             restore_db_instance = rds_client.create_db_instance(
                 DBClusterIdentifier = restore_db_cluster_identifier,
                 DBInstanceIdentifier = ,
-                DBInstanceClass = source_db_instance["DBInstanceClass"],
-                Engine = source_db_instance["Engine"],
-                AvailabilityZone = source_db_instance["AvailabilityZone"],
-                DBSubnetGroupName = source_db_instance["DBSubnetGroup"]["DBSubnetGroupName"],
-                PreferredMaintenanceWindow = source_db_instance["PreferredMaintenanceWindow"],
-                DBParameterGroupName = source_db_instance["DBParameterGroups"][0]["DBParameterGroupName"],
-                Port = source_db_instance["Port"],
                 AutoMinorVersionUpgrade = source_db_instance["AutoMinorVersionUpgrade"],
+                AvailabilityZone = source_db_instance["AvailabilityZone"],
+                DBInstanceClass = source_db_instance["DBInstanceClass"],
+                DBParameterGroupName = source_db_instance["DBParameterGroups"][0]["DBParameterGroupName"],
+                DBSubnetGroupName = source_db_instance["DBSubnetGroup"]["DBSubnetGroupName"],
+                EnableCloudwatchLogsExports = source_db_instance["EnabledCloudwatchLogsExports"],
+                EnablePerformanceInsights = source_db_instance["PerformanceInsightsEnabled"],
+                Engine = source_db_instance["Engine"],
                 LicenseModel = source_db_instance["LicenseModel"],
-                OptionGroupName = source_db_instance["OptionGroupMemberships"][0]["OptionGroupName"],
-                PubliclyAccessible = source_db_instance["PubliclyAccessible"],
                 MonitoringInterval = source_db_instance["MonitoringInterval"],
                 MonitoringRoleArn = source_db_instance["MonitoringRoleArn"],
-                EnablePerformanceInsights = source_db_instance["PerformanceInsightsEnabled"],
+                OptionGroupName = source_db_instance["OptionGroupMemberships"][0]["OptionGroupName"],
                 PerformanceInsightsKMSKeyId = source_db_instance["PerformanceInsightsKMSKeyId"],
-                EnableCloudwatchLogsExports = source_db_instance["EnabledCloudwatchLogsExports"],
+                Port = source_db_instance["Port"],
+                PreferredMaintenanceWindow = source_db_instance["PreferredMaintenanceWindow"],
+                PubliclyAccessible = source_db_instance["PubliclyAccessible"]
             )
     except botocore.exceptions.ClientError as client_err:
         sys.exit(client_err)
