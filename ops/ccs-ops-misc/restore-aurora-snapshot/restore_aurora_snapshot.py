@@ -44,20 +44,20 @@ def main():
     try:
         print("\nRestoring aurora cluster...")
         restore_db_cluster = rds_client.restore_db_cluster_from_snapshot(
-            AvailabilityZones = source_db_cluster["AvailabilityZones"],
             DBClusterIdentifier = restore_db_cluster_identifier,
             SnapshotIdentifier = source_db_cluster_snapshot_identifier,
-            Engine = source_db_cluster["Engine"],
-            EngineVersion = source_db_cluster["EngineVersion"],
-            Port = source_db_cluster["Port"],
-            DBSubnetGroupName = source_db_cluster["DBSubnetGroup"],
-            VpcSecurityGroupIds = [security_group["VpcSecurityGroupId"] for security_group in source_db_cluster["VpcSecurityGroups"]],
-            KmsKeyId = source_db_cluster["KmsKeyId"],
-            EnableCloudwatchLogsExports = source_db_cluster["EnabledCloudwatchLogsExports"],
-            EngineMode = source_db_cluster["EngineMode"],
+            AvailabilityZones = source_db_cluster["AvailabilityZones"],
+            CopyTagsToSnapshot = source_db_cluster["CopyTagsToSnapshot"],
             DBClusterParameterGroupName = source_db_cluster["DBClusterParameterGroup"],
+            DBSubnetGroupName = source_db_cluster["DBSubnetGroup"],
             DeletionProtection = source_db_cluster["DeletionProtection"],
-            CopyTagsToSnapshot = source_db_cluster["CopyTagsToSnapshot"]
+            EnableCloudwatchLogsExports = source_db_cluster["EnabledCloudwatchLogsExports"],
+            Engine = source_db_cluster["Engine"],
+            EngineMode = source_db_cluster["EngineMode"],
+            EngineVersion = source_db_cluster["EngineVersion"],
+            KmsKeyId = source_db_cluster["KmsKeyId"],
+            Port = source_db_cluster["Port"],
+            VpcSecurityGroupIds = [security_group["VpcSecurityGroupId"] for security_group in source_db_cluster["VpcSecurityGroups"]]
         )
     except botocore.exceptions.ClientError as client_err:
         sys.exit(client_err)
@@ -71,8 +71,28 @@ def main():
 
     try:
         print("Restore of aurora cluster complete!")
-        print("Creating cluster instances...")
-
+        print("\nCreating cluster instances...")
+        for source_db_instance in source_db_cluster_instances:
+            restore_db_instance = rds_client.create_db_instance(
+                DBClusterIdentifier = restore_db_cluster_identifier,
+                DBInstanceIdentifier = ,
+                DBInstanceClass = source_db_instance["DBInstanceClass"],
+                Engine = source_db_instance["Engine"],
+                AvailabilityZone = source_db_instance["AvailabilityZone"],
+                DBSubnetGroupName = source_db_instance["DBSubnetGroup"]["DBSubnetGroupName"],
+                PreferredMaintenanceWindow = source_db_instance["PreferredMaintenanceWindow"],
+                DBParameterGroupName = source_db_instance["DBParameterGroups"][0]["DBParameterGroupName"],
+                Port = source_db_instance["Port"],
+                AutoMinorVersionUpgrade = source_db_instance["AutoMinorVersionUpgrade"],
+                LicenseModel = source_db_instance["LicenseModel"],
+                OptionGroupName = source_db_instance["OptionGroupMemberships"][0]["OptionGroupName"],
+                PubliclyAccessible = source_db_instance["PubliclyAccessible"],
+                MonitoringInterval = source_db_instance["MonitoringInterval"],
+                MonitoringRoleArn = source_db_instance["MonitoringRoleArn"],
+                EnablePerformanceInsights = source_db_instance["PerformanceInsightsEnabled"],
+                PerformanceInsightsKMSKeyId = source_db_instance["PerformanceInsightsKMSKeyId"],
+                EnableCloudwatchLogsExports = source_db_instance["EnabledCloudwatchLogsExports"],
+            )
     except botocore.exceptions.ClientError as client_err:
         sys.exit(client_err)
 
