@@ -385,7 +385,6 @@ resource "aws_cloudwatch_metric_alarm" "bfd_server_alarm_all_500s" {
       namespace   = "bfd-${var.env_config.env}/bfd-server"
       period      = "60"
       stat        = "Sum"
-      unit        = "Count"
     }
   }
 
@@ -397,7 +396,6 @@ resource "aws_cloudwatch_metric_alarm" "bfd_server_alarm_all_500s" {
       namespace   = "bfd-${var.env_config.env}/bfd-server"
       period      = "60"
       stat        = "Sum"
-      unit        = "Count"
     }
   }
 }
