@@ -3,7 +3,7 @@ terraform {
 }
 
 provider "aws" {
-  # Revert once this is fixed: https://github.com/terraform-providers/terraform-provider-aws/issues/13236
+  # FIXME BFD-211: Revert once this is fixed: https://github.com/terraform-providers/terraform-provider-aws/issues/13236
   # version = "~> 2.25"
   version = "<= 2.60.0"
   region = "us-east-1"
