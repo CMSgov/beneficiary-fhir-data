@@ -28,10 +28,11 @@ def main():
         try:
             source_db_cluster_snapshot_identifier = input("\nCluster snapshot identifier: ")
             source_db_cluster_snapshot = rds_client.describe_db_cluster_snapshots(DBClusterSnapshotIdentifier = source_db_cluster_snapshot_identifier)["DBClusterSnapshots"][0]
-            restore_db_cluster_identifier = source_db_cluster_snapshot["DBClusterSnapshotIdentifier"][4:] # Remove "rds:" from snapshot identifier for use as new cluster name
             break
         except botocore.exceptions.ClientError as client_err:
             print(client_err)
+
+    restore_db_cluster_identifier = source_db_cluster_snapshot["DBClusterSnapshotIdentifier"][4:] # Remove "rds:" from snapshot identifier for use as new cluster name
 
     print(f"\nSource aurora cluster identifier: {source_db_cluster_identifier}")
     print(f"Source aurora cluster snapshot identifier: {source_db_cluster_snapshot_identifier}")
@@ -42,7 +43,7 @@ def main():
         sys.exit("\nExiting script")
 
     try:
-        print("\nRestoring aurora cluster...")
+        print(f"\nRestoring snapshot {source_db_cluster_snapshot_identifier} to aurora cluster {restore_db_cluster_identifier}")
         restore_db_cluster = rds_client.restore_db_cluster_from_snapshot(
             DBClusterIdentifier = restore_db_cluster_identifier,
             SnapshotIdentifier = source_db_cluster_snapshot_identifier,
@@ -64,24 +65,23 @@ def main():
 
     while True:
         restore_db_cluster = rds_client.describe_db_clusters(DBClusterIdentifier = restore_db_cluster_identifier)["DBClusters"][0]
-        if restore_db_cluster["Status"].lower() == "available":
+        print(f"Cluster status: {restore_db_cluster["Status"]}")
+        if restore_db_cluster["Status"] == "available":
             break
-        time.sleep(30)
-        print(".", end = "")
+        time.sleep(15)
 
     try:
-        print("Restore of aurora cluster complete!")
-        print("\nCreating cluster instances...")
+        source_db_instance_count = 0
         for source_db_instance in source_db_cluster_instances:
+            print(f"Creating cluster instance {restore_db_cluster_identifier}-node-{source_db_instance_count}")
             restore_db_instance = rds_client.create_db_instance(
                 DBClusterIdentifier = restore_db_cluster_identifier,
-                DBInstanceIdentifier = ,
+                DBInstanceIdentifier = f"{restore_db_cluster_identifier}-node-{source_db_instance_count}",
                 AutoMinorVersionUpgrade = source_db_instance["AutoMinorVersionUpgrade"],
                 AvailabilityZone = source_db_instance["AvailabilityZone"],
                 DBInstanceClass = source_db_instance["DBInstanceClass"],
                 DBParameterGroupName = source_db_instance["DBParameterGroups"][0]["DBParameterGroupName"],
                 DBSubnetGroupName = source_db_instance["DBSubnetGroup"]["DBSubnetGroupName"],
-                EnableCloudwatchLogsExports = source_db_instance["EnabledCloudwatchLogsExports"],
                 EnablePerformanceInsights = source_db_instance["PerformanceInsightsEnabled"],
                 Engine = source_db_instance["Engine"],
                 LicenseModel = source_db_instance["LicenseModel"],
@@ -89,12 +89,20 @@ def main():
                 MonitoringRoleArn = source_db_instance["MonitoringRoleArn"],
                 OptionGroupName = source_db_instance["OptionGroupMemberships"][0]["OptionGroupName"],
                 PerformanceInsightsKMSKeyId = source_db_instance["PerformanceInsightsKMSKeyId"],
-                Port = source_db_instance["Port"],
                 PreferredMaintenanceWindow = source_db_instance["PreferredMaintenanceWindow"],
+                PromotionTier = source_db_instance["PromotionTier"],
                 PubliclyAccessible = source_db_instance["PubliclyAccessible"]
             )
+            source_db_instance_count += 1
     except botocore.exceptions.ClientError as client_err:
         sys.exit(client_err)
+
+    while True:
+        restore_db_instances = rds_client.describe_db_instances(Filters = [{"Name":"db-cluster-id", "Values":[restore_db_cluster_identifier]}])["DBInstances"]
+        print(f"Instance status: {[instance["DBInstanceStatus"] for instance in restore_db_instances]}")
+        if [instance["DBInstanceStatus"] for instance in restore_db_instances].count("available") == len(restore_db_instances):
+            break
+        time.sleep(15)
 
 if __name__ == "__main__":
     main()
