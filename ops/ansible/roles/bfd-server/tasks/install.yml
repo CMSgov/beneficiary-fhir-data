@@ -89,7 +89,7 @@
 
 - name: Add selinux file context to allow log rotation
   sefcontext:
-    target: "{{ data_server_dir }}(/.*)?"
+    target: "{{ data_server_dir }}(/.*json|/.*log)?"
     setype: var_log_t
     state: present
   become: true
