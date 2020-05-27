@@ -336,67 +336,26 @@ module "bfd_server_metrics_ab2d" {
 # FHIR server alarms, partner specific
 #
 
-# Deprecate classic HTTP 500 alarm for expression HTTP 500 alarm
-# module "bfd_server_alarm_all_500s" {
-#   source = "../resources/bfd_server_alarm"
+# TODO: Deprecate this alarm in favor of metric math expression to more accurately
+# represet our error budget
+#
+module "bfd_server_alarm_all_500s" {
+  source = "../resources/bfd_server_alarm"
 
-#   env    = var.env_config.env
+  env    = var.env_config.env
 
-#   alarm_config = {
-#     alarm_name       = "all-500s"
-#     partner_name     = "all"
-#     metric_prefix    = "http-requests/count-500"
-#     eval_periods     = "15"
-#     period           = "60"
-#     datapoints       = "15"
-#     statistic        = "Sum"
-#     ext_statistic    = null
-#     threshold        = "8.0"
-#     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-#     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-#   }
-# }
-
-resource "aws_cloudwatch_metric_alarm" "bfd_server_alarm_all_500s" {
-  alarm_name          = "bfd-${var.env_config.env}-server-all-500s"
-
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "15"
-  datapoints_to_alarm = "15"
-  threshold           = "0.1"
-
-  treat_missing_data  = "notBreaching"
-
-  alarm_actions       = data.aws_sns_topic.cloudwatch_alarms.arn == null ? [] : [data.aws_sns_topic.cloudwatch_alarms.arn]
-  ok_actions          = data.aws_sns_topic.cloudwatch_ok.arn == null ? [] : [data.aws_sns_topic.cloudwatch_ok.arn]
-
-  metric_query {
-    id          = "e1"
-    expression  = "m2/m1*100"
-    label       = "Error Rate"
-    return_data = "true"
-  }
-
-  metric_query {
-    id = "m1"
-
-    metric {
-      metric_name = "http-requests/count/all/all"
-      namespace   = "bfd-${var.env_config.env}/bfd-server"
-      period      = "60"
-      stat        = "Sum"
-    }
-  }
-
-  metric_query {
-    id = "m2"
-
-    metric {
-      metric_name = "http-requests/count-500/all"
-      namespace   = "bfd-${var.env_config.env}/bfd-server"
-      period      = "60"
-      stat        = "Sum"
-    }
+  alarm_config = {
+    alarm_name       = "all-500s"
+    partner_name     = "all"
+    metric_prefix    = "http-requests/count-500"
+    eval_periods     = "15"
+    period           = "60"
+    datapoints       = "15"
+    statistic        = "Sum"
+    ext_statistic    = null
+    threshold        = "8.0"
+    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
+    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
