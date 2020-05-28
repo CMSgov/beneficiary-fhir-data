@@ -12,6 +12,7 @@ variable "alarm_config" {
     statistic        = string,
     ext_statistic    = string,
     threshold        = string,
+    datapoints       = string,
     alarm_notify_arn = string,
     ok_notify_arn    = string
   })
