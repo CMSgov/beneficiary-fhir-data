@@ -3,6 +3,19 @@ MyMedicare.gov BlueButton Parent POM
 
 This repo just contains a Maven parent POM and some other build/dev resources that are shared by the CMS/MyMedicare.gov Java projects.
 
+## About
+
+The Beneficiary FHIR Data Server (BFD) provides FHIR-formatted beneficiary data to CMS Peering Partner APIs.
+
+### DASG Mission
+Drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare. 
+
+### BFD Mission
+Enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare. 
+
+### BFD Vision
+Provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data. 
+
 ## Development Environment
 
 Going to work on this project or one of the other Blue Button Java projects? Great! You can follow the instructions in [Development Environment Setup](./dev/devenv-readme.md) to get going.
