@@ -42,10 +42,10 @@ A: First issues will be tracked on the BFD’s jira board and labeled (via versi
 Substantive changes need to go through a design process involving the core team.
 Opening an RFC provides a path for this inclusion and process.
 Start an RFC by copying the file [`rfcs/0000-template.md`](rfcs/0000-template.md) to `rfcs/0000-<my idea>.md` and fill in the details. 
+Open a PR using the RFC template [submit a pull request](#opening-a-pr).
 The RFC will remain open for a 2 week period, at the end of which a go/no-go meeting will be held.
 If approved by at least two core team members and there are no outstanding reservations, the RFC will be accepted and given a number.
 Once accepted the author of the RFC and their team can scope the work within their regular process. Link or reference the RFC in the related JIRA ticket.
-When the work is ready [submit a pull request](#opening-a-pr).
 The core team will respond with design feedback, and the author should be prepared to revise it in response.
 
 **FAQ**
