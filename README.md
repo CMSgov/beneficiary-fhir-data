@@ -5,7 +5,7 @@ This repo just contains a Maven parent POM and some other build/dev resources th
 
 ## About
 
-The Beneficiary FHIR Data Server (BFD) provides FHIR-formatted beneficiary data to CMS Peering Partner APIs.
+Beneficiary FHIR Data (BFD) Server: The BFD Server is an internal backend system used at CMS to represent Medicare beneficiaries' demographic, enrollment, and claims data in [FHIR](https://www.hl7.org/fhir/overview.html) format.
 
 ### DASG Mission
 Drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare. 
