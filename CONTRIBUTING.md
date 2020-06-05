@@ -93,6 +93,9 @@ git checkout -b <your username>/<your feature name>
 # If you ever have to rename this branch you can do so with
 # git branch -m <your username>/<your feature name> <your username>/<your new name>
 ```
+### Setting Up A Local Development Environment On Windows
+
+Going to work on this project or one of the other Blue Button Java projects? Great! You can follow the instructions in [Development Environment Setup](./dev/devenv-readme.md) to get going.
 
 #### Opening A PR
 
