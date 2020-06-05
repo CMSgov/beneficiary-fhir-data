@@ -1,3 +1,4 @@
+
 # Welcome!
 
 We want to ensure a welcoming environment for all of our projects. Our staff follow the [18F Code of Conduct](https://github.com/18F/code-of-conduct/blob/master/code-of-conduct.md) and all contributors should do the same.
@@ -25,7 +26,7 @@ Any [substantive change must go though an RFC process](#proposing-substantive-ch
 
 Any code changes should be properly commented and accompanied by appropriate unit test as per DASG engineering guidelines.
 
-INSERT IMAGE OF PROCESS
+![Alt text](docs/assets/BFDContributionDiagram.png "Diagram")
 
 **FAQ**
 
@@ -92,6 +93,9 @@ git checkout -b <your username>/<your feature name>
 # If you ever have to rename this branch you can do so with
 # git branch -m <your username>/<your feature name> <your username>/<your new name>
 ```
+### Setting Up A Local Development Environment On Windows
+
+Going to work on this project or one of the other Blue Button Java projects? Great! You can follow the instructions in [Development Environment Setup](./dev/devenv-readme.md) to get going.
 
 #### Opening A PR
 
