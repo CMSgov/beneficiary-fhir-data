@@ -16,10 +16,6 @@ Enable the CMS Enterprise to drive innovation in data sharing so that beneficiar
 ### BFD Vision
 Provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data. 
 
-## Development Environment
-
-Going to work on this project or one of the other Blue Button Java projects? Great! You can follow the instructions in [Development Environment Setup](./dev/devenv-readme.md) to get going.
-
 ## Releases
 
 This project uses Maven's [maven-release-plugin](http://maven.apache.org/maven-release/maven-release-plugin/) for releases, and must be manually released by a developer with permissions to [its GitHub repo](https://github.com/HHSIDEAlab/bluebutton-parent-pom) and to [OSSRH](http://central.sonatype.org/pages/ossrh-guide.html) (which is used to ensure its releases land in Maven Central).
