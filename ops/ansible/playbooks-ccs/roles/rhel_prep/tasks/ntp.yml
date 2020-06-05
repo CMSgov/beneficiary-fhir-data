@@ -12,6 +12,11 @@
     line: 'server 169.254.169.123 prefer iburst'
   become: yes
 
+- name: Set timezone to UTC
+  timezone:
+    name: UTC
+  become: yes
+
 - name: Restart ntpd
   service:
     name: ntpd
