@@ -12,3 +12,27 @@ Installation:
 
 Usage:
 `python3 restore_aurora_snapshot.py`
+
+The script will prompt for all nessecary information.
+
+Database Failure Scenario Walkthrough
+-------------------------------------
+Lets say some data corruption has been introduced to the database after the latest ETL run and you want to get the FHIR servers on yesterdays copy of the data while you troubleshoot the issue.  That scenario might go like this:
+- Run the restore script to create a temporary restore cluster:
+  - `cd ops/ccs-ops-misc/restore-aurora-snapshot`
+  - `source .venv/bin/activate`
+  - `python3 restore_aurora_snapshot.py`
+- Create a new branch with updated FHIR server databse config:
+  - `git checkout -b myname/myhotfixbranch`
+  - `cd ops/ansible/playbooks-ccs`
+  - `source .venv/bin/activate`
+  - `ansible-vault edit vars/(env)/group_vars/all/vault.yml`
+  - `git commit -a -m 'Emergency procedure configure FHIR servers in (env) to use temporary aurora cluster'`
+- Push your branch to github:
+  - `git push -u origin myname/myhotfixbranch`
+- There are two options at this point:
+  - Run through a whole deployment pipeline using `deploy from non-master` option in Jenkins
+  - Review and merge the branch into master, then detach existing instances from the ASG while checking the option to replace with new instances.  The new instances will come online with updated configuration.
+
+  Once the issue is resolved and the original database is in a desired state, revert your changes either by deploying from master again if you deployed from a non master branch, or reverting the hotfix commit on master and recycling ASG instances as noted above.
+  
