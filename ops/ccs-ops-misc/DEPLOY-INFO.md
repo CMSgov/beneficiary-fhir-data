@@ -1,7 +1,7 @@
 Deployment Runbook
 ------------------
 
-# General Info
+### General Info
 
 - Single, multibranch Jenkinsfile provides all stage orchestration.
   - App build logic located here: `apps/build.groovy`
@@ -12,7 +12,7 @@ Deployment Runbook
 - There is a gate (manual approval stage) between TEST and PROD-SBX deployment, but not between PROD-SBX and PROD deployment.  Recommend locking the PROD environment in order to gate the PROD-SBX deployment for additional testing.
 - Our merge strategy in Jenkins is to merge the current deploying branch with master, which creates a unique commit ID in Jenkins that is appended to deployed AMIs.  To look up the commit ID of an AMI, you'll need to look up the merge commit in Jenkins and then find the originating commit from the BFD repo.
 
-# Failed Deployment Troubleshooting
+### Failed Deployment Troubleshooting
 
 ELB health checks and smoke testing embedded in the BFD startup script prevent completely broken deployments.  Additionally we use a create-before-destroy apply method in terraform when creating a new deployment autoscaling group.  If a new deployment fails these checks, it will time out the terraform deployment, leaving the original autoscaling group in tact, thus preventing an outage.
 
