@@ -31,6 +31,6 @@ In circumstances where the old deployment autoscaling group is no longer online,
 - If a large subset of requests are affected, a roll forward may be less acceptable and a roll back should be attempted
 
 There is no safe way to perform a roll back in Jenkins as all stages are dependent on variables acquired from previous stages at runtime, so the safe way to perform a roll back so to extract the terraform apply command from a previous deploy and run it locally:
-- Change to the appropriate terraform environment directory: `cd ops/terraform/env/test/stateless/`
-- Extract and run the terraform plan command from Jenkins: `terraform plan -var=fhir_ami=ami-034084a3946310dc4 -var=etl_ami=ami-0dba7ffeecdd9b8be -var=ssh_key_name=bfd-test -var=git_branch_name=master -var=git_commit_id=ec883a06fbdc7fdc72daa1655eefe26643aac008 -no-color -out=tfplan`
-- Extract and run the terraform apply command from Jenkins: `terraform apply -no-color -input=false tfplan`
+- Change to the appropriate terraform environment directory. Example: `cd ops/terraform/env/test/stateless/`
+- Extract and run the terraform plan command from Jenkins. Example `terraform plan -var=fhir_ami=ami-034084a3946310dc4 -var=etl_ami=ami-0dba7ffeecdd9b8be -var=ssh_key_name=bfd-test -var=git_branch_name=master -var=git_commit_id=ec883a06fbdc7fdc72daa1655eefe26643aac008 -no-color -out=tfplan`
+- Extract and run the terraform apply command from Jenkins. Example: `terraform apply -no-color -input=false tfplan`
