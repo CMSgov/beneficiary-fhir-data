@@ -24,6 +24,8 @@ Non-outage deployment timeout is the #1 issue encountered when deploying BFD, an
 - BFD service itself fails or is slow to start
 - AWS operations called by terraform are slow
 
+For insight into the cloud-init stage look at /var/log/cloud-init.log and /var/log/cloud-init-output.log
+For insight into the BFD FHIR application servers look in /usr/local/bfd-server/
 In circumstances where the old deployment autoscaling group is online and no outage has occured, the best option is to roll forward and attempt another deployment with any associated fixes.
 
 In circumstances where the old deployment autoscaling group is no longer online, but performance or functionality of the new autoscaling group is degraded, a determiniation should be made whether to perform a roll forward or a roll back:
