@@ -10,6 +10,7 @@ def main():
 
     rds_client = boto3.client("rds")
 
+    # Prompt for a cluster id until a vaild one is input
     while True:
         try:
             source_db_cluster_identifier = input("\nCluster identifier: ")
@@ -24,6 +25,7 @@ def main():
     for snapshot in source_db_cluster_snapshot_all:
         print(snapshot['DBClusterSnapshotIdentifier'])
 
+    # Prompt for a snapshot id obtained from selected cluster id until a valid one is input
     while True:
         try:
             source_db_cluster_snapshot_identifier = input("\nCluster snapshot identifier: ")
@@ -42,6 +44,7 @@ def main():
     if verify_restore.lower() != "y":
         sys.exit("\nExiting script")
 
+    # Create a new aurora cluster from the selected snapshot, copying all settings from the selected source cluster
     try:
         print(f"\nRestoring snapshot {source_db_cluster_snapshot_identifier} to aurora cluster {restore_db_cluster_identifier}")
         restore_db_cluster = rds_client.restore_db_cluster_from_snapshot(
@@ -63,6 +66,7 @@ def main():
     except botocore.exceptions.ClientError as client_err:
         sys.exit(client_err)
 
+    # Poll AWS every 15 seconds until the cluster finished creating
     while True:
         restore_db_cluster = rds_client.describe_db_clusters(DBClusterIdentifier = restore_db_cluster_identifier)['DBClusters'][0]
         print(f"Cluster status: {restore_db_cluster['Status']}")
@@ -70,6 +74,7 @@ def main():
             break
         time.sleep(15)
 
+    # Create the same number of cluster nodes the original source cluster had, copying all settings from each node
     try:
         source_db_instance_count = 0
         for source_db_instance in source_db_cluster_instances:
@@ -97,6 +102,7 @@ def main():
     except botocore.exceptions.ClientError as client_err:
         sys.exit(client_err)
 
+    # Poll AWS every 15 seconds until all cluster nodes are finished creating
     while True:
         restore_db_instances = rds_client.describe_db_instances(Filters = [{"Name":"db-cluster-id", "Values":[restore_db_cluster_identifier]}])['DBInstances']
         print(f"Instance status: {[instance['DBInstanceStatus'] for instance in restore_db_instances]}")
