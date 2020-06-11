@@ -66,7 +66,7 @@ def main():
     except botocore.exceptions.ClientError as client_err:
         sys.exit(client_err)
 
-    # Poll AWS every 15 seconds until the cluster finished creating
+    # Poll AWS every 15 seconds until the cluster is finished creating
     while True:
         restore_db_cluster = rds_client.describe_db_clusters(DBClusterIdentifier = restore_db_cluster_identifier)['DBClusters'][0]
         print(f"Cluster status: {restore_db_cluster['Status']}")
