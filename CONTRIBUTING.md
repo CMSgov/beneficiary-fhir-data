@@ -24,7 +24,7 @@ Small changes like "good first issues" can be submitted for consideration withou
 
 Any [substantive change must go though an RFC process](#proposing-substantive-changes) before work on the change itself can start. 
 
-Any code changes should be properly commented and accompanied by appropriate unit test as per DASG engineering guidelines.
+Any code changes should be properly commented and accompanied by appropriate unit and integration test as per DASG engineering guidelines.
 
 ![Alt text](docs/assets/BFDContributionDiagram.png "Diagram")
 
