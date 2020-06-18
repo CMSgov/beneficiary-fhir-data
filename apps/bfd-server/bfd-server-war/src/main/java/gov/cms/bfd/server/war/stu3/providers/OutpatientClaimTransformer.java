@@ -450,10 +450,13 @@ final class OutpatientClaimTransformer {
           claimLine.getRevenueCenterRenderingPhysicianNPI());
 
       // set revenue center status indicator codes for the claim
-      item.getRevenue()
-          .addExtension(
-              TransformerUtils.createExtensionCoding(
-                  eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
+      // Dt: 6-18-20 Handling for optional status code claim line: BFD-252
+      if (claimLine.getStatusCode().isPresent()) {
+        item.getRevenue()
+            .addExtension(
+                TransformerUtils.createExtensionCoding(
+                    eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
+      }
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
