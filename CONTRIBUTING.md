@@ -22,7 +22,7 @@ Review the [README](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/
 Contributions to the BFD are welcome from any party inside CMS.
 Small changes like "good first issues" can be submitted for consideration without any additional process.
 
-Any [substantive change must go though an RFC process](#proposing-substantive-changes) before work on the change itself can start. 
+Any [substantive change must go though an RFC process](#proposing-substantive-changes) before work on the change itself can start.
 
 Any code changes should be properly commented and accompanied by appropriate unit and integration test as per DASG engineering guidelines.
 
