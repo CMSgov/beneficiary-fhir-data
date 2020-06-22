@@ -26,7 +26,7 @@ Any [substantive change must go though an RFC process](#proposing-substantive-ch
 
 Any code changes should be properly commented and accompanied by appropriate unit and integration test as per [DASG Engineering Standards](https://github.com/CMSgov/cms-oeda-dasg/blob/master/policies/engineering_standards.md).
 
-![Alt text](docs/assets/BFDContributionDiagram.png "Diagram")
+![Workflow diagram for making a contribution to BFD](docs/assets/BFDContributionDiagram.png "Making a Contribution to BFD")
 
 **FAQ**
 
