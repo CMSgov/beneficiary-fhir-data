@@ -36,7 +36,7 @@ A: In general bug fixes and small changes that do not affect behavior or meaning
 
 Q: How do I know what “first issues” are up for grabs? 
 
-A: First issues will be tracked on the BFD’s jira board and labeled (via versions) “Good First Issue”
+A: First issues are tracked on the BFD’s Jira board with the "Good_First_Issue" label: <https://jira.cms.gov/issues/?jql=project%20%3D%20BFD%20AND%20status%20%3D%20Open%20AND%20labels%20%3D%20Good_First_Issue>
 
 ### Proposing substantive changes
 
