@@ -12,7 +12,7 @@ Contributing to the BFD
 
 BFD exists to enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.
 
-We provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data by providing Coverage, Patient, and EOB FHIR-formatted data.
+We provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data by providing [FHIR](https://www.hl7.org/fhir/)-formatted data, including beneficiary demographic, enrollment, and claims data.
 
 Review the [README](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/README.md) for additional information on the BFD. 
 
