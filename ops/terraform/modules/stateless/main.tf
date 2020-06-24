@@ -6,6 +6,7 @@
 locals {
   azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config        = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  is_prod           = substr(var.env_config.env, 0, 4) == "prod"
   port              = 7443
   cw_period         = 60    # Seconds
   cw_eval_periods   = 3
@@ -231,9 +232,9 @@ module "fhir_asg" {
 
   # Initial size is one server per AZ
   asg_config        = {
-    min             = length(local.azs)
+    min             = local.is_prod ? 2*length(local.azs): length(local.azs)
     max             = 8*length(local.azs)
-    desired         = length(local.azs)
+    desired         = local.is_prod ? 2*length(local.azs): length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
   }
