@@ -22,7 +22,34 @@ This project is in the worldwide [public domain](LICENSE.md). As stated in [LICE
 >
 > All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
 
-## Setting up the FHIR server locally
+## AWS Configuration
+
+### AWS Credentials
+
+Many of the automated tests associated with the Blue Button framework use AWS resources.  Before running a build using Maven or importing projects into your Eclipse IDE, which will run a build automatically, please ensure the appropriate accounts and credentials are configured within your environment.  **This is necessary to prevent incurring unwanted charges on the wrong AWS account**.
+
+Below are links to detailed instructions on configuring your AWS credentials for your environment:
+
+  * [Configuration and Credential Files](http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html)
+
+## Github Configuration
+
+You will need to configure an SSH credential in order to clone the Blue Button repositories.  Instructions are thoroughly documented on Github but for convenience here are the relevant links:
+
+  * [Connecting to Github with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
+  * [Generating a new SSH key and adding it to the ssh-agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/)
+  * [Adding a new SSH key to your GitHub account](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/)
+  * [Testing your SSH connection](https://help.github.com/articles/testing-your-ssh-connection/)
+
+## Cloning the Repository
+
+Clone the repository:
+```
+mkdir -p ~/workspaces/bfd/
+git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/beneficiary-fhir-data.git
+```
+
+## Setting up the FHIR server and DB with Docker
 
 Requirements: Docker 
 
@@ -30,12 +57,7 @@ Caution: Setting up your local environments requires git patches to run. Please 
 
 Let's begin!
 
-Clone the repository onto you're computer.
-```
-git clone https://github.com/CMSgov/beneficiary-fhir-data
-```
-
-The instructions from here on should be run from the `contributing` directory in repository.
+The instructions from here on should be run from the `contributing` directory located at /
 
 To simply run tests or execute other tasks in the BFD bring up the docker containers.
 Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory.
@@ -192,3 +214,51 @@ docker-compose -f docker-compose.bb2.yml exec bb2 ./docker-compose/migrate.sh
 We work with sensitive information: do not put any PHI or PII in the public repo for BFD.
 
 If you believe you’ve found or been made aware of a security vulnerability, please refer to the CMS Vulnerability Disclosure Policy (here is a [link](https://www.cms.gov/Research-Statistics-Data-and-Systems/CMS-Information-Technology/CIO-Directives-and-Policies/Downloads/CMS-Vulnerability-Disclosure-Policy.pdf) to the most recent version as of the time of this commit.
+
+## Eclipse Configuration
+
+The following instructions are to be executed from within the Eclipse IDE application to ensure proper configuration.
+
+### Eclipse JDK
+
+Verify Eclipse is using the correct Java 8 JDK.
+
+1. Open **Window > Preferences**.
+1. Select **Java > Installed JREs**.
+1. If your JDK does not appear in the **Installed JREs** table add it by clicking the **Add** button, select **Standard VM** and locate your installation using the **Directory...** button.
+1. Ensure your JDK is selected in the **Installed JREs** table by checking the checkbox next to the JDK you wish to use.
+
+### Eclipse Preferences
+
+If you're using Eclipse for development, you'll want to configure its preferences, as follows:
+
+1. Open **Window > Preferences**.
+1. Select **Maven**.
+    1. Enable **Download Artifact Sources**.
+    1. Enable **Download Artifact JavaDoc**.
+1. Select **Maven > Annotation Processing**.
+    1. Enable the **Automatically configure JDT APT** option.
+1. Select **Java > Code Style > Code Templates**.
+    1. Click **Import...** and select this project's [eclipse-codetemplates.xml](docs/assets/eclipse-codetemplates.xml) file.
+        * This configures the file, class, method, etc. comments on new items such that they match the existing style used in these projects.
+    1. Enable the **Automatically add comments for new methods and types** option.
+1. Select **Java > Code Style > Formatter**.
+    1. Click **Import...** and select this project's [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file.
+        * This configures the Eclipse autoformatter (`ctrl+shift+f`) to (mostly) match the one used by the autoformatter that is applied during Maven builds.
+        * The [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file was originally acquired from here: <https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml>.
+1. Select **Java > Editor > Save Actions**.
+    1. Enable the **Perform the selected actions on save** option.
+    1. Enable the **Format source code** option.
+1. Click **OK**.
+
+### Importing Maven Projects into Eclipse
+
+The repository can easily be added to your Eclipse workspace using the **Import** feature.
+
+1. Open **File > Import...**.
+1. Select **Existing Maven Projects**.
+1. Specify the **Root Directory** using the **Browse...** button or by typing in a path: `~/workspaces/bfd/beneficiary-fhir-data.git`.
+1. Verify that it found the projects in the **Projects** table.
+1. Click **Finish**.
+1. The projects and packages you selected will now appear in the **Project Explorer** window.
+
