@@ -50,6 +50,7 @@ Once accepted the author of the RFC and their team can scope the work within the
 The core team will respond with design feedback, and the author should be prepared to revise it in response.
 
 **FAQ**
+
 Q: What qualifies as a substantive change?
 
 A: There is no strict definition, however examples of substantive changes are:
