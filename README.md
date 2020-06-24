@@ -22,8 +22,8 @@ This project is in the worldwide [public domain](LICENSE.md). As stated in [LICE
 >
 > All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
 
-Setting up the FHIR server locally
----
+## Setting up the FHIR server locally
+
 Requirements: Docker 
 
 Caution: Setting up your local environments requires git patches to run. Please make sure you `make unservable` and `make unloadadable` before you commit your changes to revert these patches. 
@@ -186,8 +186,9 @@ docker-compose -f docker-compose.yml -f docker-compose.bb2.yml -f docker-compose
 ```
 docker-compose -f docker-compose.bb2.yml exec bb2 ./docker-compose/migrate.sh
 ```
-Security
---
+
+## Security
+
 We work with sensitive information: do not put any PHI or PII in the public repo for BFD.
 
 If you believe you’ve found or been made aware of a security vulnerability, please refer to the CMS Vulnerability Disclosure Policy (here is a [link](https://www.cms.gov/Research-Statistics-Data-and-Systems/CMS-Information-Technology/CIO-Directives-and-Policies/Downloads/CMS-Vulnerability-Disclosure-Policy.pdf) to the most recent version as of the time of this commit.

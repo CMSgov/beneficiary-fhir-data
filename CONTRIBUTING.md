@@ -80,22 +80,11 @@ A: Anyone can coordinate with you and the core team to take over the work.
 
 ### Getting started
 
-Clone this repository to get started.
+Going to work on this project? Great! There are currently two documented methods for getting a local environment up and running to get you setup for development. 
 
-```
-git clone https://github.com/CMSgov/beneficiary-fhir-data.git
-```
+[Getting started with Docker](README.md) 
 
-Then checkout a new branch to work on (the `-b` tells it to make a new branch).
-
-```
-git checkout -b <your username>/<your feature name>
-# If you ever have to rename this branch you can do so with
-# git branch -m <your username>/<your feature name> <your username>/<your new name>
-```
-### Setting Up A Local Development Environment On Windows
-
-Going to work on this project or one of the other Blue Button Java projects? Great! You can follow the instructions in [Development Environment Setup](./dev/devenv-readme.md) to get going.
+[Getting started without Docker (Windows only)](./dev/devenv-readme.md)
 
 #### Opening A PR
 
