@@ -1,5 +1,9 @@
 # API Changelog
 
+## BFD-8: Add and map coverage fields dual01..dual12 and rfrnc_yr to the coverage resource
+
+The dual_01..dual12 and rfnrc_yr are essentially coverage related fields and need to be included in the coverage resource. Previously, these fields were only available on the patient resource and when beneficiaries choose to redact their demographic data, downstream consumers lose these vital eligibility fields thus the need to add them to the coverage resource. In future versions of the API, we'll want to consider removing these from the patient resource. 
+
 ## BLUEBUTTON-1843: HAPI 4.1.0 Upgrade
 
 As part of the upgrade of the HAPI package used by the BFD, the FHIR version was changed from `3.0.1` to `3.0.2`. 
@@ -75,7 +79,7 @@ hicn,mbi or mbi,hicn | include HICN and MBI
 
 ## BLUEBUTTON-1506: Support for _Since Parameter
 
-Support for `_lastUpdated` as a search parameter is added for resources. RFC-0004 explains the details of the schanges.
+Support for `_lastUpdated` as a search parameter is added for resources. RFC-0004 explains the details of the changes.
 
 
 ## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
