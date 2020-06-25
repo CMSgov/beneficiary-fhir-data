@@ -221,13 +221,13 @@ If you're using Eclipse for development, you'll want to configure its preference
 1. Select **Maven > Annotation Processing**.
     1. Enable the **Automatically configure JDT APT** option.
 1. Select **Java > Code Style > Code Templates**.
-    1. Click **Import...** and select this project's [eclipse-codetemplates.xml](./eclipse-codetemplates.xml) file.
+    1. Click **Import...** and select this project's [eclipse-codetemplates.xml](docs/assets/eclipse-codetemplates.xml) file.
         * This configures the file, class, method, etc. comments on new items such that they match the existing style used in these projects.
     1. Enable the **Automatically add comments for new methods and types** option.
 1. Select **Java > Code Style > Formatter**.
-    1. Click **Import...** and select this project's [eclipse-java-google-style.xml](./eclipse-java-google-style.xml) file.
+    1. Click **Import...** and select this project's [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file.
         * This configures the Eclipse autoformatter (`ctrl+shift+f`) to (mostly) match the one used by the autoformatter that is applied during Maven builds.
-        * The [eclipse-java-google-style.xml](./eclipse-java-google-style.xml) file was originally acquired from here: <https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml>.
+        * The [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file was originally acquired from here: <https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml>.
 1. Select **Java > Editor > Save Actions**.
     1. Enable the **Perform the selected actions on save** option.
     1. Enable the **Format source code** option.
@@ -239,7 +239,7 @@ The repository can easily be added to your Eclipse workspace using the **Import*
 
 1. Open **File > Import...**.
 1. Select **Existing Maven Projects**.
-1. Specify the **Root Directory** using the **Browse...** button or by typing in a path: `~/workspaces/bfd/beneficiary-fhir-data.git`.
+1. Specify the **Root Directory** using the **Browse...** button or by typing in a path ex: `~/workspaces/bfd/beneficiary-fhir-data.git`.
 1. Verify that it found the projects in the **Projects** table.
 1. Click **Finish**.
 1. The projects and packages you selected will now appear in the **Project Explorer** window.
