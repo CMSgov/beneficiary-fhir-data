@@ -625,12 +625,17 @@ public final class RifLoader implements AutoCloseable {
     }
   }
 
+  /**
+   * Ensures that a {@link Beneficiary} records for old and new benificiaries are equal or not
+   * equal.
+   *
+   * @param newBeneficiaryRecord the {@link Beneficiary} new record being processed
+   * @param oldBeneficiaryRecord the {@link Beneficiary} old record that was processed
+   */
   private static boolean isBeneficiaryHistoryEqual(
       Beneficiary newBeneficiaryRecord, Beneficiary oldBeneficiaryRecord) {
 
     if (newBeneficiaryRecord.getBirthDate().equals(oldBeneficiaryRecord.getBirthDate())
-        && newBeneficiaryRecord.getHicn().equals(oldBeneficiaryRecord.getHicn())
-        && newBeneficiaryRecord.getBirthDate().equals(oldBeneficiaryRecord.getBirthDate())
         && newBeneficiaryRecord.getHicn().equals(oldBeneficiaryRecord.getHicn())
         && newBeneficiaryRecord.getHicnUnhashed().equals(oldBeneficiaryRecord.getHicnUnhashed())
         && newBeneficiaryRecord.getSex() == oldBeneficiaryRecord.getSex()
