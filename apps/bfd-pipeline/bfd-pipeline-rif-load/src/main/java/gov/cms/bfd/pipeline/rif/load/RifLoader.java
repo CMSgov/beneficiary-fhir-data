@@ -632,7 +632,7 @@ public final class RifLoader implements AutoCloseable {
    * @param newBeneficiaryRecord the {@link Beneficiary} new record being processed
    * @param oldBeneficiaryRecord the {@link Beneficiary} old record that was processed
    */
-  private static boolean isBeneficiaryHistoryEqual(
+  static boolean isBeneficiaryHistoryEqual(
       Beneficiary newBeneficiaryRecord, Beneficiary oldBeneficiaryRecord) {
 
     if (newBeneficiaryRecord.getBirthDate().equals(oldBeneficiaryRecord.getBirthDate())

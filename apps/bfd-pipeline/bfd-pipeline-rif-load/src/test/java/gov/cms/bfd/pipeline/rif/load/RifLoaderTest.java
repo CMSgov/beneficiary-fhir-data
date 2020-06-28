@@ -1,8 +1,11 @@
 package gov.cms.bfd.pipeline.rif.load;
 
+import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Optional;
 import javax.crypto.SecretKeyFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -85,5 +88,101 @@ public final class RifLoaderTest {
     Assert.assertEquals(
         "742086db6bf338dedda6175ea3af8ca5e85b81fda9cc7078004a4d3e4792494b",
         RifLoader.computeMbiHash(options, secretKeyFactory, "2456689"));
+  }
+
+  /**
+   * Runs a couple of fake HICNs through {@link
+   * gov.cms.bfd.pipeline.rif.load.RifLoader#computeHicnHash(LoadAppOptions, SecretKeyFactory,
+   * String)} to verify that the expected result is produced.
+   */
+  @Test
+  public void isBeneficiaryHistoryEqual() {
+    Beneficiary newBene = new Beneficiary();
+    LocalDate birthDate = LocalDate.of(1960, 1, 8);
+    String hicn = "2332j3l2";
+    Optional<String> hicnUnhased = Optional.of("323232");
+    char sex = 'M';
+    Optional<String> medicareBeneficiaryId = Optional.of("beneficiaryId");
+
+    newBene.setBirthDate(birthDate);
+    newBene.setHicn(hicn);
+    newBene.setHicnUnhashed(hicnUnhased);
+    newBene.setSex(sex);
+    newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
+
+    Beneficiary oldBene = new Beneficiary();
+    oldBene.setBirthDate(birthDate);
+    oldBene.setHicn(hicn);
+    oldBene.setHicnUnhashed(hicnUnhased);
+    oldBene.setSex(sex);
+    oldBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
+
+    // Both old and new beneficiary have the same values return true
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary birth date is not the same as old should assert false
+    newBene.setBirthDate(LocalDate.of(1950, 1, 8));
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary birth date and set it back to old should assert true
+    newBene.setBirthDate(birthDate);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary hicn is not the same as old should assert false
+    newBene.setHicn("difHicn");
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary hicn and set it back to old should assert true
+    newBene.setHicn(hicn);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary hicn unleashed is not the same as old should assert false
+    newBene.setHicnUnhashed(Optional.of("difHicn"));
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary hicn unleashed and set it back to old should assert true
+    newBene.setHicnUnhashed(hicnUnhased);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary hicn unleashed is not the same as old should assert false
+    newBene.setSex('F');
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary sex and set it back to old should assert true
+    newBene.setSex(sex);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary mediciarybeneficiaryid is not the same as old should assert false
+    newBene.setMedicareBeneficiaryId(Optional.of("diff"));
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary sex and set it back to old should assert true
+    newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Check for nulls
+    // New beneficiary hicn unleashed is null and the return result should assert false
+    newBene.setHicnUnhashed(Optional.empty());
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary hicn unleashed and set it back to old should assert true
+    newBene.setHicnUnhashed(hicnUnhased);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary hicn unleashed is null and the return result should assert false
+    newBene.setSex(Character.MIN_VALUE);
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary sex and set it back to old should assert true
+    newBene.setSex(sex);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary mediciarybeneficiaryid is null and the return result should assert false
+    newBene.setMedicareBeneficiaryId(Optional.empty());
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary sex and set it back to old should assert true
+    newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
   }
 }
