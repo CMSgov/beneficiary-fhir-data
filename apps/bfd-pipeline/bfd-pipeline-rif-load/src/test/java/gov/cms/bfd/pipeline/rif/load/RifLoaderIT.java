@@ -176,10 +176,6 @@ public final class RifLoaderIT {
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
-    // TODO something like this to setup your negative (doesn't add an entry change) test
-    // loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    // loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENE_UNCHANGED));
-
     /*
      * Verify that the updates worked as expected by manually checking some fields.
      */
@@ -214,7 +210,7 @@ public final class RifLoaderIT {
       Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      // Last Name inserted with value of "Doe"
+      // Last Name inserted with value of "Johnson"
       Assert.assertEquals("Johnson", beneficiaryFromDb.getNameSurname());
       // Following fields were NOT changed in update record
       Assert.assertEquals("John", beneficiaryFromDb.getNameGiven());
@@ -271,12 +267,16 @@ public final class RifLoaderIT {
   public void loadSampleUUnchanged() {
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    // this should insert a new beneficiary history record
+    loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+
+    long start = System.currentTimeMillis();
+    // this should bypass inserting a new beneficiary history record because it already exists
     loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
      */
-    long start = System.currentTimeMillis();
     LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
         RifLoaderTestUtils.createEntityManagerFactory(options);
@@ -304,10 +304,12 @@ public final class RifLoaderIT {
             .ifPresent(
                 lastUpdated -> {
                   Assert.assertFalse(
-                      "Expected a recent lastUpdated timestamp",
+                      "Expected not a recent lastUpdated timestamp",
                       lastUpdated.after(Date.from(Instant.now().minusSeconds(secs))));
                 });
       }
+      // Make sure the size is the same and no records have been inserted if the same fields in the
+      // beneficiary history table are the same.
       Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
     } finally {
