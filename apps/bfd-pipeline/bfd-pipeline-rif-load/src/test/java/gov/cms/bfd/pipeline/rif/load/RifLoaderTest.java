@@ -103,12 +103,14 @@ public final class RifLoaderTest {
     Optional<String> hicnUnhased = Optional.of("323232");
     char sex = 'M';
     Optional<String> medicareBeneficiaryId = Optional.of("beneficiaryId");
+    Optional<String> mbiHash = Optional.of("mbiHash");
 
     newBene.setBirthDate(birthDate);
     newBene.setHicn(hicn);
     newBene.setHicnUnhashed(hicnUnhased);
     newBene.setSex(sex);
     newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
+    newBene.setMbiHash(mbiHash);
 
     Beneficiary oldBene = new Beneficiary();
     oldBene.setBirthDate(birthDate);
@@ -116,6 +118,7 @@ public final class RifLoaderTest {
     oldBene.setHicnUnhashed(hicnUnhased);
     oldBene.setSex(sex);
     oldBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
+    oldBene.setMbiHash(mbiHash);
 
     // Both old and new beneficiary have the same values return true
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
@@ -158,6 +161,14 @@ public final class RifLoaderTest {
 
     // Undo New beneficiary sex and set it back to old should assert true
     newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // New beneficiary mbihash is not the same as old should assert false
+    newBene.setMbiHash(Optional.of("mbihashdiff"));
+    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // Undo New beneficiary mbihash and set it back to old should assert true
+    newBene.setMbiHash(mbiHash);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
     // Check for nulls

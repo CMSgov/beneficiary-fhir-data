@@ -639,6 +639,7 @@ public final class RifLoader implements AutoCloseable {
         && newBeneficiaryRecord.getHicn().equals(oldBeneficiaryRecord.getHicn())
         && newBeneficiaryRecord.getHicnUnhashed().equals(oldBeneficiaryRecord.getHicnUnhashed())
         && newBeneficiaryRecord.getSex() == oldBeneficiaryRecord.getSex()
+        && newBeneficiaryRecord.getMbiHash().equals(oldBeneficiaryRecord.getMbiHash())
         && newBeneficiaryRecord
             .getMedicareBeneficiaryId()
             .equals(oldBeneficiaryRecord.getMedicareBeneficiaryId())) {
