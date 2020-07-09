@@ -323,6 +323,53 @@ The contract ID fields `PTD_CNTRCT_JAN_ID`...`PTD_CNTRCT_DEC_ID` (or `PTDCNTRCT0
         https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2015-2014.rif \
         https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2016-2014.rif
    ```
+   
+7. The following is a summary of the changes related to update  2020-05-21-synthetic-bene-updated-mbi:
+To denote that an MBI is synthetic in the BFD database, we are using the 2nd position character = "S". We are breaking the MBI standard format for just the 2nd character position for this purpose:
+https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI-with-Format.pdf
+However, we ran in to validation issues with 999 of the 30K records when updating the values in SLS and also accounting for that difference in the 2nd character position.
+These records had an "S" in the 3rd character position and were failing the validation.
+To resolve, the 3rd character position of those 999 MBI values was updated from "S" => "T".
+For example, the MBI value "8SS0A00AA00" was updated to "8ST0A00AA00"
+All MBI values are now updated to conform to the MBI standard format, with the exception of our special case to denote them as synthetic vs. real.
+
+  ``` 
+  $ wget \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/0_manifest.xml \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-beneficiary-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-beneficiary-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-beneficiary-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2000-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2001-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2001-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2002-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2015-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2016-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-pde-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-pde-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-pde-2016.rif 
+  ``` 
 
 
 The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/beneficiary-fhir-data:bfd-model-rif-samples/dev](./).
