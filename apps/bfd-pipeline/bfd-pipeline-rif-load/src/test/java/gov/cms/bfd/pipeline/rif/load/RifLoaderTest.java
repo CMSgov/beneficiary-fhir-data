@@ -171,7 +171,7 @@ public final class RifLoaderTest {
     newBene.setMbiHash(mbiHash);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // Check for nulls
+    // Check for nulls on fields
     // New beneficiary hicnUnhashed is null and the return result should assert false
     newBene.setHicnUnhashed(Optional.empty());
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
