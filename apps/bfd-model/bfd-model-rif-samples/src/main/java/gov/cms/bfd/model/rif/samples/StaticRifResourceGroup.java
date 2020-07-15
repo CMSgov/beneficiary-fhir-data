@@ -44,6 +44,9 @@ public enum StaticRifResourceGroup {
 
   SAMPLE_U(StaticRifResource.SAMPLE_U_BENES, StaticRifResource.SAMPLE_U_CARRIER),
 
+  SAMPLE_U_BENES_UNCHANGED(
+      StaticRifResource.SAMPLE_U_BENES_UNCHANGED, StaticRifResource.SAMPLE_U_CARRIER),
+
   SYNTHETIC_DATA(
       StaticRifResource.SYNTHETIC_BENEFICIARY_1999,
       StaticRifResource.SYNTHETIC_BENEFICIARY_2000,

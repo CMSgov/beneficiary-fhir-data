@@ -52,14 +52,14 @@ public final class RifLoaderIT {
   @Test
   public void loadSampleA() {
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
   @Ignore
   @Test
   public void loadSampleAWithoutClean() {
     DataSource dataSource = DatabaseTestHelper.getTestDatabase();
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
   @Test
@@ -67,7 +67,7 @@ public final class RifLoaderIT {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           // Verify that LoadedFile entity
-          loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
           final List<LoadedFile> loadedFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
           Assert.assertTrue(
               "Expected to have many loaded files in SAMPLE A", loadedFiles.size() > 1);
@@ -91,7 +91,7 @@ public final class RifLoaderIT {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           // Verify that a loaded files exsits
-          loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
           final List<LoadedFile> beforeLoadedFiles =
               RifLoaderTestUtils.findLoadedFiles(entityManager);
           Assert.assertTrue("Expected to have at least one file", beforeLoadedFiles.size() > 0);
@@ -99,7 +99,7 @@ public final class RifLoaderIT {
           LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
 
           RifLoaderTestUtils.pauseMillis(10);
-          loadSample(dataSource, StaticRifResourceGroup.SAMPLE_U);
+          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
           // Verify that the loaded list was updated properly
           final List<LoadedFile> afterLoadedFiles =
@@ -124,7 +124,7 @@ public final class RifLoaderIT {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
           // Setup a loaded file with an old date
-          loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
           final List<LoadedFile> loadedFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
           final EntityTransaction txn = entityManager.getTransaction();
           txn.begin();
@@ -140,7 +140,7 @@ public final class RifLoaderIT {
               beforeFiles.stream().anyMatch(file -> file.getCreated().before(oldDate)));
 
           // Load another set that will cause the old file to be trimmed
-          loadSample(dataSource, StaticRifResourceGroup.SAMPLE_U);
+          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
           // Verify that old file was trimmed
           final List<LoadedFile> afterFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
@@ -155,7 +155,8 @@ public final class RifLoaderIT {
   public void buildSyntheticLoadedFiles() {
     RifLoaderTestUtils.doTestWithDb(
         (dataSource, entityManager) -> {
-          loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);
+          loadSample(
+              dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
           // Verify that a loaded files exsits
           final List<LoadedFile> loadedFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
           Assert.assertTrue("Expected to have at least one file", loadedFiles.size() > 0);
@@ -172,8 +173,8 @@ public final class RifLoaderIT {
   @Test
   public void loadSampleU() {
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_U);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
     /*
      * Verify that the updates worked as expected by manually checking some fields.
@@ -209,7 +210,7 @@ public final class RifLoaderIT {
       Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      // Last Name inserted with value of "Doe"
+      // Last Name inserted with value of "Johnson"
       Assert.assertEquals("Johnson", beneficiaryFromDb.getNameSurname());
       // Following fields were NOT changed in update record
       Assert.assertEquals("John", beneficiaryFromDb.getNameGiven());
@@ -260,13 +261,70 @@ public final class RifLoaderIT {
 
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
+   * StaticRifResourceGroup#SAMPLE_U} data.
+   */
+  @Test
+  public void loadSampleUUnchanged() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    // this should insert a new beneficiary history record
+    loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+
+    long start = System.currentTimeMillis();
+    // this should bypass inserting a new beneficiary history record because it already exists
+    loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
+
+    /*
+     * Verify that the updates worked as expected by manually checking some fields.
+     */
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      CriteriaQuery<BeneficiaryHistory> beneficiaryHistoryCriteria =
+          entityManager.getCriteriaBuilder().createQuery(BeneficiaryHistory.class);
+      List<BeneficiaryHistory> beneficiaryHistoryEntries =
+          entityManager
+              .createQuery(
+                  beneficiaryHistoryCriteria.select(
+                      beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
+              .getResultList();
+      for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
+        Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
+        // A recent lastUpdated timestamp
+        Assert.assertTrue("Expected a lastUpdated field", beneHistory.getLastUpdated().isPresent());
+        long end = System.currentTimeMillis();
+        // finding the time difference and converting it into seconds
+        long secs = (end - start) / 1000L;
+        beneHistory
+            .getLastUpdated()
+            .ifPresent(
+                lastUpdated -> {
+                  Assert.assertFalse(
+                      "Expected not a recent lastUpdated timestamp",
+                      lastUpdated.after(Date.from(Instant.now().minusSeconds(secs))));
+                });
+      }
+      // Make sure the size is the same and no records have been inserted if the same fields in the
+      // beneficiary history table are the same.
+      Assert.assertEquals(4, beneficiaryHistoryEntries.size());
+
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
+  /**
+   * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
    * StaticRifResourceGroup#SAMPLE_B} data.
    */
   @Ignore
   @Test
   public void loadSampleB() {
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_B);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
   }
 
   /**
@@ -284,7 +342,7 @@ public final class RifLoaderIT {
         Runtime.getRuntime().maxMemory()),
     Runtime.getRuntime().maxMemory() >= 4500000000L); */
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
   }
 
   /**
@@ -294,10 +352,13 @@ public final class RifLoaderIT {
   @Test
   public void loadSampleMctData() {
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT);
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT.getResources()));
+    loadSample(
+        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1.getResources()));
+    loadSample(
+        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2.getResources()));
+    loadSample(
+        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
   }
 
   /** Tests the RifLoaderIdleTasks class with a Sample. Note: only works with Postgres. */
@@ -305,7 +366,7 @@ public final class RifLoaderIT {
   @Test
   public void runIdleTasks() {
     final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     RifLoader loader = createLoader(dataSource, true);
 
     // The sample are loaded with mbiHash set, clear them for this test
@@ -367,7 +428,7 @@ public final class RifLoaderIT {
   @Test
   public void runIdleTasksWithNoFixups() {
     final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, StaticRifResourceGroup.SAMPLE_A);
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     final RifLoader loader = createLoader(dataSource, false);
 
     // Should need no work
@@ -447,10 +508,7 @@ public final class RifLoaderIT {
    * @param dataSource a {@link DataSource} for the test DB to use
    * @param sampleGroup the {@link StaticRifResourceGroup} to load
    */
-  private void loadSample(DataSource dataSource, StaticRifResourceGroup sampleGroup) {
-    // Generate the sample RIF data to feed through the pipeline.
-    List<StaticRifResource> sampleResources =
-        Arrays.stream(sampleGroup.getResources()).collect(Collectors.toList());
+  private void loadSample(DataSource dataSource, List<StaticRifResource> sampleResources) {
     LOGGER.info("Loading RIF file from {}...", sampleResources.get(0).getResourceUrl().toString());
 
     RifFilesEvent rifFilesEvent =
