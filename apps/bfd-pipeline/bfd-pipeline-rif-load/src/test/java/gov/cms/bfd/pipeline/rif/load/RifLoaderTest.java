@@ -139,15 +139,15 @@ public final class RifLoaderTest {
     newBene.setHicn(hicn);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // New beneficiary hicn unleashed is not the same as old should assert false
+    // New beneficiary hicnunHashed is not the same as old should assert false
     newBene.setHicnUnhashed(Optional.of("difHicn"));
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // Undo New beneficiary hicn unleashed and set it back to old should assert true
+    // Undo New beneficiary hicnUnhased and set it back to old should assert true
     newBene.setHicnUnhashed(hicnUnhased);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // New beneficiary hicn unleashed is not the same as old should assert false
+    // New beneficiary sex is not the same as old should assert false
     newBene.setSex('F');
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
@@ -159,7 +159,7 @@ public final class RifLoaderTest {
     newBene.setMedicareBeneficiaryId(Optional.of("diff"));
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // Undo New beneficiary sex and set it back to old should assert true
+    // Undo New beneficiary mediciarybeneficiaryid and set it back to old should assert true
     newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
@@ -172,15 +172,15 @@ public final class RifLoaderTest {
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
     // Check for nulls
-    // New beneficiary hicn unleashed is null and the return result should assert false
+    // New beneficiary hicnUnhashed is null and the return result should assert false
     newBene.setHicnUnhashed(Optional.empty());
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // Undo New beneficiary hicn unleashed and set it back to old should assert true
+    // Undo New beneficiary hicnUnhashed and set it back to old should assert true
     newBene.setHicnUnhashed(hicnUnhased);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // New beneficiary hicn unleashed is null and the return result should assert false
+    // New beneficiary sex is null and the return result should assert false
     newBene.setSex(Character.MIN_VALUE);
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
@@ -192,7 +192,7 @@ public final class RifLoaderTest {
     newBene.setMedicareBeneficiaryId(Optional.empty());
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // Undo New beneficiary sex and set it back to old should assert true
+    // Undo beneficiary mediciarybeneficiaryid and set it back to old should assert true
     newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
   }
