@@ -3,7 +3,7 @@
 [RFC Proposal]: #rfc-proposal
 
 * RFC Proposal ID: `0000-patient-fhir-r4-carin_bfdv2`
-* Start Date: TBD
+* Start Date: 08-03-2020
 * RFC PR: [BFD-264-v2_Patient_RFC #313](https://github.com/CMSgov/beneficiary-fhir-data/pull/313)
 * JIRA Ticket(s): [BFD-264](https://jira.cms.gov/browse/BFD-264)
 
