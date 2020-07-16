@@ -113,9 +113,10 @@ Type boolean
 
 ##### MANDATORY New Fields to be Added:
 None as part of FHIR-R4 Spec. But CARIN mandates some mandatory Patient fields:  
-Identifier  
-Name  
-Gender  
+
+*Identifier  
+*Name  
+*Gender  
 
 ##### Cardinality Rule Changes (From STU3 to R4)
 NONE.
