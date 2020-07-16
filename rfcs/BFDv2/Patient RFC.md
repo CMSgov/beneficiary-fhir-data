@@ -2,11 +2,10 @@
 
 [RFC Proposal]: #rfc-proposal
 
-* RFC Proposal ID: `0000-patient-fhir-r4-carin`
+* RFC Proposal ID: `0000-patient-fhir-r4-carin_bfdv2`
 * Start Date: TBD
-* RFC PR: TBD
-* JIRA Ticket(s):
-* [BFD-264](https://jira.cms.gov/browse/BFD-264)
+* RFC PR: [BFD-264-v2_Patient_RFC #313](https://github.com/CMSgov/beneficiary-fhir-data/pull/313)
+* JIRA Ticket(s): [BFD-264](https://jira.cms.gov/browse/BFD-264)
 
 
 This RFC proposes that our team migrate from BFD v1 STU3 Patient FHIR resource to the first normative FHIR release, R4 and implement CARIN Patient profile.
