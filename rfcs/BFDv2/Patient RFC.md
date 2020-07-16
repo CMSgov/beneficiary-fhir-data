@@ -42,16 +42,17 @@ interoperability with all our peer partners seamless by enabling to provide FHIR
 [Proposed Solution]: #proposed-solution
 
 
-BFD proposes to provide a new v2 endpoint to support Patient FHRI-R4 and CARIN complaint resource. 
+BFD proposes to provide a new v2 endpoint based on Patient FHRI-R4 and CARIN BB Profile. 
 
+Sample indicative Patient v2 endpoint:  
 https://localhost:1337/v2/fhir/Patient?_id=-19990000000001&_format=json
 
 
-Patient FHIR R4 (US-Core, Normative release):
+Patient FHIR R4 (US-Core, Normative release):  
 http://hl7.org/fhir/R4/patient.html
 
 
-CARIN Patient Profile:
+CARIN Patient Profile:  
 http://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-CARIN-BB-Patient.html
 
 ### Detailed Design
