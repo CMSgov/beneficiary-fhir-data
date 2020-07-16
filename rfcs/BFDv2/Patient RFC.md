@@ -184,9 +184,9 @@ The element Patient.identifier is sliced based on the values of value:type, valu
 ### Differential View
 [Differential View]: #differential-view
 
-[Differential_view_1](./Differential_view_Patientv2_1.png)
+[Differential_view_1](./Differential_view_Patientv2_1.PNG)
 
-[Differential_view_2](./Differential_view_Patientv2_2.png)
+[Differential_view_2](./Differential_view_Patientv2_2.PNG)
 
 
 ### Unresolved Questions
