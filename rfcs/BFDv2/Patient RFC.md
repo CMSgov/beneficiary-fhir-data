@@ -32,10 +32,10 @@ This RFC proposes that our team migrate from BFD v1 STU3 Patient FHIR resource t
 ## Motivation
 [Motivation]: #motivation
 
-This change will make BFD's Patient resource increase the system's conformance with FHIR R4 and industry alliance like CARIN.
+This change will make BFD's Patient FHIR resource increase the system's conformance with FHIR R4 and industry alliance like CARIN.
 This will help BFD move its platform to use the first normative release of FHIR R4. This will also make integration and 
-interoperability with all our peer partners seamless by enabling to provide FHIR-R4 validated and conformant Patient resources
-(Beneficaries demographic data).
+interoperability with all our peer partners seamless by enabling to provide FHIR R4 validated and conformant Patient resources
+(Beneficiaries demographic data).
 
 
 ## Proposed Solution
