@@ -94,12 +94,12 @@ Future State: The element Patient.identifier is sliced based on the values of va
 
 Slicing Implementation: POC code above. Slicing codes are used from the below list:
 
-Code	Display
-MR		Medical record number
-MA		Patient Medicaid number
-PI		Patient internal identifier
-PT		Patient external identifier
-SN		Subscriber Number
+Code		Display  
+MR		Medical record number  
+MA		Patient Medicaid number  
+PI		Patient internal identifier  
+PT		Patient external identifier  
+SN		Subscriber Number  
  
 
 ##### Extensions/Code System Changes:
@@ -145,11 +145,11 @@ Patient.gender:
 
 #### Not Supported:
 
-•	Telecom field - we don’t send, not in CCW.
-•	Email field – we don’t send, not in CCW.
-•	Ethnicity - we don’t send, not in CCW.
-•	Communication/Language - we don’t send, not in CCW.
-•	Contact/Next of Kin - we don’t send, not in CCW.
+•	Telecom field - we don’t send, not in CCW.  
+•	Email field – we don’t send, not in CCW.  
+•	Ethnicity - we don’t send, not in CCW.  
+•	Communication/Language - we don’t send, not in CCW.  
+•	Contact/Next of Kin - we don’t send, not in CCW.  
 
 #### R4 Non-Conformance Errors: 
 
@@ -167,12 +167,14 @@ http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex
 
 #### CARIN IG:
 https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-CARIN-BB-Patient.html
-Summary
-Mandatory: 2 elements
-Must-Support: 1 element
-Slices
-This structure defines the following Slices:
-The element Patient.identifier is sliced based on the values of value:type, value:system
+
+Summary:  
+•	Mandatory: 2 elements  
+•	Must-Support: 1 element  
+
+Slices:
+This structure defines the following Slices:  
+•	The element Patient.identifier is sliced based on the values of value:type, value:system
 
 ### Current State
 [Current State]: #current-state
@@ -207,12 +209,12 @@ Do we need to return hash identifiers? Use the identifier flag in the header to 
 What is the best approach in CMS-Blue Button to map Hispanic race to US-Core Race code (see below):
 
 	Code			Display  
-•	1002-5			American Indian or Alaska Native  	
-•	2028-9			Asian  	
-•	2054-5			Black or African American  	
-•	2076-8			Native Hawaiian or Other Pacific Islander  	
+•	1002-5			American Indian or Alaska Native  
+•	2028-9			Asian  
+•	2054-5			Black or African American  
+•	2076-8			Native Hawaiian or Other Pacific Islander  
 •	2106-3			White  
-•	UNK			Unknown  	
+•	UNK			Unknown  
 •	ASKU			Asked but no answer  
 
  		
