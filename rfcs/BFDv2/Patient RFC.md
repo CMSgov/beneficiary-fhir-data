@@ -115,9 +115,9 @@ Type boolean
 ##### MANDATORY New Fields to be Added:
 None as part of FHIR-R4 Spec. But CARIN mandates some mandatory Patient fields:  
 
-*Identifier  
-*Name  
-*Gender  
+•	Identifier  
+•	Name  
+•	Gender  
 
 ##### Cardinality Rule Changes (From STU3 to R4)
 NONE.
@@ -145,11 +145,11 @@ Patient.gender:
 
 #### Not Supported:
 
-Telecom field - we don’t send, not in CCW.
-Email field – we don’t send, not in CCW.
-Ethnicity - we don’t send, not in CCW.
-Communication/Language - we don’t send, not in CCW.
-Contact/Next of Kin - we don’t send, not in CCW.
+•	Telecom field - we don’t send, not in CCW.
+•	Email field – we don’t send, not in CCW.
+•	Ethnicity - we don’t send, not in CCW.
+•	Communication/Language - we don’t send, not in CCW.
+•	Contact/Next of Kin - we don’t send, not in CCW.
 
 #### R4 Non-Conformance Errors: 
 
@@ -206,14 +206,14 @@ Do we need to return hash identifiers? Use the identifier flag in the header to 
 
 What is the best approach in CMS-Blue Button to map Hispanic race to US-Core Race code (see below):
 
-Code			Display
-1002-5			American Indian or Alaska Native	
-2028-9			Asian	
-2054-5			Black or African American	
-2076-8			Native Hawaiian or Other Pacific Islander	
-2106-3			White
-UNK				Unknown	
-ASKU			Asked but no answer
+	Code			Display  
+•	1002-5			American Indian or Alaska Native  	
+•	2028-9			Asian  	
+•	2054-5			Black or African American  	
+•	2076-8			Native Hawaiian or Other Pacific Islander  	
+•	2106-3			White  
+•	UNK			Unknown  	
+•	ASKU			Asked but no answer  
 
  		
 
