@@ -378,6 +378,32 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
+   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
+   * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
+   */
+  static int addImpatientDiagnosisCode(ExplanationOfBenefit eob, Diagnosis diagnosis) {
+    DiagnosisComponent diagnosisComponent =
+        new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
+    diagnosisComponent.setDiagnosis(diagnosis.toCodeableConcept());
+
+    for (DiagnosisLabel diagnosisLabel : diagnosis.getLabels()) {
+      CodeableConcept diagnosisTypeConcept =
+          createCodeableConcept(diagnosisLabel.getSystem(), diagnosisLabel.toCode());
+      diagnosisTypeConcept.getCodingFirstRep().setDisplay(diagnosisLabel.getDisplay());
+      diagnosisComponent.addType(diagnosisTypeConcept);
+    }
+    if (diagnosis.getPresentOnAdmission().isPresent()) {
+      diagnosisComponent.addExtension(
+          createExtensionCoding(
+              eob, CcwCodebookVariable.CLM_POA_IND_SW1, diagnosis.getPresentOnAdmission()));
+    }
+
+    eob.getDiagnosis().add(diagnosisComponent);
+    return diagnosisComponent.getSequenceElement().getValue();
+  }
+
+  /**
    * @param eob the {@link ExplanationOfBenefit} that the specified {@link ItemComponent} is a child
    *     of
    * @param item the {@link ItemComponent} to add an {@link ItemComponent#getDiagnosisLinkId()}
