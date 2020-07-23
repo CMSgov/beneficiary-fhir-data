@@ -24,12 +24,12 @@
 					"valueCoding": {
 						"system": "urn:oid:2.16.840.1.113883.6.238",
 						"code": "2054-5",
-						"display": "White"
+						"display": "Black"
 					}
 				},
 				{
 					"url": "text",
-					"valueString": "White"
+					"valueString": "Black"
 				}
 			]
 		},
