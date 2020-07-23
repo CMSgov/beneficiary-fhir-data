@@ -609,7 +609,8 @@ public final class RifLoader implements AutoCloseable {
     Beneficiary oldBeneficiaryRecord =
         entityManager.find(Beneficiary.class, newBeneficiaryRecord.getBeneficiaryId());
 
-    if (oldBeneficiaryRecord != null) {
+    if (oldBeneficiaryRecord != null
+        && !isBeneficiaryHistoryEqual(newBeneficiaryRecord, oldBeneficiaryRecord)) {
       BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
       oldBeneCopy.setBeneficiaryId(oldBeneficiaryRecord.getBeneficiaryId());
       oldBeneCopy.setBirthDate(oldBeneficiaryRecord.getBirthDate());
@@ -617,10 +618,35 @@ public final class RifLoader implements AutoCloseable {
       oldBeneCopy.setHicnUnhashed(oldBeneficiaryRecord.getHicnUnhashed());
       oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
       oldBeneCopy.setMedicareBeneficiaryId(oldBeneficiaryRecord.getMedicareBeneficiaryId());
+      oldBeneCopy.setMbiHash(oldBeneficiaryRecord.getMbiHash());
       oldBeneCopy.setLastUpdated(batchTimestamp);
 
       entityManager.persist(oldBeneCopy);
     }
+  }
+
+  /**
+   * Ensures that a {@link Beneficiary} records for old and new benificiaries are equal or not
+   * equal.
+   *
+   * @param newBeneficiaryRecord the {@link Beneficiary} new record being processed
+   * @param oldBeneficiaryRecord the {@link Beneficiary} old record that was processed
+   */
+  static boolean isBeneficiaryHistoryEqual(
+      Beneficiary newBeneficiaryRecord, Beneficiary oldBeneficiaryRecord) {
+
+    if (newBeneficiaryRecord.getBirthDate().equals(oldBeneficiaryRecord.getBirthDate())
+        && newBeneficiaryRecord.getHicn().equals(oldBeneficiaryRecord.getHicn())
+        && newBeneficiaryRecord.getHicnUnhashed().equals(oldBeneficiaryRecord.getHicnUnhashed())
+        && newBeneficiaryRecord.getSex() == oldBeneficiaryRecord.getSex()
+        && newBeneficiaryRecord.getMbiHash().equals(oldBeneficiaryRecord.getMbiHash())
+        && newBeneficiaryRecord
+            .getMedicareBeneficiaryId()
+            .equals(oldBeneficiaryRecord.getMedicareBeneficiaryId())) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
