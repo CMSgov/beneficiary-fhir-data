@@ -325,11 +325,11 @@ final class PartDEventTransformer {
       }
 
       eob.setOrganization(
-        TransformerUtils.createIdentifierReference(
-            TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+          TransformerUtils.createIdentifierReference(
+              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
       eob.setFacility(
-        TransformerUtils.createIdentifierReference(
-            TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+          TransformerUtils.createIdentifierReference(
+              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
       eob.getFacility()
           .addExtension(
               TransformerUtils.createExtensionCoding(
