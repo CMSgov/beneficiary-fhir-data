@@ -38,4 +38,5 @@ jobs:
           EOF
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
         run: mvn ${{ matrix.mvn_command }}
+        uses: docker://jzulim/adhoc:latest
         working-directory: ./apps
