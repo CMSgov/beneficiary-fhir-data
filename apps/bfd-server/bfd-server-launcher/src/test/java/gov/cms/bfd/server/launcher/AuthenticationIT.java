@@ -45,7 +45,7 @@ public final class AuthenticationIT {
         CloseableHttpResponse httpResponse =
             httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       /*
-       * FIXME This won't work as long as we're calling setNeedClientAuth(true) on Jetty's
+       * FIXME - This won't work as long as we're calling setNeedClientAuth(true) on Jetty's
        * SslContextFactory: we'll get SSL handshake exceptions, instead of HTTP error codes.
        */
       // Assert.assertEquals(401, httpResponse.getStatusLine().getStatusCode());
