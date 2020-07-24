@@ -164,12 +164,15 @@ http://build.fhir.org/ig/HL7/carin-bb
 
 #### CARIN IG
 
-https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-CARIN-BB-Patient.html
-Summary
-Mandatory: 2 elements
-Must-Support: 1 element
-Slices
-This structure defines the following Slices:
+http://build.fhir.org/ig/HL7/carin-bb/profiles.html  
+
+https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-CARIN-BB-Patient.html  
+
+Summary:  
+Mandatory: 2 elements  
+Must-Support: 1 element  
+Slices:  
+This structure defines the following Slices:  
 The element Patient.identifier is sliced based on the values of value:type, value:system
 
 ### Current State
