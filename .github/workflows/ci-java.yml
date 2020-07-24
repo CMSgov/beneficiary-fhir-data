@@ -2,7 +2,7 @@ name: 'CI - Java'
 on: pull_request
 jobs:
   mvn-job:
-    runs-on: docker://jzulim/adhoc
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         java_version: [1.8]
@@ -43,5 +43,6 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
+        uses: docker://jzulim/adhoc:latest
         run: mvn ${{ matrix.mvn_command }}
         working-directory: ./apps
