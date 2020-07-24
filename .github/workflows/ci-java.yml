@@ -2,7 +2,7 @@ name: 'CI - Java'
 on: pull_request
 jobs:
   mvn-job:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     strategy:
       matrix:
         java_version: [1.8]
@@ -36,6 +36,12 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
         run: mvn ${{ matrix.mvn_command }}
         working-directory: ./apps
