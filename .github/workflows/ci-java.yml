@@ -2,7 +2,7 @@ name: 'CI - Java'
 on: pull_request
 jobs:
   mvn-job:
-    runs-on: docker://jzulim/adhoc:latest
+    runs-on: docker://jzulim/adhoc
     strategy:
       matrix:
         java_version: [1.8]
