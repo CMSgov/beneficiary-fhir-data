@@ -257,15 +257,79 @@ final class PartDEventTransformer {
      * throw new InvalidRifValueException(
      * "Service Provider ID Qualifier Code is invalid: " +
      * claimGroup.serviceProviderIdQualiferCode);
+     *   Code	    Code value
+     *   01        National Provider Identifier (NPI)
+     *   06        Unique Physician Identification Number (UPIN)
+     *   07        National Council for Prescription Drug Programs (NCPDP) provider identifier
+     *   08        State license number
+     *   11        Federal tax number
+     *   99        Other
      */
 
     if (!claimGroup.getServiceProviderId().isEmpty()) {
+      switch (claimGroup.getServiceProviderId()) {
+        case "01":
+          {
+            eob.setOrganization(
+                TransformerUtils.createIdentifierReference(
+                    TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+            eob.setFacility(
+                TransformerUtils.createIdentifierReference(
+                    TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+            break;
+          }
+        case "06":
+          eob.setOrganization(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_UPIN, claimGroup.getServiceProviderId()));
+          eob.setFacility(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_UPIN, claimGroup.getServiceProviderId()));
+          break;
+        case "07":
+          eob.setOrganization(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_NCPDP, claimGroup.getServiceProviderId()));
+          eob.setFacility(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_NCPDP, claimGroup.getServiceProviderId()));
+          break;
+        case "08":
+          eob.setOrganization(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_STATE_LICENSE_NUMBER,
+                  claimGroup.getServiceProviderId()));
+          eob.setFacility(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_STATE_LICENSE_NUMBER,
+                  claimGroup.getServiceProviderId()));
+          break;
+        case "11":
+          eob.setOrganization(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_FEDERAL_TAX_NUMBER,
+                  claimGroup.getServiceProviderId()));
+          eob.setFacility(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_FEDERAL_TAX_NUMBER,
+                  claimGroup.getServiceProviderId()));
+          break;
+        case "99":
+          eob.setOrganization(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_OTHER, claimGroup.getServiceProviderId()));
+          eob.setFacility(
+              TransformerUtils.createIdentifierReference(
+                  TransformerConstants.CODING_OTHER, claimGroup.getServiceProviderId()));
+          break;
+      }
+
       eob.setOrganization(
-          TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+        TransformerUtils.createIdentifierReference(
+            TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
       eob.setFacility(
-          TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+        TransformerUtils.createIdentifierReference(
+            TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
       eob.getFacility()
           .addExtension(
               TransformerUtils.createExtensionCoding(

@@ -163,6 +163,24 @@ public final class TransformerConstants {
    */
   static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
+  /** The Unique Physician Identification Number (UPIN), as available at <a */
+  static final String CODING_UPIN = "";
+
+  /**
+   * The National Council for Prescription Drug Programs (NCPDP) provider identifier, as available
+   * at <a
+   */
+  static final String CODING_NCPDP = "";
+
+  /** The State License Number as available at <a */
+  static final String CODING_STATE_LICENSE_NUMBER = "";
+
+  /** The Federal Tax Number as available at <a */
+  static final String CODING_FEDERAL_TAX_NUMBER = "";
+
+  /** The Other as available at <a */
+  static final String CODING_OTHER = "";
+
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a
    * standardized coding system for basic units of measure.
