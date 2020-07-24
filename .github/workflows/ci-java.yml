@@ -2,7 +2,7 @@ name: 'CI - Java'
 on: pull_request
 jobs:
   mvn-job:
-    runs-on: macos-latest
+    runs-on: docker://adhoc:latest
     strategy:
       matrix:
         java_version: [1.8]
