@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +36,7 @@ final class Diagnosis extends IcdCode {
     Objects.requireNonNull(labels);
 
     this.presentOnAdmission = null;
-    this.labels = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(labels)));
+    this.labels = new HashSet<>(Arrays.asList(labels));
   }
 
   /**
@@ -65,12 +64,16 @@ final class Diagnosis extends IcdCode {
     Objects.requireNonNull(labels);
 
     this.presentOnAdmission = presentOnAdmission.orElse(null);
-    this.labels = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(labels)));
+    this.labels = new HashSet<>(Arrays.asList(labels));
   }
 
   /** @return the ICD label */
   Set<DiagnosisLabel> getLabels() {
     return labels;
+  }
+
+  public void setLabels(DiagnosisLabel label) {
+    this.labels.add(label);
   }
 
   /** @return the ICD presentOnAdmission indicator */

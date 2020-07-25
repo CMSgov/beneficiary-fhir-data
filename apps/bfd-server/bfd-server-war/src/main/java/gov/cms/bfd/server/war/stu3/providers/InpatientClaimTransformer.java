@@ -188,7 +188,7 @@ final class InpatientClaimTransformer {
         Optional.of(claimGroup.getUtilizationDayCount()));
 
     for (Diagnosis diagnosis : extractDiagnoses(claimGroup))
-      TransformerUtils.addImpatientDiagnosisCode(eob, diagnosis);
+      TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
     for (CCWProcedure procedure :
         TransformerUtils.extractCCWProcedures(
@@ -310,34 +310,36 @@ final class InpatientClaimTransformer {
      * rather than requiring if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
-        d -> {
-          if (d.isPresent()) diagnoses.add(d.get());
+        diagnosisToAdd -> {
+          if (diagnosisToAdd.isPresent()) {
+            Optional<Diagnosis> matchingDiagnosis =
+                diagnoses.stream()
+                    .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
+                    .findFirst();
+            if (matchingDiagnosis.isPresent()) {
+              // add labels
+              matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
+            } else {
+              diagnoses.add(diagnosisToAdd.get());
+            }
+          }
         };
-    if (claim.getDiagnosisAdmittingCode() != null) {
-      diagnosisAdder.accept(
-          Diagnosis.from(
-              claim.getDiagnosisAdmittingCode(),
-              claim.getDiagnosisAdmittingCodeVersion(),
-              DiagnosisLabel.ADMITTING));
-    }
-    boolean principalExists = false;
-    if (claim.getDiagnosis1PresentOnAdmissionCode() != null) {
-      diagnosisAdder.accept(
-          Diagnosis.from(
-              claim.getDiagnosis1Code(),
-              claim.getDiagnosis1CodeVersion(),
-              claim.getDiagnosis1PresentOnAdmissionCode(),
-              DiagnosisLabel.PRINCIPAL));
-      principalExists = true;
-    }
-
-    if (principalExists && claim.getDiagnosisPrincipalCode() != null) {
-      diagnosisAdder.accept(
-          Diagnosis.from(
-              claim.getDiagnosisPrincipalCode(),
-              claim.getDiagnosisPrincipalCodeVersion(),
-              DiagnosisLabel.PRINCIPAL));
-    }
+    diagnosisAdder.accept(
+        Diagnosis.from(
+            claim.getDiagnosisAdmittingCode(),
+            claim.getDiagnosisAdmittingCodeVersion(),
+            DiagnosisLabel.ADMITTING));
+    diagnosisAdder.accept(
+        Diagnosis.from(
+            claim.getDiagnosis1Code(),
+            claim.getDiagnosis1CodeVersion(),
+            claim.getDiagnosis1PresentOnAdmissionCode(),
+            DiagnosisLabel.PRINCIPAL));
+    diagnosisAdder.accept(
+        Diagnosis.from(
+            claim.getDiagnosisPrincipalCode(),
+            claim.getDiagnosisPrincipalCodeVersion(),
+            DiagnosisLabel.PRINCIPAL));
     diagnosisAdder.accept(
         Diagnosis.from(
             claim.getDiagnosis2Code(),
