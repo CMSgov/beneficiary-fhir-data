@@ -164,7 +164,7 @@ public final class TransformerConstants {
   static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
   /** The Unique Physician Identification Number (UPIN), as available at <a */
-  static final String CODING_UPIN = "";
+  static final String CODING_UPIN = "http://hl7.org/fhir/sid/us-npi";
 
   /**
    * The National Council for Prescription Drug Programs (NCPDP) provider identifier, as available
