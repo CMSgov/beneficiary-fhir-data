@@ -891,7 +891,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
      */
     List<IBaseResource> pagedEntries = new ArrayList<>();
     pagedResults.getEntry().forEach(e -> pagedEntries.add(e.getResource()));
-    Assert.assertEquals(4, pagedEntries.size());
+    Assert.assertEquals(5, pagedEntries.size());
   }
 
   /**
@@ -1435,7 +1435,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
         Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
       else if (claimType.equals(ClaimType.PDE))
         // PDE Claims do not contain SAMHSA fields and thus won't be filtered.
-        Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+        Assert.assertEquals(2, filterToClaimType(searchResults, claimType).size());
       else Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
     }
   }
@@ -1517,7 +1517,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
             "_lastUpdated=le" + nowDateTime,
             "_lastUpdated=ge" + earlyDateTime + "&_lastUpdated=le" + nowDateTime,
             "_lastUpdated=gt" + earlyDateTime + "&_lastUpdated=lt" + nowDateTime);
-    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 8);
+    testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), allUrls, 9);
 
     // Empty searches
     List<String> emptyUrls =
