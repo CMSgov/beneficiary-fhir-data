@@ -267,7 +267,7 @@ final class PartDEventTransformer {
      */
 
     if (!claimGroup.getServiceProviderId().isEmpty()) {
-      switch (claimGroup.getServiceProviderId()) {
+      switch (claimGroup.getServiceProviderIdQualiferCode()) {
         case "01":
           {
             eob.setOrganization(
@@ -276,8 +276,8 @@ final class PartDEventTransformer {
             eob.setFacility(
                 TransformerUtils.createIdentifierReference(
                     TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
-            break;
           }
+          break;
         case "06":
           eob.setOrganization(
               TransformerUtils.createIdentifierReference(
@@ -324,12 +324,6 @@ final class PartDEventTransformer {
           break;
       }
 
-      eob.setOrganization(
-          TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
-      eob.setFacility(
-          TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
       eob.getFacility()
           .addExtension(
               TransformerUtils.createExtensionCoding(
