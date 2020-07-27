@@ -29,7 +29,6 @@ public final class AuthenticationIT {
             httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       Assert.assertEquals(200, httpResponse.getStatusLine().getStatusCode());
     }
-    httpclient.close();
   }
 
   /**
@@ -44,8 +43,7 @@ public final class AuthenticationIT {
                 ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
         CloseableHttpClient httpClient = ServerTestUtils.createHttpClient(Optional.empty());
         CloseableHttpResponse httpResponse =
-            httpClient.execute(new HttpGet(serverProcess.getServerUri())); 
-            httpclient.close();) {
+            httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       /*
        * FIXME This won't work as long as we're calling setNeedClientAuth(true) on Jetty's
        * SslContextFactory: we'll get SSL handshake exceptions, instead of HTTP error codes.
@@ -68,8 +66,7 @@ public final class AuthenticationIT {
         CloseableHttpClient httpClient =
             ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.UNTRUSTED));
         CloseableHttpResponse httpResponse =
-            httpClient.execute(new HttpGet(serverProcess.getServerUri())); 
-            httpclient.close(); ) {
+            httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       /*
        * FIXME This won't work as long as we're calling setNeedClientAuth(true) on Jetty's
        * SslContextFactory: we'll get SSL handshake exceptions, instead of HTTP error codes.
