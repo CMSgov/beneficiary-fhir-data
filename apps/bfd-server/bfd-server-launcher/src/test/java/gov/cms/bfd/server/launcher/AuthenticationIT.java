@@ -20,14 +20,16 @@ public final class AuthenticationIT {
    */
   @Test
   public void authenticationWorksForTrustedClient() throws IOException {
+    CloseableHttpClient httpClient =
+        ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.TRUSTED));
     try (ServerProcess serverProcess =
             new ServerProcess(
                 ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
-        CloseableHttpClient httpClient =
-            ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.TRUSTED));
         CloseableHttpResponse httpResponse =
             httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       Assert.assertEquals(200, httpResponse.getStatusLine().getStatusCode());
+    } finally {
+      httpClient.close();
     }
   }
 
@@ -38,10 +40,10 @@ public final class AuthenticationIT {
    */
   @Test(expected = SSLHandshakeException.class)
   public void accessDeniedForNoClientCert() throws IOException {
+    CloseableHttpClient httpClient = ServerTestUtils.createHttpClient(Optional.empty());
     try (ServerProcess serverProcess =
             new ServerProcess(
                 ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
-        CloseableHttpClient httpClient = ServerTestUtils.createHttpClient(Optional.empty());
         CloseableHttpResponse httpResponse =
             httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       /*
@@ -49,6 +51,8 @@ public final class AuthenticationIT {
        * SslContextFactory: we'll get SSL handshake exceptions, instead of HTTP error codes.
        */
       // Assert.assertEquals(401, httpResponse.getStatusLine().getStatusCode());
+    } finally {
+      httpClient.close();
     }
   }
 
@@ -60,11 +64,11 @@ public final class AuthenticationIT {
    */
   @Test(expected = SSLHandshakeException.class)
   public void accessDeniedForClientCertThatIsNotTrusted() throws IOException {
+    CloseableHttpClient httpClient =
+        ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.UNTRUSTED));
     try (ServerProcess serverProcess =
             new ServerProcess(
                 ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
-        CloseableHttpClient httpClient =
-            ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.UNTRUSTED));
         CloseableHttpResponse httpResponse =
             httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       /*
@@ -72,6 +76,8 @@ public final class AuthenticationIT {
        * SslContextFactory: we'll get SSL handshake exceptions, instead of HTTP error codes.
        */
       // Assert.assertEquals(403, httpResponse.getStatusLine().getStatusCode());
+    } finally {
+      httpClient.close();
     }
   }
 }
