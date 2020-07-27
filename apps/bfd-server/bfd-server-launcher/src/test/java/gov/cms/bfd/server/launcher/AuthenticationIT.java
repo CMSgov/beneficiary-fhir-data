@@ -28,6 +28,8 @@ public final class AuthenticationIT {
         CloseableHttpResponse httpResponse =
             httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
       Assert.assertEquals(200, httpResponse.getStatusLine().getStatusCode());
+    } finally {
+        httpclient.close();
     }
   }
 
@@ -49,6 +51,8 @@ public final class AuthenticationIT {
        * SslContextFactory: we'll get SSL handshake exceptions, instead of HTTP error codes.
        */
       // Assert.assertEquals(401, httpResponse.getStatusLine().getStatusCode());
+    } finally {
+        httpclient.close();
     }
   }
 
@@ -72,6 +76,8 @@ public final class AuthenticationIT {
        * SslContextFactory: we'll get SSL handshake exceptions, instead of HTTP error codes.
        */
       // Assert.assertEquals(403, httpResponse.getStatusLine().getStatusCode());
+    } finally {
+        httpclient.close();
     }
   }
 }
