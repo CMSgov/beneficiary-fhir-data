@@ -27,7 +27,7 @@ jobs:
             <toolchain>
               <type>jdk</type>
               <provides>
-                <version>${{ matrix.java_version }}</version>
+                <version>1.8</version>
                 <vendor>OpenJDK</vendor>
               </provides>
               <configuration>
