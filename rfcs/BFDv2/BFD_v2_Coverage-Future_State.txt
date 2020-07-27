@@ -1,0 +1,408 @@
+{
+	"resourceType": "Coverage",
+	"id": "part-c--20140000010000",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2020-07-24T10:50:54.121+00:00"
+	},
+	"extension": [
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_01",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_01",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_02",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_02",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_03",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_03",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_04",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_04",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_05",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_05",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_06",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_06",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_07",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_07",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_08",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_08",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_09",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_09",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_10",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_10",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_11",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_11",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_12",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_12",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_01",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_01",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_02",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_02",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_03",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_03",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_04",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_04",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_05",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_05",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_06",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_06",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_07",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_07",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_08",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_08",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_09",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_09",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_10",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_10",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_11",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_11",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_12",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_pbp_id_12",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_01",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_01",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_02",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_02",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_03",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_03",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_04",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_04",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_05",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_05",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_06",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_06",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_07",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_07",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_08",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_08",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_09",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_09",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_10",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_10",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_11",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_11",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_12",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/ptc_plan_type_cd_12",
+				"code": "C"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_01",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_01",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_02",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_02",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_03",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_03",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_04",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_04",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_05",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_05",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_06",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_06",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_07",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_07",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_08",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_08",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_09",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_09",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_10",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_10",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_11",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_11",
+				"code": "D"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/hmo_ind_12",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/hmo_ind_12",
+				"code": "D"
+			}
+		}
+	],
+	"status": "active",
+	"type": {
+		"coding": [
+			{
+				"system": "Medicare",
+				"code": "Part C"
+			},
+			{
+				"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+				"code": "SUBSIDIZ",
+				"display": "subsidized health program"
+			}
+		]
+	},
+	"subscriberId": "2SW4N00AA00",
+	"beneficiary": {
+		"reference": "Patient/-20140000010000"
+	},
+	"relationship": {
+		"coding": [
+			{
+				"system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+				"code": "self",
+				"display": "Self"
+			}
+		]
+	},
+	"payor": [
+		{
+			"identifier": "Centers for Medicare & Medicaid Services"
+		}
+	],
+	"period": {
+		"start": "2010-02-15",
+		"end": "2019-03-01"
+	},
+	"class": [
+		{
+			"type": {
+				"coding": [
+					{
+						"system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+						"code": "subgroup",
+						"display": "SubGroup"
+					}
+				]
+			},
+			"value": "Medicare"
+		},
+		{
+			"type": {
+				"coding": [
+					{
+						"system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+						"code": "subplan",
+						"display": "SubPlan"
+					}
+				]
+			},
+			"value": "Part C"
+		}
+	]
+}
