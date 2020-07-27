@@ -317,8 +317,9 @@ final class InpatientClaimTransformer {
                     .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
                     .findFirst();
             if (matchingDiagnosis.isPresent()) {
-              // add labels
+              // append labels
               matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
+              diagnoses.add(matchingDiagnosis.get());
             } else {
               diagnoses.add(diagnosisToAdd.get());
             }
