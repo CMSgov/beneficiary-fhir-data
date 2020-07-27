@@ -209,66 +209,17 @@ final class PartDEventTransformer {
         .setAmount(TransformerUtils.createMoney(claimGroup.getGapDiscountAmount()));
 
     if (claimGroup.getPrescriberIdQualifierCode() == null
-        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01")
-        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("06")
-        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("07")
-        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("08")
-        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("11")
-        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("99"))
+        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01"))
       throw new InvalidRifValueException(
           "Prescriber ID Qualifier Code is invalid: " + claimGroup.getPrescriberIdQualifierCode());
 
     if (claimGroup.getPrescriberId() != null) {
-      switch (claimGroup.getPrescriberIdQualifierCode()) {
-        case "01":
-          TransformerUtils.addCareTeamPractitioner(
-              eob,
-              rxItem,
-              TransformerConstants.CODING_NPI_US,
-              claimGroup.getPrescriberId(),
-              ClaimCareteamrole.PRIMARY);
-          break;
-        case "06":
-          TransformerUtils.addCareTeamPractitioner(
-              eob,
-              rxItem,
-              TransformerConstants.CODING_UPIN,
-              claimGroup.getPrescriberId(),
-              ClaimCareteamrole.PRIMARY);
-          break;
-        case "07":
-          TransformerUtils.addCareTeamPractitioner(
-              eob,
-              rxItem,
-              TransformerConstants.CODING_NCPDP,
-              claimGroup.getPrescriberId(),
-              ClaimCareteamrole.PRIMARY);
-          break;
-        case "08":
-          TransformerUtils.addCareTeamPractitioner(
-              eob,
-              rxItem,
-              TransformerConstants.CODING_STATE_LICENSE_NUMBER,
-              claimGroup.getPrescriberId(),
-              ClaimCareteamrole.PRIMARY);
-          break;
-        case "11":
-          TransformerUtils.addCareTeamPractitioner(
-              eob,
-              rxItem,
-              TransformerConstants.CODING_FEDERAL_TAX_NUMBER,
-              claimGroup.getPrescriberId(),
-              ClaimCareteamrole.PRIMARY);
-          break;
-        case "99":
-          TransformerUtils.addCareTeamPractitioner(
-              eob,
-              rxItem,
-              TransformerConstants.CODING_OTHER,
-              claimGroup.getPrescriberId(),
-              ClaimCareteamrole.PRIMARY);
-          break;
-      }
+      TransformerUtils.addCareTeamPractitioner(
+          eob,
+          rxItem,
+          TransformerConstants.CODING_NPI_US,
+          claimGroup.getPrescriberId(),
+          ClaimCareteamrole.PRIMARY);
     }
 
     rxItem.setService(

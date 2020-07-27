@@ -43,22 +43,6 @@ public final class PartDEventTransformerTest {
     assertPartDMatches(claim, eob, "01", "01", TransformerConstants.CODING_NPI_US);
   }
 
-  @Test
-  public void transformSampleARecord2() throws FHIRException {
-    List<Object> parsedRecords =
-        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    PartDEvent claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof PartDEvent)
-            .map(r -> (PartDEvent) r)
-            .skip(1)
-            .findAny()
-            .get();
-
-    ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
-    assertPartDMatches(claim, eob, "06", "06", TransformerConstants.CODING_UPIN);
-  }
-
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
    * the specified {@link PartDEvent}.
