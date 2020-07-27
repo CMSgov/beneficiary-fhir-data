@@ -271,26 +271,32 @@ final class PartDEventTransformer {
         case "01":
           eob.setOrganization(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_NPI_US, 
+                  claimGroup.getServiceProviderId()));
           eob.setFacility(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_NPI_US, 
+                  claimGroup.getServiceProviderId()));
           break;
         case "06":
           eob.setOrganization(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_UPIN, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_UPIN, 
+                  claimGroup.getServiceProviderId()));
           eob.setFacility(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_UPIN, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_UPIN, 
+                  claimGroup.getServiceProviderId()));
           break;
         case "07":
           eob.setOrganization(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NCPDP, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_NCPDP, 
+                  claimGroup.getServiceProviderId()));
           eob.setFacility(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NCPDP, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_NCPDP, 
+                  claimGroup.getServiceProviderId()));
           break;
         case "08":
           eob.setOrganization(
@@ -315,10 +321,12 @@ final class PartDEventTransformer {
         case "99":
           eob.setOrganization(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_OTHER, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_OTHER, 
+                  claimGroup.getServiceProviderId()));
           eob.setFacility(
               TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_OTHER, claimGroup.getServiceProviderId()));
+                  TransformerConstants.CODING_OTHER, 
+                  claimGroup.getServiceProviderId()));
           break;
       }
 
