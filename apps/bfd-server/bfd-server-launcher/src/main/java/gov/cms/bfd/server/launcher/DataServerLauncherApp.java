@@ -113,6 +113,7 @@ public final class DataServerLauncherApp {
     // Modify the default HTTP config.
     HttpConfiguration httpConfig = new HttpConfiguration();
     httpConfig.setSecurePort(appConfig.getPort());
+    httpConfig.setIdleTimeout(300000);
 
     // Create the HTTPS config.
     HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
