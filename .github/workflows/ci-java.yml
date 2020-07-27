@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java_version: [1.8]
+        java_version: ['1.8.0.252']
         mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
     steps:
       - name: 'Configure AWS credentials'
@@ -27,7 +27,7 @@ jobs:
             <toolchain>
               <type>jdk</type>
               <provides>
-                <version>${{ matrix.java_version }}</version>
+                <version>1.8</version>
                 <vendor>OpenJDK</vendor>
               </provides>
               <configuration>
