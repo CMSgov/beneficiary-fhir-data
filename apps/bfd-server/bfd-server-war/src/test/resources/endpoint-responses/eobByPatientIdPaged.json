@@ -8,10 +8,10 @@
   "total" : 8,
   "link" : [ {
     "relation" : "first",
-    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient=567834"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_format=json&startIndex=0&_count=8&patient=Patient%2F567834"
   }, {
     "relation" : "last",
-    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_count=8&startIndex=0&patient=567834"
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_format=json&startIndex=0&_count=8&patient=Patient%2F567834"
   }, {
     "relation" : "self",
     "url" : "https://localhost:IGNORED_FIELD/v1/fhir/ExplanationOfBenefit?_count=8&_format=json&patient=Patient%2F567834"
@@ -2067,6 +2067,12 @@
             "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
             "code" : "external-first",
             "display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."
+          } ]
+        }, {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+            "code" : "principal",
+            "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
           } ]
         } ]
       }, {
