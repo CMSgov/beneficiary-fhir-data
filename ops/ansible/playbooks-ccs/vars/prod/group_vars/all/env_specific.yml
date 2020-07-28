@@ -16,7 +16,7 @@ env_name_std: 'prod'
 data_pipeline_ec2_instance_type_mem_mib: "{{ 64 * 1024 }}"
 data_pipeline_ec2_instance_type_vcpu: 16
 
-data_pipeline_idempotency_required: true
+data_pipeline_idempotency_required: false
 
 # These systems are m5.xlarge (4 vCPUs, 16 GB RAM).
 data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
