@@ -7,7 +7,7 @@ jobs:
       matrix:
         java_version: ['1.8.0.252']
         # Pinning this version as version 262 causes AuthenticationIT tests to fail
-        # See BFD-332
+        # See BFD-332. 
         mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
     steps:
       - name: 'Configure AWS credentials'
