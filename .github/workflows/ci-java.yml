@@ -4,10 +4,7 @@ jobs:
   mvn-job:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        java_version: ['1.8.0.252']
-        # Pinning this version as version 262 causes AuthenticationIT tests to fail
-        # See BFD-332. 
+      matrix: 
         mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
     steps:
       - name: 'Configure AWS credentials'
@@ -21,7 +18,9 @@ jobs:
       - name: 'Setup JDK'
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ matrix.java_version }}
+          java-version: '1.8.0.252'
+          # Pinning this version as version 262 causes AuthenticationIT tests to fail
+          # See BFD-332.
       - name: 'Generate maven toolchain config'
         run: |
           cat << EOF > ~/.m2/toolchains.xml
