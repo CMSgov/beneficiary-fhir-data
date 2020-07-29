@@ -164,22 +164,24 @@ public final class TransformerConstants {
   static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
   /** The Unique Physician Identification Number (UPIN), as available at <a */
-  static final String CODING_UPIN = "http://hl7.org/fhir/sid/us-npi";
+  static final String CODING_UPIN = "https://bluebutton.cms.gov/resources/variables/upin";
 
   /**
    * The National Council for Prescription Drug Programs (NCPDP) provider identifier, as available
    * at <a
    */
-  static final String CODING_NCPDP = "";
+  static final String CODING_NCPDP = "https://bluebutton.cms.gov/resources/variables/ncpdp";
 
   /** The State License Number as available at <a */
-  static final String CODING_STATE_LICENSE_NUMBER = "";
+  static final String CODING_STATE_LICENSE_NUMBER =
+      "https://bluebutton.cms.gov/resources/variables/state_license_number";
 
   /** The Federal Tax Number as available at <a */
-  static final String CODING_FEDERAL_TAX_NUMBER = "";
+  static final String CODING_FEDERAL_TAX_NUMBER =
+      "https://bluebutton.cms.gov/resources/variables/federal_tax_number";
 
   /** The Other as available at <a */
-  static final String CODING_OTHER = "";
+  static final String CODING_OTHER = "https://bluebutton.cms.gov/resources/variables/other";
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a
