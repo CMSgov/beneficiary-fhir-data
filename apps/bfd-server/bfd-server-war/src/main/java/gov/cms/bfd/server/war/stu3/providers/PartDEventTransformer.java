@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import java.math.BigDecimal;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateType;
@@ -266,60 +267,37 @@ final class PartDEventTransformer {
      *   99        Other
      */
 
+    String identiferSystem = null;
+
     if (!claimGroup.getServiceProviderId().isEmpty()) {
       switch (claimGroup.getServiceProviderIdQualiferCode()) {
         case "01":
-          eob.setOrganization(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
-          eob.setFacility(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+          identiferSystem = TransformerConstants.CODING_NPI_US;
           break;
         case "06":
-          eob.setOrganization(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_UPIN, claimGroup.getServiceProviderId()));
-          eob.setFacility(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_UPIN, claimGroup.getServiceProviderId()));
+          identiferSystem = TransformerConstants.CODING_UPIN;
           break;
         case "07":
-          eob.setOrganization(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NCPDP, claimGroup.getServiceProviderId()));
-          eob.setFacility(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_NCPDP, claimGroup.getServiceProviderId()));
+          identiferSystem = TransformerConstants.CODING_NCPDP;
           break;
         case "08":
-          eob.setOrganization(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_STATE_LICENSE_NUMBER,
-                  claimGroup.getServiceProviderId()));
-          eob.setFacility(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_STATE_LICENSE_NUMBER,
-                  claimGroup.getServiceProviderId()));
+          identiferSystem = TransformerConstants.CODING_STATE_LICENSE_NUMBER;
           break;
         case "11":
-          eob.setOrganization(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_FEDERAL_TAX_NUMBER,
-                  claimGroup.getServiceProviderId()));
-          eob.setFacility(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_FEDERAL_TAX_NUMBER,
-                  claimGroup.getServiceProviderId()));
+          identiferSystem = TransformerConstants.CODING_FEDERAL_TAX_NUMBER;
           break;
         case "99":
-          eob.setOrganization(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_OTHER, claimGroup.getServiceProviderId()));
-          eob.setFacility(
-              TransformerUtils.createIdentifierReference(
-                  TransformerConstants.CODING_OTHER, claimGroup.getServiceProviderId()));
+          identiferSystem = TransformerConstants.CODING_OTHER;
           break;
+      }
+
+      if (StringUtils.isNotBlank(identiferSystem) && StringUtils.isNotEmpty(identiferSystem)) {
+        eob.setOrganization(
+            TransformerUtils.createIdentifierReference(
+                identiferSystem, claimGroup.getServiceProviderId()));
+        eob.setFacility(
+            TransformerUtils.createIdentifierReference(
+                identiferSystem, claimGroup.getServiceProviderId()));
       }
 
       eob.getFacility()
