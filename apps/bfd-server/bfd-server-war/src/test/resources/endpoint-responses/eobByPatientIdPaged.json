@@ -2065,14 +2065,14 @@
         "type" : [ {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
-            "code" : "principal",
-            "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
+            "code" : "external-first",
+            "display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."
           } ]
         }, {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
-            "code" : "external-first",
-            "display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."
+            "code" : "principal",
+            "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
           } ]
         } ]
       }, {
