@@ -210,7 +210,7 @@ final class PartDEventTransformer {
         .setAmount(TransformerUtils.createMoney(claimGroup.getGapDiscountAmount()));
 
     if (claimGroup.getPrescriberIdQualifierCode() == null
-        && !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01"))
+        || !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01"))
       throw new InvalidRifValueException(
           "Prescriber ID Qualifier Code is invalid: " + claimGroup.getPrescriberIdQualifierCode());
 
@@ -267,7 +267,7 @@ final class PartDEventTransformer {
      *   99        Other
      */
 
-    String identiferSystem = null;
+    String identiferSystem;
 
     if (!claimGroup.getServiceProviderId().isEmpty()) {
       switch (claimGroup.getServiceProviderIdQualiferCode()) {
@@ -286,12 +286,12 @@ final class PartDEventTransformer {
         case "11":
           identiferSystem = TransformerConstants.CODING_FEDERAL_TAX_NUMBER;
           break;
-        case "99":
-          identiferSystem = TransformerConstants.CODING_OTHER;
+        default:
+          identiferSystem = null;
           break;
       }
 
-      if (StringUtils.isNotBlank(identiferSystem) && StringUtils.isNotEmpty(identiferSystem)) {
+      if (StringUtils.isNotBlank(identiferSystem)) {
         eob.setOrganization(
             TransformerUtils.createIdentifierReference(
                 identiferSystem, claimGroup.getServiceProviderId()));
