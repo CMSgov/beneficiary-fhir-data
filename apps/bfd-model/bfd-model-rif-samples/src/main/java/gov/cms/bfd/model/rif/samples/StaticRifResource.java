@@ -56,8 +56,6 @@ public enum StaticRifResource {
 
   SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
-  SAMPLE_A_PDE_UPIN(resourceUrl("rif-static-samples/sample-a-pde-upin.txt"), RifFileType.PDE, 1),
-
   SAMPLE_B_BENES(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
       RifFileType.BENEFICIARY,

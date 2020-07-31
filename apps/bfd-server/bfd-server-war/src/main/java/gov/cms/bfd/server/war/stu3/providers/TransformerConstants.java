@@ -180,9 +180,6 @@ public final class TransformerConstants {
   static final String CODING_FEDERAL_TAX_NUMBER =
       "https://bluebutton.cms.gov/resources/variables/federal_tax_number";
 
-  /** The Other as available at <a */
-  static final String CODING_OTHER = "https://bluebutton.cms.gov/resources/variables/other";
-
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a
    * standardized coding system for basic units of measure.
