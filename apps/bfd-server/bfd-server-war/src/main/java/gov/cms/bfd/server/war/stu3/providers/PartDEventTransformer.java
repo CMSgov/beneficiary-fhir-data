@@ -246,18 +246,7 @@ final class PartDEventTransformer {
             TransformerUtils.createExtensionQuantity(
                 CcwCodebookVariable.DAYS_SUPLY_NUM, claimGroup.getDaysSupply()));
 
-    // TODO CBBD-241 - This code was commented out because values other than
-    // "01"
-    // were coming thru
-    // such as "07". Need to discuss with Karl if this check needs to be
-    // here -
-
     /*
-     * if (claimGroup.serviceProviderIdQualiferCode == null ||
-     * !claimGroup.serviceProviderIdQualiferCode.equalsIgnoreCase("01"))
-     * throw new InvalidRifValueException(
-     * "Service Provider ID Qualifier Code is invalid: " +
-     * claimGroup.serviceProviderIdQualiferCode);
      *   Code	    Code value
      *   01        National Provider Identifier (NPI)
      *   06        Unique Physician Identification Number (UPIN)
