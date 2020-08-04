@@ -264,16 +264,10 @@ final class PartDEventTransformer {
           identiferSystem = TransformerConstants.CODING_NPI_US;
           break;
         case "06":
-          identiferSystem = TransformerConstants.CODING_UPIN;
-          break;
         case "07":
-          identiferSystem = TransformerConstants.CODING_NCPDP;
-          break;
         case "08":
-          identiferSystem = TransformerConstants.CODING_STATE_LICENSE_NUMBER;
-          break;
         case "11":
-          identiferSystem = TransformerConstants.CODING_FEDERAL_TAX_NUMBER;
+          identiferSystem = TransformerConstants.CODING_CODESYSTEM;
           break;
         default:
           identiferSystem = null;
