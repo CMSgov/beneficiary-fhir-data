@@ -97,6 +97,15 @@ public final class Operation {
     /** Handled by {@link ExplanationOfBenefitResourceProvider}. */
     V1_EOB("/v1/fhir/ExplanationOfBenefit"),
 
+    /** Handled by {@link PatientResourceProvider}. */
+    V2_PATIENT("/v2/fhir/Patient"),
+
+    /** Handled by {@link CoverageResourceProvider}. */
+    V2_COVERAGE("/v2/fhir/Coverage"),
+
+    /** Handled by {@link ExplanationOfBenefitResourceProvider}. */
+    V2_EOB("/v2/fhir/ExplanationOfBenefit"),
+
     /** Some other, unknown HTTP endpoint/operation. */
     OTHER(null);
 
