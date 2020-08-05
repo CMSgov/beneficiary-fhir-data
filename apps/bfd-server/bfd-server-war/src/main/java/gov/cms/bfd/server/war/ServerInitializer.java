@@ -59,6 +59,12 @@ public final class ServerInitializer implements WebApplicationInitializer {
     cxfServletReg.setLoadOnStartup(1);
     cxfServletReg.addMapping("/v1/fhir/*");
 
+    // Register the Blue Button R4 Server/Servlet.
+    R4Server r4Servlet = new R4Server();
+    cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
+    cxfServletReg.setLoadOnStartup(1);
+    cxfServletReg.addMapping("/v2/fhir/*");
+
     /*
      * Register the MetricRegistry and HealthCheckRegistry into the ServletContext,
      * so that InstrumentedFilter and AdminServlet (configured in web.xml) can work.
