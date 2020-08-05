@@ -1,5 +1,12 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,13 +19,6 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
 final class BeneficiaryTransformer {
@@ -183,8 +183,6 @@ final class BeneficiaryTransformer {
           TransformerUtils.createExtensionCoding(
               patient, CcwCodebookVariable.RACE, beneficiary.getRace().get()));
 
-      // HL7 Race Code system (R4/CARIN)
-
       String ombCode =
           TransformerUtils.getOMBRaceTable().get(beneficiary.getRace().get().toString());
       String ombDisplay =
@@ -220,14 +218,12 @@ final class BeneficiaryTransformer {
     if (beneficiary.getNameMiddleInitial().isPresent())
       name.addGiven(String.valueOf(beneficiary.getNameMiddleInitial().get()));
 
-    // The reference year of the enrollment data
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       patient.addExtension(
           TransformerUtils.createExtensionDate(
               CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
     }
 
-    // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
       patient.addExtension(
           TransformerUtils.createExtensionCoding(
