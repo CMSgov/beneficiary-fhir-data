@@ -55,7 +55,7 @@ final class BeneficiaryTransformer {
 
     patient.setId(beneficiary.getBeneficiaryId());
 
-    if (beneficiary.getBeneficiaryDateOfDeath() != null) {
+    if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
       patient.setActive(false);
     } else {
       patient.setActive(true);

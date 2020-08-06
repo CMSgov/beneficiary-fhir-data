@@ -11,8 +11,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
-import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -129,8 +127,8 @@ public class SpringConfiguration {
   private static HikariDataSource createTestDatabaseIfNeeded(
       String url, String connectionsMaxText, MetricRegistry metricRegistry) {
     /*
-     * Note: Eventually, we may add support for other test DB types, but
-     * right now only in-memory HSQL DBs are supported.
+     * Note: Eventually, we may add support for other test DB types, but right now only in-memory
+     * HSQL DBs are supported.
      */
     if (url.endsWith(":hsqldb:mem")) {
       return createTestDatabaseIfNeededForHsql(url, connectionsMaxText, metricRegistry);
@@ -218,9 +216,8 @@ public class SpringConfiguration {
     poolingDataSource.setMaximumPoolSize(connectionsMax);
 
     /*
-     * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a
-     * strongly worded letter instructing it to avoid sequential scans whenever
-     * possible.
+     * FIXME Temporary workaround for CBBI-357: send Postgres' query planner a strongly worded
+     * letter instructing it to avoid sequential scans whenever possible.
      */
     if (poolingDataSource.getJdbcUrl() != null
         && poolingDataSource.getJdbcUrl().contains("postgre"))
@@ -231,8 +228,8 @@ public class SpringConfiguration {
     poolingDataSource.setMetricRegistry(metricRegistry);
 
     /*
-     * FIXME Temporary setting for BB-1233 to find the source of any possible leaks
-     * (see: https://github.com/brettwooldridge/HikariCP/issues/1111)
+     * FIXME Temporary setting for BB-1233 to find the source of any possible leaks (see:
+     * https://github.com/brettwooldridge/HikariCP/issues/1111)
      */
     poolingDataSource.setLeakDetectionThreshold(60 * 1000);
   }
@@ -271,10 +268,9 @@ public class SpringConfiguration {
     extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
 
     /*
-     * These configuration settings will set Hibernate to log all SQL
-     * statements and collect statistics, logging them out at the end of
-     * each session. They will cause a ton of logging, which will REALLY
-     * slow things down, so this should generally be disabled in production.
+     * These configuration settings will set Hibernate to log all SQL statements and collect
+     * statistics, logging them out at the end of each session. They will cause a ton of logging,
+     * which will REALLY slow things down, so this should generally be disabled in production.
      */
     if (HIBERNATE_DETAILED_LOGGING) {
       extraProperties.put(AvailableSettings.FORMAT_SQL, "true");
@@ -286,9 +282,8 @@ public class SpringConfiguration {
     /*
      * Couldn't get these settings to work. Might need to read
      * http://www.codesenior.com/en/tutorial/How-to-Show-Hibernate-
-     * Statistics-via-JMX-in-Spring-Framework-And-Jetty-Server more closely.
-     * (But I suspect the reason is that Hibernate's JMX support is just
-     * poorly tested and flat-out broken.)
+     * Statistics-via-JMX-in-Spring-Framework-And-Jetty-Server more closely. (But I suspect the
+     * reason is that Hibernate's JMX support is just poorly tested and flat-out broken.)
      */
     // extraProperties.put(AvailableSettings.JMX_ENABLED, "true");
     // extraProperties.put(AvailableSettings.JMX_DOMAIN_NAME, "hibernate");
@@ -331,20 +326,14 @@ public class SpringConfiguration {
 
   /**
    * @param r4PatientResourceProvider the application's {@link R4PatientResourceProvider} bean
-   * @param r4CoverageResourceProvider the application's {@link R4CoverageResourceProvider} bean
-   * @param r4EobResourceProvider the application's {@link R4ExplanationOfBenefitResourceProvider}
-   *     bean
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
   public List<IResourceProvider> r4ResourceProviders(
-      R4PatientResourceProvider r4PatientResourceProvider,
-      R4CoverageResourceProvider r4CoverageResourceProvider,
-      R4ExplanationOfBenefitResourceProvider r4EobResourceProvider) {
+      R4PatientResourceProvider r4PatientResourceProvider) {
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
-    r4ResourceProviders.add(r4CoverageResourceProvider);
-    r4ResourceProviders.add(r4EobResourceProvider);
+
     return r4ResourceProviders;
   }
 
