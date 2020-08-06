@@ -15,13 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /*
- * PagingArguments encapsulates the arguments related to paging for the
- * {@link ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
+ * PagingArguments encapsulates the arguments related to paging for the {@link
+ * ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
  */
 public final class OffsetLinkBuilder implements LinkBuilder {
 
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(R4ExplanationOfBenefitResourceProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(R4PatientResourceProvider.class);
 
   private final Optional<Integer> pageSize;
   private final Optional<Integer> startIndex;
@@ -146,8 +145,8 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     }
 
     /*
-     * This formula rounds numTotalResults down to the nearest multiple of pageSize
-     * that's less than and not equal to numTotalResults
+     * This formula rounds numTotalResults down to the nearest multiple of pageSize that's less than
+     * and not equal to numTotalResults
      */
     int lastIndex;
     try {
