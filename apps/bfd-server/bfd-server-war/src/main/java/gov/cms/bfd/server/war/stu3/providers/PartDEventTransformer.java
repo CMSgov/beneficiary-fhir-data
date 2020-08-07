@@ -247,7 +247,7 @@ final class PartDEventTransformer {
                 CcwCodebookVariable.DAYS_SUPLY_NUM, claimGroup.getDaysSupply()));
 
     /*
-     * This chart is to dosplay the different code values for the different service provider id qualifer 
+     * This chart is to dosplay the different code values for the different service provider id qualifer
      * codes below
      *   Code	    Code value
      *   01        National Provider Identifier (NPI)
