@@ -247,6 +247,8 @@ final class PartDEventTransformer {
                 CcwCodebookVariable.DAYS_SUPLY_NUM, claimGroup.getDaysSupply()));
 
     /*
+     * This chart is to dosplay the different code values for the different service provider id qualifer 
+     * codes below
      *   Code	    Code value
      *   01        National Provider Identifier (NPI)
      *   06        Unique Physician Identification Number (UPIN)
@@ -264,10 +266,16 @@ final class PartDEventTransformer {
           identiferSystem = TransformerConstants.CODING_NPI_US;
           break;
         case "06":
+          identiferSystem = TransformerConstants.CODING_UPIN;
+          break;
         case "07":
+          identiferSystem = TransformerConstants.CODING_NCPDP;
+          break;
         case "08":
+          identiferSystem = TransformerConstants.CODING_STATE_LICENSE;
+          break;
         case "11":
-          identiferSystem = TransformerConstants.CODING_CODESYSTEM;
+          identiferSystem = TransformerConstants.CODING_FEDERAL_TAX_NUM;
           break;
         default:
           identiferSystem = null;

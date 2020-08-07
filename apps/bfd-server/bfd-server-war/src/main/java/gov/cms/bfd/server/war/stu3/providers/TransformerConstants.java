@@ -164,7 +164,20 @@ public final class TransformerConstants {
   static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
   /** The Code System, as available at <a */
-  static final String CODING_CODESYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
+  static final String FHIR_IDENTIFIER_TYPE_CODESYSTEM =
+      "http://terminology.hl7.org/CodeSystem/v2-0203";
+
+  /** The Code System, as available for UPIN */
+  static final String CODING_UPIN = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
+
+  /** The Code System, as available for NCPDP */
+  static final String CODING_NCPDP = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
+
+  /** The Code System, as available for State License Number */
+  static final String CODING_STATE_LICENSE = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
+
+  /** The Code System, as available for Federal Tax Number */
+  static final String CODING_FEDERAL_TAX_NUM = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a
