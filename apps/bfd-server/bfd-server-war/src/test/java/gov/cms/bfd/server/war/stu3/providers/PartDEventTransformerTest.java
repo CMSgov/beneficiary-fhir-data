@@ -45,28 +45,28 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecordWithUPIN() throws FHIRException {
     String serviceProviderIdQualiferCode = "06";
-    String serviceProviderCode = TransformerConstants.CODING_CODESYSTEM;
+    String serviceProviderCode = TransformerConstants.CODING_UPIN;
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithNCPDP() throws FHIRException {
     String serviceProviderIdQualiferCode = "07";
-    String serviceProviderCode = TransformerConstants.CODING_CODESYSTEM;
+    String serviceProviderCode = TransformerConstants.CODING_NCPDP;
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithStateLicenseNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "08";
-    String serviceProviderCode = TransformerConstants.CODING_CODESYSTEM;
+    String serviceProviderCode = TransformerConstants.CODING_STATE_LICENSE;
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "11";
-    String serviceProviderCode = TransformerConstants.CODING_CODESYSTEM;
+    String serviceProviderCode = TransformerConstants.CODING_FEDERAL_TAX_NUM;
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
