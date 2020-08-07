@@ -17,8 +17,14 @@ alter table "Beneficiaries" add column "derivedMailingAddress6" varchar(40);
 
 alter table "Beneficiaries" add column "derivedCityName" varchar(100);
 
+alter table "Beneficiaries" add column "derivedStateCode" varchar(2);
+
+alter table "Beneficiaries" add column "derivedZipCode" varchar(9);
+
 alter table "Beneficiaries" add column "mbiEffectiveDate" date;
 
 alter table "Beneficiaries" add column "mbiObsoleteDate" date;
+
+alter table "Beneficiaries" add column "beneLinkKey" numeric(38);
 
 alter table "InpatientClaimLines" add column "clmUncompensatedCareAmount" numeric(38, 2)
