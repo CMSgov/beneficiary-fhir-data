@@ -17,7 +17,7 @@ alter table "Beneficiaries" add column "derivedMailingAddress6" varchar(40);
 
 alter table "Beneficiaries" add column "derivedCityName" varchar(100);
 
-alter table "Beneficiaries" add column "derivedStateCode" varchar(2);
+alter table "Beneficiaries" add column "derivedStateCode" char(2);
 
 alter table "Beneficiaries" add column "derivedZipCode" varchar(9);
 
