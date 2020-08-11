@@ -168,16 +168,16 @@ public final class TransformerConstants {
       "http://terminology.hl7.org/CodeSystem/v2-0203";
 
   /** The Code System, as available for UPIN */
-  static final String CODING_UPIN = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
+  static final String CODING_UPIN = FHIR_IDENTIFIER_TYPE_CODESYSTEM;
 
   /** The Code System, as available for NCPDP */
-  static final String CODING_NCPDP = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
+  static final String CODING_NCPDP = "http://ncpdp.org/provider-id";
 
   /** The Code System, as available for State License Number */
-  static final String CODING_STATE_LICENSE = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
+  static final String CODING_STATE_LICENSE = FHIR_IDENTIFIER_TYPE_CODESYSTEM;
 
   /** The Code System, as available for Federal Tax Number */
-  static final String CODING_FEDERAL_TAX_NUM = FHIR_IDENTIFIER_TYPE_CODESYSTEM + "/";
+  static final String CODING_FEDERAL_TAX_NUM = FHIR_IDENTIFIER_TYPE_CODESYSTEM;
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a

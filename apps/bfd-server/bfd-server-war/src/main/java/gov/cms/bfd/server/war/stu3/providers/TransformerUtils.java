@@ -701,12 +701,40 @@ public final class TransformerUtils {
    *     Reference#getIdentifier()}
    * @param identifierValue the {@link Identifier#getValue()} to use in {@link
    *     Reference#getIdentifier()}
+   * @param providerIdentifiers the {@link Identifier#getServiceProviderIdentifiers()} to use in
+   *     {@link Reference#getIdentifier()}
    * @return a {@link Reference} with the specified {@link Identifier}
    */
-  static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
-    return new Reference()
-        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
-        .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+  static Reference createIdentifierReference(
+      String identifierSystem,
+      String identifierValue,
+      ServiceProviderIdentifiers... providerIdentifiers) {
+
+    Reference reference = new Reference();
+    if (providerIdentifiers.length > 0) {
+      Coding coding =
+          new Coding()
+              .setSystem(providerIdentifiers[0].bySystem())
+              .setCode(providerIdentifiers[0].byCode())
+              .setDisplay(providerIdentifiers[0].byDisplay());
+      List<Coding> codingList = new ArrayList<Coding>();
+      codingList.add(coding);
+
+      CodeableConcept codeableConcept = new CodeableConcept().setCoding(codingList);
+      reference.setIdentifier(
+          new Identifier()
+              .setSystem(identifierSystem)
+              .setValue(identifierValue)
+              .setType(codeableConcept));
+
+    } else {
+      reference.setIdentifier(
+          new Identifier().setSystem(identifierSystem).setValue(identifierValue));
+    }
+
+    reference.setDisplay(retrieveNpiCodeDisplay(identifierValue));
+
+    return reference;
   }
 
   /**

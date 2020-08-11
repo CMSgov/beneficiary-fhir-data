@@ -259,36 +259,43 @@ final class PartDEventTransformer {
      */
 
     String identiferSystem;
+    ServiceProviderIdentifiers providerIdentifier;
 
     if (!claimGroup.getServiceProviderId().isEmpty()) {
       switch (claimGroup.getServiceProviderIdQualiferCode()) {
         case "01":
           identiferSystem = TransformerConstants.CODING_NPI_US;
+          providerIdentifier = ServiceProviderIdentifiers.NPI;
           break;
         case "06":
           identiferSystem = TransformerConstants.CODING_UPIN;
+          providerIdentifier = ServiceProviderIdentifiers.UPIN;
           break;
         case "07":
           identiferSystem = TransformerConstants.CODING_NCPDP;
+          providerIdentifier = ServiceProviderIdentifiers.NCPDP;
           break;
         case "08":
           identiferSystem = TransformerConstants.CODING_STATE_LICENSE;
+          providerIdentifier = ServiceProviderIdentifiers.SL;
           break;
         case "11":
           identiferSystem = TransformerConstants.CODING_FEDERAL_TAX_NUM;
+          providerIdentifier = ServiceProviderIdentifiers.FTN;
           break;
         default:
           identiferSystem = null;
+          providerIdentifier = null;
           break;
       }
 
       if (StringUtils.isNotBlank(identiferSystem)) {
         eob.setOrganization(
             TransformerUtils.createIdentifierReference(
-                identiferSystem, claimGroup.getServiceProviderId()));
+                identiferSystem, claimGroup.getServiceProviderId(), providerIdentifier));
         eob.setFacility(
             TransformerUtils.createIdentifierReference(
-                identiferSystem, claimGroup.getServiceProviderId()));
+                identiferSystem, claimGroup.getServiceProviderId(), providerIdentifier));
       }
 
       eob.getFacility()
