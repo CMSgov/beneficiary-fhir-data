@@ -101,7 +101,7 @@ public final class TransformerUtilsTest {
   }
 
   @Test
-  public void createReference() {
+  public void createReferenceTest() {
     String identifierSystem = "identifierSystem";
     String identifierValue = "identifierValue";
 
