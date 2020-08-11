@@ -1,11 +1,13 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import java.util.List;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.junit.Assert;
 import org.junit.Test;
@@ -96,5 +98,41 @@ public final class TransformerUtilsTest {
     Assert.assertEquals("Expect there to be two care team members", 2, eob.getCareTeam().size());
     TransformerUtils.addCareTeamPractitioner(eob, null, "system", "123", ClaimCareteamrole.ASSIST);
     Assert.assertEquals("Expect there to be two care team members", 2, eob.getCareTeam().size());
+  }
+
+  @Test
+  public void createReference() {
+    String identifierSystem = "identifierSystem";
+    String identifierValue = "identifierValue";
+
+    Reference reference =
+        TransformerUtils.createIdentifierReference(identifierSystem, identifierValue);
+
+    Assert.assertEquals(identifierSystem, reference.getIdentifier().getSystem());
+    Assert.assertEquals(identifierValue, reference.getIdentifier().getValue());
+    Assert.assertTrue(isCodingListNullOrEmpty(reference.getIdentifier().getType().getCoding()));
+
+    ServiceProviderIdentifiers providerIdentifier = ServiceProviderIdentifiers.NPI;
+    reference =
+        TransformerUtils.createIdentifierReference(
+            identifierSystem, identifierValue, providerIdentifier);
+
+    Assert.assertEquals(identifierSystem, reference.getIdentifier().getSystem());
+    Assert.assertEquals(identifierValue, reference.getIdentifier().getValue());
+    Assert.assertEquals(
+        providerIdentifier.byCode(),
+        reference.getIdentifier().getType().getCoding().get(0).getCode());
+    Assert.assertEquals(
+        providerIdentifier.byDisplay(),
+        reference.getIdentifier().getType().getCoding().get(0).getDisplay());
+    Assert.assertEquals(
+        providerIdentifier.bySystem(),
+        reference.getIdentifier().getType().getCoding().get(0).getSystem());
+  }
+
+  private boolean isCodingListNullOrEmpty(List<Coding> coding) {
+    if (coding == null || coding.isEmpty() || coding.size() == 0) return true;
+
+    return false;
   }
 }

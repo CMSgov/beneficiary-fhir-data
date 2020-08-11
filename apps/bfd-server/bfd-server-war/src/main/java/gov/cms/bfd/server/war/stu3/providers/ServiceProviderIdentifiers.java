@@ -1,11 +1,14 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 public enum ServiceProviderIdentifiers {
-  NPI("", "NPI", "National Provider Identifier"),
-  UPIN("", "UPIN", "Unique Physician Identification Number"),
-  NCPDP("", "NCPDP", "National Council for Prescription Drug Programs"),
-  SL("", "DL", "State license number"),
-  FTN("", "DL", "Federal tax number");
+  NPI(TransformerConstants.CODING_NPI_US, "NPI", "National Provider Identifier"),
+  UPIN(TransformerConstants.CODING_UPIN, "UPIN", "Unique Physician Identification Number"),
+  NCPDP(
+      TransformerConstants.CODING_NCPDP,
+      "NCPDP",
+      "National Council for Prescription Drug Programs"),
+  SL(TransformerConstants.CODING_STATE_LICENSE, "DL", "State license number"),
+  FTN(TransformerConstants.CODING_FEDERAL_TAX_NUM, "TAX", "Federal tax number");
 
   public final String system;
   public final String code;
