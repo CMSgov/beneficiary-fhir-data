@@ -27,4 +27,8 @@ alter table "Beneficiaries" add column "mbiObsoleteDate" date;
 
 alter table "Beneficiaries" add column "beneLinkKey" numeric(38);
 
+alter table "BeneficiariesHistory" add column "mbiEffectiveDate" date;
+
+alter table "BeneficiariesHistory" add column "mbiObsoleteDate" date;
+
 alter table "InpatientClaimLines" add column "clmUncompensatedCareAmount" numeric(38, 2);
