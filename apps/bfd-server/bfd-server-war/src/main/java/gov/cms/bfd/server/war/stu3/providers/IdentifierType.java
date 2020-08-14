@@ -1,7 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-/** Enumerates the idenitifer types of values that for different code sets
- * and their corresponding system, code, and display values.
+/**
+ * Enumerates the idenitifer types of values that for different code sets and their corresponding
+ * system, code, and display values.
  */
 public enum IdentifierType {
   NPI(

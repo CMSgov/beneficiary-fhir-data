@@ -75,7 +75,6 @@ public final class PartDEventTransformerTest {
    * gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer#transform(com.codahale.metrics.MetricRegistry,
    * Object)} works as expected when run against the {@link String serviceProviderIdQualiferCode}
    * and {@link String serviceProviderCode}.
-   *
    */
   private void checkOrgAndFacility(
       String serviceProviderIdQualiferCode, String serviceProviderCode) {
