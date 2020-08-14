@@ -100,6 +100,11 @@ public final class TransformerUtilsTest {
     Assert.assertEquals("Expect there to be two care team members", 2, eob.getCareTeam().size());
   }
 
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createIdentifierReference(String,
+   * String)} sets {@link Reference)} correctly.
+   */
   @Test
   public void createReferenceTest() {
     String identifierSystem = "identifierSystem";
@@ -111,22 +116,30 @@ public final class TransformerUtilsTest {
     Assert.assertEquals(identifierSystem, reference.getIdentifier().getSystem());
     Assert.assertEquals(identifierValue, reference.getIdentifier().getValue());
     Assert.assertTrue(isCodingListNullOrEmpty(reference.getIdentifier().getType().getCoding()));
+  }
 
-    ServiceProviderIdentifiers providerIdentifier = ServiceProviderIdentifiers.NPI;
-    reference =
-        TransformerUtils.createIdentifierReference(
-            identifierSystem, identifierValue, providerIdentifier);
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.TransformerUtils#createIdentifierReference
+   * (gov.cms.bfd.server.war.stu3.providers.IdentifierType, String)} sets {@link Reference)}
+   * correctly.
+   */
+  @Test
+  public void createReferenceForIdentifierTypeTest() {
+    String identifierValue = "identifierValue";
+    IdentifierType identifierType = IdentifierType.NPI;
+    Reference reference =
+        TransformerUtils.createIdentifierReference(identifierType, identifierValue);
 
-    Assert.assertEquals(identifierSystem, reference.getIdentifier().getSystem());
+    Assert.assertEquals(identifierType.bySystem(), reference.getIdentifier().getSystem());
     Assert.assertEquals(identifierValue, reference.getIdentifier().getValue());
     Assert.assertEquals(
-        providerIdentifier.byCode(),
-        reference.getIdentifier().getType().getCoding().get(0).getCode());
+        identifierType.byCode(), reference.getIdentifier().getType().getCoding().get(0).getCode());
     Assert.assertEquals(
-        providerIdentifier.byDisplay(),
+        identifierType.byDisplay(),
         reference.getIdentifier().getType().getCoding().get(0).getDisplay());
     Assert.assertEquals(
-        providerIdentifier.bySystem(),
+        identifierType.bySystem(),
         reference.getIdentifier().getType().getCoding().get(0).getSystem());
   }
 

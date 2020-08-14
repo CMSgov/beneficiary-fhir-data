@@ -9,7 +9,6 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import java.math.BigDecimal;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateType;
@@ -258,44 +257,37 @@ final class PartDEventTransformer {
      *   99        Other
      */
 
-    String identiferSystem;
-    ServiceProviderIdentifiers providerIdentifier;
+    IdentifierType identifierType;
 
     if (!claimGroup.getServiceProviderId().isEmpty()) {
       switch (claimGroup.getServiceProviderIdQualiferCode()) {
         case "01":
-          identiferSystem = TransformerConstants.CODING_NPI_US;
-          providerIdentifier = ServiceProviderIdentifiers.NPI;
+          identifierType = IdentifierType.NPI;
           break;
         case "06":
-          identiferSystem = TransformerConstants.CODING_UPIN;
-          providerIdentifier = ServiceProviderIdentifiers.UPIN;
+          identifierType = IdentifierType.UPIN;
           break;
         case "07":
-          identiferSystem = TransformerConstants.CODING_NCPDP;
-          providerIdentifier = ServiceProviderIdentifiers.NCPDP;
+          identifierType = IdentifierType.NCPDP;
           break;
         case "08":
-          identiferSystem = TransformerConstants.CODING_STATE_LICENSE;
-          providerIdentifier = ServiceProviderIdentifiers.SL;
+          identifierType = IdentifierType.SL;
           break;
         case "11":
-          identiferSystem = TransformerConstants.CODING_FEDERAL_TAX_NUM;
-          providerIdentifier = ServiceProviderIdentifiers.FTN;
+          identifierType = IdentifierType.FTN;
           break;
         default:
-          identiferSystem = null;
-          providerIdentifier = null;
+          identifierType = null;
           break;
       }
 
-      if (StringUtils.isNotBlank(identiferSystem)) {
+      if (identifierType != null) {
         eob.setOrganization(
             TransformerUtils.createIdentifierReference(
-                identiferSystem, claimGroup.getServiceProviderId(), providerIdentifier));
+                identifierType, claimGroup.getServiceProviderId()));
         eob.setFacility(
             TransformerUtils.createIdentifierReference(
-                identiferSystem, claimGroup.getServiceProviderId(), providerIdentifier));
+                identifierType, claimGroup.getServiceProviderId()));
       }
 
       eob.getFacility()

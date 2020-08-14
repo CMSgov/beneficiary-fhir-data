@@ -701,40 +701,41 @@ public final class TransformerUtils {
    *     Reference#getIdentifier()}
    * @param identifierValue the {@link Identifier#getValue()} to use in {@link
    *     Reference#getIdentifier()}
-   * @param providerIdentifiers the {@link Identifier#getServiceProviderIdentifiers()} to use in
-   *     {@link Reference#getIdentifier()}
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
+
+    return new Reference()
+        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+  }
+
+  /**
+   * @param identifierType the {@link gov.cms.bfd.server.war.stu3.providers.IdentifierType}
+   * @param identifierValue the {@link Identifier#getValue()} to use in {@link
+   *     Reference#getIdentifier()}
    * @return a {@link Reference} with the specified {@link Identifier}
    */
   static Reference createIdentifierReference(
-      String identifierSystem,
-      String identifierValue,
-      ServiceProviderIdentifiers... providerIdentifiers) {
+      IdentifierType identifierType, String identifierValue) {
 
     Reference reference = new Reference();
-    if (providerIdentifiers.length > 0) {
-      Coding coding =
-          new Coding()
-              .setSystem(providerIdentifiers[0].bySystem())
-              .setCode(providerIdentifiers[0].byCode())
-              .setDisplay(providerIdentifiers[0].byDisplay());
-      List<Coding> codingList = new ArrayList<Coding>();
-      codingList.add(coding);
+    Coding coding =
+        new Coding()
+            .setSystem(identifierType.bySystem())
+            .setCode(identifierType.byCode())
+            .setDisplay(identifierType.byDisplay());
+    List<Coding> codingList = new ArrayList<Coding>();
+    codingList.add(coding);
 
-      CodeableConcept codeableConcept = new CodeableConcept().setCoding(codingList);
-      reference.setIdentifier(
-          new Identifier()
-              .setSystem(identifierSystem)
-              .setValue(identifierValue)
-              .setType(codeableConcept));
-
-    } else {
-      reference.setIdentifier(
-          new Identifier().setSystem(identifierSystem).setValue(identifierValue));
-    }
-
-    reference.setDisplay(retrieveNpiCodeDisplay(identifierValue));
-
-    return reference;
+    CodeableConcept codeableConcept = new CodeableConcept().setCoding(codingList);
+    return reference
+        .setIdentifier(
+            new Identifier()
+                .setSystem(identifierType.bySystem())
+                .setValue(identifierValue)
+                .setType(codeableConcept))
+        .setDisplay(retrieveNpiCodeDisplay(identifierValue));
   }
 
   /**

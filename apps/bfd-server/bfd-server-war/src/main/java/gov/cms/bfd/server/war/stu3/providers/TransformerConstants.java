@@ -163,21 +163,76 @@ public final class TransformerConstants {
    */
   static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
+  /**
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
+   * identifier is a NPI.
+   */
+  static final String CODED_IDENTIFIER_TYPE_NPI = "NPI";
+
+  /**
+   * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
+   * identifier is a NPI.
+   */
+  static final String CODED_IDENTIFIER_TYPE_NPI_DISPLAY = "National Provider Identifier";
+
+  /**
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
+   * identifier is a UPIN.
+   */
+  static final String CODED_IDENTIFIER_TYPE_UPIN = "UPIN";
+
+  /**
+   * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
+   * identifier is a UPIN.
+   */
+  static final String CODED_IDENTIFIER_TYPE_UPIN_DISPLAY = "Unique Physician Identification Number";
+
   /** The Code System, as available at <a */
-  static final String FHIR_IDENTIFIER_TYPE_CODESYSTEM =
+  static final String CODING_SYSTEM_HL7_IDENTIFIER_TYPE =
       "http://terminology.hl7.org/CodeSystem/v2-0203";
 
-  /** The Code System, as available for UPIN */
-  static final String CODING_UPIN = FHIR_IDENTIFIER_TYPE_CODESYSTEM;
+  /**
+   * Used as the {@link Coding#getSystem()} for custom-to-BFD {@link Identifier#getType()} codes.
+   */
+  static final String CODING_SYSTEM_IDENTIFIER_TYPE =
+      BASE_URL_BBAPI_RESOURCES + "/codesystem/identifier-type";
 
-  /** The Code System, as available for NCPDP */
-  static final String CODING_NCPDP = "http://ncpdp.org/provider-id";
+  /**
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
+   * identifier is a PDP.
+   */
+  static final String CODED_IDENTIFIER_TYPE_PDP = "NCPDP";
 
-  /** The Code System, as available for State License Number */
-  static final String CODING_STATE_LICENSE = FHIR_IDENTIFIER_TYPE_CODESYSTEM;
+  /**
+   * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
+   * identifier is a PDP.
+   */
+  static final String CODED_IDENTIFIER_TYPE_PDP_DISPLAY =
+      "National Council for Prescription Drug Programs";
 
-  /** The Code System, as available for Federal Tax Number */
-  static final String CODING_FEDERAL_TAX_NUM = FHIR_IDENTIFIER_TYPE_CODESYSTEM;
+  /**
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
+   * identifier is a DL.
+   */
+  static final String CODED_IDENTIFIER_TYPE_DL = "DL";
+
+  /**
+   * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
+   * identifier is a DL.
+   */
+  static final String CODED_IDENTIFIER_TYPE_DL_DISPLAY = "State license number";
+
+  /**
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
+   * identifier is a TAX.
+   */
+  static final String CODED_IDENTIFIER_TYPE_TAX = "TAX";
+
+  /**
+   * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
+   * identifier is a TAX.
+   */
+  static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Federal tax number";
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a

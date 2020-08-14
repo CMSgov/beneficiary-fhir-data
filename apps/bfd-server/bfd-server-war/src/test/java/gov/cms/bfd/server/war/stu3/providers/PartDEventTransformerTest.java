@@ -38,47 +38,55 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecordWithNPI() throws FHIRException {
     String serviceProviderIdQualiferCode = "01";
-    String serviceProviderCode = TransformerConstants.CODING_NPI_US;
+    String serviceProviderCode = IdentifierType.NPI.bySystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithUPIN() throws FHIRException {
     String serviceProviderIdQualiferCode = "06";
-    String serviceProviderCode = TransformerConstants.CODING_UPIN;
+    String serviceProviderCode = IdentifierType.UPIN.bySystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithNCPDP() throws FHIRException {
     String serviceProviderIdQualiferCode = "07";
-    String serviceProviderCode = TransformerConstants.CODING_NCPDP;
+    String serviceProviderCode = IdentifierType.NCPDP.bySystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithStateLicenseNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "08";
-    String serviceProviderCode = TransformerConstants.CODING_STATE_LICENSE;
+    String serviceProviderCode = IdentifierType.SL.bySystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "11";
-    String serviceProviderCode = TransformerConstants.CODING_FEDERAL_TAX_NUM;
+    String serviceProviderCode = IdentifierType.FTN.bySystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer#transform(com.codahale.metrics.MetricRegistry,
+   * Object)} works as expected when run against the {@link String serviceProviderIdQualiferCode}
+   * and {@link String serviceProviderCode}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
   private void checkOrgAndFacility(
-      String ServiceProviderIdQualiferCode, String ServiceProviderCode) {
+      String serviceProviderIdQualiferCode, String serviceProviderCode) {
     PartDEvent claim = getPartDEventClaim();
-    claim.setServiceProviderIdQualiferCode(ServiceProviderIdQualiferCode);
+    claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
     TransformerTestUtils.assertReferenceEquals(
-        ServiceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
+        serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(
-        ServiceProviderCode, claim.getServiceProviderId(), eob.getFacility());
+        serviceProviderCode, claim.getServiceProviderId(), eob.getFacility());
   }
 
   private PartDEvent getPartDEventClaim() {
