@@ -76,7 +76,6 @@ public final class PartDEventTransformerTest {
    * Object)} works as expected when run against the {@link String serviceProviderIdQualiferCode}
    * and {@link String serviceProviderCode}.
    *
-   * @throws FHIRException (indicates test failure)
    */
   private void checkOrgAndFacility(
       String serviceProviderIdQualiferCode, String serviceProviderCode) {

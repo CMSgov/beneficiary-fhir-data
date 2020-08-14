@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+/** Enumerates the idenitifer types of values that for different code sets
+ * and their corresponding system, code, and display values.
+ */
 public enum IdentifierType {
   NPI(
       TransformerConstants.CODING_NPI_US,
@@ -31,15 +34,15 @@ public enum IdentifierType {
     this.code = code;
     this.display = display;
   }
-
+  /** @return the string for the corresponding system for the enum value */
   public String bySystem() {
     return system;
   }
-
+  /** @return the string for the corresponding code for the enum value */
   public String byCode() {
     return code;
   }
-
+  /** @return the string for the corresponding display for the enum value */
   public String byDisplay() {
     return display;
   }
