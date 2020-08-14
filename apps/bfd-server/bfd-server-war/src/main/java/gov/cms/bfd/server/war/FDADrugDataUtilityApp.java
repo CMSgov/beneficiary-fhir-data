@@ -111,11 +111,11 @@ public final class FDADrugDataUtilityApp {
 
     // unzip FDA NDC file
     unzip(downloadedNdcZipFile, workingDir);
-    Path originalNdcDataFile = workingDir.resolve("product.txt");
+    Path originalNdcDataFile = workingDir.resolve("product.xls");
     if (!Files.isReadable(originalNdcDataFile))
-      originalNdcDataFile = workingDir.resolve("Product.txt");
+      originalNdcDataFile = workingDir.resolve("Product.xls");
     if (!Files.isReadable(originalNdcDataFile))
-      throw new IllegalStateException("Unable to locate product.txt in " + ndctextZipUrl);
+      throw new IllegalStateException("Unable to locate product.xls in " + ndctextZipUrl);
 
     // convert file format from cp1252 to utf8
     CharsetDecoder inDec =
