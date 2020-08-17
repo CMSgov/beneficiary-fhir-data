@@ -722,9 +722,9 @@ public final class TransformerUtils {
     Reference reference = new Reference();
     Coding coding =
         new Coding()
-            .setSystem(identifierType.bySystem())
-            .setCode(identifierType.byCode())
-            .setDisplay(identifierType.byDisplay());
+            .setSystem(identifierType.getSystem())
+            .setCode(identifierType.getCode())
+            .setDisplay(identifierType.getDisplay());
     List<Coding> codingList = new ArrayList<Coding>();
     codingList.add(coding);
 
@@ -732,7 +732,7 @@ public final class TransformerUtils {
     return reference
         .setIdentifier(
             new Identifier()
-                .setSystem(identifierType.bySystem())
+                .setSystem(identifierType.getSystem())
                 .setValue(identifierValue)
                 .setType(codeableConcept))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));

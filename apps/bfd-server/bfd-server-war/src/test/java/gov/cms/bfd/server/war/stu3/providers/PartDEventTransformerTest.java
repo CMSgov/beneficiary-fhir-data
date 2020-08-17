@@ -38,35 +38,35 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecordWithNPI() throws FHIRException {
     String serviceProviderIdQualiferCode = "01";
-    String serviceProviderCode = IdentifierType.NPI.bySystem();
+    String serviceProviderCode = IdentifierType.NPI.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithUPIN() throws FHIRException {
     String serviceProviderIdQualiferCode = "06";
-    String serviceProviderCode = IdentifierType.UPIN.bySystem();
+    String serviceProviderCode = IdentifierType.UPIN.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithNCPDP() throws FHIRException {
     String serviceProviderIdQualiferCode = "07";
-    String serviceProviderCode = IdentifierType.NCPDP.bySystem();
+    String serviceProviderCode = IdentifierType.NCPDP.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithStateLicenseNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "08";
-    String serviceProviderCode = IdentifierType.SL.bySystem();
+    String serviceProviderCode = IdentifierType.SL.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
   @Test
   public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "11";
-    String serviceProviderCode = IdentifierType.FTN.bySystem();
+    String serviceProviderCode = IdentifierType.FTN.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 

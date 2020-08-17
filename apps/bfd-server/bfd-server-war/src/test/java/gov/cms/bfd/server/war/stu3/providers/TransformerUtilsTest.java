@@ -131,15 +131,15 @@ public final class TransformerUtilsTest {
     Reference reference =
         TransformerUtils.createIdentifierReference(identifierType, identifierValue);
 
-    Assert.assertEquals(identifierType.bySystem(), reference.getIdentifier().getSystem());
+    Assert.assertEquals(identifierType.getSystem(), reference.getIdentifier().getSystem());
     Assert.assertEquals(identifierValue, reference.getIdentifier().getValue());
     Assert.assertEquals(
-        identifierType.byCode(), reference.getIdentifier().getType().getCoding().get(0).getCode());
+        identifierType.getCode(), reference.getIdentifier().getType().getCoding().get(0).getCode());
     Assert.assertEquals(
-        identifierType.byDisplay(),
+        identifierType.getDisplay(),
         reference.getIdentifier().getType().getCoding().get(0).getDisplay());
     Assert.assertEquals(
-        identifierType.bySystem(),
+        identifierType.getSystem(),
         reference.getIdentifier().getType().getCoding().get(0).getSystem());
   }
 

@@ -36,15 +36,15 @@ public enum IdentifierType {
     this.display = display;
   }
   /** @return the string for the corresponding system for the enum value */
-  public String bySystem() {
+  public String getSystem() {
     return system;
   }
   /** @return the string for the corresponding code for the enum value */
-  public String byCode() {
+  public String getCode() {
     return code;
   }
   /** @return the string for the corresponding display for the enum value */
-  public String byDisplay() {
+  public String getDisplay() {
     return display;
   }
 }
