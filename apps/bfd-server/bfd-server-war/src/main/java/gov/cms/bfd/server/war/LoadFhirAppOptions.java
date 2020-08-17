@@ -14,12 +14,11 @@ public class LoadFhirAppOptions implements Serializable {
   private static final long serialVersionUID = 2884121140016566847L;
 
   /**
-   * A reasonable (though not terribly performant) suggested default value for
-   * {@link #getLoaderThreads()}.
+   * A reasonable (though not terribly performant) suggested default value for {@link
+   * #getLoaderThreads()}.
    */
   public static final int DEFAULT_LOADER_THREADS =
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
-
 
   private final boolean v2Enabled;
 
@@ -38,7 +37,6 @@ public class LoadFhirAppOptions implements Serializable {
    */
   public LoadFhirAppOptions(boolean v2Enabled) {
 
-
     this.v2Enabled = v2Enabled;
   }
 
@@ -50,8 +48,6 @@ public class LoadFhirAppOptions implements Serializable {
   public boolean isV2Enabled() {
     return v2Enabled;
   }
-
-
 
   /** @see java.lang.Object#toString() */
   @Override
