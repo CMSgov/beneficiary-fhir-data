@@ -5,6 +5,7 @@ export BFD_PORT='{{ data_server_appserver_https_port }}'
 export BFD_KEYSTORE='{{ data_server_dir }}/bluebutton-appserver-keystore.jks'
 export BFD_TRUSTSTORE='{{ data_server_dir }}/bluebutton-appserver-truststore.jks'
 export BFD_WAR='{{ data_server_dir }}/{{ data_server_war | basename }}'
+export V2_ENABLED='{{ data_pipeline_v2_enabled }}'
 
 # The WAR picks up its config from Java system properties, so set some variables we can use for
 # those.
