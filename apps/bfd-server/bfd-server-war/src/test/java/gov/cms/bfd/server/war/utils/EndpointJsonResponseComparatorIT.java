@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonDiff;
@@ -861,6 +862,7 @@ public final class EndpointJsonResponseComparatorIT {
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
     ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     JsonNode beforeNode = null;
     try {
       beforeNode = mapper.readTree(approvedJson);
@@ -875,6 +877,7 @@ public final class EndpointJsonResponseComparatorIT {
       throw new UncheckedIOException(
           "Unable to deserialize the following JSON content as tree: " + newJson, e);
     }
+
     JsonNode diff = JsonDiff.asJson(beforeNode, afterNode);
 
     // Filter out diffs that we don't care about (due to changing with each call)
