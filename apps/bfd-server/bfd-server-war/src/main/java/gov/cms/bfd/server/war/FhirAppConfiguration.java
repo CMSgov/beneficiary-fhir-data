@@ -3,16 +3,13 @@ package gov.cms.bfd.server.war;
 import java.io.Serializable;
 import java.util.Optional;
 
-/**
- * Models the configuration options for the application.
- *
- */
+/** Models the configuration options for the application. */
 public final class FhirAppConfiguration implements Serializable {
   private static final long serialVersionUID = -6845504165285244536L;
 
   /**
-   * The name of the environment variable that should be used to provide the
-   * {@link #getLoadOptions()} {@link LoadFhirAppOptions#isV2Enabled()} value.
+   * The name of the environment variable that should be used to provide the {@link
+   * #getLoadOptions()} {@link LoadFhirAppOptions#isV2Enabled()} value.
    */
   public static final String ENV_VAR_KEY_V2_ENABLED = "V2_ENABLED";
 
@@ -50,7 +47,7 @@ public final class FhirAppConfiguration implements Serializable {
    * from them.
    *
    * @return the {@link FhirAppConfiguration} instance represented by the configuration provided to
-   *         this application via the environment variables
+   *     this application via the environment variables
    */
   static FhirAppConfiguration readConfigFromEnvironmentVariables() {
 
@@ -68,14 +65,11 @@ public final class FhirAppConfiguration implements Serializable {
    *
    * @param booleanText the text to try and parse a <code>boolean</code> from
    * @return the parsed <code>boolean</code>, or {@link Optional#empty()} if nothing valid could be
-   *         parsed
+   *     parsed
    */
   static Optional<Boolean> parseBoolean(String booleanText) {
-    if ("true".equalsIgnoreCase(booleanText))
-      return Optional.of(true);
-    else if ("false".equalsIgnoreCase(booleanText))
-      return Optional.of(false);
-    else
-      return Optional.empty();
+    if ("true".equalsIgnoreCase(booleanText)) return Optional.of(true);
+    else if ("false".equalsIgnoreCase(booleanText)) return Optional.of(false);
+    else return Optional.empty();
   }
 }
