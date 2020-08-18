@@ -5,25 +5,12 @@ import java.io.Serializable;
 /** Models the user-configurable application options. */
 public class LoadFhirAppOptions implements Serializable {
 
-  /*
-   * This class is marked Serializable purely to help keep AppConfigurationTest simple.
-   * Unfortunately, Path implementations aren't also Serializable, so we have to store Strings here,
-   * instead.
-   */
-
   private static final long serialVersionUID = 2884121140016566847L;
-
-  /**
-   * A reasonable (though not terribly performant) suggested default value for
-   * {@link #getLoaderThreads()}.
-   */
-  public static final int DEFAULT_LOADER_THREADS =
-      Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
   private final boolean v2Enabled;
 
   /**
-   * Constructs a new {@link LoadAppOptions} instance.
+   * Constructs a new {@link LoadFhirAppOptions} instance.
    *
    * @param v2Enabled the value to use for {@link #isV2Enabled()}
    */
