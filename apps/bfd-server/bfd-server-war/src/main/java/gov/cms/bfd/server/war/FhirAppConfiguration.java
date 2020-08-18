@@ -25,7 +25,7 @@ public final class FhirAppConfiguration implements Serializable {
 
   /**
    * Constructs a new {@link FhirAppConfiguration} instance.
-   * 
+   *
    * @param loadOptions the value to use for {@link #getLoadOptions()}
    */
   public FhirAppConfiguration(LoadFhirAppOptions loadOptions) {
@@ -51,18 +51,16 @@ public final class FhirAppConfiguration implements Serializable {
 
   /**
    * Per <code>/dev/design-decisions-readme.md</code>, this application accepts its configuration
-   * via environment variables. Read those in, and build an {@link AppConfiguration} instance from
-   * them.
+   * via environment variables. Read those in, and build an {@link FhirAppConfiguration} instance
+   * from them.
    *
    * <p>
    * As a convenience, this method will also verify that AWS credentials were provided, such that
    * {@link DefaultAWSCredentialsProviderChain} can load them. If not, an
    * {@link AppConfigurationException} will be thrown.
    *
-   * @return the {@link AppConfiguration} instance represented by the configuration provided to this
-   *         application via the environment variables
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *         configuration passed to the application are incomplete or incorrect.
+   * @return the {@link FhirAppConfiguration} instance represented by the configuration provided to
+   *         this application via the environment variables *
    */
   static FhirAppConfiguration readConfigFromEnvironmentVariables() {
 
