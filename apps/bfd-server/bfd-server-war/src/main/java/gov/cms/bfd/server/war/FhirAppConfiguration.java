@@ -6,27 +6,26 @@ import java.util.Optional;
 /**
  * Models the configuration options for the application.
  *
- * <p>Note that, in addition to the configuration specified here, the application must also be
- * provided with credentials that can be used to access the specified S3 bucket. For that, the
- * application supports all of the mechanisms that are supported by {@link
- * DefaultAWSCredentialsProviderChain}, which include environment variables, EC2 instance profiles,
- * etc.
+ * <p>
+ * Note that, in addition to the configuration specified here, the application must also be provided
+ * with credentials that can be used to access the specified S3 bucket. For that, the application
+ * supports all of the mechanisms that are supported by {@link DefaultAWSCredentialsProviderChain},
+ * which include environment variables, EC2 instance profiles, etc.
  */
 public final class FhirAppConfiguration implements Serializable {
   private static final long serialVersionUID = -6845504165285244536L;
 
   /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#isV2Enabled()} value.
+   * The name of the environment variable that should be used to provide the
+   * {@link #getLoadOptions()} {@link LoadFhirAppOptions#isV2Enabled()} value.
    */
   public static final String ENV_VAR_KEY_V2_ENABLED = "V2_ENABLED";
 
   private final LoadFhirAppOptions loadOptions;
 
   /**
-   * Constructs a new {@link AppConfiguration} instance.
-   *
-   * @param extractionOptions the value to use for {@link #getExtractionOptions()}
+   * Constructs a new {@link FhirAppConfiguration} instance.
+   * 
    * @param loadOptions the value to use for {@link #getLoadOptions()}
    */
   public FhirAppConfiguration(LoadFhirAppOptions loadOptions) {
@@ -43,7 +42,7 @@ public final class FhirAppConfiguration implements Serializable {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("AppConfiguration [=");
+    builder.append("FhirAppConfiguration [=");
     builder.append(", loadOptions=");
     builder.append(loadOptions);
     builder.append("]");
@@ -55,14 +54,15 @@ public final class FhirAppConfiguration implements Serializable {
    * via environment variables. Read those in, and build an {@link AppConfiguration} instance from
    * them.
    *
-   * <p>As a convenience, this method will also verify that AWS credentials were provided, such that
-   * {@link DefaultAWSCredentialsProviderChain} can load them. If not, an {@link
-   * AppConfigurationException} will be thrown.
+   * <p>
+   * As a convenience, this method will also verify that AWS credentials were provided, such that
+   * {@link DefaultAWSCredentialsProviderChain} can load them. If not, an
+   * {@link AppConfigurationException} will be thrown.
    *
    * @return the {@link AppConfiguration} instance represented by the configuration provided to this
-   *     application via the environment variables
+   *         application via the environment variables
    * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     configuration passed to the application are incomplete or incorrect.
+   *         configuration passed to the application are incomplete or incorrect.
    */
   static FhirAppConfiguration readConfigFromEnvironmentVariables() {
 
@@ -80,11 +80,14 @@ public final class FhirAppConfiguration implements Serializable {
    *
    * @param booleanText the text to try and parse a <code>boolean</code> from
    * @return the parsed <code>boolean</code>, or {@link Optional#empty()} if nothing valid could be
-   *     parsed
+   *         parsed
    */
   static Optional<Boolean> parseBoolean(String booleanText) {
-    if ("true".equalsIgnoreCase(booleanText)) return Optional.of(true);
-    else if ("false".equalsIgnoreCase(booleanText)) return Optional.of(false);
-    else return Optional.empty();
+    if ("true".equalsIgnoreCase(booleanText))
+      return Optional.of(true);
+    else if ("false".equalsIgnoreCase(booleanText))
+      return Optional.of(false);
+    else
+      return Optional.empty();
   }
 }
