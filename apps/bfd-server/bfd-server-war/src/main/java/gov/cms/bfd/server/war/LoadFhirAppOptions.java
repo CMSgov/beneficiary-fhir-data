@@ -14,8 +14,8 @@ public class LoadFhirAppOptions implements Serializable {
   private static final long serialVersionUID = 2884121140016566847L;
 
   /**
-   * A reasonable (though not terribly performant) suggested default value for {@link
-   * #getLoaderThreads()}.
+   * A reasonable (though not terribly performant) suggested default value for
+   * {@link #getLoaderThreads()}.
    */
   public static final int DEFAULT_LOADER_THREADS =
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
@@ -25,15 +25,7 @@ public class LoadFhirAppOptions implements Serializable {
   /**
    * Constructs a new {@link LoadAppOptions} instance.
    *
-   * @param hicnHashIterations the value to use for {@link #getHicnHashIterations()}
-   * @param hicnHashPepper the value to use for {@link #getHicnHashPepper()}
-   * @param databaseUrl the value to use for {@link #getDatabaseUrl()}
-   * @param databaseUsername the value to use for {@link #getDatabaseUsername()}
-   * @param databasePassword the value to use for {@link #getDatabasePassword()}
-   * @param loaderThreads the value to use for {@link #getLoaderThreads()}
-   * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
-   * @param fixupsEnabled the value to use for {@link #isFixupsEnabled()}
-   * @param fixupThreads the value fot use for {@link #getFixupThreads()}
+   * @param v2Enabled the value to use for {@link #isV2Enabled()}
    */
   public LoadFhirAppOptions(boolean v2Enabled) {
 
