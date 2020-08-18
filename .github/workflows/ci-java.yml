@@ -38,5 +38,5 @@ jobs:
           </toolchains>
           EOF
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn -X ${{ matrix.mvn_command }}
+        run: mvn -e ${{ matrix.mvn_command }}
         working-directory: ./apps
