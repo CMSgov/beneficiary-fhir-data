@@ -2,7 +2,7 @@ name: 'CI - Java'
 on: pull_request
 jobs:
   mvn-job:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       matrix: 
         mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
@@ -38,5 +38,5 @@ jobs:
           </toolchains>
           EOF
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn -e ${{ matrix.mvn_command }}
+        run: mvn ${{ matrix.mvn_command }}
         working-directory: ./apps
