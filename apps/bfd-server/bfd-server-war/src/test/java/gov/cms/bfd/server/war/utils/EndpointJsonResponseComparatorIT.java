@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.flipkart.zjsonpatch.JsonDiff;
 import com.google.gson.JsonArray;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -861,6 +862,7 @@ public final class EndpointJsonResponseComparatorIT {
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
     ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
     JsonNode beforeNode = null;
     try {
       beforeNode = mapper.readTree(approvedJson);
