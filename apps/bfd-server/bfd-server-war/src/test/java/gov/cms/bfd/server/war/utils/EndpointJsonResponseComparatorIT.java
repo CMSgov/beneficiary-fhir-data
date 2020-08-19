@@ -297,22 +297,27 @@ public final class EndpointJsonResponseComparatorIT {
     return jsonResponse;
   }
 
- /**
+  /**
    * FIXME: Additional workaround due to HAPI not always returning array elements in the same order
    * for a specific searchParam {@link JsonArray} in the capability statement. This method is only
    * necessary until the following issue has been resolved with HAPI:
    * https://github.com/jamesagnew/hapi-fhir/issues/1183
    *
-   * <p>Before: { "type" : [ {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
-   *   "code" : "principal", "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment." ]
-   * }, {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
-   *     "code" : "external-first","display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."} } ]} ]}
+   * <p>Before: { "type" : [ {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code" : "principal",
+   * "display" : "The single medical diagnosis that is most relevant to the patient's chief
+   * complaint or need for treatment." ] }, {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code" :
+   * "external-first","display" : "The code used to identify the 1st external cause of injury,
+   * poisoning, or other adverse effect."} } ]} ]}
    *
-   * 
-   * <p>After: { "type" : [ {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
-   *    "code" : "external-first","display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."} ]
-   * }, {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type","code" : "principal",
-   *     "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."} ]} ]}
+   * <p>After: { "type" : [ {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code" :
+   * "external-first","display" : "The code used to identify the 1st external cause of injury,
+   * poisoning, or other adverse effect."} ] }, {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type","code" : "principal",
+   * "display" : "The single medical diagnosis that is most relevant to the patient's chief
+   * complaint or need for treatment."} ]} ]}
    *
    * @param unsortedResponse the JSON string with an unsorted diagnosisType array
    * @param parseStringAt the JSON string with the search string
@@ -339,7 +344,7 @@ public final class EndpointJsonResponseComparatorIT {
     }
 
     Collections.sort(
-      diagnosisTypes,
+        diagnosisTypes,
         new Comparator<JsonNode>() {
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("coding").get(0).get("code").toString();
