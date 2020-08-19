@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonDiff;
@@ -284,6 +283,53 @@ public final class EndpointJsonResponseComparatorIT {
         });
 
     ((ArrayNode) searchParamsArray).removeAll();
+    for (int i = 0; i < searchParams.size(); i++) {
+      ((ArrayNode) searchParamsArray).add((ObjectNode) searchParams.get(i));
+    }
+
+    String jsonResponse = null;
+    try {
+      jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
+    } catch (JsonProcessingException e) {
+      throw new UncheckedIOException(
+          "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+    }
+    return jsonResponse;
+  }
+
+  private static String sortDiagnosisTypes(String unsortedResponse, String parseStringAt) {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.writerWithDefaultPrettyPrinter();
+    JsonNode parsedJson = null;
+    try {
+      parsedJson = mapper.readTree(unsortedResponse);
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+    }
+
+    // This returns the searchParam node for the resource
+    JsonNode searchParamsArray = parsedJson.at(parseStringAt);
+
+    Iterator<JsonNode> searchParamsArrayIterator = searchParamsArray.elements();
+    List<JsonNode> searchParams = new ArrayList<JsonNode>();
+    while (searchParamsArrayIterator.hasNext()) {
+      searchParams.add(searchParamsArrayIterator.next());
+    }
+
+    Collections.sort(
+        searchParams,
+        new Comparator<JsonNode>() {
+          public int compare(JsonNode node1, JsonNode node2) {
+            String name1 = node1.get("coding").get(0).get("code").toString();
+            String name2 = node2.get("coding").get(0).get("code").toString();
+            return name1.compareTo(name2);
+          }
+        });
+
+    ((ArrayNode) searchParamsArray).removeAll();
+    // java.lang.ClassCastException: com.fasterxml.jackson.databind.node.MissingNode
+    // cannot be cast to com.fasterxml.jackson.databind.node.ArrayNode
     for (int i = 0; i < searchParams.size(); i++) {
       ((ArrayNode) searchParamsArray).add((ObjectNode) searchParams.get(i));
     }
@@ -609,7 +655,7 @@ public final class EndpointJsonResponseComparatorIT {
         .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
         .returnBundle(Bundle.class)
         .execute();
-    return jsonInterceptor.getResponse();
+    return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/entry/3/resource/diagnosis/7/type");
   }
 
   /**
@@ -637,7 +683,7 @@ public final class EndpointJsonResponseComparatorIT {
         .count(8)
         .returnBundle(Bundle.class)
         .execute();
-    return jsonInterceptor.getResponse();
+    return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/entry/3/resource/diagnosis/7/type");
   }
 
   /**
@@ -767,7 +813,7 @@ public final class EndpointJsonResponseComparatorIT {
         .resource(ExplanationOfBenefit.class)
         .withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()))
         .execute();
-    return jsonInterceptor.getResponse();
+    return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/diagnosis/7/type");
   }
 
   /**
@@ -862,7 +908,7 @@ public final class EndpointJsonResponseComparatorIT {
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
     ObjectMapper mapper = new ObjectMapper();
-    mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+
     JsonNode beforeNode = null;
     try {
       beforeNode = mapper.readTree(approvedJson);
