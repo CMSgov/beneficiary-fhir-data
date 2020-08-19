@@ -297,6 +297,27 @@ public final class EndpointJsonResponseComparatorIT {
     return jsonResponse;
   }
 
+ /**
+   * FIXME: Additional workaround due to HAPI not always returning array elements in the same order
+   * for a specific searchParam {@link JsonArray} in the capability statement. This method is only
+   * necessary until the following issue has been resolved with HAPI:
+   * https://github.com/jamesagnew/hapi-fhir/issues/1183
+   *
+   * <p>Before: { "type" : [ {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+   *   "code" : "principal", "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment." ]
+   * }, {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+   *     "code" : "external-first","display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."} } ]} ]}
+   *
+   * 
+   * <p>After: { "type" : [ {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+   *    "code" : "external-first","display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."} ]
+   * }, {"coding" : [ {"system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type","code" : "principal",
+   *     "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."} ]} ]}
+   *
+   * @param unsortedResponse the JSON string with an unsorted diagnosisType array
+   * @param parseStringAt the JSON string with the search string
+   * @return the JSON string with the sorted diagnosis type array
+   */
   private static String sortDiagnosisTypes(String unsortedResponse, String parseStringAt) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.writerWithDefaultPrettyPrinter();
@@ -308,17 +329,17 @@ public final class EndpointJsonResponseComparatorIT {
           "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
     }
 
-    // This returns the searchParam node for the resource
-    JsonNode searchParamsArray = parsedJson.at(parseStringAt);
+    // This returns the DiagnosisType array node for the resource
+    JsonNode diagnosisTypeArray = parsedJson.at(parseStringAt);
 
-    Iterator<JsonNode> searchParamsArrayIterator = searchParamsArray.elements();
-    List<JsonNode> searchParams = new ArrayList<JsonNode>();
-    while (searchParamsArrayIterator.hasNext()) {
-      searchParams.add(searchParamsArrayIterator.next());
+    Iterator<JsonNode> diagnosisTypeArrayIterator = diagnosisTypeArray.elements();
+    List<JsonNode> diagnosisTypes = new ArrayList<JsonNode>();
+    while (diagnosisTypeArrayIterator.hasNext()) {
+      diagnosisTypes.add(diagnosisTypeArrayIterator.next());
     }
 
     Collections.sort(
-        searchParams,
+      diagnosisTypes,
         new Comparator<JsonNode>() {
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("coding").get(0).get("code").toString();
@@ -327,11 +348,9 @@ public final class EndpointJsonResponseComparatorIT {
           }
         });
 
-    ((ArrayNode) searchParamsArray).removeAll();
-    // java.lang.ClassCastException: com.fasterxml.jackson.databind.node.MissingNode
-    // cannot be cast to com.fasterxml.jackson.databind.node.ArrayNode
-    for (int i = 0; i < searchParams.size(); i++) {
-      ((ArrayNode) searchParamsArray).add((ObjectNode) searchParams.get(i));
+    ((ArrayNode) diagnosisTypeArray).removeAll();
+    for (int i = 0; i < diagnosisTypes.size(); i++) {
+      ((ArrayNode) diagnosisTypeArray).add((ObjectNode) diagnosisTypes.get(i));
     }
 
     String jsonResponse = null;
@@ -908,7 +927,6 @@ public final class EndpointJsonResponseComparatorIT {
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
     ObjectMapper mapper = new ObjectMapper();
-
     JsonNode beforeNode = null;
     try {
       beforeNode = mapper.readTree(approvedJson);
