@@ -24,4 +24,4 @@ data_server_ssl_client_certificates: []
 data_server_db_connections_max: 40
 
 # Whether to enable BFD API V2
-data_pipeline_v2_enabled: false
+data_server_v2_enabled: false
