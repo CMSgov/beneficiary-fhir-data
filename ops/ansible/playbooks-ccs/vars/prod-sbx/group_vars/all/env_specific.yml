@@ -12,6 +12,9 @@ s3_bucket_etl_staging: 'bfd-prod-sbx-etl-577373831711'
 # The abbreviated name for this environment, per https://confluence.cms.gov/display/ODI/AWS+Naming+and+Tagging+Conventions.
 env_name_std: 'prod-sbx'
 
+# Whether to enable BFD API V2
+data_server_v2_enabled: false
+
 # This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
 data_pipeline_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
 data_pipeline_ec2_instance_type_vcpu: 4
